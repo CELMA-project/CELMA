@@ -1,0 +1,36 @@
+Copied from divExBAdv
+
+- Check convergence for J^4*divExBAdv
+
+Results:
+========
+...error high on outer rho
+------------------
+!!! FOUND MISTAKE: Missed globalLastXVal
+
+- simpleGaussianW0AtEdge:
+  + Converges
+  + Reaches machine precession
+  ! Highest error around guards
+  ! Diverges at the end
+- simpleGaussian:
+  + Converges
+  + Reaches machine precession
+  ! Diverges at the end
+- twoGaussians:
+  + Converges
+  + Reaches machine precession
+- twoGaussianSwapped:
+  + Converges
+  + Reaches machine precession
+  ! Diverges at the end
+- twoNormalGaussian:
+  + Converges
+  + Reaches machine precession
+  ! Diverges at the end
+
+Conclusion:
+===========
+Converges
+Looks like reaches machine precession
+Error at boundaries looks different

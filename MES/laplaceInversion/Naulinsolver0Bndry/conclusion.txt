@@ -1,0 +1,14 @@
+Copied from failedNaulinSolverSetBoundaries/
+
+- Check that Naulin Solver implementation is correct using phi=0 on the
+  boundaries
+
+Results:
+========
+- twoGaussians: Converging
+- twoGaussiansSwapped: Converging
+- twoNormalGaussians: Converging
+
+Conclusion:
+===========
+Got 2nd order convergence as expected :D

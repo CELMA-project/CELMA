@@ -1,0 +1,13 @@
+Copied from divPerp/
+
+- Check that we get second order convergence when divPerp is multiplied with J
+
+Results:
+========
+- twoGaussians:
+  + Second order convergence
+  + S looks fine
+
+Conclusion:
+===========
+As expected this gives second order convergence

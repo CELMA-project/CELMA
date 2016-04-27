@@ -1,0 +1,134 @@
+#
+# Input file for  "divExBAdv/twoGaussians"
+#
+# x - The radial coordinate (rho)
+# y - The height of the cylinder (z)
+# z - The azimuthal coordinate (theta)
+
+# Root options
+###############################################################################
+nout = 0            # Number of output timesteps
+timestep = 1e-3     # Time between outputs
+
+dump_format="nc"   # Write NetCDF format files
+
+# Setting the z coordinate
+ZMIN = 0.0
+ZMAX = 1.0 # dz = 2*pi(ZMAX - ZMIN)/(MZ - 1)
+
+# Number of guard cells
+MXG = 1 # If this is changed the self implemented boundaries needs to change
+MYG = 0 # If this is changed the self implemented boundaries needs to change
+
+# Number of splittings in x
+NXPE = 4
+###############################################################################
+
+
+# Mesh options
+###############################################################################
+[mesh]
+# Number of points
+nx = 4096 + 2*MXG
+ny = 1
+nz = 2^12
+# The grid spacing
+# As the points are located half between grid points, there will be as many
+# line segments as points
+# NOTE: We must divide by INNER POINTS (different definition of nx and ny)
+dx = geom:Lx/(nx-2*MXG)
+# The metrics
+g33 = 1/(geom:xl^2)
+J = geom:xl
+# Puts the boundaries half a step outside the last gridpoints
+symmetricGlobalY=true
+symmetricGlobalX=true
+# Position of the separatrix (-1 is non periodic, >ny is periodic)
+# --------Non-periodic----------
+ixseps1 = -1
+ixseps2 = -1
+# ------------------------------
+###############################################################################
+
+
+# Solver settings
+###############################################################################
+[solver]
+# In principle it is the same what we set this to (as long as it doesn't raises
+# error) as we here are not stepping forward in time)
+# PVODE raises an error if no fields are being solved for
+# Therefore set to euler solver which does not get this error
+type = euler
+###############################################################################
+
+
+# Methods options
+###############################################################################
+# Methods used for the radial (x) derivative terms
+[ddx]
+first  = C2 # d/dx (f)
+second = C2 # d^2/dx^2 (f)
+upwind = U1 # u*d/dx (f)
+
+#Methods used for the axial (y) derivative terms
+[ddy]
+first  = C2 # d/dy (f)
+second = C2 # d^2/dy^2 (f)
+upwind = U1 # u*d/dy (f)
+
+#Methods used for the azimuthal (z) derivative terms
+[ddz]
+first  = FFT # d/dz (f)
+second = FTT # d^2/dz^2 (f)
+###############################################################################
+
+
+# Specifying the output
+###############################################################################
+[output]
+floats = false # floats = false => output in double
+###############################################################################
+
+
+# Settings for the variables
+###############################################################################
+# Geometry
+# =============================================================================
+[geom]
+Lx = 30                     # The length of x from boundary to boundary
+xl = x * geom:Lx            # x in range [0,Lx]
+# =============================================================================
+
+
+# The functions to test
+# =============================================================================
+# *****************************************************************************
+[n]
+function = 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
+
+# Boundaries
+bndry_xin   = none                       # Manual boundary found in the code
+bndry_xout  = dirichlet_o4(n:function)
+bndry_yup   = none                       # Since we are using 2D
+bndry_ydown = none                       # Since we are using 2D
+# *****************************************************************************
+
+# *****************************************************************************
+[phi]
+function = 0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
+
+# Boundaries
+bndry_xin   = none                       # Manual boundary found in the code
+bndry_xout  = dirichlet_o4(phi:function)
+bndry_yup   = none                       # Since we are using 2D
+bndry_ydown = none                       # Since we are using 2D
+# *****************************************************************************
+# =============================================================================
+
+
+# The analytic solution
+# =============================================================================
+[S]
+solution = (0.000605968916598195*geom:xl^2*(-0.0155350415393255*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0145641014431176*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 0.0310700830786509*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + geom:xl*(0.0155350415393255*sqrt(2)*pi*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000517834717977515*pi^2*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.00024273502405196*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 0.000517834717977515*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000517834717977515*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000485470048103921*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)*cos(z + pi/4) - 0.000517834717977515*geom:xl*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)))*exp(-0.00444444444444444*geom:xl^2 - 0.0533333333333333*geom:xl*cos(z))*sin(z)^2 + 0.0246164359036436*geom:xl*(geom:xl^3*(0.923116346386636*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^2 - 0.00410273931727394)*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + geom:xl^2*(0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))))*(1.86420498471906*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0621401661573018*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z) - 0.852143788966211*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))^2*(geom:xl^3*(0.0155350415393255*sqrt(2)*pi*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000517834717977515*pi^2*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.00024273502405196*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 0.000517834717977515*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000517834717977515*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.000485470048103921*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)*cos(z + pi/4) - 0.000517834717977515*geom:xl*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)) + geom:xl^2*(0.0155350415393255*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)))*exp(-0.00444444444444444*geom:xl^2 - 0.0533333333333333*geom:xl*cos(z)) + 0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*(0.0246164359036436*geom:xl*(geom:xl^3*(0.000258917358988758*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))^2*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 8.63057863295859e-6*sqrt(2)*pi*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.00103566943595503*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*(geom:xl*cos(z) + 30)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) - 1.43842977215976e-7*pi^2*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 4.49509303799926e-7*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.72611572659172e-5*sqrt(2)*pi*(geom:xl*cos(z) + 30)*(sin(z) + cos(z))*cos(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.000517834717977515*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)^2)*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4))) + geom:xl^2*(0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)) - geom:xl^2*(-1.43842977215976e-7*pi^2*geom:xl*(geom:xl*cos(z) + 30)^2*(sin(z) - cos(z))^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.34852791139978e-7*sqrt(2)*pi*geom:xl*(geom:xl*cos(z) + 30)^2*(sin(z) - cos(z))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 6.32122458468647e-8*geom:xl*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4)^2 + 1.72611572659172e-5*sqrt(2)*pi*geom:xl*(geom:xl*cos(z) + 30)*(sin(z) - cos(z))*sin(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.61823349367974e-5*geom:xl*(geom:xl*cos(z) + 30)*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 0.000517834717977515*geom:xl*sin(z)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 4.31528931647929e-6*sqrt(2)*pi*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 4.04558373419934e-6*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*sin(z + pi/4) - 0.000517834717977515*(geom:xl*cos(z) + 30)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4))))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z) - (geom:xl^3*(0.923116346386636*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^2 - 0.00410273931727394)*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + geom:xl^2*(0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))))*(0.0310700830786509*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0291282028862352*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0621401661573018*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)) + 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*(0.0246164359036436*geom:xl*(geom:xl^3*(5.47031908969858e-5*geom:xl - 0.923116346386636*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^3 + 0.000328219145381915*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + geom:xl^2*(0.923116346386636*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^2 - 0.00410273931727394)*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) - 2*geom:xl*(0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + geom:xl*(geom:xl*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*(0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + 0.00065643829076383*geom:xl*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z)))*sin(z)^2 + (0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z)))))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z) - 0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*(geom:xl^3*(0.0246164359036436*geom:xl*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^2 - 0.000328219145381915*geom:xl - 0.00131287658152766*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z)))*sin(z) + geom:xl^2*(0.0246164359036436*geom:xl*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z) + 0.0246164359036436*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z)) + geom:xl^2*(1.75050210870355e-5*geom:xl^2*sin(z)^2 + 0.00196931487229149*geom:xl*cos(z) - 0.0246164359036436)*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z)))*sin(z) + 0.0246164359036436*geom:xl^2*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60))/geom:xl^4
+# =============================================================================
+##############################################################################

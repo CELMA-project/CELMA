@@ -1,0 +1,173 @@
+Two Gaussians
+=====================================================================================================================================
+# Two gaussians
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+# Rewriting this to cylindrical coordinates, gives
+# sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))
+
+# The gaussian
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+# In cylindrical coordinates, this translates to
+# f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+
+# A parabola
+# In cartesian coordinates, we have
+# ((x-x0)/Lx)^2
+# Chosing this function to have a zero value at the edge yields in cylindrical coordinates
+# ((x*cos(z)+Lx)/(2*Lx))^2
+# +2 to ensure positivity of n
+
+w = 0.8*Lx
+rho0 = 0.3*Lx
+theta0 = 5*pi/4
+the_vars['n'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
+                  exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
+                  ((x*cos(z)+Lx)/(2*Lx))**2\
+                  +2
+
+# The gaussian
+
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+# In cylindrical coordinates, this translates to
+# f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+# Multiplication of cos(pi*x/(2*Lx)) to give zero boundaries
+
+w = 0.5*Lx
+rho0 = 0.2*Lx
+theta0 = pi
+the_vars['phi'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*cos(pi*x/(2*Lx))
+
+
+
+
+
+[vortD]
+(0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*cos(pi*geom:xl/60) - 0.0153852724397773*pi*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(pi*geom:xl/60))*(0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)) + (0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 2)*((0.923116346386636*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))^2*cos(pi*geom:xl/60) + 0.0307705448795545*pi*(0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))*sin(pi*geom:xl/60) - 0.00410273931727394*cos(pi*geom:xl/60) - 0.000256421207329621*pi^2*cos(pi*geom:xl/60))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z))) + (0.00065643829076383*geom:xl*sin(z)^2 + 0.0246164359036436*cos(z))*exp(-geom:xl*(0.00222222222222222*geom:xl + 0.0266666666666667*cos(z)))*cos(pi*geom:xl/60)/geom:xl + (0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*cos(pi*geom:xl/60) - 0.0153852724397773*pi*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(pi*geom:xl/60))/geom:xl) + 0.0246164359036436*(0.0155350415393255*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 0.0310700830786509*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z)*cos(pi*geom:xl/60)/geom:xl
+
+[phi]
+0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*cos(pi*geom:xl/60)
+
+[n]
+0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 2
+=====================================================================================================================================
+
+
+
+
+
+Two Gaussians swapped
+=====================================================================================================================================
+# Two gaussians (swapped phi and n)
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+# Rewriting this to cylindrical coordinates, gives
+# sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))
+
+# The gaussian
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+# In cylindrical coordinates, this translates to
+# f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+
+# A parabola
+# In cartesian coordinates, we have
+# ((x-x0)/Lx)^2
+# Chosing this function to have a zero value at the edge yields in cylindrical coordinates
+# ((x*cos(z)+Lx)/(2*Lx))^2
+
+# Multiplication of cos(pi*x/(2*Lx)) to give zero boundaries
+
+w = 0.8*Lx
+rho0 = 0.3*Lx
+theta0 = 5*pi/4
+the_vars['phi'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
+                  exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
+                  ((x*cos(z)+Lx)/(2*Lx))**2*\
+                  cos(pi*x/(2*Lx))
+
+# The gaussian
+
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+# In cylindrical coordinates, this translates to
+# f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+
+w = 0.5*Lx
+rho0 = 0.2*Lx
+theta0 = pi
+the_vars['n'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))
+
+
+
+[phi]
+0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60)
+
+[n]
+0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
+
+[vortD]
+0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*(0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0155350415393255*pi*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(pi*geom:xl/60)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)*cos(pi*geom:xl/60))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)) + 0.923116346386636*((0.000258917358988758*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))^2*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) - 8.63057863295859e-6*sqrt(2)*pi*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))*cos(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 8.63057863295859e-6*pi*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*(geom:xl*cos(z) + 30)^2*sin(pi*geom:xl/60)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.00103566943595503*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*(geom:xl*cos(z) + 30)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)*cos(pi*geom:xl/60) - 1.43842977215976e-7*pi^2*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) - 1.43842977215976e-7*sqrt(2)*pi^2*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))*sin(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 7.19214886079882e-8*pi^2*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) - 4.49509303799926e-7*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) + 1.72611572659172e-5*sqrt(2)*pi*(geom:xl*cos(z) + 30)*(sin(z) + cos(z))*cos(z)*cos(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 1.72611572659172e-5*pi*(geom:xl*cos(z) + 30)*sin(pi*geom:xl/60)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) + 0.000517834717977515*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)^2*cos(pi*geom:xl/60))*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4))) + (0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0155350415393255*pi*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(pi*geom:xl/60)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)*cos(pi*geom:xl/60))/geom:xl + (-1.43842977215976e-7*pi^2*geom:xl*(geom:xl*cos(z) + 30)^2*(sin(z) - cos(z))^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.34852791139978e-7*sqrt(2)*pi*geom:xl*(geom:xl*cos(z) + 30)^2*(sin(z) - cos(z))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 6.32122458468647e-8*geom:xl*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4)^2 + 1.72611572659172e-5*sqrt(2)*pi*geom:xl*(geom:xl*cos(z) + 30)*(sin(z) - cos(z))*sin(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.61823349367974e-5*geom:xl*(geom:xl*cos(z) + 30)*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) + 0.000517834717977515*geom:xl*sin(z)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 4.31528931647929e-6*sqrt(2)*pi*(geom:xl*cos(z) + 30)^2*(sin(z) + cos(z))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 4.04558373419934e-6*(geom:xl*cos(z) + 30)^2*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*sin(z + pi/4) - 0.000517834717977515*(geom:xl*cos(z) + 30)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4)))*cos(pi*geom:xl/60)/geom:xl)*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)) + 0.0246164359036436*(0.0155350415393255*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.0145641014431176*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60)*cos(z + pi/4) - 0.0310700830786509*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(pi*geom:xl/60))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z)/geom:xl
+=====================================================================================================================================
+
+
+
+
+Two Normal Gaussians
+=====================================================================================================================================
+# Two normal gaussians
+
+# The gaussian
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+# In cylindrical coordinates, this translates to
+# f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
+#   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+# Multiplication of cos(pi*x/(2*Lx)) to give zero boundaries
+
+w = 0.8*Lx
+rho0 = 0.3*Lx
+theta0 = 5*pi/4
+the_vars['phi'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*cos(pi*x/(2*Lx))
+
+# Adding of 2 ensures that n is positive
+w = 0.5*Lx
+rho0 = 0.2*Lx
+theta0 = 0
+the_vars['n'] = 2+exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))
+
+
+
+
+[vortD]
+0.923116346386636*(-0.00444444444444444*geom:xl + 0.0266666666666667*cos(z))*(0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60) - 0.0155350415393255*pi*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(pi*geom:xl/60))*exp(-0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z)) + (0.923116346386636*exp(-0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z)) + 2)*((0.932102492359528*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))^2*cos(pi*geom:xl/60) + 0.0310700830786509*pi*(0.00173611111111111*geom:xl + 0.015625*sin(z + pi/4))*sin(pi*geom:xl/60) - 0.000258917358988758*pi^2*cos(pi*geom:xl/60) - 0.00161823349367974*cos(pi*geom:xl/60))*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4))) + (0.000227564085048713*geom:xl*cos(z + pi/4)^2 + 0.0145641014431176*sin(z + pi/4))*exp(-geom:xl*(0.000868055555555556*geom:xl + 0.015625*sin(z + pi/4)))*cos(pi*geom:xl/60)/geom:xl + (0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60) - 0.0155350415393255*pi*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(pi*geom:xl/60))/geom:xl) + 0.000358516269668668*exp(-0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*cos(pi*geom:xl/60)*cos(z + pi/4)
+
+[phi]
+0.932102492359528*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(pi*geom:xl/60)
+
+[n]
+0.923116346386636*exp(-0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z)) + 2
+=====================================================================================================================================

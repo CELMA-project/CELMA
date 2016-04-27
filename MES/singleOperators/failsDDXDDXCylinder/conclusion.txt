@@ -1,0 +1,28 @@
+Copied from MES/DDXCylinder
+
+- Check that DDX on DDX is working in cylinder geometry
+
+Results:
+========
+- properZ:
+  + L2   = 0.5
+  + Linf = 0.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! No convergence
+- gaussian:
+  + L2   = -0.5
+  + Linf = -1.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! Diverges
+- gaussianWSinAndParabola:
+  + L2   = -0.5
+  + Linf = -1.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! Diverges
+
+Conclusion:
+===========
+Not proper divergence

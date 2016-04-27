@@ -1,0 +1,91 @@
+Gaussian with sinus and parabola
+======================================================================================================================================
+# The potential
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+
+# The gaussian
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+
+# A parabola
+# In cartesian coordinates, we have
+# ((x-x0)/Lx)^2
+
+# Added a normalization factor of 7
+
+
+wx = 0.5*Lx
+wy = 0.5*Ly
+x0 = 0.3*Lx
+y0 = 0.5*Ly
+the_vars['phi'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))*\
+                  exp(-(((x-x0)**2/(2*wx**2)) + ((y-y0)**2/(2*wy**2))))*\
+                  ((x-x0)/Lx)**2*\
+                  7
+
+# The profile
+the_vars['profile'] = sin(2*pi*x/Lx + pi*y/Ly)**2
+
+# The parallel velocity, given by the sheath boundary condition
+the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))*the_vars['profile']
+
+
+
+
+
+
+
+[profile]
+sin(pi*geom:xl/15 + pi*y/150)^2
+
+[uEPar]
+0.915025564196348*exp(-7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15 + pi*y/150)^2/sqrt(pi)
+
+[phi]
+7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60)
+======================================================================================================================================
+
+
+
+
+
+No y dependency in profile
+======================================================================================================================================
+# No y variation in the profile
+
+# The potential
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+
+the_vars['phi'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+
+# The profile
+the_vars['profile'] = sin(2*pi*x/Lx)**2
+
+# The parallel velocity, given by the sheath boundary condition
+the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))*the_vars['profile']
+
+
+
+[phi]
+sin(sqrt(2)*pi*(geom:xl + y)/60)
+
+[uEPar]
+0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15)^2/sqrt(pi)
+
+[profile]
+sin(pi*geom:xl/15)^2
+======================================================================================================================================

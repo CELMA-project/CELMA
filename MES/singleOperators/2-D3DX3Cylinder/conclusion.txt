@@ -1,0 +1,27 @@
+Copied from D3DX3Cylinder
+
+- Check that own implementation of D3DX3 is working in cylinder geometry
+  without using 2 ghost cells
+
+
+Results:
+========
+- Initially needed something which needed 2 ghost point
+  !!! FIXED
+- properZ:
+  !!! Seems like inner rho is wrong
+  - If use properZ => get convergence
+  - If out comment innerRhoCylinder(f); => get convergence
+  - DDX(f) also have trouble with first point for 2048 points
+  ! CONCLUSION, properZ is a bad function as it is multivalued around the
+    center, hence it is not smooth, and convergence cannot be expected
+- gaussian: Convergence
+- gaussianWSinAndParabola: Convergence, reaching machine precision
+
+
+Conclusion:
+===========
+Expected convergence, with exception of properZ, which is multivalued in origo
+Note that innerRhoCylinder is working, as the other functions are not
+symmetric (note also that they go toward one value as rho->0 [That is: The
+functions does not "wiggle" close to rho=0 in a rho, theta plot])

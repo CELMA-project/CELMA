@@ -1,0 +1,20 @@
+Copied from D3DZ2DXCylinder
+
+- Check that DDX(D2DZ2(f)) is working in cylinder geometry
+
+Results:
+========
+- properZ:
+  + L2   = 1.99
+  + Linf = 0.19
+  + Error dominates at inner rho
+  + S looks good
+  + Starts with proper convergence
+  !!! Does not converge
+- gaussian: Converges
+- gaussianWSinAndParabola: Converges
+
+Conclusion:
+===========
+Unsure why properZ does not converge
+Other than that: Proper convergence :D
