@@ -42,3 +42,9 @@
 
 # Doxygen
 html/
+
+#BOUT
+*.log*
+*.nc
+*.png
+*.pdf
