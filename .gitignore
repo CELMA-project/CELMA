@@ -26,3 +26,15 @@
 *.exe
 *.out
 *.app
+
+# svn
+.svn/
+
+# Backups
+*~
+*.bak
+*.swp
+
+# Python
+*.pyc
+*.status
