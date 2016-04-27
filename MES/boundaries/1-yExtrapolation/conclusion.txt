@@ -1,0 +1,14 @@
+Copied from MES/singleOperator/DDX
+
+- Check that extrapolation is set properly
+
+Results:
+========
+- Gives fourth order convergence, and reaches machine precession
+  !!! Assignment operator behaves unexpected !!!
+  !!! Initially points to the same addresses !!!
+
+Conclusion:
+===========
+Converges as expected
+!!! Assignment operator behaves unexpected !!!

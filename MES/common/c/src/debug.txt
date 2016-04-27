@@ -1,0 +1,23 @@
+In the loop
+
+                // Debug with one ghost
+                output << "the_field(" << 0 <<",  "<< yInd << ", "<< zInd << ") - the_field(" << 1 <<",  "<< yInd << ", "<< zInd+piIndex << ")=" << the_field(0, yInd, zInd) - the_field(1, yInd, zInd+piIndex)<<std::endl;
+
+
+
+
+                // Debug with one ghost
+                output << "the_field(" << 0 <<",  "<< yInd << ", "<< zInd << ") - the_field(" << 1 <<",  "<< yInd << ", "<< zInd-piIndex << ")=" << the_field(0, yInd, zInd) - the_field(1, yInd, zInd-piIndex)<<std::endl;
+
+
+Issue:
+Looks like cauchy not properly set...gives inf values
+Inside the for loop
+
+
+                output << "f("<<xInd<<","<<firstLowerYGhost+4<<","<<zInd<<") = " << f(xInd,firstLowerYGhost+1,zInd) << std::endl;
+                output << "f("<<xInd<<","<<firstLowerYGhost+3<<","<<zInd<<") = " << f(xInd,firstLowerYGhost+1,zInd) << std::endl;
+                output << "f("<<xInd<<","<<firstLowerYGhost+2<<","<<zInd<<") = " << f(xInd,firstLowerYGhost+1,zInd) << std::endl;
+                output << "f("<<xInd<<","<<firstLowerYGhost+1<<","<<zInd<<") = " << f(xInd,firstLowerYGhost+1,zInd) << std::endl;
+                output << "f("<<xInd<<","<<firstLowerYGhost  <<","<<zInd<<") = " << f(xInd,firstLowerYGhost,zInd) << std::endl;
+                throw BoutException("Throw in cauchyYDown");

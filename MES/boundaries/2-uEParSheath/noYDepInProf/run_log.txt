@@ -1,0 +1,9 @@
+start_time            run_type    run_no   run_time_H:M:S      dump_folder
+2016-4-13.15:25:35      basic       0      0:00:00.055195      noYDepInProf/ny_16
+2016-4-13.15:25:35      basic       1      0:00:00.057496      noYDepInProf/ny_32
+2016-4-13.15:25:35      basic       2      0:00:00.056520      noYDepInProf/ny_64
+2016-4-13.15:25:35      basic       3      0:00:00.111848      noYDepInProf/ny_128
+2016-4-13.15:25:35      basic       4      0:00:00.162449      noYDepInProf/ny_256
+2016-4-13.15:25:35      basic       5      0:00:00.264357      noYDepInProf/ny_512
+2016-4-13.15:25:35      basic       6      0:00:00.473458      noYDepInProf/ny_1024
+2016-4-13.15:25:36      basic       7      0:00:00.876554      noYDepInProf/ny_2048

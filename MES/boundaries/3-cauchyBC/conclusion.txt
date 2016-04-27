@@ -1,0 +1,15 @@
+Copied from 2-uEParSheath
+
+- Check that the cauchy BC is set correctly
+
+Results:
+========
+- gaussianWSinAndParabola: 1st order convergence
+- noXDepInFunc: 1st order convergence
+
+
+Conclusion:
+===========
+For some reason: All trials here (see cauchyMethods.txt and
+derivations/bounadries/) have given 1st order convergence.
+Proceed with care

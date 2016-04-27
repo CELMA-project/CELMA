@@ -1,0 +1,25 @@
+Copied from D3DX2DZCylinder
+
+- Check that D2DX2(DDZ(f)) is working in cylinder geometry
+
+Results:
+========
+- properZ: Converges until 4 last points, then diverges
+  + L2: - 0.5
+  + Linf: - 1.5
+  + S looks fine
+  !!! DIVERGES !!!
+- gaussian: Converges until last point
+  + L2: 1.99
+  + Linf: 1.68
+  + S looks fine
+- gaussianWSinAndParabola: Converges until last point
+  + L2: 2.00
+  + Linf: 1.94
+  + S looks fine
+
+Conclusion:
+===========
+Unsure why not converges last point
+Unsure why Z converges
+Other than that: Proper convergence :D

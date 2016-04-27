@@ -1,0 +1,31 @@
+Copied from oldDivExBAdv
+
+- Check convergence for divExBAdv
+
+Results:
+========
+- Do not get convergence...
+- Trouble is coming from outer boundary
+------------------
+!!! FOUND MISTAKE: Missed globalLastXVal
+
+
+- simpleGaussian:
+  + Not converging
+  + High error on inner rho
+- simpleGaussianW0AtEdge:
+  + Not converging
+  + High error on inner rho
+- twoGaussians:
+  + Not converging
+  + High error on inner rho
+- twoGaussiansSwapped:
+  + Not converging
+  + High error on inner rho
+- twoNormalGaussians:
+  + Not converging
+  + High error on inner rho
+
+Conclusion:
+===========
+We are multiplying with 1/J^4, this is expected to destroy the convergence
