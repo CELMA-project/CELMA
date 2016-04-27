@@ -1,0 +1,15 @@
+Copied from MMS/discretizationOld/divOfScalarTimesVector/divPerp/
+
+- Check that div is working properly
+
+Results:
+========
+- twoGaussians:
+  + L2   = 1.5
+  + Linf = 1.0
+  + Error dominates at inner rho
+  + S looks good
+
+Conclusion:
+===========
+- First order convergence explained in subConvergence.ipynb

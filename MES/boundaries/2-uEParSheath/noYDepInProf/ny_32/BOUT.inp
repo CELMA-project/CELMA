@@ -1,0 +1,135 @@
+#
+# Input file for  "uEParSheath/noYDepInProf"
+#
+# x - The radial coordinate (rho)
+# y - The height of the cylinder (z)
+# z - The azimuthal coordinate (theta)
+
+# Root options
+###############################################################################
+nout = 0            # Number of output timesteps
+timestep = 1e-3     # Time between outputs
+
+dump_format="nc"   # Write NetCDF format files
+
+# Setting the z coordinate
+ZMIN = 0.0
+ZMAX = 1.0 # dz = 2*pi(ZMAX - ZMIN)/(MZ - 1)
+
+# Number of guard cells
+MXG = 1 # If this is changed the self implemented boundaries needs to change
+MYG = 1 # If this is changed the self implemented boundaries needs to change
+
+# Number of splittings in x
+NXPE = 4
+###############################################################################
+
+
+# Mesh options
+###############################################################################
+[mesh]
+# Number of points
+nx = 128 + 2*MXG
+ny = 4098
+nz = 2^0
+# The grid spacing
+# As the points are located half between grid points, there will be as many
+# line segments as points
+# NOTE: We must divide by INNER POINTS (different definition of nx and ny)
+dx = geom:Lx/(nx-2*MXG)
+dy = geom:Ly/(ny)
+# The metrics
+g33 = 1/(geom:xl^2)
+J = geom:xl
+# Puts the boundaries half a step outside the last gridpoints
+symmetricGlobalY=true
+symmetricGlobalX=true
+# Position of the separatrix (-1 is non periodic, >ny is periodic)
+# --------Non-periodic----------
+ixseps1 = -1
+ixseps2 = -1
+# ------------------------------
+###############################################################################
+
+
+# Solver settings
+###############################################################################
+[solver]
+# In principle it is the same what we set this to (as long as it doesn't raises
+# error) as we here are not stepping forward in time)
+# PVODE raises an error if no fields are being solved for
+# Therefore set to euler solver which does not get this error
+type = euler
+###############################################################################
+
+
+# Methods options
+###############################################################################
+# Methods used for the radial (x) derivative terms
+[ddx]
+first  = C2 # d/dx (f)
+second = C2 # d^2/dx^2 (f)
+upwind = U1 # u*d/dx (f)
+
+#Methods used for the axial (y) derivative terms
+[ddy]
+first  = C2 # d/dy (f)
+second = C2 # d^2/dy^2 (f)
+upwind = U1 # u*d/dy (f)
+
+#Methods used for the azimuthal (z) derivative terms
+[ddz]
+first  = FFT # d/dz (f)
+second = FTT # d^2/dz^2 (f)
+###############################################################################
+
+
+# Specifying the output
+###############################################################################
+[output]
+floats = false # floats = false => output in double
+###############################################################################
+
+
+# Settings for the variables
+###############################################################################
+# Geometry
+# =============================================================================
+[geom]
+Lx = 30                     # The length of x from boundary to boundary
+Ly = 150                    # The length of y from boundary to boundary
+xl = x * geom:Lx            # x in range [0,Lx]
+yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
+# =============================================================================
+
+# Constants
+# =============================================================================
+[cst]
+# Hydrogren values for mu and Lambda
+mu     = 1836.36
+Lambda = log(sqrt(mu/(2.0*pi)))
+# Referenrence potential
+phiRef = 3.5
+# =============================================================================
+
+# Damping profile
+# =============================================================================
+[dampProf]
+profile  = sin(pi*geom:xl/15)^2
+# =============================================================================
+
+# The functions to test
+# =============================================================================
+# *****************************************************************************
+[uEPar]
+function = 0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15)^2/sqrt(pi)
+
+# Boundaries found in the code
+# *****************************************************************************
+
+# *****************************************************************************
+[phi]
+function = sin(sqrt(2)*pi*(geom:xl + y)/60)
+# *****************************************************************************
+# =============================================================================
+##############################################################################

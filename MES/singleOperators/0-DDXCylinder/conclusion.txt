@@ -1,0 +1,13 @@
+Copied from MMS/discretizationOld/DDXCylinder
+
+- Check that DDX is working in cylinder geometry
+
+Results:
+========
+- properZ: Convergence
+- gaussian: Convergence
+- gaussianWSinAndParabola: Convergence
+
+Conclusion:
+===========
+Expected convergence :D

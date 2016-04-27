@@ -1,0 +1,28 @@
+Copied from oldDivSource
+
+- Check convergence for divSource
+
+Results:
+========
+- twoGaussians:
+  + L2   = 2.0
+  + Linf = 1.82
+  + Error dominates at inner rho
+  + S looks good
+- twoGaussiansSwapped:
+  + L2   = 1.50
+  + Linf = 1.00
+  + Error dominates at inner rho
+  + S looks good
+- twoNormalGaussians:
+  + Starts with convergence
+  + L2   = -0.36
+  + Linf = -1.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! divergence !!!
+
+Conclusion:
+===========
+Unsure why divergence on twoNormalGaussians
+Other than that: Expected convergence :D

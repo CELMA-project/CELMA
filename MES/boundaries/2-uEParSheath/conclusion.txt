@@ -1,0 +1,22 @@
+Copied from 1-yExtrapolation/
+
+- Check that extrapolation is set properly
+
+Results:
+========
+- gaussianWSinAndParabola:
+  Linf: 1.0
+  L2:   1.5
+  Could be that this is bad function to test due to
+  1. Profile has y-dependency
+  2. Function itself is bad
+  Possible to check this by checking the taylor series
+- noYDepInProf:
+  Linf: 4.0 until last point
+  L2:   4.0 until last point
+  Looks like machine precession reached
+
+Conclusion:
+===========
+Looks like gives expected convergence
+Note also that the absolute values of the errors varies a lot

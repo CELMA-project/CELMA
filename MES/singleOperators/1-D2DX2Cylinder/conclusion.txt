@@ -1,0 +1,19 @@
+Copied from DDXDDXCylinder
+
+- Check that DDX on DDX is working in cylinder geometry
+- Cleaned so only simplest implemetation is present
+
+Results:
+========
+- properZ:
+  + L2   = -0.5
+  + Linf = -1.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! Diverges
+- gaussian: Converges
+- gaussianWSinAndParabola: Converges
+
+Conclusion:
+===========
+Unsure why properZ diverges...

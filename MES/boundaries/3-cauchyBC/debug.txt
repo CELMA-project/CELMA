@@ -1,0 +1,23 @@
+Issue: Had problems with assignment on non-finite data
+Place the following below cauchyYDown
+
+    // DELME
+    mesh->communicate(fCauchy);
+    for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+        for(int yInd = mesh->xstart; yInd <= mesh->xend; yInd ++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                // Set the ghost point
+                fCauchy(xInd, yInd, zInd) =
+                    0.5*(-fCauchy(xInd, yInd-1, zInd) + fCauchy(xInd, yInd+1, zInd)) /mesh->dy(xInd, yInd)
+                    ;
+                output << "fCauchy("<<xInd<<","<<yInd-1<<","<<zInd<<") = " << fCauchy(xInd,yInd-1,zInd) << std::endl;
+                output << "fCauchy("<<xInd<<","<<yInd+1<<","<<zInd<<") = " << fCauchy(xInd,yInd+1,zInd) << std::endl;
+                output << "fCauchy("<<xInd<<","<<yInd<<","<<zInd<<") = " << fCauchy(xInd,yInd,zInd) << std::endl;
+                throw BoutException("lol");
+            }
+        }
+    }
+    output << "fCauchy(1,1,0) = " << fCauchy(1,1,0) <<"\n\n\n\n\n\n" << std::endl;
+
+    fCauchy=DDY(fCauchy);
+    // END DELME

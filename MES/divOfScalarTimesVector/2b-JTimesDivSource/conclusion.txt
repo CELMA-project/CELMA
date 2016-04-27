@@ -1,0 +1,21 @@
+Copied from divSource
+
+- Check convergence for J*divSource
+
+Results:
+========
+- twoGaussians: Convergence
+- twoGaussiansSwapped: Convergence
+- twoNormalGaussians:
+  + Starts with convergence
+  + L2   = 2.00
+  + Linf = -0.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! divergence !!!
+
+Conclusion:
+===========
+Unsure why divergence on twoNormalGaussians, could be hitting machine
+precession
+Other than that: Expected convergence :D
