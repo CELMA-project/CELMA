@@ -1,0 +1,1 @@
+(  n*(-phi_x*(phi_xxz*x**3  + phi_xz*x**2  + phi_z*x   + phi_zzz*x) + phi_z*(phi_xx*x**2 + phi_xxx*x**3 + phi_xzz*x - 2*phi_zz)) - phi_x**2*(n_xz*x**3 + n_z*x**2) + phi_z**2*(n_xz*x - n_z) + phi_x*(  phi_z*(n_x*x**2 + n_xx*x**3- n_zz*x) - 2*n_z*(phi_xx*x**3 + phi_zz*x)) + 2*n_x*phi_z*(phi_xx*x**3 + phi_zz*x))/x**4

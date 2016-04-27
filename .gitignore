@@ -38,3 +38,7 @@
 # Python
 *.pyc
 *.status
+.ipynb_checkpoints/
+
+# Doxygen
+html/
