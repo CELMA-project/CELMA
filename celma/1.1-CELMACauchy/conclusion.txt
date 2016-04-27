@@ -1,0 +1,8 @@
+Copied from 1-CELMA
+
+Testing out the cauchy boundary conditions
+
+Results:
+========
+Not implemented
+Not run
