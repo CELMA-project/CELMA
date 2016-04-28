@@ -169,7 +169,7 @@ profile  = tanhhat(geom:xl, w, c, steep)
 scale       = 1.0
 function    = xoutVal
 
-# Set center value and xout value
+# Set xout value
 xoutVal       = -3
 
 # Boundaries

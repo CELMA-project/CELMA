@@ -1,5 +1,5 @@
 #
-# Input file for "1-CELMA/lessSource"
+# Input file for "1.1-CELMACauchy/fullSOriginalParamsWRONG"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -136,15 +136,18 @@ artViscPerpVortD = 5.0e-2
 # =============================================================================
 [theSource]
 # Made as a gaussian function
-a    = 0.05
+a    = 0.01
 bRho = 0
-bZ   = 25
 cRho = 10
-cZ   = 7
 # Radial profile
 radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
+# Parallel profile
+width     = 80*2
+centre    = 0
+steepness = 0.06
+parProf   = tanhhat(geom:yl, width, centre, steepness)
 # Source
-S           = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+S = a*radialProf*parProf
 # =============================================================================
 
 
@@ -172,8 +175,10 @@ xoutVal       = -3
 # Boundaries
 bndry_xin   = none                        # Manual boundary found in the code
 bndry_xout  = dirichlet_o4(lnN:function)  # Small values at the edge
-bndry_yup   = neumann_o2(0.0)             # Assume zero gradients at sheat
-bndry_ydown = neumann_o2(0.0)             # Do not allow gradients at the source
+bndry_yup   = none                        # Set cauchy boundary conditions
+bndry_ydown = none                        # Set cauchy boundary conditions
+a = lnN:function                          # THIS IS COMPLETELY WRONG!!!!!
+b = 0.0                                   # Caucy gradient
 # =============================================================================
 
 

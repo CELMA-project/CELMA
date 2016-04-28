@@ -4,5 +4,26 @@ Testing out the cauchy boundary conditions
 
 Results:
 ========
-Not implemented
-Not run
+#################### WRONG CAUCHY ############################
+- PBSDriver-0-c-0-FullSOriginalParametersSScan.py
+    + SAmp 1.0e-1 - Crash before start
+    + SAmp 5.0e-2 - Crash before start
+    + SAmp 1.0e-2
+        !!! For some reason the source is not plotted
+        * Cylinder is heavily filled
+        ! Density is fixed too low
+        * Other profiles are more consistent with intuition
+        * Radial profiles are unexpected...much more plasma
+        * Reaches ln_n = -0.8
+        ! Sharp gradients edge
+        ! Crashes at om_ci = 60
+    + SAmp 5.0e-3
+        !!! For some reason the source is not plotted
+        * As above
+        * Reaches ln_n = -1.228
+        ! Sharp gradients edge
+        ! COMPLETES THE RUN!
+    + SAmp 1.0e-3
+        !!! For some reason the source is not plotted
+        * As above
+##############################################################

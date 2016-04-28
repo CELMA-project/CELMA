@@ -20,7 +20,7 @@ restart    = None
 remove_old = True
 nout       = 0
 timestep   = 1e-10
-directory  = "fullSLowColl"
+directory  = "fullSOriginalParams"
 # Shall we make?
 make       = False
 # The number of processors
