@@ -11,7 +11,6 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from saveFolderFuncs import scanWTagSaveFunc as saveFolderFunc
 from postProcessing.plotting import combinedDriver
 
 # The options for the run
@@ -104,13 +103,13 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards        = xguards       ,\
-                     yguards        = yguards       ,\
-                     xSlice         = xSlice        ,\
-                     ySlice         = ySlice        ,\
-                     zSlice         = zSlice        ,\
-                     savePlot       = savePlot      ,\
-                     saveFolderFunc = saveFolderFunc,\
-                     theRunName     = theRunName    ,\
+                     xguards        = xguards           ,\
+                     yguards        = yguards           ,\
+                     xSlice         = xSlice            ,\
+                     ySlice         = ySlice            ,\
+                     zSlice         = zSlice            ,\
+                     savePlot       = savePlot          ,\
+                     saveFolderFunc = "scanWTagSaveFunc",\
+                     theRunName     = theRunName        ,\
                     )
 # =============================================================================
