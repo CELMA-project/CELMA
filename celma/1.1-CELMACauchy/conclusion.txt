@@ -27,3 +27,18 @@ Results:
         !!! For some reason the source is not plotted
         * As above
 ##############################################################
+
+
+- PBSDriver-0-c-0-FullSOriginalParametersSScan.py
+    :D Runs very fast
+    ! Sharp gradients towards the radial boundary...more plasma in the box
+    ! Still doesn't plot the source...bug?
+    + SAmp 1.0e-2
+        ! Crashes at om_ci = 60
+    + SAmp 5.0e-3
+        ! COMPLETES THE RUN
+        * Doesn't look too bad, but not too good at source plate
+
+
+BUG: No source plotting in line-plot?
+     Plots just fine when not on cluster
