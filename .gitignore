@@ -44,7 +44,13 @@
 html/
 
 #BOUT
-*.log*
+*log*
 *.nc
 *.png
 *.pdf
+visualization/
+celma
+
+# Miscellaneous
+*delme*
+nout*/
