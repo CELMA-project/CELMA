@@ -11,7 +11,7 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-
+from saveFolderFuncs import scanWTagSaveFunc as saveFolderFunc
 from postProcessing.plotting import combinedDriver
 
 # The options for the run
@@ -49,7 +49,7 @@ theRunName = "0-g-0-elongatedSLowCollSAmpScan"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -108,7 +108,7 @@ myRuns.execute_runs(\
                      ySlice         = ySlice        ,\
                      zSlice         = zSlice        ,\
                      savePlot       = savePlot      ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
+                     saveFolderFunc = saveFolderFunc,\
                      theRunName     = theRunName    ,\
                     )
 # =============================================================================

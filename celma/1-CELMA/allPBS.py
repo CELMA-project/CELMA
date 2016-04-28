@@ -7,7 +7,7 @@ import re
 
 # Make
 print('Now making')
-os.system('make')
+os.system('make clean && make')
 # Find all files
 files = [f for f in os.listdir('.') if os.path.isfile(f)]
 # Find files matching a specific pattern
