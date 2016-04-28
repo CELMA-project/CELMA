@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-saveFolder = "0-i-0-FullSOriginalParametersSScan"
+theRunName = "0-i-0-FullSOriginalParametersSScan"
 # =============================================================================
 
 
@@ -49,66 +49,65 @@ nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
 BOUT_walltime         = '06:00:00'
-BOUT_run_name         = saveFolder
+BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + saveFolder.capitalize()
+post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
 
-for SAmp in SAmps:
-    curSaveFolder = saveFolder + '_S_' + str(SAmp)
-    # Create the runner
-    # ========================================================================
-    myRuns = PBS_runner(\
-                directory  = directory ,\
-                nproc      = nproc ,\
-                # Set temporal domain
-                nout       = nout  ,\
-                timestep   = timestep,\
-                # Copy the source file
-                cpy_source = True  ,\
-                make       = make  ,\
-                restart    = restart,\
-                additional = [
-                              ('tag',curSaveFolder,0),\
-                              ('theSource','s',SAmp),\
-                             ],\
-                # PBS options
-                BOUT_nodes            = BOUT_nodes           ,\
-                BOUT_ppn              = BOUT_ppn             ,\
-                BOUT_walltime         = BOUT_walltime        ,\
-                BOUT_run_name         = BOUT_run_name        ,\
-                post_process_nproc    = post_process_nproc   ,\
-                post_process_nodes    = post_process_nodes   ,\
-                post_process_ppn      = post_process_ppn     ,\
-                post_process_walltime = post_process_walltime,\
-                post_process_queue    = post_process_queue   ,\
-                post_process_run_name = post_process_run_name,\
-                )
-    # ========================================================================
+# Create the runner
+# =============================================================================
+myRuns = PBS_runner(\
+            directory  = directory ,\
+            nproc      = nproc ,\
+            # Set temporal domain
+            nout       = nout  ,\
+            timestep   = timestep,\
+            # Copy the source file
+            cpy_source = True  ,\
+            make       = make  ,\
+            restart    = restart,\
+            additional = [
+                          ('tag',theRunName,0),\
+                          ('theSource','a',SAmps) ,\
+                         ],\
+            # PBS options
+            BOUT_nodes            = BOUT_nodes           ,\
+            BOUT_ppn              = BOUT_ppn             ,\
+            BOUT_walltime         = BOUT_walltime        ,\
+            BOUT_run_name         = BOUT_run_name        ,\
+            post_process_nproc    = post_process_nproc   ,\
+            post_process_nodes    = post_process_nodes   ,\
+            post_process_ppn      = post_process_ppn     ,\
+            post_process_walltime = post_process_walltime,\
+            post_process_queue    = post_process_queue   ,\
+            post_process_run_name = post_process_run_name,\
+            )
+# =============================================================================
 
 
-    # Perform the run
-    # ========================================================================
-    myRuns.execute_runs(\
-                         remove_old               = remove_old,\
-                         post_processing_function = combinedDriver,\
-                         # This function will be called every time after
-                         # performing a run
-                         post_process_after_every_run = True,\
-                         # Below are the kwargs arguments being passed to
-                         # the post processing function
-                         # Switches
-                         xguards    = xguards      ,\
-                         yguards    = yguards      ,\
-                         xSlice     = xSlice       ,\
-                         ySlice     = ySlice       ,\
-                         zSlice     = zSlice       ,\
-                         savePlot   = savePlot     ,\
-                         saveFolder = curSaveFolder,\
-                        )
-    # ========================================================================
+# Perform the run
+# =============================================================================
+myRuns.execute_runs(\
+                     remove_old               = remove_old,\
+                     post_processing_function = combinedDriver,\
+                     # This function will be called every time after
+                     # performing a run
+                     post_process_after_every_run = True,\
+                     # Below are the kwargs arguments being passed to
+                     # the post processing function
+                     # Switches
+                     xguards        = xguards           ,\
+                     yguards        = yguards           ,\
+                     xSlice         = xSlice            ,\
+                     ySlice         = ySlice            ,\
+                     zSlice         = zSlice            ,\
+                     savePlot       = savePlot          ,\
+                     saveFolderFunc = "scanWTagSaveFunc",\
+                     theRunName     = theRunName        ,\
+                    )
+# =============================================================================
