@@ -49,8 +49,8 @@ html/
 *.png
 *.pdf
 visualization/
-celma
 
 # Miscellaneous
 *delme*
+*tmp*
 nout*/
