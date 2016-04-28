@@ -1,5 +1,5 @@
 #
-# Input file for "1-CELMA/fullSOriginalParams"
+# Input file for "1.1-CELMACauchy/fullSOriginalParams"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -145,7 +145,7 @@ radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
 width     = 80*2
 centre    = 0
 steepness = 0.06
-parProf   = tanhhat(geom:yl, width, centre, steepness)
+parProf   = tanhhat(geom:yl, theSource:width, theSource:centre, theSource:steepness)
 # Source
 S = a*radialProf*parProf
 # =============================================================================
@@ -167,17 +167,25 @@ profile  = tanhhat(geom:xl, w, c, steep)
 # =============================================================================
 [lnN]
 scale       = 1.0
-function    = xoutVal
 
-# Set center value and xout value
+# Parallel profile
+width     = 20*2
+centre    = 0
+steepness = 0.06
+parProf   = 3*tanhhat(geom:yl, lnN:width, lnN:centre, lnN:steepness)
+
+# Set xout value
 xoutVal       = -3
+
+# Set initial function
+function    = lnN:parProf*theSource:radialProf + xoutVal
 
 # Boundaries
 bndry_xin   = none                        # Manual boundary found in the code
 bndry_xout  = dirichlet_o4(lnN:function)  # Small values at the edge
 bndry_yup   = none                        # Set cauchy boundary conditions
 bndry_ydown = none                        # Set cauchy boundary conditions
-a = lnN:function                          # Caucy value found from steady state runs
+a = lnN:function                          # Caucy value from init function
 b = 0.0                                   # Caucy gradient
 # =============================================================================
 
