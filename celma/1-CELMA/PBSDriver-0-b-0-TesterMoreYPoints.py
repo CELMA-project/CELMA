@@ -11,15 +11,19 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
+from saveFolderFuncs import scanWTagSaveFunc as saveFolderFunc
 from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
+# *****************************************************************************
+SAmps   = [0.5, 0.05]
+# *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
-nout       = [100]
-timestep   = [1e-2]
+nout       = [20]
+timestep   = [5e0]
 directory  = "moreYPoints"
 # Shall we make?
 make       = False
@@ -35,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-saveFolder = "0-b-0-TesterMoreYPoints"
+theRunName = "0-b-0-TesterMoreYPoints"
 # =============================================================================
 
 
@@ -45,14 +49,14 @@ saveFolder = "0-b-0-TesterMoreYPoints"
 nproc                 = 140
 BOUT_nodes            = 7
 BOUT_ppn              = 20
-BOUT_walltime         = '48:00:00'
-BOUT_run_name         = saveFolder
+BOUT_walltime         = '06:00:00'
+BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + saveFolder.capitalize()
+post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
 
@@ -68,6 +72,10 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            additional = [
+                          ('tag',theRunName,0),\
+                          ('theSource', 'a', SAmps) ,\
+                         ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\
@@ -79,8 +87,6 @@ myRuns = PBS_runner(\
             post_process_walltime = post_process_walltime,\
             post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
-            # Tag (used to catalogize the runs)
-            additional = ('tag',saveFolder,0)            ,\
             )
 # =============================================================================
 
@@ -96,12 +102,13 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards    = xguards    ,\
-                     yguards    = yguards    ,\
-                     xSlice     = xSlice     ,\
-                     ySlice     = ySlice     ,\
-                     zSlice     = zSlice     ,\
-                     savePlot   = savePlot   ,\
-                     saveFolder = saveFolder ,\
+                     xguards        = xguards       ,\
+                     yguards        = yguards       ,\
+                     xSlice         = xSlice        ,\
+                     ySlice         = ySlice        ,\
+                     zSlice         = zSlice        ,\
+                     savePlot       = savePlot      ,\
+                     saveFolderFunc = saveFolderFunc,\
+                     theRunName     = theRunName    ,\
                     )
 # =============================================================================
