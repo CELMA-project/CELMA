@@ -23,7 +23,7 @@ timestep   = [5e-10, 5e-5, 5e-1, 5e0, 5e1]
 nout       = [20]*len(timestep)
 directory  = "data"
 # Shall we make?
-make       = True
+make       = False
 # =============================================================================
 
 
