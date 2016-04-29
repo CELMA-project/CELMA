@@ -72,9 +72,9 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            series_add = [
+            additional = [
                           ('tag',theRunName,0),\
-                          ('theSource','s',SAmps),\
+                          ('theSource','a',SAmps),\
                           ('cst','nuEI',eiCollisions),\
                          ],\
             # PBS options

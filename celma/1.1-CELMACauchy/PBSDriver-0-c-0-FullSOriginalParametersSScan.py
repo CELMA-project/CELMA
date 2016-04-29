@@ -73,7 +73,7 @@ myRuns = PBS_runner(\
             restart    = restart,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('theSource','s',SAmps),\
+                          ('theSource','a',SAmps),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
