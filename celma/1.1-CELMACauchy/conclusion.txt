@@ -5,6 +5,8 @@ Testing out the cauchy boundary conditions
 Results:
 ========
 #################### WRONG CAUCHY ############################
+In this block, a in the cauchy was errornously set to xoutval
+
 - PBSDriver-0-c-0-FullSOriginalParametersSScan.py
     + SAmp 1.0e-1 - Crash before start
     + SAmp 5.0e-2 - Crash before start
@@ -29,6 +31,10 @@ Results:
 ##############################################################
 
 
+################### WRONG SOURCE #############################
+In this block the source amplitude 'a' was supposed to be set, but the 'a' was
+instead set to 's' (i.e. the source was homogeneously set to one value)
+
 - PBSDriver-0-c-0-FullSOriginalParametersSScan.py
     :D Runs very fast
     ! Sharp gradients towards the radial boundary...more plasma in the box
@@ -40,5 +46,73 @@ Results:
         * Doesn't look too bad, but not too good at source plate
 
 
-BUG: No source plotting in line-plot?
-     Plots just fine when not on cluster
+- PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
+    + nuEI = 500
+    + nuEI = 300
+      * Full noise parallel direction after 5 om_ci
+      ! Crashes after 5 om_ci
+    + nuEI = 100
+      ! Does not even complete one timestep
+
+
+- PBSDriver-0-c-1-FullSOrigPCollScan.py
+    + nuEI = 300
+      * Runs fine although a tad violent
+    + nuEI = 100
+      * Looks fine
+      ! Crashes at om_ci = 90
+    + nuEI = 50
+      ! Does not even complete one timestep
+    + nuEI = 1
+      ! Does not even complete one timestep
+    + nuEI = 0.1
+      ! Does not even complete one timestep
+
+
+- PBSDriver-0-c-2-FullSOriginalParametersSParWidthScan.py
+    + SAmp = 0.01
+        + Width = 120
+          ! Crash after 60 om_ci
+          * Not sure why, could be large radial gradients
+        + Width = 100
+          ! Crash after 60 om_ci
+          * Not sure why, could be large radial gradients
+        + Width = 80
+    !!! CANNOT REALLY DISTINGUISH THE 3
+    !!! NO S PLOTTED
+    !!! NO MENTION IN THE LOGFILES
+    !!! SUGGESTED MEASURE TO TAKE:
+        1. TRY TO COLLECT S FROM OUTPUT FILE
+        2. DEBUG THE POSTPROCESS BY DISABLE THE DEL IN BOUT_RUNNERS
+    + SAmp = 0.005
+        + Width = 120
+          * Looks fine
+          :D Run completes
+        + Width = 100
+        + Width = 80
+##############################################################
+
+- PBSDriver-0-a-0-RestartFromCELMA0c0.py
+  ! Source plotted just fine
+  * Plasma is being emptied
+  * Extremely high values of ue
+  * Runs just fine
+
+
+- PBSDriver-0-b-0-fullSLowColl.py
+    + timestep = 5e-1
+        * Doesn't complete even one iteration
+    + timestep = 5e-4
+    + timestep = 5e-6
+
+
+- PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
+
+
+- PBSDriver-0-c-0-FullSOriginalParametersSScan.py
+
+
+- PBSDriver-0-c-1-FullSOrigPCollScan.py
+
+
+- PBSDriver-0-c-2-FullSOriginalParametersSParWidthScan.py

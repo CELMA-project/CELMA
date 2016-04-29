@@ -15,10 +15,12 @@ from postProcessing.plotting import parPerpDriver
 
 # The options for the run
 # =============================================================================
+width = [20]
+width = [el*2 for el in width]
 # Set the temporal domain
 restart    = None
 remove_old = True
-nout       = 0
+nout       = 2
 timestep   = 1e-10
 directory  = "fullSOriginalParams"
 # Shall we make?
@@ -54,6 +56,9 @@ myRuns = basic_runner(\
                       cpy_source = True      ,\
                       make       = make      ,\
                       restart    = restart   ,\
+                      additional = [
+                                    ('theSource','width',width),\
+                                   ],\
                       )
 # =============================================================================
 
