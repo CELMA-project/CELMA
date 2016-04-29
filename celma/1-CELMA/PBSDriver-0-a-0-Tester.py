@@ -19,7 +19,7 @@ from postProcessing.plotting import combinedDriver
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e1]
+timestep   = [5e0]
 directory  = "data"
 # Shall we make?
 make       = False
