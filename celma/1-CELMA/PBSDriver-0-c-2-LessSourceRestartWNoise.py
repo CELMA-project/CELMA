@@ -15,17 +15,15 @@ from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
-# *****************************************************************************
-SAmps = [1e-2, 5e-3]
-width = [60, 50, 40]
-width = [el*2 for el in width]
-# *****************************************************************************
 # Set the temporal domain
-restart    = None
-remove_old = False
+restart      = "overwrite"
+restart_from = "lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
+remove_old   = False
 nout       = [20]
 timestep   = [5e0]
-directory  = "fullSOriginalParams"
+directory  = "lessSource"
+# Addnoise
+addnoise = {'var':None, 'scale':1e-3}
 # Shall we make?
 make       = False
 # =============================================================================
@@ -40,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-2-FullSOriginalParametersSParWidthScan"
+saveFolder = "0-c-2-LessSourceRestartWNoise"
 # =============================================================================
 
 
@@ -51,13 +49,13 @@ nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
 BOUT_walltime         = '06:00:00'
-BOUT_run_name         = theRunName
+BOUT_run_name         = saveFolder
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + theRunName.capitalize()
+post_process_run_name = 'post' + saveFolder.capitalize()
 # =============================================================================
 
 
@@ -73,11 +71,11 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            additional = [
-                          ('tag',theRunName,0),\
-                          ('theSource','a',SAmps),\
-                          ('theSource','width',width),\
-                         ],\
+            restart_from = restart_from,\
+            # Tag (used to catalogize the runs)
+            additional = ('tag',saveFolder,0)            ,\
+            # Addnoise
+            addnoise   = addnoise,\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\
@@ -104,13 +102,12 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards        = xguards           ,\
-                     yguards        = yguards           ,\
-                     xSlice         = xSlice            ,\
-                     ySlice         = ySlice            ,\
-                     zSlice         = zSlice            ,\
-                     savePlot       = savePlot          ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
-                     theRunName     = theRunName        ,\
+                     xguards    = xguards    ,\
+                     yguards    = yguards    ,\
+                     xSlice     = xSlice     ,\
+                     ySlice     = ySlice     ,\
+                     zSlice     = zSlice     ,\
+                     savePlot   = savePlot   ,\
+                     saveFolder = saveFolder ,\
                     )
 # =============================================================================

@@ -18,7 +18,7 @@ from postProcessing.plotting import combinedDriver
 # Set the temporal domain
 restart    = None
 remove_old = False
-timestep   = [5e-1, 5e0, 5e1]
+timestep   = [5e-1, 5e-4, 5e-6]
 nout       = [20]*len(timestep)
 directory  = "fullSLowColl"
 # Shall we make?
