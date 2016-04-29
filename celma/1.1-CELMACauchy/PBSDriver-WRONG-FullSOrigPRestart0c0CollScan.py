@@ -16,11 +16,12 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-SAmps = [1e-2, 5e-3]
+SAmps = [5e-3]
+eiCollisions = [300, 100]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
-remove_old = False
+restart      = "overwrite"
+restart_from = "fullSOriginalParams/"
 nout       = [20]
 timestep   = [5e0]
 directory  = "fullSOriginalParams"
@@ -38,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-0-FullSOriginalParametersSScan"
+theRunName = "0-c-0-1-FullSOrigPRestart0c0CollScan"
 # =============================================================================
 
 
@@ -71,9 +72,11 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            additional = [
+            restart_from = restart_from,\
+            series_add = [
                           ('tag',theRunName,0),\
                           ('theSource','s',SAmps),\
+                          ('cst','nuEI',eiCollisions),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
