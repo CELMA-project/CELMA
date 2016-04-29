@@ -17,6 +17,8 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 SAmps = [1e-2, 5e-3]
+width = [60, 50, 40]
+width = [el*2 for el in width]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
@@ -38,7 +40,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-0-FullSOriginalParametersSScan"
+theRunName = "0-c-2-FullSOriginalParametersSParWidthScan"
 # =============================================================================
 
 
@@ -71,9 +73,10 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            additional = [
+            series_add = [
                           ('tag',theRunName,0),\
                           ('theSource','s',SAmps),\
+                          ('theSource','width',width),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
