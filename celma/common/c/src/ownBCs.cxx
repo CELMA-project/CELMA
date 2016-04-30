@@ -49,11 +49,11 @@ OwnBCs::OwnBCs(){
  *
  * ## Explanation of the procedure:
  * The innermost ghost points in x (closest to the boundary) with a z value
- * lower than (and excluding) \f$\pi\f$ will be set to the value of the innermost
- * internal (meaning all points excluding the ghost points) point which
- * lies \f$\theta + \pi\f$ away. The next ghost point will be set to the value of
- * the second innermost internal point which lies \f$\theta + \pi\f$ away, and so
- * on.
+ * lower than (and excluding) \f$\pi\f$ will be set to the value of the
+ * innermost internal point (meaning all points excluding the ghost points)
+ * which lies \f$\theta + \pi\f$ away. The next ghost point will be set to the
+ * value of the second innermost internal point which lies \f$\theta + \pi\f$
+ * away, and so on.
  *
  * This means that the index of the point diametrically opposite to the
  * current ghost point will be on the form
