@@ -15,15 +15,16 @@ from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
+# *****************************************************************************
+SAmps = [1e-2, 5e-3]
+visc = [5e-2, 5e-4, 0]
+# *****************************************************************************
 # Set the temporal domain
-restart      = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None
-restart_from = "data/nout_20_timestep_1.0/tag_0-a-0-Tester_0"
+restart    = None
 remove_old = False
-nout       = [12]
-timestep   = [1e-1]
-directory  = "data"
+nout       = [20]
+timestep   = [5e0]
+directory  = "fullSOriginalParams"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-saveFolder = "0-a-1-TesterRestart"
+theRunName = "0-i-1-FullSOriginalParametersArtificialScan"
 # =============================================================================
 
 
@@ -49,13 +50,13 @@ nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
 BOUT_walltime         = '06:00:00'
-BOUT_run_name         = saveFolder
+BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + saveFolder.capitalize()
+post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
 
@@ -71,7 +72,14 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
+            additional = [
+                          ('tag',theRunName,0),\
+                          ('theSource','a',SAmps) ,\
+                         ],\
+            series_add = [
+                          ('cst','artViscPar',visc),\
+                          ('cst','artViscPerp',visc),\
+                         ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\
@@ -83,8 +91,6 @@ myRuns = PBS_runner(\
             post_process_walltime = post_process_walltime,\
             post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
-            # Tag (used to catalogize the runs)
-            additional = ('tag',saveFolder,0)            ,\
             )
 # =============================================================================
 
@@ -100,12 +106,13 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards    = xguards    ,\
-                     yguards    = yguards    ,\
-                     xSlice     = xSlice     ,\
-                     ySlice     = ySlice     ,\
-                     zSlice     = zSlice     ,\
-                     savePlot   = savePlot   ,\
-                     saveFolder = saveFolder ,\
+                     xguards        = xguards           ,\
+                     yguards        = yguards           ,\
+                     xSlice         = xSlice            ,\
+                     ySlice         = ySlice            ,\
+                     zSlice         = zSlice            ,\
+                     savePlot       = savePlot          ,\
+                     saveFolderFunc = "scanWTagSaveFunc",\
+                     theRunName     = theRunName        ,\
                     )
 # =============================================================================

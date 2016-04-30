@@ -22,7 +22,7 @@ moreSource = ('theSource', 'a', 0.1)
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e1]
 directory  = "lessSource"
 # Shall we make?
 make       = False

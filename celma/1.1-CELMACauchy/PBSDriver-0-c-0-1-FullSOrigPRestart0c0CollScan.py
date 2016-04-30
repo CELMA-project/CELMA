@@ -21,6 +21,8 @@ eiCollisions = [500, 300, 100]
 # *****************************************************************************
 # Set the temporal domain
 restart      = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None
 restart_from = "fullSOriginalParams/nout_20_timestep_5.0/tag_0-c-0-FullSOriginalParametersSScan_0_theSource_s_0.005/"
 remove_old = False
 nout       = [20]
