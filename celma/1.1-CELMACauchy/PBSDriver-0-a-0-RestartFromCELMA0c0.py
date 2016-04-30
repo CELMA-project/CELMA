@@ -17,6 +17,8 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # Set the temporal domain
 restart      = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None
 restart_from = "../1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
 remove_old = False
 timestep   = [5e-10, 5e-5, 5e-1, 5e0, 5e1]
