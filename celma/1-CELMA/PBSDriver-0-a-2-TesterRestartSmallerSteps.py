@@ -17,7 +17,9 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # Set the temporal domain
 restart      = "overwrite"
-restart_from = "data/nout_12_timestep_0.1/tag_0-a-1-TesterRestart_0"
+# Uncomment this if you just want to plot
+# restart      = None
+restart_from = "data/nout_20_timestep_1.0/tag_0-a-0-Tester_0"
 remove_old   = False
 nout         = [40]
 timestep     = [5.0e-2]

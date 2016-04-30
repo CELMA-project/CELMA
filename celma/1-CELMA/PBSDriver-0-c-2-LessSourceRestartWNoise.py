@@ -17,13 +17,15 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # Set the temporal domain
 restart      = "overwrite"
+# Addnoise
+addnoise = {'var':None, 'scale':1e-3}
+# Uncomment this if you just want to plot
+# restart      = None; addnoise = None
 restart_from = "lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
 remove_old   = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e1]
 directory  = "lessSource"
-# Addnoise
-addnoise = {'var':None, 'scale':1e-3}
 # Shall we make?
 make       = False
 # =============================================================================
@@ -48,7 +50,7 @@ saveFolder = "0-c-2-LessSourceRestartWNoise"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = saveFolder
 post_process_nproc    = 1
 post_process_nodes    = 1
