@@ -40,7 +40,30 @@ Looks like n was not properly communicated
   !!! Run doesn't start properly
 -----------------END OF OLD CONCLUSION----------------------
 
-
+-  PBSDriver-0-a-0-Tester.py
+    Amplitude S: 0.5
+    + Crashes after om_ci = 13
+-  PBSDriver-0-a-1-TesterRestart.py
+    + Crashes after om_ci = 14.2, can see ripples
+-  PBSDriver-0-a-2-TesterRestartSmallerSteps.py
+    + Crashes after om_ci = 13.8, can see ripples after om_ci = 13.7
+-  PBSDriver-0-a-3-TesterMoreIt.py
+    !!! No idea what is happening here, but looks BAD (not communicated or so)
+-  PBSDriver-0-b-0-TesterMoreYPoints.py
+    Amplitude S: 0.5
+    !!! Didn't even complete one step
+    Amplitude S: 0.05
+        + Step = 5e0
+        !!! Didn't even complete one step
+        + Step = 5e-1
+-  PBSDriver-0-c-0-TesterLessSource.py
+    :D Runs fine to 1000, potential looks a tad strange
+-  PBSDriver-0-c-1-TesterLessSource+.py
+    :D Runs fine to 100, potential looks a tad strange
+# RUNNING with 1000
+-  PBSDriver-0-c-2-LessSourceRestartWNoise.py
+    :D Runs fine to 100, but still no turbulence
+# RUNNING with 1000
 -  PBSDriver-0-d-0-CollisionScan.py
     Amplitude S: 0.1
     + nuei 0.1   - 10 omega_ci until crash
@@ -79,7 +102,40 @@ Looks like n was not properly communicated
     + nuei 300.0 - Crash before start
     + nuei 600.0 - 10 omega_ci until crash
 - PBSDriver-0-g-0-elongatedSLowCollSAmpScan.py
+    + SAmp 1.0e-1 - Crash before start
+    + SAmp 5.0e-2 - Crash before start
     + SAmp 1.0e-2 - Crash before start
     + SAmp 5.0e-3 - Crash before start
-    + SAmp 1.0e-3 - Crash before start
-    + SAmp 5.0e-4 - Crash before start
+-  PBSDriver-0-g-1-elongatedSLowSCollScan.py
+    Amplitude S: 5.0e-4
+    + nuei 0.1   - Crash before start
+    + nuei 1.0   - Crash before start
+    + nuei 50.0  - Crash before start
+    + nuei 100.0 - Crash before start
+    + nuei 300.0 - Crash before start
+-  PBSDriver-0-h-0-elongatedSOriginalParametersSScan.py
+    + SAmp 1.0e-1 - Crash after om_ci = 20
+    + SAmp 5.0e-2 - Crash after om_ci = 45
+    + SAmp 1.0e-2 - Runs just fine
+    + SAmp 5.0e-3 - Runs just fine
+    + SAmp 1.0e-3 - Plasma seriously emptied
+-  PBSDriver-0-i-0-FullSOriginalParametersSScan.py
+    + SAmp 1.0e-1 - Crash after om_ci = 20
+    + SAmp 5.0e-2 - Crash after om_ci = 20
+    + SAmp 1.0e-2 - Runs just fine, almost fills
+    + SAmp 5.0e-3 - Runs just fine
+    + SAmp 1.0e-3 - Column is emptying
+-  PBSDriver-0-i-1-FullSOriginalParametersCollScan.py
+    + SAmp 1.0e-2:
+#        * nuei 0.1   -
+#        * nuei 1.0   -
+#        * nuei 50.0  -
+#        * nuei 100.0 -
+#        * nuei 300.0 -
+    + SAmp 5.0e-3:
+#        * nuei 0.1   -
+#        * nuei 1.0   -
+#        * nuei 50.0  -
+#        * nuei 100.0 -
+#        * nuei 300.0 -
+-  PBSDriver-0-i-2-FullSOriginalParametersSScan.py
