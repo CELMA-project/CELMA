@@ -16,18 +16,16 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-nuEISlope = [1.0e0, 5.0e-1, 1.0e-1, 5.0e-2]
-nuEISlope = [-el for el in nuEISlope]
+SAmps = [5e-2]
+width = [500]
+eiCollisions = [300, 100, 50, 1, 0.1]
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None
-restart_from = "../1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
+restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [1e0]
-directory  = "a-data"
+timestep   = [5e0]
+directory  = "fullSOriginalParams"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -42,7 +40,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "a-0-restartFrom1CELMA0c0"
+theRunName = "0-c-2-FullSOrigPWholeCylCollScan"
 # =============================================================================
 
 
@@ -75,12 +73,12 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
-            # Tag (used to catalogize the runs)
-            additional = [\
-                         ('tag',theRunName,0),\
-                         ('rmp','nuEISlope',nuEISlope),\
-                         ]                   ,\
+            additional = [
+                          ('tag',theRunName,0),\
+                          ('theSource','a',SAmps),\
+                          ('theSource','width',width),\
+                          ('cst','nuEI',eiCollisions),\
+                         ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\

@@ -16,17 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-nuEISlope = [1.0e0, 5.0e-1, 1.0e-1, 5.0e-2]
-nuEISlope = [-el for el in nuEISlope]
+nuEISlope = [-1.0e-1]
+nuEIStart = [598]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None
-restart_from = "../1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
+restart_from = "a-data/nout_20_timestep_1.0/rmp_nuEISlope_-0.1_tag_a-0-restartFrom1CELMA0c0_0"
 remove_old = False
 nout       = [20]
-timestep   = [1e0]
+timestep   = [5e1]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -42,7 +42,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "a-0-restartFrom1CELMA0c0"
+theRunName = "PBSDriver-a-2-restartFromA0"
 # =============================================================================
 
 
@@ -52,7 +52,7 @@ theRunName = "a-0-restartFrom1CELMA0c0"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -80,6 +80,7 @@ myRuns = PBS_runner(\
             additional = [\
                          ('tag',theRunName,0),\
                          ('rmp','nuEISlope',nuEISlope),\
+                         ('rmp','nuEIStart',nuEIStart),\
                          ]                   ,\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
