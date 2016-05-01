@@ -106,13 +106,21 @@ instead set to 's' (i.e. the source was homogeneously set to one value)
     + timestep = 5e-6
 
 
-- PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
-
-
 - PBSDriver-0-c-0-FullSOriginalParametersSScan.py
+    + SAmp: 1e-1
+# Running
+    + SAmp: 5e-2
+# Running
+    + SAmp: 1e-2    - Column not properly filled
+    + SAmp: 5e-3    - Column not properly filled
+
+
+- PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
+#! Start after new 0-c-0
 
 
 - PBSDriver-0-c-1-FullSOrigPCollScan.py
+# Running
 
 
 - PBSDriver-0-c-2-FullSOriginalParametersSParWidthScan.py
