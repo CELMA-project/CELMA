@@ -16,8 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-nuEISlope = [1.0e0, 5.0e-1, 1.0e-1, 5.0e-2]
-nuEISlope = [-el for el in nuEISlope]
+nuEISlope = [0.0]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
@@ -42,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "a-0-restartFrom1CELMA0c0"
+saveFolder = "a-1-restartFrom1CELMA0c0NormalRestart"
 # =============================================================================
 
 
@@ -53,13 +52,13 @@ nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
 BOUT_walltime         = '06:00:00'
-BOUT_run_name         = theRunName
+BOUT_run_name         = saveFolder
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + theRunName.capitalize()
+post_process_run_name = 'post' + saveFolder.capitalize()
 # =============================================================================
 
 
@@ -78,7 +77,7 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             # Tag (used to catalogize the runs)
             additional = [\
-                         ('tag',theRunName,0),\
+                         ('tag',saveFolder,0),\
                          ('rmp','nuEISlope',nuEISlope),\
                          ]                   ,\
             # PBS options
@@ -107,13 +106,12 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards        = xguards           ,\
-                     yguards        = yguards           ,\
-                     xSlice         = xSlice            ,\
-                     ySlice         = ySlice            ,\
-                     zSlice         = zSlice            ,\
-                     savePlot       = savePlot          ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
-                     theRunName     = theRunName        ,\
+                     xguards    = xguards    ,\
+                     yguards    = yguards    ,\
+                     xSlice     = xSlice     ,\
+                     ySlice     = ySlice     ,\
+                     zSlice     = zSlice     ,\
+                     savePlot   = savePlot   ,\
+                     saveFolder = saveFolder ,\
                     )
 # =============================================================================

@@ -137,17 +137,18 @@ artViscPerpVortD = artViscPerp
 # The source
 # =============================================================================
 [theSource]
-# Made as a gaussian function
-a    = 0.01
-bRho = 0
-cRho = 10
+# The amplitude
+a = 0.01
 # Radial profile
-radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
+radialWidth     = 17*2
+radialCentre    = 0
+radialSteepness = 0.3
+radialProf      = tanhhat(geom:xl, theSource:radialWidth, theSource:radialCentre, theSource:radialSteepness)
 # Parallel profile
-width     = 80*2
-centre    = 0
-steepness = 0.06
-parProf   = tanhhat(geom:yl, width, centre, steepness)
+parWidth     = 80*2
+parCentre    = 0
+parSteepness = 0.06
+parProf      = tanhhat(geom:yl, theSource:parWidth, theSource:parCentre, theSource:parSteepness)
 # Source
 S = a*radialProf*parProf
 # =============================================================================
