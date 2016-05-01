@@ -1,5 +1,5 @@
 #
-# Input file for "1.1-CELMACauchy/restartBroaderCauchy"
+# Input file for "1.1-CELMACauchy/fullSOrigPBroaderS"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -168,21 +168,25 @@ profile  = tanhhat(geom:xl, w, c, steep)
 # =============================================================================
 [lnN]
 scale       = 1.0
-function    = xoutVal
+
+# Parallel profile
+width     = 20*2
+centre    = 0
+steepness = 0.06
+parProf   = abs(xoutVal)*tanhhat(geom:yl, lnN:width, lnN:centre, lnN:steepness)
 
 # Set xout value
 xoutVal       = -3
+
+# Set initial function
+function    = lnN:parProf*theSource:radialProf + xoutVal
 
 # Boundaries
 bndry_xin   = none                        # Manual boundary found in the code
 bndry_xout  = dirichlet_o4(lnN:function)  # Small values at the edge
 bndry_yup   = none                        # Set cauchy boundary conditions
 bndry_ydown = none                        # Set cauchy boundary conditions
-# Caucy value found from steady state runs
-# dampProf has its minimum at 0, and maximum at 1
-# We scale the profile, such that it hits the steady state condition
-steadyStateVal = -0.369
-a = (-lnN:xoutVal + lnN:steadyStateVal)*dampProf:profile + lnN:xoutVal
+a = lnN:function                          # Caucy value from init function
 b = 0.0                                   # Caucy gradient
 # =============================================================================
 

@@ -1,5 +1,5 @@
 #
-# Input file for "1.1-CELMACauchy/restartBroaderCauchy"
+# Input file for "1-CELMA/fullSOrigPBroaderS"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -119,34 +119,35 @@ nuEN = 30
 nuIN = 0.3
 
 # Parallel artificial dissipation
-artViscParLnN    = 5.0e0 # Density
-artViscParUEPar  = 5.0e0 # Electron velocity
-artViscParUIPar  = 5.0e0 # Ion velocity
-artViscParVortD  = 5.0e0 # Vorticity
+artViscPar       = 5.0e0
+artViscParLnN    = artViscPar # Density
+artViscParUEPar  = artViscPar # Electron velocity
+artViscParUIPar  = artViscPar # Ion velocity
+artViscParVortD  = artViscPar # Vorticity
 
 # Perpendicular diffusion
-artViscPerpLnN   = 5.0e-2
-artViscPerpUEPar = 5.0e-2
-artViscPerpUIPar = 5.0e-2
-artViscPerpVortD = 5.0e-2
+artViscPerp      = 5.0e-2
+artViscPerpLnN   = artViscPerp
+artViscPerpUEPar = artViscPerp
+artViscPerpUIPar = artViscPerp
+artViscPerpVortD = artViscPerp
 # =============================================================================
 
 
 # The source
 # =============================================================================
 [theSource]
-# The amplitude
-a = 0.01
+# Made as a gaussian function
+a    = 0.01
+bRho = 0
+cRho = 10
 # Radial profile
-radialWidth     = 17*2
-radialCentre    = 0
-radialSteepness = 0.3
-radialProf      = tanhhat(geom:xl, theSource:radialWidth, theSource:radialCentre, theSource:radialSteepness)
+radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
 # Parallel profile
-parWidth     = 80*2
-parCentre    = 0
-parSteepness = 0.06
-parProf      = tanhhat(geom:yl, theSource:parWidth, theSource:parCentre, theSource:parSteepness)
+width     = 80*2
+centre    = 0
+steepness = 0.06
+parProf   = tanhhat(geom:yl, width, centre, steepness)
 # Source
 S = a*radialProf*parProf
 # =============================================================================
@@ -176,14 +177,8 @@ xoutVal       = -3
 # Boundaries
 bndry_xin   = none                        # Manual boundary found in the code
 bndry_xout  = dirichlet_o4(lnN:function)  # Small values at the edge
-bndry_yup   = none                        # Set cauchy boundary conditions
-bndry_ydown = none                        # Set cauchy boundary conditions
-# Caucy value found from steady state runs
-# dampProf has its minimum at 0, and maximum at 1
-# We scale the profile, such that it hits the steady state condition
-steadyStateVal = -0.369
-a = (-lnN:xoutVal + lnN:steadyStateVal)*dampProf:profile + lnN:xoutVal
-b = 0.0                                   # Caucy gradient
+bndry_yup   = neumann_o2(0.0)             # Assume zero gradients at sheat
+bndry_ydown = neumann_o2(0.0)             # Do not allow gradients at the source
 # =============================================================================
 
 

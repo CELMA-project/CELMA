@@ -48,14 +48,16 @@ Looks like n was not properly communicated
 -  PBSDriver-0-a-2-TesterRestartSmallerSteps.py
     + Crashes after om_ci = 13.8, can see ripples after om_ci = 13.7
 -  PBSDriver-0-a-3-TesterMoreIt.py
-    !!! No idea what is happening here, but looks BAD (not communicated or so)
+    Amplitude S: 0.5
+    + Crashes after om_ci = 13
 -  PBSDriver-0-b-0-TesterMoreYPoints.py
     Amplitude S: 0.5
     !!! Didn't even complete one step
     Amplitude S: 0.05
         + Step = 5e0
-        !!! Didn't even complete one step
+            !!! Didn't even complete one step
         + Step = 5e-1
+            !!! After 2 steps see crash coming from source region
 -  PBSDriver-0-c-0-TesterLessSource.py
     :D Runs fine to 1000, potential looks a tad strange
 -  PBSDriver-0-c-1-TesterLessSource+.py
@@ -125,17 +127,31 @@ Looks like n was not properly communicated
     + SAmp 1.0e-2 - Runs just fine, almost fills
     + SAmp 5.0e-3 - Runs just fine
     + SAmp 1.0e-3 - Column is emptying
--  PBSDriver-0-i-1-FullSOriginalParametersCollScan.py
+-  PBSDriver-0-i-1-FullSOriginalParametersArtificialScan.py
     + SAmp 1.0e-2:
-#        * nuei 0.1   -
-#        * nuei 1.0   -
-#        * nuei 50.0  -
-#        * nuei 100.0 -
-#        * nuei 300.0 -
+        * ArtVisc 5e-2 - Problem around sheath, crashes after om_ci = 40
+        * ArtVisc 5e-4 - Problem around sheath, crashes after om_ci = 15
+        * ArtVisc 0    - Problem around sheath, crashes after om_ci = 15
     + SAmp 5.0e-3:
-#        * nuei 0.1   -
-#        * nuei 1.0   -
-#        * nuei 50.0  -
-#        * nuei 100.0 -
-#        * nuei 300.0 -
--  PBSDriver-0-i-2-FullSOriginalParametersSScan.py
+        * ArtVisc 5e-2 - Problem around sheath, crashes after om_ci = 80
+        * ArtVisc 5e-4 - Problem around sheath, crashes after om_ci = 15
+        * ArtVisc 0    - Problem around sheath, crashes after om_ci = 15
+-  PBSDriver-0-i-2-FullSOriginalParametersCollScan.py
+    + SAmp 1.0e-2:
+        * nuei 0.1   - Crash after om_ci = 25 !! n depletion around sheath
+        * nuei 1.0   - Crash after om_ci = 10 !! n depletion around sheath
+        * nuei 50.0  - Crash after om_co = 20 !! n depletion around sheath
+        * nuei 100.0 - Crash after om_co = 55 !! n depletion around sheath
+        * nuei 300.0 - Crash after om_co = 60 !! n depletion around sheath
+    + SAmp 5.0e-3:
+        * nuei 0.1   - Crash after om_ci = 35 !! n depletion around sheath
+        * nuei 1.0   - Crash after om_ci = 75 !! n depletion around sheath
+        * nuei 50.0  - Crash after om_ci = 75 !! n depletion around sheath
+        * nuei 100.0 - Crash after om_ci = 90 !! n depletion around sheath
+        * nuei 300.0 - Runs OK                !! n depletion around sheath
+-  PBSDriver-0-j-0-FullSOrigPBroaderSCollScan.py
+#    + nuei 0.1   -
+#    + nuei 1.0   -
+#    + nuei 50.0  -
+#    + nuei 100.0 -
+#    + nuei 300.0 -
