@@ -119,16 +119,18 @@ nuEN = 30
 nuIN = 0.3
 
 # Parallel artificial dissipation
-artViscParLnN    = 5.0e0 # Density
-artViscParUEPar  = 5.0e0 # Electron velocity
-artViscParUIPar  = 5.0e0 # Ion velocity
-artViscParVortD  = 5.0e0 # Vorticity
+artViscPar       = 5.0e0
+artViscParLnN    = artViscPar # Density
+artViscParUEPar  = artViscPar # Electron velocity
+artViscParUIPar  = artViscPar # Ion velocity
+artViscParVortD  = artViscPar # Vorticity
 
 # Perpendicular diffusion
-artViscPerpLnN   = 5.0e-2
-artViscPerpUEPar = 5.0e-2
-artViscPerpUIPar = 5.0e-2
-artViscPerpVortD = 5.0e-2
+artViscPerp      = 5.0e-2
+artViscPerpLnN   = artViscPerp
+artViscPerpUEPar = artViscPerp
+artViscPerpUIPar = artViscPerp
+artViscPerpVortD = artViscPerp
 # =============================================================================
 
 
