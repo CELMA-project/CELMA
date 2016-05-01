@@ -51,6 +51,7 @@ html/
 visualization/
 celma/1-CELMA/celma
 celma/1.1-CELMACauchy/celma
+celma/2-CELMACollisionDamper/celma
 
 # Miscellaneous
 *delme*

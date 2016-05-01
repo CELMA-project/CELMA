@@ -97,15 +97,11 @@ instead set to 's' (i.e. the source was homogeneously set to one value)
   * Plasma is being emptied
   * Extremely high values of ue
   * Runs just fine
-
-
 - PBSDriver-0-b-0-fullSLowColl.py
     + timestep = 5e-1
         * Doesn't complete even one iteration
     + timestep = 5e-4
     + timestep = 5e-6
-
-
 - PBSDriver-0-c-0-FullSOriginalParametersSScan.py
     + SAmp: 1e-1
 # Running
@@ -113,17 +109,11 @@ instead set to 's' (i.e. the source was homogeneously set to one value)
 # Running
     + SAmp: 1e-2    - Column not properly filled
     + SAmp: 5e-3    - Column not properly filled
-
-
 - PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
 #! Start after new 0-c-0
-
-
 - PBSDriver-0-c-1-FullSOrigPCollScan.py
 # Running
-
-
-- PBSDriver-0-c-2-FullSOriginalParametersSParWidthScan.py
-
-
 - PBSDriver-0-d-0-RestartFromCELMA0c0BroaderCauchy.py
+    !!! Plasma quickly depleted (no longer held up by neumann = 0)
+- PBSDriver-0-e-0-FullSOrigPBroaderSCollScan.py
+# Running
