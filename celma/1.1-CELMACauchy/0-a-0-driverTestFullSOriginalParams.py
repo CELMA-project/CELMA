@@ -15,7 +15,7 @@ from postProcessing.plotting import parPerpDriver
 
 # The options for the run
 # =============================================================================
-width = [20]
+width = [500]
 width = [el*2 for el in width]
 # Set the temporal domain
 restart    = None
