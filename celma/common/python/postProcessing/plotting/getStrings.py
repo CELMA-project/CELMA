@@ -35,7 +35,12 @@ def getTime(depth = 'second'):
 #}}}
 
 #{{{getSaveString
-def getSaveString(fileName, simulationPath, timeFolder = None, additional = None):
+def getSaveString(fileName         ,\
+                  simulationPath   ,\
+                  timeFolder = None,\
+                  prePaths   = None,\
+                  postPaths  = None,\
+                  ):
     """
     Returns a string which can be used in saving functions.
 
@@ -46,22 +51,24 @@ def getSaveString(fileName, simulationPath, timeFolder = None, additional = None
     simulationPath - Path of the simulation
     timeFolder     - Name of time folder.
                      If none is given, a folder will be made
-    additional     - Iterable with folder name
+    prePaths       - Iterable with folder names inserted in the front
+    postPaths      - Iterable with folder names inserted in the back
 
     Output
     saveString - String which can be used to save functions
     timeFolder - String of the time folder
     """
 
-    if additional == None:
+    # Get the folderstructure before the time
+    if prePaths == None:
         folders = []
     else:
-        if type(additional) == str:
-            folders = [additional]
+        if type(prePaths) == str:
+            folders = [prePaths]
         else:
-            folders = list(additional)
+            folders = list(prePaths)
 
-    # Create the folder structuehre
+    # Create the folder structure
     if timeFolder == None:
         timeFolder = getTime()
         folders.append(timeFolder)
@@ -69,6 +76,17 @@ def getSaveString(fileName, simulationPath, timeFolder = None, additional = None
         folders.append(timeFolder)
     folders.insert(0, simulationPath.split('/')[0])
     savePath = ''
+    for folder in folders:
+        savePath = os.path.join(savePath, folder)
+
+    # Get the folderstructure after the time
+    if postPaths == None:
+        folders = []
+    else:
+        if type(postPaths) == str:
+            folders = [postPaths]
+        else:
+            folders = list(postPaths)
     for folder in folders:
         savePath = os.path.join(savePath, folder)
 

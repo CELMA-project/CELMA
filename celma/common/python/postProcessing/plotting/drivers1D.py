@@ -9,6 +9,7 @@ from .line import Line
 from .plotters import Plot1D
 from .getStrings import getSaveString
 import matplotlib.pyplot as plt
+import numpy as np
 from multiprocessing import Process
 
 #{{{Drivers
@@ -314,6 +315,7 @@ def single1DDriver(path                      ,\
                    ySlice     = slice(0,None),\
                    zSlice     = slice(0,None),\
                    tSlice     = None         ,\
+                   polAvg     = False        ,\
                    showPlot   = False        ,\
                    savePlot   = True         ,\
                    saveFolder = None         ,\
@@ -333,6 +335,8 @@ def single1DDriver(path                      ,\
     ySlice     - How to slice in y
     zSlice     - How to slice in z
     tSlice     - How to slice in t
+    polAvg     - Whether or not to perform a poloidal average of
+                 the data
     showPlot   - If the plot is to be displayed
     savePlot   - If the plot is to be saved
     saveFolder - Name of save folder
@@ -354,6 +358,8 @@ def single1DDriver(path                      ,\
                      xSlice     = xSlice    ,\
                      ySlice     = ySlice    ,\
                      zSlice     = zSlice    ,\
+                     tSlice     = tSlice    ,\
+                     polAvg     = polAvg    ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\
@@ -386,6 +392,31 @@ def single1DDriver(path                      ,\
     if orgObj.useCombinedPlot:
         orgObj.makeCombinedLine()
 
+    # Treatment of extra lines
+    if pltName == "mainFields":
+        # Find lnN, uEPar and uIPar
+        for line in orgObj.lines:
+            if line.name == 'lnN':
+                lnN = line.field
+            if line.name == 'uEPar':
+                uEPar = line.field
+            if line.name == 'uIPar':
+                uIPar = line.field
+        # Create the jPar line (the first extra line)
+        orgObj.extraLines['jPar'].field = np.exp(lnN)*(uIPar - uEPar)
+        if orgObj.extraLines['jPar'].plotPos:
+            orgObj.lines.insert(orgObj.extraLines['jPar'].plotPos,\
+                                orgObj.extraLines['jPar'])
+        else:
+            orgObj.lines.append(orgObj.extraLines['jPar'])
+        # Create the n line (the second extra line)
+        orgObj.extraLines['n'].field = np.exp(lnN)
+        if orgObj.extraLines['n'].plotPos:
+            orgObj.lines.insert(orgObj.extraLines['n'].plotPos,\
+                                orgObj.extraLines['n'])
+        else:
+            orgObj.lines.append(orgObj.extraLines['n'])
+
     # Do the plot
     timeFolder = plotter.plotDriver(fig, orgObj, timeFolder=timeFolder)
 
@@ -404,14 +435,18 @@ def getMainFields():
     mainFields = Organizer("mainFields")
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
-    mainFields.lines.append(Line('lnN'  , r'\ln(n)'                    ))
-    mainFields.lines.append(Line('uIPar', r'u_{i,\parallel}', plotPos=4))
-    mainFields.lines.append(Line('uEPar', r'u_{e,\parallel}', plotPos=2))
-    mainFields.lines.append(Line('vortD', r'\Omega^D'                  ))
+    mainFields.lines.append(Line('lnN'  , r'\ln(n)'         , plotPos=0))
+    mainFields.lines.append(Line('uIPar', r'u_{i,\parallel}', plotPos=6))
+    mainFields.lines.append(Line('uEPar', r'u_{e,\parallel}', plotPos=4))
+    mainFields.lines.append(Line('vortD', r'\Omega^D'       , plotPos=3))
     # Helping field
-    mainFields.lines.append(Line('phi'  , r'\phi'                      ))
-    mainFields.lines.append(Line('S'    , r'S'                         ))
-    mainFields.lines.append(Line('vort' , r'\Omega'                    ))
+    mainFields.lines.append(Line('phi'  , r'\phi'           , plotPos=1))
+    mainFields.lines.append(Line('S'    , r'S'              , plotPos=7))
+    mainFields.lines.append(Line('vort' , r'\Omega'         , plotPos=5))
+    # Extra lines
+    # FIXME: This API is not so intuitive, consider change
+    mainFields.extraLines['jPar'] = Line('jPar', r'j_\parallel', plotPos=8)
+    mainFields.extraLines['n'   ] = Line('n'   , r'n'          , plotPos=2)
 
     return mainFields
 #}}}
