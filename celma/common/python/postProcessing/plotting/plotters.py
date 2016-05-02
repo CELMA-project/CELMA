@@ -4,6 +4,7 @@
 Contains class for plotting
 """
 
+from ..statistics import polAvg
 from .getStrings import getSaveString, getTime
 from .cylinderMesh import CylinderMesh
 from matplotlib import get_backend
@@ -41,6 +42,7 @@ class Plot(object):
                  ySlice     = slice(0,None),\
                  zSlice     = slice(0,None),\
                  tSlice     = None         ,\
+                 polAvg     = False        ,\
                  showPlot   = False        ,\
                  savePlot   = True         ,\
                  saveFolder = None         ,\
@@ -57,6 +59,8 @@ class Plot(object):
         ySlice       - How the data will be sliced in y
         zSlice       - How the data will be sliced in z
         tSlice       - How the data will be sliced in t
+        polAvg       - Whether or not to perform a poloidal average of
+                       the data
         showPlot     - If the plot should be displayed
         savePlot     - If plot should be saved
         saveFolder   - Name of the folder to save plots in
@@ -163,8 +167,12 @@ class Plot(object):
         self._tind = self._getIndices(tSlice)
 
         # Get the time
-        self._t      = collect('t_array', path=self._path, info=False)
+        self._t = collect('t_array', path=self._path, tind=self._tind, info=False)
+
         self._frames = len(self._t)
+
+        # Set polAvg option
+        self._polAvg = polAvg
     #}}}
 
     #{{{ _getIndices
@@ -430,6 +438,9 @@ class Plot1D(Plot):
             field[:]   = line.field
             line.field = field
 
+        if self._polAvg:
+            line.field = polAvg(line.field)
+
         # Flatten the variables except the time dimension
         # -1 => total size divided by product of all other listed dimensions
         line.field = line.field.reshape(line.field.shape[0], -1)
@@ -451,21 +462,31 @@ class Plot1D(Plot):
         """
 
         # Initial plot
-        self._plotLines(fig, orgObj, 0.0)
+        if self._tind != None:
+            tInd = self._tind[0]
+        else:
+            tInd = 0
+
+        self._plotLines(fig, orgObj, tInd)
 
         if self._savePlot:
             # Make a saveName by stripping the orgObj's plot name for bad
             # characters
-            saveName   = orgObj.pltName.replace("\\", "")
-            saveName   = saveName.replace("{", "")
-            saveName   = saveName.replace("}", "")
-            saveName   = saveName.replace("^", "")
-            fileName   = saveName + '-' + self._direction
-            additional = ['visualization', self._saveFolder]
+            saveName = orgObj.pltName.replace("\\", "")
+            saveName = saveName.replace("{", "")
+            saveName = saveName.replace("}", "")
+            saveName = saveName.replace("^", "")
+            fileName = saveName + '-' + self._direction
+            prePaths = ['visualization', self._saveFolder]
+            if self._polAvg:
+                postPaths = 'polAvg'
+            else:
+                postPaths = []
             saveString, timeFolder = getSaveString(fileName               ,\
                                                    self._path             ,\
                                                    timeFolder = timeFolder,\
-                                                   additional = additional,\
+                                                   prePaths   = prePaths  ,\
+                                                   postPaths  = postPaths ,\
                                                    )
 
         # Animate if we have more than one frame
@@ -526,6 +547,7 @@ class Plot2D(Plot):
                  varMax     = None         ,\
                  varMin     = None         ,\
                  varyMaxMin = False        ,\
+                 varFunc    = None         ,\
                  **kwargs):
         #{{{docstring
         """
@@ -542,6 +564,8 @@ class Plot2D(Plot):
         xSlice     - How the data will be sliced in x
         ySlice     - How the data will be sliced in y
         zSlice     - How the data will be sliced in z
+        varFunc    - Function which returns the variable (used if
+                     variables is not collectable)
         For more details, refer to the docstring of the Plot class
         """
         #}}}
@@ -580,14 +604,26 @@ class Plot2D(Plot):
 
         # Collect the full variable
         # Stored as an ndarray with the indices [t,x,y,z] (=[t,rho,z,theta])
-        self._variable = collect(varName             ,\
-                                 path    = path      ,\
-                                 yguards = yguards   ,\
-                                 xguards = xguards   ,\
-                                 tind    = self._tind,\
-                                 info    = False     ,\
-                                 )
+        if varFunc is None:
+            self._variable = collect(varName             ,\
+                                     path    = path      ,\
+                                     yguards = yguards   ,\
+                                     xguards = xguards   ,\
+                                     tind    = self._tind,\
+                                     info    = False     ,\
+                                     )
+        else:
+            self._variable = varFunc(path    = path      ,\
+                                     yguards = yguards   ,\
+                                     xguards = xguards   ,\
+                                     tind    = self._tind,\
+                                     info    = False     ,\
+                                     **kwargs)
 
+        if self._polAvg:
+            self._variable = polAvg(self._variable)
+
+        # Add the last theta slice
         self._variable =\
                 self._cyl.addLastThetaSlice(self._variable, len(self._t))
 
@@ -814,16 +850,21 @@ class Plot2D(Plot):
         if self._savePlot:
             # Make a saveName by stripping the orgObj's plot name for bad
             # characters
-            saveName   = pltName.replace("\\", "")
-            saveName   = saveName.replace("{", "")
-            saveName   = saveName.replace("}", "")
-            saveName   = saveName.replace("^", "")
-            fileName   = saveName + '-2D'
-            additional = ['visualization', self._saveFolder]
+            saveName = pltName.replace("\\", "")
+            saveName = saveName.replace("{", "")
+            saveName = saveName.replace("}", "")
+            saveName = saveName.replace("^", "")
+            fileName = saveName + '-2D'
+            prePaths = ['visualization', self._saveFolder]
+            if self._polAvg:
+                postPaths = 'polAvg'
+            else:
+                postPaths = []
             saveString, timeFolder = getSaveString(fileName               ,\
                                                    self._path             ,\
                                                    timeFolder = timeFolder,\
-                                                   additional = additional,\
+                                                   prePaths   = prePaths  ,\
+                                                   postPaths  = postPaths ,\
                                                    )
 
         # Animate if we have more than one frame

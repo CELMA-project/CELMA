@@ -13,7 +13,7 @@ Contains the organizer class
 #{{{class Organizer
 class Organizer(object):
     """
-    Class which organizes several lines in a plot.
+    Class which organizes several lines in a 1D plot.
 
     This class is responsible for
 
@@ -48,6 +48,7 @@ class Organizer(object):
         self.combLine             = None
         self.combLineLineObjs     = []
         self.lines                = []
+        self.extraLines           = {}
         self.axes                 = []
     #}}}
 
@@ -65,15 +66,28 @@ class Organizer(object):
         5. Returns the figure
         """
 
+        # Append lines with eventual extra lines
+        # The extra lines are treated specially since they are not
+        # collectable
+        nExtraLines = len(self.extraLines.keys())
+        if nExtraLines > 0:
+            for key in self.extraLines.keys():
+                # Insert the extraLines into self.lines
+                self.lines.append(self.extraLines[key])
+
         # Organize the lines
-        newLines = self.lines.copy()
+        newLines = [None]*len(self.lines)
+        # Make a copy as we are going to pop the list
         for line in self.lines:
             if line.plotPos:
-                newInd = line.plotPos
-                oldInd = self.lines.index(line)
-                # Swap
-                newLines[oldInd], newLines[newInd] =\
-                        newLines[newInd], newLines[oldInd]
+                # Get index in self line
+                index = self.lines.index(line)
+                newLines[line.plotPos] = line
+        if len(self.lines) > 0:
+            # Get the free indices in newLines
+            indices = [i for i, el in enumerate(newLines) if el is None]
+            for index, line in zip(indices, self.lines):
+                newLines[index] = line
 
         # Reassign
         self.lines = newLines
@@ -117,6 +131,14 @@ class Organizer(object):
         # Pop the combined line in order not to collect it
         if self.useCombinedPlot:
             self.combLine = self.lines.pop()
+
+        # Pop the extra lines in order not to collect them
+        if nExtraLines > 0:
+            for key in self.extraLines.keys():
+                # Update the extraLines, and remove them from
+                # self.lines, in order not to collect them
+                ind = self.lines.index(self.extraLines[key])
+                self.extraLines[key] = self.lines.pop(ind)
 
         fig.canvas.set_window_title(self.pltName)
 

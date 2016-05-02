@@ -7,7 +7,9 @@ Contains drivers for plotting 2D plots
 from .plotters import Plot2D
 from .getStrings import getSaveString
 import matplotlib.pyplot as plt
+import numpy as np
 from multiprocessing import Process
+from boutdata import collect
 
 #{{{allMainFields2DDriver
 def allMainFields2DDriver(path                ,\
@@ -32,12 +34,15 @@ def allMainFields2DDriver(path                ,\
     """
     #}}}
 
-    functions = [lnN2DDriver  ,\
+    functions = [\
+                 lnN2DDriver  ,\
                  uEPar2DDriver,\
                  uIPar2DDriver,\
                  vortD2DDriver,\
                  vort2DDriver ,\
                  phi2DDriver  ,\
+                 n2DDriver    ,\
+                 jPar2DDriver ,\
                 ]
 
     if useSubProcess:
@@ -267,7 +272,7 @@ def phi2DDriver(path             ,\
     timeFolder - The name of the timefolder
                  Enables several plots to be put into same timeFolder
 
-    Specific lnN output:
+    Specific phi output:
     timeFolder - The name of the timefolder
                  Enables several plots to be put into same timeFolder
 
@@ -288,6 +293,140 @@ def phi2DDriver(path             ,\
     return timeFolder
 #}}}
 
+#{{{n2DDriver
+def n2DDriver(path             ,\
+              timeFolder = None,\
+              **kwargs):
+    #{{{docstring
+    """
+    Driver for the n field.
+
+    Specific n input:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    Specific n output:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    For more details, see single2DDriver
+    """
+    #}}}
+
+    varName = None
+    pltName = r'n'
+
+    #{{{varFunc
+    def varFunc(path    = None,\
+                yguards = None,\
+                xguards = None,\
+                tind    = None,\
+                **kwargs):
+        """
+        Function which returns the parallel current variable.
+
+        This function will be called in plotters.Plot2D
+        """
+
+        lnN = collect("lnN"               ,\
+                      path    = path      ,\
+                      yguards = yguards   ,\
+                      xguards = xguards   ,\
+                      tind    = tind      ,\
+                      info    = False     ,\
+                      )
+
+        n = np.exp(lnN)
+
+        return n
+    #}}}
+
+    # Do the plot
+    timeFolder = single2DDriver(path                   ,\
+                                varName                ,\
+                                pltName    = pltName   ,\
+                                timeFolder = timeFolder,\
+                                varFunc    = varFunc   ,\
+                                **kwargs)
+
+    return timeFolder
+#}}}
+
+#{{{jPar2DDriver
+def jPar2DDriver(path             ,\
+                timeFolder = None,\
+                **kwargs):
+    #{{{docstring
+    """
+    Driver for the jPar field.
+
+    Specific jPar input:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    Specific jPar output:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    For more details, see single2DDriver
+    """
+    #}}}
+
+    varName = None
+    pltName = r'j_\parallel'
+
+    #{{{varFunc
+    def varFunc(path    = None,\
+                yguards = None,\
+                xguards = None,\
+                tind    = None,\
+                **kwargs):
+        """
+        Function which returns the parallel current variable.
+
+        This function will be called in plotters.Plot2D
+        """
+
+        lnN = collect("lnN"               ,\
+                      path    = path      ,\
+                      yguards = yguards   ,\
+                      xguards = xguards   ,\
+                      tind    = tind      ,\
+                      info    = False     ,\
+                      )
+
+        uEPar = collect("uEPar"             ,\
+                        path    = path      ,\
+                        yguards = yguards   ,\
+                        xguards = xguards   ,\
+                        tind    = tind      ,\
+                        info    = False     ,\
+                        )
+
+        uIPar = collect("uIPar"             ,\
+                        path    = path      ,\
+                        yguards = yguards   ,\
+                        xguards = xguards   ,\
+                        tind    = tind      ,\
+                        info    = False     ,\
+                        )
+
+        jPar = np.exp(lnN)*(uIPar - uEPar)
+
+        return jPar
+    #}}}
+
+    # Do the plot
+    timeFolder = single2DDriver(path                   ,\
+                                varName                ,\
+                                pltName    = pltName   ,\
+                                timeFolder = timeFolder,\
+                                varFunc    = varFunc   ,\
+                                **kwargs)
+
+    return timeFolder
+#}}}
+
 #{{{single2DDriver
 def single2DDriver(path                      ,\
                    varName                   ,\
@@ -297,6 +436,7 @@ def single2DDriver(path                      ,\
                    ySlice     = slice(0,None),\
                    zSlice     = slice(0,None),\
                    tSlice     = None         ,\
+                   polAvg     = False        ,\
                    showPlot   = False        ,\
                    savePlot   = True         ,\
                    saveFolder = None         ,\
@@ -305,6 +445,7 @@ def single2DDriver(path                      ,\
                    varMin     = None         ,\
                    varyMaxMin = None         ,\
                    timeFolder = None         ,\
+                   varFunc    = None         ,\
                    ):
     #{{{docstring
     """
@@ -319,6 +460,8 @@ def single2DDriver(path                      ,\
     ySlice     - How to slice in y
     zSlice     - How to slice in z
     tSlice     - How to slice in t
+    polAvg     - Whether or not to perform a poloidal average of
+                 the data
     showPlot   - If the plot is to be displayed
     savePlot   - If the plot is to be saved
     saveFolder - Name of save folder
@@ -329,6 +472,8 @@ def single2DDriver(path                      ,\
                  to the max/min of the current timestep or not
     timeFolder - The name of the timefolder
                  Enables several plots to be put into same timeFolder
+    varFunc    - Function which returns the variable (used if variables
+                 is not collectable)
 
     Output:
     timeFolder - The name of the timefolder
@@ -344,12 +489,15 @@ def single2DDriver(path                      ,\
                      xSlice     = xSlice    ,\
                      ySlice     = ySlice    ,\
                      zSlice     = zSlice    ,\
+                     tSlice     = tSlice    ,\
+                     polAvg     = polAvg    ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\
                      varMax     = varMax    ,\
                      varMin     = varMin    ,\
                      varyMaxMin = varyMaxMin,\
+                     varFunc    = varFunc   ,\
                     )
 
     # Do the plot

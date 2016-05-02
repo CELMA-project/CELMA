@@ -11,6 +11,8 @@ Results:
     + Slope -1.0e-1 - Finished just fine
     + Slope -5.0e-2 - Finished just fine
 - PBSDriver-a-0-0-restartFrom1CELMA0c0INVESTIGATE.py
+    + Crash after om_ci = 1000.5
+        ! High potential drop
 - PBSDriver-a-1-restartFrom1CELMA0c0NormalRestart.py
     + Runs normally
 - PBSDriver-a-2-restartFromA0.py
