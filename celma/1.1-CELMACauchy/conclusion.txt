@@ -98,22 +98,33 @@ instead set to 's' (i.e. the source was homogeneously set to one value)
   * Extremely high values of ue
   * Runs just fine
 - PBSDriver-0-b-0-fullSLowColl.py
-    + timestep = 5e-1
-        * Doesn't complete even one iteration
-    + timestep = 5e-4
-    + timestep = 5e-6
+    + timestep = 5e-1   - Doesn't complete even one iteration
+    + timestep = 5e-4   - Doesn't complete even one iteration
+    + timestep = 5e-6   - Doesn't complete even one iteration
 - PBSDriver-0-c-0-FullSOriginalParametersSScan.py
-    + SAmp: 1e-1
-# Running
-    + SAmp: 5e-2
-# Running
+    + SAmp: 1e-1    - Crash after om_ci = 10, column filled above 0 (INVESTIGATE)
+    + SAmp: 5e-2    - Crash after om_ci = 10, column filled above 0, still depletion
     + SAmp: 1e-2    - Column not properly filled
     + SAmp: 5e-3    - Column not properly filled
-- PBSDriver-0-c-0-1-FullSOrigPRestart0c0CollScan.py
-#! Start after new 0-c-0
+- PBSDriver-0-c-0-0-FullSOriginalParametersSScanINVESTIGATE.py
 - PBSDriver-0-c-1-FullSOrigPCollScan.py
-# Running
+    + nuEI 300 - Crash after om_ci = 10, column filled above 0
+    + nuEI 100 - Didn't even finish first step
+    + nuEI 50  - Didn't even finish first step
+    + nuEI 1   - Didn't even finish first step
+    + nuEI 0.1 - Didn't even finish first step
+- PBSDriver-0-c-2-FullSOrigPWholeCylCollScan.py
+# Initial (500, not 100) coll at 300 works, but looks like BC at source not
+  working
+# RUNNING
 - PBSDriver-0-d-0-RestartFromCELMA0c0BroaderCauchy.py
     !!! Plasma quickly depleted (no longer held up by neumann = 0)
 - PBSDriver-0-e-0-FullSOrigPBroaderSCollScan.py
-# Running
+    !!! nuEI 300 - Crash after om_ci = 10, a bit unsure why crashed
+    + nuEI 100 - Didn't even finish first step
+    + nuEI 50  - Didn't even finish first step
+    + nuEI 1   - Didn't even finish first step
+    + nuEI 0.1 - Didn't even finish first step
+
+All runs until this point: Plasma is being emptied
+IDEA: Have the source running all the way

@@ -57,15 +57,18 @@ Looks like n was not properly communicated
         + Step = 5e0
             !!! Didn't even complete one step
         + Step = 5e-1
-            !!! After 2 steps see crash coming from source region
+            !!! After 2 steps see crash coming from source region (INVESTIGATE)
+-  PBSDriver-0-b-0-0-TesterMoreYPointsINVESTIGATEstarter.py
+-  PBSDriver-0-b-0-1-TesterMoreYPointsINVESTIGATE.py
 -  PBSDriver-0-c-0-TesterLessSource.py
     :D Runs fine to 1000, potential looks a tad strange
 -  PBSDriver-0-c-1-TesterLessSource+.py
     :D Runs fine to 100, potential looks a tad strange
-# RUNNING with 1000
+    + Crashes after om_ci = 200
 -  PBSDriver-0-c-2-LessSourceRestartWNoise.py
     :D Runs fine to 100, but still no turbulence
 # RUNNING with 1000
+# Currently no turbulence
 -  PBSDriver-0-d-0-CollisionScan.py
     Amplitude S: 0.1
     + nuei 0.1   - 10 omega_ci until crash
@@ -75,11 +78,12 @@ Looks like n was not properly communicated
     + nuei 300.0 - 15 omega_ci until crash
 -  PBSDriver-0-d-1-CollisionScanLessSource.py
     Amplitude S: 0.01
-    + nuei 0.1   - 75  omega_ci until crash
+    + nuei 0.1   - 75  omega_ci until crash (INVESTIGATE)
     + nuei 1.0   - 65  omega_ci until crash
     + nuei 50.0  - 100 omega_ci until weird crash
     + nuei 100.0 - Looks like run OK, but POTENTIAL UNEXPECTED (upward cup)
     + nuei 300.0 - Looks like run OK, but POTENTIAL UNEXPECTED (upward cup)
+-  PBSDriver-0-d-1-0-CollisionScanLessSourceINVESTIGATE.py
 -  PBSDriver-0-d-2-CollisionScanLessSource-.py
     Amplitude S: 0.001
     + nuei 0.1   - Completes - Plasma is seriously emptied, radial BC keeps a bit of n
@@ -129,13 +133,14 @@ Looks like n was not properly communicated
     + SAmp 1.0e-3 - Column is emptying
 -  PBSDriver-0-i-1-FullSOriginalParametersArtificialScan.py
     + SAmp 1.0e-2:
-        * ArtVisc 5e-2 - Problem around sheath, crashes after om_ci = 40
+        * ArtVisc 5e-2 - Problem around sheath, crashes after om_ci = 40 (INVESTIGATE)
         * ArtVisc 5e-4 - Problem around sheath, crashes after om_ci = 15
         * ArtVisc 0    - Problem around sheath, crashes after om_ci = 15
     + SAmp 5.0e-3:
         * ArtVisc 5e-2 - Problem around sheath, crashes after om_ci = 80
         * ArtVisc 5e-4 - Problem around sheath, crashes after om_ci = 15
         * ArtVisc 0    - Problem around sheath, crashes after om_ci = 15
+-  PBSDriver-0-i-1-0-FullSOriginalParametersArtificialScanINVESTIGATE.py
 -  PBSDriver-0-i-2-FullSOriginalParametersCollScan.py
     + SAmp 1.0e-2:
         * nuei 0.1   - Crash after om_ci = 25 !! n depletion around sheath
@@ -150,8 +155,9 @@ Looks like n was not properly communicated
         * nuei 100.0 - Crash after om_ci = 90 !! n depletion around sheath
         * nuei 300.0 - Runs OK                !! n depletion around sheath
 -  PBSDriver-0-j-0-FullSOrigPBroaderSCollScan.py
-#    + nuei 0.1   -
-#    + nuei 1.0   -
-#    + nuei 50.0  -
-#    + nuei 100.0 -
-#    + nuei 300.0 -
+    + nuei 0.1   - Crash after om_ci = 5
+    + nuei 1.0   - Crash after om_ci = 5
+    + nuei 50.0  - Crash after om_ci = 15
+    + nuei 100.0 - Crash after om_ci = 10
+    + nuei 300.0 - Crash after om_ci = 20 (INVESTIGATE)
+-  PBSDriver-0-j-0-0-FullSOrigPBroaderSCollScanINVESTIGATE.py
