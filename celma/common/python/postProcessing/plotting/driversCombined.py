@@ -106,7 +106,7 @@ def combinedDriver(path                          ,\
 
         # Plots without poloidal average
         p1 = Process(\
-                    target = combinedDriver                   ,\
+                    target = combined1D2D                   ,\
                     args   = (path,)                          ,\
                     kwargs = {'xguards'        :xguards       ,\
                               'yguards'        :yguards       ,\
@@ -131,7 +131,7 @@ def combinedDriver(path                          ,\
 
         # Plots with poloidal average
         p2 = Process(\
-                    target = combinedDriver                   ,\
+                    target = combined1D2D                   ,\
                     args   = (path,)                          ,\
                     kwargs = {'xguards'        :xguards       ,\
                               'yguards'        :yguards       ,\
@@ -160,46 +160,46 @@ def combinedDriver(path                          ,\
     else:
         #{{{ Normal function call
         # Plots without poloidal average
-        timeFolder = combinedDriver(path                            ,\
-                                    xguards         = xguards       ,\
-                                    yguards         = yguards       ,\
-                                    marker          = marker        ,\
-                                    xSlice          = xSlice        ,\
-                                    ySlice          = ySlice        ,\
-                                    zSlice          = zSlice        ,\
-                                    tSlice          = tSlice        ,\
-                                    showPlot        = showPlot      ,\
-                                    savePlot        = savePlot      ,\
-                                    saveFolder      = saveFolder    ,\
-                                    saveFolderFunc  = saveFolderFunc,\
-                                    varMax          = varMax        ,\
-                                    varMin          = varMin        ,\
-                                    varyMaxMin      = varyMaxMin    ,\
-                                    useSubProcess   = useSubProcess ,\
-                                    timeFolder      = timeFolder    ,\
-                                    polAvg          = False         ,\
-                                    **kwargs)
+        timeFolder = combined1D2D(path                            ,\
+                                  xguards         = xguards       ,\
+                                  yguards         = yguards       ,\
+                                  marker          = marker        ,\
+                                  xSlice          = xSlice        ,\
+                                  ySlice          = ySlice        ,\
+                                  zSlice          = zSlice        ,\
+                                  tSlice          = tSlice        ,\
+                                  showPlot        = showPlot      ,\
+                                  savePlot        = savePlot      ,\
+                                  saveFolder      = saveFolder    ,\
+                                  saveFolderFunc  = saveFolderFunc,\
+                                  varMax          = varMax        ,\
+                                  varMin          = varMin        ,\
+                                  varyMaxMin      = varyMaxMin    ,\
+                                  useSubProcess   = useSubProcess ,\
+                                  timeFolder      = timeFolder    ,\
+                                  polAvg          = False         ,\
+                                  **kwargs)
 
         # Plots with poloidal average
-        timeFolder = combinedDriver(path                            ,\
-                                    xguards         = xguards       ,\
-                                    yguards         = yguards       ,\
-                                    marker          = marker        ,\
-                                    xSlice          = xSlice        ,\
-                                    ySlice          = ySlice        ,\
-                                    zSlice          = zSlice        ,\
-                                    tSlice          = tSlice        ,\
-                                    showPlot        = showPlot      ,\
-                                    savePlot        = savePlot      ,\
-                                    saveFolder      = saveFolder    ,\
-                                    saveFolderFunc  = saveFolderFunc,\
-                                    varMax          = varMax        ,\
-                                    varMin          = varMin        ,\
-                                    varyMaxMin      = varyMaxMin    ,\
-                                    useSubProcess   = useSubProcess ,\
-                                    timeFolder      = timeFolder    ,\
-                                    polAvg          = True          ,\
-                                    **kwargs)
+        timeFolder = combined1D2D(path                            ,\
+                                  xguards         = xguards       ,\
+                                  yguards         = yguards       ,\
+                                  marker          = marker        ,\
+                                  xSlice          = xSlice        ,\
+                                  ySlice          = ySlice        ,\
+                                  zSlice          = zSlice        ,\
+                                  tSlice          = tSlice        ,\
+                                  showPlot        = showPlot      ,\
+                                  savePlot        = savePlot      ,\
+                                  saveFolder      = saveFolder    ,\
+                                  saveFolderFunc  = saveFolderFunc,\
+                                  varMax          = varMax        ,\
+                                  varMin          = varMin        ,\
+                                  varyMaxMin      = varyMaxMin    ,\
+                                  useSubProcess   = useSubProcess ,\
+                                  timeFolder      = timeFolder    ,\
+                                  polAvg          = True          ,\
+                                  **kwargs)
         #}}}
 
     return timeFolder
