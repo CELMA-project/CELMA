@@ -4,7 +4,7 @@
 Init-file for plotting
 """
 
-from .driversCombined import combinedDriver, combinedDriverWPolAvg
+from .driversCombined import combinedDriver, combined1D2D
 from .drivers1D import single1DDriver, parDriver, perpDriver, parPerpDriver
 from .drivers2D import (single2DDriver       ,\
                         allMainFields2DDriver,\
