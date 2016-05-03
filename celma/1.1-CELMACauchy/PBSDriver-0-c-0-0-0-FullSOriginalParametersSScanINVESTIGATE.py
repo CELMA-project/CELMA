@@ -16,13 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-SAmps = [1e-1, 5e-2, 1e-2, 5e-3]
+SAmps = [1e-1]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart      = "overwrite"
+restart_from = "fullSOriginalParams/nout_20_timestep_5.0/tag_0-c-0-FullSOriginalParametersSScan_0_theSource_a_0.1/"
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e-2]
 directory  = "fullSOriginalParams"
 # Shall we make?
 make       = False
@@ -38,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-0-FullSOriginalParametersSScan"
+theRunName = "0-c-0-0-0-FullSOriginalParametersSScanINVESTIGATE"
 # =============================================================================
 
 
@@ -71,6 +72,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('theSource','a',SAmps),\

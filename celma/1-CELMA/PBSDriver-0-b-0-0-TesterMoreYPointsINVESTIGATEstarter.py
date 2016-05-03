@@ -16,13 +16,13 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-SAmps   = [0.5, 0.05]
+SAmps   = [0.05]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
-nout       = [20]
-timestep   = [5e0]
+nout       = [1]
+timestep   = [0.25]
 directory  = "moreYPoints"
 # Shall we make?
 make       = False
@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-TesterMoreYPoints"
+theRunName = "0-b-0-0-TesterMoreYPointsINVESTIGATEstarter"
 # =============================================================================
 
 

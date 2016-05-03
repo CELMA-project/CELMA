@@ -42,7 +42,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "PBSDriver-a-2-restartFromA0"
+theRunName = "a-2-restartFromA0"
 # =============================================================================
 
 

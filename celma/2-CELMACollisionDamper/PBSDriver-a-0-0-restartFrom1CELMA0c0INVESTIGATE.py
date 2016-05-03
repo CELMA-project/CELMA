@@ -16,17 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-nuEISlope = [1.0e0, 5.0e-1, 1.0e-1, 5.0e-2]
+nuEISlope = [1.0e0]
 nuEISlope = [-el for el in nuEISlope]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None
-restart_from = "../1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
+restart_from = "a-data/nout_20_timestep_1.0/rmp_nuEISlope_-1.0_tag_a-0-restartFrom1CELMA0c0_0/"
 remove_old = False
 nout       = [20]
-timestep   = [1e0]
+timestep   = [1e-2]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -42,7 +42,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "a-0-restartFrom1CELMA0c0"
+theRunName = "a-0-0-restartFrom1CELMA0c0INVESTIGATE"
 # =============================================================================
 
 

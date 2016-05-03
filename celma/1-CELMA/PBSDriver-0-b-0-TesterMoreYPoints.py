@@ -22,7 +22,7 @@ SAmps   = [0.5, 0.05]
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e-1]
 directory  = "moreYPoints"
 # Shall we make?
 make       = False
