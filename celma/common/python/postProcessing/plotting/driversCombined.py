@@ -11,28 +11,28 @@ from .saveFolderFuncs import scanWTagSaveFunc
 import matplotlib.pyplot as plt
 from multiprocessing import Process
 
-#{{{combinedDriverWPolAvg
-def combinedDriverWPolAvg(path                          ,\
-                          xguards        = False        ,\
-                          yguards        = False        ,\
-                          marker         = 'o'          ,\
-                          xSlice         = slice(0,None),\
-                          ySlice         = slice(0,None),\
-                          zSlice         = slice(0,None),\
-                          tSlice         = None         ,\
-                          showPlot       = False        ,\
-                          savePlot       = True         ,\
-                          saveFolder     = None         ,\
-                          saveFolderFunc = None         ,\
-                          varMax         = None         ,\
-                          varMin         = None         ,\
-                          varyMaxMin     = None         ,\
-                          useSubProcess  = True         ,\
-                          timeFolder     = None         ,\
-                          **kwargs):
+#{{{combinedDriver
+def combinedDriver(path                          ,\
+                   xguards        = False        ,\
+                   yguards        = False        ,\
+                   marker         = 'o'          ,\
+                   xSlice         = slice(0,None),\
+                   ySlice         = slice(0,None),\
+                   zSlice         = slice(0,None),\
+                   tSlice         = None         ,\
+                   showPlot       = False        ,\
+                   savePlot       = True         ,\
+                   saveFolder     = None         ,\
+                   saveFolderFunc = None         ,\
+                   varMax         = None         ,\
+                   varMin         = None         ,\
+                   varyMaxMin     = None         ,\
+                   useSubProcess  = True         ,\
+                   timeFolder     = None         ,\
+                   **kwargs):
     #{{{docstring
     """
-    A wrapper function for combinedDriver
+    A wrapper function for combined combined1D2D
 
     Input:
     path           - The simulation folder
@@ -205,26 +205,26 @@ def combinedDriverWPolAvg(path                          ,\
     return timeFolder
 #}}}
 
-#{{{combinedDriver
-def combinedDriver(path                          ,\
-                   xguards        = False        ,\
-                   yguards        = False        ,\
-                   marker         = 'o'          ,\
-                   xSlice         = slice(0,None),\
-                   ySlice         = slice(0,None),\
-                   zSlice         = slice(0,None),\
-                   tSlice         = None         ,\
-                   polAvg         = False         ,\
-                   showPlot       = False        ,\
-                   savePlot       = True         ,\
-                   saveFolder     = None         ,\
-                   saveFolderFunc = None         ,\
-                   varMax         = None         ,\
-                   varMin         = None         ,\
-                   varyMaxMin     = None         ,\
-                   useSubProcess  = True         ,\
-                   timeFolder     = None         ,\
-                   **kwargs):
+#{{{combined1D2D
+def combined1D2D(path                          ,\
+                 xguards        = False        ,\
+                 yguards        = False        ,\
+                 marker         = 'o'          ,\
+                 xSlice         = slice(0,None),\
+                 ySlice         = slice(0,None),\
+                 zSlice         = slice(0,None),\
+                 tSlice         = None         ,\
+                 polAvg         = False         ,\
+                 showPlot       = False        ,\
+                 savePlot       = True         ,\
+                 saveFolder     = None         ,\
+                 saveFolderFunc = None         ,\
+                 varMax         = None         ,\
+                 varMin         = None         ,\
+                 varyMaxMin     = None         ,\
+                 useSubProcess  = True         ,\
+                 timeFolder     = None         ,\
+                 **kwargs):
     #{{{docstring
     """
     Driver for combined 1D and 2D plots.
@@ -294,11 +294,11 @@ def combinedDriver(path                          ,\
         #{{{ Function call through subprocess
         if timeFolder is None:
             # Create the savepath if not already set
-            additional = ['visualization', saveFolder]
+            prePaths = ['visualization', saveFolder]
             saveString, timeFolder = getSaveString(''                     ,\
                                                    path                   ,\
                                                    timeFolder = timeFolder,\
-                                                   additional = additional,\
+                                                   prePaths   = prePaths,\
                                                    )
 
         # Do the 1D plots
