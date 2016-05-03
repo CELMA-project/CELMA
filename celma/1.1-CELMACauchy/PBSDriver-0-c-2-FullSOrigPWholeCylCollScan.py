@@ -18,6 +18,7 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 SAmps = [5e-2]
 width = [500]
+width = [el*2 for el in width]
 eiCollisions = [300, 100, 50, 1, 0.1]
 # *****************************************************************************
 # Set the temporal domain
