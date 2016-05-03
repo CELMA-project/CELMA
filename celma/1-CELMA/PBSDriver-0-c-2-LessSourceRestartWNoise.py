@@ -20,7 +20,7 @@ restart      = "overwrite"
 # Addnoise
 addnoise = {'var':None, 'scale':1e-3}
 # Uncomment this if you just want to plot
-# restart      = None; addnoise = None
+restart      = None; addnoise = None
 restart_from = "lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0/"
 remove_old   = False
 nout       = [20]
