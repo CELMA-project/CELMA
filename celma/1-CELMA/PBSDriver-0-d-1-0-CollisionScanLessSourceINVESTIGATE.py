@@ -17,13 +17,14 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 moreSource   = ('theSource', 'a', 0.01)
-eiCollisions = [300, 100, 50, 1, 0.1]
+eiCollisions = [0.1]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart      = "overwrite"
+restart_from = "lessSource/nout_20_timestep_5.0/cst_nuEI_0.1_tag_0-d-1-collisionScanLessSource_0_theSource_a_0.01/"
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e-2]
 directory  = "lessSource"
 # Shall we make?
 make       = False
@@ -39,7 +40,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-d-1-collisionScanLessSource"
+theRunName = "0-d-1-0-collisionScanLessSourceINVESTIGATE"
 # =============================================================================
 
 
@@ -72,6 +73,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\

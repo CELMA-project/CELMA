@@ -16,13 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 100, 50, 1, 0.1]
+eiCollisions = [300]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart      = "overwrite"
+restart_from = "fullSOrigPBroaderS/nout_20_timestep_5.0/cst_nuEI_300_tag_0-j-0-FullSOrigPBroaderSCollScan_0/"
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e-2]
 directory  = "fullSOrigPBroaderS"
 # Shall we make?
 make       = False
@@ -38,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-j-0-FullSOrigPBroaderSCollScan"
+theRunName = "0-j-0-0-FullSOrigPBroaderSCollScanINVESTIGATE"
 # =============================================================================
 
 
@@ -71,6 +72,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
