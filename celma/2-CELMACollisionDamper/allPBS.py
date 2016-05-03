@@ -20,13 +20,15 @@ files = [f for f in files if re.search(string_to_find, f) != None]
 if mode == 'all':
     pass
 elif mode == 'noRestart':
-    files = [f for f in files if 'restart' not in f]
-    files = [f for f in files if 'Restart' not in f]
+    files1 = [f for f in files if 'restart' not in f]
+    files2 = [f for f in files if 'Restart' not in f]
+    files = [*files1, *files2]
 elif mode == 'restart':
-    files = [f for f in files if 'restart' in f]
-    files = [f for f in files if 'Restart' in f]
+    files1 = [f for f in files if 'restart' in f]
+    files2 = [f for f in files if 'Restart' in f]
+    files = [*files1, *files2]
 else:
-    raise RuntimeError("Mode '{}' not reckognized".format(mode))
+    raise RuntimeError("Mode '{}' not recognized".format(mode))
 
 # Call the file
 for f in files:
