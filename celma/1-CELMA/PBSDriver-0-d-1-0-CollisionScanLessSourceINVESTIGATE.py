@@ -22,6 +22,8 @@ eiCollisions = [0.1]
 # Set the temporal domain
 restart      = "overwrite"
 restart_from = "lessSource/nout_20_timestep_5.0/cst_nuEI_0.1_tag_0-d-1-collisionScanLessSource_0_theSource_a_0.01/"
+# Uncomment this if you just want to plot
+# restart      = None
 remove_old = False
 nout       = [20]
 timestep   = [5e-2]
