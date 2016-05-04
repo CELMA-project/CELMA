@@ -42,7 +42,7 @@ Looks like n was not properly communicated
 
 -  PBSDriver-0-a-0-Tester.py
     Amplitude S: 0.5
-    + Crashes after om_ci = 13 (max|jPar|=0.05)
+    + Crashes after om_ci = 13 (max|jPar|=0.05), (n 0.041 -> 1.48244)
 -  PBSDriver-0-a-1-TesterRestart.py
     + Crashes after om_ci = 14.2, can see ripples
 -  PBSDriver-0-a-2-TesterRestartSmallerSteps.py
@@ -54,40 +54,39 @@ Looks like n was not properly communicated
     Amplitude S: 0.5
     !!! Didn't even complete one step
     Amplitude S: 0.05
-        + Step = 5e0
-            !!! Didn't even complete one step
-        + Step = 5e-1
-            !!! After 2 steps see crash coming from source region (INVESTIGATE)
+        + Step = 5e0  - !!!Didn't even complete one step
+        + Step = 5e-1 - !!! After 2 steps see crash coming from source region (INVESTIGATE)
+                        !!! Cannot see max|jPar|
 -  PBSDriver-0-b-0-0-TesterMoreYPointsINVESTIGATEstarter.py
 # Redo
 -  PBSDriver-0-b-0-1-TesterMoreYPointsINVESTIGATE.py
 # Redo
 -  PBSDriver-0-c-0-TesterLessSource.py
-    :D Runs fine to 1000, potential looks a tad strange (max|jPar|=0.00125)
+    :D Runs fine to 1000, potential looks a tad strange (max|jPar|=0.014)
 -  PBSDriver-0-c-1-TesterLessSource+.py
     :D Runs fine to 100, potential looks a tad strange
-    + Crashes after om_ci = 200
+    + Crashes after om_ci = 200 (max|jPar|=0.025)
 -  PBSDriver-0-c-2-LessSourceRestartWNoise.py
     :D Runs fine to 100, but still no turbulence
-    Runs to 1700 om_ci, killed by walltime, still no turbulence
+    Runs to 1700 om_ci, killed by walltime, still no turbulence (max|jPar|=0.017), (n 0.041 -> 0.7)
 -  PBSDriver-0-d-0-CollisionScan.py
     Amplitude S: 0.1
     + nuei 0.1   - 10 omega_ci until crash
     + nuei 1.0   - 20 omega_ci until crash
     + nuei 50.0  - 10 omega_ci until crash
-    + nuei 100.0 - 10 omega_ci until crash
-    + nuei 300.0 - 15 omega_ci until crash
+    + nuei 100.0 - 10 omega_ci until crash (max|jPar|=0.027)
+    + nuei 300.0 - 15 omega_ci until crash (max|jPar|=0.021)
 -  PBSDriver-0-d-1-CollisionScanLessSource.py
     Amplitude S: 0.01
     + nuei 0.1   - 75  omega_ci until crash (INVESTIGATE)
     + nuei 1.0   - 65  omega_ci until crash
     + nuei 50.0  - 100 omega_ci until weird crash
     + nuei 100.0 - Looks like run OK, but POTENTIAL UNEXPECTED (upward cup)
-    + nuei 300.0 - Looks like run OK, but POTENTIAL UNEXPECTED (upward cup)
+    + nuei 300.0 - Looks like run OK, but POTENTIAL UNEXPECTED (upward cup) (max|jPar|=0.007)
 -  PBSDriver-0-d-1-0-CollisionScanLessSourceINVESTIGATE.py
 -  PBSDriver-0-d-2-CollisionScanLessSource-.py
     Amplitude S: 0.001
-    + nuei 0.1   - Completes - Plasma is seriously emptied, radial BC keeps a bit of n
+    + nuei 0.1   - Completes - Plasma is seriously emptied, radial BC keeps a bit of n (max|jPar|=0.007)
     + nuei 1.0   - Completes - Plasma is seriously emptied, radial BC keeps a bit of n
     + nuei 50.0  - Completes - Plasma is seriously emptied, radial BC keeps a bit of n
     + nuei 100.0 - Completes - Plasma is seriously emptied, radial BC keeps a bit of n
@@ -98,8 +97,10 @@ Looks like n was not properly communicated
     + nuei 1.0   - No crash...looks like exhaust of old car
     + nuei 50.0  - No crash...reaches quasi steady state with noise around source
     + nuei 100.0 - 15 omega_ci until crash
-    + nuei 300.0 - 45 omega_ci until crash
-    + nuei 600.0 - Looks like run OK, NO POTENTIAL CUP, STRAIGTH CUR PROFILES
+                   !!! max|jPar|=0.012 ... Have runs which performs at 0.017...
+                   !!! Then again, compare it with 0-c-2, see that integrated current is larger
+    + nuei 300.0 - 45 omega_ci until crash (cannot see max|jPar|)
+    + nuei 600.0 - Looks like run OK, NO POTENTIAL CUP, STRAIGTH CUR PROFILES (max|jPar|=0.007)
 -  PBSDriver-0-f-0-correctMuLowS.py
     Amplitude S: 0.05
     + nuei 0.1   - Crash before start
@@ -107,12 +108,12 @@ Looks like n was not properly communicated
     + nuei 50.0  - Crash before start
     + nuei 100.0 - Crash before start
     + nuei 300.0 - Crash before start
-    + nuei 600.0 - 10 omega_ci until crash
+    + nuei 600.0 - 10 omega_ci until crash (max|jPar|=0.019)
 - PBSDriver-0-g-0-elongatedSLowCollSAmpScan.py
-    + SAmp 1.0e-1 - Crash before start
-    + SAmp 5.0e-2 - Crash before start
-    + SAmp 1.0e-2 - Crash before start
-    + SAmp 5.0e-3 - Crash before start
+    + SAmp 1.0e-2 - Crash after om_ci = 0.3
+    + SAmp 5.0e-3 - Crash after om_ci = 0.3
+    + SAmp 1.0e-3 - Crash after om_ci = 0.3
+    + SAmp 5.0e-4 - Crash after om_ci = 0.3 (cannot see max|jPar|)
 -  PBSDriver-0-g-1-elongatedSLowSCollScan.py
     Amplitude S: 5.0e-4
     + nuei 0.1   - Crash before start
@@ -121,15 +122,15 @@ Looks like n was not properly communicated
     + nuei 100.0 - Crash before start
     + nuei 300.0 - Crash before start
 -  PBSDriver-0-h-0-elongatedSOriginalParametersSScan.py
-    + SAmp 1.0e-1 - Crash after om_ci = 20
-    + SAmp 5.0e-2 - Crash after om_ci = 45
-    + SAmp 1.0e-2 - Runs just fine
+    + SAmp 1.0e-1 - Crash after om_ci = 20 (max|jPar|=0.3)
+    + SAmp 5.0e-2 - Crash after om_ci = 45 (cannot see max|jPar|)
+    + SAmp 1.0e-2 - Runs just fine (max|jPar|=0.06)
     + SAmp 5.0e-3 - Runs just fine
     + SAmp 1.0e-3 - Plasma seriously emptied
 -  PBSDriver-0-i-0-FullSOriginalParametersSScan.py
-    + SAmp 1.0e-1 - Crash after om_ci = 20
-    + SAmp 5.0e-2 - Crash after om_ci = 20
-    + SAmp 1.0e-2 - Runs just fine, almost fills
+    + SAmp 1.0e-1 - Crash after om_ci = 10 (max|jPar|=0.024)
+    + SAmp 5.0e-2 - Crash after om_ci = 20 (max|jPar|=0.027)
+    + SAmp 1.0e-2 - Runs just fine, almost fills (max|jPar|=0.09)
     + SAmp 5.0e-3 - Runs just fine
     + SAmp 1.0e-3 - Column is emptying
 -  PBSDriver-0-i-1-FullSOriginalParametersArtificialScan.py
@@ -142,6 +143,7 @@ Looks like n was not properly communicated
         * ArtVisc 5e-4 - Problem around sheath, crashes after om_ci = 15
         * ArtVisc 0    - Problem around sheath, crashes after om_ci = 15
 -  PBSDriver-0-i-1-0-FullSOriginalParametersArtificialScanINVESTIGATE.py
+#
 -  PBSDriver-0-i-2-FullSOriginalParametersCollScan.py
     + SAmp 1.0e-2:
         * nuei 0.1   - Crash after om_ci = 25 !! n depletion around sheath
@@ -149,16 +151,38 @@ Looks like n was not properly communicated
         * nuei 50.0  - Crash after om_co = 20 !! n depletion around sheath
         * nuei 100.0 - Crash after om_co = 55 !! n depletion around sheath
         * nuei 300.0 - Crash after om_co = 60 !! n depletion around sheath
+            !!! (max|jPar|=0.013)
+            !!! Integrated current is bigger
     + SAmp 5.0e-3:
         * nuei 0.1   - Crash after om_ci = 35 !! n depletion around sheath
         * nuei 1.0   - Crash after om_ci = 75 !! n depletion around sheath
         * nuei 50.0  - Crash after om_ci = 75 !! n depletion around sheath
         * nuei 100.0 - Crash after om_ci = 90 !! n depletion around sheath
-        * nuei 300.0 - Runs OK                !! n depletion around sheath
+        * nuei 300.0 - Runs OK                !! n depletion around sheath (max|jPar|=0.007)
 -  PBSDriver-0-j-0-FullSOrigPBroaderSCollScan.py
     + nuei 0.1   - Crash after om_ci = 5
     + nuei 1.0   - Crash after om_ci = 5
     + nuei 50.0  - Crash after om_ci = 15
     + nuei 100.0 - Crash after om_ci = 10
     + nuei 300.0 - Crash after om_ci = 20 (INVESTIGATE)
+            !!! (max|jPar|=0.006)
+            !!! Much broader area, but still ...
 -  PBSDriver-0-j-0-0-FullSOrigPBroaderSCollScanINVESTIGATE.py
+#
+-  PBSDriver-0-k-0-higherBackgroundCollScan.py
+    xoutVal = -2
+    + nuei 0.1   - Crash before start
+    + nuei 1.0   - Crash before start
+    + nuei 50.0  - Crash before start
+    + nuei 100.0 - Crash before start
+    + nuei 300.0 - Crash before start
+    + nuei 600.0 - Crash before start
+    xoutVal = -1
+    + nuei 0.1   - Crash before start
+    + nuei 1.0   - Crash before start
+    + nuei 50.0  - Crash before start
+    + nuei 100.0 - Crash before start
+    + nuei 300.0 - Crash before start
+    + nuei 600.0 - Crash before start
+-  PBSDriver-0-l-0-noNeutralsCollScan.py
+-  PBSDriver-0-m-0-LessYPoints.py
