@@ -20,6 +20,8 @@ SAmps = [1e-1]
 # *****************************************************************************
 # Set the temporal domain
 restart      = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None
 restart_from = "fullSOriginalParams/nout_20_timestep_5.0/tag_0-c-0-FullSOriginalParametersSScan_0_theSource_a_0.1/"
 remove_old = False
 nout       = [20]
