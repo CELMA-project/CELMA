@@ -1,0 +1,7 @@
+Copied from 1-CELMA
+
+Trying a top-down approach, where we start with the most cheats, and build us
+down to no cheats
+
+Results:
+========

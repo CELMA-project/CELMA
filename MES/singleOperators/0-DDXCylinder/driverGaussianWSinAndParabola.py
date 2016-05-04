@@ -50,9 +50,10 @@ my_runs.execute_runs(\
                      post_process_after_every_run = False,\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
-                     show_plot     = False    ,\
-                     use_dy        = False    ,\
-                     use_dz        = False    ,\
-                     xz_error_plot = True     ,\
+                     show_plot     = False,\
+                     use_dy        = False,\
+                     use_dz        = False,\
+                     xz_error_plot = True ,\
+                     extension     = 'pdf',\
                     )
 # =============================================================================
