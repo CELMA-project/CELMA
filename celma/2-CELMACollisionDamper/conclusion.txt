@@ -16,4 +16,4 @@ Results:
 - PBSDriver-a-1-restartFrom1CELMA0c0NormalRestart.py
     + Runs normally
 - PBSDriver-a-2-restartFromA0.py
-# Running
+    ! Crash after 1370, current is lowering (max|jPar| = -0.015)

@@ -93,10 +93,17 @@ instead set to 's' (i.e. the source was homogeneously set to one value)
 ##############################################################
 
 - PBSDriver-0-a-0-RestartFromCELMA0c0.py
-  ! Source plotted just fine
-  * Plasma is being emptied
-  * Extremely high values of ue
-  * Runs just fine
+    + timestep = 5e0
+        * Plasma is being emptied
+        * Runs just fine
+        * Less current in the box
+        ! Extremely high values of ue
+    + timestep = 5e1
+        * The current is lowering
+        * ue is lowering
+        * Plasma more emptied
+        ! Crashes after om_ci = 1250
+        ??? No indication why this crashes ???
 - PBSDriver-0-b-0-fullSLowColl.py
     + timestep = 5e-1   - Doesn't complete even one iteration
     + timestep = 5e-4   - Doesn't complete even one iteration
