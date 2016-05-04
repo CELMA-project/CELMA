@@ -21,6 +21,8 @@ eiCollisions = [300]
 # Set the temporal domain
 restart      = "overwrite"
 restart_from = "fullSOrigPBroaderS/nout_20_timestep_5.0/cst_nuEI_300_tag_0-j-0-FullSOrigPBroaderSCollScan_0/"
+# Uncomment this if you just want to plot
+# restart      = None
 remove_old = False
 nout       = [20]
 timestep   = [5e-2]

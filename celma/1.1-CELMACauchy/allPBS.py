@@ -6,7 +6,7 @@ import os
 import re
 
 # Mode can be 'all', 'noRestart' or 'restart'
-mode = 'noRestart'
+mode = 'all'
 
 # Make
 print('Now making')

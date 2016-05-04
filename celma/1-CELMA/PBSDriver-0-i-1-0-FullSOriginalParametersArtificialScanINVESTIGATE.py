@@ -22,6 +22,8 @@ visc = [5e-2]
 # Set the temporal domain
 restart      = "overwrite"
 restart_from = "fullSOriginalParams/nout_20_timestep_5.0/cst_artViscPar_0.05_cst_artViscPerp_0.05_tag_0-i-1-FullSOriginalParametersArtificialScan_0_theSource_a_0.005/"
+# Uncomment this if you just want to plot
+# restart      = None
 remove_old = False
 nout       = [20]
 timestep   = [5e-1]
