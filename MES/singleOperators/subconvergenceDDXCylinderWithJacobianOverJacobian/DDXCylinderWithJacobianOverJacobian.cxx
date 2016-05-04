@@ -42,7 +42,7 @@ int DDXCylinderWithJacobianOverJacobian::init(bool restarting) {
     // ************************************************************************
     f.setBoundary("f");
     f.applyBoundary();
-    innerRhoCylinder(f);
+    ownBC.innerRhoCylinder(f);
     // ************************************************************************
 
     // Communicate before taking derivatives
