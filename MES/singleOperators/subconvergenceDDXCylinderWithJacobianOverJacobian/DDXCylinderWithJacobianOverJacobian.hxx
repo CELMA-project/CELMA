@@ -15,8 +15,8 @@
 #include <derivs.hxx>                     // Gives the derivatives
 #include <difops.hxx>                     // Gives the diff options
 #include <vecops.hxx>                     // Gives the vec diff options
-#include "../../common/c/OwnBc.hxx"          // Gives method to set own BC
-#include "../../common/c/SetInnerRho.hxx"    // Gives method to set inner rho
+// Gives own boundaries (doing so by setting ghost points)
+#include "../../common/c/include/ownBCs.hxx"
 
 class DDXCylinderWithJacobianOverJacobian : public PhysicsModel {
 public:
@@ -43,6 +43,11 @@ private:
     // Make a field group to communicate
     // *****************************************************************************
     FieldGroup com_group;
+    // *****************************************************************************
+
+    // Other objects
+    // *****************************************************************************
+    OwnBCs ownBC;           // Class containing methods which sets the ghost points
     // *****************************************************************************
     // ############################################################################
 };

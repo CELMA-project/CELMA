@@ -42,14 +42,14 @@ Looks like n was not properly communicated
 
 -  PBSDriver-0-a-0-Tester.py
     Amplitude S: 0.5
-    + Crashes after om_ci = 13
+    + Crashes after om_ci = 13 (max|jPar|=0.05)
 -  PBSDriver-0-a-1-TesterRestart.py
     + Crashes after om_ci = 14.2, can see ripples
 -  PBSDriver-0-a-2-TesterRestartSmallerSteps.py
     + Crashes after om_ci = 13.8, can see ripples after om_ci = 13.7
 -  PBSDriver-0-a-3-TesterMoreIt.py
     Amplitude S: 0.5
-    + Crashes after om_ci = 13
+    + Crashes after om_ci = 13 (max|jPar|=0.05)
 -  PBSDriver-0-b-0-TesterMoreYPoints.py
     Amplitude S: 0.5
     !!! Didn't even complete one step
@@ -59,16 +59,17 @@ Looks like n was not properly communicated
         + Step = 5e-1
             !!! After 2 steps see crash coming from source region (INVESTIGATE)
 -  PBSDriver-0-b-0-0-TesterMoreYPointsINVESTIGATEstarter.py
+# Redo
 -  PBSDriver-0-b-0-1-TesterMoreYPointsINVESTIGATE.py
+# Redo
 -  PBSDriver-0-c-0-TesterLessSource.py
-    :D Runs fine to 1000, potential looks a tad strange
+    :D Runs fine to 1000, potential looks a tad strange (max|jPar|=0.00125)
 -  PBSDriver-0-c-1-TesterLessSource+.py
     :D Runs fine to 100, potential looks a tad strange
     + Crashes after om_ci = 200
 -  PBSDriver-0-c-2-LessSourceRestartWNoise.py
     :D Runs fine to 100, but still no turbulence
-# RUNNING with 1000
-# Currently no turbulence
+    Runs to 1700 om_ci, killed by walltime, still no turbulence
 -  PBSDriver-0-d-0-CollisionScan.py
     Amplitude S: 0.1
     + nuei 0.1   - 10 omega_ci until crash

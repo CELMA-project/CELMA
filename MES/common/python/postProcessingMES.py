@@ -13,7 +13,7 @@ import os
 #{{{perform_MES_test
 def perform_MES_test(\
                      paths,\
-                     extension     = 'png' ,\
+                     extension     = 'pdf' ,\
                      show_plot     = False ,\
                      xz_error_plot = False ,\
                      xy_error_plot = False ,\
@@ -337,7 +337,7 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
 
         fig = plt.figure(figsize = (10, 7))
         ax  = plt.subplot()
-        cplot = ax.contourf(RHO, THETA, E['field'], 500, cmap=cm.RdYlBu_r)
+        cplot = ax.contourf(RHO, THETA, E['field'], 200, cmap=cm.RdYlBu_r)
 
         # Decorations
         cbar = plt.colorbar(cplot)

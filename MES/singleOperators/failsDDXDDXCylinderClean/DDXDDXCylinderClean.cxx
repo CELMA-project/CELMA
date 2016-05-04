@@ -7,6 +7,45 @@
 
 #include "DDXDDXCylinderClean.hxx"
 
+// Set xout ghost point of the resulting field of DDX
+// *****************************************************************************
+void xout_after_DDX(Field3D &out, Field3D const &in){
+    /* Info:
+     * Set xout ghost point of the resulting field of DDX
+     *
+     * Input:
+     * in    - The field that was used to find out
+     * out   - DDX(in), but without the ghost point in xout
+     *
+     * Output:
+     * out- DDi(in), with the ghost point of xout set
+     */
+    TRACE("Halt in xout_after_DDX");
+
+    if (mesh->lastX()){
+        /* NOTE: xend
+         *       xend = index value of last inner point on this processor
+         *       xend+1 = first guard point
+         */
+        int x_ind = mesh->xend + 1;
+
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int y_ind = mesh->ystart; y_ind <= mesh->yend; y_ind++){
+            for(int z_ind = 0; z_ind < mesh->ngz -1; z_ind ++){
+                out(x_ind, y_ind, z_ind) =
+                    - (1.0/5.0)*out(x_ind-3, y_ind, z_ind)
+                    +           out(x_ind-2, y_ind, z_ind)
+                    - 3.0*      out(x_ind-1, y_ind, z_ind)
+                    + (16.0/5.0)*
+                      // Calculation of boundary value
+                      ((in(x_ind, y_ind, z_ind)-in(x_ind-1, y_ind, z_ind))/
+                       mesh->dx(x_ind, y_ind));
+            }
+        }
+    }
+}
+// *****************************************************************************
+
 // Initialization of the physics
 // ############################################################################
 int DDXDDXCylinderClean::init(bool restarting) {
@@ -42,7 +81,7 @@ int DDXDDXCylinderClean::init(bool restarting) {
     // ************************************************************************
     f.setBoundary("f");
     f.applyBoundary();
-    innerRhoCylinder(f);
+    ownBC.innerRhoCylinder(f);
     // ************************************************************************
 
     // Communicate before taking derivatives
@@ -52,7 +91,7 @@ int DDXDDXCylinderClean::init(bool restarting) {
 
     // Calculate
     DDXf = DDX(f);
-    innerRhoCylinder(DDXf); // Set inner rho boundary
+    ownBC.innerRhoCylinder(DDXf); // Set inner rho boundary
     xout_after_DDX(DDXf, f);       // Set outer rho boundary
     mesh->communicate(DDXf);
     S_num = DDX(DDXf);

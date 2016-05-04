@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-TesterMoreYPoints"
+theRunName = "0-b-0-1-TesterMoreYPointsINVESTIGATE"
 # =============================================================================
 
 
