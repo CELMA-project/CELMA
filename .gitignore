@@ -48,10 +48,25 @@ html/
 *.nc
 *.png
 *.pdf
+
+# CELMA-dev
 visualization/
 celma/1-CELMA/celma
 celma/1.1-CELMACauchy/celma
 celma/2-CELMACollisionDamper/celma
+gaussianWSinAndParabola/
+twoGaussians/
+MES/singleOperators/0-DDXCylinder/DDXCylinder
+MES/singleOperators/1-D2DX2Cylinder/D2DX2Cylinder
+MES/singleOperators/2-D3DX3Cylinder/D3DX3Cylinder
+MES/singleOperators/3-D3DZ3Cylinder/D3DZ3Cylinder
+MES/singleOperators/4-D2DXDZCylinder/D2DXDZCylinder
+MES/singleOperators/5-D3DX2DZCylinder/D3DX2DZCylinder
+MES/singleOperators/6-D3DZ2DXCylinder/D3DZ2DXCylinder
+MES/singleOperators/7-DDXCylinderWithJacobian/DDXCylinderWithJacobian
+MES/singleOperators/failsDDXDDXCylinderClean/DDXDDXCylinderClean
+MES/singleOperators/subconvergenceDDXCylinderWithJacobianOverJacobian/DDXCylinderWithJacobianOverJacobian
+MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 
 # Miscellaneous
 *delme*
