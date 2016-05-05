@@ -16,14 +16,14 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-SAmps = [1e-1, 5e-2, 1e-2, 5e-3, 1e-3]
+eiCollisions = [600, 300, 100, 50, 10, 5, 1]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e0]
-directory  = "fullSOriginalParams"
+directory  = "c-lowSheathCond"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-i-0-FullSOriginalParametersSScan"
+theRunName = "0-c-0-lowSheathCollScan"
 # =============================================================================
 
 
@@ -73,7 +73,7 @@ myRuns = PBS_runner(\
             restart    = restart,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('theSource','a',SAmps) ,\
+                          ('cst','nuEI',eiCollisions),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
