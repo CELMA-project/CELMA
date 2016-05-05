@@ -11,12 +11,12 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combinedDriver
+from postProcessing.plotting import combined1D2D
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100, 50, 1]
+eiCollisions = [600, 300, 100, 50, 10, 5, 1]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
@@ -94,7 +94,7 @@ myRuns = PBS_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = combinedDriver,\
+                     post_processing_function = combined1D2D,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
