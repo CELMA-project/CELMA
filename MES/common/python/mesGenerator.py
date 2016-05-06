@@ -67,7 +67,7 @@ def set_plot_style():
 
 #{{{make_plot
 def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
-              include_aux = False):
+              include_aux = False, save = False):
     """3D plot of the MMS variables"""
 
     plt_size, n_grid_lines = set_plot_style()
@@ -128,7 +128,7 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                 # Plot the plot
                 ax1 = fig.gca(projection='3d')
                 ax1.plot_surface(X_ax_len, Y_ax_len, cur_plt(X_ax_len, Y_ax_len),\
-                                 cmap = cm.gnuplot,\
+                                 cmap = cm.RdYlBu_r,\
                                  linewidth = 0)
                 # Set the labels
                 ax1.set_xlabel('x')
@@ -153,8 +153,9 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                 fig = plt.figure(fig_no, figsize = plt_size)
                 ax2 = fig.add_subplot(111)
                 # Plot the plot
+                # zorder decides what should be drawn first
                 cont = ax2.contourf(X_RT, Y_RT, cur_plt(X_ax_len, Y_ax_len),\
-                                    N, cmap = cm.gnuplot)
+                                    N, cmap = cm.RdYlBu_r, zorder=-20)
                 cbar = plt.colorbar(cont)
                 cbar.ax.set_ylabel(cur_var_key)
                 # Set the labels
@@ -165,6 +166,14 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                     ax2.set_ylabel(r'$z$')
                 # Set the grid
                 ax2.grid()
+
+                if save:
+                    # Set zorder value below which artists will be rasterized
+                    # If this is not set, everything will be vecotrized, giving
+                    # plots with a huge size
+                    ax2.set_rasterization_zorder(-10)
+                    plt.tight_layout()
+                    plt.savefig('{}.pdf'.format(cur_var_key))
     #}}}
     # Show the plots
     plt.show()

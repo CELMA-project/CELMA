@@ -149,7 +149,8 @@ int Celma::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int Celma::rhs(BoutReal t) {
+int Celma::rhs(BoutReal t)
+{
     TRACE("Halt in Celma::rhs");
 
     // Manually specifying rho inner ghost points
@@ -298,7 +299,7 @@ int Celma::rhs(BoutReal t) {
     // ************************************************************************
 
 
-    
+
     // Terms in vorticity
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;

@@ -176,13 +176,13 @@ Looks like n was not properly communicated
     + nuei 50.0  - Crash before start
     + nuei 100.0 - Crash before start
     + nuei 300.0 - Crash before start
-    + nuei 600.0 - Crash before start
+    + nuei 600.0 - Runs fine
     xoutVal = -1
     + nuei 0.1   - Crash before start
     + nuei 1.0   - Crash before start
     + nuei 50.0  - Crash before start
     + nuei 100.0 - Crash before start
     + nuei 300.0 - Crash before start
-    + nuei 600.0 - Crash before start
+    + nuei 600.0 - Runs fine
 -  PBSDriver-0-l-0-noNeutralsCollScan.py
 -  PBSDriver-0-m-0-LessYPoints.py
