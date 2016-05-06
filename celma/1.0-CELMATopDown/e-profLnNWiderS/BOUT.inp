@@ -1,9 +1,5 @@
 #
-<<<<<<< Updated upstream
-# Input file for "3-CELMATopDown/data"
-=======
-# Input file for "1.0-CELMATopDown/data"
->>>>>>> Stashed changes
+# Input file for "1.0-CELMATopDown/profLnNWiderS"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -144,10 +140,8 @@ bRho = 0
 bZ   = 25
 cRho = 10
 cZ   = 7
-# Radial profile
-radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
 # Source
-S           = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+S           = a*dampProf:profile*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
 # =============================================================================
 
 
@@ -167,7 +161,7 @@ profile  = tanhhat(geom:xl, w, c, steep)
 # =============================================================================
 [lnN]
 scale       = 1.0
-function    = xoutVal
+function    = ((geom:Ly - geom:yl)/geom:Ly)*dampProf:profile + xoutVal
 
 # Set xout value
 xoutVal       = -1
@@ -197,7 +191,7 @@ bndry_ydown = dirichlet_o4(0.0)            # Stagnation point
 # =============================================================================
 [uIPar]
 scale       = 1.0
-eq          = geom:yl^2/geom:Ly^2
+eq          = geom:yl/geom:Ly
 # Multiply with the radial profile of the source, and the damping profile
 function = eq * dampProf:profile
 
