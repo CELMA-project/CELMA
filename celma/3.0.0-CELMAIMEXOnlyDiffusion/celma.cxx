@@ -9,7 +9,8 @@
 
 // Initialization of the physics
 // ############################################################################
-int Celma::init(bool restarting) {
+int Celma::init(bool restarting)
+{
     TRACE("Halt in Celma::init");
 
     // Create the solver
@@ -99,6 +100,9 @@ int Celma::init(bool restarting) {
     bm = BRACKET_ARAKAWA;
     // ************************************************************************
 
+    // Specify that the operator is split into convective and diffusive parts
+    setSplitOperator();
+
     // Add a FieldGroup to communicate
     // ************************************************************************
     // NOTE: We only communicate variables we are taking derivatives of
@@ -149,8 +153,10 @@ int Celma::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int Celma::rhs(BoutReal t) {
-    TRACE("Halt in Celma::rhs");
+// Slow dynamic treated explicitly
+int Celma::convective(BoutReal t)
+{
+    TRACE("Halt in Celma::convective");
 
     // Manually specifying rho inner ghost points
     // ************************************************************************
@@ -221,35 +227,26 @@ int Celma::rhs(BoutReal t) {
 
     // Terms in lnNPar
     // ************************************************************************
-    lnNAdv         = - invJ*bracket(phi, lnN, bm);
-    lnNRes         =   (0.51*nuEI/mu) *
-                         (Laplace_perp(lnN)+gradPerpLnN*gradPerpLnN);
-    gradUEPar      = - Grad_par(uEPar);
-    lnNUeAdv       = - Vpar_Grad_par(uEPar, lnN);
-    srcN           =   S/n;
-    lnNParArtVisc  =   artViscParLnN*D2DY2(lnN);
-    lnNPerpArtVisc =   artViscPerpLnN*Laplace_perp(lnN);
+    lnNAdv    = - invJ*bracket(phi, lnN, bm);
+    gradUEPar = - Grad_par(uEPar);
+    lnNUeAdv  = - Vpar_Grad_par(uEPar, lnN);
+    srcN      =   S/n;
     ddt(lnN) =   lnNAdv
-                + lnNRes
                 + gradUEPar
                 + lnNUeAdv
                 + srcN
-                + lnNParArtVisc
-                + lnNPerpArtVisc
                 ;
     // ************************************************************************
 
 
     // Terms in uEPar
     // ************************************************************************
-    uEParAdv         = - invJ*bracket(phi, uEPar, bm) ;
-    uEParParAdv      = - Vpar_Grad_par(uEPar, uEPar) ;
-    gradPhiLnN       =   mu*Grad_par(phi - lnN) ;
-    uEParRes         = - 0.51*nuEI *( uEPar - uIPar) ;
-    ueNeutral        = - nuEN*uEPar;
-    ueSrc            = - S*uEPar/n ;
-    uEParParArtVisc  =   artViscParUEPar*D2DY2(uEPar)/n;
-    uEParPerpArtVisc =   (artViscPerpUEPar/n)*Laplace_perp(uEPar);
+    uEParAdv    = - invJ*bracket(phi, uEPar, bm) ;
+    uEParParAdv = - Vpar_Grad_par(uEPar, uEPar) ;
+    gradPhiLnN  =   mu*Grad_par(phi - lnN) ;
+    uEParRes    = - 0.51*nuEI *( uEPar - uIPar) ;
+    ueNeutral   = - nuEN*uEPar;
+    ueSrc       = - S*uEPar/n ;
 
     ddt(uEPar) =
           uEParAdv
@@ -258,22 +255,18 @@ int Celma::rhs(BoutReal t) {
         + uEParRes
         + ueNeutral
         + ueSrc
-        + uEParParArtVisc
-        + uEParPerpArtVisc
         ;
     // ************************************************************************
 
 
     // Terms in uIPar
     // ************************************************************************
-    uIParAdv         = - invJ*bracket(phi, uIPar, bm);
-    uIParParAdv      = - Vpar_Grad_par(uIPar, uIPar);
-    gradPhi          = - Grad_par(phi);
-    uIParRes         = - (0.51*nuEI/mu) *(uIPar - uEPar);
-    uiNeutral        = - nuIN*uIPar;
-    uiSrc            = - S*uIPar/n;
-    uIParParArtVisc  =   artViscParUIPar*D2DY2(uIPar)/n;
-    uIParPerpArtVisc =   (artViscPerpUIPar/n)*Laplace_perp(uIPar);
+    uIParAdv    = - invJ*bracket(phi, uIPar, bm);
+    uIParParAdv = - Vpar_Grad_par(uIPar, uIPar);
+    gradPhi     = - Grad_par(phi);
+    uIParRes    = - (0.51*nuEI/mu) *(uIPar - uEPar);
+    uiNeutral   = - nuIN*uIPar;
+    uiSrc       = - S*uIPar/n;
 
     ddt(uIPar) =
           uIParAdv
@@ -282,7 +275,143 @@ int Celma::rhs(BoutReal t) {
         + uIParRes
         + uiNeutral
         + uiSrc
-        + uIParParArtVisc
+        ;
+    // ************************************************************************
+
+
+    // Preparation
+    // ************************************************************************
+    DivUIParNGradPerpPhi = ownOp.div_f_GradPerp_g(uIPar*n, phi);
+    // Set the ghost points in order to take DDY
+    ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
+    // We must communicate as we will take DDY
+    mesh->communicate(DivUIParNGradPerpPhi);
+    // ************************************************************************
+
+
+
+    // Terms in vorticity
+    // ************************************************************************
+    vortNeutral = - nuIN*n*vort;
+    potNeutral  = - nuIN*ownOp.Grad_perp(phi)*ownOp.Grad_perp(n);
+    nGradUiUe   =   Vpar_Grad_par(n, uIPar - uEPar);
+    uiUeGradN   =   Vpar_Grad_par(uIPar - uEPar, n);
+
+    ddt(vortD) =
+              vortNeutral
+            + potNeutral
+            + nGradUiUe
+            + uiUeGradN
+            ;
+    // ************************************************************************
+    return 0;
+}
+
+// Fast dynamic treated implicitly
+int Celma::diffusive(BoutReal t, bool linear)
+{
+    TRACE("Halt in Celma::diffusive");
+
+    // Manually specifying rho inner ghost points
+    // ************************************************************************
+    ownBC.innerRhoCylinder(lnN);
+    ownBC.innerRhoCylinder(uEPar);
+    ownBC.innerRhoCylinder(uIPar);
+    ownBC.innerRhoCylinder(phi);    // Used to set BC in lapalace inversion
+    ownBC.innerRhoCylinder(vortD);  // Later taken derivative of
+    // The inner boundaries of phi is set in the inversion procedure
+    // ************************************************************************
+
+    // Preparations
+    // ************************************************************************
+    /* NOTE: Preparations
+     * 1. gradPerp(lnN) is input to the NaulinSolver , thus
+     *    a) gradPerpLnN needs to be calculated...
+     *    b) ...which requires that lnN has been communicated
+     * 2. n is input to the NaulinSolver, so
+     *    a) It needs to be calculated
+     *    b) We will communicate as the derivative is needed in vortD
+     *
+     * Note also:
+     * 1. No further derivatives is taken for GradPerp(lnN), so this is not
+     *    needed to be communicated.
+     * 2. We are taking the derivative of phi in the NaulinSolver, however,
+     *    this happens in a loop, and it is communicated before taking the
+     *    derivative
+     */
+    mesh->communicate(lnN);
+    gradPerpLnN = ownOp.Grad_perp(lnN);
+    n = exp(lnN);
+    // ************************************************************************
+
+    // Laplace inversion
+    // ************************************************************************
+    /* NOTE: Solve for phi
+     * 1. phi and vort is output
+     * 2. The solver takes care of perpendicular boundaries
+     */
+    phi = ownLapl.NaulinSolver(gradPerpLnN, n, vortD, phi, vort);
+    // ************************************************************************
+
+    // Treating parallel boundary conditions
+    // ************************************************************************
+    /* NOTE: No boundary condition on phi
+     * - We need to know the parallel ghost point of phi, as we are using the
+     *   Grad_par(phi) to calculate uEPar.
+     * - phi is not an evolved variable.
+     * - Setting a boundary condition on this would be to constrain the result.
+     * - Extrapolation is used instead.
+     */
+    ownBC.extrapolateYGhost(phi);
+    // Use the sheath boundary condition with constant Te for uEPar at SE
+    // Here we have phiRef = Lambda
+    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda, dampingProfile);
+    // ************************************************************************
+
+    // Communicate before taking derivatives
+    mesh->communicate(comGroup);
+
+    /* NOTE: Bracket operator
+     * The bracket operator returns -(grad(phi) x b/B)*grad(f)
+     * As B is defined by in field aligned coordinates, and we are working with
+     * cylindrical coordinates (which happens to coincide with the metrics of
+     * that of the field aligned coordinate system) we need to multiply with
+     * 1/J
+     */
+
+    // Terms in lnNPar
+    // ************************************************************************
+    lnNRes         =   (0.51*nuEI/mu) *
+                         (Laplace_perp(lnN)+gradPerpLnN*gradPerpLnN);
+    lnNParArtVisc  =   artViscParLnN*D2DY2(lnN);
+    lnNPerpArtVisc =   artViscPerpLnN*Laplace_perp(lnN);
+    ddt(lnN) =
+                + lnNRes
+                + lnNParArtVisc
+                + lnNPerpArtVisc
+                ;
+    // ************************************************************************
+
+
+    // Terms in uEPar
+    // ************************************************************************
+    uEParParArtVisc  =   artViscParUEPar*D2DY2(uEPar)/n;
+    uEParPerpArtVisc =   (artViscPerpUEPar/n)*Laplace_perp(uEPar);
+
+    ddt(uEPar) =
+          uEParParArtVisc
+        + uEParPerpArtVisc
+        ;
+    // ************************************************************************
+
+
+    // Terms in uIPar
+    // ************************************************************************
+    uIParParArtVisc  =   artViscParUIPar*D2DY2(uIPar)/n;
+    uIParPerpArtVisc =   (artViscPerpUIPar/n)*Laplace_perp(uIPar);
+
+    ddt(uIPar) =
+          uIParParArtVisc
         + uIParPerpArtVisc
         ;
     // ************************************************************************
@@ -298,25 +427,17 @@ int Celma::rhs(BoutReal t) {
     // ************************************************************************
 
 
-    TRACE("Before vorticity");
+
     // Terms in vorticity
     // ************************************************************************
-    vortNeutral                = - nuIN*n*vort;
-    potNeutral                 = - nuIN*ownOp.Grad_perp(phi)*ownOp.Grad_perp(n);
     divExBAdvGradPerpPhiN      = - ownOp.div_uE_dot_grad_n_GradPerp_phi(n, phi);
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
-    nGradUiUe                  =   Vpar_Grad_par(n, uIPar - uEPar);
-    uiUeGradN                  =   Vpar_Grad_par(uIPar - uEPar, n);
     vortDParArtVisc            =   artViscParVortD*D2DY2(vortD);
     vortDPerpArtVisc           =   artViscPerpVortD*Laplace_perp(vortD);
 
     ddt(vortD) =
-              vortNeutral
-            + potNeutral
             + divExBAdvGradPerpPhiN
             + parDerDivUIParNGradPerpPhi
-            + nGradUiUe
-            + uiUeGradN
             + vortDParArtVisc
             + vortDPerpArtVisc
             ;
