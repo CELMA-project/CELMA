@@ -16,14 +16,14 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100, 50, 10, 5, 1]
+eiCollisions = [100, 50, 10, 5, 1, 0.1]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e0]
-directory  = "a-data"
+directory  = "d-widerS"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-dataCollScan"
+theRunName = "0-d-0-widerS"
 # =============================================================================
 
 
@@ -48,11 +48,7 @@ theRunName = "0-a-0-dataCollScan"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-<<<<<<< Updated upstream
-BOUT_walltime         = '06:00:00'
-=======
 BOUT_walltime         = '03:00:00'
->>>>>>> Stashed changes
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
