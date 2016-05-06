@@ -34,6 +34,7 @@
 *~
 *.bak
 *.swp
+*.swo
 
 # Python
 *.pyc
@@ -52,9 +53,10 @@ html/
 # CELMA-dev
 visualization/
 celma/1-CELMA/celma
+celma/1.0-CELMATopDown/celma
 celma/1.1-CELMACauchy/celma
 celma/2-CELMACollisionDamper/celma
-celma/3-CELMATopDown/celma
+celma/3.0.0-CELMAIMEXOnlyDiffusion/celma
 gaussianWSinAndParabola/
 twoGaussians/
 MES/singleOperators/0-DDXCylinder/DDXCylinder

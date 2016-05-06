@@ -337,7 +337,13 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
 
         fig = plt.figure(figsize = (10, 7))
         ax  = plt.subplot()
-        cplot = ax.contourf(RHO, THETA, E['field'], 100, cmap=cm.RdYlBu_r)
+        # zorder decides what should be drawn first
+        cplot = ax.contourf(RHO, THETA, E['field'], 500,\
+                            cmap=cm.RdYlBu_r, zorder=-20)
+        # Set zorder value below which artists will be rasterized
+        # If this is not set, everything will be vecotrized, giving
+        # plots with a huge size
+        ax.set_rasterization_zorder(-10)
 
         # Decorations
         cbar = plt.colorbar(cplot)
@@ -391,7 +397,13 @@ def plot_xy_errors(data, root_folder, extension, z_plane, directions):
 
         fig = plt.figure(figsize = (10, 7))
         ax  = plt.subplot()
-        cplot = ax.contourf(RHO, Z, E['field'], 500, cmap=cm.RdYlBu_r)
+        # zorder decides what should be drawn first
+        cplot = ax.contourf(RHO, Z, E['field'], 500,\
+                            cmap=cm.RdYlBu_r, zorder=-20)
+        # Set zorder value below which artists will be rasterized
+        # If this is not set, everything will be vecotrized, giving
+        # plots with a huge size
+        ax.set_rasterization_zorder(-10)
 
         # Decorations
         cbar = plt.colorbar(cplot)
