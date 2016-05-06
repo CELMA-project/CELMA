@@ -1,9 +1,5 @@
 #
-<<<<<<< Updated upstream
-# Input file for "3-CELMATopDown/data"
-=======
-# Input file for "1.0-CELMATopDown/data"
->>>>>>> Stashed changes
+# Input file for "1.0-CELMATopDown/widerS"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -144,10 +140,8 @@ bRho = 0
 bZ   = 25
 cRho = 10
 cZ   = 7
-# Radial profile
-radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
 # Source
-S           = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+S           = a*dampProf:profile*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
 # =============================================================================
 
 
