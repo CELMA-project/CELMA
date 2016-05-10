@@ -23,7 +23,7 @@ void  Util_1DSs3(double *w, double *w_0,double *w_1,double *w_2,
     register int ix;
     for(ix=0;ix<nx;ix++)
         w[ix] =  6./11.*
-            (3.*w_0[ix] -1.5*w_1[ix] +1./3.*w_2[ix]+dt*(3.*r_0[ix] -3.*r_1[ix] +r_2[ix]) );  
+            (3.*w_0[ix] -1.5*w_1[ix] +1./3.*w_2[ix]+dt*(3.*r_0[ix] -3.*r_1[ix] +r_2[ix]) );
 
 }
 
@@ -52,7 +52,7 @@ void  Util_Ss3(double **w, double **w_0,double **w_1,double **w_2,
 {
     register int ix,iy;
     for(iy=0;iy<ny;iy++) for(ix=0;ix<nx;ix++)
-        w[iy][ix] =  3.*w_0[iy][ix] -1.5*w_1[iy][ix] +1./3.*w_2[iy][ix]+dt*(3.*r_0[iy][ix] -3.*r_1[iy][ix] +r_2[iy][ix]);  
+        w[iy][ix] =  3.*w_0[iy][ix] -1.5*w_1[iy][ix] +1./3.*w_2[iy][ix]+dt*(3.*r_0[iy][ix] -3.*r_1[iy][ix] +r_2[iy][ix]);
 
 
     for(iy=0;iy<ny;iy++) for(ix=0;ix<nx;ix++)
@@ -63,7 +63,7 @@ void Util_1DSsTimeStep(int iter,int nx, double dt,double mue,double *lamda,
                      double *w,double *w_0, double *w_1, double *w_2,
                      double *r_0, double *r_1, double *r_2)
 {
-  switch (iter) 
+  switch (iter)
     {
     case 0:
       Util_1DSs1(w,w_0,r_0,nx,dt);
@@ -77,7 +77,7 @@ void Util_1DSsTimeStep(int iter,int nx, double dt,double mue,double *lamda,
 
 if(mue != 0.0)
   {
-  switch (iter) 
+  switch (iter)
     {
     case 0:
       *lamda   = -1./(mue*dt);
@@ -89,7 +89,7 @@ if(mue != 0.0)
       *lamda   =-11./6./(mue*dt);
      }
   }
-else 
+else
   *lamda = 0.;
 }
 
@@ -97,7 +97,7 @@ void Util_2DSsTimeStep(int iter,int nx, int ny, double dt,double mue,double *lam
                        double **w,double **w_0, double **w_1, double **w_2,
                        double **r_0, double **r_1, double **r_2)
 {
-    switch (iter) 
+    switch (iter)
     {
         case 0:
             Util_Ss1(w,w_0,r_0,ny,nx,dt);
@@ -111,7 +111,7 @@ void Util_2DSsTimeStep(int iter,int nx, int ny, double dt,double mue,double *lam
 
     if(mue > 0.0)
     {
-        switch (iter) 
+        switch (iter)
         {
             case 0:
                 *lamda   = -1./(mue*dt);
@@ -123,7 +123,7 @@ void Util_2DSsTimeStep(int iter,int nx, int ny, double dt,double mue,double *lam
                 *lamda   =-11./6./(mue*dt);
         }
     }
-    else 
+    else
         *lamda = 0.;
 
 }
@@ -133,16 +133,21 @@ void Util_2DSsTimeStep(int iter,int nx, int ny, double dt,double mue,double *lam
 /*********************************************************/
 
 /*
-  does the Stiffly Stable Timestepping 
+  does the Stiffly Stable Timestepping
 */
 
 void Util_3DSsTimeStep(int iter,int nx, int ny, int nz, double dt,double mue,double *lamda,
                        double ***w,double ***w_0, double ***w_1, double ***w_2,
                        double ***r_0, double ***r_1, double ***r_2)
 {
+    /* loeiten:
+     * w is the parameter under consiteration
+     * w_0 - w_2 are the last saved values
+     * three last parameters are last dt values
+     */
     static int i;
 
-    switch (iter) 
+    switch (iter)
     {
         case 0:
             for(i=0;i<nz;i++)
@@ -160,7 +165,7 @@ void Util_3DSsTimeStep(int iter,int nx, int ny, int nz, double dt,double mue,dou
 
     if(mue != 0.0)
     {
-        switch (iter) 
+        switch (iter)
         {
             case 0:
                 *lamda   = -1./(mue*dt);
@@ -172,7 +177,7 @@ void Util_3DSsTimeStep(int iter,int nx, int ny, int nz, double dt,double mue,dou
                 *lamda   =-11./(6.*mue*dt);
         }
     }
-    else 
+    else
         *lamda = 0.;
 
 }

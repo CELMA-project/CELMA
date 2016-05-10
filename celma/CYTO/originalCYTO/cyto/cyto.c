@@ -12,13 +12,15 @@
 
 #undef VSTATIC // Using Vstatic dereases necessary dt in first steps
 #undef QSTATIC // Test simple electron heat flux
+/* loeiten: Say what?*/
 #define ME 0.01 //(1./1836.2)
 
 #define DX(F)  0.5*hval[iz][ir]*( (F)[iz][ip][ir+1] - (F)[iz][ip][ir-1])
 #define DY(F)  0.5*vval[iz][ir]*( (F)[iz][ip+1][ir] - (F)[iz][ip-1][ir])
 
 
-#undef NONLINEAR
+/*loeiten: commented here*/
+// #undef NONLINEAR
 #ifdef NONLINEAR
 #define CONVECT Util_3DArakawaNl
 #else
@@ -26,13 +28,20 @@
 #endif
 
 /* These Flags are for debugging */
+/*loeiten: commented here, then uncommented, because...hilarious*/
 #undef DEBUG
 #undef CNTFILES
 #undef COMM_STATUS
 #define CHECK_STRUCTURE  Util_PrintStructures(d,p,__LINE__)
-// #define CHECK_STRUCTURE
+#define CHECK_STRUCTURE
 
 
+/*loeiten:
+ * Notice looping opposite order
+ * Not sure what d is for...some HDF_DS type
+ * Looks like forall_BD includes the inner points
+ * !!!Negative indices!!!
+ */
 #define FORALL for(iz=0;iz<nz;iz++) for(ip=0;ip<ny;ip++) for(ir=0;ir<nx;ir++)
 #define FORALL_BD for(iz=-d->offz;iz<(nz+d->offz);iz++) for(ip=-d->offy;ip<(ny+d->offy);ip++) for(ir=-d->offx;ir<(nx+d->offx);ir++)
 
@@ -115,6 +124,7 @@ int main(int argc,char **argv)
       W_Q0     = TRUE,
       W_DZQ     = TRUE;
 
+    /*loeiten: Is this to be believed?*/
     const char code_desc[] ={
      "# The CYTO code solves the global, electrostatic fluid equations for a plasma in a cylinder:\n"\
      "#\n"                                                              \
@@ -176,7 +186,12 @@ int main(int argc,char **argv)
         "lTe: -;"                                       \
         "lTi: -;" };
 
-
+    /*loeiten:
+     * No integrator.h there...
+     * FOUND IT: IN include/definitions.h
+     * What is para?
+     * looks like d can be given from input, evt see around line 560
+     */
     // These structures define most of the variables, they are defined in include/intergrator.h
     HDF_DS
         data = {0}, *d; // compiler will warn about missing braces, but this is c99 standard
@@ -288,7 +303,7 @@ int main(int argc,char **argv)
             ***laxq = NULL,
             ***laxv = NULL;
 
-
+/*loeiten
 // Neutrals Slow species
         double
                 ***H_slow_0        = NULL,
@@ -312,6 +327,7 @@ int main(int argc,char **argv)
         **      H_fast_bdr[2]   = {NULL,NULL},
         **H_fast_bdrlow   = NULL,
         **H_fast_bdrup    = NULL;
+*/
 
 
     double
@@ -337,6 +353,7 @@ int main(int argc,char **argv)
         ***dzV      = NULL,
         ***dzzV     = NULL;
 
+    /*loeiten: Capital N denotes Fluxes*/
     double
         ***VN       = NULL,
         ***dzVN     = NULL,
@@ -414,19 +431,19 @@ int main(int argc,char **argv)
 
 
     double
-        **hval      = NULL,
-        **vval      = NULL,
+        **hval      = NULL, /*loeiten: 1/dx (rho)*/
+        **vval      = NULL, /*loeiten: 1/r*dy (theta)*/
         **nlval     = NULL,
         *rcor       = NULL,
-        *edrcor     = NULL,
+        *edrcor     = NULL, /*loeiten: 1/r*/
         **norm      = NULL,
         *dynbg      = NULL;
 
 
     double
         *zcor     = NULL,
-        *zhval    = NULL,
-        *zgval    = NULL;
+        *zhval    = NULL, /*loeiten: Around 2230: Geom of derivative, looks like gridspacing, see Cyto_DParallelSOL*/
+        *zgval    = NULL; /*loeiten: Around 2230: Curvature of derivative*/
 
 
     double
@@ -831,11 +848,13 @@ int main(int argc,char **argv)
 
     CHECK_STRUCTURE;
     if(p->coordsys == CYLINDRICAL) {
+        /*loeiten: Enters here*/
         ispolar = TRUE;
         sprintf(d->coordsys,"cylindrical");
         sprintf(d->dim_label[0],"z");
         sprintf(d->dim_label[2],"r");
         sprintf(d->dim_label[1],"phi");
+        /*loeiten: Setting the rho coordinate*/
         FORX_BD
         {
             r = p->xmin+(d->lnx*d->grid_coords[2]+ir+0.5)*p->dx;
@@ -947,6 +966,7 @@ int main(int argc,char **argv)
             zgval[iz] = g*g*val/dz/((1.-val*val)*sqrt(1.-val*val));
         }
     }
+    /*loeiten: Enters here, sets the z-coordinate (parallel)*/
     else
     {
         dz = (p->zmax-p->zmin)/(double)(d->dims[0]);
@@ -1005,8 +1025,25 @@ int main(int argc,char **argv)
     /* RBDCND:      X = A           X = B */
     BUGREPORT;
     /*****************************************************************************/
+    /* loeiten:
+     * r    - rho
+     * bd   - boundary
+     * cnd  - condition
+     * f    - potential?
+     * w    - vorticity (looks like the H field)?
+     * n    - density
+     * u    - ion vel
+     * v    - electron vel
+     * t    - electron temp
+     * q    - heat flux
+     */
     if(p->xmin == 0. && ispolar)
     {
+        /*loeiten:
+         * Enters here
+         * NOTE: THESE CORRESPONDS TO mbdcnd 5 and 6 as given in laplace_solver
+         *       Defined in include/definitions
+         */
         rbdcndf   = ZeroDIR;
         rbdcndw   = ZeroDIR;
         rbdcndn   = ZeroDIR;
@@ -1032,6 +1069,10 @@ int main(int argc,char **argv)
 
     for(i=0;i<2;i++)
     {
+    /* loeiten: These are the boundaries...
+     *          0 = inner boundary
+     *          1 = outer boundary
+     */
         FORZY_BD nbdr[i][iz][ip]  = 0.;
         FORZY_BD fbdr[i][iz][ip]  = 0.;
         FORZY_BD wbdr[i][iz][ip]  = 0.;
@@ -1050,6 +1091,12 @@ int main(int argc,char **argv)
     /* ZBDCND:      Z = down           Z = up*/
 
 
+
+    /*loeiten: NOTE: THESE ARE UNUSED!!!!
+     *          Boundaries in parallel direction
+     *         ... w is strange
+     *         ... n is strange
+     */
     zbndcndf = DIRNEU;
     zbndcndw = DIRNEU;
     zbndcndn = DIRNEU;
@@ -1059,6 +1106,11 @@ int main(int argc,char **argv)
     zbndcndv = NEUNEU;
 
     BUGREPORT;
+    /*loeiten: NOTE: THESE ARE UNUSED!!!!
+     *          Boundaries in parallel direction
+     *         ... w is strange
+     *         ... n is strange
+     */
     FORYX_BD wbdrup[ip][ir]  = 0.;
     FORYX_BD wbdrlow[ip][ir] = 0.;
     FORYX_BD nbdrup[ip][ir]  = 0.;
@@ -1091,7 +1143,9 @@ int main(int argc,char **argv)
 
 
 
-
+    /* loeiten:
+     * Looks like initial stuff is going on here
+     */
     if(d->restart == RESTART)
     {
      /******************RESTART FROM FILE MADE BY CYTO ****************************************/
@@ -1219,6 +1273,9 @@ int main(int argc,char **argv)
    }
    else if (d->restart == START_FROM_INI || d->restart == DEFAULTSTART )
    {
+       /*loeiten: Enters here, looks like initializing the fields and adding
+        *         noise
+        */
        // printf("START_FROM_INI...\n");
 
        /******************START FROM INI FILE  ****************************************/
@@ -1239,6 +1296,11 @@ int main(int argc,char **argv)
        {
            phase =  (double)rand()/(double)RAND_MAX ;
 
+           /*loeiten:
+            *         This is noise generator for mode m
+            *         dims[2] = inner points in rho
+            *         grid_coords[2] = 0 ...
+            *           */
            FORALL_BD  {
                irg = ir + nx*d->grid_coords[2];
                n_0[iz][ip][ir]+=  n_0[iz][ip][ir]*0.001/(double)(m*m)
@@ -1262,6 +1324,7 @@ int main(int argc,char **argv)
        FORALL_BD omega[iz][ip][ir]  = 0.;
 
 
+      /*loeiten: Initialize Omega^H */
       FORALL_BD
        {
            r = p->xmin+(d->lnx*d->grid_coords[2]+ir+0.5)*p->dx;
@@ -1374,6 +1437,8 @@ int main(int argc,char **argv)
          );
 
 
+    /*loeiten: Interesting: This is only 400 when using the ini file, looks
+     * like it is given in atomic units*/
     mu     = p->Mi/ME;
     delta  = p->delta;
     nu     = p->nu;/* assume nu to be determined from plasma core while it should be plasma edge)*/
@@ -1424,6 +1489,9 @@ int main(int argc,char **argv)
     dsource[iz][ip][ir] =  exp(-r*r*(p->kappan*p->kappan));  //    *exp(-((z/Lz)*(z/Lz)));
    }
 
+   /* loeiten:
+    * Say what??
+    */
    // set up a shape function to drive vorticity to zero in the vicinity of the radial wall
 
    FORALL {
@@ -1456,6 +1524,7 @@ int main(int argc,char **argv)
 #ifdef TE
    strcat(d->desc,"Uses Electron Temperature equation.\n");
 #else
+   /* loeiten: Enters here*/
    strcat(d->desc,"Electron Temperature constant.\n");
 #endif //TE
 
@@ -1463,6 +1532,7 @@ int main(int argc,char **argv)
 #ifdef QSTATIC
    strcat(d->desc,"static.\n");
 #else
+   /* loeiten: Enters here*/
    strcat(d->desc,"dynamic.\n");
 #endif
 
@@ -1500,27 +1570,59 @@ int main(int argc,char **argv)
           /*********************************************/
           /*                   Electron Density        */
           /*********************************************/
+
+          /* loeiten:
+           * CONVECT macro in top of this file
+           * For the non-linear case:
+           * #define CONVECT Util_3DArakawaNl
+           * found in
+           */
+          /* loeiten: n_0 is the logarithm           */
           CONVECT(dtn_0,f_0,n_0,nlval,nz,nx,ny);
           FORALL dtn_0[iz][ip][ir]   +=  -dzVN[iz][ip][ir];
 
           // density source
+          /* loeiten: Source given around 1483*/
           FORALL    dtn_0[iz][ip][ir] += p->nprof*dsource[iz][ip][ir]/exp_n_0[iz][ip][ir];
 
           // artificial "ionisation", keeps log density from falling below min_nt
           // FORALL    dtn_0[iz][ip][ir]-=  p->source* (n_0[iz][ip][ir]-lmin_nt -fabs(n_0[iz][ip][ir]-lmin_nt));
 
           // PARALLEL_DAMPING
+          /* loeiten: limiter: Says that this is only artificial (parallel), limiter=5 in the cyto_myset.ini*/
           FORALL       dtn_0[iz][ip][ir]+=p->limiter*(dzzN[iz][ip][ir] +  dzN[iz][ip][ir] *dzN[iz][ip][ir]);//+ 0.1*laxn[iz][ip][ir];
 
           // Explicit part of damping
+          /* loeiten: !!! Here the second derivatives are missing
+           *          mue_n: diffusion
+           */
           FORALL dtn_0[iz][ip][ir] += p->mue_n*(dxn[iz][ip][ir]*dxn[iz][ip][ir] + dyn[iz][ip][ir]*dyn[iz][ip][ir]);
 
+          /*loeiten:
+           * dt = 1e-4
+           * first argument second line: This is the time stepped variable
+           *    In n: input to Laplace_Solve3D
+           *    In w: after damping, also input to laplace 3D
+           *    In ion: called tfeld, and u2 set to tfeld
+           *    In electron:  called tfeld, and v2 set to tfeld
+           *    All of these are set to the n_0, w_0 etc. in the end
+           * looks like n_0, n_1 and n_2 are from previous steps (see pointer stuff at the end of the while loop)
+           * Time stepper defined in
+           * util_timestep.c
+           */
           Util_3DSsTimeStep(iter,nx,ny,nz,p->dt,p->mue_n,&lamda,
                             n,n_0,n_1,n_2,dtn_0,dtn_1,dtn_2);
 
+          /* loeiten: What is really going on here???, is this some kind of
+           * weird swap of values? Why use an so ineffective procedure then?
+           */
           Laplace_Solve3D(d,p,n_2,n,nbdr[0],nbdr[1],hval[0],rcor,rbdcndn,lamda,TRUE);
 
           // Calculate dt ln n .....with implicit term
+          /* loeiten: Takes the laplacian of n_0, makes a tfeld, and set the
+           * boundary for that
+           * Then: When calculating the vorticity^H, tfeld is overwritten
+           */
           Cyto_Laplace(res,n_0,hval,vval,edrcor,nx,ny,nz,p,ispolar);
           FORALL tfeld[iz][ip][ir] = dtn_0[iz][ip][ir] +  p->mue_n*res[iz][ip][ir];
           // UPDATE BOUNDARY ON dtn
@@ -1531,6 +1633,7 @@ int main(int argc,char **argv)
           /*********************************************/
           /* Global Vorticity equation: Needs to be evaluated AFTER dt_n_0 is known  */
           /*********************************************/
+          /* loeiten: Look below*/
           //  Note that w = omega + grad N grad phi
           CONVECT(dtw_0,f_0,omega,nlval,nz,nx,ny);
 
@@ -1543,8 +1646,17 @@ int main(int argc,char **argv)
           FORALL dtw_0[iz][ip][ir] +=  (dzUN[iz][ip][ir] - dzVN[iz][ip][ir]/p->Z);
 
           // Collisional Term: Pedersen current
+          /* loeiten: sigma is ion neutral collision, set to 0.05 in the ini
+           * file
+           * NOTE: !!!! MISSING n
+           */
           FORALL dtw_0[iz][ip][ir] +=  -p->sigma*omega[iz][ip][ir];
 
+          /* loeiten:
+           * NOTE: The first term is very important, but is
+           *        term is commented out
+           *        Using the temporary field, which has been overwritten above
+           */
           // \nabla (d_t n) \nabla \phi term
           //FORALL dtw_0[iz][ip][ir] += DX(tfeld)*dxf[iz][ip][ir]+DY(tfeld)*dyf[iz][ip][ir];
 
@@ -1568,6 +1680,7 @@ int main(int argc,char **argv)
                             w,w_0,w_1,w_2,dtw_0,dtw_1,dtw_2);
 
 
+          /* loeiten: Here, solving again the potential, but have some "damping on it???? !!! */
           // Damping only on vorticity, omega, thus substract grad n grad phi term ,
           FORALL tfeld[iz][ip][ir]  =  dxn[iz][ip][ir]*dxf[iz][ip][ir]+ dyn[iz][ip][ir]*dyf[iz][ip][ir];
           FORALL  w[iz][ip][ir]  -=  tfeld[iz][ip][ir];
@@ -1577,6 +1690,7 @@ int main(int argc,char **argv)
           FORALL  w_2[iz][ip][ir]  +=  tfeld[iz][ip][ir];
 
 
+          /*loeiten: This part is skipped*/
 #ifdef TE
           /*********************************************/
           /*       log Electron temperature            */
@@ -1655,6 +1769,7 @@ int main(int argc,char **argv)
           CONVECT(dtU_0,f_0,U_0,nlval,nz,nx,ny);
 
           // Parallel advection
+          /* loeiten: padvection = 0 in the init file */
           FORALL dtU_0[iz][ip][ir]  += -padvection*dzU[iz][ip][ir]*U_0[iz][ip][ir];
           BUGREPORT;
 
@@ -1664,9 +1779,13 @@ int main(int argc,char **argv)
           FORALL dtU_0[iz][ip][ir]  += -p->sigma*U_0[iz][ip][ir] ;
 
           // Resistivity
+          /* loeiten: A perverted term, see below for definition*/
           FORALL dtU_0[iz][ip][ir]  += nu_vmu[iz][ip][ir];
 
           // Thermal force
+          /* loeiten: Not present here
+           * NOTE: Not division by zero, but rather (alpha/mu)*dz(Te)
+           */
           FORALL dtU_0[iz][ip][ir]  += -Alpha/mu*dzt[iz][ip][ir];
 
           //FORALL dtU_0[iz][ip][ir] -= U_0[iz][ip][ir]*target[iz][ip][ir];
@@ -1690,6 +1809,7 @@ int main(int argc,char **argv)
           // Parallel Forces
           FORALL dtV_0[iz][ip][ir]   +=  mu*(dzF[iz][ip][ir] - exp_t_0[iz][ip][ir]*(dzN[iz][ip][ir]+dzt[iz][ip][ir]));
 
+          /* loeiten: 3 terms not present*/
           // Parallel Advection
           FORALL dtV_0[iz][ip][ir] += -0.*padvection*dzV[iz][ip][ir]*(V_0[iz][ip][ir]+p->alpha);
 
@@ -1700,6 +1820,7 @@ int main(int argc,char **argv)
           FORALL dtV_0[iz][ip][ir]   += -0.*p->delta*(V_0[iz][ip][ir]+p->alpha);
 
           // Coloumb collision Term
+          /* loeiten: A perverted term, see below for definition*/
           FORALL dtV_0[iz][ip][ir]   += -mu*nu_vmu[iz][ip][ir] ;
 
           // Parallel velocity towards zero at wall
@@ -1743,6 +1864,7 @@ int main(int argc,char **argv)
           if(iter < 400)          iter++;
       } // End of if (FALSE == first)
 
+      /* loeiten: Loop starts here*/
       first = FALSE;
 
       /*********************************************************************/
@@ -1751,12 +1873,26 @@ int main(int argc,char **argv)
 
       BUGREPORT;
       // Extrapolate value on boundary
+      /* loeiten: What kind of extrapolation?
+       *          Indices on nbdr and n_0 not the same
+       *          nx is last rho point
+       *          Does not match any extrapolation known to me
+       *          Think it is like this: nbdr[0] is inner rho, nbdr[1] is outer
+       *          rho
+       *
+       *          Hypothesis: Setting lnN to -3 at BC?
+       *          Doesn't look like this when look at the physical data
+       */
       FORZY_BD  nbdr[1][iz][ip]   = 0.5*(3.*n_0[iz][ip][nx-1]-n_0[iz][ip][nx-2]);
       FORZY_BD  tbdr[1][iz][ip]   = 0.5*(3.*t_0[iz][ip][nx-1]-t_0[iz][ip][nx-2]);
+      /* loeiten:
+       * rbdcndn - boundary condtion type, here set to
+       */
       PH_Update2dBoundaries(n_0,rbdcndn, nbdr[0], nbdr[1],hval,d);
       PH_Update2dBoundaries(t_0,rbdcndt, tbdr[0], tbdr[1],hval,d);
 
 
+      /* loeiten: This is used for parallel damping*/
       Cyto_DParallelSOL(IS_DENSITY,dzN,dzzN,n_0,f_0,exp_n_0,exp_t_0,U_0,dzU,zhval,zgval,d,p);
       FORALL laxn[iz][ip][ir] =   LAXF*dzzN[iz][ip][ir]; // LAXF*(n_0[iz+1][ip][ir] -2.*n_0[iz][ip][ir]+ n_0[iz-1][ip][ir]);
 
@@ -1772,7 +1908,15 @@ int main(int argc,char **argv)
 
 
 
+      /* loeiten:
+       * t0 = 0, se only got the first part
+       * nu_m = nu_ei/mu
+       */
       FORALL  nu_density[iz][ip][ir] =  nu_m*exp_n_0[iz][ip][ir]*exp(-3.5*t_0[iz][ip][ir]);
+      /* loeiten:
+       * ...!!! ions are not moving here...
+       * alpha is set to 0
+       */
       FORALL  nu_vmu[iz][ip][ir]     =  nu_density[iz][ip][ir] * (V_0[iz][ip][ir]+ p->alpha -0.* U_0[iz][ip][ir]);
 
       BUGREPORT;
@@ -1785,6 +1929,7 @@ int main(int argc,char **argv)
       */
       BUGREPORT;
       PH_Update2dBoundaries(omega,rbdcndw, ombdr[0], ombdr[1],hval,d);
+      /*loeiten: This is the normal laplace inversion*/
       Laplace_Solve3D(d,p,f_0,omega,fbdr[0],fbdr[1],hval[0],rcor,rbdcndf,fac_pot,FALSE);
       PH_Update2dBoundaries(f_0,rbdcndf, fbdr[0], fbdr[1],hval,d);
 
@@ -1798,6 +1943,7 @@ int main(int argc,char **argv)
       FORALL dyf[iz][ip][ir] = DY(f_0);
 
       BUGREPORT;
+      /*loeiten: This here is bad...only solving three times*/
       for(i=0;i<3;i++)
       {
           FORALL  omega[iz][ip][ir] = w_0[iz][ip][ir]- dxn[iz][ip][ir]*dxf[iz][ip][ir]-dyn[iz][ip][ir]*dyf[iz][ip][ir];
@@ -1832,6 +1978,7 @@ int main(int argc,char **argv)
       BUGREPORT;
 
       // calculate boundary for w  = om + d_r phi  d_r n
+      /* loeiten: This looks like what ahnie was talking about*/
       /* for(iz=0;iz<nz;iz++)
           for(ip=-1;ip<=ny;ip++)
               wbdr[1][iz][ip] =   ombdr[1][iz][ip] +
@@ -1897,6 +2044,9 @@ int main(int argc,char **argv)
       FORALL_BD J_0[iz][ip][ir] = -exp_n_0[iz][ip][ir]*(V_0[iz][ip][ir]+p->alpha - U_0[iz][ip][ir]);// contains electron bulk drift alpha
 
 
+      /*loeiten: NOTE: WE DO NOT MISS AN N TERM HERE
+       *         RECALL: N = ln(n)
+       */
       FORALL dzVN[iz][ip][ir] =  dzV[iz][ip][ir] +  (V_0[iz][ip][ir]+p->alpha)*dzN[iz][ip][ir]; // contains electron bulk drift alpha
       FORALL dzUN[iz][ip][ir] =  dzU[iz][ip][ir] +  U_0[iz][ip][ir]*dzN[iz][ip][ir];
 
@@ -2236,6 +2386,7 @@ void Cyto_DParallelSOL(int identity,double ***result,double ***result2,
     BUGREPORT;
     if(offz == 1)
     {
+        /* loeiten: Enters here*/
         if(data->grid_coords[0] == 0)
         {
             if(para->zmin < 0.0)
@@ -2313,8 +2464,10 @@ void Cyto_DParallelSOL(int identity,double ***result,double ***result2,
             }
             else // zmin >= 0 , case when we do not have boundary at lower end
             {
+                /* loeiten: Enters here*/
                 // Lower boundary, start of plasma, a nonconducting wall
                 BUGREPORT;
+                /* loeiten: Enters first argument...the identity*/
                 switch(identity){
                     case IS_CURRENT: // Zero current
                         FORYX_BD val[-1][ip][ir] = -val[0][ip][ir];
@@ -2383,6 +2536,8 @@ void Cyto_DParallelSOL(int identity,double ***result,double ***result2,
                     }
                     break;
                 case IS_IONVELOCITY:
+                    /* loetien: It eneters here, but the boundary val is 1,as
+                     * expected*/
                     // Ion speed is cs ~ sqrt(Te) into the limiter
                     FORYX_BD
                     {
@@ -2392,6 +2547,7 @@ void Cyto_DParallelSOL(int identity,double ***result,double ***result2,
                     break;
                 case IS_DENSITY:
                     // density flux remains constant at the sheath that is dz N = -dz U
+                    /*loeiten: Say what? dzv are the same...don't see this*/
                     FORYX_BD   val[nz][ip][ir] = -0.01*(30.*dzv[nz-1][ip][ir]+30.*dzv[nz-1][ip][ir]+20.*dzv[nz-1][ip][ir]+20.*dzv[nz-1][ip][ir])/(0.5*zhval[nz-1]) + val[nz-2][ip][ir];
                     break;
                 case IS_POTENTIAL:
