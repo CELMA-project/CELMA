@@ -1,0 +1,66 @@
+/****************************************************/
+/*						    */
+/*	DIFFERENTIALOPERATOREN ALS MAKROS	    */
+/*						    */
+/****************************************************/
+
+
+
+#define zDxO2(f,y,x,fxO2)	(fxO2*(f[(y)][(x)+1]-f[(y)][(x)-1]))
+#define zDx_rsO2(f,y,x,fxO2)	(2.*fxO2*(f[(y)][(x)]-f[(y)][(x)-1]))
+#define zDx_lsO2(f,y,x,fxO2)	(2.*fxO2*(-f[(y)][(x)]+f[(y)][(x)+1]))
+
+#define zDxO4(f,y,x,fxO4)	(fxO4*(f[(y)][(x)-2]-8.0*\
+				(f[(y)][(x)-1]-f[(y)][(x)+1])-f[(y)][(x)+2]))
+
+#define zDyO2(f,y,x,fyO2)	(fyO2*(f[(y)+1][(x)]-f[(y)-1][(x)]))
+#define zDy_bsO2(f,y,x,fyO2)	(fyO2*(-3.*f[(y)][(x)]+4.*f[(y)+1][(x)]- f[(y)+2][(x)]))
+#define zDy_tsO2(f,y,x,fyO2)	(fyO2*( 3.*f[(y)][(x)]-4.*f[(y)-1][(x)]+ f[(y)-2][(x)]))
+
+#define zDyO4(f,y,x,fyO4)	(fyO4*(f[(y)-2][(x)]-8.0*\
+				(f[(y)-1][(x)]-f[(y)+1][(x)])-f[(y)+2][(x)]))
+
+#define zDxxO2(f,y,x,fxxO2)	(fxxO2*(f[(y)][(x)+1]-2.*f[(y)][(x)]+f[(y)][(x)-1]))
+#define zDxxO4(f,y,x,fxxO4)	(fxxO4*(-f[(y)][(x)+2]-f[(y)][(x)-2]\
+				+16.*(f[(y)][(x)+1]+f[(y)][(x)-1])\
+				-30.*f[(y)][(x)]))
+
+#define zDyyO2(f,y,x,fyyO2)	(fyyO2*(f[(y)+1][(x)]-2.*f[(y)][(x)]+f[(y)-1][(x)]))
+#define zDyyO4(f,y,x,fyyO4)	(fyyO4*(-f[(y)+2][(x)]-f[(y)-2][(x)]\
+				+16.*(f[(y)+1][(x)]+f[(y)-1][(x)])\
+				-30.*f[(y)][(x)]))
+
+#define zDxx_lsO2(f,y,x,fxxO2) (fxxO2)*(2.*f[(y)][(x)]-5.*f[(y)][(x)+1] +4.*f[(y)][(x)+2] - f[(y)][(x)+3])
+#define zDxx_rsO2(f,y,x,fxxO2) (fxxO2)*(-2.*f[(y)][(x)]+5.*f[(y)][(x)-1] -4.*f[(y)][(x)-2] + f[(y)][(x)-3])
+
+#define zDyy_bsO2(f,y,x,fyyO2) fyyO2*(2.*f[(y)][(x)]-5.*f[(y)+1][(x)] +4.*f[(y)+2][(x)] - f[(y)+3][(x)])
+#define zDyy_tsO2(f,y,x,fyyO2) fyyO2*(-2.*f[(y)][(x)]+5.*f[(y)-1][(x)] -4.*f[(y)-2][(x)] + f[(y)-3][(x)])
+
+
+#define zDyxO2(f,y,x,fyO2,fxO2) (fyO2*fxO2*(f[(y)+1][(x)+1]-f[(y)+1][(x)-1]\
+					    -f[(y)-1][(x)+1]+f[(y)-1][(x)-1]))
+
+
+#define zDyxO4(f,y,x,fyO4,fxO4) (fyO4*fxO4)
+
+
+#define zLaplO2(f,y,x,fyyO2,fxxO2) (zDxxO2(f,y,x,fxxO2)+zDyyO2(f,y,x,fyyO2))
+#define zLaplO4(f,y,x,fyyO4,fxxO4) (zDxxO4(f,y,x,fxxO4)+zDyyO4(f,y,x,fyyO4))
+
+#define zLapl_lsO2(f,y,x,fyyO2,fxxO2) (zDxx_lsO2(f,y,x,fxxO2) + zDyyO2(f,y,x,fyyO2))
+#define zLapl_rsO2(f,y,x,fyyO2,fxxO2) (zDxx_rsO2(f,y,x,fxxO2) + zDyyO2(f,y,x,fyyO2))
+
+#define zLapl_bsO2(f,y,x,fyyO2,fxxO2) (zDyy_bsO2(f,y,x,fyyO2) + zDxxO2(f,y,x,fxxO2))
+#define zLapl_tsO2(f,y,x,fyyO2,fxxO2) (zDyy_tsO2(f,y,x,fyyO2) + zDxxO2(f,y,x,fxxO2))
+
+#define zLapl_lbO2(f,y,x,fyyO2,fxxO2) (zDxx_lsO2(f,y,x,fxxO2) + zDyy_bsO2(f,y,x,fyyO2))
+#define zLapl_ltO2(f,y,x,fyyO2,fxxO2) (zDxx_lsO2(f,y,x,fxxO2) + zDyy_tsO2(f,y,x,fyyO2))
+#define zLapl_rbO2(f,y,x,fyyO2,fxxO2) (zDxx_rsO2(f,y,x,fxxO2) + zDyy_bsO2(f,y,x,fyyO2))
+#define zLapl_rtO2(f,y,x,fyyO2,fxxO2) (zDxx_rsO2(f,y,x,fxxO2) + zDyy_tsO2(f,y,x,fyyO2))
+
+
+
+
+
+
+
