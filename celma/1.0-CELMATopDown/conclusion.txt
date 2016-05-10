@@ -25,7 +25,9 @@ Results:
     + nuei 100.0 - Runs fine
     + nuei 300.0 - Runs fine
     + nuei 600.0 - Runs fine
-- e
+-  PBSDriver-0-d-0-WiderS.py
+#
+-  PBSDriver-0-e-0-profLnNWiderS.py
     * Gradient pattern around source region for vort and cur, NOT present in 'a'
     + nuei 0.1   - Crash before start
     + nuei 1.0   - Crash before start
