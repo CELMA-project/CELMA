@@ -236,6 +236,7 @@ class CylVec(object):
 
         return out
     #}}}
+
     #{{{__neg__
     def __neg__(self):
         """Overload negation"""
