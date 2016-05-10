@@ -89,6 +89,9 @@ include/shmemx.h
 include/vampirtrace/
 
 # Cyto runs
+cyto/cyto_sample.ini
+cyto/cyto_second.ini
+cyto/database/
 cyto/HDF_DS_p0_*
 cyto/HDF_DS_p0_*
 cyto/HDF_DS_p0_*
