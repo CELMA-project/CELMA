@@ -31,7 +31,11 @@ cd ../../cyto
 
 ```
 rm -f ini.00* HDF_DS_p0_l* cyto.0* cyto.1* cyto.2* cyto.3* database/cyto && make clean && make DEBUG=1 && mv cyto.ubuntu cyto
-./cyto -D
+./cyto -I cyto_myset.ini
 ```
 
-**Note**: Other ways of running it seems to raise a NaN number
+If using `pyclewn` in vim, debugging can be performed with <kbd>F12</kbd>
+
+```
+nnoremap <F12> :Pyclewn gdb --args cyto<CR> :Cbreak main <CR> :Cmapkeys <CR> :C r nnoremap <F12> :Pyclewn gdb --args cyto<CR> :Cbreak main <CR> :Cmapkeys <CR> :C r -I cyto_myset.ini <CR> <CR>
+```

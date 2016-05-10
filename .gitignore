@@ -71,6 +71,9 @@ MES/singleOperators/failsDDXDDXCylinderClean/DDXDDXCylinderClean
 MES/singleOperators/subconvergenceDDXCylinderWithJacobianOverJacobian/DDXCylinderWithJacobianOverJacobian
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 
+# CYTO branch
+celma/CYTO/0-CYTO/cyto
+
 # Miscellaneous
 *delme*
 *tmp*
