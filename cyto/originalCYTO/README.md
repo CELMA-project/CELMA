@@ -1,5 +1,5 @@
 # CYTO
-This is a non-bloated version of 'https://svn.fysik.dtu.dk/vona/check/TYR',
+This is an (almost) non-bloated version of 'https://svn.fysik.dtu.dk/vona/check/TYR',
 originally checked out at r42
 
 ## Install
