@@ -1,1 +1,0 @@
-cyto.run -B SET009 0 -ot 0.5 -nu 7.2 -delta 20 -sigma 0.05 -dt 0.0005 -mue_w .0005 -mue_n .0005 -nprof 1 -gamma 0 -et 20000 -kappan 0.5 -limiter 5 -Mi 4

@@ -4,3 +4,9 @@ Trying the IMEX solver
 
 Results:
 ========
+-  PBSDriver-0-a-0-dataTimeScan.py
+    + internalTime 1e-3:
+    + internalTime 5e-3:
+    + internalTime 1e-4:
+    + internalTime 5e-4:
+    + internalTime 5e-5: !!!mxiterations reached
