@@ -24,18 +24,18 @@ HEADERFILES = ../include/*.h
 .SUFFIXES=.c
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o$@	
+	$(CC) $(CFLAGS) -c $< -o$@
 
 $(OUT):$(OBJ)
 	ar rcs $(OUT) $(OBJ)
 
 depend: dep
 
-dep: 
+dep:
 	makedepend --$(CFLAGS) --$(HEADERFILES) $(SRC)
 
 clean:
-	rm -f $(OBJ) $(OUT) *.bak 
+	rm -f $(OBJ) $(OUT) *.bak
 
 install:
-	make; cp -v $(OUT) $(HOME)/lib 
+	make; cp -v $(OUT) $(PWD)/../lib

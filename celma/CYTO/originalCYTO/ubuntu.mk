@@ -1,15 +1,15 @@
-DBF = -DDATABASEPATH='"'$(HOME)'/database"'
+DBF = -DDATABASEPATH='"$(PWD)/../cyto/database"'
 
 #ICC = 1
 GCC = 1
-#DEBUG =1 
+#DEBUG =1
 GNU = 1
 
 #Includes to be found here
 
 ifdef GNU
-MPI_L_PATH =/usr/lib/openmpi/lib
-MPI_I_PATH =/usr/lib/openmpi/include
+MPI_L_PATH = $(PWD)/../lib
+MPI_I_PATH = $(PWD)/../include
 endif
 
 ifdef ICC
@@ -21,19 +21,19 @@ endif
 MKL_PATH =
 
 
-HDF_I_PATH =/usr/include/hdf
-HDF_L_PATH =/home/vona/lib
+HDF_I_PATH = $(PWD)/../include
+HDF_L_PATH = $(PWD)/../lib
 
 FFTW_I_PATH =/usr/include
-FFTW_L_PATH =/usr/lib64	
+FFTW_L_PATH =/usr/lib64
 #FFTW_I_PATH =$(HOME)/include
 #FFTW_L_PATH =$(HOME)/lib
 
-COMMON_PATH =$(HOME)
+COMMON_PATH =$(PWD)/..
 
 
 
-FFTLIB=FFTW 
+FFTLIB=FFTW
 # or make it:  Intel_MPL
 
 
@@ -50,53 +50,53 @@ COPTIM = -O4
 CPROF = -O2 -p
 
 
-PCC    = mpicc 
-PCCFLAG =   $(CCFLAG) 
+PCC    = mpicc
+PCCFLAG =   $(CCFLAG)
 PCDEBUG = -g
 PCOPTIM =  -O4
 PCPROF  = -G
 endif
 
 ifdef ICC
-#the intel compiler 
+#the intel compiler
 CC = icc
-CCFLAG = $(DBF) -D$(OSTYPE) -Dlinux -D$(FFTLIB) -Wstrict-prototypes $(INCLUDE)  -c 
-CCOPTIM = -O2   
+CCFLAG = $(DBF) -D$(OSTYPE) -Dlinux -D$(FFTLIB) -Wstrict-prototypes $(INCLUDE)  -c
+CCOPTIM = -O2
 CCPROF =  -qp
 CCDEBUG = -O0 -w2 -g
 
 
-PCC    =  mpicc  
-PCCFLAG =  $(CCFLAG) 
-PCOPTIM =  -O2  
+PCC    =  mpicc
+PCCFLAG =  $(CCFLAG)
+PCOPTIM =  -O2
 PCDEBUG = -O0 -w2 -g
-PCPROF  = -qp 
+PCPROF  = -qp
 endif
 
 LLOPTS =  -L/soft/intel/composerxe-2011.3.174/compiler/lib/intel64/ -lifcoremt -Bstatic -lirc -Bdynamic
-LLOPTS=  -O4  -L$(HDF_L_PATH) -L$(FFTW_L_PATH) -L$(COMMON_PATH)/lib  -L/usr/lib64 -L/usr/X11R6/lib -L/usr/local/lib -L$(MPI_L_PATH)  -Bstatic  -Bdynamic  
+LLOPTS=  -O4 $(PWD)/../lib/libmpi.so -Wl,-rpath=$(PWD)/../lib/ -L$(PWD)/../lib -L$(HDF_L_PATH) -L$(FFTW_L_PATH) -L$(COMMON_PATH)/lib  -L/usr/lib64 -L/usr/X11R6/lib -L/usr/local/lib -L$(MPI_L_PATH) -Bstatic  -Bdynamic
 
 #LLOPTS=  -std=gnu99  -O2  -L$(HDF_L_PATH) -L$(FFTW_L_PATH) -L$(COMMON_PATH)/lib  -L/usr/lib64 -L/usr/X11R6/lib -L/usr/local/lib -L$(MPI_L_PATH)
 LPROF = -p $(LOPTS)
 
 
 ifdef DEBUG
-CFLAGS =   $(CDEBUG) $(CCFLAG)
-PCFLAGS =  $(PCDEBUG) $(PCCFLAG) 
+CFLAGS =   $(CDEBUG) $(CCFLAG) -DDEBUG
+PCFLAGS =  $(PCDEBUG) $(PCCFLAG)
 LOPTS  = $(CDEBUG) $(LLOPTS)
 else
 CFLAGS =   $(CCOPTIM) $(CCFLAG)
-PCFLAGS =  $(PCOPTIM) $(PCCFLAG) 
+PCFLAGS =  $(PCOPTIM) $(PCCFLAG)
 LOPTS  = $(CCOPTIM) $(LLOPTS)
-endif 
+endif
 
 
 FC     = ifort
 FCFLAG = -c
-FOPTIM = -O2 -axP  -tpp7 -w  -extend_source 
+FOPTIM = -O2 -axP  -tpp7 -w  -extend_source
 FDEBUG = -g
 FPROF  = -fast -O4 -p
-FDOUBLE= 
+FDOUBLE=
 LF    = ifort
 
 
@@ -105,12 +105,12 @@ XLIBS     =  -lXaw -lXext -lXt -lXmu -lX11
 CLIBS = -lm
 FLIBS =
 FFT =
-MKL = 
+MKL =
 FFTW=  -lfftw3
 HDF = -lmfhdf -ldf -ljpeg -lz
 PLPLOT = `pkg-config --cflags --libs plplotd`
 COMMON = $(COMMON_PATH)/lib/libcommon.a
-TCLTK =  -ltk8.5  -ltcl8.5  
+TCLTK =  -ltk8.5  -ltcl8.5
 
 MV = mv
 RM = rm -f
