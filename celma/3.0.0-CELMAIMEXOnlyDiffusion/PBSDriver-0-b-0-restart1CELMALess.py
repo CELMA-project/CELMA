@@ -18,7 +18,7 @@ from postProcessing.plotting import combined1D2D
 # Set the temporal domain
 restart      = "overwrite"
 # Uncomment this if you just want to plot
-restart      = None;
+# restart      = None;
 restart_from = "/mnt/mimer/mmag/CELMA-dev/celma/1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0"
 remove_old   = False
 nout       = [20]
