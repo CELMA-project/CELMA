@@ -16,13 +16,13 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [550, 500]
+eiCollisions = [500]
 # *****************************************************************************
 # Set the temporal domain
 restart      = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "/mnt/mimer/mmag/CELMA-dev/celma/1-CELMA/lessSource/nout_20_timestep_50.0/tag_0-c-0-LessSource_0"
+restart_from = "b-restartFrom1CELMA/timestep_0.0005/nout_20_timestep_5.0/cst_nuEI_550_tag_0-b-1-restart1CELMALessLessColl_0/"
 remove_old   = False
 nout       = [20]
 timestep   = [5e0]
@@ -42,7 +42,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-saveFolder = "0-b-1-restart1CELMALessLessColl"
+saveFolder = "0-b-2-restart1CELMALessLessColl2"
 # =============================================================================
 
 
