@@ -181,7 +181,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
  * \param[in] phiRef  The reference potential compared to the ground
  *                    (0 by default)
- * \param[in] profile The profile (varying along \$f\rho\$f) (0 by default)
+ * \param[in] profile The profile (varying along \$f\rho\$f) (1.0 by default)
  *
  * \param[out] uEPar The field after the ghost point has been set
  *
