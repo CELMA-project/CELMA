@@ -73,20 +73,20 @@ void OwnLaplacianInversions::create(OwnOperators &opObj,
  * Rearranging gives
  *
  * \f{eqnarray}{
- * \Omega  &=& \frac{\Omega^D}{n} - \nabla_\perp n\cdot\nabla_\perp \phi\\
+ * \Omega  &=& \frac{\Omega^D}{n} - \nabla_\perp \ln(n)\cdot\nabla_\perp \phi\\
  * \nabla_\perp^2 \phi
- * &=& \frac{\Omega^D}{n} - \nabla_\perp n\cdot\nabla_\perp \phi
+ * &=& \frac{\Omega^D}{n} - \nabla_\perp \ln(n)\cdot\nabla_\perp \phi
  * \f}
  *
  * The iteration now works as follows:
  *      1. Get the voritcity from
  *         \code{.cpp}
- *         vort = (vortD/n) + grad_perp(ln_n)*grad_perp(phiCur)
+ *         vort = (vortD/n) - grad_perp(ln_n)*grad_perp(phiCur)
  *         \endcode
  *         where phiCur is phi of the current iteration
- *      2. Invert phi to find the voricity using
+ *      2. Invert \f$phi\f$ to find the voricity using
  *         \code{.cpp}
- *         phiNext = laplace_perp(vort)
+ *         phiNext = invert_laplace_perp(vort)
  *         \endcode
  *         where phiNext is the newly obtained \f$phi\f$
  *      3. Calculate

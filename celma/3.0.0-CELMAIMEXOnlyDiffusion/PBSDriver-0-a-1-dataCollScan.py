@@ -16,13 +16,14 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100, 50, 10, 5, 1]
+eiCollisions = [300, 100, 50, 10]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e0]
+internalTime = [1e-3]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -74,6 +75,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('solver', 'timestep', internalTime),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
