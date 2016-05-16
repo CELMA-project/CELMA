@@ -1,7 +1,9 @@
 # CELMA-dev
 
-Developement branch of the CELMA code, copied from revision 1130 of 
+Developement branch of the CELMA code, copied from revision 1130 of
 https://svn.fysik.dtu.dk/mmag/Code-developement/BOUT/
+
+Current implementation works with the latest commit of BOUT++ version 3
 
 * celma: Folder with the codes
 * derivation: Derivation of operators and boundaries
