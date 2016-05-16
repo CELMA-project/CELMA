@@ -1,11 +1,24 @@
-# THE FOLLOWING WORKS :D :D :D
-# NOTE: It could be that YCM-Generator works, while standing in BOUT-dev
-#       directory and typing
-#       ./config_gen.py /home/mmag/BOUT-dev/ --compiler="/home/mmag/.vim/bundle/YCM-Generator/fake-toolchain/Unix/clang" --configure_opts="--with-checks=3 --with-track --with-debug --with-petsc" --verbose
-#       One gets that clang is not able to build cxx files
-
 import os
 import ycm_core
+
+"""
+Configure file for you complete me.
+
+The following assumes that
+    1. BOUT-dev is installed in the $HOME directory
+    2. PETSc version petsc-3.5.4 is installed in the $HOME directory
+    3. python 2.7 is installed under anaconda3 in the $HOME directory
+       under the environment py27
+"""
+
+# NOTE: It could be that YCM-Generator works, while standing in BOUT-dev
+#       directory and typing
+#       ./config_gen.py $(HOME)/BOUT-dev/ --compiler="$(HOME)/.vim/bundle/YCM-Generator/fake-toolchain/Unix/clang" --configure_opts="--with-checks=3 --with-track --with-debug --with-petsc" --verbose
+#       One gets that clang is not able to build cxx files
+
+# Get the home directory
+home = os.path.expanduser("~")
+petsc = os.path.join(home, "petsc-3.5.4")
 
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
@@ -20,19 +33,18 @@ flags = [
 '-DCHECK=3',
 '-DSIGHANDLE',
 '-DTRACK',
-'-DREVISION=d21357473dd3c018721e49af50bd7f85ffc72302',
 '-DNCDF',
 '-DBOUT_HAS_PETSC',
 '-DBOUT_HAS_PETSC_DEV',
 '-DBOUT_HAS_PVODE',
 # BOUT++ Flags Added by me (these are needed in order to make it run)
-'-I/home/mmag/BOUT-dev',
-'-I/home/mmag/BOUT-dev/include',
-# BOUT++ Flags
+'-I{}/BOUT-dev'.format(home),
+'-I{}/BOUT-dev/include'.format(home),
+# PETSc Flags
 '-I../include',
-'-I/home/mmag/petsc-3.6.3/include',
-'-I/home/mmag/petsc-3.6.3/arch-linux2-cxx-debug/include',
-'-I/home/mmag/anaconda3/envs/py27/include',
+'-I{}/include'.format(petsc),
+'-I{}/arch-linux2-cxx-debug/include'.format(petsc),
+'-I{}/anaconda3/envs/py27/include'.format(home),
 ]
 
 

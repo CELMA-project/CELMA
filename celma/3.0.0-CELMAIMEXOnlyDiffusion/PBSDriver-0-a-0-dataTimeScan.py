@@ -20,7 +20,7 @@ restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e0]
-internalTime = [1.0, 5e-1, 1e-1, 5e-2, 5e-3, 5e-4, 5e-5]
+internalTime = [5e-3, 1e-3, 5e-4, 1e-4, 5e-5]
 directory  = "a-data"
 # Shall we make?
 make       = False
