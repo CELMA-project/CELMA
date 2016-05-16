@@ -1,0 +1,6 @@
+Copied from 1-CELMA
+
+Using only neumann BCs
+
+Results:
+========
