@@ -16,15 +16,18 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 100, 50, 10]
+eiCollisions = [500]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
-remove_old = False
+restart      = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "b-restartFrom1CELMA/timestep_0.0005/nout_20_timestep_5.0/cst_nuEI_550_tag_0-b-1-restart1CELMALessLessColl_0/"
+remove_old   = False
 nout       = [20]
 timestep   = [5e0]
-internalTime = [1e-3]
-directory  = "a-data"
+internalTime = [5e-4]
+directory  = "b-restartFrom1CELMA"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,7 +42,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-dataCollScan"
+saveFolder = "0-b-2-restart1CELMALessLessColl2"
 # =============================================================================
 
 
@@ -50,13 +53,13 @@ nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
 BOUT_walltime         = '06:00:00'
-BOUT_run_name         = theRunName
+BOUT_run_name         = saveFolder
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-post_process_run_name = 'post' + theRunName.capitalize()
+post_process_run_name = 'post' + saveFolder.capitalize()
 # =============================================================================
 
 
@@ -72,11 +75,13 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            additional = [
-                          ('tag',theRunName,0),\
-                          ('cst','nuEI',eiCollisions),\
+            restart_from = restart_from,\
+            # Tag (used to catalogize the runs)
+            additional = [\
+                          ('tag',saveFolder,0)                ,\
                           ('solver', 'timestep', internalTime),\
-                         ],\
+                          ('cst','nuEI',eiCollisions),\
+                         ]                      ,\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\
@@ -103,13 +108,12 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     xguards        = xguards           ,\
-                     yguards        = yguards           ,\
-                     xSlice         = xSlice            ,\
-                     ySlice         = ySlice            ,\
-                     zSlice         = zSlice            ,\
-                     savePlot       = savePlot          ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
-                     theRunName     = theRunName        ,\
+                     xguards    = xguards    ,\
+                     yguards    = yguards    ,\
+                     xSlice     = xSlice     ,\
+                     ySlice     = ySlice     ,\
+                     zSlice     = zSlice     ,\
+                     savePlot   = savePlot   ,\
+                     saveFolder = saveFolder ,\
                     )
 # =============================================================================
