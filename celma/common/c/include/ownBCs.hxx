@@ -68,7 +68,7 @@ class OwnBCs
                       const Field3D &phi,
                       const BoutReal &Lambda,
                       const BoutReal &phiRef = 0.0,
-                      const Field3D &profile = 0.0);
+                      const Field3D &profile = 1.0);
         //! Specify the lower ghost from the Cauchy boundary condition
         void cauchyYDown(Field3D &f,
                          const BoutReal &t = 0.0,
