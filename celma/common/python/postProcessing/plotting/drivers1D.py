@@ -462,20 +462,20 @@ def getLnNFields():
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
     lnN.lines.append(Line('lnNAdv'                             ,\
-        r'-J\{\phi,\ln(n)\}'                                   ))
+        r'-\frac{1}{J}\{\phi,\ln(n)\}'                         ))
     lnN.lines.append(Line('lnNRes'                             ,\
         r'\frac{0.51\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n) +'+\
         r'\left[\nabla_\perp\ln(n)\right]^2\right)'            ))
     lnN.lines.append(Line('gradUEPar'                          ,\
         r'-\partial_{\parallel}u_{e,\parallel}'                ))
     lnN.lines.append(Line('lnNUeAdv'                           ,\
-        r'-u_{e,\parallel}\cdot\nabla_\parallel\ln(n)'         ))
+        r'-u_{e,\parallel}\partial_\parallel\ln(n)'            ))
     lnN.lines.append(Line('srcN'                               ,\
         r'\frac{S}{n}'                                         ))
     lnN.lines.append(Line('lnNPerpArtVisc'                     ,\
-        r'-D_{n,\perp} \partial^2_{\perp}\ln(n)'               ))
+        r'D_{n,\perp} \partial^2_{\perp}\ln(n)'                ))
     lnN.lines.append(Line('lnNParArtVisc'                      ,\
-        r'-D_{n,\parallel} \partial^2_{\parallel}\ln(n)'       ))
+        r'D_{n,\parallel} \partial^2_{\parallel}\ln(n)'        ))
 
     return lnN
 #}}}
@@ -489,22 +489,22 @@ def getUEParFields():
     # Making the orgObj instance
     uEPar = Organizer(r"u_{e,\parallel}", useCombinedPlot=True)
     # Making lines in the pattern name, lable, plotPos
-    uEPar.lines.append(Line('uEParAdv'                                      ,\
-    r'-r\{\phi,u_{e,\parallel}\}'                                           ))
-    uEPar.lines.append(Line('uEParParAdv'                                   ,\
-    r'- u_{e,\parallel}\partial_{\parallel}u_{e,\parallel}'                 ))
-    uEPar.lines.append(Line('gradPhiLnN'                                    ,\
-    r'\mu\nabla_\parallel\left( \phi - \ln(n)\right)'                       ))
-    uEPar.lines.append(Line('uEParRes'                                      ,\
-    r'-0.51\nu_{ei}\left(u_{e,\parallel}-u_{i,\parallel} \right)'           ))
-    uEPar.lines.append(Line('ueSrc'                                         ,\
-    r'-\frac{S u_{e,\parallel}}{n}'                                         ))
-    uEPar.lines.append(Line('ueNeutral'                                     ,\
-    r'-\nu_{en}u_{e,\parallel}'                                             ))
-    uEPar.lines.append(Line('uEParPerpArtVisc'                              ,\
-    r'-D_{u_{e,\parallel}, \perp}\nabla^2_\perp u_{e,\parallel}'            ))
-    uEPar.lines.append(Line('uEParParArtVisc'                               ,\
-    r'-D_{u_{e,\parallel}, \parallel} \partial^2_{\parallel}u_{e,\parallel}'))
+    uEPar.lines.append(Line('uEParAdv'                                     ,\
+    r'-\frac{1}{J}\{\phi,u_{e,\parallel}\}'                                ))
+    uEPar.lines.append(Line('uEParParAdv'                                  ,\
+    r'- u_{e,\parallel}\partial_{\parallel}u_{e,\parallel}'                ))
+    uEPar.lines.append(Line('gradPhiLnN'                                   ,\
+    r'\mu\partial_\parallel\left( \phi - \ln(n)\right)'                    ))
+    uEPar.lines.append(Line('uEParRes'                                     ,\
+    r'-0.51\nu_{ei}\left(u_{e,\parallel}-u_{i,\parallel} \right)'          ))
+    uEPar.lines.append(Line('ueSrc'                                        ,\
+    r'-\frac{S u_{e,\parallel}}{n}'                                        ))
+    uEPar.lines.append(Line('ueNeutral'                                    ,\
+    r'-\nu_{en}u_{e,\parallel}'                                            ))
+    uEPar.lines.append(Line('uEParPerpArtVisc'                             ,\
+    r'D_{u_{e,\parallel}, \perp}\nabla^2_\perp u_{e,\parallel}'            ))
+    uEPar.lines.append(Line('uEParParArtVisc'                              ,\
+    r'D_{u_{e,\parallel}, \parallel} \partial^2_{\parallel}u_{e,\parallel}'))
 
     return uEPar
 #}}}
@@ -519,21 +519,21 @@ def getUIParFields():
     uIPar = Organizer(r"u_{i,\parallel}", useCombinedPlot=True)
     # Making lines in the pattern name, lable, plotPos
     uIPar.lines.append(Line('uIParAdv'                                    ,\
-             r'-J\{\phi,u_{i,\parallel}\}'                                ))
+             r'-\frac{1}{J}\{\phi,u_{i,\parallel}\}'                      ))
     uIPar.lines.append(Line('uIParParAdv'                                 ,\
              r'-u_{i,\parallel}\partial_{\parallel}u_{i,\parallel}'       ))
     uIPar.lines.append(Line('gradPhi'                                     ,\
-             r'-\nabla\left(\phi\right)'                                  ))
+             r'-\partial_\parallel\phi'                                   ))
     uIPar.lines.append(Line('uIParRes'                                    ,\
              r'-0.51\nu_{ei}\left(u_{i,\parallel}-u_{e,\parallel} \right)'))
-    uIPar.lines.append(Line('uIParPerpArtVisc'                            ,\
-             r'D_{u_{i,\parallel}, \perp}\nabla^2_\perp u_{i,\parallel}'  ))
     uIPar.lines.append(Line('uiNeutral'                                   ,\
-             r'-\nu_{ei}u_{i,\parallel}'                                  ))
+             r'-\nu_{in}u_{i,\parallel}'                                  ))
     uIPar.lines.append(Line('uiSrc'                                       ,\
              r'-\frac{S u_{i,\parallel}}{n}'                              ))
+    uIPar.lines.append(Line('uIParPerpArtVisc'                            ,\
+             r'D_{u_{i,\parallel}, \perp}\nabla^2_\perp u_{i,\parallel}'  ))
     uIPar.lines.append(Line('uIParParArtVisc'                             ,\
-             r'-D_{u_i,\parallel} \partial^2_{\parallel}u_{i,\parallel}'  ))
+             r'D_{u_i,\parallel} \partial^2_{\parallel}u_{i,\parallel}'   ))
 
     return uIPar
 #}}}
@@ -566,9 +566,9 @@ def getVortDFields():
     vortD.lines.append(Line('uiUeGradN'                          ,\
         r'(u_{i,\parallel}-u_{e,\parallel})\partial_{\parallel}n'))
     vortD.lines.append(Line('vortDParArtVisc'                    ,\
-         r'-D_{\Omega^D} \partial^2_{\parallel}\Omega^D'         ))
+         r'D_{\Omega^D} \partial^2_{\parallel}\Omega^D'          ))
     vortD.lines.append(Line('vortDPerpArtVisc'                   ,\
-         r'-D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D'          ))
+         r'D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D'           ))
 
     return vortD
 #}}}
