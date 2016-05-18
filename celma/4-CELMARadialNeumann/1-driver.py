@@ -18,9 +18,9 @@ from postProcessing.plotting import combined1D2D
 # Set the temporal domain
 restart    = None
 remove_old = True
-nout       = 4
+nout       = 1
 timestep   = 1e-10
-directory  = "b-noDamp"
+directory  = "e-smallCylNoDampSmallerS"
 # Shall we make?
 make       = True
 # The number of processors

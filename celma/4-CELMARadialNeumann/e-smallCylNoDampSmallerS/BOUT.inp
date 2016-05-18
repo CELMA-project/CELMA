@@ -1,5 +1,5 @@
 #
-# Input file for "1.0-CELMATopDown/data"
+# Input file for "4-CELMARadialNeumann/smallCylNoDampSmallerS"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -98,8 +98,8 @@ floats = false # floats = false => output in double
 # Geometry
 # =============================================================================
 [geom]
-Lx = 30                     # The length of x from boundary to boundary
-Ly = 150                    # The length of y from boundary to boundary
+Lx = 10                     # The length of x from boundary to boundary
+Ly = 100                    # The length of y from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
@@ -109,13 +109,14 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
 [cst]
 # Hydrogren values for mu and Lambda
-mu     = 200
+mu     = 1836.36
 Lambda = log(sqrt(mu/(2.0*pi)))
 
 # Collision frequencies
+# Based on table 7.2 page 103 in Christianes thesis
 nuEI = 600
-nuEN = 0
-nuIN = 0
+nuEN = 30
+nuIN = 0.3
 
 # Parallel artificial dissipation
 artViscParLnN    = 5.0e0 # Density
@@ -136,26 +137,21 @@ artViscPerpVortD = 5.0e-2
 [theSource]
 # Made as a gaussian function
 a    = 0.05
-bRho = 0
-bZ   = 25
-cRho = 10
-cZ   = 7
+bRho = 0*geom:Lx
+bZ   = (1.0/6.0)*geom:Ly
+cRho = (1.0/3.0)*geom:Lx
+cZ   = (7.0/150.0)*geom:Ly
 # Radial profile
 radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
 # Source
-S           = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+S          = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
 # =============================================================================
 
 
 # Damping profile
 # =============================================================================
 [dampProf]
-# Damping profile obtained from 10.1.0-testing_damping_term/driver_test_damping.py
-# 2*geom in order to get the diameter
-w        = 0.75*(2*geom:Lx)
-c        = 0
-steep    = 0.50
-profile  = tanhhat(geom:xl, w, c, steep)
+profile  = 1.0
 # =============================================================================
 
 
@@ -166,13 +162,13 @@ scale       = 1.0
 function    = xoutVal
 
 # Set xout value
-xoutVal       = -1
+xoutVal       = -3
 
 # Boundaries
-bndry_xin   = none                        # Manual boundary found in the code
-bndry_xout  = dirichlet_o4(lnN:function)  # Small values at the edge
-bndry_yup   = neumann_o2(0.0)             # Assume zero gradients at sheat
-bndry_ydown = neumann_o2(0.0)             # Do not allow gradients at the source
+bndry_xin   = none             # Manual boundary found in the code
+bndry_xout  = neumann_o2(0.0)  # Set to neumann
+bndry_yup   = neumann_o2(0.0)  # Assume zero gradients at sheat
+bndry_ydown = neumann_o2(0.0)  # Do not allow gradients at the source
 # =============================================================================
 
 
@@ -182,10 +178,10 @@ bndry_ydown = neumann_o2(0.0)             # Do not allow gradients at the source
 scale       = 1.0
 function    = uIPar:function
 # Boundaries
-bndry_xin   = none                         # Manual boundary found in code
-bndry_xout  = dirichlet_o4(uIPar:function) # Damping of dynamics
-bndry_yup   = none                         # Set in the source code
-bndry_ydown = dirichlet_o4(0.0)            # Stagnation point
+bndry_xin   = none              # Manual boundary found in code
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
+bndry_yup   = none              # Set in the source code
+bndry_ydown = dirichlet_o4(0.0) # Stagnation point
 # =============================================================================
 
 
@@ -198,8 +194,8 @@ eq          = geom:yl^2/geom:Ly^2
 function = eq * dampProf:profile
 
 # Boundaries
-bndry_xin   = none                          # Manual boundary found in code
-bndry_xout  = dirichlet_o4(uIPar:function)  # Damping of dynamics
+bndry_xin   = none              # Manual boundary found in code
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
 # Due to differences in velocity, not all yup are at the ion sound speed
 bndry_yup   = dirichlet_o4(dampProf:profile)
 bndry_ydown = dirichlet_o4(0.0)  # Stagnation point
@@ -223,7 +219,7 @@ scale       = 1.0
 function    = 0.0               # Initial vorticity (set in the code)
 # Boundaries
 bndry_xin   = none              # Manual boundary found in the code
-bndry_xout  = dirichlet_o4(0.0)
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
 bndry_yup   = neumann_o2(0.0)
 bndry_ydown = neumann_o2(0.0)   # Location of density source
 # =============================================================================
