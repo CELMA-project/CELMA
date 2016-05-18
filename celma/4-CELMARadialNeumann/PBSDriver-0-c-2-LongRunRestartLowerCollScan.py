@@ -16,14 +16,17 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100, 50, 1, 0.1]
+eiCollisions = [200, 100, 50, 10]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "c-smallerCylinderNoDamp/nout_20_timestep_50.0/cst_nuEI_300_tag_0-c-1-CollisionScan_0/"
 remove_old = False
 nout       = [20]
 timestep   = [5e0]
-directory  = "b-noDamp"
+directory  = "c-smallerCylinderNoDamp"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-collisionScan"
+theRunName = "0-c-2-LongRunRestartLowerCollScan"
 # =============================================================================
 
 
