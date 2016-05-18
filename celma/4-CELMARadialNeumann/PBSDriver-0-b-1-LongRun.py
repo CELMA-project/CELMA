@@ -16,13 +16,13 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100, 50, 1, 0.1]
+eiCollisions = [300]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e0]
+timestep   = [5e1]
 directory  = "b-noDamp"
 # Shall we make?
 make       = False
@@ -38,7 +38,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-collisionScan"
+theRunName = "0-b-1-LongRun"
 # =============================================================================
 
 
