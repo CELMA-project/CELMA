@@ -32,13 +32,27 @@ Results:
     + nuei  600: Finishes after 1h 47min - Steady state reached
     + nuei  300: Finishes after 4h       - Steady state reached
 -  PBSDriver-0-c-2-LongRunRestartLowerCollScan.py
-    + nuei  200: Running
-    + nuei  100: Running
-    + nuei   50: Running
+    + nuei  200: Finished after 26 mins - Looks good
+    + nuei  100: Finished after 33 mins - Looks good
+    + nuei   50: Failed - Too small timestep in pvode
+    + nuei   10: Failed - Naulin solver
+-  PBSDriver-0-c-3-LongRunRestart2LowerCollScan.py
+    + nuei   90: Running
+    + nuei   80: Running
+    + nuei   70: Running
+    + nuei   60: Running
+    + nuei   50: Failed - Too small timestep in pvode
     + nuei   10: Running
--  PBSDriver-0-d
-    (...checking if current is zero)
+    + nuei    1: Running
+    + nuei  0.1: Running
+-  PBSDriver-0-d-0-LongRun.py
+    + nuei  600: Finishes after 10 min, but still some current around source at
+                 radial boundaries
 -  PBSDriver-0-e-0-CollisionScan.py
+    + nuei  600: Finished after 37 mins   - Looks good
+    + nuei  300: Finished after 1h 6 mins - Looks good
+    + nuei  100: Finished after 48 mins   - Looks good
+-  PBSDriver-0-f-0-CollisionScan.py
     + nuei  600: Running
     + nuei  300: Running
     + nuei  100: Running
