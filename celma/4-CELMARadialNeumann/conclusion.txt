@@ -37,14 +37,14 @@ Results:
     + nuei   50: Failed - Too small timestep in pvode
     + nuei   10: Failed - Naulin solver
 -  PBSDriver-0-c-3-LongRunRestart2LowerCollScan.py
-    + nuei   90: Running
-    + nuei   80: Running
-    + nuei   70: Running
-    + nuei   60: Running
+    + nuei   90: Finished 19 steps, killed by walltime (6h) - Gets an instability in the begining
+    + nuei   80: Finished after 4h - Miraculously survives big instability, small instability pertains
+    + nuei   70: Finish one time step - Too small time step in pvode - Parallel instability
+    + nuei   60: Does not finish one time step - Naulin Solver fails
     + nuei   50: Failed - Too small timestep in pvode
-    + nuei   10: Running
-    + nuei    1: Running
-    + nuei  0.1: Running
+    + nuei   10: Failed - Too small timestep in pvode
+    + nuei    1: Failed - Too small timestep in pvode
+    + nuei  0.1: Failed - Too small timestep in pvode
 -  PBSDriver-0-d-0-LongRun.py
     + nuei  600: Finishes after 10 min, but still some current around source at
                  radial boundaries
@@ -53,6 +53,13 @@ Results:
     + nuei  300: Finished after 1h 6 mins - Looks good
     + nuei  100: Finished after 48 mins   - Looks good
 -  PBSDriver-0-f-0-CollisionScan.py
-    + nuei  600: Running
-    + nuei  300: Running
+    + nuei  600: Finished after 3 mins - Looks good
+    + nuei  300: Finished after 5 mins - Looks good
+    + nuei  100: Finishes 17 steps, then killed by walltime - Gets an instability around 40 om_ci
+-  PBSDriver-0-f-1-LongRun.py
+    !!! nuei  600: Finished after 11 h - Looks good
+    !!! nuei  300: Finished after 19 min - Looks good
+    + nuei  100: Finishes 2 steps - killed by walltime (12h)
+-  PBSDriver-0-f-2-LongRunRestartLowerCollScan.py
+    + nuei  200: Running
     + nuei  100: Running
