@@ -1,0 +1,14 @@
+Copied from 4-CELMARadialNeumann
+
+Same as 4-CELMARadialNeumann, but using IMEX
+
+Results:
+========
+-    PBSDriver-0-a-0-LongRun.py
+    + nuei  600: SNES failed
+    + nuei  300: SNES failed
+    + nuei  100: SNES failed
+-  PBSDriver-0-b-0-Restart4CELMAf600.py
+    + internalTime 5e-2: Did not even finish one time step, Naulin Solver fails
+    + internalTime 5e-3: Did not even finish one time step, Naulin Solver fails
+    + internalTime 5e-4: Completes 2 timesteps, then killed by walltime - Looks good
