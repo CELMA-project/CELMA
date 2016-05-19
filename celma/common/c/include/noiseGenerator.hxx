@@ -14,7 +14,7 @@
  * This class provides noise generators for adding noise in cylinder geometry
  * by adding a reasonable perturbation with random phases.
  * The noise is made on a cartesian grid, and then interpolated to a cylinder
- * grid
+ * grid.
  *
  * \warning The following is only suitable if using a cylindrical Clebsch
  *          coordinate system
@@ -37,18 +37,29 @@ class NoiseGenerator
          */
         //! Vector with the continuous variable x
         std::vector<BoutReal> x;
-        //! Declare matrix as 2D vector: Should rather call M2D
-        std::vector< std::vector <BoutReal> > M;
+        //! Vector with the continuous variable z
+        std::vector<BoutReal> z;
 
-        int const seed;      //!< Seed to the random noise generator
+        //! Declare matrix as 3D
+        std::vector< std::vector < std::vector<BoutReal> > > M;
+
+        int const seed;       //!< Seed to the random noise generator
         size_t const maxMode; //!< Max mode of perturbation
-        BoutReal LRho;       //!< Radius is cylindrical geometry
-        BoutReal Lx;         //!< x length in cartesian geometry
-        BoutReal phiX;       //!< Phase in the (Cartesian) x direction
-        BoutReal phiY;       //!< Phase in the (Cartesian) y direction
-        BoutReal kScale;     //!< Scaling of the modes
+        BoutReal LRho;        //!< Radius is cylindrical geometry
+        BoutReal Lx;          //!< x length in cartesian geometry
+        BoutReal Lz;          //!< z length in cartesian geometry
+        BoutReal phiX;        //!< Phase in the (Cartesian) x direction
+        BoutReal phiY;        //!< Phase in the (Cartesian) y direction
+        BoutReal phiZ;        //!< Phase in the (Cartesian) z direction
+        BoutReal kScale;      //!< Scaling of the modes
 
-        size_t numXYPoints;  //!< Number of points in x and y direction for the matrix
+        //! Number of points in the x and y direction for the matrix
+        size_t numXYPoints;
+        //! Number of points in the z direction for the matrix
+        size_t numZPoints;
+
+        //! Number of inner y points in the Field3D grid
+        size_t innerYPointsInFieldGrid;
 
         // Member functions
         //! Creates a vector from 0 to totalLength with equidistant spacing
