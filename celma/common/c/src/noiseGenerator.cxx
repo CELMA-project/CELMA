@@ -19,9 +19,10 @@ NoiseGenerator::NoiseGenerator(const string &section, int const &seed, size_t co
 {
     TRACE("Halt in NoiseGenerator::NoiseGenerator");
 
-    // Get LRho
+    // Get LRho and Lz
     Options *geomOptions = Options::getRoot()->getSection(section);
     geomOptions->get("Lx", LRho, 0.0);
+    geomOptions->get("Ly", Lz, 0.0);
 
     // NOTE: Take care when comparing floats
     // http://stackoverflow.com/questions/17333/most-effective-way-for-float-and-double-comparison
@@ -31,21 +32,30 @@ NoiseGenerator::NoiseGenerator(const string &section, int const &seed, size_t co
         output << "DBL_EPSILON = " << DBL_EPSILON << std::endl;
         throw BoutException("No Lx found, or Lx set to 0.0!\n");
     }
+    if ( fabs(Lz - 0.0) < DBL_EPSILON ){
+        output << "Searched in section '" << section << "' with Ly = " << Lz << std::endl;
+        output << "fabs(Lz - 0.0) = " << fabs(LRho - 0.0) <<std::endl;
+        output << "DBL_EPSILON = " << DBL_EPSILON << std::endl;
+        throw BoutException("No Ly found, or Ly set to 0.0!\n");
+    }
 
     // LRho read from the input file is the radius. We must thus multiply this
     // with 2 in order to get the Lx length.
     // Note also that we let Lx = Ly in the cartesian grid.
     Lx = LRho*2.0;
 
-    // Get the number of points in x and y direction for the matrix
+    // Get the number of points in x and y and z direction for the matrix
     /* NOTE: Number of points for the matrix
      *       Chosen large in order to have a lot of
      *       matrix points around the meshpoint for Field3D f.
      */
     numXYPoints = 5*mesh->GlobalNx;
+    // No need for interpolation in the z direction as the grids coincides
+    numZPoints = mesh->GlobalNy;
 
-    // Make a linspace of x
+    // Make a linspace of x and z
     linspace(numXYPoints, Lx, x);
+    linspace(numZPoints,  Lz, z);
 
     // Initialize the matrix
     initializeMatrix();
@@ -53,6 +63,9 @@ NoiseGenerator::NoiseGenerator(const string &section, int const &seed, size_t co
     // Seed the random number generator
     // http://stackoverflow.com/questions/686353/c-random-float-number-generation
     srand (static_cast <unsigned> (seed));
+
+    // Calculate number of inner y points in the Field3D grid
+    innerYPointsInFieldGrid = mesh->yend - mesh->ystart + 1;
 
     // Set the noiseField to 0
     noiseField = 0.0;
@@ -89,7 +102,7 @@ void NoiseGenerator::generateRandomPhases(Field3D &f, BoutReal const &scale)
     // Interpolate the matrix
     interpolCartMatrixToCylField(noiseField);
 
-    // Multiply cos(rho*0.5*pi/rhoLen)
+    // Multiply cos(rho*0.5*pi/LRho) in order to not add anything on the boundary
     // The Jacobian in cylinder geometry equals rho
     noiseField *= cos(mesh->J*0.5*PI/LRho);
 
@@ -147,22 +160,33 @@ void NoiseGenerator::linspace(size_t const &nPoints,
 }
 
 /*!
- * Initialized the matrix M with 0's
+ * Initialize the matrix M with 0's
+ *
+ * We will do this by the way proposed in
+ * http://stackoverflow.com/questions/18062463/what-is-the-most-efficient-way-to-initialize-a-3d-vector
  */
 void NoiseGenerator::initializeMatrix()
 {
 
     TRACE("Halt in NoiseGenerator::initializeMatrix");
 
-    M.reserve(numXYPoints);
-
-    // As matrix currently has no size yet, we cannot use the iterator to loop over
-    // the rows, we will therefore fall back to standard loop over numbers
-    // Create a column of size numXYPoints, and fill it with 0
-    std::vector<BoutReal> cols(numXYPoints, 0.0);
-    for(size_t xInd = 0; xInd < numXYPoints ; ++xInd){
-        M.push_back(cols);
+    M.resize(numXYPoints);
+    for(int xInd = 0; xInd < numXYPoints; xInd++) {
+        M[xInd].resize(numXYPoints);
+        for(int yInd = 0; yInd < numXYPoints; yInd++){
+            M[xInd][yInd].resize(numZPoints);
+        }
     }
+
+    // Initialize all the values to 0.0
+    for(int xInd = 0; xInd < numXYPoints; xInd++) {
+        for(int yInd = 0; yInd < numXYPoints; yInd++){
+            for(int zInd = 0; zInd < numZPoints; zInd++){
+                M[xInd][yInd][zInd] = 0.0;
+            }
+        }
+    }
+
 }
 
 // FIXME: Write why we set it to -5/2
@@ -185,14 +209,23 @@ void NoiseGenerator::add52Noise()
              (rand()) / (static_cast <BoutReal> (RAND_MAX/(2.0*M_PI)));
         phiY = static_cast <BoutReal>
              (rand()) / (static_cast <BoutReal> (RAND_MAX/(2.0*M_PI)));
+        phiZ = static_cast <BoutReal>
+             (rand()) / (static_cast <BoutReal> (RAND_MAX/(2.0*M_PI)));
+        // We scale the modes with k^(-5/2)
+        kScale = pow(modeNr,-5.0/2.0);
         for(size_t xInd = 0; xInd < M.size(); ++xInd){
             for(size_t yInd = 0; yInd < M[xInd].size(); ++yInd){
-                // We scale the modes with k^(-5/2)
-                kScale = pow(modeNr,-5.0/2.0);
-                // Making the M
-                M[xInd][yInd] +=
-                    kScale*sin(modeNr*(x[xInd]*2.0*M_PI/Lx) + phiX)
-                  + kScale*sin(modeNr*(x[yInd]*2.0*M_PI/Lx) + phiY);
+                for(size_t zInd = 0; zInd < M[xInd][yInd].size(); ++zInd){
+                    // Add the perturbation
+                    M[xInd][yInd][zInd] +=
+                        kScale*
+                        (
+                              sin(modeNr*(x[xInd]*2.0*M_PI/Lx) + phiX)
+                            + sin(modeNr*(x[yInd]*2.0*M_PI/Lx) + phiY)
+                            + sin(modeNr*(z[zInd]*2.0*M_PI/Lz) + phiZ)
+                        )
+                      ;
+                }
             }
         }
     }
@@ -218,6 +251,7 @@ void NoiseGenerator::interpolCartMatrixToCylField(Field3D &noiseField)
     size_t x2; // x1 + 1
     size_t y1; // Index in x closest to (before or equal) current circleY value
     size_t y2; // y1 + 1
+    size_t matrixZIndex; // Mapped index
 
     // Loop through all the inner points
     /* NOTE: Addressing "off by one" looping over the local range
@@ -279,6 +313,15 @@ void NoiseGenerator::interpolCartMatrixToCylField(Field3D &noiseField)
                 // after the current index)
                 y2 = y1 + 1;
 
+                /* Map the Field3D indices in y to the z indices in the matrix
+                 * Subtract with mesh->start as the two idices may start at
+                 * different counting
+                 */
+                matrixZIndex =   yInd
+                               + mesh->getYProcIndex()*innerYPointsInFieldGrid
+                               - mesh->ystart
+                               ;
+
                 // Making the interpolation
                 noiseField(xInd, yInd, zInd) =
                                   (1.0/(
@@ -287,19 +330,19 @@ void NoiseGenerator::interpolCartMatrixToCylField(Field3D &noiseField)
                                         )
                                    )*
                                    (
-                                     M[x1][y1]*(
+                                     M[x1][y1][matrixZIndex]*(
                                          (x[x2] - circleX)*
                                          (x[y2] - circleY)
                                                   )
-                                   + M[x2][y1]*(
+                                   + M[x2][y1][matrixZIndex]*(
                                          (circleX - x[x1])*
                                          (x[y2]  - circleY)
                                                   )
-                                   + M[x1][y2]*(
+                                   + M[x1][y2][matrixZIndex]*(
                                          (x[x2]  - circleX)*
                                          (circleY - x[y1])
                                                   )
-                                   + M[x2][y2]*(
+                                   + M[x2][y2][matrixZIndex]*(
                                          (circleX - x[x1])*
                                          (circleY - x[y1])
                                                   )
