@@ -26,7 +26,8 @@ class Celma : public PhysicsModel
 {
 protected:
     int init(bool restarting);
-    int rhs(BoutReal t);
+    int convective(BoutReal t);
+    int diffusive(BoutReal t, bool linear);
 private:
     // Global variable initialization
     // ############################################################################
