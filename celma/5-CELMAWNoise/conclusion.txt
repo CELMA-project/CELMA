@@ -1,0 +1,20 @@
+Copied from 4-CELMARadialNeumann
+
+Testing noise generator
+
+Results:
+========
+-  PBSDriver-0-a-0-CollScan.py
+    + timestep 5e-1
+        * nuei  600: Running
+        * nuei  300: Running
+        * nuei  100: Running
+    + timestep 5e-1
+        * nuei  600: Running
+        * nuei  300: Running
+        * nuei  100: Running
+-  PBSDriver-0-a-1-LongRun.py
+    + nuei  600: Running
+-  PBSDriver-0-a-2-Restart4CELMAfnuEI300.py
+    + timestep 5e0: Running
+    + timestep 5e1: Running
