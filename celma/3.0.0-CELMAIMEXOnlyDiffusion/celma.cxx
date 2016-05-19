@@ -289,7 +289,6 @@ int Celma::convective(BoutReal t)
     // ************************************************************************
 
 
-
     // Terms in vorticity
     // ************************************************************************
     vortNeutral = - nuIN*n*vort;
@@ -425,7 +424,6 @@ int Celma::diffusive(BoutReal t, bool linear)
     // We must communicate as we will take DDY
     mesh->communicate(DivUIParNGradPerpPhi);
     // ************************************************************************
-
 
 
     // Terms in vorticity
