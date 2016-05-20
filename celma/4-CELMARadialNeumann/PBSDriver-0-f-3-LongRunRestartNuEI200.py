@@ -16,15 +16,17 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [600, 300, 100]
+eiCollisions = [200]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "f-smallCylNoDampSmallerSNoNeut/nout_20_timestep_5.0/cst_nuEI_200_tag_0-f-2-LongRunRestartLowerCollScan_0/"
 remove_old = False
 nout       = [20]
-timestep   = [5e-1, 5e0, 5e1, 5e2]
-nout      *= len(timestep)
-directory  = "a-data"
+timestep   = [5e1]
+directory  = "f-smallCylNoDampSmallerSNoNeut"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-CollScan"
+theRunName = "0-f-3-LongRunRestart2LongerNuEI200"
 # =============================================================================
 
 
@@ -72,6 +74,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
