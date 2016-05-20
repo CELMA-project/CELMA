@@ -98,9 +98,10 @@ private:
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
     // *****************************************************************************
 
-    // Additional methods and solvers
+    // Switches
     // *****************************************************************************
     bool includeNoise;
+    bool noiseAdded;
     // *****************************************************************************
 
     // Make a field group to communicate
