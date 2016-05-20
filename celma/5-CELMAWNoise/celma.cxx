@@ -56,6 +56,7 @@ int Celma::init(bool restarting) {
     // ************************************************************************
     Options *switches = options->getSection("switch");
     switches->get("includeNoise", includeNoise, false);
+    noiseAdded = false;
     // ************************************************************************
 
     // Calculate diffusion from grid size
@@ -150,16 +151,6 @@ int Celma::init(bool restarting) {
     SOLVE_FOR4(vortD, lnN, uIPar, uEPar);
     //*************************************************************************
 
-    if (includeNoise){
-        // Class containing the noise generators
-        // Calls the constructor with default arguments
-        NoiseGenerator noise("geom", 3);
-        // Add noise
-        //*********************************************************************
-        noise.generateRandomPhases(lnN, 1.0e-3);
-        //*********************************************************************
-    }
-
     return 0;
 }
 // ############################################################################
@@ -168,6 +159,41 @@ int Celma::init(bool restarting) {
 // ############################################################################
 int Celma::rhs(BoutReal t) {
     TRACE("Halt in Celma::rhs");
+
+    if (includeNoise && !noiseAdded){
+        /* NOTE: Positioning of includeNoise
+         *
+         * If the add noise is going to be called when doing a restart, the
+         * includeNoise must be added in the rhs
+         *
+         * int main(int argc, char **argv)
+         *    # Solver *solver = Solver::create();
+         *    # solver->setModel(model);                  # Call of model init
+         *    # solver->addMonitor(bout_monitor, Solver::BACK);
+         *    # solver->outputVars(dump);                 # Call of load restart files
+         *    # solver->solve();
+         *int Solver::solve(int NOUT, BoutReal TIMESTEP)
+         *int PvodeSolver::init(bool restarting, int nout, BoutReal tstep)
+         *    # Around line 83 there is the call
+         *    # if(Solver::init(restarting, nout, tstep)){
+         *    # This loads the restart files
+         *void solver_f(integer N, BoutReal t, N_Vector u, N_Vector udot, void *f_data
+         *PvodeSolver::rhs(int N, BoutReal t, BoutReal *udata, BoutReal *dudata)
+         *Solver::run_rhs(BoutReal t)
+         *int PhysicsModel::runRHS(BoutReal time)
+         *int Celma::rhs(BoutReal t)
+         */
+        // Class containing the noise generators
+        // Calls the constructor with default arguments
+        NoiseGenerator noise("geom", 3);
+        // Add noise
+        //*********************************************************************
+        noise.generateRandomPhases(lnN, 1.0e-3);
+        //*********************************************************************
+
+        // Declare that the noise has been added
+        noiseAdded = true;
+    }
 
     // Manually specifying rho inner ghost points
     // ************************************************************************
