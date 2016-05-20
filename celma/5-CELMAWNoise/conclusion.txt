@@ -6,15 +6,16 @@ Results:
 ========
 -  PBSDriver-0-a-0-CollScan.py
     + timestep 5e-1
-        * nuei  600: Running
-        * nuei  300: Running
-        * nuei  100: Running
-    + timestep 5e-1
-        * nuei  600: Running
-        * nuei  300: Running
-        * nuei  100: Running
+        * nuei  600: Finished after 1 min  - Looks good, and can see arakawa working
+        * nuei  300: Finished after 2 mins - Looks good, and can see arakawa working
+        * nuei  100: Finished after 3 mins - Looks good, and can see arakawa working
+    + timestep 5e0
+        * nuei  600: Finished after 19 mins - Looks good, and can see arakawa working
+        * nuei  300: Finished after 30 mins - Looks good, and can see arakawa working
+        * nuei  100: Finishes 12 steps, then too low timestep - Gets big blow up
 -  PBSDriver-0-a-1-LongRun.py
-    + nuei  600: Running
+    + nuei  300: Finishes 6 steps, then killed by walltime (12h) - Onset of turbulence started
 -  PBSDriver-0-a-2-Restart4CELMAfnuEI300.py
-    + timestep 5e0: Running
-    + timestep 5e1: Running
+| You are rerunning these
+    + timestep 5e0: Finishes after 30 sec - Arakawa not active
+    + timestep 5e1: Finishes after 1 min  - Arakawa not active

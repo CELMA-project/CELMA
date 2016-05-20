@@ -61,5 +61,7 @@ Results:
     !!! nuei  300: Finished after 19 min - Looks good
     + nuei  100: Finishes 2 steps - killed by walltime (12h)
 -  PBSDriver-0-f-2-LongRunRestartLowerCollScan.py
+    + nuei  200: Finished after 1h 21min
+    + nuei  100: Does not even finish 1 timestep
+-  PBSDriver-0-f-3-LongRunRestart2Longer.py
     + nuei  200: Running
-    + nuei  100: Running
