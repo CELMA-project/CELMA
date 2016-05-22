@@ -16,16 +16,16 @@ from postProcessing.plotting import combined1D2D
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200]
+eiCollisions = [150, 100, 50]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "f-smallCylNoDampSmallerSNoNeut/nout_20_timestep_5.0/cst_nuEI_200_tag_0-f-2-LongRunRestartLowerCollScan_0/"
+restart_from = "f-smallCylNoDampSmallerSNoNeut/nout_20_timestep_50.0/cst_nuEI_200_tag_0-f-3-LongRunRestart2LongerNuEI200_0/"
 remove_old = False
 nout       = [20]
-timestep   = [5e1]
+timestep   = [5e0]
 directory  = "f-smallCylNoDampSmallerSNoNeut"
 # Shall we make?
 make       = False
@@ -41,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-f-3-LongRunRestart2LongerNuEI200"
+theRunName = "0-f-4-RestartLongRunNuEI200CollScan"
 # =============================================================================
 
 
@@ -51,7 +51,7 @@ theRunName = "0-f-3-LongRunRestart2LongerNuEI200"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
