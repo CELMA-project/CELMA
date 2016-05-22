@@ -11,22 +11,20 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combined1D2D
+from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200]
+eiCollisions = [600, 300, 100]
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "f-smallCylNoDampSmallerSNoNeut/nout_20_timestep_5.0/cst_nuEI_200_tag_0-f-2-LongRunRestartLowerCollScan_0/"
+restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e1]
-directory  = "f-smallCylNoDampSmallerSNoNeut"
+nout      *= len(timestep)
+directory  = "b-noArtPerp"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,7 +39,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-f-3-LongRunRestart2LongerNuEI200"
+theRunName = "0-b-0-CollScan"
 # =============================================================================
 
 
@@ -51,7 +49,7 @@ theRunName = "0-f-3-LongRunRestart2LongerNuEI200"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -74,7 +72,6 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
@@ -98,7 +95,7 @@ myRuns = PBS_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = combined1D2D,\
+                     post_processing_function = combinedDriver,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
