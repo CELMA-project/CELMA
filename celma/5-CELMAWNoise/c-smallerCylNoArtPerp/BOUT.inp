@@ -1,5 +1,5 @@
 #
-# Input file for "5-CELMAWNoise/noArtPerp"
+# Input file for "5-CELMAWNoise/smallerCylNoArtPerp"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -98,7 +98,7 @@ floats = false # floats = false => output in double
 # Geometry
 # =============================================================================
 [geom]
-Lx = 10                     # The length of x from boundary to boundary
+Lx = 5                      # The length of x from boundary to boundary
 Ly = 100                    # The length of y from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
@@ -132,11 +132,6 @@ artViscPerpUIPar = artPerp
 artViscPerpVortD = artPerp
 # =============================================================================
 
-# Switches
-# =============================================================================
-[switch]
-includeNoise = true
-# =============================================================================
 
 # The source
 # =============================================================================
