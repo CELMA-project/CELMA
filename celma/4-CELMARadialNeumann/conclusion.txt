@@ -63,5 +63,12 @@ Results:
 -  PBSDriver-0-f-2-LongRunRestartLowerCollScan.py
     + nuei  200: Finished after 1h 21min
     + nuei  100: Does not even finish 1 timestep
--  PBSDriver-0-f-3-LongRunRestart2Longer.py
-    + nuei  200: Running
+-  PBSDriver-0-f-3-LongRunRestartNuEI200.py
+    + nuei  200: Finished 14 of 20 timesteps, killed by walltime (24h) - Looks good
+-  PBSDriver-0-f-4-RestartLongRunNuEI200CollScan.py
+    + timestep 5e0
+        * nuei 150: Finished after 21 mins - Looks good
+        * nuei 100: Didn't even finish 1 timestep - Naulin Solver failed
+        * nuei  50: Didn't even finish 1 timestep - Too small timestep
+-  PBSDriver-0-f-5-RestartNuEI150.py
+    + nuei 100: Did not even finish one timestep, Naulin solver failed
