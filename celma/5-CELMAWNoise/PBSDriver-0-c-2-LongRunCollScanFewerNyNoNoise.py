@@ -18,6 +18,7 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 eiCollisions = [300, 200, 100]
 ny = [24]
+noise = False
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
@@ -39,7 +40,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-1-LongRunCollScanFewerNy"
+theRunName = "0-c-2-LongRunCollScanFewerNyNoNoise"
 # =============================================================================
 
 
@@ -49,7 +50,7 @@ theRunName = "0-c-1-LongRunCollScanFewerNy"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -76,6 +77,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('switch','includeNoise',noise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

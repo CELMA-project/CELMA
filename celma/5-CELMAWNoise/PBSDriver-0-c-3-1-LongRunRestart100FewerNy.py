@@ -16,11 +16,13 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 200, 100]
+eiCollisions = [100]
 ny = [24]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
+# restart      = None;
+restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/ny_24/cst_nuEI_100_tag_0-c-1-LongRunCollScanFewerNy_0/"
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
@@ -39,7 +41,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-1-LongRunCollScanFewerNy"
+theRunName = "0-c-3-1-LongRunRestart100FewerNy"
 # =============================================================================
 
 
@@ -49,7 +51,7 @@ theRunName = "0-c-1-LongRunCollScanFewerNy"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -73,6 +75,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
