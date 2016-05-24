@@ -165,6 +165,10 @@ class Plot(object):
         self._yind = self._getIndices(ySlice)
         self._zind = self._getIndices(zSlice)
         self._tind = self._getIndices(tSlice)
+        # Used if we are taking poloidal averages
+        self._xSlice = xSlice
+        self._ySlice = ySlice
+        self._zSlice = zSlice
 
         # Get the time
         self._t = collect('t_array', path=self._path, tind=self._tind, info=False)
@@ -420,26 +424,49 @@ class Plot1D(Plot):
     def collectLine(self, line):
         """Collects the data for one line and reshapes it"""
 
-        line.field = collect(line.name,\
-                             path    = self._path   ,\
-                             xguards = self._xguards,\
-                             yguards = self._yguards,\
-                             xind    = self._xind   ,\
-                             yind    = self._yind   ,\
-                             zind    = self._zind   ,\
-                             tind    = self._tind   ,\
-                             info    = False)
-
-        # Variable not saved each timestep
-        if len(line.field.shape) == 3:
-            # Make it a 4d variable
-            field      = np.zeros(( len(self._t), *line.field.shape))
-            # Copy the field in to each time
-            field[:]   = line.field
-            line.field = field
-
         if self._polAvg:
-            line.field = polAvg(line.field)
+            # We need to collect the whole field if we would like to do
+            # poloidal averages
+            line.field = collect(line.name,\
+                                 path    = self._path   ,\
+                                 xguards = self._xguards,\
+                                 yguards = self._yguards,\
+                                 tind    = self._tind   ,\
+                                 info    = False)
+
+            # If Variable not saved each timestep
+            if len(line.field.shape) == 3:
+                # Make it a 4d variable
+                field      = np.zeros(( len(self._t), *line.field.shape))
+                # Copy the field in to each time
+                field[:]   = line.field
+                line.field = field
+
+            # Take the poloidal average, and slice the result
+            line.field = polAvg(line.field) \
+                    [:,\
+                     self._xSlice,\
+                     self._ySlice,\
+                     self._zSlice,\
+                    ]
+        else:
+            line.field = collect(line.name,\
+                                 path    = self._path   ,\
+                                 xguards = self._xguards,\
+                                 yguards = self._yguards,\
+                                 xind    = self._xind   ,\
+                                 yind    = self._yind   ,\
+                                 zind    = self._zind   ,\
+                                 tind    = self._tind   ,\
+                                 info    = False)
+
+            # If Variable not saved each timestep
+            if len(line.field.shape) == 3:
+                # Make it a 4d variable
+                field      = np.zeros(( len(self._t), *line.field.shape))
+                # Copy the field in to each time
+                field[:]   = line.field
+                line.field = field
 
         # Flatten the variables except the time dimension
         # -1 => total size divided by product of all other listed dimensions
