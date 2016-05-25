@@ -1,5 +1,5 @@
 #
-# Input file for "5-CELMAWNoise/smallerCylNoArtPerp"
+# Input file for "5-CELMAWNoise/longerCylinder"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -99,7 +99,7 @@ floats = false # floats = false => output in double
 # =============================================================================
 [geom]
 Lx = 5                      # The length of x from boundary to boundary
-Ly = 100                    # The length of y from boundary to boundary
+Ly = 200                    # The length of y from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
@@ -119,11 +119,10 @@ nuEN = 0.0
 nuIN = 0.0
 
 # Parallel artificial dissipation
-artPar = 5.0
-artViscParLnN    = artPar # Density
-artViscParUEPar  = artPar # Electron velocity
-artViscParUIPar  = artPar # Ion velocity
-artViscParVortD  = artPar # Vorticity
+artViscParLnN    = 5.0e0 # Density
+artViscParUEPar  = 5.0e0 # Electron velocity
+artViscParUIPar  = 5.0e0 # Ion velocity
+artViscParVortD  = 5.0e0 # Vorticity
 
 # Perpendicular diffusion
 artPerp = 0.0

@@ -18,15 +18,13 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 eiCollisions = [300, 200, 100]
 ny = [24]
-nx = [18]
-nz = [32]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "c-smallerCylNoArtPerp"
+directory  = "e-longerCylinder"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,16 +39,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-4-LongRunCollScanFewerNxNyNz"
+theRunName = "0-e-0-LongRunCollScanFewerNyLongerCyl"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
-BOUT_nodes            = 2
-BOUT_ppn              = 12
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 20
 BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -67,9 +65,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            nx         = nx,\
             ny         = ny,\
-            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
