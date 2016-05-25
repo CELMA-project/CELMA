@@ -18,6 +18,7 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 eiCollisions = [200]
 ny = [24]
+noise = False
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
@@ -79,6 +80,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('switch','includeNoise',noise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
