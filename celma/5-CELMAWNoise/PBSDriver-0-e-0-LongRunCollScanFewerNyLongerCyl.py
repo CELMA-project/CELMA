@@ -20,7 +20,7 @@ eiCollisions = [300, 200, 100]
 ny = [24]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
 remove_old = False
 nout       = [20]
 timestep   = [5e2]

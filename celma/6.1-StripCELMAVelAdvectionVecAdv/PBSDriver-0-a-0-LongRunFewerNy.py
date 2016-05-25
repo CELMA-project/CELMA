@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 200, 100]
+eiCollisions = [100]
 ny = [24]
 # *****************************************************************************
 # Set the temporal domain
@@ -24,7 +24,7 @@ restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "c-smallerCylNoArtPerp"
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,7 +39,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-1-LongRunCollScanFewerNy"
+theRunName = "0-a-0-LongRunFewerNy"
 # =============================================================================
 
 
