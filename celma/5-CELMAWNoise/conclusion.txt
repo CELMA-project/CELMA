@@ -13,9 +13,42 @@ Results:
         * nuei  600: Finished after 19 mins - Looks good, and can see arakawa working
         * nuei  300: Finished after 30 mins - Looks good, and can see arakawa working
         * nuei  100: Finishes 12 steps, then too low timestep - Gets big blow up
+    + timestep 5e1
+        * nuei  600: Finishes 9 steps - killed by walltime (6h) - Looks OK
+        * nuei  300: Finishes 9 steps - killed by walltime (6h) - Looks OK
+        * nuei  100: Finishes 2 steps - killed by walltime (6h) - Looks OK
+    + timestep 5e2
+        * nuei  600: Finished 2 steps - killed by walltime (6h) - Looks OK, can see structures in pol avg
+        * nuei  300: Didn't even finish 1 step - killed by walltime (6h)
+        * nuei  100: Didn't even finish 1 step - killed by walltime (6h)
 -  PBSDriver-0-a-1-LongRun.py
-    + nuei  300: Finishes 6 steps, then killed by walltime (12h) - Onset of turbulence started
+    + timestep 5e2
+        * nuei  300: Finishes 15 steps, then killed by walltime (48h) - Plasma spins around, but no turbulence
 -  PBSDriver-0-a-2-Restart4CELMAfnuEI300.py
-| You are rerunning these
-    + timestep 5e0: Finishes after 30 sec - Arakawa not active
-    + timestep 5e1: Finishes after 1 min  - Arakawa not active
+    + timestep 5e0: Noise added (NOTE: Not so visible on pol avg) - Finishes after 30s
+    + timestep 5e1: Finishes after 26 h 19 min - Looks ok, sees some modes which are damped (maybe others grows up from this?)
+    + timestep 5e2: Finishes 2 steps, then killed by walltime (48h)
+-  PBSDriver-0-a-3-RestartLongRun.py
+    + timestep 5e2
+        * nuei  300: Running
+-  PBSDriver-0-b-0-CollScan.py
+    + timestep 5e1
+        * nuei  600: Finished after 9h 10 min - Looks OK (have a burst in the fluctuations)
+        * nuei  300: Finished 11 steps, then killed by walltime (12h) - Looks good, can see some fluctuations, but dissappears
+        * nuei  100: Finished 2 steps, then killed by walltime (12h) - Instability in parallel direction
+-  PBSDriver-0-c-0-LongRunCollScan.py
+    + nuei  300: Running
+    + nuei  200: Running
+    + nuei  100: Running
+-  PBSDriver-0-c-1-LongRunCollScanFewerNy.py
+    + nuei  300: Completes 16 steps, then killed by walltime (6h) - There are some fluctuations, but not as the one with higher ny (could be due to upwinding?)
+    + nuei  200: Completes 8 steps, then killed by walltime (6h) - There are some fluctuations, but not as the one with higher ny (could be due to upwinding?)
+    + nuei  100: !!! Finished 5 steps, then killed by walltime (6h) - Gives the linear mode
+-  PBSDriver-0-c-2-LongRunCollScanFewerNyNoNois.py
+    + nuei  300: Finishes, completes after 12 mins - Looks good
+    + nuei  200: Completes 16 steps, then killed by walltime (6h) - Looks good
+    + nuei  100: Completes 2 steps, then killed by walltime (6h) - Looks good
+-  PBSDriver-0-c-3-1
+    + nuei 100: Running
+-  PBSDriver-0-c-3-2
+    + nuei 300: Running
