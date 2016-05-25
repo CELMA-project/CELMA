@@ -16,7 +16,6 @@ import matplotlib.cm as cm
 from boutdata import collect
 import numpy as np
 import warnings
-import os
 
 # All post processing functions called by bout_runners must accept the
 # first argument from bout_runners (called 'folder' in
@@ -427,12 +426,16 @@ class Plot1D(Plot):
         if self._polAvg:
             # We need to collect the whole field if we would like to do
             # poloidal averages
-            line.field = collect(line.name,\
-                                 path    = self._path   ,\
-                                 xguards = self._xguards,\
-                                 yguards = self._yguards,\
-                                 tind    = self._tind   ,\
-                                 info    = False)
+            try:
+                line.field = collect(line.name,\
+                                     path    = self._path   ,\
+                                     xguards = self._xguards,\
+                                     yguards = self._yguards,\
+                                     tind    = self._tind   ,\
+                                     info    = False)
+            except ValueError:
+                import pdb; pdb.set_trace()
+                pass
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
@@ -450,15 +453,18 @@ class Plot1D(Plot):
                      self._zSlice,\
                     ]
         else:
-            line.field = collect(line.name,\
-                                 path    = self._path   ,\
-                                 xguards = self._xguards,\
-                                 yguards = self._yguards,\
-                                 xind    = self._xind   ,\
-                                 yind    = self._yind   ,\
-                                 zind    = self._zind   ,\
-                                 tind    = self._tind   ,\
-                                 info    = False)
+            try:
+                line.field = collect(line.name,\
+                                     path    = self._path   ,\
+                                     xguards = self._xguards,\
+                                     yguards = self._yguards,\
+                                     xind    = self._xind   ,\
+                                     yind    = self._yind   ,\
+                                     zind    = self._zind   ,\
+                                     tind    = self._tind   ,\
+                                     info    = False)
+            except ValueError:
+                pass
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
@@ -735,8 +741,8 @@ class Plot2D(Plot):
         # If we want the max and min to vary
         if self._varyMaxMin:
             # Update the max and min
-            self._varMax = np.max(Z_RT)
-            self._varMin = np.min(Z_RT)
+            self._varMax = np.max(self.Z_RT)
+            self._varMin = np.min(self.Z_RT)
             # Update the levels
             self._levels = np.linspace(self._varMin   ,\
                                        self._varMax   ,\
