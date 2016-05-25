@@ -5,6 +5,9 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from boututils.datafile import DataFile
+import os
+
 
 """
 Contains the organizer class
@@ -24,10 +27,11 @@ class Organizer(object):
     """
 
     #{{{Constructor
-    def __init__(self                   ,\
-                 pltName                ,\
-                 cols            = 2    ,\
-                 useCombinedPlot = False,\
+    def __init__(self                    ,\
+                 pltName                 ,\
+                 cols            = 2     ,\
+                 useCombinedPlot = False ,\
+                 path            = "data",\
                  ):
         """
         The constructor initializes the list of lines
@@ -50,6 +54,12 @@ class Organizer(object):
         self.lines                = []
         self.extraLines           = {}
         self.axes                 = []
+
+        # Variables collectable in the dump file
+        dataFileVars =\
+            DataFile(os.path.join(path,"BOUT.dmp.0.nc")).list()
+        # Make everything lowercase in order to easen comparison
+        self._dataFileVars = [el.lower() for el in dataFileVars]
     #}}}
 
     #{{{pltPrepare
@@ -58,13 +68,26 @@ class Organizer(object):
         Prepares the lines in a plot for plotting.
         Call this function before calling collect.
 
-        1. Check if any plot pos have been given.
+        1. Check that a line is collectable.
+        2. Add extra lines (combination of fields etc.) if any.
+        3. Check if any plot pos have been given.
            If yes, lines will be rearranged.
-        2. Set the color of each plot.
-        3. Finds the bottom axes
-        4. Creates the figure and axes.
-        5. Returns the figure
+        4. Set the color of each plot.
+        5. Finds the bottom axes.
+        6. Creates the figure and axes.
+        7. Returns the figure.
         """
+
+        # Check that lines are collectable
+        notFound = []
+        for line in self.lines:
+            lowerCaseLin = line.name.lower()
+            if lowerCaseLin not in self._dataFileVars:
+                print("\n\n!!! Warning: {} could not be found\n\n".\
+                      format(line.name))
+                notFound.append(line)
+        for missing in notFound:
+            self.lines.remove(missing)
 
         # Append lines with eventual extra lines
         # The extra lines are treated specially since they are not
