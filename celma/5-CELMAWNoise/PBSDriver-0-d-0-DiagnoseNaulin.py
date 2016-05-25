@@ -5,30 +5,20 @@
 from bout_runners import PBS_runner
 import numpy as np
 
-import os, sys
-# If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common/python')
-# Sys path is a list of system paths
-sys.path.append(commonDir)
-
-from postProcessing.plotting import combinedDriver
-
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [100]
+eiCollisions = [200]
 ny = [24]
-noise = False
+noise = True
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/ny_24/cst_nuEI_100_tag_0-c-1-LongRunCollScanFewerNy_0/"
+restart      = None;
 remove_old = False
-nout       = [20]
-timestep   = [5e2]
-directory  = "c-smallerCylNoArtPerp"
+nout       = [1]
+timestep   = [1, 10]
+nout *= len(timestep)
+directory  = "d-diagnoseNaulin/"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,7 +33,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-d-2-DiagnoseNaulinWRestartC031"
+theRunName = "0-d-0-DiagnoseNaulin"
 # =============================================================================
 
 
@@ -53,13 +43,9 @@ theRunName = "0-d-2-DiagnoseNaulinWRestartC031"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 20
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '00:10:00'
 BOUT_run_name         = theRunName
-post_process_nproc    = 1
-post_process_nodes    = 1
-post_process_ppn      = 20
-post_process_walltime = '0:29:00'
-post_process_queue    = 'xpresq'
+BOUT_queue            = 'xpresq'
 post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
@@ -77,7 +63,6 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
@@ -88,34 +73,12 @@ myRuns = PBS_runner(\
             BOUT_ppn              = BOUT_ppn             ,\
             BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_nproc    = post_process_nproc   ,\
-            post_process_nodes    = post_process_nodes   ,\
-            post_process_ppn      = post_process_ppn     ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
-            post_process_run_name = post_process_run_name,\
+            BOUT_queue            = BOUT_queue           ,\
             )
 # =============================================================================
 
 
 # Perform the run
 # =============================================================================
-myRuns.execute_runs(\
-                     remove_old               = remove_old,\
-                     post_processing_function = combinedDriver,\
-                     # This function will be called every time after
-                     # performing a run
-                     post_process_after_every_run = True,\
-                     # Below are the kwargs arguments being passed to
-                     # the post processing function
-                     # Switches
-                     xguards        = xguards           ,\
-                     yguards        = yguards           ,\
-                     xSlice         = xSlice            ,\
-                     ySlice         = ySlice            ,\
-                     zSlice         = zSlice            ,\
-                     savePlot       = savePlot          ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
-                     theRunName     = theRunName        ,\
-                    )
+myRuns.execute_runs(remove_old = remove_old)
 # =============================================================================
