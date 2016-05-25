@@ -52,14 +52,7 @@ html/
 
 # CELMA-dev
 visualization/
-celma/1-CELMA/celma
-celma/1.0-CELMATopDown/celma
-celma/1.1-CELMACauchy/celma
-celma/2-CELMACollisionDamper/celma
-celma/3.0.0-CELMAIMEXOnlyDiffusion/celma
-celma/4-CELMARadialNeumann/celma
-celma/4.1-CELMARadialNeumannIMEX/celma
-celma/5-CELMAWNoise/celma
+celma/*/celma
 gaussianWSinAndParabola/
 twoGaussians/
 MES/singleOperators/0-DDXCylinder/DDXCylinder
