@@ -370,15 +370,15 @@ def single1DDriver(path                      ,\
         pltName = saveFolder
 
     if pltName == "mainFields":
-        orgObj = getMainFields()
+        orgObj = getMainFields(path)
     elif pltName == "lnNFields":
-        orgObj = getLnNFields()
+        orgObj = getLnNFields(path)
     elif pltName == "uEParFields":
-        orgObj = getUEParFields()
+        orgObj = getUEParFields(path)
     elif pltName == "uIParFields":
-        orgObj = getUIParFields()
+        orgObj = getUIParFields(path)
     elif pltName == "vortDFields":
-        orgObj = getVortDFields()
+        orgObj = getVortDFields(path)
     else:
         raise NotImplementedError("{} is not implemented".format(pltName))
 
@@ -426,13 +426,13 @@ def single1DDriver(path                      ,\
 
 #{{{Field getters
 #{{{getMainFields
-def getMainFields():
+def getMainFields(path):
     """
     Prepares the main fields
     """
 
     # Making the orgObj instance
-    mainFields = Organizer("mainFields")
+    mainFields = Organizer("mainFields", path = path)
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
     mainFields.lines.append(Line('lnN'  , r'\ln(n)'         , plotPos=0))
@@ -452,13 +452,13 @@ def getMainFields():
 #}}}
 
 #{{{getLnNFields
-def getLnNFields():
+def getLnNFields(path):
     """
     Prepares the lnN fields
     """
 
     # Making the orgObj instance
-    lnN = Organizer(r"\ln(n)", useCombinedPlot=True)
+    lnN = Organizer(r"\ln(n)", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
     lnN.lines.append(Line('lnNAdv'                             ,\
@@ -481,13 +481,13 @@ def getLnNFields():
 #}}}
 
 #{{{getUEParFields
-def getUEParFields():
+def getUEParFields(path):
     """
     Prepares the uEPar fields
     """
 
     # Making the orgObj instance
-    uEPar = Organizer(r"u_{e,\parallel}", useCombinedPlot=True)
+    uEPar = Organizer(r"u_{e,\parallel}", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     uEPar.lines.append(Line('uEParAdv'                                     ,\
     r'-\frac{1}{J}\{\phi,u_{e,\parallel}\}'                                ))
@@ -510,13 +510,13 @@ def getUEParFields():
 #}}}
 
 #{{{getUIParFields
-def getUIParFields():
+def getUIParFields(path):
     """
     Prepares the uIPar fields
     """
 
     # Making the orgObj instance
-    uIPar = Organizer(r"u_{i,\parallel}", useCombinedPlot=True)
+    uIPar = Organizer(r"u_{i,\parallel}", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     uIPar.lines.append(Line('uIParAdv'                                    ,\
              r'-\frac{1}{J}\{\phi,u_{i,\parallel}\}'                      ))
@@ -539,13 +539,13 @@ def getUIParFields():
 #}}}
 
 #{{{getVortDFields
-def getVortDFields():
+def getVortDFields(path):
     """
     Prepares the vortD fields
     """
 
     # Making the orgObj instance
-    vortD = Organizer(r"\Omega^D", useCombinedPlot=True)
+    vortD = Organizer(r"\Omega^D", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     vortD.lines.append(Line('vortNeutral'                        ,\
          r'-\nu_{in}n\Omega'                                     ))
