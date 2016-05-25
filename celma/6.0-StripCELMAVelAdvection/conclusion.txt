@@ -4,4 +4,5 @@ Checking if we can identify the fast dynamics by reducing the system
 
 Results:
 ========
-- Not run yet
+-  PBSDriver-0-a-0-LongRunFewerNy.py
+    + Running

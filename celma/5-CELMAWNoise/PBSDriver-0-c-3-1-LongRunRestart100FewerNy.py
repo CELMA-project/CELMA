@@ -43,7 +43,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-d-2-DiagnoseNaulinWRestartC031"
+theRunName = "0-c-3-1-LongRunRestart100FewerNy"
 # =============================================================================
 
 

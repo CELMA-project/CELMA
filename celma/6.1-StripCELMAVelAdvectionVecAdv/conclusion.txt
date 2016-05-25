@@ -1,7 +1,8 @@
-Copied from 5-CELMAWNoise
+Copied from 6.0-StripCELMAVelAdvection
 
 Checking if we can identify the fast dynamics by reducing the system
 
 Results:
 ========
-- Not run yet
+-  PBSDriver-0-a-0-LongRunFewerNy.py
+    + Running
