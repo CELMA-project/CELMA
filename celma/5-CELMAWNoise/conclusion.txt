@@ -4,6 +4,8 @@ Testing noise generator
 
 Results:
 ========
+a-data
+------
 -  PBSDriver-0-a-0-CollScan.py
     + timestep 5e-1
         * nuei  600: Finished after 1 min  - Looks good, and can see arakawa working
@@ -31,13 +33,21 @@ Results:
 -  PBSDriver-0-a-3-RestartLongRun.py
     + timestep 5e2
         * nuei  300: Finished 10 steps, then killed by walltime (48h) - Looks good, but cannot see any onset of turbulence
+
+
+b-noArtPerp/
+------------
 -  PBSDriver-0-b-0-CollScan.py
     + timestep 5e1
         * nuei  600: Finished after 9h 10 min - Looks OK (have a burst in the fluctuations)
         * nuei  300: Finished 11 steps, then killed by walltime (12h) - Looks good, can see some fluctuations, but dissappears
         * nuei  100: Finished 2 steps, then killed by walltime (12h) - Instability in parallel direction
+
+
+c-smallerCylNoArtPerp/
+---------------------
 -  PBSDriver-0-c-0-LongRunCollScan.py
-*    + nuei  300: Running
+    + nuei  300: Finished after 32h 19 min - Onset on 1-mode
     + nuei  200: Finishes 2 step, then too small timestep (5h)
     + nuei  100: Finishes 1 step, then too small timestep (4h)
 -  PBSDriver-0-c-1-LongRunCollScanFewerNy.py
@@ -49,17 +59,81 @@ Results:
     + nuei  200: Completes 16 steps, then killed by walltime (6h) - Looks good
     + nuei  100: Completes 2 steps, then killed by walltime (6h) - Looks good
 -  PBSDriver-0-c-3-1-LongRunRestart100FewerNy.py
-    + nuei 100: Finishes 4 steps, then takes too small timesteps (4h) - Looks ok, onset on linear mode
-* Rerunning
+    + nuei 100: Running
 -  PBSDriver-0-c-3-2-LongRunRestart300FewerNy.py
-    + nuei 300: Finished after 16 h
-* Rerunning
-- PBSDriver-0-d-0
-    + timestep  1: Running
-    + timestep 10: Running
-- PBSDriver-0-d-1
-    + timestep  1: Running
-    + timestep 10: Running
-- PBSDriver-0-d-2
-    + timestep  1: Running
-    + timestep 10: Running
+    + nuei 300: Running
+-  PBSDriver-0-c-4-LongRunCollScanFewerNxNyNz.py
+    + nuei  300: Finished 3h 1m - No modes present
+    + nuei  200: Finished 3h 24m - No modes present
+    + nuei  100: Running
+-  PBSDriver-0-c-5-LongRunParArtScanLowerNxNyNz.py
+    + nuei  200:
+        * artPar 5e0 : Running
+        * artPar 1e0 : Finishes 4 timesteps - Too small timestep (1h 7min)
+        * artPar 5e-1: Finishes 1 timestep - Too small timestep (35 min)
+        * artPar 1e-1: Could not even finish one timestep - Too small timestep
+        * artPar 5e-2: Could not even finish one timestep - Too small timestep
+        * artPar 1e-2: Could not even finish one timestep - Too small timestep
+    + nuei  100:
+        * artPar 5e0 : Running
+        * artPar 1e0 : Finishes 1 timestep - Too small timestep (1 h)
+        * artPar 5e-1: Could not even finish one timestep - Too small timestep
+        * artPar 1e-1: Could not even finish one timestep - Too small timestep
+        * artPar 5e-2: Could not even finish one timestep - Too small timestep
+        * artPar 1e-2: Could not even finish one timestep - Too small timestep
+-  PBSDriver-0-c-6-LongRunRadiusScanLowerNxNyNz.py
+    + nuei  200:
+        * Lx  5: Running
+        * Lx 10: Running
+        * Lx 15: Running
+        * Lx 20: Could not even finish one timestep - Too small timestep
+        * Lx 25: Could not even finish one timestep - Too small timestep
+        * Lx 30: Could not even finish one timestep - Too small timestep
+    + nuei  100:
+        * Lx  5: Running
+        * Lx 10: Running
+        * Lx 15: Could not even finish one timestep - Too small timestep
+        * Lx 20: Could not even finish one timestep - Too small timestep
+        * Lx 25: Could not even finish one timestep - Too small timestep
+        * Lx 30: Could not even finish one timestep - Too small timestep
+
+
+d-diagnoseNaulin/
+-----------------
+-  PBSDriver-0-d-0-DiagnoseNaulin.py
+    + timestep  1: Min - 0, max - 6, mean - 1.4480746791131855, std - 1.0973285281721314
+    + timestep 10: Min - 0, max - 8, mean - 1.6674138985123292, std - 1.6520928968909816
+-  PBSDriver-0-d-1-DiagnoseNaulinWRestartC01.py
+    + timestep  1: Min - 0, max - 9, mean - 2.4482758620689653, std - 1.3283696747764293
+    + timestep 10: Min - 0, max - 9, mean - 0.5719781332253493, std - 0.9565538653705883
+-  PBSDriver-0-d-2-DiagnoseNaulinWRestartC031.py
+    + timestep  1: Min - 0, max - 12, mean - 4.117142857142857, std - 2.0460394793406134
+    + timestep 10: Min - 0, max - 12, mean - 1.7969397513547976, std - 2.3789569068840417
+
+
+e-longerCylinder/
+-----------------
+-  PBSDriver-0-e-0-LongRunCollScanFewerNyLongerCyl.py
+    + nuei  300: Finished 1h 42 min - Possible to see some fluctuations on phi, but looks like there is a spurious "star" from the center
+        * Restart 1: Running
+    + nuei  200: Finished 2h 25 min - From phi can see there are something growing, but not a mode
+        * Restart 1: Running
+    + nuei  100: Finished 2h 37 min - From phi can see there are something growing, but not a mode
+        * Restart 1: Running
+
+
+
+
+Summaries
+=========
+1 mode
+------
+0-c-0   - 300 nuei - 32h
+
+2 modes
+-------
+0-a-1   - 300 nuei - 48h
+0-c-0   - 200 nuei -  5h (too small time steps)
+0-c-0   - 100 nuei -  4h (too small time steps)
+0-c-1   - 100 nuei -  6h (killed by walltime)
+0-c-3-1 - 100 nuei -  4h (takes too small timesteps)
