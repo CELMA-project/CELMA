@@ -16,15 +16,19 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 100]
+eiCollisions = [200, 100]
+artPar  = [5e0, 1e0, 5e-1, 1e-1]
+artPerp = [5e-2]
 ny = [24]
+nx = [18]
+nz = [32]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "a-data"
+directory  = "c-smallerCylNoArtPerp"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,16 +43,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-LongRunFewerNy"
+theRunName = "0-c-5-1-LongRunParArtScanLowerNxNyNzAddArtPerp"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 48
-BOUT_nodes            = 3
-BOUT_ppn              = 20
+nproc                 = 24
+BOUT_nodes            = 2
+BOUT_ppn              = 12
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -65,7 +69,9 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            nx         = nx,\
             ny         = ny,\
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -76,6 +82,8 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('cst','artPar',artPar),\
+                          ('cst','artPerp',artPerp),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

@@ -16,15 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 100]
+eiCollisions = [300]
 ny = [24]
+noise = False
 # *****************************************************************************
+restart    = "overwrite"
+restart_from = "e-longerCylinder/nout_20_timestep_500.0/ny_24/cst_nuEI_300_switch_includeNoise_True_tag_0-e-0-LongRunCollScanFewerNyLongerCyl_0/"
 # Set the temporal domain
-restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "a-data"
+directory  = "e-longerCylinder"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,7 +41,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-LongRunFewerNy"
+theRunName = "0-e-1-RestartLongRunNuEI300NyLongerCyl"
 # =============================================================================
 
 
@@ -49,7 +51,7 @@ theRunName = "0-a-0-LongRunFewerNy"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 20
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -73,9 +75,11 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('switch','includeNoise',noise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
