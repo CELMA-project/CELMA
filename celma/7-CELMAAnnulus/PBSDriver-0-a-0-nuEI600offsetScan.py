@@ -16,14 +16,15 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [300, 100]
-ny = [24]
+eiCollisions = [600]
+offset = [1, 2, 5]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
+nout      *= len(timestep)
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -35,21 +36,21 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 4
+ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-LongRunFewerNy"
+theRunName = "0-a-0-nuEI600offsetScan"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 48
-BOUT_nodes            = 3
+nproc                 = 96
+BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -65,7 +66,6 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            ny         = ny,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -76,6 +76,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('geom','offset',offset),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
