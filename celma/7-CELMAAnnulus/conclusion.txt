@@ -47,7 +47,7 @@ b-noArtPerp/
 c-smallerCylNoArtPerp/
 ---------------------
 -  PBSDriver-0-c-0-LongRunCollScan.py
-    + nuei  300: Finished after 32h 19 min - Onset of 1-mode
+    + nuei  300: Finished after 32h 19 min - Onset on 1-mode
     + nuei  200: Finishes 2 step, then too small timestep (5h)
     + nuei  100: Finishes 1 step, then too small timestep (4h)
 -  PBSDriver-0-c-1-LongRunCollScanFewerNy.py
