@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.cm as cm
 from boutdata import collect
+from boututils.options import BOUTOptions
 import numpy as np
 import warnings
 
@@ -105,7 +106,20 @@ class Plot(object):
         else:
             innerPoints = nPoints
 
-        self._rho = dx * np.array(np.arange(0.5, innerPoints))
+        # By default there is no offset in the cylinder
+        # For comparision with other codes, an offset option is set
+        # Read the input file
+        myOpts = BOUTOptions(path)
+        # Read in geom offset
+        try:
+            offset = eval(myOpts.geom['offset'])
+            spacing = "\n"*3
+            print("{0}!!!WARNING: 'offset' found in BOUT.inp, "
+                  "running as annulus!!!{0}".format(spacing))
+            self._rho = offset + dx * np.array(np.arange(0.5, innerPoints))
+        except KeyError:
+            # This is the default
+            self._rho = dx * np.array(np.arange(0.5, innerPoints))
 
         if xguards:
             # Insert the first and last grid point
