@@ -4,5 +4,20 @@ Checking if we can identify the fast dynamics by reducing the system
 
 Results:
 ========
+a-data
+------
 -  PBSDriver-0-a-0-LongRunFewerNy.py
-    + Running
+    + nuei 300: Running
+    + nuei 100: Finished 2 steps - Killed by walltime (24h)
+-  PBSDriver-0-a-1-nuEI100LongRunLowerNxNyNzAddArtPar1.py
+    + nuei  100:
+        * artPar 1e0 : Didn't even finish one timestep (18 min)
+
+
+
+Summaries
+=========
+
+Comparision of 0-c-5-1 and 6.1-StripCELMAVelAdvectionVecAdv/0-a-1
+-----------------------------------------------------------------
+Waiting for runs to finish
