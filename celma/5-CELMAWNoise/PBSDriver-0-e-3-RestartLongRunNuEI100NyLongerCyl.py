@@ -21,6 +21,8 @@ ny = [24]
 noise = False
 # *****************************************************************************
 restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
 restart_from = "e-longerCylinder/nout_20_timestep_500.0/ny_24/cst_nuEI_100_switch_includeNoise_True_tag_0-e-0-LongRunCollScanFewerNyLongerCyl_0/"
 # Set the temporal domain
 remove_old = False

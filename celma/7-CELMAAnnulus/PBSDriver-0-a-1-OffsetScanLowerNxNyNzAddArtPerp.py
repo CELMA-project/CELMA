@@ -16,19 +16,20 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200]
+eiCollisions = [100]
+artPar  = [1e0]
+artPerp = [5e-2]
 ny = [24]
-noise = False
+nx = [18]
+nz = [32]
+offset = [1, 2, 5]
 # *****************************************************************************
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "e-longerCylinder/nout_20_timestep_500.0/ny_24/cst_nuEI_200_switch_includeNoise_True_tag_0-e-0-LongRunCollScanFewerNyLongerCyl_0/"
 # Set the temporal domain
+restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "e-longerCylinder"
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,17 +44,17 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-e-2-RestartLongRunNuEI200NyLongerCyl"
+theRunName = "0-a-1-OffsetScanLowerNxNyNzAddArtPerp"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 48
-BOUT_nodes            = 3
-BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+nproc                 = 24
+BOUT_nodes            = 2
+BOUT_ppn              = 12
+BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -69,7 +70,9 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            nx         = nx,\
             ny         = ny,\
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -77,11 +80,12 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('switch','includeNoise',noise),\
+                          ('cst','artPar',artPar),\
+                          ('cst','artPerp',artPerp),\
+                          ('geom','offset',offset),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
