@@ -100,8 +100,9 @@ private:
 
     // Switches
     // *****************************************************************************
-    bool includeNoise;
-    bool noiseAdded;
+    bool includeNoise;   // Include noise
+    bool forceAddNoise;  // Add noise on restart as well
+    bool noiseAdded;     // A check whether the noise is added or not
     // *****************************************************************************
 
     // Make a field group to communicate
