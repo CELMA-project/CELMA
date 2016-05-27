@@ -56,7 +56,16 @@ int Celma::init(bool restarting) {
     // ************************************************************************
     Options *switches = options->getSection("switch");
     switches->get("includeNoise", includeNoise, false);
+    switches->get("forceAddNoise", forceAddNoise, false);
     noiseAdded = false;
+    if (restarting && !(forceAddNoise)){
+        output << "\n\n\n!!!!Warning!!!\n"
+               << "includeNoise=true && restart=true\n"
+               << "forceAddNoise=false => program reset includeNoise to false"
+               << std::endl;
+        includeNoise = false;
+        noiseAdded = true; // For extra safety measurements
+    }
     // ************************************************************************
 
     // Calculate diffusion from grid size
