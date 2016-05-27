@@ -7,6 +7,17 @@ Results:
 a-data
 ------
 -  PBSDriver-0-a-0-nuEI600.py
+    + offset 1: Finished after 1 steps, killed by walltime (6h)
+    + offset 2: Finished after 1 steps, killed by walltime (6h)
+    + offset 5: Finished after 2 steps, killed by walltime (6h)
+-  PBSDriver-0-a-1-OffsetScanLowerNxNyNzAddArtPerp.py
     + offset 1: Running
     + offset 2: Running
-    + offset 5: To be runned
+    + offset 5: Running
+
+Summaries
+=========
+
+Comparision of 0-c-5-1 and 7-CELMAAnnulus/0-a-1
+-----------------------------------------------
+Waiting for runs to finish
