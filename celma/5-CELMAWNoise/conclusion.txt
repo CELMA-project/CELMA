@@ -65,7 +65,7 @@ c-smallerCylNoArtPerp/
 -  PBSDriver-0-c-4-LongRunCollScanFewerNxNyNz.py
     + nuei  300: Finished 3h 1m - No modes present
     + nuei  200: Finished 3h 24m - No modes present
-    + nuei  100: Running
+    + nuei  100: Finished 13 steps (10h 40m) - Too small timestep - Mode started
 -  PBSDriver-0-c-5-LongRunParArtScanLowerNxNyNz.py
     + nuei  200:
         * artPar 5e0 : Finished 3h 14 min - No mode present
@@ -81,28 +81,49 @@ c-smallerCylNoArtPerp/
         * artPar 1e-1: Could not even finish one timestep - Too small timestep
         * artPar 5e-2: Could not even finish one timestep - Too small timestep
         * artPar 1e-2: Could not even finish one timestep - Too small timestep
--  PBSDriver-0-c-5-1-
+-  PBSDriver-0-c-5-1-LongRunParArtScanLowerNxNyNzAddArtPerp.py
     + nuei  200:
-        * artPar 5e0 : Running
-        * artPar 1e0 : Running
-        * artPar 5e-1: Running
-        * artPar 1e-1: Running
+        * artPar 5e0 : Finishes (8h 58m)   - No mode found
+        * artPar 1e0 : Finishes (7h 25min) - Developes 1 mode (seems not to finish development)
+        * artPar 5e-1: Finishes (13h 15min) - Developes 1 mode (seems not to finish development)
+        * artPar 1e-1: Did not even finish one timestep - Too small timestep (22 m)
     + nuei  100:
+        * artPar 5e0 : Finishes (11h 38m) - No mode observed
+        * artPar 1e0 : Finishes (10h 2m)  - Develpes 1 mode (seems not to finish development)
+        * artPar 5e-1: Finish 2 timesteps, then too small timestep (2h 38 m) - 2 mode
+        * artPar 1e-1: Did not even finish one timestep - Too small timestep (25 m)
+-  PBSDriver-0-c-5-2-1-LongRunParArt1NuEI200LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
+    + nuei  200:
+        * artPar 1e0 : Running
+-  PBSDriver-0-c-5-2-2-LongRunParArt1NuEI100LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
+    + nuei  100:
+        * artPar 1e0 : Running
+-  PBSDriver-0-c-5-2-3-LongRunParArt0.5NuEI100LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
+    + nuei  100:
+        * artPar 5e-1: Didn't even finish one timestep - Too small timestep (5 min)
+!!!Check plot
+-  PBSDriver-0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp.py (restarted from c-5-1)
+    + nuei 75:
         * artPar 5e0 : Running
         * artPar 1e0 : Running
+        * artPar 5e-1: Finished 1 timesteps, then too small timestep (2h 6m)
+!!! Check plot
+    + nuei 50:
+        * artPar 5e0 : Running
+        * artPar 1e0 : Finished 2 timesteps, then too small timestep (2h 4m)
         * artPar 5e-1: Running
-        * artPar 1e-1: Running
+!!! Check plot
 -  PBSDriver-0-c-6-LongRunRadiusScanLowerNxNyNz.py
     + nuei  200:
         * Lx  5: Finished after 3h 13 min - No mode
-        * Lx 10: Running
-        * Lx 15: Running
+        * Lx 10: Finished after 19h 25 min - Looks like mode is in forming
+        * Lx 15: Finished after 22h 43m - Looks like mode is trying to form
         * Lx 20: Could not even finish one timestep - Too small timestep
         * Lx 25: Could not even finish one timestep - Too small timestep
         * Lx 30: Could not even finish one timestep - Too small timestep
     + nuei  100:
-        * Lx  5: Running
-        * Lx 10: Running
+        * Lx  5: Finished 13 steps, then too low timestep () - mode forms
+        * Lx 10: Finished 8 steps, then killed by walltime (24h)
         * Lx 15: Could not even finish one timestep - Too small timestep
         * Lx 20: Could not even finish one timestep - Too small timestep
         * Lx 25: Could not even finish one timestep - Too small timestep
@@ -126,15 +147,71 @@ e-longerCylinder/
 -----------------
 -  PBSDriver-0-e-0-LongRunCollScanFewerNyLongerCyl.py
     + nuei  300: Finished 1h 42 min - Possible to see some fluctuations on phi, but looks like there is a spurious "star" from the center
-        * Restart 1: Finished 1h 25 min
-* Rerunning
     + nuei  200: Finished 2h 25 min - From phi can see there are something growing, but not a mode
-        * Restart 1: Finished 2h 18 min
-* Rerunning
     + nuei  100: Finished 2h 37 min - From phi can see there are something growing, but not a mode
-        * Restart 1: Finished 2h 38 min
-* Rerunning
+-  PBSDriver-0-e-1-RestartLongRunNuEI300NyLongerCyl.py
+    + nuei  300: Finished 1h 28m - Could be that something is growing up from the edge
+-  PBSDriver-0-e-2-RestartLongRunNuEI200NyLongerCyl.py
+    + nuei  200: Finished after 2h 34m - !!! Ring mode seen in vorticity
+-  PBSDriver-0-e-3-RestartLongRunNuEI100NyLongerCyl.py
+    + nuei  100: Finished after 3h 20m - !!! Ring mode seen in potential
 
+
+f-RK4Tests/
+-----------
+NOTE: Parallel CFL should be fulfilled
+-  PBSDriver-0-f-0-RK4CFLTestNz64.py
+    + timestep  1e1  : Solution blows up (get very high numbers), still runs though
+    + timestep  1e0  : Solution blows up (get very high numbers), still runs though
+    + timestep 1e-1  : Solution blows up (get very high numbers), still runs though
+    + timestep 1e-2  : Solution blows up (get very high numbers), can still see field in perp dir, still runs
+    + timestep 7e-3  : Solution blows up parallely
+    + timestep 6e-3  : Start of blow up from parallel edges
+    + timestep 5.5e-3: Start of minor blow up from parallel edges
+    + timestep 5e-3  : Teeny-weeny blow up from parallel edgdes
+    + timestep 4.5e-3: Even tinier blow up from parallel edgdes
+    + timestep 1e-3  : Runs, and gives nice results
+    + timestep 1e-4  : Runs, and gives nice results
+-  PBSDriver-0-f-1-RK4CFLTestNz32.py
+    + timestep 5.5e-3: Start of minor blow up from parallel edges
+    + timestep 5e-3  : Teeny-weeny blow up from parallel edgdes
+    + timestep 4.5e-3: Runs somewhat smoothly
+DO ME nz 2**11 and 2**5 more or less the same
+
+
+g-smallerCylLowerMassRatioLowerNxNyNz/
+--------------------------------------
+-  PBSDriver-0-g-0-LongRunCollScan.py
+    + nuei  200:
+        * artPar 5e0 : Finished after  5 m - No modes (some symmetric perturbation disappearing/reappearing)
+        * artPar 1e0 : Finished after 18 m - No modes, looks like something is growing
+        * artPar 5e-1: Finished after 24 m - No modes (some symmetric perturbation disappearing/reappearing), parallel looks strange
+        * artPar 1e-1: Finished after 29 m - No modes (some symmetric perturbation disappearing/reappearing), parallel looks strange
+      ! Restart 1
+        * artPar 5e0 : Finished after  5 m - Hard to say if something is growing or not
+        * artPar 1e0 : Running
+        * artPar 5e-1: Running
+        * artPar 1e-1: Running
+    + nuei  100:
+        * artPar 5e0 : Finished after     6 m - No modes (some symmetric perturbation disappearing/reappearing), looks like getting bigger
+        * artPar 1e0 : Finished after    43 m - No modes (some symmetric perturbation disappearing)
+        * artPar 5e-1: Finished after    37 m - No modes (some symmetric perturbation disappearing/reappearing)
+        * artPar 1e-1: Finished after 1h 23 m - No modes (some symmetric perturbation disappearing), parallel looks strange
+      ! Restart 1
+        * artPar 5e0 : Running
+        * artPar 1e0 : Running
+        * artPar 5e-1: Running
+        * artPar 1e-1: Running
+    + nuei   50:
+        * artPar 5e0 : Finished after 4m - No modes, but looks like some is starting
+        * artPar 1e0 : Finished 2h 15m   - No modes (some symmetric perturbation disappearing)
+        * artPar 5e-1: Running
+        * artPar 1e-1: Running
+      ! Restart 1
+        * artPar 5e0 : Running
+        * artPar 1e0 : Running
+        * artPar 5e-1: Running
+        * artPar 1e-1: Running
 
 
 
@@ -143,7 +220,10 @@ Summaries
 1 mode
 ------
 0-c-0   - 300 nuei -             - 32h
-0-c-5   - 200 nuei - artPar 1e0  -  1h
+0-c-5   - 200 nuei - artPar 1e0  -  1h (too small timestep)
+0-c-5-1 - 200 nuei - artPar 1e0  -  7h - Unfinished developement?
+0-c-5-1 - 100 nuei - artPar 1e0  - 10h - Unfinished developement?
+0-c-5-1 - 200 nuei - artPar 5e-1 - 13h - Unfinished developement?
 
 2 modes
 -------
@@ -152,9 +232,33 @@ Summaries
 0-c-0   - 100 nuei -             -  4h (too small time steps)
 0-c-1   - 100 nuei -             -  6h (killed by walltime)
 0-c-3-1 - 100 nuei -             -  3h (takes too small timesteps)
+0-c-4   - 100 nuei -             - 10h 40 min (takes too small timesteps)
 0-c-5   - 100 nuei - artPar 5e 0 - 10h (takes too small timesteps)
 0-c-5   - 200 nuei - artPar 5e-1 -     35 min (takes too small timesteps) ! NOTE: Not symmetric
+0-c-5-1 - 100 nuei - artPar 5e-1 -  2h (takes too small timestep)
+0-c-6   - 100 nuei - Lx  5       - 10h 40 min (takes too small timesteps)
 
 3 modes
 -------
 0-c-5   - 100 nuei - artPar 1e0  -  1h (takes too small timesteps)
+
+
+
+Comparision of 0-c-5-1 and 0-g-0
+--------------------------------
+Waiting for runs to finish
+
+
+Comparision of 0-c-5-1 and 6.0-StripCELMAVelAdvection/0-a-1
+-----------------------------------------------------------
+Waiting for runs to finish
+
+
+Comparision of 0-c-5-1 and 6.1-StripCELMAVelAdvectionVecAdv/0-a-1
+-----------------------------------------------------------------
+Waiting for runs to finish
+
+
+Comparision of 0-c-5-1 and 7-CELMAAnnulus/0-a-1
+-----------------------------------------------
+Waiting for runs to finish
