@@ -11,20 +11,22 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combinedDriver
+from postProcessing.plotting import combined1D2D
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200, 100, 50]
-artPar  = [5e0, 1e0, 5e-1, 1e-1]
+eiCollisions = [300]
 # *****************************************************************************
+# Set spatial domain
+nz         = [2**el for el in range(7,11)]
 # Set the temporal domain
-restart    = "overwrite"
+restart    = None
 remove_old = False
-nout       = [20]
-timestep   = [5e2]
-directory  = "g-smallerCylLowerMassRatioLowerNxNyNz"
+nout       = [10]
+timestep   = [5.5e-3, 5e-3]
+nout *= len(timestep)
+directory  = "f-RK4Tests"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -35,22 +37,23 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 4
+ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-g-0-LongRunCollScan"
+theRunName = "0-f-2-RK4CFLTestNzScan"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
-BOUT_nodes            = 2
-BOUT_ppn              = 12
-BOUT_walltime         = '24:00:00'
+nproc                 = 16
+BOUT_nodes            = 1
+BOUT_ppn              = 20
+BOUT_walltime         = '00:29:00'
 BOUT_run_name         = theRunName
+BOUT_queue            = 'xpresq'
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
@@ -63,6 +66,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 # Create the runner
 # =============================================================================
 myRuns = PBS_runner(\
+            nz         = nz,\
             directory  = directory ,\
             nproc      = nproc ,\
             # Set temporal domain
@@ -75,13 +79,13 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('cst','artPar',artPar),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
             BOUT_ppn              = BOUT_ppn             ,\
             BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
+            BOUT_queue            = BOUT_queue           ,\
             post_process_nproc    = post_process_nproc   ,\
             post_process_nodes    = post_process_nodes   ,\
             post_process_ppn      = post_process_ppn     ,\
@@ -96,7 +100,7 @@ myRuns = PBS_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = combinedDriver,\
+                     post_processing_function = combined1D2D,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
