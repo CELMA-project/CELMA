@@ -94,25 +94,42 @@ c-smallerCylNoArtPerp/
         * artPar 1e-1: Did not even finish one timestep - Too small timestep (25 m)
 -  PBSDriver-0-c-5-2-1-LongRunParArt1NuEI200LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
     + nuei  200:
-        * artPar 1e0 : Running
+        * artPar 1e0 : Finished after 4h 9m - Mode 1 spinning around
 -  PBSDriver-0-c-5-2-2-LongRunParArt1NuEI100LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
     + nuei  100:
-        * artPar 1e0 : Running
+        * artPar 1e0 : Finished after 7h 37m - Mode 1 going around
 -  PBSDriver-0-c-5-2-3-LongRunParArt0.5NuEI100LowerNxNyNzAddArtPerp.py (restarted from c-5-1)
     + nuei  100:
         * artPar 5e-1: Didn't even finish one timestep - Too small timestep (5 min)
-!!!Check plot
--  PBSDriver-0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp.py (restarted from c-5-1)
+-  PBSDriver-0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp.py
     + nuei 75:
-        * artPar 5e0 : Running
-        * artPar 1e0 : Running
-        * artPar 5e-1: Finished 1 timesteps, then too small timestep (2h 6m)
-!!! Check plot
+        * artPar 5e0 : Finished after 7h 43m, no modes observed
+        * artPar 1e0 : Finished after 11h 38m, some mode...mix between 1 mode and 2 mode?
+        * artPar 5e-1: Finished 1 timesteps, then too small timestep (2h 6m) - 2 mode starting
+       ! Restart 1
+        * artPar 1e0 : Finished after 11h 38m - Mode just spins around
     + nuei 50:
-        * artPar 5e0 : Running
-        * artPar 1e0 : Finished 2 timesteps, then too small timestep (2h 4m)
-        * artPar 5e-1: Running
-!!! Check plot
+        * artPar 5e0 : Finished after 6h 15 min - Starting as 2 mode, continuing as 1 mode
+        * artPar 1e0 : Finished 2 timesteps, then too small timestep (2h 4m) - Mode starting
+        * artPar 5e-1: Finished 1 timesteps, then too small timestep (2h 4m) - Mode starting
+       ! Restart 1
+        * artPar 5e0 : Finished 3 steps, then too small timestep (38 m) - !!! Mode is there, get start pattern (see vort)
+    + nuei  25:
+        * artPar 5e0 : Finished 9 timesteps, then too small timestep (3h 44m) - 3 mode -> 1 mode (or turbulence)
+        * artPar 1e0 : Finished 1 timestep, then too small timestep (1h 25m) - 3 mode
+        * artPar 5e-1: Didn't even finish one timestep, too small timestep (10m)
+    + nuei  10:
+        * artPar 5e0 : Finish 4 timesteps, too small timestep (3h 54m) - Either 3 mode or turbulence
+        * artPar 1e0 : Didn't even finish one timestep, too small timestep (16m)
+        * artPar 5e-1: Didn't even finish one timestep, too small timestep (7m)
+    + nuei   5:
+        * artPar 5e0 : Finish 4 timesteps, too small timestep (3h 50m) - Starts as 4 mode, develops into turbulence
+        * artPar 1e0 : Didn't even finish one timestep, too small timestep (1h 8m)
+        * artPar 5e-1: Didn't even finish one timestep, too small timestep (26m)
+    + nuei 0.1:
+        * artPar 5e0 : Finish 3 timesteps, too small timestep (3h 27m) - Starts 4 mode
+        * artPar 1e0 : Didn't even finish one timestep, too small timestep (28m)
+        * artPar 5e-1: Didn't even finish one timestep, too small timestep (9m)
 -  PBSDriver-0-c-6-LongRunRadiusScanLowerNxNyNz.py
     + nuei  200:
         * Lx  5: Finished after 3h 13 min - No mode
@@ -176,7 +193,15 @@ NOTE: Parallel CFL should be fulfilled
     + timestep 5.5e-3: Start of minor blow up from parallel edges
     + timestep 5e-3  : Teeny-weeny blow up from parallel edgdes
     + timestep 4.5e-3: Runs somewhat smoothly
-DO ME nz 2**11 and 2**5 more or less the same
+-  PBSDriver-0-f-2-RK4CFLTestNzScan.py
+    ! NOTE: These two are almost identical. Full driver not run, as it was
+            problematic to distinguish from the current postprocessing routine
+    + nz = 32
+        * timestep 5.5e-3: Start of minor blow up from parallel edges
+        * timestep 5e-3  : Teeny-weeny blow up from parallel edgdes
+    + nz = 2058
+        * timestep 5.5e-3: Start of minor blow up from parallel edges
+        * timestep 5e-3  : Teeny-weeny blow up from parallel edgdes
 
 
 g-smallerCylLowerMassRatioLowerNxNyNz/
@@ -189,29 +214,30 @@ g-smallerCylLowerMassRatioLowerNxNyNz/
         * artPar 1e-1: Finished after 29 m - No modes (some symmetric perturbation disappearing/reappearing), parallel looks strange
       ! Restart 1
         * artPar 5e0 : Finished after  5 m - Hard to say if something is growing or not
-        * artPar 1e0 : Running
-        * artPar 5e-1: Running
-        * artPar 1e-1: Running
+        * artPar 1e0 : Finished after 21 m - No modes - some symmetric perturbation disappearing/reappearing
+        * artPar 5e-1: Finished after 24 m - No modes - some symmetric perturbation disappearing/reappearing
+        * artPar 1e-1: Finished after 33 m - "Modes" does not evolve, parallel still strange
     + nuei  100:
         * artPar 5e0 : Finished after     6 m - No modes (some symmetric perturbation disappearing/reappearing), looks like getting bigger
         * artPar 1e0 : Finished after    43 m - No modes (some symmetric perturbation disappearing)
         * artPar 5e-1: Finished after    37 m - No modes (some symmetric perturbation disappearing/reappearing)
         * artPar 1e-1: Finished after 1h 23 m - No modes (some symmetric perturbation disappearing), parallel looks strange
       ! Restart 1
-        * artPar 5e0 : Running
-        * artPar 1e0 : Running
-        * artPar 5e-1: Running
-        * artPar 1e-1: Running
+        * artPar 5e0 : Finished after     2 m - Perturbations appearing/disapperaing (mostly disappearing)
+        * artPar 1e0 : Finished after 1h 30 m - All perturbations dissapears
+        * artPar 5e-1: Finished after !! 33 m - Perturbations appearing/disapperaing
+        * artPar 1e-1: Finished after 1h 35 m - See no mode, looks like there may be something going on around the sheath
     + nuei   50:
         * artPar 5e0 : Finished after 4m - No modes, but looks like some is starting
         * artPar 1e0 : Finished 2h 15m   - No modes (some symmetric perturbation disappearing)
-        * artPar 5e-1: Running
-        * artPar 1e-1: Running
+        * artPar 5e-1: Finished 3h 10m   - Could be that there is something going around around the sheath
+        * artPar 1e-1: Finished 5h  1m   - No modes (some symmetric perturbation disappearing)
       ! Restart 1
-        * artPar 5e0 : Running
-        * artPar 1e0 : Running
-        * artPar 5e-1: Running
-        * artPar 1e-1: Running
+        * artPar 5e0 : Some perturbations growing (not moving though)
+        * artPar 1e0 : Cannot see any mode, could be that something is going on around sheath
+        * artPar 5e-1: To be run
+        * artPar 1e-1: To be run
+!!! CONSIDER EVEN LOWER COLLISIONALITIES
 
 
 
@@ -223,7 +249,10 @@ Summaries
 0-c-5   - 200 nuei - artPar 1e0  -  1h (too small timestep)
 0-c-5-1 - 200 nuei - artPar 1e0  -  7h - Unfinished developement?
 0-c-5-1 - 100 nuei - artPar 1e0  - 10h - Unfinished developement?
+c-5-2-1 - 200 nuei - artPar 1e0  -  4h
+c-5-2-2 - 100 nuei - artPar 1e0  -  7h
 0-c-5-1 - 200 nuei - artPar 5e-1 - 13h - Unfinished developement?
+
 
 2 modes
 -------
@@ -236,12 +265,30 @@ Summaries
 0-c-5   - 100 nuei - artPar 5e 0 - 10h (takes too small timesteps)
 0-c-5   - 200 nuei - artPar 5e-1 -     35 min (takes too small timesteps) ! NOTE: Not symmetric
 0-c-5-1 - 100 nuei - artPar 5e-1 -  2h (takes too small timestep)
+0-c-5-3 -  75 nuei - artPar 5e-1 -  2h (takes too small timestep)
+0-c-5-3 -  50 nuei - artPar 5e-1 -  2h (takes too small timestep)
 0-c-6   - 100 nuei - Lx  5       - 10h 40 min (takes too small timesteps)
+
 
 3 modes
 -------
 0-c-5   - 100 nuei - artPar 1e0  -  1h (takes too small timesteps)
+0-c-5-3 -  50 nuei - artPar 1e0  -  2h (takes too small timesteps)
+0-c-5-3 -  25 nuei - artPar 5e0  -  1h (takes too small timesteps)
 
+
+4 modes
+-------
+0-c-5-3 -   5 nuei - artPar 5e0 - 3h 50m (takes too small timesteps) !!! Looks like develops turbulence
+0-c-5-3 - 0.1 nuei - artPar 5e0 - 3h 27m (takes too small timesteps)
+
+
+Undetermined
+------------
+0-c-5-3 - 75 nuei - artPar 1e0 - 11 h - Undecided mix of 1 mode and 2 mode
+0-c-5-3 - 50 nuei - artPar 5e0 -  6 h - Starts as 2 mode, evolves to 1 mode
+0-c-5-3 - 25 nuei - artPar 5e0 -  3 h 44m - 3 mode -> 1 mode (or turbulence) (takes too small timesteps)
+0-c-5-3 - 10 nuei - artPar 5e0 -  3 h 54m - Either 3 mode or turbulence (takes too small timesteps)
 
 
 Comparision of 0-c-5-1 and 0-g-0
