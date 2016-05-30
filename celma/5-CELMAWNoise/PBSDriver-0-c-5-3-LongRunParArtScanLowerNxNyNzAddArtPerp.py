@@ -16,15 +16,15 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [75, 50]
+eiCollisions = [75, 50, 25, 10, 5, 0.1]
 artPar  = [5e0, 1e0, 5e-1]
 artPerp = [5e-2]
-ny = [24]
 nx = [18]
+ny = [24]
 nz = [32]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
 remove_old = False
 nout       = [20]
 timestep   = [5e2]

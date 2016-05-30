@@ -244,6 +244,11 @@ g-smallerCylLowerMassRatioLowerNxNyNz/
 !!! CONSIDER EVEN LOWER COLLISIONALITIES
 
 
+h-fromCProperResEdge/
+---------------------
+    + nuei 25: Running
+    + nuei  5: Running
+
 
 Summaries
 =========

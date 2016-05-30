@@ -16,20 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200, 100]
-artPar  = [1e0]
-artPerp = [5e-2]
-ny = [24]
-nx = [18]
-nz = [32]
-offset = [1, 2, 5]
+eiCollisions = [25, 5]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-directory  = "a-data"
+directory  = "h-fromCProperResEdge"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -44,7 +38,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-1-OffsetScanLowerNxNyNzAddArtPerp"
+theRunName = "0-h-0-ProperResEdge"
 # =============================================================================
 
 
@@ -70,9 +64,6 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            nx         = nx,\
-            ny         = ny,\
-            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -83,9 +74,6 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('cst','artPar',artPar),\
-                          ('cst','artPerp',artPerp),\
-                          ('geom','offset',offset),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
