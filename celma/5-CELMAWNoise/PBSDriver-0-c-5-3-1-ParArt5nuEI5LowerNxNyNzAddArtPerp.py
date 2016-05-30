@@ -16,18 +16,21 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [75, 50, 25, 10, 5, 0.1]
-artPar  = [5e0, 1e0, 5e-1]
+eiCollisions = [5]
+artPar  = [5e0]
 artPerp = [5e-2]
-nx = [18]
 ny = [24]
+nx = [18]
 nz = [32]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/nx_18_ny_24_nz_32/cst_artPar_5.0_cst_artPerp_0.05_cst_nuEI_5_tag_0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp_0/"
 remove_old = False
 nout       = [20]
-timestep   = [5e2]
+timestep   = [25]
 directory  = "c-smallerCylNoArtPerp"
 # Shall we make?
 make       = False
@@ -43,7 +46,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp"
+theRunName = "0-c-5-3-1-ParArt5nuEI5LowerNxNyNzAddArtPerp"
 # =============================================================================
 
 
@@ -79,6 +82,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
