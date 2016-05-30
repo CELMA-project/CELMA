@@ -16,13 +16,12 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [200, 100]
+eiCollisions = [200]
 artPar  = [1e0]
 artPerp = [5e-2]
 ny = [24]
 nx = [18]
 nz = [32]
-offset = [1, 2, 5]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
@@ -44,7 +43,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-1-OffsetScanLowerNxNyNzAddArtPerp"
+theRunName = "0-a-2-nuEI200LongRunLowerNxNyNzAddArtPar1"
 # =============================================================================
 
 
@@ -85,7 +84,6 @@ myRuns = PBS_runner(\
                           ('cst','nuEI',eiCollisions),\
                           ('cst','artPar',artPar),\
                           ('cst','artPerp',artPerp),\
-                          ('geom','offset',offset),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
