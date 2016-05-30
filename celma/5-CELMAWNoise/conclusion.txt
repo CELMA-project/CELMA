@@ -130,6 +130,10 @@ c-smallerCylNoArtPerp/
         * artPar 5e0 : Finish 3 timesteps, too small timestep (3h 27m) - Starts 4 mode
         * artPar 1e0 : Didn't even finish one timestep, too small timestep (28m)
         * artPar 5e-1: Didn't even finish one timestep, too small timestep (9m)
+-  PBSDriver-0-c-5-3-1
+    + Finishes 19 steps, then too small timesteps (18 m) - develops star pattern at edge (best seen in vorticity)
+-  PBSDriver-0-c-5-3-2
+    + Finishes 9 steps, then too small timesteps (25 m) - develops star pattern (best seen in vorticity)
 -  PBSDriver-0-c-6-LongRunRadiusScanLowerNxNyNz.py
     + nuei  200:
         * Lx  5: Finished after 3h 13 min - No mode
