@@ -61,7 +61,7 @@ int Celma::init(bool restarting) {
     artViscParUIPar *= SQ(mesh->dy(0,0));
     artViscParVortD *= SQ(mesh->dy(0,0));
 
-    // The perpednicular diffusion is in our model never hyper
+    // The perpednicular diffusion is in our model
     artViscPerpLnN   *= SQ(mesh->dx(0,0) + mesh->dz);
     artViscPerpUEPar *= SQ(mesh->dx(0,0) + mesh->dz);
     artViscPerpUIPar *= SQ(mesh->dx(0,0) + mesh->dz);
@@ -307,7 +307,7 @@ int Celma::rhs(BoutReal t) {
     // ************************************************************************
 
 
-    
+
     // Terms in vorticity
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;
