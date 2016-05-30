@@ -24,7 +24,6 @@ restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e2]
-nout      *= len(timestep)
 directory  = "a-data"
 # Shall we make?
 make       = False
