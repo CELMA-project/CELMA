@@ -7,17 +7,47 @@ Results:
 a-data
 ------
 -  PBSDriver-0-a-0-nuEI600.py
-    + offset 1: Finished after 1 steps, killed by walltime (6h)
-    + offset 2: Finished after 1 steps, killed by walltime (6h)
-    + offset 5: Finished after 2 steps, killed by walltime (6h)
+    + offset 1: Finished after 1 steps, killed by walltime (6h) - Some modes growing up (more star pattern at the edge)
+    + offset 2: Finished after 1 steps, killed by walltime (6h) - Some modes growing up (star pattern at the edge)
+    + offset 5: Finished after 2 steps, killed by walltime (6h) - Some modes growing up
 -  PBSDriver-0-a-1-OffsetScanLowerNxNyNzAddArtPerp.py
-    + offset 1: Running
-    + offset 2: Running
-    + offset 5: Running
+    + nuei  100:
+        * offset 1: Finishes 9 steps, then killed by walltime (24h) - See some turbulence like stuff in phi (with 2-mode)
+        * offset 2: Running (previous did not exit program properly)
+        * offset 5: Finishes 9 steps, then killed by walltime (24h) - Some modes, but disappearing
+    + nuei  200:
+        * offset 1: Running
+        * offset 2: Running
+        * offset 5: Running
+
 
 Summaries
 =========
 
-Comparision of 0-c-5-1 and 7-CELMAAnnulus/0-a-1
------------------------------------------------
-Waiting for runs to finish
+Comparision of 5-CELMAWNoise/0-c-5-1 and 7-CELMAAnnulus/0-a-1
+-------------------------------------------------------------
+Could be that the two encompass different physics, but for now it looks
+like the annulus solution is not the reason why Jarrods HERMES
+implementation is faster
+
++ nuei 100, artPar 1e0:
+    1. 0-c-5-1
+        * Finishes (10h 2m) and developes 1 mode
+    2. 0-a-1
+        * offset 1:
+            Killed by walltime (24 h) [could be that modes are developing]
+        * offset 2:
+            Running
+        * offset 5:
+            Killed by walltime (24 h) [some modes present, but they are disappearing]
+
++ nuei 200, artPar 1e0:
+    1. 0-c-5-1
+        * Finishes (7h 25min) develops 1 mode, but unsure if finishes developement
+    2. 0-a-1
+        * offset 1:
+            Running
+        * offset 2:
+            Running
+        * offset 5:
+            Running
