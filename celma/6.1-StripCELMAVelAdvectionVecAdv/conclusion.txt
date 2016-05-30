@@ -7,17 +7,31 @@ Results:
 a-data
 ------
 -  PBSDriver-0-a-0-LongRunFewerNy.py
-    + nuei 300: Running
-    + nuei 100: Finished 2 steps - Killed by walltime (24h)
+    + nuei 300: Finishes 6 steps - Killed by walltime (24h) - 1 mode in phi, but seems to disappear
+    + nuei 100: Finished 3 steps - Killed by walltime (24h) - 1 mode in phi, but seems to disappear
 -  PBSDriver-0-a-1-nuEI100LongRunLowerNxNyNzAddArtPar1.py
     + nuei  100:
         * artPar 1e0 : Didn't even finish one timestep (18 min)
+    + nuei  200:
+        * artPar 1e0 : Running
 
 
 
 Summaries
 =========
 
-Comparision of 0-c-5-1 and 6.1-StripCELMAVelAdvectionVecAdv/0-a-1
------------------------------------------------------------------
-Waiting for runs to finish
+Comparision of 5-CELMAWNoise/0-c-5-1 and 6.1-StripCELMAVelAdvectionVecAdv/0-a-1
+-------------------------------------------------------------------------------
+As for now, it doesn't look like this is a good step either
+
++ nuei 100, artPar 1e0:
+    1. 0-c-5-1
+        * Finishes (10h 2m) and developes 1 mode
+    2. 0-a-1
+        * Didn't even finish one timestep - too small timestep (18 min)
+
++ nuei 200, artPar 1e0:
+    1. 0-c-5-1
+        * Finishes (7h 25min) develops 1 mode, but unsure if finishes developement
+    2. 0-a-1
+        * Running
