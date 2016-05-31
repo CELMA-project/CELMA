@@ -1,0 +1,9 @@
+Copied from 5-CELMAWNoise
+
+Testing if filtering of noise helps on "star pattern"
+
+Results:
+========
+a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
+-------------------------------------------------------
+Not run yet
