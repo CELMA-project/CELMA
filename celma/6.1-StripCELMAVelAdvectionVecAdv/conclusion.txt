@@ -13,7 +13,7 @@ a-data
     + nuei  100:
         * artPar 1e0 : Didn't even finish one timestep (18 min)
     + nuei  200:
-        * artPar 1e0 : Running
+        * artPar 1e0 : Finished 4 timesteps, then breaks at Naulin Solver (2h 49m)
 
 
 
@@ -34,4 +34,4 @@ As for now, it doesn't look like this is a good step either
     1. 0-c-5-1
         * Finishes (7h 25min) develops 1 mode, but unsure if finishes developement
     2. 0-a-1
-        * Running
+        * Finishes 4 timesteps, Naulin Solver fails (2h 49m)
