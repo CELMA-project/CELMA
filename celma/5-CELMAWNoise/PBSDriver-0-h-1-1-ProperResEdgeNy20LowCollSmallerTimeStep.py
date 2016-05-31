@@ -16,23 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [5]
-artPar  = [5e0]
-artPerp = [5e-2]
-ny = [24]
-nx = [18]
-nz = [32*2, 32*4]
-nx *= len(nz)
-ny *= len(nz)
+eiCollisions = [5, 0.1]
+ny = 20
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/nx_18_ny_24_nz_32/cst_artPar_5.0_cst_artPerp_0.05_cst_nuEI_5_tag_0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp_0/"
+restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [25, 5e2]
+timestep   = [1, 25]
 nout      *= len(timestep)
 directory  = "h-fromCProperResEdge"
 # Shall we make?
@@ -49,16 +40,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-3-1-c531nuEI5RestartMoreNz"
+theRunName = "0-h-1-1-ProperResEdgeNy20LowCollSmallerTimeStep"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
+nproc                 = 40
 BOUT_nodes            = 2
-BOUT_ppn              = 12
+BOUT_ppn              = 20
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -75,9 +66,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            nx         = nx,\
-            ny         = ny,\
-            nz         = nz,\
+            ny         = ny    ,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -85,12 +74,9 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('cst','artPar',artPar),\
-                          ('cst','artPerp',artPerp),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
