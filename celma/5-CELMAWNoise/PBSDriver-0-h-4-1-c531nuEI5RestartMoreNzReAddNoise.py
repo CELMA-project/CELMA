@@ -24,6 +24,8 @@ nx = [18]
 nz = [32*2, 32*4]
 nx *= len(nz)
 ny *= len(nz)
+includeNoise = True
+forceAddNoise = True
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
@@ -49,7 +51,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-3-1-c531nuEI5RestartMoreNz"
+theRunName = "0-h-4-1-c531nuEI5RestartMoreNzReAddNoise"
 # =============================================================================
 
 
@@ -91,6 +93,8 @@ myRuns = PBS_runner(\
                           ('cst','nuEI',eiCollisions),\
                           ('cst','artPar',artPar),\
                           ('cst','artPerp',artPerp),\
+                          ('switch','includeNoise',includeNoise),\
+                          ('switch','forceAddNoise',forceAddNoise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
