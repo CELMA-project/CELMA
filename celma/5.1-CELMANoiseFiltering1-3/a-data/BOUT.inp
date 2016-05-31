@@ -242,6 +242,8 @@ inner_boundary_flags = 1024
 outer_boundary_flags = 0
 include_yguards = false # Do invert for the boundary cells
 global_flags = 4        # Only one guard in the x boundary for inner and outer
+# Filtering (default 0)
+filter = 0.334 # Filtering the top 1/3
 # Options to the NaulinSolver
 maxit = 1e6
 # =============================================================================

@@ -73,7 +73,7 @@ int Celma::init(bool restarting) {
     // 1/3 of number of gridpoints
     // NOTE: Currently GlobalNz returns MZ, which has the additional z
     //       plane
-    maxMode = int((mesh->GlobalNz - 1)/3.0)
+    maxMode = int(ceil((mesh->GlobalNz - 1)/3.0));
     // ************************************************************************
 
     // Calculate diffusion from grid size
@@ -249,11 +249,10 @@ int Celma::rhs(BoutReal t) {
     /* NOTE: Solve for phi
      * 1. phi and vort is output
      * 2. The solver takes care of perpendicular boundaries
+     * 3. Filtering of higher modes is done internally with the filter flag in
+     *    BOUT.inp
      */
     phi = ownLapl.NaulinSolver(gradPerpLnN, n, vortD, phi, vort);
-    // Filtering highest modes
-    // FIXME: Strictly speaking, this should be done for each inversion
-    phi = lowPass(phi, maxMode);
     // ************************************************************************
 
     // Treating parallel boundary conditions
