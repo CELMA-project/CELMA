@@ -12,13 +12,13 @@ a-data
     + offset 5: Finished after 2 steps, killed by walltime (6h) - Some modes growing up
 -  PBSDriver-0-a-1-OffsetScanLowerNxNyNzAddArtPerp.py
     + nuei  100:
-        * offset 1: Finishes 9 steps, then killed by walltime (24h) - See some turbulence like stuff in phi (with 2-mode)
-        * offset 2: Running (previous did not exit program properly)
-        * offset 5: Finishes 9 steps, then killed by walltime (24h) - Some modes, but disappearing
+        * offset 1: Finishes 9 steps, then killed by walltime (24h) - See some turbulence like stuff in phi (with 2-mode), some star in vort
+        * offset 2: Finishes 8 steps, then killed by wallitme (24h) - See some turbulence like stuff in phi (with 2-mode), star pattern in vort
+        * offset 5: Finishes 9 steps, then killed by walltime (24h) - Some modes, but disappearing, NO star found
     + nuei  200:
-        * offset 1: Running
-        * offset 2: Running
-        * offset 5: Running
+        * offset 1: Finishes 10 steps, then killed by walltime (24h) - See some turbulence like stuff in phi (with 2-mode), star pattern in vort
+        * offset 2: Finishes 19 steps, then killed by wallitme (24h) - See some turbulence like stuff in phi (with 2-mode), star pattern in vort
+        * offset 5: Finishes after 20 h                              - Some modes, but disappearing, NO star found
 
 
 Summaries
