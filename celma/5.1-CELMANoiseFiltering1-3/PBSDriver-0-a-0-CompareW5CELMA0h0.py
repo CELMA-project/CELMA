@@ -16,27 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [0.1]
-artPar  = [5e0]
-artPerp = [5e-2]
-ny = [24]
-nx = [18]
-nz = [32*2, 32*4]
-nx *= len(nz)
-ny *= len(nz)
-includeNoise = True
-forceAddNoise = True
+eiCollisions = [25, 5]
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/nx_18_ny_24_nz_32/cst_artPar_5.0_cst_artPerp_0.05_cst_nuEI_0.1_tag_0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp_0/"
+restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [25, 5e2]
-nout      *= len(timestep)
-directory  = "h-fromCProperResEdge"
+timestep   = [5e2]
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -51,7 +38,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-4-2-c531nuEI0.1RestartMoreNzReAddNoise"
+theRunName = "0-a-0-CompareW5CELMA0h0"
 # =============================================================================
 
 
@@ -77,9 +64,6 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            nx         = nx,\
-            ny         = ny,\
-            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -87,14 +71,9 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('cst','artPar',artPar),\
-                          ('cst','artPerp',artPerp),\
-                          ('switch','includeNoise',includeNoise),\
-                          ('switch','forceAddNoise',forceAddNoise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
