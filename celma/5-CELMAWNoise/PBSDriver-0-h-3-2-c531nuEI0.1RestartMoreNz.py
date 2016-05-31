@@ -32,8 +32,8 @@ restart    = "overwrite"
 restart_from = "c-smallerCylNoArtPerp/nout_20_timestep_500.0/nx_18_ny_24_nz_32/cst_artPar_5.0_cst_artPerp_0.05_cst_nuEI_0.1_tag_0-c-5-3-LongRunParArtScanLowerNxNyNzAddArtPerp_0/"
 remove_old = False
 nout       = [20]
-# timestep   = [25]
-timestep   = [5e2]
+timestep   = [25, 5e2]
+nout      *= len(timestep)
 directory  = "h-fromCProperResEdge"
 # Shall we make?
 make       = False
