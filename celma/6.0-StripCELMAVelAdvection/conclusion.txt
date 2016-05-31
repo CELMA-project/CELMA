@@ -1,6 +1,7 @@
 Copied from 5-CELMAWNoise
 
 Checking if we can identify the fast dynamics by reducing the system
+NOTE: This also removes damping from upwinding
 
 Results:
 ========
