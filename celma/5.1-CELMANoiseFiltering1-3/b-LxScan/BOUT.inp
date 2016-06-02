@@ -1,5 +1,5 @@
 #
-# Input file for "5.1-CELMANoiseFiltering1-3/data"
+# Input file for "5.1-CELMANoiseFiltering1-3/LxScan"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -27,8 +27,8 @@ MYG = 1
 [mesh]
 # Number of points
 nx = 16 + 2*MXG
-ny = 24
-nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+ny = 20
+nz = 64         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
