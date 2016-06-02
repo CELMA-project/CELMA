@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25, 5]
+eiCollisions = [25, 5, 0.1]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None

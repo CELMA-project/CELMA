@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 """Driver which runs using PBS."""
@@ -16,7 +17,8 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25, 5]
+eiCollisions = [25]
+nz = [256]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
@@ -38,7 +40,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-0-ProperResEdge"
+theRunName = "0-h-0-1-ProperResEdgeHigherNz"
 # =============================================================================
 
 
@@ -64,6 +66,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            nz         = nz    ,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
