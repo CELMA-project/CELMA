@@ -25,7 +25,7 @@ nz = [256]
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e2, 5e0]
+timestep   = [5e2, 5e1, 5e0]
 nout      *= len(timestep)
 directory  = "b-LxScan"
 # Shall we make?
