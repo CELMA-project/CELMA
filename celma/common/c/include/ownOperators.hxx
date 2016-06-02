@@ -74,7 +74,7 @@ class OwnOperators
         Field3D D3DZ3(const Field3D &f);
         //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
         Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
-        //! Operator for \f$\nabla\cdot_(\mathbf{u}_e \nabla_\perp \phi)\f$
+        //! Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
                                                const Field3D &phi);
         //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry

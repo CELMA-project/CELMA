@@ -15,12 +15,16 @@ from postProcessing.plotting import combined1D2D
 
 # The options for the run
 # =============================================================================
+# *****************************************************************************
+Lx = 10
+Ly = 100
+# *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = True
-nout       = 2
+nout       = 0
 timestep   = 1e-10
-directory  = "a-data"
+directory  = "c-MoreSource"
 # Shall we make?
 make       = True
 # The number of processors
@@ -50,7 +54,9 @@ myRuns = basic_runner(\
                       # Set temporal domain
                       nout       = nout      ,\
                       timestep   = timestep  ,\
-                      NXPE       = NXPE      ,\
+                      # Additional
+                      additional = [('geom', 'Lx', Lx),
+                                    ('geom', 'Ly', Ly)],\
                       # Copy the source file
                       cpy_source = True      ,\
                       make       = make      ,\
