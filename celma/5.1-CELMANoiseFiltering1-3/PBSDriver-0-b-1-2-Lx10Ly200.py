@@ -17,13 +17,18 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 eiCollisions = [25]
+Lx = 10
+nx = [32 + 2]
+ny = [40]
+nz = [128]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e-2]
-directory  = "c-MoreSource"
+timestep   = [5e0]
+nout      *= len(timestep)
+directory  = "b-LxScan"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,15 +43,15 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-0-CompareW0a0"
+theRunName = "0-b-1-2-Lx10Ly200"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 40
-BOUT_nodes            = 2
+nproc                 = 80
+BOUT_nodes            = 4
 BOUT_ppn              = 20
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
@@ -64,6 +69,9 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            nx         = nx,\
+            ny         = ny,\
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -74,6 +82,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('geom','Lx', Lx),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

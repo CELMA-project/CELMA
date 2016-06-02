@@ -17,17 +17,14 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 eiCollisions = [25]
-Lx = 5
-nx = [16 + 2]
-nz = [64]
+a = [5e-2, 1e-2, 5e-3]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e2, 5e1, 5e0]
-nout      *= len(timestep)
-directory  = "b-LxScan"
+timestep   = [5e-2]
+directory  = "c-MoreSource"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -42,7 +39,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-1-Lx5"
+theRunName = "0-c-0-CompareW0a0SAmpScan"
 # =============================================================================
 
 
@@ -68,8 +65,6 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            nx         = nx,\
-            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -80,7 +75,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('geom','Lx', Lx),\
+                          ('theSource','a',a),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
