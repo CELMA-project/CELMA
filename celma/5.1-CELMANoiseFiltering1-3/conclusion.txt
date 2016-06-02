@@ -4,6 +4,55 @@ Testing if filtering of noise helps on "star pattern"
 
 Results:
 ========
+
 a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
 -------------------------------------------------------
-Not run yet
+-  PBSDriver-0-a-0-CompareW5CELMA0h0.py
+    + nuEI  25: Runs 5 steps, then too small steps (11h) - Looks fine, can see that the vorticity starts with small ring-shape, touches the wall and goes back
+    + nuEI   5: Finishes 3 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
+    + nuEI 0.1: Finishes 2 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
+-  PBSDriver-0-a-0.2
+-  PBSDriver-0-a-0.3
+-  PBSDriver-0-a-0-1-CompareW5CELMA0h0RestartNuEI25.py
+-  PBSDriver-0-a-0-1-1-CompareW5CELMA0h0RestartNuEI25.py
+-  PBSDriver-0-a-0-2-CompareW5CELMA0h0RestartNuEI25.py
+
+
+b-LxScan
+--------
+-  PBSDriver-0-b-0-1-Lx5.py
+    + timestep 5e2: Did not even finish one timestep, killed by walltime (24h)
+    + timestep 5e0: Running
+-  PBSDriver-0-b-0-2-Lx10.py
+    + timestep 5e2: Finished 1 timestep, killed by walltime (24h) - Very thin boundary on vort
+    + timestep 5e0: Running
+-  PBSDriver-0-b-0-3-Lx15.py
+    + timestep 5e2: Did not even finish one timestep, too small timestep (16h)
+    + timestep 5e0: Running
+-  PBSDriver-0-b-0-4-Lx20.py
+    + timestep 5e2: Did not even finish one timestep, too small timestep (6h)
+    + timestep 5e0: Running
+
+
+c-MoreSource
+------------
+
+
+
+Summaries:
+----------
+Orzsag's 2/3 filter prevents the star pattern formation
+
+
+4-mode
+------
+0-a-0 -   5 nuei - 24h (killed by walltime)
+
+5-mode
+------
+0-a-0 - 0.1 nuei - 24h (killed by walltime)
+
+Turbulence:
+-----------
+0-a-0 -  25 nuei - 11h (too small step)
+0-a-0 -   5 nuei - 24h (killed by walltime)

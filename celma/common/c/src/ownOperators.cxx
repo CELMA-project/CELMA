@@ -339,6 +339,19 @@ Field3D OwnOperators::D3DZ3(const Field3D &f)
  *   \nabla_\perp g
  * \f}
  *
+ * The expression for the perpendicular Laplacian can be found in the
+ * coordinates manual. Note that in cylinder coordinates
+ *
+ * \f{eqnarray}{
+ *   G^x &=& \frac{1}{J}\\
+ *   G^y &=& 0\\
+ *   G^z &=& 0\\
+ *   g^{zz} &=& \frac{1}{\rho^2}\\
+ *   g^{yy}\partial_y^2
+ *   - \frac{1}{J}\partial_y\left(\frac{J}{g^{yy}}\partial_y\right)
+ *   &=& 0
+ * \f}
+ *
  * \param[in] f The f field
  * \param[in] g The g field
  *
@@ -352,8 +365,8 @@ Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f,
     Field3D result;
 
     result =   f*D2DX2(g)
-             + (f/J2)*D2DZ2(g)
              + (f/J)*DDX(g)
+             + (f/J2)*D2DZ2(g)
              + DDX(f)*DDX(g)
              + (1/J2)*DDZ(f)*DDZ(g)
              ;
@@ -362,7 +375,7 @@ Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f,
 }
 
 /*!
- * Operator for \f$\nabla\cdot_(\mathbf{u}_e \nabla_\perp \phi)\f$ using
+ * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
  * cylindrical geometry. The derivation can be found in the derivation folder.
  *
  * \param[in] n The density
