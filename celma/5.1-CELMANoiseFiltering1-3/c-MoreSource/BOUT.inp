@@ -1,5 +1,5 @@
 #
-# Input file for "5.1-CELMANoiseFiltering1-3/data"
+# Input file for "5.1-CELMANoiseFiltering1-3/MoreSource"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -27,8 +27,8 @@ MYG = 1
 [mesh]
 # Number of points
 nx = 16 + 2*MXG
-ny = 24
-nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+ny = 20
+nz = 64         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -141,16 +141,20 @@ includeNoise = true
 # The source
 # =============================================================================
 [theSource]
-# Made as a gaussian function
-a    = 0.05
-bRho = 0*geom:Lx
-bZ   = (1.0/6.0)*geom:Ly
-cRho = (1.0/3.0)*geom:Lx
-cZ   = (7.0/150.0)*geom:Ly
+# The amplitude
+a = 0.05
 # Radial profile
-radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
+radialWidth     = 17*2*(30/geom:Lx)
+radialCentre    = 0
+radialSteepness = 0.3
+radialProf      = tanhhat(geom:xl, theSource:radialWidth, theSource:radialCentre, theSource:radialSteepness)
+# Parallel profile
+parWidth     = 80*2*(150/geom:Ly)
+parCentre    = 0
+parSteepness = 0.06
+parProf      = tanhhat(geom:yl, theSource:parWidth, theSource:parCentre, theSource:parSteepness)
 # Source
-S          = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+S = a*radialProf*parProf
 # =============================================================================
 
 

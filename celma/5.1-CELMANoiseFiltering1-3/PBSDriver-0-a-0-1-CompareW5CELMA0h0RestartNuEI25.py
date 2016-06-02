@@ -16,14 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25, 5]
+eiCollisions = [25]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_500.0/cst_nuEI_25_tag_0-a-0-CompareW5CELMA0h0_0/"
 remove_old = False
-nout       = [20]
-timestep   = [5e2]
-directory  = "h-fromCProperResEdge"
+nout       = [50, 6, 7]
+timestep   = [2, 25, 25]
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,7 +41,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-0-ProperResEdge"
+theRunName = "0-a-0-1-CompareW5CELMA0h0RestartNuEI25"
 # =============================================================================
 
 
@@ -71,6 +74,7 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
