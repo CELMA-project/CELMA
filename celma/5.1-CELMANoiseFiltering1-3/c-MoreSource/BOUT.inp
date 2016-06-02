@@ -142,16 +142,17 @@ includeNoise = true
 # =============================================================================
 [theSource]
 # The amplitude
-a = 0.05
+# a = 0.05
+a = 1.0
 # Radial profile
-radialWidth     = 17*2*(30/geom:Lx)
+radialWidth     = 0.5*2*geom:Lx
 radialCentre    = 0
-radialSteepness = 0.3
+radialSteepness = 5/geom:Lx
 radialProf      = tanhhat(geom:xl, theSource:radialWidth, theSource:radialCentre, theSource:radialSteepness)
 # Parallel profile
-parWidth     = 80*2*(150/geom:Ly)
+parWidth     = 0.5*2*geom:Ly
 parCentre    = 0
-parSteepness = 0.06
+parSteepness = 5/geom:Ly
 parProf      = tanhhat(geom:yl, theSource:parWidth, theSource:parCentre, theSource:parSteepness)
 # Source
 S = a*radialProf*parProf
