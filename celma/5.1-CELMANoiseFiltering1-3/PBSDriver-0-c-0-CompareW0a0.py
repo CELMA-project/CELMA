@@ -16,14 +16,14 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25, 5]
+eiCollisions = [25]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e2]
-directory  = "h-fromCProperResEdge"
+timestep   = [5e-2]
+directory  = "c-MoreSource"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,16 +38,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-h-0-ProperResEdge"
+theRunName = "0-c-0-CompareW0a0"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
+nproc                 = 40
 BOUT_nodes            = 2
-BOUT_ppn              = 12
+BOUT_ppn              = 20
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
