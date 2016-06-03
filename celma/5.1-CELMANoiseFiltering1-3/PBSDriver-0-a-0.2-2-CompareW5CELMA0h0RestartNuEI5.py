@@ -16,16 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25]
-a = [5e-2, 1e-2, 5e-3]
+eiCollisions = [5]
 # *****************************************************************************
 # Set the temporal domain
-restart    = None
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_500.0/cst_nuEI_5_tag_0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5_0/"
 remove_old = False
 nout       = [20]
-timestep   = [5e-2, 5e-5]
-nout      *= len(timestep)
-directory  = "c-MoreSource"
+timestep   = [5e1]
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -40,16 +41,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-0-CompareW0a0SAmpScan"
+theRunName = "0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 40
+nproc                 = 24
 BOUT_nodes            = 2
-BOUT_ppn              = 20
+BOUT_ppn              = 12
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -73,10 +74,10 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
-                          ('theSource','a',a),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
