@@ -247,7 +247,7 @@ g-smallerCylLowerMassRatioLowerNxNyNz/
 h-fromCProperResEdge/
 ---------------------
 -  PBSDriver-0-h-0-ProperResEdge.py
-    + nuei 25: Finished 4 steps, then too low timestep (12h) - Looks like turbulence, but killed by starformation (128 spikes)
+    + nuei 25: Finished 4 steps, then too low timestep (12h) - Looks like turbulence, but killed by star formation (128 spikes)
     + nuei  5: Finished 3 steps, then killed by walltime (24h) -
 -  PBSDriver-0-h-1-ProperResEdgeNy20LowColl.py
     + nuei   5: Running
