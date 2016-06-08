@@ -19,12 +19,10 @@ from postProcessing.plotting import combinedDriver
 eiCollisions = [25]
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
 # Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "a-data/nout_20_timestep_500.0/cst_nuEI_25_tag_0-a-0-CompareW5CELMA0h0_0/"
+restart    = None;
 remove_old = False
-nout       = [50]
+nout       = [100]
 timestep   = [2]
 directory  = "a-data"
 # Shall we make?
@@ -39,9 +37,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 4
 zSlice     = 0
+tSlice     = slice(0, 50)
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-1-CompareW5CELMA0h0RestartNuEI25"
+theRunName = "0-a-0-2-CompareW5CELMA0h0RestartNuEI25"
 # =============================================================================
 
 
@@ -74,7 +73,6 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
@@ -110,6 +108,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
