@@ -1,0 +1,7 @@
+Copied from 5-CELMAWNoise
+
+Filtering dependent on the radial position
+
+Results:
+========
+Not run yet
