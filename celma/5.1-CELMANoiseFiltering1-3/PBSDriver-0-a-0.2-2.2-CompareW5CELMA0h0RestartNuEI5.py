@@ -16,15 +16,15 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-eiCollisions = [25]
+eiCollisions = [5]
 # *****************************************************************************
 # Set the temporal domain
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_500.0/cst_nuEI_25_tag_0-a-0-CompareW5CELMA0h0_0/"
+restart_from = "a-data/nout_2_timestep_50.0/cst_nuEI_5_tag_0-a-0.2-2.1-CompareW5CELMA0h0RestartNuEI5_0/"
 remove_old = False
-nout       = [50]
+nout       = [100]
 timestep   = [2]
 directory  = "a-data"
 # Shall we make?
@@ -41,7 +41,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-1-CompareW5CELMA0h0RestartNuEI25"
+theRunName = "0-a-0.2-2.2-CompareW5CELMA0h0RestartNuEI5"
 # =============================================================================
 
 
