@@ -41,7 +41,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5"
+theRunName = "0-a-0.2-2-CompareW5CELMA0h0RestartNuEI5"
 # =============================================================================
 
 
