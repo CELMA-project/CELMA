@@ -14,13 +14,11 @@ a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
 -  PBSDriver-0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5.py
     + nuEI   5: Finished 2 steps, then too small step (17h) - See nice 3 mode
 -  PBSDriver-0-a-0.2-2.1-CompareW5CELMA0h0RestartNuEI5.py
-    + nuEI   5: Finished 4 steps, then Naulin Solver crashes after small timesteps (2h) - Start with 3 mode, then evolves to 4 mode !!! Problems at the boundaries
--  PBSDriver-0-a-0.2-2.2-CompareW5CELMA0h0RestartNuEI5.py
     # Same as 0-a-0.2-2.1, but with ending the simulation after 100 omci
-    + nuEI   5: Finishes after 1h 2m - Looks fine
--  PBSDriver-0-a-0.2-3-CompareW5CELMA0h0RestartNuEI5.py
-    # Restart of 0-a-0.2-2.2
-    + nuEI   5: To be run
+    + nuEi   5: Finishes after 1h 2m - Looks fine
+-  PBSDriver-0-a-0.2-2.2-CompareW5CELMA0h0RestartNuEI5.py
+    # Restart of 0-a-0.2-2.1
+    + nuEI   5: Finishes 45 steps, then too small timestep (1h 9m) - Can see this fast perturbation in vorticity at the same position as previously
 -  PBSDriver-0-a-0.3-1-CompareW5CELMA0h0RestartNuEI0.1.py
     + nuEI 0.1: Finished after 1 timetep, killed by walltime (24h) - Looks OK - 3 mode
 -  PBSDriver-0-a-0.3-2-CompareW5CELMA0h0RestartNuEI0.1.py
@@ -38,24 +36,27 @@ a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
 
 b-LxScan
 --------
+# NOT CHECKED ALL PLOTS YET
 -  PBSDriver-0-b-0-1-Lx5.py
     + timestep 5e2: Did not even finish one timestep, killed by walltime (24h)
-    + timestep 5e1: Running
-    + timestep 5e0: Running
+    + timestep 5e1: Did not even finish one timestep, killed by walltime (24h)
+    + timestep 5e0: Did not even finish one timestep, killed by walltime (24h)
 -  PBSDriver-0-b-0-2-Lx10.py
     + timestep 5e2: Finished 1 timestep, killed by walltime (24h) - Very thin boundary on vort
-    + timestep 5e1: Running
+    + timestep 5e1: Finished 10 timestpes, killed by walltime (24h)
     + timestep 5e0: Finished after 27 min - Looks fine
 -  PBSDriver-0-b-0-3-Lx15.py
     + timestep 5e2: Did not even finish one timestep, too small timestep (16h)
-    + timestep 5e1: Running
+    + timestep 5e1: Completed 4 timesteps, then too small timestep (19h)
     + timestep 5e0: Finished after 2h 22 m - Parallel blow up in phi, uePar and vorts
 -  PBSDriver-0-b-0-4-Lx20.py
     + timestep 5e2: Did not even finish one timestep, too small timestep (6h)
-    + timestep 5e1: Running
-    + timestep 5e0: Running
+    + timestep 5e1: Finished 1 timestep, then too small timestep (5h 29m)
+    + timestep 5e0: Finished 16 steps, then killed by walltime (24h)
 -  PBSDriver-0-b-1-2-1-Lx10ny40.py
+    + timestep 5: Finished after 5h 47m
 -  PBSDriver-0-b-1-2-Lx10Ly200.py
+    + timestep 5: Finished after 14m
 
 
 c-MoreSource
