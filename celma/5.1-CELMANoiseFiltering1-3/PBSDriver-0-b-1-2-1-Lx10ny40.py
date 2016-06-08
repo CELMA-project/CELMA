@@ -43,7 +43,7 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-1-2-Lx10Ly200"
+theRunName = "0-b-1-2-1-Lx10ny40"
 # =============================================================================
 
 
