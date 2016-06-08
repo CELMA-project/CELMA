@@ -11,31 +11,43 @@ a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
     + nuEI  25: Runs 5 steps, then too small steps (11h) - Looks fine, can see that the vorticity starts with small ring-shape, touches the wall and goes back
     + nuEI   5: Finishes 3 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
     + nuEI 0.1: Finishes 2 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
--  PBSDriver-0-a-0.2
--  PBSDriver-0-a-0.3
+-  PBSDriver-0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5.py
+    FIXME - Finished 2 steps, then too small step (17h) - See nice 3 mode
+-  PBSDriver-0-a-0.3-1-CompareW5CELMA0h0RestartNuEI0.1.py
+    FIXME
 -  PBSDriver-0-a-0-1-CompareW5CELMA0h0RestartNuEI25.py
+    FIXME
 -  PBSDriver-0-a-0-1-1-CompareW5CELMA0h0RestartNuEI25.py
+    FIXME
 -  PBSDriver-0-a-0-2-CompareW5CELMA0h0RestartNuEI25.py
+    FIXME
 
 
 b-LxScan
 --------
 -  PBSDriver-0-b-0-1-Lx5.py
     + timestep 5e2: Did not even finish one timestep, killed by walltime (24h)
+    + timestep 5e1: Running
     + timestep 5e0: Running
 -  PBSDriver-0-b-0-2-Lx10.py
     + timestep 5e2: Finished 1 timestep, killed by walltime (24h) - Very thin boundary on vort
-    + timestep 5e0: Running
+    + timestep 5e1: Running
+    + timestep 5e0: Finished after 27 min - Looks fine
 -  PBSDriver-0-b-0-3-Lx15.py
     + timestep 5e2: Did not even finish one timestep, too small timestep (16h)
-    + timestep 5e0: Running
+    + timestep 5e1: Running
+    + timestep 5e0: Finished after 2h 22 m - Parallel blow up in phi, uePar and vorts
 -  PBSDriver-0-b-0-4-Lx20.py
     + timestep 5e2: Did not even finish one timestep, too small timestep (6h)
+    + timestep 5e1: Running
     + timestep 5e0: Running
+-  PBSDriver-0-b-1-2-1-Lx10ny40.py
+-  PBSDriver-0-b-1-2-Lx10Ly200.py
 
 
 c-MoreSource
 ------------
+-  PBSDriver-0-c-0-CompareW0a0SAmpScan.py
 
 
 
@@ -43,6 +55,9 @@ Summaries:
 ----------
 Orzsag's 2/3 filter prevents the star pattern formation
 
+3-mode
+------
+0-a-0.2-1 -  5 nuei - 17 h (too small timestep)
 
 4-mode
 ------
