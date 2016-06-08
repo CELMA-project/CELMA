@@ -1,0 +1,12 @@
+5.1-CELMANoiseFiltering1-3
+
+Correcting mistake that filtering away 2/3 of the modes in ddt
+This could in principle take away energy sinks in the system
+
+Results:
+========
+
+a-data
+------
+-  PBSDriver-0-a-0-CompareW5CELMA0h0.py
+    + nuEI  25: Running
