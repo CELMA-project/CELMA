@@ -17,15 +17,13 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 eiCollisions = [25]
+ny = 20
 # *****************************************************************************
 # Set the temporal domain
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "a-data/nout_20_timestep_500.0/cst_nuEI_25_tag_0-a-0-CompareW5CELMA0h0_0/"
+restart    = None
 remove_old = False
-nout       = [50]
-timestep   = [2]
+nout       = [20]
+timestep   = [5e2]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -41,16 +39,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-1-CompareW5CELMA0h0RestartNuEI25"
+theRunName = "0-a-0-CompareW5CELMA0h0"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
+nproc                 = 40
 BOUT_nodes            = 2
-BOUT_ppn              = 12
+BOUT_ppn              = 20
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -67,6 +65,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            ny         = ny,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -74,7 +73,6 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
