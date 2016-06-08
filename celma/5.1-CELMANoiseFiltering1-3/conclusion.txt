@@ -12,15 +12,28 @@ a-data (copied from 5-CELMAWNoise/h-fromCProperResEdge)
     + nuEI   5: Finishes 3 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
     + nuEI 0.1: Finishes 2 steps, then killed by walltime (24h) - Looks fine, mode structures and probably start of turbulence
 -  PBSDriver-0-a-0.2-1-CompareW5CELMA0h0RestartNuEI5.py
-    FIXME - Finished 2 steps, then too small step (17h) - See nice 3 mode
+    + nuEI   5: Finished 2 steps, then too small step (17h) - See nice 3 mode
+-  PBSDriver-0-a-0.2-2.1-CompareW5CELMA0h0RestartNuEI5.py
+    + nuEI   5: Finished 4 steps, then Naulin Solver crashes after small timesteps (2h) - Start with 3 mode, then evolves to 4 mode !!! Problems at the boundaries
+-  PBSDriver-0-a-0.2-2.2-CompareW5CELMA0h0RestartNuEI5.py
+    # Same as 0-a-0.2-2.1, but with ending the simulation after 100 omci
+    + nuEI   5: Finishes after 1h 2m - Looks fine
+-  PBSDriver-0-a-0.2-3-CompareW5CELMA0h0RestartNuEI5.py
+    # Restart of 0-a-0.2-2.2
+    + nuEI   5: To be run
 -  PBSDriver-0-a-0.3-1-CompareW5CELMA0h0RestartNuEI0.1.py
-    FIXME
+    + nuEI 0.1: Finished after 1 timetep, killed by walltime (24h) - Looks OK - 3 mode
+-  PBSDriver-0-a-0.3-2-CompareW5CELMA0h0RestartNuEI0.1.py
+    + nuEI 0.1: Running
 -  PBSDriver-0-a-0-1-CompareW5CELMA0h0RestartNuEI25.py
-    FIXME
--  PBSDriver-0-a-0-1-1-CompareW5CELMA0h0RestartNuEI25.py
-    FIXME
+    # Restart of 0-a-0
+    + nout 50 timestep  2: Finished after 19 mins - Looks OK, can see vort out on the boundary, and growing
 -  PBSDriver-0-a-0-2-CompareW5CELMA0h0RestartNuEI25.py
-    FIXME
+    # Restart of 0-a-0-1
+    + nout 100 timestep  2: Finished 55 steps, then too small timesteps (44 min) - last couple of steps gives counter rotation in vort at high velocity
+-  PBSDriver-0-a-0-2-CompareW5CELMA0h0RestartNuEI25PLOTTING1.py
+    # Just plotting of 0-a-0-2
+    + See structure rotating, then at one point fast blob coming out of nowhere in the vorticity
 
 
 b-LxScan
@@ -48,7 +61,14 @@ b-LxScan
 c-MoreSource
 ------------
 -  PBSDriver-0-c-0-CompareW0a0SAmpScan.py
-
+    + timestep 5e-2:
+        * a 5e-2: Didn't even finish one timestep (killed by walltime)
+        * a 1e-2: Didn't even finish one timestep (killed by walltime)
+        * a 5e-3: Didn't even finish one timestep (killed by walltime)
+    + timestep 5e-5:
+        * a 5e-2: Didn't even finish one timestep (killed by walltime)
+        * a 1e-2: Didn't even finish one timestep (killed by walltime)
+        * a 5e-3: Didn't even finish one timestep (killed by walltime)
 
 
 Summaries:
@@ -57,7 +77,8 @@ Orzsag's 2/3 filter prevents the star pattern formation
 
 3-mode
 ------
-0-a-0.2-1 -  5 nuei - 17 h (too small timestep)
+0-a-0.2-1 -   5 nuei - 17 h (too small timestep)
+0-a-0.3-1 - 0.1 nuei - 24 h (killed by walltime)
 
 4-mode
 ------
@@ -66,6 +87,11 @@ Orzsag's 2/3 filter prevents the star pattern formation
 5-mode
 ------
 0-a-0 - 0.1 nuei - 24h (killed by walltime)
+
+Undetermined
+------------
+0-a-0.2-2.1 - Starts with 3 mode, evolves to 4 mode, and then to turbulence
+
 
 Turbulence:
 -----------
