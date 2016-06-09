@@ -24,7 +24,7 @@ restart    = None
 remove_old = True
 nout       = 0
 timestep   = 1e-10
-directory  = "c-MoreSource"
+directory  = "a-data"
 # Shall we make?
 make       = True
 # The number of processors
