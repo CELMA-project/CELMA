@@ -3,33 +3,24 @@
 
 #include "../include/ownFilters.hxx"
 
+// OwnFilters
+
 /*!
  * \brief Constructor
  *
- * Constructor which calculates lmabdaMin from kMax.
+ * Constructor which calculates kMax.
  * kMax is found from the Nyquist sampling theorem which basically states that
  * a given mode number k is properly resolved with 2*k points. In addition, in
  * order not to get aliasing from non-linear wave coupling, Orzsag 2/3 rule is
  * used.
  *
- * \note Do not confuse the mode number with the inverse wavelength. Instead,
- *       the relation \f$\lambda = \frac{C}{k}\f$ holds, where \f$C\f$ is the
- *       circumference
+ * \param[in] *options Pointer to options parser
  */
-OwnFilters::OwnFilters()
+OwnFilters::OwnFilters(Options *options)
 {
-    TRACE("Halt in OwnFilters::ownFilters");
+    TRACE("Halt in OwnFilters::OwnFilters");
 
     ncz = mesh->ngz-1;
-
-    // Get MXG
-    int MXG;
-    Options *options = Options::getRoot();
-    options->get("MXG", MXG, 2);
-
-    // GlobalNx includes the ghost points
-    BoutReal outerRho = (mesh->GlobalNx - 2*MXG - 0.5)*mesh->dx(0,0);
-    BoutReal outerCircumference = TWOPI*outerRho;
 
     /* FIXME: Write the Nyquist sampling theorem
      *        Found that can be expressed as
@@ -37,16 +28,115 @@ OwnFilters::OwnFilters()
      *        but need to formalize it
      */
     // Calculate the kMax from the Nyquist sampling theorem
-    int kMax = int(ncz/2.0);
+    kMax = int(ncz/2.0);
 
     // Use the Orzag's 2/3 rule
     kMax = int (floor((2.0/3.0)*kMax));
 
-    // Calculate the corresponding minimum wavelength
-    lambdaMin = outerCircumference/kMax;
-
     // Allocate fourierArray
     fourierArray = new dcomplex[ncz/2 + 1];
+}
+
+/*!
+ * This function now works as a constructor of the child-classes of OwnFilters
+ */
+OwnFilters* OwnFilters::createFilter(Options *options)
+{
+    TRACE("Halt in OwnFiltersFactory::newOwnFilter");
+
+    // The filter option is by defualt found in the ownFilter section
+    if(options == NULL){
+        options = Options::getRoot()->getSection("ownFilters");
+    }
+
+    string type;
+
+    options->get("type", type, "none");
+
+    if(type == lowercase("none")){
+        output << "Filter type set to 'none'" << std::endl;
+        return new AllPass(options);
+    }
+    else if(type == lowercase("radialLowPass")){
+        output << "Filter type set to 'radialLowPass'" << std::endl;
+        return new RadialLowPass(options);
+    }else {
+        // Create a stream which we cast to a string
+        std::ostringstream stream;
+        stream << "Filtertype '"<< type << "' not implemented\n"
+               << "Available filters:\n"
+               << "none          - No filtering will be performed\n"
+               << "radialLowPass - Filtering dependant on rho\n"
+               ;
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+
+        throw BoutException(message);
+    }
+}
+
+/*!
+ * \brief Destructor
+ *
+ * Deallocates the fourierArray
+ */
+OwnFilters::~OwnFilters()
+{
+    TRACE("Halt in OwnFilters::~OwnFilters");
+
+    // Deallocate fourierArray
+    delete[] fourierArray;
+}
+
+// AllPass
+
+/*!
+ * Filter modified from the standard LowPass filter in BOUT++.
+ * The shortest wavelength poloidally at any \f$\rho\f$ is being set from the
+ * Nyquist sampling theorem and Orszag's 2/3 rule at the outermost radius.
+ *
+ * The corresponding mode number to the shortest wavelength is calculated for a
+ * particular \f$\rho\f$, and is used as the maximum k at that \f$\rho\f$
+ *
+ * \param[in] var  Variable to be filtered.
+ *
+ * \returns result The filtered variable
+ */
+const Field3D AllPass::ownFilter(const Field3D &var)
+{
+    TRACE("Halt in AllPass::ownFilter");
+
+    return var;
+}
+
+// RadialLowPass
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which calculates lmabdaMin from kMax.
+ * The list initializer calls the parent constructor with an argument.
+ *
+ * \note Do not confuse the mode number with the inverse wavelength. Instead,
+ *       the relation \f$\lambda = \frac{C}{k}\f$ holds, where \f$C\f$ is the
+ *       circumference
+ */
+RadialLowPass::RadialLowPass(Options *options) : OwnFilters(options)
+{
+    TRACE("Halt in RadialLowPass::RadialLowPass");
+
+    // Get MXG
+    int MXG;
+    options = Options::getRoot();
+    options->get("MXG", MXG, 2);
+
+    // GlobalNx includes the ghost points
+    BoutReal outerRho = (mesh->GlobalNx - 2*MXG - 0.5)*mesh->dx(0,0);
+    BoutReal outerCircumference = TWOPI*outerRho;
+
+    // Calculate the corresponding minimum wavelength
+    lambdaMin = outerCircumference/kMax;
 
     // Throw exception if the only mode present in the center is the offset mode
     circumference = TWOPI*mesh->J(1, 0);  // Lowest circumference
@@ -69,9 +159,9 @@ OwnFilters::OwnFilters()
  *
  * \returns result The filtered variable
  */
-const Field3D OwnFilters::radialLowPass(const Field3D &var)
+const Field3D RadialLowPass::ownFilter(const Field3D &var)
 {
-    TRACE("Halt in OwnFilters::radialLowPass");
+    TRACE("Halt in RadialLowPass::ownFilter");
 
     Field3D result;
 
@@ -104,19 +194,6 @@ const Field3D OwnFilters::radialLowPass(const Field3D &var)
     result.setLocation(var.getLocation());
 
     return result;
-}
-
-/*!
- * \brief Destructor
- *
- * Deallocates the fourierArray
- */
-OwnFilters::~OwnFilters()
-{
-    TRACE("Halt in OwnFilters::~ownFilters");
-
-    // Deallocate fourierArray
-    delete[] fourierArray;
 }
 
 #endif
