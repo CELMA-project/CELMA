@@ -17,6 +17,14 @@ int Celma::init(bool restarting) {
     ownLapl.create(ownOp, ownBC);
     // ************************************************************************
 
+    // Create the filter
+    // ************************************************************************
+    /* NOTE: Calls createFilter without making an object of ownFilter.
+     *       The child is typecasted to the parent
+     */
+    ownFilter = OwnFilters::createFilter();
+    // ************************************************************************
+
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
 
@@ -246,7 +254,7 @@ int Celma::rhs(BoutReal t) {
      */
     phi = ownLapl.NaulinSolver(gradPerpLnN, n, vortD, phi, vort);
     // Filter
-    phi = ownFilters.radialLowPass(phi);
+    phi = ownFilter->ownFilter(phi);
     // ************************************************************************
 
     // Treating parallel boundary conditions
@@ -294,7 +302,7 @@ int Celma::rhs(BoutReal t) {
                 + lnNPerpArtVisc
                 ;
     // Filtering highest modes
-    ddt(lnN) = ownFilters.radialLowPass(ddt(lnN));
+    ddt(lnN) = ownFilter->ownFilter(ddt(lnN));
     // ************************************************************************
 
 
@@ -320,7 +328,7 @@ int Celma::rhs(BoutReal t) {
         + uEParPerpArtVisc
         ;
     // Filtering highest modes
-    ddt(uEPar) = ownFilters.radialLowPass(ddt(uEPar));
+    ddt(uEPar) = ownFilter->ownFilter(ddt(uEPar));
     // ************************************************************************
 
 
@@ -346,7 +354,7 @@ int Celma::rhs(BoutReal t) {
         + uIParPerpArtVisc
         ;
     // Filtering highest modes
-    ddt(uIPar) = ownFilters.radialLowPass(ddt(uIPar));
+    ddt(uIPar) = ownFilter->ownFilter(ddt(uIPar));
     // ************************************************************************
 
 
@@ -382,7 +390,7 @@ int Celma::rhs(BoutReal t) {
             + vortDPerpArtVisc
             ;
     // Filtering highest modes
-    ddt(vortD) = ownFilters.radialLowPass(ddt(vortD));
+    ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
     // ************************************************************************
     return 0;
 }

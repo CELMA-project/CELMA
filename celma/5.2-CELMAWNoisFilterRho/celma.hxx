@@ -26,7 +26,8 @@
 // Gives own lowPass filter
 #include "../common/c/include/ownFilters.hxx"
 
-class Celma : public PhysicsModel {
+class Celma : public PhysicsModel
+{
 protected:
     int init(bool restarting);
     int rhs(BoutReal t);
@@ -72,7 +73,7 @@ private:
     // Auxiliary fields
     // *****************************************************************************
     Field3D n;               // Density
-    Field3D dampingProfile; // Radial profile
+    Field3D dampingProfile;  // Radial profile
     Field3D S;               // Particle source
     Field3D invJ;            // 1/J (used in front of the bracket operator)
     Vector3D gradPerpLnN;    // gradPerpLnN
@@ -98,7 +99,7 @@ private:
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
     OwnOperators ownOp;             // Class containing own differential operators
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
-    OwnFilters ownFilters;          // Class containing own filters
+    OwnFilters *ownFilter;          // Pointer to the chosen filter class
     // *****************************************************************************
 
     // Switches
@@ -106,11 +107,6 @@ private:
     bool includeNoise;   // Include noise
     bool forceAddNoise;  // Add noise on restart as well
     bool noiseAdded;     // A check whether the noise is added or not
-    // *****************************************************************************
-
-    // Max mode when using low-pass filter
-    // *****************************************************************************
-    int maxMode;
     // *****************************************************************************
 
     // Make a field group to communicate
