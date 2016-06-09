@@ -51,8 +51,9 @@ OwnFilters::OwnFilters()
     // Throw exception if the only mode present in the center is the offset mode
     circumference = TWOPI*mesh->J(1, 0);  // Lowest circumference
     kMaxCurrent   = int(floor(circumference/lambdaMin));
-    if(kMaxCurrent == 0){
-        throw BoutException("kMaxCurrent at inner rho is 0.\nFix by increasing nz");
+    if(kMaxCurrent <= 0){
+        throw BoutException("kMaxCurrent at inner rho is equal or below 0.\n"
+                            "Fix by increasing nz");
     }
 }
 
@@ -83,8 +84,7 @@ const Field3D OwnFilters::radialLowPass(const Field3D &var)
     for(int xInd=0; xInd<mesh->ngx; xInd++) {
         // Set the current kMax (J = rho in cylinder coordinates)
         circumference = TWOPI*mesh->J(xInd, 0);
-        kMaxCurrent   = int(floor(circumference/lambdaMin));
-
+        kMaxCurrent   = int(abs(floor(circumference/lambdaMin)));
         for(int yInd=0; yInd<mesh->ngy; yInd++) {
             // Take the FFT for a given radius at a given parallel plane
             rfft(&(var(xInd, yInd, 0)), ncz, fourierArray);
@@ -97,8 +97,7 @@ const Field3D OwnFilters::radialLowPass(const Field3D &var)
 
             // Reverse FFT
             irfft(fourierArray, ncz, &(result(xInd, yInd, 0)));
-
-            result(xInd, yInd, 0) = result(xInd, yInd, 0);
+            result(xInd, yInd, ncz) = result(xInd, yInd, 0);
         }
     }
 
