@@ -2,6 +2,8 @@ Copied from 5-CELMAWNoise
 
 Testing if filtering of noise helps on "star pattern"
 
+NOTE: BetterProc not working as the domain split is not working
+
 Results:
 ========
 
@@ -38,9 +40,9 @@ b-LxScan
 --------
 # NOT CHECKED ALL PLOTS YET
 -  PBSDriver-0-b-0-1-Lx5.py
-    + timestep 5e2: Did not even finish one timestep, killed by walltime (24h)
-    + timestep 5e1: Did not even finish one timestep, killed by walltime (24h)
-    + timestep 5e0: Did not even finish one timestep, killed by walltime (24h)
+    + timestep 5e2: Did not even finish one timestep, killed by walltime (24h) !!! Wrong domain split
+    + timestep 5e1: Did not even finish one timestep, killed by walltime (24h) !!! Wrong domain split
+    + timestep 5e0: Did not even finish one timestep, killed by walltime (24h) !!! Wrong domain split
 -  PBSDriver-0-b-0-2-Lx10.py
     + timestep 5e2: Finished 1 timestep, killed by walltime (24h) - Very thin boundary on vort
     + timestep 5e1: Finished 10 timestpes, killed by walltime (24h)
@@ -63,13 +65,13 @@ c-MoreSource
 ------------
 -  PBSDriver-0-c-0-CompareW0a0SAmpScan.py
     + timestep 5e-2:
-        * a 5e-2: Didn't even finish one timestep (killed by walltime)
-        * a 1e-2: Didn't even finish one timestep (killed by walltime)
-        * a 5e-3: Didn't even finish one timestep (killed by walltime)
+        * a 5e-2: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
+        * a 1e-2: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
+        * a 5e-3: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
     + timestep 5e-5:
-        * a 5e-2: Didn't even finish one timestep (killed by walltime)
-        * a 1e-2: Didn't even finish one timestep (killed by walltime)
-        * a 5e-3: Didn't even finish one timestep (killed by walltime)
+        * a 5e-2: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
+        * a 1e-2: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
+        * a 5e-3: Didn't even finish one timestep (killed by walltime) !!! Wrong domain split
 
 
 Summaries:
