@@ -1,7 +1,9 @@
 5.1-CELMANoiseFiltering1-3
 
 Correcting mistake that filtering away 2/3 of the modes in ddt
-This could in principle take away energy sinks in the system
+This could in principle have taken away energy sinks in the system
+
+NOTE: BetterProc not working as the domain split is not working
 
 Results:
 ========
@@ -14,4 +16,4 @@ a-data
         ^ The dynamics in vort is comletely different from that of the case in 5.1-0-a-0
         ^ The dynamics in n looks somewhat similar (although different)
 -  PBSDriver-0-a-0-CompareW5CELMA0h0BetterProc.py
-    + nuEI  25, ny = 20: Running
+    + nuEI  25, ny = 20: Did not even finish one timestep
