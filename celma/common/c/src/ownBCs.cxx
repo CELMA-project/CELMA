@@ -33,6 +33,26 @@ OwnBCs::OwnBCs(){
      *       ystart-1 = first guard point
      */
     firstLowerYGhost = mesh->ystart-1;
+
+    /* Check that there are enough points
+     * ngy is the size of local mesh including guard cells
+     */
+    if (mesh->ngy - 2*mesh->ystart < 4){
+
+        // Create a stream which we cast to a string
+        std::ostringstream stream;
+        stream << "Not enough inner points i the y-direction\n"
+               << "The cauchy and uEPar BC needs 3 inner points in y\n"
+               << "extrapolateYUp and extrapolateYDown needs 4 inner points "
+               << "in y\n"
+               << "Currently the number of inner points is "
+               << mesh->ngy - 2*mesh->ystart;
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+
+        throw BoutException(message);
+    }
 }
 
 // Member functions
@@ -393,7 +413,7 @@ void OwnBCs::getAFunction(const string &section)
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "'a' not found in section '" << section << "' "
-               << "but is needed when setting the Cauchy BC";
+               << "but is needed when setting the Cauchy BC\n";
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
         const char* message = str.c_str();
