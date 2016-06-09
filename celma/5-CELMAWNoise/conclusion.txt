@@ -325,19 +325,19 @@ Undetermined
 
 Comparision of 0-c-5-1 and 0-g-0
 --------------------------------
-Waiting for runs to finish
+To be compared
 
 
 Comparision of 0-c-5-1 and 6.0-StripCELMAVelAdvection/0-a-1
 -----------------------------------------------------------
-Waiting for runs to finish
+To be compared
 
 
 Comparision of 0-c-5-1 and 6.1-StripCELMAVelAdvectionVecAdv/0-a-1
 -----------------------------------------------------------------
-Waiting for runs to finish
+To be compared
 
 
 Comparision of 0-c-5-1 and 7-CELMAAnnulus/0-a-1
 -----------------------------------------------
-Waiting for runs to finish
+To be compared
