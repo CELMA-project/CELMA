@@ -4,4 +4,4 @@ Filtering dependent on the radial position
 
 Results:
 ========
-Not run yet
+Looks like made a mistake: Only get 2-mode
