@@ -48,6 +48,7 @@ int Celma::init(bool restarting) {
     cst->get("artViscPerpUEPar", artViscPerpUEPar, 0.0);
     cst->get("artViscPerpUIPar", artViscPerpUIPar, 0.0);
     cst->get("artViscPerpVortD", artViscPerpVortD, 0.0);
+    cst->get("artHyperAzVortD",  artHyperAzVortD,  0.0);
     // ************************************************************************
 
     // Get the source constants
@@ -63,8 +64,9 @@ int Celma::init(bool restarting) {
     // Get the switches
     // ************************************************************************
     Options *switches = options->getSection("switch");
-    switches->get("includeNoise", includeNoise, false);
-    switches->get("forceAddNoise", forceAddNoise, false);
+    switches->get("useHyperViscAzVortD", useHyperViscAzVortD, false);
+    switches->get("includeNoise"       , includeNoise       , false);
+    switches->get("forceAddNoise"      , forceAddNoise      , false);
     noiseAdded = false;
     if (restarting && !(forceAddNoise)){
         output << "\n\n\n!!!!Warning!!!\n"
@@ -90,6 +92,9 @@ int Celma::init(bool restarting) {
     artViscPerpUEPar *= SQ(mesh->dx(0,0) + mesh->dz);
     artViscPerpUIPar *= SQ(mesh->dx(0,0) + mesh->dz);
     artViscPerpVortD *= SQ(mesh->dx(0,0) + mesh->dz);
+
+    // Azimuthal hyperviscosities
+    artHyperAzVortD *= SQ(SQ(mesh->dz));
     // ************************************************************************
 
     // Load from the geometry
@@ -378,6 +383,12 @@ int Celma::rhs(BoutReal t) {
     uiUeGradN                  =   Vpar_Grad_par(uIPar - uEPar, n);
     vortDParArtVisc            =   artViscParVortD*D2DY2(vortD);
     vortDPerpArtVisc           =   artViscPerpVortD*Laplace_perp(vortD);
+    if (useHyperViscAzVortD){
+        vortDhyperVisc = - artHyperAzVortD*D4DZ4(vortD);
+    }
+    else{
+        vortDhyperVisc = 0.0;
+    }
 
     ddt(vortD) =
               vortNeutral
@@ -388,6 +399,7 @@ int Celma::rhs(BoutReal t) {
             + uiUeGradN
             + vortDParArtVisc
             + vortDPerpArtVisc
+            + vortDhyperVisc
             ;
     // Filtering highest modes
     ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
