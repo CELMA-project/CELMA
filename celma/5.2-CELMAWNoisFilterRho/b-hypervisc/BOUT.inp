@@ -1,5 +1,5 @@
 #
-# Input file for "5.1-CELMANoiseFiltering1-3/data"
+# Input file for "5.2-CELMAWNoisFilterRho/hypervisc"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -130,12 +130,17 @@ artViscPerpLnN   = artPerp
 artViscPerpUEPar = artPerp
 artViscPerpUIPar = artPerp
 artViscPerpVortD = artPerp
+
+# Azimuthal hyperdiffusion
+artHyperAzVortD = 0.1
 # =============================================================================
 
 # Switches
 # =============================================================================
 [switch]
-includeNoise = true
+includeNoise        = true
+forceAddNoise       = false
+useHyperViscAzVortD = true
 # =============================================================================
 
 # The source
@@ -252,6 +257,6 @@ maxit = 1e6
 # The filter
 # =============================================================================
 [ownFilters]
-type = radialLowPass
+type = none
 # =============================================================================
 ##############################################################################

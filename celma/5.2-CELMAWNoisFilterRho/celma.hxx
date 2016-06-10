@@ -63,6 +63,7 @@ private:
     Field3D vortNeutral, potNeutral;
     Field3D divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi;
     Field3D nGradUiUe, uiUeGradN, vortDParArtVisc, vortDPerpArtVisc;
+    Field3D vortDhyperVisc;
     // *****************************************************************************
 
     // Temporary fields
@@ -91,6 +92,8 @@ private:
     // Perpendicular dissipation
     BoutReal artViscPerpLnN, artViscPerpUEPar, artViscPerpUIPar;
     BoutReal artViscPerpVortD;
+    // Azimuthal hyperviscosities
+    BoutReal artHyperAzVortD;
     // *****************************************************************************
 
     // Additional methods and solvers
@@ -104,9 +107,10 @@ private:
 
     // Switches
     // *****************************************************************************
-    bool includeNoise;   // Include noise
-    bool forceAddNoise;  // Add noise on restart as well
-    bool noiseAdded;     // A check whether the noise is added or not
+    bool includeNoise;        // Include noise
+    bool forceAddNoise;       // Add noise on restart as well
+    bool noiseAdded;          // A check whether the noise is added or not
+    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
     // *****************************************************************************
 
     // Make a field group to communicate
