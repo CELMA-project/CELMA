@@ -4,4 +4,5 @@ Filtering dependent on the radial position
 
 Results:
 ========
-Looks like made a mistake: Only get 2-mode
+-  PBSDriver-0-a-0-CompareW5CELMA0h0.py
+    + nuei 25: Completes 6 steps, then too small timestep (15 h) - Looks ok

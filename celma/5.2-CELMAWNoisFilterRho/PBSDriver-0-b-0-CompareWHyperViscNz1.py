@@ -17,14 +17,15 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 eiCollisions = [25]
-ny = 20
+includeNoise = False
 # *****************************************************************************
+nz = 1
 # Set the temporal domain
 restart    = None
 remove_old = False
 nout       = [20]
-timestep   = [5e2]
-directory  = "a-data"
+timestep   = [5e1]
+directory  = "b-hypervisc"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -39,16 +40,16 @@ ySlice     = 4
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-CompareW5CELMA0h0"
+theRunName = "0-b-0-CompareWHyperViscNz1"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 40
+nproc                 = 24
 BOUT_nodes            = 2
-BOUT_ppn              = 20
+BOUT_ppn              = 12
 BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -65,7 +66,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            ny         = ny,\
+            nz         = nz ,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -76,6 +77,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('cst','nuEI',eiCollisions),\
+                          ('switch','includeNoise',includeNoise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
