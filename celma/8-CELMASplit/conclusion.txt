@@ -1,0 +1,14 @@
+Copied from 5.2-CELMAWNoisFilterRho
+
+- Made model split
+  NOTE: The split is ignored for non-split solvers, and the rhs will simply be
+        the sum of the split
+- Parallel current terms now combined (numerical operators should resemble
+  conserved quantities)
+- Changed Grad_par with DDY (Grad_par divides by sqrt(g_22))
+
+Results:
+========
+a-data
+------
+Not yet implemented
