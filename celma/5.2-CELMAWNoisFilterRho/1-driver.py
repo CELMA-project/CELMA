@@ -22,7 +22,7 @@ Ly = 100
 # Set the temporal domain
 restart    = None
 remove_old = True
-nout       = 0
+nout       = 2
 timestep   = 1e-10
 directory  = "a-data"
 # Shall we make?
