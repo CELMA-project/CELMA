@@ -547,28 +547,30 @@ def getVortDFields(path):
     # Making the orgObj instance
     vortD = Organizer(r"\Omega^D", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
-    vortD.lines.append(Line('vortNeutral'                        ,\
-         r'-\nu_{in}n\Omega'                                     ))
-    vortD.lines.append(Line('potNeutral'                         ,\
-         r'-\nu_{in}\nabla_\perp \phi \cdot \nabla_\perp n'      ))
-    vortD.lines.append(Line('divExBAdvGradPerpPhiN'              ,\
-         r'-\nabla\cdot\left('                                   +\
-         r'\mathbf{u}_E \cdot\nabla'                             +\
-         r'\left[ n \nabla_\perp \phi \right]'                   +\
-         r'\right)'                                              ))
-    vortD.lines.append(Line('parDerDivUIParNGradPerpPhi'         ,\
-         r'-\partial_\parallel \nabla\cdot\left('                +\
-         r'u_{i,\parallel} '                                     +\
-         r'n \nabla_\perp \phi'                                  +\
-         r'\right)'                                              ))
-    vortD.lines.append(Line('nGradUiUe'                          ,\
-         r'n\partial_\parallel (u_{i,\parallel}-u_{e,\parallel})'))
-    vortD.lines.append(Line('uiUeGradN'                          ,\
-        r'(u_{i,\parallel}-u_{e,\parallel})\partial_{\parallel}n'))
-    vortD.lines.append(Line('vortDParArtVisc'                    ,\
-         r'D_{\Omega^D} \partial^2_{\parallel}\Omega^D'          ))
-    vortD.lines.append(Line('vortDPerpArtVisc'                   ,\
-         r'D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D'           ))
+    vortD.lines.append(Line('vortNeutral'                          ,\
+         r'-\nu_{in}n\Omega'                                       ))
+    vortD.lines.append(Line('potNeutral'                           ,\
+         r'-\nu_{in}\nabla_\perp \phi \cdot \nabla_\perp n'        ))
+    vortD.lines.append(Line('divExBAdvGradPerpPhiN'                ,\
+         r'-\nabla\cdot\left('                                     +\
+         r'\mathbf{u}_E \cdot\nabla'                               +\
+         r'\left[ n \nabla_\perp \phi \right]'                     +\
+         r'\right)'                                                ))
+    vortD.lines.append(Line('parDerDivUIParNGradPerpPhi'           ,\
+         r'-\partial_\parallel \nabla\cdot\left('                  +\
+         r'u_{i,\parallel} '                                       +\
+         r'n \nabla_\perp \phi'                                    +\
+         r'\right)'                                                ))
+    vortD.lines.append(Line('nGradUiUe'                            ,\
+         r'n\partial_\parallel (u_{i,\parallel}-u_{e,\parallel})'  ))
+    vortD.lines.append(Line('uiUeGradN'                            ,\
+        r'(u_{i,\parallel}-u_{e,\parallel})\partial_{\parallel}n'  ))
+    vortD.lines.append(Line('divParCur'                            ,\
+        r'\partial_{\parallel}(n[u_{i,\parallel}-u_{e,\parallel}])'))
+    vortD.lines.append(Line('vortDParArtVisc'                      ,\
+         r'D_{\Omega^D} \partial^2_{\parallel}\Omega^D'            ))
+    vortD.lines.append(Line('vortDPerpArtVisc'                     ,\
+         r'D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D'             ))
 
     return vortD
 #}}}
