@@ -53,8 +53,9 @@ html/
 # CELMA-dev
 visualization/
 celma/*/celma
-gaussianWSinAndParabola/
-twoGaussians/
+nx_*/
+nz_*/
+MES_results/
 MES/singleOperators/0-DDXCylinder/DDXCylinder
 MES/singleOperators/1-D2DX2Cylinder/D2DX2Cylinder
 MES/singleOperators/2-D3DX3Cylinder/D3DX3Cylinder

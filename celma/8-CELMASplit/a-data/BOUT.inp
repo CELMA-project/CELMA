@@ -1,0 +1,266 @@
+#
+# Input file for "8-CELMASplit/data"
+#
+# x - The radial coordinate (rho)
+# y - The height of the cylinder (z)
+# z - The azimuthal coordinate (theta)
+
+# Root options
+###############################################################################
+nout = 2         # Number of output timesteps
+timestep = 1e-10 # Time between outputs
+
+dump_format="nc" # Write NetCDF format files
+
+# Setting the z coordinate
+ZMIN = 0.0
+ZMAX = 1.0 # dz = 2*pi(ZMAX - ZMIN)/(MZ - 1)
+
+# Number of guard cells
+MXG = 1
+MYG = 1
+###############################################################################
+
+
+# Mesh options
+###############################################################################
+[mesh]
+# Number of points
+nx = 16 + 2*MXG
+ny = 24
+nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+# The grid spacing
+# As the points are located half between grid points, there will be as many
+# line segments as points
+# NOTE: We must divide by INNER POINTS (different definition of nx and ny)
+dx = geom:Lx/(nx-2*MXG)
+dy = geom:Ly/(ny)
+# The metrics
+g33 = 1/(geom:xl^2)
+J = geom:xl
+# Puts the boundaries half a step outside the last gridpoints
+symmetricGlobalY=true
+symmetricGlobalX=true
+# Position of the separatrix (-1 is non periodic, >ny is periodic)
+# --------Non-periodic----------
+ixseps1 = -1
+ixseps2 = -1
+# ------------------------------
+###############################################################################
+
+
+# Methods options
+###############################################################################
+# Methods used for the radial (x) derivative terms
+[ddx]
+first  = C2 # d/dx (f)
+second = C2 # d^2/dx^2 (f)
+upwind = U1 # u*d/dx (f)
+
+#Methods used for the axial (y) derivative terms
+[ddy]
+first  = C2 # d/dy (f)
+second = C2 # d^2/dy^2 (f)
+upwind = U1 # u*d/dy (f)
+
+#Methods used for the azimuthal (z) derivative terms
+[ddz]
+first  = FFT # d/dz (f)
+second = FTT # d^2/dz^2 (f)
+###############################################################################
+
+
+# Solver settings
+###############################################################################
+[solver]
+# The solver advances the system in time
+type = pvode             # Which solver to use (cvode should be same as pvode)
+mms  = false             # false by default
+
+atol = 1.0e-10 # absolute tolerance
+rtol = 1.0e-5  # relative tolerance
+
+# cvode, pvode and rk4 options
+# NOTE: If this is set too high, the computer MIGHT interpret it as 0
+mxstep = 100000000
+###############################################################################
+
+
+# Specifying the output
+###############################################################################
+[output]
+floats = false # floats = false => output in double
+###############################################################################
+
+
+# Settings for the variables
+###############################################################################
+# Geometry
+# =============================================================================
+[geom]
+Lx = 5                      # The length of x from boundary to boundary
+Ly = 100                    # The length of y from boundary to boundary
+xl = x * geom:Lx            # x in range [0,Lx]
+yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
+# =============================================================================
+
+
+# Constants
+# =============================================================================
+[cst]
+# Hydrogren values for mu and Lambda
+mu     = 1836.36
+Lambda = log(sqrt(mu/(2.0*pi)))
+
+# Collision frequencies
+nuEI = 1e-2
+nuEN = 0.0
+nuIN = 0.0
+
+# Parallel artificial dissipation
+artPar = 5.0
+artViscParLnN    = artPar # Density
+artViscParUEPar  = artPar # Electron velocity
+artViscParUIPar  = artPar # Ion velocity
+# Vorticity
+# Should be 0, as parallel current [ue and ui] is known to all orders, i.e. no
+# drifts
+artViscParVortD  = 0.0
+
+# Perpendicular diffusion
+artPerp = 5e-2
+artViscPerpLnN   = artPerp
+artViscPerpUEPar = artPerp
+artViscPerpUIPar = artPerp
+# Should be zero due to gyroviscous cancellation
+artViscPerpVortD = 0.0
+
+# Azimuthal hyperdiffusion
+artHyperAzVortD = 0.1
+# =============================================================================
+
+# Switches
+# =============================================================================
+[switch]
+includeNoise        = true
+forceAddNoise       = false
+useHyperViscAzVortD = false
+# =============================================================================
+
+# The source
+# =============================================================================
+[theSource]
+# Made as a gaussian function
+a    = 0.05
+bRho = 0*geom:Lx
+bZ   = (1.0/6.0)*geom:Ly
+cRho = (1.0/3.0)*geom:Lx
+cZ   = (7.0/150.0)*geom:Ly
+# Radial profile
+radialProf = exp(-(geom:xl-bRho)^2.0/((cRho^2.0)))
+# Source
+S          = a*radialProf*exp(-(geom:yl-bZ)^2.0/(2.0*(cZ^2.0)))
+# =============================================================================
+
+
+# Damping profile
+# =============================================================================
+[dampProf]
+profile  = 1.0
+# =============================================================================
+
+
+# Logarithm of the density
+# =============================================================================
+[lnN]
+scale       = 1.0
+function    = xoutVal
+
+# Set xout value
+xoutVal       = -3
+
+# Boundaries
+bndry_xin   = none             # Manual boundary found in the code
+bndry_xout  = neumann_o2(0.0)  # Set to neumann
+bndry_yup   = neumann_o2(0.0)  # Assume zero gradients at sheat
+bndry_ydown = neumann_o2(0.0)  # Do not allow gradients at the source
+# =============================================================================
+
+
+# Parallel electron velocity
+# =============================================================================
+[uEPar]
+scale       = 1.0
+function    = uIPar:function
+# Boundaries
+bndry_xin   = none              # Manual boundary found in code
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
+bndry_yup   = none              # Set in the source code
+bndry_ydown = dirichlet_o4(0.0) # Stagnation point
+# =============================================================================
+
+
+# Parallel ion velocity
+# =============================================================================
+[uIPar]
+scale       = 1.0
+eq          = geom:yl^2/geom:Ly^2
+# Multiply with the radial profile of the source, and the damping profile
+function = eq * dampProf:profile
+
+# Boundaries
+bndry_xin   = none              # Manual boundary found in code
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
+# Due to differences in velocity, not all yup are at the ion sound speed
+bndry_yup   = dirichlet_o4(dampProf:profile)
+bndry_ydown = dirichlet_o4(0.0)  # Stagnation point
+# =============================================================================
+
+
+# The potential phi
+# =============================================================================
+[phi]
+# Boundaries of the iterative scheme set in the Naulin solver
+function    = 0.0
+# Boundary needed for D3DX3
+bndry_xout  = dirichlet_o4(phi:function)
+# =============================================================================
+
+
+# Non-boussinesq vorticity
+# =============================================================================
+[vortD]
+scale       = 1.0
+function    = 0.0               # Initial vorticity (set in the code)
+# Boundaries
+bndry_xin   = none              # Manual boundary found in the code
+bndry_xout  = neumann_o2(0.0)   # Set to neumann
+bndry_yup   = neumann_o2(0.0)
+bndry_ydown = neumann_o2(0.0)   # Location of density source
+# =============================================================================
+
+
+# The solver
+# =============================================================================
+[phiSolver]
+# Inner boundary flag is set to be cylinder like (see the manual for the
+# numbers)
+inner_boundary_flags = 1024
+# Outer boundary flag
+# 0 - dirichlet 0 is used
+outer_boundary_flags = 0
+include_yguards = false # Do invert for the boundary cells
+global_flags = 4        # Only one guard in the x boundary for inner and outer
+# Filtering (default 0)
+filter = 0.0 # Filtering will happen after the inversion is done
+# Options to the NaulinSolver
+maxit = 1e6
+# =============================================================================
+
+
+# The filter
+# =============================================================================
+[ownFilters]
+type = radialLowPass
+# =============================================================================
+##############################################################################
