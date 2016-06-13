@@ -23,6 +23,11 @@ class OwnBCs
         int firstUpperYGhost; //!< Given that the processor has a boundary
         int firstLowerYGhost; //!< Given that the processor has a boundary
 
+        /*! If a warning is given rather than throwing an error if
+         *  insufficient number of points is found
+         */
+        bool warnPoints;
+
         // Member functions
         //! A function which loops over the inner boundary
         void innerRhoCylinderLoop(Field3D &the_field,

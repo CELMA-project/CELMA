@@ -24,6 +24,10 @@ class OwnOperators
         // Data members
         //! Should xboundary be calculated in D3DZ3
         bool incXBndry;
+        /*! If a warning is given rather than throwing an error if
+         *  insufficient number of points is found
+         */
+        bool warnPoints;
         //! Value of last X, used in D3DZ3
         BoutReal globalLastXVal;
         //! Function generator for D3DZ3
