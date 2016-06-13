@@ -64,6 +64,8 @@ OwnOperators::OwnOperators(const string &section) :
     /* Check that there are enough points
      * ngx is the size of local mesh including guard cells
      */
+    Options *switchOptions = Options::getRoot()->getSection("switch");
+    switchOptions->get("warnPoints", warnPoints, false);
     if (mesh->ngx - 2*mesh->xstart < 4){
 
         // Create a stream which we cast to a string
@@ -72,11 +74,16 @@ OwnOperators::OwnOperators(const string &section) :
                << "D3DX3 needs 4 inner points  x\n"
                << "Currently the number of inner points is "
                << mesh->ngx- 2*mesh->xstart;
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
 
-        throw BoutException(message);
+        if (warnPoints){
+            output << "\n\n!!! WARNING" << stream << "\n\n" << std::endl;
+        }
+        else{
+            std::string str =  stream.str();
+            // Cast the stream to a const char in order to use it in BoutException
+            const char* message = str.c_str();
+            throw BoutException(message);
+        }
     }
 }
 
