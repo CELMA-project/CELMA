@@ -86,7 +86,7 @@ private:
     BoutReal nuEI, nuEN, nuIN;      // electron, ion, and neutral collision freqs
     BoutReal a, bRho, bZ, cRho, cZ; // Variables used in the source term
     BoutReal Lx, Ly;                // The box dimensions
-    // Parallel aritifical dissipation
+    // Parallel artificial dissipation
     BoutReal artViscParLnN, artViscParUEPar, artViscParUIPar;
     BoutReal artViscParVortD;
     // Perpendicular dissipation
@@ -100,8 +100,8 @@ private:
     // *****************************************************************************
     BRACKET_METHOD bm;              // The bracket method
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
-    OwnOperators ownOp;             // Class containing own differential operators
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
+    OwnOperators *ownOp;            // Pointer to the chosen operators class
     OwnFilters *ownFilter;          // Pointer to the chosen filter class
     // *****************************************************************************
 
