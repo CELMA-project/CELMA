@@ -92,7 +92,7 @@ private:
     // *****************************************************************************
     BRACKET_METHOD bm;              // The bracket method
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
-    OwnOperators ownOp;             // Class containing own differential operators
+    OwnOperators *ownOp;            // Pointer to the chosen operators class
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
     // *****************************************************************************
 

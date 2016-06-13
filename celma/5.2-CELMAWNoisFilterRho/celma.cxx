@@ -12,17 +12,18 @@
 int Celma::init(bool restarting) {
     TRACE("Halt in Celma::init");
 
-    // Create the solver
-    // ************************************************************************
-    ownLapl.create(ownOp, ownBC);
-    // ************************************************************************
-
-    // Create the filter
+    // Create classes from factories
     // ************************************************************************
     /* NOTE: Calls createFilter without making an object of ownFilter.
      *       The child is typecasted to the parent
      */
     ownFilter = OwnFilters::createFilter();
+    ownOp     = OwnOperators::createOperators();
+    // ************************************************************************
+
+    // Create the solver
+    // ************************************************************************
+    ownLapl.create(ownOp, ownBC);
     // ************************************************************************
 
     // Get the option (before any sections) in the BOUT.inp file
@@ -245,7 +246,7 @@ int Celma::rhs(BoutReal t) {
      *    derivative
      */
     mesh->communicate(lnN);
-    gradPerpLnN = ownOp.Grad_perp(lnN);
+    gradPerpLnN = ownOp->Grad_perp(lnN);
     n = exp(lnN);
     // ************************************************************************
 
@@ -365,7 +366,7 @@ int Celma::rhs(BoutReal t) {
 
     // Preparation
     // ************************************************************************
-    DivUIParNGradPerpPhi = ownOp.div_f_GradPerp_g(uIPar*n, phi);
+    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
     // Set the ghost points in order to take DDY
     ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
     // We must communicate as we will take DDY
@@ -376,8 +377,8 @@ int Celma::rhs(BoutReal t) {
     // Terms in vorticity
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;
-    potNeutral                 = - nuIN*ownOp.Grad_perp(phi)*ownOp.Grad_perp(n);
-    divExBAdvGradPerpPhiN      = - ownOp.div_uE_dot_grad_n_GradPerp_phi(n, phi);
+    potNeutral                 = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
+    divExBAdvGradPerpPhiN      = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
     nGradUiUe                  =   Vpar_Grad_par(n, uIPar - uEPar);
     uiUeGradN                  =   Vpar_Grad_par(uIPar - uEPar, n);
