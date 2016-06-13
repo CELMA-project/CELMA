@@ -512,11 +512,13 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
  *
  * \param[in] n The density
  * \param[in] phi The potential
+ * \param[in] vortD The modified vorticity (not used here)
  *
  * \return result The result of the operation
  */
 Field3D OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                          const Field3D &phi)
+                                                          const Field3D &phi,
+                                                          const Field3D &vortD)
 {
     TRACE("Halt in OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi");
 
@@ -577,5 +579,84 @@ Field3D OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
 
     return result;
 }
+
+// OwnOpOnlyBracket
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which calls parent constructor and sets the bracket method
+ */
+OwnOpOnlyBracket::OwnOpOnlyBracket(Options *options) :
+    OwnOperators(options)
+{
+    TRACE("Halt in OwnOpOnlyBracket::OwnOpOnlyBracket");
+
+    bm = BRACKET_ARAKAWA;
+}
+
+/*!
+ * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
+ * cylindrical geometry.
+ *
+ * \param[in] n The density (not used here)
+ * \param[in] phi The potential
+ * \param[in] vortD The modified vorticity
+ *
+ * \return result The result of the operation
+ *
+ * \warning This implementation lacks the correction terms
+ */
+Field3D OwnOpOnlyBracket::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                         const Field3D &phi,
+                                                         const Field3D &vortD)
+{
+    TRACE("Halt in OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi");
+
+    return - invJ*bracket(phi, vortD, bm);
+}
+
+// OwnOp2Brackets
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which calls parent constructor and sets the bracket method
+ */
+OwnOp2Brackets::OwnOp2Brackets(Options *options) :
+    OwnOperators(options)
+{
+    TRACE("Halt in OwnOp2Brackets::OwnOp2Brackets");
+
+    bm = BRACKET_ARAKAWA;
+}
+
+/*!
+ * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
+ * cylindrical geometry. The derivation can be found in the derivation folder.
+ *
+ * \param[in] n The density (not used here)
+ * \param[in] phi The potential
+ * \param[in] vortD The modified vorticity
+ *
+ * \return result The result of the operation
+ */
+Field3D OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                       const Field3D &phi,
+                                                       const Field3D &vortD)
+{
+    TRACE("Halt in OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi");
+
+    Field3D result;
+
+    result = - invJ          *bracket(phi, vortD         , bm)
+             - invJ *DDX(phi)*(DDX(n)*DDZ(phi) - DDZ(n)*DDX(phi))
+             - invJ3*DDZ(phi)*bracket(n  , DDZ(phi, true), bm)
+             + invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
+        ;
+
+    return result;
+}
+
 
 #endif
