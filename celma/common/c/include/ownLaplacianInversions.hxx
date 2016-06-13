@@ -46,7 +46,7 @@ class OwnLaplacianInversions
 
         // Member functions
         //! Alternative to a constructor
-        void create(OwnOperators &opObj,
+        void create(OwnOperators *opObj,
                     OwnBCs &BCObj,
                     const string &section = "phiSolver");
         //! The NaulinSolver
