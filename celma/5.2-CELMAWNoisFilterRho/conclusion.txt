@@ -1,6 +1,8 @@
 Copied from 5-CELMAWNoise
 
 Filtering dependent on the radial position
+Added possibility to run with hypervisc
+Removed dz from perpendicular visc (makes it possible to expand from nz=1)
 
 Results:
 ========
