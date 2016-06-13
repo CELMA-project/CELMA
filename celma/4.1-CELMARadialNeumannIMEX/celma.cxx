@@ -15,6 +15,10 @@ int Celma::init(bool restarting)
 
     // Create the solver
     // ************************************************************************
+    /* NOTE: Calls createOperators without making an object of OwnOperators.
+     *       The child is typecasted to the parent
+     */
+    ownOp = OwnOperators::createOperators();
     ownLapl.create(ownOp, ownBC);
     // ************************************************************************
 
@@ -185,7 +189,7 @@ int Celma::convective(BoutReal t)
      *    derivative
      */
     mesh->communicate(lnN);
-    gradPerpLnN = ownOp.Grad_perp(lnN);
+    gradPerpLnN = ownOp->Grad_perp(lnN);
     n = exp(lnN);
     // ************************************************************************
 
@@ -280,7 +284,7 @@ int Celma::convective(BoutReal t)
 
     // Preparation
     // ************************************************************************
-    DivUIParNGradPerpPhi = ownOp.div_f_GradPerp_g(uIPar*n, phi);
+    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
     // Set the ghost points in order to take DDY
     ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
     // We must communicate as we will take DDY
@@ -291,7 +295,7 @@ int Celma::convective(BoutReal t)
     // Terms in vorticity
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;
-    potNeutral                 = - nuIN*ownOp.Grad_perp(phi)*ownOp.Grad_perp(n);
+    potNeutral                 = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
     nGradUiUe                  =   Vpar_Grad_par(n, uIPar - uEPar);
     uiUeGradN                  =   Vpar_Grad_par(uIPar - uEPar, n);
 
@@ -337,7 +341,7 @@ int Celma::diffusive(BoutReal t, bool linear)
      *    derivative
      */
     mesh->communicate(lnN);
-    gradPerpLnN = ownOp.Grad_perp(lnN);
+    gradPerpLnN = ownOp->Grad_perp(lnN);
     n = exp(lnN);
     // ************************************************************************
 
@@ -408,7 +412,7 @@ int Celma::diffusive(BoutReal t, bool linear)
 
     // Preparation
     // ************************************************************************
-    DivUIParNGradPerpPhi = ownOp.div_f_GradPerp_g(uIPar*n, phi);
+    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
     // Set the ghost points in order to take DDY
     ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
     // We must communicate as we will take DDY
@@ -418,7 +422,7 @@ int Celma::diffusive(BoutReal t, bool linear)
 
     // Terms in vorticity
     // ************************************************************************
-    divExBAdvGradPerpPhiN      = - ownOp.div_uE_dot_grad_n_GradPerp_phi(n, phi);
+    divExBAdvGradPerpPhiN      = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
     vortDParArtVisc            =   artViscParVortD*D2DY2(vortD);
     vortDPerpArtVisc           =   artViscPerpVortD*Laplace_perp(vortD);

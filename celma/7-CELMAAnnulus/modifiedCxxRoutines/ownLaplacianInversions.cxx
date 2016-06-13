@@ -12,7 +12,7 @@
  * \param[in] BCObj Object containing own boundary conditions
  * \param[in] section Section to read the input data from
  */
-void OwnLaplacianInversions::create(OwnOperators &opObj,
+void OwnLaplacianInversions::create(OwnOperators *opObj,
                                     OwnBCs &BCObj,
                                     const string &section)
 {
@@ -20,7 +20,7 @@ void OwnLaplacianInversions::create(OwnOperators &opObj,
     TRACE("Halt in OwnLaplacianInversions::OwnLaplacianInversions");
 
     // Set the operator and boundary object
-    ownOp = &opObj;
+    ownOp = opObj;
 
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
