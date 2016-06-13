@@ -6,6 +6,8 @@
 
 class OwnOperators;
 class OwnOpSimpleStupid;
+class OwnOpOnlyBracket;
+class OwnOp2Brackets;
 
 // OwnOperators
 
@@ -40,6 +42,7 @@ class OwnOperators
         Field2D J2; //!< The Jacobian raised to power 2
         Field2D J3; //!< The Jacobian raised to power 3
 
+        Field2D invJ ; //!< The inverse of the Jacobian
         Field2D invJ2; //!< The inverse of the Jacobian raised to power 2
         Field2D invJ3; //!< The inverse of the Jacobian raised to power 3
         Field2D invJ4; //!< The inverse of the Jacobian raised to power 4
@@ -61,13 +64,17 @@ class OwnOperators
         Vector3D Grad_perp(const Field3D &f);
         /*! Operator for
          * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+         *
+         * Vort is set to 0.0 to have backward compability
          */
         /* NOTE: The = 0 is needed
          *       Tells the compiler that no function body will be given
          *       (pure virtual)
          */
-        virtual Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                       const Field3D &phi) = 0;
+        virtual Field3D div_uE_dot_grad_n_GradPerp_phi(
+                                                const Field3D &n,
+                                                const Field3D &phi,
+                                                const Field3D &vortD = 0.0) = 0;
 
         // Auxiliary functions
         //! Getter for IncXbndry
@@ -133,7 +140,7 @@ class OwnOpSimpleStupid : public OwnOperators
         /**@{*/
         Field3D n_z,    n_zz; //!< \f$\theta\f$ derivatives of \f$n\f$
         /**@}*/
-        Field3D n_xz; //!< Mixed derivatives of \f$n\f$
+        Field3D n_xz;   //!< Mixed derivatives of \f$n\f$
     public:
         // Constructors
         OwnOpSimpleStupid(Options *options, string &phiBndrySec);
@@ -145,7 +152,8 @@ class OwnOpSimpleStupid : public OwnOperators
          * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
          */
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                               const Field3D &phi);
+                                               const Field3D &phi,
+                                               const Field3D &vortD = 0.0);
 
         //! Destructor
         /* NOTE: {} in the end is needed
@@ -153,6 +161,98 @@ class OwnOpSimpleStupid : public OwnOperators
          *       "udefined reference to `vtable for ...'"
          */
         virtual ~OwnOpSimpleStupid(){};
+};
+
+// OwnOpOnlyBracket
+
+/*!
+ * \class OwnOpSimpleStupid
+ *
+ * \brief Simple stupid implementation of
+ *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+ *
+ * The implementation is just using normal finite differences. No Arakawa
+ * brackets is used. There are indications that this scheme is not energy
+ * conserving.
+ *
+ * Inherit from OwnOperators through public inheritance.
+ *
+ * \warning This implementation has been found to create high \f$k\f$ structures
+ *
+ * \warning The following is only suitable if using a cylindrical Clebsch
+ *          coordinate system
+ *
+ * \author Michael Løiten
+ * \date 2016.07.13
+ */
+class OwnOpOnlyBracket : public OwnOperators
+{
+    private:
+        BRACKET_METHOD bm;   //!< The bracket method
+    public:
+        // Constructors
+        OwnOpOnlyBracket(Options *options);
+
+        // Member data
+        /*! Operator for
+         * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+         */
+        Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                               const Field3D &phi,
+                                               const Field3D &vortD = 0.0);
+
+        //! Destructor
+        /* NOTE: {} in the end is needed
+         *       If else the compiler gives
+         *       "udefined reference to `vtable for ...'"
+         */
+        virtual ~OwnOpOnlyBracket(){};
+};
+
+// OwnOp2Brackets
+
+/*!
+ * \class OwnOpSimpleStupid
+ *
+ * \brief Simple stupid implementation of
+ *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+ *
+ * The implementation is just using normal finite differences. No Arakawa
+ * brackets is used. There are indications that this scheme is not energy
+ * conserving.
+ *
+ * Inherit from OwnOperators through public inheritance.
+ *
+ * \warning This implementation has been found to create high \f$k\f$ structures
+ *
+ * \warning The following is only suitable if using a cylindrical Clebsch
+ *          coordinate system
+ *
+ * \author Michael Løiten
+ * \date 2016.07.13
+ */
+class OwnOp2Brackets : public OwnOperators
+{
+    private:
+        BRACKET_METHOD bm;   //!< The bracket method
+    public:
+        // Constructors
+        OwnOp2Brackets(Options *options);
+
+        // Member data
+        /*! Operator for
+         * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+         */
+        Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                               const Field3D &phi,
+                                               const Field3D &vortD = 0.0);
+
+        //! Destructor
+        /* NOTE: {} in the end is needed
+         *       If else the compiler gives
+         *       "udefined reference to `vtable for ...'"
+         */
+        virtual ~OwnOp2Brackets(){};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file
