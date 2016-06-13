@@ -88,10 +88,10 @@ int Celma::init(bool restarting) {
     artViscParVortD *= SQ(mesh->dy(0,0));
 
     // The perpednicular diffusion is in our model
-    artViscPerpLnN   *= SQ(mesh->dx(0,0) + mesh->dz);
-    artViscPerpUEPar *= SQ(mesh->dx(0,0) + mesh->dz);
-    artViscPerpUIPar *= SQ(mesh->dx(0,0) + mesh->dz);
-    artViscPerpVortD *= SQ(mesh->dx(0,0) + mesh->dz);
+    artViscPerpLnN   *= SQ(mesh->dx(0,0));
+    artViscPerpUEPar *= SQ(mesh->dx(0,0));
+    artViscPerpUIPar *= SQ(mesh->dx(0,0));
+    artViscPerpVortD *= SQ(mesh->dx(0,0));
 
     // Azimuthal hyperviscosities
     artHyperAzVortD *= SQ(SQ(mesh->dz));
