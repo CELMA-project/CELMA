@@ -90,6 +90,14 @@ floats = false # floats = false => output in double
 ###############################################################################
 
 
+# Switches
+###############################################################################
+[switch]
+# Give a warning rather than throwing error when insufficient number of points
+warnPoints = true
+###############################################################################
+
+
 # Settings for the variables
 ###############################################################################
 # Geometry
