@@ -20,22 +20,24 @@ The following assumes that
 home = os.path.expanduser("~")
 petsc = os.path.join(home, "petsc-3.5.4")
 
+# NOTE: The following flags are those which are printed out when running
+#       make after configuring
+
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
 # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
 flags = [
 # BOUT++ Flags
-'-g',
-'-O2',
-'-g ',
-'-O0',
-'-Og',
 '-DCHECK=3',
 '-DSIGHANDLE',
 '-DTRACK',
 '-DNCDF',
 '-DBOUT_HAS_PETSC',
-'-DBOUT_HAS_PETSC_DEV',
+'-DBOUT_HAS_PETSC_3_5',
+'-DBOUT_HAS_IDA',
+'-DBOUT_HAS_CVODE',
+'-DCVODEINT=long',
+'-DIDAINT=long',
 '-DBOUT_HAS_PVODE',
 # BOUT++ Flags Added by me (these are needed in order to make it run)
 '-I{}/BOUT-dev'.format(home),
@@ -45,6 +47,8 @@ flags = [
 '-I{}/include'.format(petsc),
 '-I{}/arch-linux2-cxx-debug/include'.format(petsc),
 '-I{}/anaconda3/envs/py27/include'.format(home),
+# CVODE flags
+'-I{}/local/include'.format(home),
 ]
 
 
