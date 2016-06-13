@@ -4,5 +4,19 @@ Filtering dependent on the radial position
 
 Results:
 ========
+a-data
+------
 -  PBSDriver-0-a-0-CompareW5CELMA0h0.py
     + nuei 25: Completes 6 steps, then too small timestep (15 h) - Looks ok
+-  PBSDriver-0-a-01
+    + nuei 25: Completes 100 steps (timestep 1) (16 m) - Looks ok
+-  PBSDriver-0-a-012
+    + nuei 25: Completes 100 steps (timestep 2) (37 m) - Looks ok
+-  PBSDriver-0-a-013
+    + nuei 25: Completes 23 steps, then too small timestep (50 m)
+        > Weird blob in vort, looks like starts at same rho as everything else
+
+
+b-data
+------
+-  PBSDriver-0-b-0-CompareWHyperViscNz1.py
