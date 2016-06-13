@@ -50,17 +50,17 @@ OwnFilters* OwnFilters::createFilter(Options *options)
     }
 
     string type;
-
     options->get("type", type, "none");
 
     if(type == lowercase("none")){
         output << "Filter type set to 'none'" << std::endl;
-        return new AllPass(options);
+        return new OwnFiltAllPass(options);
     }
     else if(type == lowercase("radialLowPass")){
         output << "Filter type set to 'radialLowPass'" << std::endl;
-        return new RadialLowPass(options);
-    }else {
+        return new OwnFiltRadialLowPass(options);
+    }
+    else {
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "Filtertype '"<< type << "' not implemented\n"
@@ -89,7 +89,7 @@ OwnFilters::~OwnFilters()
     delete[] fourierArray;
 }
 
-// AllPass
+// OwnFiltAllPass
 
 /*!
  * Filter modified from the standard LowPass filter in BOUT++.
@@ -103,14 +103,14 @@ OwnFilters::~OwnFilters()
  *
  * \returns result The filtered variable
  */
-const Field3D AllPass::ownFilter(const Field3D &var)
+const Field3D OwnFiltAllPass::ownFilter(const Field3D &var)
 {
-    TRACE("Halt in AllPass::ownFilter");
+    TRACE("Halt in OwnFiltAllPass::ownFilter");
 
     return var;
 }
 
-// RadialLowPass
+// OwnFiltRadialLowPass
 
 /*!
  * \brief Constructor
@@ -122,9 +122,9 @@ const Field3D AllPass::ownFilter(const Field3D &var)
  *       the relation \f$\lambda = \frac{C}{k}\f$ holds, where \f$C\f$ is the
  *       circumference
  */
-RadialLowPass::RadialLowPass(Options *options) : OwnFilters(options)
+OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) : OwnFilters(options)
 {
-    TRACE("Halt in RadialLowPass::RadialLowPass");
+    TRACE("Halt in OwnFiltRadialLowPass::OwnFiltRadialLowPass");
 
     // Get MXG
     int MXG;
@@ -159,9 +159,9 @@ RadialLowPass::RadialLowPass(Options *options) : OwnFilters(options)
  *
  * \returns result The filtered variable
  */
-const Field3D RadialLowPass::ownFilter(const Field3D &var)
+const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var)
 {
-    TRACE("Halt in RadialLowPass::ownFilter");
+    TRACE("Halt in OwnFiltRadialLowPass::ownFilter");
 
     Field3D result;
 

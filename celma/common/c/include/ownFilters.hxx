@@ -5,8 +5,8 @@
 #include <fft.hxx>
 
 class OwnFilters;
-class AllPass;
-class RadialLowPass;
+class OwnFiltAllPass;
+class OwnFiltRadialLowPass;
 
 // OwnFilters
 
@@ -18,8 +18,8 @@ class RadialLowPass;
  * Contains generic data and function for child filters
  *
  * \author Michael Løiten
- * \date 2016.08.06
- * \date 2016.08.09
+ * \date 2016.06.08
+ * \date 2016.07.09
  */
 class OwnFilters
 {
@@ -40,6 +40,7 @@ class OwnFilters
          */
         virtual const Field3D ownFilter(const Field3D &var) = 0;
 
+        //! Factory which chooses child class
         static OwnFilters* createFilter(Options *options = NULL);
     protected:
         // Data members
@@ -51,10 +52,10 @@ class OwnFilters
         int kMax;               //!< Global maximum mode number
 };
 
-// AllPass
+// OwnFiltAllPass
 
 /*!
- * \class AllPass
+ * \class OwnFiltAllPass
  *
  * \brief No filtering performed.
  *
@@ -63,29 +64,29 @@ class OwnFilters
  * Inherit from OwnFilters through public inheritance.
  *
  * \author Michael Løiten
- * \date 2016.08.09
+ * \date 2016.07.09
  */
-class AllPass : public OwnFilters
+class OwnFiltAllPass : public OwnFilters
 {
     public:
         //! Constructor does nothing
-        AllPass(Options *options) : OwnFilters(options){};
+        OwnFiltAllPass(Options *options) : OwnFilters(options){};
 
         //! Destructor
         /* NOTE: {} in the end is needed
          *       If else the compiler gives
          *       "udefined reference to `vtable for ...'"
          */
-        virtual ~AllPass(){};
+        virtual ~OwnFiltAllPass(){};
 
-        //! AllPass implementation of ownFilter
+        //! OwnFiltAllPass implementation of ownFilter
         const Field3D ownFilter(const Field3D &var);
 };
 
-// RadialLowPass
+// OwnFiltRadialLowPass
 
 /*!
- * \class RadialLowPass
+ * \class OwnFiltRadialLowPass
  *
  * \brief Lowpass filters in the \f$\theta\f$ direction
  *
@@ -98,18 +99,18 @@ class AllPass : public OwnFilters
  *          coordinate system
  *
  * \author Michael Løiten
- * \date 2016.08.09
+ * \date 2016.07.09
  */
-class RadialLowPass : public OwnFilters
+class OwnFiltRadialLowPass : public OwnFilters
 {
     public:
         // Constructor
-        RadialLowPass(Options *options);
+        OwnFiltRadialLowPass(Options *options);
 
         //! Destructor
-        virtual ~RadialLowPass(){};
+        virtual ~OwnFiltRadialLowPass(){};
 
-        //! RadialLowPass implementation of ownFilter
+        //! OwnFiltRadialLowPass implementation of ownFilter
         const Field3D ownFilter(const Field3D &var);
 
     private:
