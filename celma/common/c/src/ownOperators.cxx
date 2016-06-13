@@ -5,6 +5,8 @@
 #include <fft.hxx>                     //Includes the FFT
 #include <interpolation.hxx>           //Includes the interpolation
 
+// OwnOperators
+
 /*!
  * \brief Constructor
  *
@@ -13,52 +15,20 @@
  * \param[in] section What section to get bndryFuncGen from.
  *                    Default is "phi"
  */
-OwnOperators::OwnOperators(const string &section) :
+OwnOperators::OwnOperators(Options *option) :
     incXBndry(false)
 {
     TRACE("Halt in OwnOperators::OwnOperators");
-
-    // Get the function and lastX value (used in D3DX3)
-    // ************************************************************************
-    // Get the function
-    Options *varOptions = Options::getRoot()->getSection(section);
-    string bndryFuncString;
-    // Last argument in get is the default
-    varOptions->get("bndry_xout", bndryFuncString, "");
-    if (bndryFuncString == ""){
-        output << "\n\n\n\n" << "!!!WARNING!!!: No bndry_xout found in section "
-               << section << " D3DX3 will not work"
-               << "\n\n\n\n" << std::endl;
-
-    }
-    // Strip the function name
-    int pos = bndryFuncString.find('(');
-    int pos2 = bndryFuncString.rfind(')');
-    // Recycle bndryFuncString
-    // This time the string is stripped
-    bndryFuncString = trim(bndryFuncString.substr(pos+1, pos2-pos-1));
-    bndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
-
-    // Get the last x value
-    if(mesh->lastX()){
-        /* NOTE:
-         * For a local index, globalX returns the global value between 0
-         * and 1 corresponding to that index.
-         * globalLastXVal will in this case return 1.0 When evaluating
-         * the function given in bndryFuncGen, the x variable need to be
-         * in range 0-1 (even if it contains expressions like geom:xl)
-         * in order to be consistent with the rest of the code.
-         */
-        globalLastXVal = 0.5 * (mesh->GlobalX(mesh->xend+1) + mesh->GlobalX(mesh->xend));
-    }
-    // ************************************************************************
 
     // Calculate the powers of the Jacobian
     // ************************************************************************
     J  = mesh->J;
     J2 = mesh->J^(2.0);
     J3 = mesh->J^(3.0);
-    J4 = mesh->J^(4.0);
+
+    invJ2 = 1.0/(mesh->J^(2.0));
+    invJ3 = 1.0/(mesh->J^(3.0));
+    invJ4 = 1.0/(mesh->J^(4.0));
     // ************************************************************************
 
     /* Check that there are enough points
@@ -87,7 +57,306 @@ OwnOperators::OwnOperators(const string &section) :
     }
 }
 
-// Operators
+/*!
+ * This function now works as a constructor of the child-classes of OwnFilters
+ */
+OwnOperators* OwnOperators::createOperators(Options *options)
+{
+    TRACE("Halt in OwnOperators::createOperators");
+
+    // The filter option is by defualt found in the ownFilter section
+    if(options == NULL){
+        options = Options::getRoot()->getSection("ownOperators");
+    }
+
+    string type;
+    options->get("type", type, "simplestupid");
+
+    if(type == lowercase("simpleStupid")){
+        string phiBndrySec;
+        options->get("phiBndrySec", phiBndrySec, "phi");
+        output << "OwnOperators type set to 'simpleStupid'" << std::endl;
+        output << "Will look for phi boundaries in section '" << phiBndrySec
+               << "'"<< std::endl;
+        return new OwnOpSimpleStupid(options, phiBndrySec);
+    }
+    else {
+        // Create a stream which we cast to a string
+        std::ostringstream stream;
+        stream << "OwnOperators '"<< type << "' not implemented\n"
+               << "Available filters:\n"
+               << "simpleStupid - Simple stupid implementation of "
+                                  "div_uE_dot_grad_n_GradPerp_phi\n"
+               ;
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+
+        throw BoutException(message);
+    }
+}
+
+/*!
+ * 3rd derivative in the \f$\rho\f$ direction using cylindrical geometry.
+ * This is a natural extension of D2DZ2 in src/sys/derivs.cxx, with the only
+ * execption that incXBndry is a private member data set by the
+ * constructor.
+ *
+ * \param[in] f The original field
+ *
+ * \return result The result of the operation
+ */
+Field3D OwnOperators::D3DZ3(const Field3D &f)
+{
+    TRACE("Halt in OwnOperators::D3DZ3");
+    CELL_LOC inloc = f.getLocation(); // Input location
+    CELL_LOC diffloc = inloc; // Location of differential result
+    CELL_LOC outloc    = inloc;
+
+    Field3D result;
+
+    // Use FFT
+
+    BoutReal shift = 0.; // Shifting result in Z?
+
+    result.allocate(); // Make sure data allocated
+
+    int ncz = mesh->ngz-1;
+
+    #ifndef _OPENMP
+    static dcomplex *cv = (dcomplex*) NULL;
+    #else
+    static dcomplex *globalcv;
+    static int nthreads = 0;
+    #endif
+
+    #pragma omp parallel
+    {
+        #ifndef _OPENMP
+        // Serial, so can have a single static array
+        if(cv == (dcomplex*) NULL)
+            cv = new dcomplex[ncz/2 + 1];
+        #else
+        // Parallel, so allocate a separate array for each thread
+
+        int th_id = omp_get_thread_num(); // thread ID
+        int n_th = omp_get_num_threads();
+        if(th_id == 0) {
+            if(nthreads < n_th) {
+                // Allocate memory in thread zero
+                if(nthreads > 0)
+                    delete[] globalcv;
+                globalcv = new dcomplex[n_th*(ncz/2 + 1)];
+                nthreads = n_th;
+            }
+        }
+        // Wait for memory to be allocated
+        #pragma omp barrier
+
+        dcomplex *cv = globalcv + th_id*(ncz/2 + 1); // Separate array for each thread
+        #endif
+        int xs = mesh->xstart;
+        int xe = mesh->xend;
+        int ys = mesh->ystart;
+        int ye = mesh->yend;
+        if(incXBndry) { // Include x boundary region (for mixed XZ derivatives)
+            xs = 0;
+            xe = mesh->ngx-1;
+        }
+        if (mesh->freeboundary_xin && mesh->firstX() && !mesh->periodicX)
+            xs = 0;
+        if (mesh->freeboundary_xout && mesh->lastX() && !mesh->periodicX)
+            xe = mesh->ngx-1;
+        if (mesh->freeboundary_ydown)
+            ys = 0;
+        if (mesh->freeboundary_yup)
+            ye = mesh->ngy-1;
+        #pragma omp for
+        for(int jx=xs;jx<=xe;jx++) {
+            for(int jy=ys;jy<=ye;jy++) {
+                rfft(f[jx][jy], ncz, cv); // Forward FFT
+
+                for(int jz=0;jz<=ncz/2;jz++) {
+                    BoutReal kwave=jz*2.0*PI/mesh->zlength(); // wave number is 1/[rad]
+
+                    BoutReal flt;
+                    if (jz>0.4*ncz) flt=1e-10; else flt=1.0;
+                    cv[jz] *= dcomplex(0.0, - pow(kwave, 3.0)) * flt;
+                    if(mesh->StaggerGrids)
+                        cv[jz] *= exp(Im * (shift * kwave * mesh->dz));
+                }
+
+                irfft(cv, ncz, result[jx][jy]); // Reverse FFT
+
+                result[jx][jy][ncz] = result[jx][jy][0];
+            }
+        }
+    }
+    // End of parallel section
+
+    #ifdef CHECK
+    // Mark boundaries as invalid
+    if (mesh->freeboundary_xin) result.bndry_xin = true;
+    else result.bndry_xin = false;
+    if (mesh->freeboundary_xout) result.bndry_xout = true;
+    else result.bndry_xout = false;
+    if (mesh->freeboundary_yup) result.bndry_yup = true;
+    else result.bndry_yup = false;
+    if (mesh->freeboundary_ydown) result.bndry_ydown = true;
+    else result.bndry_ydown = false;
+    #endif
+
+    result.setLocation(diffloc);
+
+    return interp_to(result, outloc);
+}
+
+/*!
+ * Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$ in cylindrical geometry.
+ * We have that
+ *
+ * \f{eqnarray}{
+ *   \nabla\cdot(f\nabla_\perp g) = f\nabla_\perp^2g + \nabla
+ *   f\cdot \nabla_\perp g = f\nabla_\perp^2g + \nabla_\perp f\cdot
+ *   \nabla_\perp g
+ * \f}
+ *
+ * The expression for the perpendicular Laplacian can be found in the
+ * coordinates manual. Note that in cylinder coordinates
+ *
+ * \f{eqnarray}{
+ *   G^x &=& \frac{1}{J}\\
+ *   G^y &=& 0\\
+ *   G^z &=& 0\\
+ *   g^{zz} &=& \frac{1}{\rho^2}\\
+ *   g^{yy}\partial_y^2
+ *   - \frac{1}{J}\partial_y\left(\frac{J}{g^{yy}}\partial_y\right)
+ *   &=& 0
+ * \f}
+ *
+ * \param[in] f The f field
+ * \param[in] g The g field
+ *
+ * \return result The result of the operation
+ */
+Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f,
+                                       const Field3D &g)
+{
+    TRACE("Halt in OwnOperators::div_f_GradPerp_g");
+
+    Field3D result;
+
+    result =   f*D2DX2(g)
+             + (f/J)*DDX(g)
+             + (f/J2)*D2DZ2(g)
+             + DDX(f)*DDX(g)
+             + (1/J2)*DDZ(f)*DDZ(g)
+             ;
+
+    return result;
+}
+
+/*!
+ * \f$\nabla_\perp f\f$, equivalent to Grad_perp in vecops.cxx, but in
+ * cylindrical geometry.  This means that there the y-component of the vector
+ * is set to 0 (as there are no off-diagonal elements). The advantage of
+ * introducing this operator is:
+ *
+ *      1. No need for setting the y-boundaries on the operand
+ *      2. Reduced calculation time
+ *
+ * \param[in] f The original field
+ *
+ * \return result The result of the operation written in a covariant basis
+ */
+Vector3D OwnOperators::Grad_perp(const Field3D &f)
+{
+    TRACE("Halt in OwnOperators::own_Grad_perp");
+    Vector3D result;
+
+    result.x = DDX(f);
+    result.y = 0.0;
+    result.z = DDZ(f);
+
+    result.covariant = true;
+
+    return result;
+}
+
+/*!
+ * Getter for incXBndry
+ *
+ * \return incXBndry Used to determine if derivatives of the ghost cells are
+ *                   going to be taken
+ */
+bool OwnOperators::getIncXbndry()
+{
+    return incXBndry;
+}
+
+/*!
+ * Setter for incXBndry
+ *
+ * \param[in] option The state of incXBndry
+ * \param[out] incXBndry Used to determine if derivatives of the ghost cells are
+ *                       going to be taken
+ */
+void OwnOperators::setIncXbndry(bool option)
+{
+    incXBndry = option;
+}
+
+// OwnOpSimpleStupid
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which sets the private member data
+ *
+ * \param[in] section What section to get bndryFuncGen from.
+ *                    Default is "phi"
+ */
+OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
+    OwnOperators(options)
+{
+    TRACE("Halt in OwnOpSimpleStupid::OwnOpSimpleStupid");
+
+    // Get the function and lastX value (used in D3DX3)
+    // ************************************************************************
+    // Get the function
+    Options *varOptions = Options::getRoot()->getSection(phiBndrySec);
+    string bndryFuncString;
+    // Last argument in get is the default
+    varOptions->get("bndry_xout", bndryFuncString, "");
+    if (bndryFuncString == ""){
+        output << "\n\n\n\n" << "!!!WARNING!!!: No bndry_xout found in section "
+               << phiBndrySec << " D3DX3 will not work"
+               << "\n\n\n\n" << std::endl;
+
+    }
+    // Strip the function name
+    int pos = bndryFuncString.find('(');
+    int pos2 = bndryFuncString.rfind(')');
+    // Recycle bndryFuncString
+    // This time the string is stripped
+    bndryFuncString = trim(bndryFuncString.substr(pos+1, pos2-pos-1));
+    bndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
+
+    // Get the last x value
+    if(mesh->lastX()){
+        /* NOTE:
+         * For a local index, globalX returns the global value between 0
+         * and 1 corresponding to that index.
+         * globalLastXVal will in this case return 1.0 When evaluating
+         * the function given in bndryFuncGen, the x variable need to be
+         * in range 0-1 (even if it contains expressions like geom:xl)
+         * in order to be consistent with the rest of the code.
+         */
+        globalLastXVal = 0.5 * (mesh->GlobalX(mesh->xend+1) + mesh->GlobalX(mesh->xend));
+    }
+    // ************************************************************************
+}
+
 /*!
  * 3rd derivative in the \f$\rho\f$ direction using cylindrical geometry. As
  * this is a wide stencil, extra care needs to be taken at the boundaries of a
@@ -106,8 +375,8 @@ OwnOperators::OwnOperators(const string &section) :
  *       the error doesn't dominate there
  * \warning This is not made for staggered grids
  */
-Field3D OwnOperators::D3DX3(const Field3D &f,
-                            const BoutReal &t)
+Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
+                                 const BoutReal &t)
 {
     TRACE("Halt in OwnOperators::D3DX3");
     // Need to initialize Field3D
@@ -238,167 +507,6 @@ Field3D OwnOperators::D3DX3(const Field3D &f,
 }
 
 /*!
- * 3rd derivative in the \f$\rho\f$ direction using cylindrical geometry.
- * This is a natural extension of D2DZ2 in src/sys/derivs.cxx, with the only
- * execption that incXBndry is a private member data set by the
- * constructor.
- *
- * \param[in] f The original field
- *
- * \return result The result of the operation
- */
-Field3D OwnOperators::D3DZ3(const Field3D &f)
-{
-    TRACE("Halt in OwnOperators::D3DZ3");
-    CELL_LOC inloc = f.getLocation(); // Input location
-    CELL_LOC diffloc = inloc; // Location of differential result
-    CELL_LOC outloc    = inloc;
-
-    Field3D result;
-
-    // Use FFT
-
-    BoutReal shift = 0.; // Shifting result in Z?
-
-    result.allocate(); // Make sure data allocated
-
-    int ncz = mesh->ngz-1;
-
-    #ifndef _OPENMP
-    static dcomplex *cv = (dcomplex*) NULL;
-    #else
-    static dcomplex *globalcv;
-    static int nthreads = 0;
-    #endif
-
-    #pragma omp parallel
-    {
-        #ifndef _OPENMP
-        // Serial, so can have a single static array
-        if(cv == (dcomplex*) NULL)
-            cv = new dcomplex[ncz/2 + 1];
-        #else
-        // Parallel, so allocate a separate array for each thread
-
-        int th_id = omp_get_thread_num(); // thread ID
-        int n_th = omp_get_num_threads();
-        if(th_id == 0) {
-            if(nthreads < n_th) {
-                // Allocate memory in thread zero
-                if(nthreads > 0)
-                    delete[] globalcv;
-                globalcv = new dcomplex[n_th*(ncz/2 + 1)];
-                nthreads = n_th;
-            }
-        }
-        // Wait for memory to be allocated
-        #pragma omp barrier
-
-        dcomplex *cv = globalcv + th_id*(ncz/2 + 1); // Separate array for each thread
-        #endif
-        int xs = mesh->xstart;
-        int xe = mesh->xend;
-        int ys = mesh->ystart;
-        int ye = mesh->yend;
-        if(incXBndry) { // Include x boundary region (for mixed XZ derivatives)
-            xs = 0;
-            xe = mesh->ngx-1;
-        }
-        if (mesh->freeboundary_xin && mesh->firstX() && !mesh->periodicX)
-            xs = 0;
-        if (mesh->freeboundary_xout && mesh->lastX() && !mesh->periodicX)
-            xe = mesh->ngx-1;
-        if (mesh->freeboundary_ydown)
-            ys = 0;
-        if (mesh->freeboundary_yup)
-            ye = mesh->ngy-1;
-        #pragma omp for
-        for(int jx=xs;jx<=xe;jx++) {
-            for(int jy=ys;jy<=ye;jy++) {
-                rfft(f[jx][jy], ncz, cv); // Forward FFT
-
-                for(int jz=0;jz<=ncz/2;jz++) {
-                    BoutReal kwave=jz*2.0*PI/mesh->zlength(); // wave number is 1/[rad]
-
-                    BoutReal flt;
-                    if (jz>0.4*ncz) flt=1e-10; else flt=1.0;
-                    cv[jz] *= dcomplex(0.0, - pow(kwave, 3.0)) * flt;
-                            -SQ(kwave) * flt;
-                    if(mesh->StaggerGrids)
-                        cv[jz] *= exp(Im * (shift * kwave * mesh->dz));
-                }
-
-                irfft(cv, ncz, result[jx][jy]); // Reverse FFT
-
-                result[jx][jy][ncz] = result[jx][jy][0];
-            }
-        }
-    }
-    // End of parallel section
-
-    #ifdef CHECK
-    // Mark boundaries as invalid
-    if (mesh->freeboundary_xin) result.bndry_xin = true;
-    else result.bndry_xin = false;
-    if (mesh->freeboundary_xout) result.bndry_xout = true;
-    else result.bndry_xout = false;
-    if (mesh->freeboundary_yup) result.bndry_yup = true;
-    else result.bndry_yup = false;
-    if (mesh->freeboundary_ydown) result.bndry_ydown = true;
-    else result.bndry_ydown = false;
-    #endif
-
-    result.setLocation(diffloc);
-
-    return interp_to(result, outloc);
-}
-
-/*!
- * Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$ in cylindrical geometry.
- * We have that
- *
- * \f{eqnarray}{
- *   \nabla\cdot(f\nabla_\perp g) = f\nabla_\perp^2g + \nabla
- *   f\cdot \nabla_\perp g = f\nabla_\perp^2g + \nabla_\perp f\cdot
- *   \nabla_\perp g
- * \f}
- *
- * The expression for the perpendicular Laplacian can be found in the
- * coordinates manual. Note that in cylinder coordinates
- *
- * \f{eqnarray}{
- *   G^x &=& \frac{1}{J}\\
- *   G^y &=& 0\\
- *   G^z &=& 0\\
- *   g^{zz} &=& \frac{1}{\rho^2}\\
- *   g^{yy}\partial_y^2
- *   - \frac{1}{J}\partial_y\left(\frac{J}{g^{yy}}\partial_y\right)
- *   &=& 0
- * \f}
- *
- * \param[in] f The f field
- * \param[in] g The g field
- *
- * \return result The result of the operation
- */
-Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f,
-                                       const Field3D &g)
-{
-    TRACE("Halt in OwnOperators::div_f_GradPerp_g");
-
-    Field3D result;
-
-    result =   f*D2DX2(g)
-             + (f/J)*DDX(g)
-             + (f/J2)*D2DZ2(g)
-             + DDX(f)*DDX(g)
-             + (1/J2)*DDZ(f)*DDZ(g)
-             ;
-
-    return result;
-}
-
-/*!
  * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
  * cylindrical geometry. The derivation can be found in the derivation folder.
  *
@@ -407,10 +515,10 @@ Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f,
  *
  * \return result The result of the operation
  */
-Field3D OwnOperators::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                     const Field3D &phi)
+Field3D OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                          const Field3D &phi)
 {
-    TRACE("Halt in OwnOperators::div_uE_dot_grad_n_GradPerp_phi");
+    TRACE("Halt in OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi");
 
     Field3D result;
 
@@ -465,57 +573,9 @@ Field3D OwnOperators::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
                           phi_xx*J3
                         + phi_zz*J
                                 )
-             )/J4;
+             )*invJ4;
 
     return result;
 }
 
-/*!
- * \f$\nabla_\perp f\f$, equivalent to Grad_perp in vecops.cxx, but in
- * cylindrical geometry.  This means that there the y-component of the vector
- * is set to 0 (as there are no off-diagonal elements). The advantage of
- * introducing this operator is:
- *
- *      1. No need for setting the y-boundaries on the operand
- *      2. Reduced calculation time
- *
- * \param[in] f The original field
- *
- * \return result The result of the operation written in a covariant basis
- */
-Vector3D OwnOperators::Grad_perp(const Field3D &f)
-{
-    TRACE("Halt in OwnOperators::own_Grad_perp");
-    Vector3D result;
-
-    result.x = DDX(f);
-    result.y = 0.0;
-    result.z = DDZ(f);
-
-    result.covariant = true;
-
-    return result;
-}
-
-// Auxiliary functions
-/*!
- * Getter for incXBndry
- *
- * \return incXBndry Used to determine if derivatives of the ghost cells are
- *                   going to be taken
- */
-bool OwnOperators::getIncXbndry(){
-    return incXBndry;
-}
-
-/*!
- * Setter for incXBndry
- *
- * \param[in] option The state of incXBndry
- * \param[out] incXBndry Used to determine if derivatives of the ghost cells are
- *                       going to be taken
- */
-void OwnOperators::setIncXbndry(bool option){
-    incXBndry = option;
-}
 #endif
