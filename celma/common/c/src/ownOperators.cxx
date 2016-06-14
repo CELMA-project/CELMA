@@ -70,9 +70,9 @@ OwnOperators* OwnOperators::createOperators(Options *options)
     }
 
     string type;
-    options->get("type", type, "simplestupid");
+    options->get("type", type, "simpleStupid");
 
-    if(type == lowercase("simpleStupid")){
+    if(lowercase(type) == lowercase("simpleStupid")){
         string phiBndrySec;
         options->get("phiBndrySec", phiBndrySec, "phi");
         output << "OwnOperators type set to 'simpleStupid'" << std::endl;
@@ -80,13 +80,24 @@ OwnOperators* OwnOperators::createOperators(Options *options)
                << "'"<< std::endl;
         return new OwnOpSimpleStupid(options, phiBndrySec);
     }
+    else if(lowercase(type) == lowercase("onlyBracket")){
+        output << "OwnOperators type set to 'onlyBracket'" << std::endl;
+        return new OwnOpOnlyBracket(options);
+    }
+    else if(lowercase(type) == lowercase("2Brackets")){
+        output << "OwnOperators type set to '2Brackets'" << std::endl;
+        return new OwnOp2Brackets(options);
+    }
     else {
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "OwnOperators '"<< type << "' not implemented\n"
-               << "Available filters:\n"
+               << "Available operators:\n"
                << "simpleStupid - Simple stupid implementation of "
                                   "div_uE_dot_grad_n_GradPerp_phi\n"
+               << "onlyBracket  - Only {phi, vortD} will be used. "
+                                  "NOTE: Not consistent\n"
+               << "2Brackets    - Consistent implementation using 2 brackets.\n"
                ;
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
@@ -649,9 +660,9 @@ Field3D OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
 
     Field3D result;
 
-    result = - invJ          *bracket(phi, vortD         , bm)
-             - invJ *DDX(phi)*(DDX(n)*DDZ(phi) - DDZ(n)*DDX(phi))
-             - invJ3*DDZ(phi)*bracket(n  , DDZ(phi, true), bm)
+    result = - invJ          *bracket(phi, vortD, bm)
+             + invJ *DDX(phi)*(D2DXDZ(phi)*DDX(n) - D2DX2(phi)*DDZ(n))
+             + invJ3*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
              + invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
         ;
 
