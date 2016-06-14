@@ -52,11 +52,11 @@ OwnFilters* OwnFilters::createFilter(Options *options)
     string type;
     options->get("type", type, "none");
 
-    if(type == lowercase("none")){
+    if(lowercase(type) == lowercase("none")){
         output << "Filter type set to 'none'" << std::endl;
         return new OwnFiltAllPass(options);
     }
-    else if(type == lowercase("radialLowPass")){
+    else if(lowercase(type) == lowercase("radialLowPass")){
         output << "Filter type set to 'radialLowPass'" << std::endl;
         return new OwnFiltRadialLowPass(options);
     }
