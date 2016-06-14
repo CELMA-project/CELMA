@@ -394,7 +394,7 @@ int Celma::convective(BoutReal t) {
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;
     potNeutral                 = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
-    divExBAdvGradPerpPhiN      = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
+    divExBAdvGradPerpPhiN      = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi, vortD);
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
     divParCur                  =   DDY(n*(uIPar - uEPar));
 
