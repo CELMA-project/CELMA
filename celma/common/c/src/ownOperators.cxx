@@ -26,6 +26,7 @@ OwnOperators::OwnOperators(Options *option) :
     J2 = mesh->J^(2.0);
     J3 = mesh->J^(3.0);
 
+    invJ  = 1.0/(mesh->J      );
     invJ2 = 1.0/(mesh->J^(2.0));
     invJ3 = 1.0/(mesh->J^(3.0));
     invJ4 = 1.0/(mesh->J^(4.0));
