@@ -9,6 +9,46 @@ Copied from 5.2-CELMAWNoisFilterRho
 
 Results:
 ========
+Getting backgrounds with nz = 2
+-------------------------------
+I.e. runs with a leading 0 in their serial number
+NOTE: No perturbations
+NOTE IMEX FIXED STEP:
+    Initially tried with timestep 1.0e0, but SNES failed reason -3
+    Initially tried with timestep 1.0e-1, but SNES failed reason -3
+Finish ordering (best to worst)
+0-a-2 - 1h 11m
+0-a-1 - 1h 18m
+0-a-0 - 1h 21m
+0-b-0 - Running
+0-b-1 - Running
+0-b-2 - Running
+0-c-0 - Running
+0-c-1 - Running
+0-c-2 - Running
+
+
+Expanding to 128
+----------------
+I.e. runs with a leading 1 in their serial number
+
+f = DataFile_netCDF(filename="BOUT.restart.0.nc")
+f.read("vortD")
+vortD = f.read("vortD")
+
+
 a-data
 ------
 Not yet implemented
+
+c-had to change timestep 1.0 snes failed
+c-had to change timestep 1.0e-2 snes failed reason -3
+
+Checkme:
+The div(ueDotGrad(nGrad(phi))) should in principle NOT be active
+Thus, in principle only need one run to restart from
+
+Could in principle check for difference in hypervisc
+(this would be more important when more z points)
+
+Coloring
