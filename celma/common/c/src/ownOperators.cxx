@@ -529,8 +529,7 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
  * \return result The result of the operation
  */
 Field3D OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                          const Field3D &phi,
-                                                          const Field3D &vortD)
+                                                          const Field3D &phi)
 {
     TRACE("Halt in OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi");
 
@@ -592,6 +591,40 @@ Field3D OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
     return result;
 }
 
+/*!
+ * Not implemented in this child class
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOpSimpleStupid::vortDAdv(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOpSimpleStupid::vortDAdv");
+
+    throw BoutException("vortDAdv not used in the OwnOpSimpleStupid "
+                        "implementation");
+
+    return phi;
+}
+
+/*!
+ * Not implemented in this child class
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOpSimpleStupid::kinEnAdvN(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOpSimpleStupid::kinEnAdvN");
+
+    throw BoutException("kinEnAdvN not used in the OwnOpSimpleStupid "
+                        "implementation");
+}
+
 // OwnOpOnlyBracket
 
 /*!
@@ -608,24 +641,53 @@ OwnOpOnlyBracket::OwnOpOnlyBracket(Options *options) :
 }
 
 /*!
- * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
- * cylindrical geometry.
+ * Not implemented in this child class
  *
- * \param[in] n The density (not used here)
  * \param[in] phi The potential
- * \param[in] vortD The modified vorticity
+ * \param[in] n The density (not used here)
  *
- * \return result The result of the operation
- *
- * \warning This implementation lacks the correction terms
+ * \returns phi (never reached)
  */
 Field3D OwnOpOnlyBracket::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                         const Field3D &phi,
-                                                         const Field3D &vortD)
+                                                         const Field3D &phi)
 {
     TRACE("Halt in OwnOpSimpleStupid::div_uE_dot_grad_n_GradPerp_phi");
 
-    return - invJ*bracket(phi, vortD, bm);
+    throw BoutException("div_uE_dot_grad_n_GradPerp_phi not used in the "
+                        "OnlyBracket implementation");
+
+    return phi;
+}
+
+/*!
+ * Calculates \f$\{\phi, Omega^D\}\f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOpOnlyBracket::vortDAdv(const Field3D &phi, const Field3D &vortD)
+{
+    TRACE("Halt in OwnOpOnlyBracket::vortDAdv");
+
+    return invJ*bracket(phi, vortD, bm);
+}
+
+/*!
+ * Not implemented in this child class
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOpOnlyBracket::kinEnAdvN(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOpOnlyBracket::kinEnAdvN");
+
+    throw BoutException("kinEnAdvN not used in the OnlyBracket "
+                        "implementation");
 }
 
 // OwnOp2Brackets
@@ -644,31 +706,59 @@ OwnOp2Brackets::OwnOp2Brackets(Options *options) :
 }
 
 /*!
- * Operator for \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$ using
- * cylindrical geometry. The derivation can be found in the derivation folder.
+ * Not implemented in this child class
  *
- * \param[in] n The density (not used here)
  * \param[in] phi The potential
- * \param[in] vortD The modified vorticity
+ * \param[in] n The density (not used here)
  *
- * \return result The result of the operation
+ * \returns phi (never reached)
  */
 Field3D OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                                       const Field3D &phi,
-                                                       const Field3D &vortD)
+                                                       const Field3D &phi)
 {
     TRACE("Halt in OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi");
 
+    throw BoutException("div_uE_dot_grad_n_GradPerp_phi not used in the "
+                        "OwnOp2Brackets implementation");
+
+    return phi;
+}
+
+/*!
+ * Calculates \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp2Brackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
+{
+    TRACE("Halt in OwnOp2Brackets::vortDAdv");
+
+    return invJ*bracket(phi, vortD, bm);
+}
+
+/*!
+ * Calculates \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp2Brackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOp2Brackets::kinEnAdvN");
+
     Field3D result;
 
-    result = - invJ          *bracket(phi, vortD, bm)
-             - invJ *DDX(phi)*(D2DXDZ(phi)*DDX(n) - D2DX2(phi)*DDZ(n))
-             - invJ3*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
-             - invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
-        ;
+    result =   invJ *DDX(phi)*(D2DXDZ(phi)*DDX(n) - D2DX2(phi)*DDZ(n))
+             + invJ3*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
+             + invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
+           ;
 
     return result;
 }
-
 
 #endif

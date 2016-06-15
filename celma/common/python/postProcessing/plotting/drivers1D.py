@@ -556,6 +556,10 @@ def getVortDFields(path):
          r'\mathbf{u}_E \cdot\nabla'                               +\
          r'\left[ n \nabla_\perp \phi \right]'                     +\
          r'\right)'                                                ))
+    vortD.lines.append(Line('vortDAdv'                             ,\
+         r'-\frac{1}{J}\{\phi, \Omega^D\}'                         ))
+    vortD.lines.append(Line('kinEnAdvN'                            ,\
+         r'-\frac{1}{2J}\{\mathbf{u}_E \cdot\mathbf{u}_E, n\}'     ))
     vortD.lines.append(Line('parDerDivUIParNGradPerpPhi'           ,\
          r'-\partial_\parallel \nabla\cdot\left('                  +\
          r'u_{i,\parallel} '                                       +\
