@@ -5,7 +5,7 @@ Contains class for plotting
 """
 
 from ..statistics import polAvg
-from .getStrings import getSaveString, getTime
+from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
 from matplotlib import get_backend
 from matplotlib.ticker import MaxNLocator, FuncFormatter
