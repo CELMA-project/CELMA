@@ -662,9 +662,9 @@ Field3D OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
     Field3D result;
 
     result = - invJ          *bracket(phi, vortD, bm)
-             + invJ *DDX(phi)*(D2DXDZ(phi)*DDX(n) - D2DX2(phi)*DDZ(n))
-             + invJ3*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
-             + invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
+             - invJ *DDX(phi)*(D2DXDZ(phi)*DDX(n) - D2DX2(phi)*DDZ(n))
+             - invJ3*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
+             - invJ4*DDZ(n)  *((DDZ(phi))^(2.0))
         ;
 
     return result;
