@@ -62,19 +62,28 @@ class OwnOperators
         Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
         //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry
         Vector3D Grad_perp(const Field3D &f);
+
+        /* NOTE: Child classes can have new memberfunctions...
+         *       which are not declared in the parent class.
+         *       Pure virtual functions (has an = 0.0 in the end of the
+         *       declaration) are used for functions which MUST be
+         *       implemented
+         *       If no default implementation is given, the declaration can end
+         *       with an empty function body {}
+         */
         /*! Operator for
-         * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
-         *
-         * Vort is set to 0.0 to have backward compability
+         * \f$\nabla\cdot(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+         * (only used in the simpleStupid implementation)
          */
-        /* NOTE: The = 0 is needed
-         *       Tells the compiler that no function body will be given
-         *       (pure virtual)
+        virtual Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                       const Field3D &phi) = 0;
+        //! Operator for \f$\{\phi, Omega^D\}\f$
+        virtual Field3D vortDAdv (const Field3D &phi, const Field3D &vortD) = 0;
+        /*! Operator for
+         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+         * (only used in 2Brackets)
          */
-        virtual Field3D div_uE_dot_grad_n_GradPerp_phi(
-                                                const Field3D &n,
-                                                const Field3D &phi,
-                                                const Field3D &vortD = 0.0) = 0;
+        virtual Field3D kinEnAdvN(const Field3D &phi, const Field3D &n) = 0;
 
         // Auxiliary functions
         //! Getter for IncXbndry
@@ -141,19 +150,24 @@ class OwnOpSimpleStupid : public OwnOperators
         Field3D n_z,    n_zz; //!< \f$\theta\f$ derivatives of \f$n\f$
         /**@}*/
         Field3D n_xz;   //!< Mixed derivatives of \f$n\f$
+
+        // Member functions
+        //! Discretizes \f$\partial_\rho^3\f$
+        Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
     public:
         // Constructors
         OwnOpSimpleStupid(Options *options, string &phiBndrySec);
 
-        // Member data
-        //! Discretizes \f$\partial_\rho^3\f$
-        Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
+        // Member functions
         /*! Operator for
          * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
          */
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                               const Field3D &phi,
-                                               const Field3D &vortD = 0.0);
+                                               const Field3D &phi);
+        //! Will throw error
+        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
+        //! Will throw error
+        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
 
         //! Destructor
         /* NOTE: {} in the end is needed
@@ -166,18 +180,17 @@ class OwnOpSimpleStupid : public OwnOperators
 // OwnOpOnlyBracket
 
 /*!
- * \class OwnOpSimpleStupid
+ * \class OwnOpOnlyBracket
  *
- * \brief Simple stupid implementation of
+ * \brief Inconsistent implementation of
  *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
  *
- * The implementation is just using normal finite differences. No Arakawa
- * brackets is used. There are indications that this scheme is not energy
- * conserving.
+ * In this implementation, only \f$\{\phi, Omega^D\}\f$ is used, which is not
+ * consistent.
  *
  * Inherit from OwnOperators through public inheritance.
  *
- * \warning This implementation has been found to create high \f$k\f$ structures
+ * \warning This implementation is not consistent.
  *
  * \warning The following is only suitable if using a cylindrical Clebsch
  *          coordinate system
@@ -193,13 +206,15 @@ class OwnOpOnlyBracket : public OwnOperators
         // Constructors
         OwnOpOnlyBracket(Options *options);
 
-        // Member data
-        /*! Operator for
-         * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
-         */
+        //! Will throw error
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                               const Field3D &phi,
-                                               const Field3D &vortD = 0.0);
+                                               const Field3D &phi);
+
+
+        //! Operator for \f$\{\phi, Omega^D\}\f$
+        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
+        //! Will throw error
+        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
 
         //! Destructor
         /* NOTE: {} in the end is needed
@@ -212,18 +227,19 @@ class OwnOpOnlyBracket : public OwnOperators
 // OwnOp2Brackets
 
 /*!
- * \class OwnOpSimpleStupid
+ * \class OwnOp2Brackets
  *
- * \brief Simple stupid implementation of
+ * \brief Implementation of
  *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+ *        using 2 brackets, and one non-bracket term
  *
- * The implementation is just using normal finite differences. No Arakawa
- * brackets is used. There are indications that this scheme is not energy
- * conserving.
+ * This implementation uses brackets for advection of \f$\Omega^D\f$, and
+ * splits the \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$ into an
+ * Arakawa part and a finite differences part. Finite differences are used as
+ * two consecutive radial derivatives are not converging (but diverging) when
+ * the grid space is decreasing.
  *
  * Inherit from OwnOperators through public inheritance.
- *
- * \warning This implementation has been found to create high \f$k\f$ structures
  *
  * \warning The following is only suitable if using a cylindrical Clebsch
  *          coordinate system
@@ -239,13 +255,16 @@ class OwnOp2Brackets : public OwnOperators
         // Constructors
         OwnOp2Brackets(Options *options);
 
-        // Member data
-        /*! Operator for
-         * \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
-         */
+        //! Will throw error
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
-                                               const Field3D &phi,
-                                               const Field3D &vortD = 0.0);
+                                               const Field3D &phi);
+        //! Operator for \f$\{\phi, Omega^D\}\f$
+        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
+        /*! Operator for
+         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+         * (only used in 2Brackets)
+         */
+        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
 
         //! Destructor
         /* NOTE: {} in the end is needed
