@@ -5,7 +5,6 @@ Class which creates a the points in a cylinder.
 """
 
 import numpy as np
-from boutdata.collect import collect
 
 #{{{class CylinderMesh
 class CylinderMesh(object):
