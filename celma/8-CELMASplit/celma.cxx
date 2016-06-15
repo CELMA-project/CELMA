@@ -71,11 +71,14 @@ int Celma::init(bool restarting) {
     switches->get("useHyperViscAzVortD", useHyperViscAzVortD, false);
     switches->get("includeNoise"       , includeNoise       , false);
     switches->get("forceAddNoise"      , forceAddNoise      , false);
+    switches->get("saveDdt"            , saveDdt            , false);
+    switches->get("saveTerms"          , saveTerms          , true );
     noiseAdded = false;
-    if (restarting && !(forceAddNoise)){
-        output << "\n\n\n!!!!Warning!!!\n"
-               << "includeNoise=true && restart=true\n"
-               << "forceAddNoise=false => program reset includeNoise to false"
+    if (restarting && includeNoise && !(forceAddNoise)){
+        output << "\n\n!!!!Warning!!!\n"
+               << "restarting = true, includeNoise = true, forceAddNoise = false\n"
+               << "Since forceAddNoise = false => program reset includeNoise to false"
+               << "\n\n"
                << std::endl;
         includeNoise = false;
         noiseAdded = true; // For extra safety measurements
@@ -177,21 +180,26 @@ int Celma::init(bool restarting) {
     // Variables to be saved repeatedly
     // vort and phi
     SAVE_REPEAT2(vort, phi);
-    // lnN terms
-    SAVE_REPEAT3(lnNAdv, lnNRes, gradUEPar);
-    SAVE_REPEAT4(lnNUeAdv, srcN, lnNParArtVisc, lnNPerpArtVisc);
-    // uEPar terms
-    SAVE_REPEAT3(uEParAdv, uEParParAdv, gradPhiLnN);
-    SAVE_REPEAT4(uEParRes, ueSrc, uEParParArtVisc, uEParPerpArtVisc);
-    SAVE_REPEAT (ueNeutral);
-    // uIPar terms
-    SAVE_REPEAT3(uIParAdv, uIParParAdv, gradPhi);
-    SAVE_REPEAT4(uIParRes, uiSrc, uIParParArtVisc, uIParPerpArtVisc);
-    SAVE_REPEAT (uiNeutral);
-    // Vorticity terms
-    SAVE_REPEAT2(vortNeutral, potNeutral);
-    SAVE_REPEAT2(divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi)
-    SAVE_REPEAT3(divParCur, vortDParArtVisc, vortDPerpArtVisc);
+    if(saveTerms){
+        // lnN terms
+        SAVE_REPEAT3(lnNAdv, lnNRes, gradUEPar);
+        SAVE_REPEAT4(lnNUeAdv, srcN, lnNParArtVisc, lnNPerpArtVisc);
+        // uEPar terms
+        SAVE_REPEAT3(uEParAdv, uEParParAdv, gradPhiLnN);
+        SAVE_REPEAT4(uEParRes, ueSrc, uEParParArtVisc, uEParPerpArtVisc);
+        SAVE_REPEAT (ueNeutral);
+        // uIPar terms
+        SAVE_REPEAT3(uIParAdv, uIParParAdv, gradPhi);
+        SAVE_REPEAT4(uIParRes, uiSrc, uIParParArtVisc, uIParPerpArtVisc);
+        SAVE_REPEAT (uiNeutral);
+        // Vorticity terms
+        SAVE_REPEAT2(vortNeutral, potNeutral);
+        SAVE_REPEAT2(divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi)
+        SAVE_REPEAT3(divParCur, vortDParArtVisc, vortDPerpArtVisc);
+    }
+    if(saveDdt){
+        SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(uIPar), ddt(uEPar));
+    }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, uIPar, uEPar);
     //*************************************************************************
