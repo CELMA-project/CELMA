@@ -108,6 +108,8 @@ private:
 
     // Switches
     // *****************************************************************************
+    bool saveDdt;             // If ddt's should be saved
+    bool saveTerms;           // If terms should be saved
     bool includeNoise;        // Include noise
     bool forceAddNoise;       // Add noise on restart as well
     bool noiseAdded;          // A check whether the noise is added or not
