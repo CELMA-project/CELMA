@@ -12,6 +12,9 @@
 int Celma::init(bool restarting) {
     TRACE("Halt in Celma::init");
 
+    // Get the option (before any sections) in the BOUT.inp file
+    Options *options = Options::getRoot();
+
     // Create the solver
     // ************************************************************************
     /* NOTE: Calls createOperators without making an object of OwnOperators.
@@ -19,6 +22,10 @@ int Celma::init(bool restarting) {
      */
     ownOp = OwnOperators::createOperators();
     ownLapl.create(ownOp, ownBC);
+    // As a small hack we find the own operator type to figure out how to
+    // treat the div(ue*grad(n grad_perp phi))
+    Options *ownOp = options->getSection("ownOperators");
+    ownOp->get("type", ownOpType, "simpleStupid");
     // ************************************************************************
 
     // Create the filter
@@ -28,9 +35,6 @@ int Celma::init(bool restarting) {
      */
     ownFilter = OwnFilters::createFilter();
     // ************************************************************************
-
-    // Get the option (before any sections) in the BOUT.inp file
-    Options *options = Options::getRoot();
 
     // Get the constants
     // ************************************************************************
@@ -194,11 +198,23 @@ int Celma::init(bool restarting) {
         SAVE_REPEAT (uiNeutral);
         // Vorticity terms
         SAVE_REPEAT2(vortNeutral, potNeutral);
-        SAVE_REPEAT2(divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi)
         SAVE_REPEAT3(divParCur, vortDParArtVisc, vortDPerpArtVisc);
-    }
-    if(saveDdt){
-        SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(uIPar), ddt(uEPar));
+        SAVE_REPEAT (parDerDivUIParNGradPerpPhi);
+
+        if(lowercase(ownOpType) == lowercase("simpleStupid")){
+            SAVE_REPEAT (divExBAdvGradPerpPhiN);
+        }
+        else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
+                  lowercase(ownOpType) == lowercase("2Brackets") ){
+            SAVE_REPEAT (vortDAdv);
+
+            if (lowercase(ownOpType) == lowercase("2Brackets")){
+                SAVE_REPEAT (kinEnAdvN);
+            }
+        }
+        if(saveDdt){
+            SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(uIPar), ddt(uEPar));
+        }
     }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, uIPar, uEPar);
@@ -402,17 +418,41 @@ int Celma::convective(BoutReal t) {
     // ************************************************************************
     vortNeutral                = - nuIN*n*vort;
     potNeutral                 = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
-    divExBAdvGradPerpPhiN      = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi, vortD);
+
+    if(lowercase(ownOpType) == lowercase("simpleStupid")){
+        divExBAdvGradPerpPhiN = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
+    }
+    else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
+              lowercase(ownOpType) == lowercase("2Brackets") ){
+        vortDAdv  = - ownOp->vortDAdv(phi, vortD);
+
+        if (lowercase(ownOpType) == lowercase("2Brackets")){
+            kinEnAdvN = - ownOp->kinEnAdvN(phi, n);
+        }
+    }
+
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
     divParCur                  =   DDY(n*(uIPar - uEPar));
 
     ddt(vortD) =
           vortNeutral
         + potNeutral
-        + divExBAdvGradPerpPhiN
         + parDerDivUIParNGradPerpPhi
         + divParCur
         ;
+
+    if(lowercase(ownOpType) == lowercase("simpleStupid")){
+        ddt(vortD) += divExBAdvGradPerpPhiN;
+    }
+    else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
+              lowercase(ownOpType) == lowercase("2Brackets") ){
+        ddt(vortD) += vortDAdv;
+
+        if (lowercase(ownOpType) == lowercase("2Brackets")){
+            ddt(vortD) += kinEnAdvN;
+        }
+    }
+
     // Filtering highest modes
     ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
     // ************************************************************************

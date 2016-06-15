@@ -63,6 +63,7 @@ private:
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
     Field3D divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi;
+    Field3D vortDAdv, kinEnAdvN;
     Field3D divParCur, vortDParArtVisc, vortDPerpArtVisc;
     Field3D vortDhyperVisc;
     // *****************************************************************************
@@ -108,6 +109,7 @@ private:
 
     // Switches
     // *****************************************************************************
+    string  ownOpType;           // Type of own operators
     bool saveDdt;             // If ddt's should be saved
     bool saveTerms;           // If terms should be saved
     bool includeNoise;        // Include noise
