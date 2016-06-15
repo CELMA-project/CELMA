@@ -1,0 +1,23 @@
+Copied from 8-CELMASplit
+
+- No division by n in the artificial viscosity
+
+Results:
+========
+Getting backgrounds with nz = 2
+-------------------------------
+I.e. runs with a leading 0 in their serial number
+NOTE: No perturbations
+NOTE IMEX FIXED STEP:
+    Initially tried with timestep 1.0e0, but SNES failed reason -3
+    Initially tried with timestep 1.0e-1, but SNES failed reason -3
+Finish ordering (best to worst)
+0-a-2 - 1h 11m
+0-a-1 - 1h 18m
+0-a-0 - 1h 21m
+0-b-0 - Running
+0-b-1 - Running
+0-b-2 - Running
+0-c-0 - Running
+0-c-1 - Running
+0-c-2 - Running
