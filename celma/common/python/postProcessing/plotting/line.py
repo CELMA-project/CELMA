@@ -4,8 +4,6 @@
 Contains the Line class.
 """
 
-import numpy as np
-
 #{{{class Line
 class Line(object):
     """
