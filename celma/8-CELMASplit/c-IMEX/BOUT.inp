@@ -1,5 +1,5 @@
 #
-# Input file for "8-CELMASplit/data"
+# Input file for "8-CELMASplit/IMEX"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -74,11 +74,15 @@ second = FTT # d^2/dz^2 (f)
 ###############################################################################
 [solver]
 # The solver advances the system in time
-type = cvode             # Which solver to use (cvode should be same as pvode)
-mms  = false             # false by default
+type = imexbdf2  # Which solver to use (cvode should be same as pvode)
+mms  = false     # false by default
 
 atol = 1.0e-10 # absolute tolerance
 rtol = 1.0e-5  # relative tolerance
+
+maxorder = 2
+adaptive = false
+timestep = 1.0e-2
 
 # cvode, pvode and rk4 options
 # NOTE: If this is set too high, the computer MIGHT interpret it as 0
@@ -145,8 +149,6 @@ artHyperAzVortD = 0.1
 includeNoise        = false
 forceAddNoise       = false
 useHyperViscAzVortD = false
-saveTerms           = true
-saveDdt             = false
 # =============================================================================
 
 # The source
