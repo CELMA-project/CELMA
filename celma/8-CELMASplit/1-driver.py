@@ -18,11 +18,12 @@ from postProcessing.plotting import combined1D2D
 # *****************************************************************************
 Lx = 10
 Ly = 100
+ownOpType = "simpleStupid"
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
 remove_old = True
-nout       = 0
+nout       = 2
 timestep   = 1e-10
 directory  = "a-data"
 # Shall we make?
@@ -55,8 +56,10 @@ myRuns = basic_runner(\
                       nout       = nout      ,\
                       timestep   = timestep  ,\
                       # Additional
-                      additional = [('geom', 'Lx', Lx),
-                                    ('geom', 'Ly', Ly)],\
+                      additional = [('geom', 'Lx', Lx),\
+                                    ('geom', 'Ly', Ly),\
+                                    ('ownOperators', 'type', ownOpType    ),\
+                                    ],\
                       # Copy the source file
                       cpy_source = True      ,\
                       make       = make      ,\
