@@ -560,7 +560,7 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uEPar
     // ************************************************************************
-    uEParParArtVisc  =   artViscParUEPar*D2DY2(uEPar)/n;
+    uEParParArtVisc  =   (artViscParUEPar/n)*D2DY2(uEPar);
     uEParPerpArtVisc =   (artViscPerpUEPar/n)*Laplace_perp(uEPar);
 
     ddt(uEPar) =
@@ -574,7 +574,7 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uIPar
     // ************************************************************************
-    uIParParArtVisc  =   artViscParUIPar*D2DY2(uIPar)/n;
+    uIParParArtVisc  =   (artViscParUIPar/n)*D2DY2(uIPar);
     uIParPerpArtVisc =   (artViscPerpUIPar/n)*Laplace_perp(uIPar);
 
     ddt(uIPar) =
