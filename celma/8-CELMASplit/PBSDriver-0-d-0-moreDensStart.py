@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType     = "onlyBracket"
+ownOpType     = "2Brackets"
 ownFilterType = "none"
 # *****************************************************************************
 # Set the spatial domain
@@ -26,7 +26,7 @@ restart    = None
 remove_old = False
 nout       = [20]
 timestep   = [5e1]
-directory  = "b-IMEXAdaptive3"
+directory  = "d-moreDens"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-1-onlyBracket"
+theRunName = "0-d-0-moreDensStart"
 # =============================================================================
 
 
