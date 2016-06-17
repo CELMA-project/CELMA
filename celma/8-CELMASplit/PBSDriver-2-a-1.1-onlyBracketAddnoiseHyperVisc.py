@@ -16,17 +16,24 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType     = "2Brackets"
-ownFilterType = "none"
+ownOpType           = "simpleStupid"
+ownFilterType       = "none"
+saveDdt             = True
+includeNoise        = True
+forceAddNoise       = True
+useHyperViscAzVortD = True
 # *****************************************************************************
-# Set the spatial domain
-nz = 2
-# Set the temporal domain
-restart    = None
 remove_old = False
-nout       = [20]
-timestep   = [5e1]
-directory  = "c-IMEX"
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_saveDdt_True_tag_1-a-0-simpleStupidExpand_0/"
+# Set the spatial domain
+nz = 128
+# Set the temporal domain
+nout       = [101]
+timestep   = [10]
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,7 +48,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-2-2Brackets"
+theRunName = "2-a-0.1-simpleStupidAddnoiseHyperVisc"
 # =============================================================================
 
 
@@ -51,7 +58,7 @@ theRunName = "0-c-2-2Brackets"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -75,10 +82,15 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type', ownOpType    ),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('ownOperators', 'type'               , ownOpType    ),\
+                          ('ownFilters'  , 'type'               , ownFilterType),\
+                          ('switch'      , 'saveDdt'            , saveDdt      ),\
+                          ('switch'      , 'includeNoise'       , includeNoise ),\
+                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

@@ -41,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-c-1-onlyBracket"
+theRunName = "0-c-1-onlyBracketStart"
 # =============================================================================
 
 
