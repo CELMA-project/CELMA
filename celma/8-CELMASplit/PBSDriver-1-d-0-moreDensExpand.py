@@ -18,15 +18,19 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 ownOpType     = "2Brackets"
 ownFilterType = "none"
+saveDdt        = True
 # *****************************************************************************
-# Set the spatial domain
-nz = 2
-# Set the temporal domain
-restart    = None
 remove_old = False
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "d-moreDens/nout_20_timestep_50.0/nz_2/ownFilters_type_none_ownOperators_type_2Brackets_tag_0-d-0-moreDensStart_0/"
+# Set the spatial domain
+nz = 128
+# Set the temporal domain
 nout       = [20]
-timestep   = [5e1]
-directory  = "b-IMEXAdaptive3"
+timestep   = [5e0]
+directory  = "d-moreDens"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,7 +45,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-2-2Brackets"
+theRunName = "1-d-0-moreDensExpand"
 # =============================================================================
 
 
@@ -51,7 +55,7 @@ theRunName = "0-b-2-2Brackets"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -75,10 +79,12 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type', ownOpType    ),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('ownOperators', 'type'   , ownOpType    ),\
+                          ('ownFilters'  , 'type'   , ownFilterType),\
+                          ('switch'      , 'saveDdt', saveDdt      ),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
