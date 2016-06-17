@@ -17,8 +17,10 @@ a-data
 -  PBSDriver-0-a-013
     + nuei 25: Completes 23 steps, then too small timestep (50 m)
         > Weird blob in vort, looks like starts at same rho as everything else
+        (Happens after 3346 omega_ci)
 
 
 b-data
 ------
 -  PBSDriver-0-b-0-CompareWHyperViscNz1.py
+    + Not run yet
