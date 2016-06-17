@@ -48,6 +48,13 @@ Checking if more density speeds up calculation
 NOTE: Density not really changed as compared with with the "a-data" runs
 
 
+Improve the density by changing the source
+------------------------------------------
+0-e-0 sAmp 0.05  : Finished after 21 m, max dens around 2.6
+0-e-0 sAmp 0.025 : Finished after 18 m, max dens around 1.4
+0-e-0 sAmp 0.020 : Running
+0-e-0 sAmp 0.0175: Running
+
 
 Ideas:
 ------
