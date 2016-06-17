@@ -1,11 +1,7 @@
-Copied from 5.2-CELMAWNoisFilterRho
+Copied from 8-CELMASplit
 
-- Made model split
-  NOTE: The split is ignored for non-split solvers, and the rhs will simply be
-        the sum of the split
-- Parallel current terms now combined (numerical operators should resemble
-  conserved quantities)
-- Changed Grad_par with DDY (Grad_par divides by sqrt(g_22))
+- artPerp = 0.25
+- Meant to compare start-up times with 8-CELMASplit
 
 Results:
 ========
@@ -13,42 +9,19 @@ Getting backgrounds with nz = 2
 -------------------------------
 I.e. runs with a leading 0 in their serial number
 NOTE: No perturbations
-NOTE IMEX FIXED STEP:
-    Initially tried with timestep 1.0e0, but SNES failed reason -3
-    Initially tried with timestep 1.0e-1, but SNES failed reason -3
+NOTE IMEX FIXED STEP: Set to 1e-2
 Finish ordering (best to worst)
-0-a-2 - 1h 11m
-0-a-1 - 1h 18m
-0-a-0 - 1h 21m
-0-b-0 - Running
-0-b-1 - Running
-0-b-2 - Running
-0-c-0 - Running
-0-c-1 - Running
-0-c-2 - Running
+0-a-2 - Finished after 9m
+0-a-1 - Finished after 9m
+0-a-0 - Finished after 9m
+0-b-1 - Finished after 5h 51h
+0-b-0 - Finished 19 timesteps, then killed by walltime (6h)
+0-b-2 - Finished 18 timesteps, then killed by walltime (6h)
+0-c-0 - Finished 11 timesteps, then SNES failed to converge -6 (33 m)
+0-c-2 - Finished 9 timesteps, then SNES failed to converge -6 (25 m)
+0-c-1 - Finished 9 timesteps, then SNES failed to converge -6 (28 m)
 
-
-Expanding to 128
-----------------
-I.e. runs with a leading 1 in their serial number
-
-f = DataFile_netCDF(filename="BOUT.restart.0.nc")
-f.read("vortD")
-vortD = f.read("vortD")
-
-
-a-data
-------
-Not yet implemented
-
-c-had to change timestep 1.0 snes failed
-c-had to change timestep 1.0e-2 snes failed reason -3
-
-Checkme:
-The div(ueDotGrad(nGrad(phi))) should in principle NOT be active
-Thus, in principle only need one run to restart from
-
-Could in principle check for difference in hypervisc
-(this would be more important when more z points)
-
-Coloring
+Conclusion:
+-----------
+High speed-up with cvode
+IMEX seems to be more unstable

@@ -14,41 +14,65 @@ Getting backgrounds with nz = 2
 I.e. runs with a leading 0 in their serial number
 NOTE: No perturbations
 NOTE IMEX FIXED STEP:
-    Initially tried with timestep 1.0e0, but SNES failed reason -3
+    Initially tried with timestep 1.0e0, but SNES failed reason -6
     Initially tried with timestep 1.0e-1, but SNES failed reason -3
 Finish ordering (best to worst)
 0-a-2 - 1h 11m
 0-a-1 - 1h 18m
 0-a-0 - 1h 21m
-0-b-0 - Running
-0-b-1 - Running
-0-b-2 - Running
-0-c-0 - Running
-0-c-1 - Running
-0-c-2 - Running
+0-b-0 - Completed 9 steps, killed by walltime
+0-b-1 - Completed 9 steps, killed by walltime
+0-b-2 - Completed 9 steps, killed by walltime
+0-c-0 - Completed 2 steps, killed by walltime
+0-c-1 - Completed 2 steps, killed by walltime
+0-c-2 - Completed 2 steps, killed by walltime
 
 
 Expanding to 128
 ----------------
 I.e. runs with a leading 1 in their serial number
+NOTE: No perturbations
+0-a-0 - 1h 41m
+0-a-1 - 1h 52m
+0-a-2 - 2h  1m
 
-f = DataFile_netCDF(filename="BOUT.restart.0.nc")
-f.read("vortD")
-vortD = f.read("vortD")
+Can see that current is fluctuation a bit (however on a small level)
 
 
-a-data
+
+Checking if more density speeds up calculation
+----------------------------------------------
+0-d-0 - Finished after 41 m 29 s
+1-d-0 - Finished after 1h 28m
+
+NOTE: Density not really changed as compared with with the "a-data" runs
+
+
+
+Ideas:
 ------
-Not yet implemented
-
-c-had to change timestep 1.0 snes failed
-c-had to change timestep 1.0e-2 snes failed reason -3
-
-Checkme:
-The div(ueDotGrad(nGrad(phi))) should in principle NOT be active
-Thus, in principle only need one run to restart from
-
 Could in principle check for difference in hypervisc
 (this would be more important when more z points)
 
 Coloring
+
+
+Python snippets
+===============
+Checked that the data is correct with
+-------------------------------------
+    from boututils.from boututils.datafile import DataFile_netCDF
+    f = DataFile_netCDF(filename="BOUT.restart.0.nc")
+    f.read("vortD")
+    vortD = f.read("vortD")
+
+
+Checking stiffness
+-------------------
+# NOTE: Watch out for high variation in the data
+import numpy as np
+from boutdata import collect
+vars = ['ddt(lnN)', 'ddt(uIPar)', 'ddt(uEPar)', 'ddt(vortD)']
+for var in vars:
+    data = collect(var, info=False)
+    print("{:10}:    Max={:.3e}    Var={:.3e}".format(var, np.max(np.abs(data)), np.var(data)))
