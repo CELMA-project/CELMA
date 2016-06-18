@@ -16,23 +16,21 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType     = "simpleStupid"
-ownFilterType = "radialLowPass"
-saveDdt       = True
-includeNoise  = True
-forceAddNoise = True
+ownOpType     = "2Brackets"
+ownFilterType = "none"
+sAmp          = [0.020]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_saveDdt_True_tag_1-a-0-simpleStupidExpand_0/"
+restart_from = "e-moreSource/nout_20_timestep_50.0/nz_2/ownFilters_type_none_ownOperators_type_2Brackets_tag_0-e-0-moreSourceSAmpScan_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [100]
-timestep   = [10]
-directory  = "a-data"
+nout       = [20]
+timestep   = [5e0]
+directory  = "e-moreSource"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -47,7 +45,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-0.0-simpleStupidAddnoiseRadialLowPass"
+theRunName = "1-e-0-moreSourceExpand"
 # =============================================================================
 
 
@@ -57,7 +55,7 @@ theRunName = "2-a-0.0-simpleStupidAddnoiseRadialLowPass"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -84,11 +82,9 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type'        , ownOpType    ),\
-                          ('ownFilters'  , 'type'        , ownFilterType),\
-                          ('switch'      , 'saveDdt'     , saveDdt      ),\
-                          ('switch'      , 'includeNoise', includeNoise ),\
-                          ('switch'      , 'forceAddNoise',forceAddNoise),\
+                          ('ownOperators', 'type', ownOpType    ),\
+                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('theSource', 'a', sAmp               ),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
