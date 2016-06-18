@@ -7,6 +7,7 @@ Copied from 5.2-CELMAWNoisFilterRho
   conserved quantities)
 - Changed Grad_par with DDY (Grad_par divides by sqrt(g_22))
 
+
 Results:
 ========
 Getting backgrounds with nz = 2
@@ -32,9 +33,9 @@ Expanding to 128
 ----------------
 I.e. runs with a leading 1 in their serial number
 NOTE: No perturbations
-0-a-0 - 1h 41m
-0-a-1 - 1h 52m
-0-a-2 - 2h  1m
+1-a-0 - 1h 41m
+1-a-1 - 1h 52m
+1-a-2 - 2h  1m
 
 Can see that current is fluctuation a bit (however on a small level)
 
@@ -48,12 +49,40 @@ Checking if more density speeds up calculation
 NOTE: Density not really changed as compared with with the "a-data" runs
 
 
+
 Improve the density by changing the source
 ------------------------------------------
 0-e-0 sAmp 0.05  : Finished after 21 m, max dens around 2.6
 0-e-0 sAmp 0.025 : Finished after 18 m, max dens around 1.4
-0-e-0 sAmp 0.020 : Running
-0-e-0 sAmp 0.0175: Running
+0-e-0 sAmp 0.020 : Finished after 19 m, max dens around 1.0
+0-e-0 sAmp 0.0175: Finished after 19 m, max dens around 0.88
+
+
+Adding noise with filter
+------------------------
+2-a-0.0 : Finished 27 steps, killed by walltime (12 h)
+2-a-1.0 : Finished 31 steps, killed by walltime (12 h)
+2-a-2.0 : Finished 27 steps, killed by walltime (12 h)
+
+
+Adding noise with hypervisc
+---------------------------
+2-a-0.1 : Finished 35 steps, timestep failed (10h 40m)
+2-a-1.1 : Finished 50 steps, killed by walltime (12 h)
+2-a-2.1 : Finished 31 steps, killed by walltime (12 h)
+
+
+Restarting with filter
+----------------------
+3-a-0.0 : Finished 2 timesteps, then cvode failed -4 (6h)
+
+
+Restarting with hypervisc
+-------------------------
+3-a-1.1 : Finished after 6 h 9 m
+
+
+
 
 
 Ideas:
@@ -62,6 +91,11 @@ Could in principle check for difference in hypervisc
 (this would be more important when more z points)
 
 Coloring
+
+
+
+
+
 
 
 Python snippets

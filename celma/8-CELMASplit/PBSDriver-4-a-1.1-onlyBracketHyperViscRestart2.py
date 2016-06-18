@@ -16,21 +16,22 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType     = "simpleStupid"
-ownFilterType = "radialLowPass"
-saveDdt       = True
-includeNoise  = True
-forceAddNoise = True
+ownOpType           = "onlyBracket"
+ownFilterType       = "none"
+saveDdt             = True
+includeNoise        = False
+forceAddNoise       = False
+useHyperViscAzVortD = True
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_saveDdt_True_tag_1-a-0-simpleStupidExpand_0/"
+restart_from = "a-data/nout_103_timestep_10/nz_128/ownFilters_type_none_ownOperators_type_onlyBracket_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_3-a-1.1-onlyBracketHyperViscRestart_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [100]
+nout       = [105]
 timestep   = [10]
 directory  = "a-data"
 # Shall we make?
@@ -47,7 +48,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-0.0-simpleStupidAddnoiseRadialLowPass"
+theRunName = "4-a-1.1-onlyBracketHyperViscRestart2"
 # =============================================================================
 
 
@@ -84,11 +85,12 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type'        , ownOpType    ),\
-                          ('ownFilters'  , 'type'        , ownFilterType),\
-                          ('switch'      , 'saveDdt'     , saveDdt      ),\
-                          ('switch'      , 'includeNoise', includeNoise ),\
-                          ('switch'      , 'forceAddNoise',forceAddNoise),\
+                          ('ownOperators', 'type'               , ownOpType    ),\
+                          ('ownFilters'  , 'type'               , ownFilterType),\
+                          ('switch'      , 'saveDdt'            , saveDdt      ),\
+                          ('switch'      , 'includeNoise'       , includeNoise ),\
+                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
