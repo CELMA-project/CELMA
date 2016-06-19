@@ -448,8 +448,15 @@ class Plot1D(Plot):
                                      tind    = self._tind   ,\
                                      info    = False)
             except ValueError:
-                import pdb; pdb.set_trace()
-                pass
+                # FIXME: What is the point of this?
+                # I just added the below
+                line.field = collect(line.name,\
+                                     path    = self._path   ,\
+                                     xguards = self._xguards,\
+                                     yguards = self._yguards,\
+                                     tind    = self._tind   ,\
+                                     info    = False)
+                # pass
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
@@ -509,12 +516,7 @@ class Plot1D(Plot):
         """
 
         # Initial plot
-        if self._tind != None:
-            tInd = self._tind[0]
-        else:
-            tInd = 0
-
-        self._plotLines(fig, orgObj, tInd)
+        self._plotLines(fig, orgObj, 0)
 
         if self._savePlot:
             # Make a saveName by stripping the orgObj's plot name for bad
