@@ -46,6 +46,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
+tSlice     = slice(85,105)
 showPlot   = False
 savePlot   = True
 theRunName = "4-a-1.1-onlyBracketHyperViscRestart2"
@@ -123,6 +124,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
