@@ -49,7 +49,6 @@ Checking if more density speeds up calculation
 NOTE: Density not really changed as compared with with the "a-data" runs
 
 
-
 Improve the density by changing the source
 ------------------------------------------
 0-e-0 sAmp 0.05  : Finished after 21 m, max dens around 2.6
@@ -57,12 +56,17 @@ Improve the density by changing the source
 0-e-0 sAmp 0.020 : Finished after 19 m, max dens around 1.0
 0-e-0 sAmp 0.0175: Finished after 19 m, max dens around 0.88
 
+Expand
+------
+1-e-0 : Finished after 18 m
+
 
 Adding noise with filter
 ------------------------
 2-a-0.0 : Finished 27 steps, killed by walltime (12 h)
 2-a-1.0 : Finished 31 steps, killed by walltime (12 h)
 2-a-2.0 : Finished 27 steps, killed by walltime (12 h)
+2-e-0   : Finished 79 steps, cvode timestep failed
 
 
 Adding noise with hypervisc
@@ -80,9 +84,20 @@ Restarting with filter
 Restarting with hypervisc
 -------------------------
 3-a-1.1 : Finished after 6 h 9 m
+3-a-2.1 : Finished 2 timesteps, then failed in Naulin solver (7h 41m)
+4-a-1.1 : Finished after 5 h 59 m
+5-a-1.1 : Running
 
 
+Check why fails
+---------------
+I2-a-0.1 : Running
+I2-e-0   : Running
+I3-a-0.0 : Running
+I3-a-2.1 : Running
 
+
+FIXME: Bug with tind
 
 
 Ideas:
