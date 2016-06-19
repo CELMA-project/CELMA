@@ -20,20 +20,20 @@ ownOpType           = "2Brackets"
 ownFilterType       = "radialLowPass"
 sAmp                = [0.020]
 saveDdt             = True
-includeNoise        = True
-forceAddNoise       = True
+includeNoise        = False
+forceAddNoise       = False
 useHyperViscAzVortD = False
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "e-moreSource/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_2Brackets_tag_1-e-0-moreSourceExpand_0_theSource_a_0.02/"
+restart_from = "e-moreSource/nout_300_timestep_10/nz_128/ownFilters_type_radialLowPass_ownOperators_type_2Brackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_False_tag_2-e-0-moreSourceAddNoiseRadialLowPass_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [300]
-timestep   = [10]
+nout       = [100]
+timestep   = [1]
 directory  = "e-moreSource"
 # Shall we make?
 make       = False
@@ -47,10 +47,9 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(280,300)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-0-moreSourceAddNoiseRadialLowPass"
+theRunName = "I2-e-0-moreSourceRadialLowPass"
 # =============================================================================
 
 
@@ -126,7 +125,6 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
-                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\

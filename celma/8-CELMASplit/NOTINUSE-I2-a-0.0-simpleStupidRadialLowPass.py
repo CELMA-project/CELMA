@@ -16,25 +16,23 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "2Brackets"
-ownFilterType       = "radialLowPass"
-sAmp                = [0.020]
-saveDdt             = True
-includeNoise        = True
-forceAddNoise       = True
-useHyperViscAzVortD = False
+ownOpType     = "simpleStupid"
+ownFilterType = "radialLowPass"
+saveDdt       = True
+includeNoise  = False
+forceAddNoise = False
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "e-moreSource/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_2Brackets_tag_1-e-0-moreSourceExpand_0_theSource_a_0.02/"
+restart_from = "a-data/nout_100_timestep_10/nz_128/ownFilters_type_radialLowPass_ownOperators_type_simpleStupid_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_tag_2-a-0.0-simpleStupidAddnoiseRadialLowPass_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [300]
-timestep   = [10]
-directory  = "e-moreSource"
+nout       = [100]
+timestep   = [1]
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -47,10 +45,9 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(280,300)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-0-moreSourceAddNoiseRadialLowPass"
+theRunName = "I2-a-0.0-simpleStupidRadialLowPass"
 # =============================================================================
 
 
@@ -87,13 +84,11 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type', ownOpType    ),\
-                          ('ownFilters'  , 'type', ownFilterType),\
-                          ('theSource', 'a', sAmp               ),\
-                          ('switch'      , 'saveDdt'            , saveDdt      ),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('ownOperators', 'type'        , ownOpType    ),\
+                          ('ownFilters'  , 'type'        , ownFilterType),\
+                          ('switch'      , 'saveDdt'     , saveDdt      ),\
+                          ('switch'      , 'includeNoise', includeNoise ),\
+                          ('switch'      , 'forceAddNoise',forceAddNoise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -126,7 +121,6 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
-                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
