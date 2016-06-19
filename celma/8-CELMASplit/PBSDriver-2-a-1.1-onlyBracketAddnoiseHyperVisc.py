@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "simpleStupid"
+ownOpType           = "onlyBracket"
 ownFilterType       = "none"
 saveDdt             = True
 includeNoise        = True
@@ -27,7 +27,7 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_saveDdt_True_tag_1-a-0-simpleStupidExpand_0/"
+restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_onlyBracket_switch_saveDdt_True_tag_1-a-1-onlyBracketExpand_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
@@ -48,7 +48,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-0.1-simpleStupidAddnoiseHyperVisc"
+theRunName = "2-a-1.1-onlyBracketAddnoiseHyperVisc"
 # =============================================================================
 
 
