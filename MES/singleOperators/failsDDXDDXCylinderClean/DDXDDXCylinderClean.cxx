@@ -92,7 +92,7 @@ int DDXDDXCylinderClean::init(bool restarting) {
     // Calculate
     DDXf = DDX(f);
     ownBC.innerRhoCylinder(DDXf); // Set inner rho boundary
-    xout_after_DDX(DDXf, f);       // Set outer rho boundary
+    xout_after_DDX(DDXf, f);      // Set outer rho boundary
     mesh->communicate(DDXf);
     S_num = DDX(DDXf);
 

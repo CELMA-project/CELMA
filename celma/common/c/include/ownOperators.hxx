@@ -84,6 +84,10 @@ class OwnOperators
          * (only used in 2Brackets)
          */
         virtual Field3D kinEnAdvN(const Field3D &phi, const Field3D &n) = 0;
+        /*! Operator for D3DX3 (must be declared virtual if it is to be
+         * publicly accessable in just one of the child classes)
+         */
+        virtual Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
 
         // Auxiliary functions
         //! Getter for IncXbndry
@@ -150,10 +154,6 @@ class OwnOpSimpleStupid : public OwnOperators
         Field3D n_z,    n_zz; //!< \f$\theta\f$ derivatives of \f$n\f$
         /**@}*/
         Field3D n_xz;   //!< Mixed derivatives of \f$n\f$
-
-        // Member functions
-        //! Discretizes \f$\partial_\rho^3\f$
-        Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
     public:
         // Constructors
         OwnOpSimpleStupid(Options *options, string &phiBndrySec);
@@ -168,6 +168,10 @@ class OwnOpSimpleStupid : public OwnOperators
         Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
         //! Will throw error
         Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
+
+        // Member functions
+        //! Discretizes \f$\partial_\rho^3\f$
+        Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
 
         //! Destructor
         /* NOTE: {} in the end is needed

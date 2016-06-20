@@ -12,6 +12,11 @@
 int D3DX3Cylinder::init(bool restarting) {
     TRACE("Halt in D3DX3Cylinder::init");
 
+    /* NOTE: Calls createOperators without making an object of OwnOperators.
+     *       The child is typecasted to the parent
+     */
+    ownOp = OwnOperators::createOperators();
+
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
 
@@ -51,7 +56,7 @@ int D3DX3Cylinder::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = ownOp.D3DX3(f);
+    S_num = ownOp->D3DX3(f);
 
     // Error in S
     e = S_num - S;
