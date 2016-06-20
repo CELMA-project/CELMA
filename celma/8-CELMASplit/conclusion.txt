@@ -66,7 +66,7 @@ Adding noise with filter
 2-a-0.0 : Finished 27 steps, killed by walltime (12 h)
 2-a-1.0 : Finished 31 steps, killed by walltime (12 h)
 2-a-2.0 : Finished 27 steps, killed by walltime (12 h)
-2-e-0   : Finished 79 steps, cvode timestep failed
+2-e-0   : Finished 79 steps, cvode timestep failed (8 h 56 m) - high perturbation in vort with small structures
 
 
 Adding noise with hypervisc
@@ -78,26 +78,28 @@ Adding noise with hypervisc
 
 Restarting with filter
 ----------------------
-3-a-0.0 : Finished 2 timesteps, then cvode failed -4 (6h)
+3-a-0.0 : Finished 2 timesteps, then cvode failed -4 (6h) - Don't see anything in plots
+3-a-1.0 : Finished after 32 h 5 m - Saturated turbulence
+3-a-2.0 : Finished 1 timestep after 23 m, then stalled (killed by user after 45 h) - Don't see anything in plots
 
 
 Restarting with hypervisc
 -------------------------
-3-a-1.1 : Finished after 6 h 9 m
-3-a-2.1 : Finished 2 timesteps, then failed in Naulin solver (7h 41m)
-4-a-1.1 : Finished after 5 h 59 m
-5-a-1.1 : Running
+3-a-1.1 : Finished after 6 h 9 m - Saturated turbulence
+3-a-2.1 : Finished 2 timesteps, then failed in Naulin solver (7h 41m) - Not apparent why from the plots
+4-a-1.1 : Finished after 5 h 59 m - Saturated turbulence
+5-a-1.1 : Finished after 20 h 33 m (300 steps) - Saturated turbulence
 
 
 Check why fails
 ---------------
-I2-a-0.1 : Running
-I2-e-0   : Running
-I3-a-0.0 : Running
-I3-a-2.1 : Running
+I2-a-0.1 : Finished 1 step (36m), then cvode timestep failed, see fast perturb, trouble with min at [1,9,23,9], see snippet
+I2-e-0   : Finihsed 3 steps (3h 37m), then cvode timestep failed, see fast perturb out in the edge, trouble with min at [0,0,0,125]
+I3-a-0.0 : Finihsed 3 steps (1h 17m), then cvode timestep failed, see small perturb, trouble at [2,9,23,1]
+I3-a-2.0 : !!! Troubles to start
+I3-a-2.1 : Finished 2 steps (46m), then cvode timestep failed, see fast perturb, trouble in source with min at [1,16,0,14], see snippet
 
 
-FIXME: Bug with tind
 
 
 Ideas:
@@ -132,3 +134,16 @@ vars = ['ddt(lnN)', 'ddt(uIPar)', 'ddt(uEPar)', 'ddt(vortD)']
 for var in vars:
     data = collect(var, info=False)
     print("{:10}:    Max={:.3e}    Var={:.3e}".format(var, np.max(np.abs(data)), np.var(data)))
+
+
+Connect to jess
+---------------
+cd /run/user/1000/gvfs/smb-share:server=jess.dtu.dk,share=mmag/CELMA-dev/celma/
+
+
+Blow-up not visible in plot?
+----------------------------
+fig, ax = plt.subplots()
+cax = ax.contourf(vort[2,:,:,14])
+cbar = fig.colorbar(cax)
+plt.show()
