@@ -70,6 +70,8 @@ MES/singleOperators/failsDDXDDXCylinderClean/DDXDDXCylinderClean
 MES/singleOperators/failsDDXDDXHighResCenter*/DDXDDXCylinderHighResCenter
 MES/singleOperators/subconvergenceDDXCylinderWithJacobianOverJacobian/DDXCylinderWithJacobianOverJacobian
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
+MES/modifiedArakawa/1-ArakawaOfDDXf2/ArakawaOfDDX
+MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 
 # Miscellaneous
 *delme*
