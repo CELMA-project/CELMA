@@ -1,0 +1,13 @@
+Copied from 0-DDXCylinder/
+
+- Check that DDX is working in cylinder geometry with 4th order at
+  innermost point
+
+Results:
+========
+- gaussian: Convergence
+- gaussianWSinAndParabola: Convergence
+
+Conclusion:
+===========
+Expected convergence :D

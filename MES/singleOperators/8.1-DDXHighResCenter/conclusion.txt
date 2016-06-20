@@ -1,0 +1,13 @@
+Copied from 8-DDXHighResCenter/
+
+- Check that DDX is working in cylinder geometry with 6th order at
+  innermost point
+
+Results:
+========
+- gaussian: Convergence
+- gaussianWSinAndParabola: Convergence
+
+Conclusion:
+===========
+Expected convergence :D
