@@ -109,6 +109,23 @@ OwnOperators* OwnOperators::createOperators(Options *options)
 }
 
 /*!
+ * Only implemented in the simpleStupid class
+ *
+ * \param[in] f The field
+ * \param[in] t The time to evaluate the boundary function
+ *
+ * \returns f (never reached)
+ */
+Field3D OwnOperators::D3DX3(const Field3D &f, const BoutReal &t)
+{
+    TRACE("Halt in OwnOperators::D3DX3");
+
+    throw BoutException("D3DX3 is only implemented in the simpleStupid class");
+
+    return f;
+}
+
+/*!
  * 3rd derivative in the \f$\rho\f$ direction using cylindrical geometry.
  * This is a natural extension of D2DZ2 in src/sys/derivs.cxx, with the only
  * execption that incXBndry is a private member data set by the
