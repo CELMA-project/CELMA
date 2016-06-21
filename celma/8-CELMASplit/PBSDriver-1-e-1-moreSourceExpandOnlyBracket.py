@@ -16,24 +16,21 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "simpleStupid"
-ownFilterType       = "none"
-saveDdt             = True
-includeNoise        = False
-forceAddNoise       = False
-useHyperViscAzVortD = True
+ownOpType     = "onlyBracket"
+ownFilterType = "none"
+sAmp          = [0.020]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "a-data/nout_101_timestep_10/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-a-0.1-simpleStupidAddnoiseHyperVisc_0/"
+# restart     = None;
+restart_from  = "e-moreSource/nout_20_timestep_50.0/nz_2/ownFilters_type_none_ownOperators_type_onlyBracket_tag_0-e-1-moreSourceOnlyBracket_0_theSource_a_0.02"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [100]
-timestep   = [1]
-directory  = "a-data"
+nout       = [20]
+timestep   = [5e0]
+directory  = "e-moreSource"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -44,11 +41,11 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 23
+ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "I2-a-0.1-simpleStupidHyperVisc"
+theRunName = "1-e-1-moreSourceExpandOnlyBracket"
 # =============================================================================
 
 
@@ -58,7 +55,7 @@ theRunName = "I2-a-0.1-simpleStupidHyperVisc"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -85,12 +82,9 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type'               , ownOpType    ),\
-                          ('ownFilters'  , 'type'               , ownFilterType),\
-                          ('switch'      , 'saveDdt'            , saveDdt      ),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('ownOperators', 'type', ownOpType    ),\
+                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('theSource', 'a', sAmp               ),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
