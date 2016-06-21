@@ -344,6 +344,8 @@ void OwnOperators::setIncXbndry(bool option)
  *
  * \param[in] section What section to get bndryFuncGen from.
  *                    Default is "phi"
+ *
+ * \warning Only dirichlet boundary condition is implemented.
  */
 OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
     OwnOperators(options)
@@ -362,6 +364,22 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
                << phiBndrySec << " D3DX3 will not work"
                << "\n\n\n\n" << std::endl;
 
+    }
+    else if !(lowercase(bndryFuncString).find("dirichlet") != string::npos){
+        // Create a stream which we cast to a string
+        std::ostringstream stream;
+        stream << "neumann boundary condition not implemented in D3DX3\n"
+               << "Found:\n"
+               << bndryFuncString
+               << "\nin\n"
+               << phiBndrySec
+               << "\nHowever, current implementation only includes dirichlet BC"
+               ;
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+
+        throw BoutException(message);
     }
     // Strip the function name
     int pos = bndryFuncString.find('(');
