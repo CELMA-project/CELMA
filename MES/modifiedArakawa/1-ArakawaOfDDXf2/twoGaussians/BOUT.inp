@@ -21,7 +21,7 @@ MXG = 1 # If this is changed the self implemented boundaries needs to change
 MYG = 0 # Make this 2D
 
 # Number of splittings in x
-NXPE = 1
+NXPE = 4
 ###############################################################################
 
 
@@ -31,7 +31,7 @@ NXPE = 1
 # Number of points
 nx = 4096 + 2*MXG
 ny = 1
-nz = 2^8
+nz = 2^15
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points

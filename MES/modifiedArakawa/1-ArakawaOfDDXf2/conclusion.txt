@@ -1,13 +1,11 @@
-Copied from 0-DDXCylinder/
+Copied from singleOperators/8.2-DDXHighResCenter/
 
-- Check that DDX is working in cylinder geometry with 4th order at
-  innermost point
+- Check that {(partial_rho phi)^2, n} is properly implemented
 
 Results:
 ========
-- gaussian: Convergence
-- gaussianWSinAndParabola: Convergence
+- TwoGaussians: Converges
 
 Conclusion:
 ===========
-Expected convergence :D
+Get expected convergece :D
