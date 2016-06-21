@@ -16,18 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "simpleStupid"
-ownFilterType       = "none"
-saveDdt             = True
-includeNoise        = False
-forceAddNoise       = False
-useHyperViscAzVortD = True
+ownOpType     = "2Brackets"
+ownFilterType = "radialLowPass"
+saveDdt       = True
+includeNoise  = False
+forceAddNoise = False
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_101_timestep_10/nz_128/ownFilters_type_none_ownOperators_type_simpleStupid_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-a-0.1-simpleStupidAddnoiseHyperVisc_0/"
+restart_from = "a-data/nout_102_timestep_10/nz_128/ownFilters_type_radialLowPass_ownOperators_type_2Brackets_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveDdt_True_tag_3-a-2.0-2BracketsRadialLowPassRestart_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
@@ -44,11 +43,11 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 23
+ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "I2-a-0.1-simpleStupidHyperVisc"
+theRunName = "I3-a-2.0-2BracketsRadialLowPass"
 # =============================================================================
 
 
@@ -58,7 +57,7 @@ theRunName = "I2-a-0.1-simpleStupidHyperVisc"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -85,12 +84,11 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownOperators', 'type'               , ownOpType    ),\
-                          ('ownFilters'  , 'type'               , ownFilterType),\
-                          ('switch'      , 'saveDdt'            , saveDdt      ),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('ownOperators', 'type'        , ownOpType    ),\
+                          ('ownFilters'  , 'type'        , ownFilterType),\
+                          ('switch'      , 'saveDdt'     , saveDdt      ),\
+                          ('switch'      , 'includeNoise', includeNoise ),\
+                          ('switch'      , 'forceAddNoise',forceAddNoise),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
