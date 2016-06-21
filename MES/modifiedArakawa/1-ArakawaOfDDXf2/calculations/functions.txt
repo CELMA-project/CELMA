@@ -1,6 +1,28 @@
-Gaussian with sinus and parabola
-======================================================================================================================================
-# Gaussian with sinus and parabola
+Simple funcs
+=====================================================================================================================================
+# Simple funcs
+
+the_vars['phi'] = x**2+sin(z)
+
+the_vars['n'] = x+sin(z)
+
+
+
+
+[phi]
+geom:xl^2 + sin(z)
+
+[n]
+geom:xl + sin(z)
+
+[S]
+-8.0*geom:xl^1.0*cos(z)
+=====================================================================================================================================
+
+
+Two Gaussians
+=====================================================================================================================================
+# Two gaussians
 
 # The skew sinus
 # In cartesian coordinates we would like a sinus with with a wave-vector in the direction
@@ -26,28 +48,15 @@ Gaussian with sinus and parabola
 # Chosing this function to have a zero value at the edge yields in cylindrical coordinates
 # ((x*cos(z)+Lx)/(2*Lx))^2
 
+# Scaling with 40 to get S in order of unity
+
 w = 0.8*Lx
 rho0 = 0.3*Lx
 theta0 = 5*pi/4
-the_vars['f'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
-                exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
-                ((x*cos(z)+Lx)/(2*Lx))**2
+the_vars['n'] = 40*sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
+                  exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
+                  ((x*cos(z)+Lx)/(2*Lx))**2
 
-
-
-
-
-[S]
-0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)
-
-[f]
-0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
-======================================================================================================================================
-
-
-
-Gaussian
-======================================================================================================================================
 # The gaussian
 
 # In cartesian coordinates we would like
@@ -56,17 +65,24 @@ Gaussian
 # f = exp(-(1/(2*w^2))*(x^2 + y^2 + x0^2 + y0^2 - 2*(x*x0+y*y0) ))
 #   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta)*cos(theta0)+sin(theta)*sin(theta0)) ))
 #   = exp(-(1/(2*w^2))*(rho^2 + rho0^2 - 2*rho*rho0*(cos(theta - theta0)) ))
+
+# Scaling with 40 to get S in order of unity
+
 w = 0.5*Lx
 rho0 = 0.2*Lx
 theta0 = pi
-the_vars['f'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))
+the_vars['phi'] = 40*exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))
 
 
 
 
-[f]
-0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
+
+[phi]
+36.9246538554654*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
+
+[n]
+37.2840996943811*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
 
 [S]
-0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
-======================================================================================================================================
+-1363.43006234594*((-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)))^2.0*(2.0*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))^2*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)) - 0.00888888888888889*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)))*(0.621401661573018*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(-sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.582564057724705*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z + pi/4) - 1.24280332314604*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(z)*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60))*exp(0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z))/(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z)) + 1363.43006234594*((-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)))^2.0*(0.0533333333333333*geom:xl*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z) + 0.0533333333333333*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))*sin(z))*(37.2840996943811*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.621401661573018*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 1.24280332314604*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))*exp(0.00222222222222222*geom:xl^2 + 0.0266666666666667*geom:xl*cos(z))/(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))
+=====================================================================================================================================
