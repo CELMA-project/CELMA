@@ -15,13 +15,13 @@ from common.python.postProcessingMES import perform_MES_test
 # The options for the run
 # =============================================================================
 # Spatial domain (+2 adds the ghost points)
-nx = [2**n+2 for n in range(4, 12)]
+nx = [2**n+2 for n in range(4, 8)]
 
 # Additional options
 remove_old = True
-directory  = "gaussian"
+directory  = "twoGaussians"
 make       = True
-nproc      = 4
+nproc      = 1
 # =============================================================================
 
 
