@@ -45,6 +45,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
+tSlice     = slice(82, 102)
 showPlot   = False
 savePlot   = True
 theRunName = "3-a-1.0-onlyBracketRadialLowPassRestart"
@@ -121,6 +122,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
