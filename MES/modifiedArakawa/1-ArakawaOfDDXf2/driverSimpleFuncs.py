@@ -15,11 +15,11 @@ from common.python.postProcessingMES import perform_MES_test
 # The options for the run
 # =============================================================================
 # Spatial domain (+2 adds the ghost points)
-nx = [2**n+2 for n in range(4, 12)]
+nx = [2**n+2 for n in range(4, 8)]
 
 # Additional options
 remove_old = True
-directory  = "gaussianWSinAndParabola"
+directory  = "simpleFuncs"
 make       = True
 nproc      = 4
 # =============================================================================
@@ -54,6 +54,5 @@ my_runs.execute_runs(\
                      use_dy        = False,\
                      use_dz        = False,\
                      xz_error_plot = True ,\
-                     extension     = 'pdf',\
                     )
 # =============================================================================

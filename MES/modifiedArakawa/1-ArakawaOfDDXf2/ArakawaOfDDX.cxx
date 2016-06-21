@@ -9,9 +9,27 @@
 
 Field3D ArakawaOfDDXf2(Field3D const &f, Field3D const &g);
 
+inline BoutReal arakawaDifferencing(
+                                    BoutReal const & f_xyzP1  ,
+                                    BoutReal const & f_xyzM1  ,
+                                    BoutReal const & f_xP1yz  ,
+                                    BoutReal const & f_xM1yz  ,
+                                    BoutReal const & f_xP1yzP1,
+                                    BoutReal const & f_xP1yzM1,
+                                    BoutReal const & f_xM1yzP1,
+                                    BoutReal const & f_xM1yzM1,
+                                    Field3D  const & g        ,
+                                    int      const & xInd     ,
+                                    int      const & yInd     ,
+                                    int      const & zInd     ,
+                                    int      const & zIndP1   ,
+                                    int      const & zIndM1
+                                   )
+                                   ;
+
 // Initialization of the physics
 // ############################################################################
-int ArakawaOfDDXf2::init(bool restarting) {
+int ArakawaOfDDX::init(bool restarting) {
     TRACE("Halt in ArakawaOfDDXf2::init");
 
     // Get the option (before any sections) in the BOUT.inp file
@@ -25,9 +43,13 @@ int ArakawaOfDDXf2::init(bool restarting) {
 
     // Obtain the fields
     // ************************************************************************
-    // f
-    f = FieldFactory::get()
-        ->create3D("f:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+    // phi
+    phi = FieldFactory::get()
+        ->create3D("phi:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+
+    // n
+    n = FieldFactory::get()
+        ->create3D("n:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
 
     // S
     S = FieldFactory::get()
@@ -37,14 +59,18 @@ int ArakawaOfDDXf2::init(bool restarting) {
     // Add a FieldGroup to communicate
     // ************************************************************************
     // Only these fields will be taken derivatives of
-    com_group.add(f);
+    com_group.add(phi);
+    com_group.add(n);
     // ************************************************************************
 
     // Set boundaries manually
     // ************************************************************************
-    f.setBoundary("f");
-    f.applyBoundary();
-    ownBC.innerRhoCylinder(f);
+    phi.setBoundary("phi");
+    phi.applyBoundary();
+    ownBC.innerRhoCylinder(phi);
+    n.setBoundary("n");
+    n.applyBoundary();
+    ownBC.innerRhoCylinder(n);
     // ************************************************************************
 
     // Communicate before taking derivatives
@@ -53,14 +79,14 @@ int ArakawaOfDDXf2::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = DDXCylHighResCenter(f);
+    S_num = ArakawaOfDDXf2(phi, n);
 
     // Error in S
     e = S_num - S;
 
     // Save the variables
     SAVE_ONCE (Lx);
-    SAVE_ONCE3(f, S, S_num);
+    SAVE_ONCE4(phi, n, S, S_num);
     SAVE_ONCE (e);
 
     // Finalize
@@ -78,347 +104,454 @@ int ArakawaOfDDXf2::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int ArakawaOfDDXf2::rhs(BoutReal t) {
+int ArakawaOfDDX::rhs(BoutReal t) {
     return 0;
 }
 // ############################################################################
 
 // Create a simple main() function
-BOUTMAIN(ArakawaOfDDXf2);
+BOUTMAIN(ArakawaOfDDX);
 
 // Destructor
-ArakawaOfDDXf2::~ArakawaOfDDXf2(){
+ArakawaOfDDX::~ArakawaOfDDX(){
     TRACE("ArakawaOfDDXf2::~ArakawaOfDDXf2");
 }
 
 // New implementation
 // NOTE: When calculating the last point, we need either 2 ghost points, or a
-// one-sided stencil. We will use a one-sided stencil, and we will not have to
-// worry about the precision of the ghost point if we are using a neumann BC,
-// as this is known to machine precision when boundaries are half between grid
-// points
+// one-sided stencil.
 Field3D ArakawaOfDDXf2(Field3D const &f, Field3D const &g)
 {
     TRACE("ArakawaOfDDXf2");
 
     Field3D result;
+    int xInd;
+    int xIndP1;
+    int xIndM1;
+    int xstart;
+    int xend  ;
+    int zIndP1 ;
+    int zIndM1 ;
+    BoutReal f_xyzP1;
+    BoutReal f_xyzM1;
+    BoutReal f_xP1yz;
+    BoutReal f_xM1yz;
+    BoutReal f_xP1yzP1;
+    BoutReal f_xP1yzM1;
+    BoutReal f_xM1yzP1;
+    BoutReal f_xM1yzM1;
 
     result.allocate();
 
     int ncz = mesh->ngz - 1;
-    if(!mesh->firstX() && !mesh->lastX()){
-        for(int xInd=mesh->xstart;xInd<=mesh->xend;xInd++){
-            for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
-                for(int zInd=0;zInd<ncz;zInd++) {
-                    int zIndP1 = (zInd + 1) % ncz;
-                    int zIndM1 = (zInd - 1 + ncz) % ncz;
-
-                    /* Boilerplate
-                     * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                     */
-                    int xIndP1 = xInd + 1;
-                    int xIndM1 = xInd - 1;
-                    BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-
-                    // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                    BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                          (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                          -
-                                          (f_xP1yz                 - f_xM1yz                )*
-                                          (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    // J+x
-                    BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                          g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                          g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                          g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-                    // Jx+
-                    BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                          g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                          g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                          g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
-                }
-            }
-        }
-    }
-    else if(mesh->firstX()){
-        // Care must be taken at the inner boundaries (2 ghost points are needed), therefore, we start one from the innermost xInd
-        for(int xInd=mesh->xstart+1;xInd<=mesh->xend;xInd++){
-            for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
-                for(int zInd=0;zInd<ncz;zInd++) {
-                    int zIndP1 = (zInd + 1) % ncz;
-                    int zIndM1 = (zInd - 1 + ncz) % ncz;
-
-                    /* Boilerplate
-                     * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                     */
-                    int xIndP1 = xInd + 1;
-                    int xIndM1 = xInd - 1;
-                    BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-
-                    // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                    BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                          (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                          -
-                                          (f_xP1yz                 - f_xM1yz                )*
-                                          (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    // J+x
-                    BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                          g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                          g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                          g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-                    // Jx+
-                    BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                          g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                          g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                          g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
-                }
-            }
-        }
-
-        int piIndex = ncz/2;
-        // Take derivative of first point only
-        // NOTE: First ghost-point is without any problem
-        // Loop over first half of cylinder
-        int xInd=mesh->xstart;
-        for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
-            // Loop until pi index
-            for(int zInd=0; zInd<piIndex; zInd++) {
-                int zIndP1 = (zInd + 1) % ncz;
-                int zIndM1 = (zInd - 1 + ncz) % ncz;
-
-                /* Boilerplate
-                 * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                 */
-                int xIndP1 = xInd + 1;
-                int xIndM1 = xInd - 1;
-                BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Two ghost points are needed. Will use same tricks as in innerRhoBoundary
-                BoutReal f_xM1yz   = pow( (-f(xInd+2, yInd, zInd   + piIndex) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Note: If zInd = piIndex will remain witin scope due to the addition of the piIndex
-                BoutReal f_xM1yzM1 = pow( (-f(xInd+2, yInd, zInd-1 + piIndex) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Note: If zInd = piIndex will overflow due to the piIndex (unless we wrap around)
-                int zIndP1PPi = (zInd + 1 + piIndex) % ncz;
-                BoutReal f_xM1yzP1 = pow( (-f(xInd+2, yInd, zIndP1PPi) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-
-                // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                      (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                      -
-                                      (f_xP1yz                 - f_xM1yz                )*
-                                      (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                // J+x
-                BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                      g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                      g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                      g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-                // Jx+
-                BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                      g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                      g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                      g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
-            }
-        }
-
-        // Loop over second half of cylinder
-        for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
-            // Loop until pi index
-            for(int zInd=piIndex; zInd<ncz; zInd++) {
-                int zIndP1 = (zInd + 1) % ncz;
-                int zIndM1 = (zInd - 1 + ncz) % ncz;
-
-                /* Boilerplate
-                 * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                 */
-                int xIndP1 = xInd + 1;
-                int xIndM1 = xInd - 1;
-                BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Two ghost points are needed. Will use same tricks as in innerRhoBoundary
-                BoutReal f_xM1yz   = pow( (-f(xInd+2, yInd, zInd   - piIndex) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Note: If zInd = piIndex will remain witin scope due to the addition of the piIndex
-                BoutReal f_xM1yzP1 = pow( (-f(xInd+2, yInd, zInd+1 - piIndex) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // Note: If zInd = piIndex will underflow due to the piIndex (unless we wrap around)
-                int zIndM1MPi = (zInd - 1 - piIndex + ncz) % ncz;
-                BoutReal f_xM1yzM1 = pow( (-f(xInd+2, yInd, zIndM1MPi) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-
-                // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                      (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                      -
-                                      (f_xP1yz                 - f_xM1yz                )*
-                                      (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                // J+x
-                BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                      g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                      g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                      g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-                // Jx+
-                BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                      g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                      g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                      g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
-            }
-        }
-    }
-    else if(mesh->lastX()){
-        // Loop until point before last inner point
-        // NOTE: First ghost-point is without any problem
-        for(int xInd=mesh->xstart;xInd<=mesh->xend-1;xInd++){
-            for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
-                for(int zInd=0;zInd<ncz;zInd++) {
-                    int zIndP1 = (zInd + 1) % ncz;
-                    int zIndM1 = (zInd - 1 + ncz) % ncz;
-
-                    /* Boilerplate
-                     * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                     */
-                    int xIndP1 = xInd + 1;
-                    int xIndM1 = xInd - 1;
-                    BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                    BoutReal f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-
-                    // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                    BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                          (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                          -
-                                          (f_xP1yz                 - f_xM1yz                )*
-                                          (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    // J+x
-                    BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                          g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                          g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                          g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-                    // Jx+
-                    BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                          g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                          g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                          g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                      / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                    result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
-                }
-            }
-        }
-        // Special care with last outer point
-        int xInd = mesh->xend;
-        for(int yInd=mesh->ystart;yInd<=mesh->yend;yInd++){
+    /* Loop over all inner points:
+     * The Arakawa bracket requires evaluation of the field in x-1 and x+1. In
+     * our case, we are at the same time taking the derivative of the fields,
+     * which means that we need to calculate the derivatives in x-1 and x+1
+     * (i.e. the ghost points/guard cells). Hence, special treatment is needed
+     * for two points closest to the domain/processor boundary
+     */
+    xstart = mesh->xstart + 2;
+    xend   = mesh->xend   - 2;
+    for(xInd=xstart; xInd<=xend; xInd++){
+        xIndP1 = xInd + 1;
+        xIndM1 = xInd - 1;
+        for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
             for(int zInd=0;zInd<ncz;zInd++) {
                 int zIndP1 = (zInd + 1) % ncz;
                 int zIndM1 = (zInd - 1 + ncz) % ncz;
 
                 /* Boilerplate
-                 * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                 * f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
                  */
-                int xIndP1 = xInd + 1;
-                int xIndM1 = xInd - 1;
-                BoutReal f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                BoutReal f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
-                // xIndP1 + 1 does not exist, therefore, we will use a one-sided stencil
-                // We use a second order one sided FD stencil (1/2, -2, 3/2)
-                YOU ARE HERE: USE DERIVATION D3DX3 TO FIND A ONE-SIDED STENCIL
-                    ALSO: MAKE MES ARAKAWA TEST
-                BoutReal f_xP1yzP1 = pow( (
-                                                  f(xIndP1-2, yInd, zIndP1)
-                                           - 4.0* f(xIndP1-1, yInd, zIndP1)
-                                           + 3.0* f(xIndP1  , yInd, zIndP1)
-                                          )
-                                          /(2.0*mesh->dx(xInd,yInd))
-                                        , 2.0);
-                BoutReal f_xP1yzM1 = pow( (
-                                                  f(xIndP1-2, yInd, zIndM1)
-                                           - 4.0* f(xIndP1-1, yInd, zIndM1)
-                                           + 3.0* f(xIndP1  , yInd, zIndM1)
-                                          )/(2.0*mesh->dx(xInd,yInd))
-                                        , 2.0);
-                BoutReal f_xP1yz   = pow( (
-                                                   f(xIndP1-1, yInd, zInd  )
-                                            - 4.0* f(xIndP1-2, yInd, zInd  )
-                                            + 3.0* f(xIndP1  , yInd, zInd  )
-                                           )/(2.0*mesh->dx(xInd,yInd))
-                                        , 2.0);
+                f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
 
-                // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
-                BoutReal Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
-                                      (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
-                                      -
-                                      (f_xP1yz                 - f_xM1yz                )*
-                                      (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
 
-                // J+x
-                BoutReal Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
-                                      g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
-                                      g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
-                                      g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-                // Jx+
-                BoutReal Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
-                                      g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
-                                      g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
-                                      g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
-                  / (mesh->dx(xInd,yInd) * mesh->dz);
-
-                result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
+                result(xInd,yInd,zInd) = arakawaDifferencing(f_xyzP1  ,
+                                                             f_xyzM1  ,
+                                                             f_xP1yz  ,
+                                                             f_xM1yz  ,
+                                                             f_xP1yzP1,
+                                                             f_xP1yzM1,
+                                                             f_xM1yzP1,
+                                                             f_xM1yzM1,
+                                                             g        ,
+                                                             xInd     ,
+                                                             yInd     ,
+                                                             zInd     ,
+                                                             zIndP1   ,
+                                                             zIndM1
+                                                            );
             }
         }
     }
 
+    // Treatment of the second first point (no special treatment of the innermost rho, as we will only use one ghost point)
+    // That means that xM1 - 1 is a ghost/guard point
+    xInd = mesh->xstart + 1;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0; zInd<ncz; zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            /* Boilerplate
+             * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+             */
+            f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xP1yz   = pow( (-f(xIndP1-1, yInd, zInd  ) + f(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xP1yzP1 = pow( (-f(xIndP1-1, yInd, zIndP1) + f(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xP1yzM1 = pow( (-f(xIndP1-1, yInd, zIndM1) + f(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            // One-sides stencils for these guys
+            f_xM1yz   = pow(
+                             (
+                              - (2.0)*f(xIndM1-1, yInd, zInd  )
+                              - (3.0)*f(xIndM1  , yInd, zInd  )
+                              + (6.0)*f(xIndM1+1, yInd, zInd  )
+                              -       f(xIndM1+2, yInd, zInd  )
+                             )/(6.0*mesh->dx(xInd,yInd)),
+                           2.0);
+            f_xM1yzP1 = pow(
+                             (
+                              - (2.0)*f(xIndM1-1, yInd, zIndP1)
+                              - (3.0)*f(xIndM1  , yInd, zIndP1)
+                              + (6.0)*f(xIndM1+1, yInd, zIndP1)
+                              -       f(xIndM1+2, yInd, zIndP1)
+                             )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yzM1 = pow(
+                             (
+                              - (2.0)*f(xIndM1-1, yInd, zIndM1)
+                              - (3.0)*f(xIndM1  , yInd, zIndM1)
+                              + (6.0)*f(xIndM1+1, yInd, zIndP1)
+                              -       f(xIndM1+2, yInd, zIndP1)
+                             )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            result(xInd,yInd,zInd) = arakawaDifferencing(f_xyzP1  ,
+                                                         f_xyzM1  ,
+                                                         f_xP1yz  ,
+                                                         f_xM1yz  ,
+                                                         f_xP1yzP1,
+                                                         f_xP1yzM1,
+                                                         f_xM1yzP1,
+                                                         f_xM1yzM1,
+                                                         g        ,
+                                                         xInd     ,
+                                                         yInd     ,
+                                                         zInd     ,
+                                                         zIndP1   ,
+                                                         zIndM1
+                                                        );
+        }
+    }
+
+    // Treatment of the first point
+    // That means that xM1 is a ghost/guard point
+    xInd = mesh->xstart;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0; zInd<ncz; zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            f_xyzP1   = pow(
+                            (
+                             - (2.0)*f(xInd  -1, yInd, zIndP1)
+                             - (3.0)*f(xInd    , yInd, zIndP1)
+                             + (6.0)*f(xInd  +1, yInd, zIndP1)
+                             -       f(xInd  +2, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xyzM1   = pow(
+                            (
+                             - (2.0)*f(xInd  -1, yInd, zIndM1)
+                             - (3.0)*f(xInd    , yInd, zIndM1)
+                             + (6.0)*f(xInd  +1, yInd, zIndM1)
+                             -       f(xInd  +2, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yz   = pow(
+                            (
+                             - (2.0)*f(xIndP1-1, yInd, zInd  )
+                             - (3.0)*f(xIndP1  , yInd, zInd  )
+                             + (6.0)*f(xIndP1+1, yInd, zInd  )
+                             -       f(xIndP1+2, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzP1 = pow(
+                            (
+                             - (2.0)*f(xIndP1-1, yInd, zIndP1)
+                             - (3.0)*f(xIndP1  , yInd, zIndP1)
+                             + (6.0)*f(xIndP1+1, yInd, zIndP1)
+                             -       f(xIndP1+2, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzM1 = pow(
+                            (
+                             - (2.0)*f(xIndP1-1, yInd, zIndM1)
+                             - (3.0)*f(xIndP1  , yInd, zIndM1)
+                             + (6.0)*f(xIndP1+1, yInd, zIndM1)
+                             -       f(xIndP1+2, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            // Different one sided stencil as M1 is already a ghost point
+            f_xM1yz   = pow(
+                            (
+                             - (11.0)*f(xIndM1  , yInd, zInd  )
+                             + (18.0)*f(xIndM1+1, yInd, zInd  )
+                             - ( 9.0)*f(xIndM1+2, yInd, zInd  )
+                             + ( 2.0)*f(xIndM1+3, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yzP1 = pow(
+                            (
+                             - (11.0)*f(xIndM1  , yInd, zIndP1)
+                             + (18.0)*f(xIndM1+1, yInd, zIndP1)
+                             - ( 9.0)*f(xIndM1+2, yInd, zIndP1)
+                             + ( 2.0)*f(xIndM1+3, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yzM1 = pow(
+                            (
+                             - (11.0)*f(xIndM1  , yInd, zIndM1)
+                             + (18.0)*f(xIndM1+1, yInd, zIndM1)
+                             - ( 9.0)*f(xIndM1+2, yInd, zIndM1)
+                             + ( 2.0)*f(xIndM1+3, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            result(xInd,yInd,zInd) = arakawaDifferencing(f_xyzP1  ,
+                                                         f_xyzM1  ,
+                                                         f_xP1yz  ,
+                                                         f_xM1yz  ,
+                                                         f_xP1yzP1,
+                                                         f_xP1yzM1,
+                                                         f_xM1yzP1,
+                                                         f_xM1yzM1,
+                                                         g        ,
+                                                         xInd     ,
+                                                         yInd     ,
+                                                         zInd     ,
+                                                         zIndP1   ,
+                                                         zIndM1
+                                                        );
+        }
+    }
+
+    // Treatment of the second last point (no special treatment of the innermost rho, as we will only use one ghost point)
+    // That means that xP1 + 1 is a ghost/guard point
+    xInd = mesh->xend - 1;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0; zInd<ncz; zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            /* Boilerplate
+             * BoutReal f_xyz = pow( (-f(xInd  -1, yInd, zInd  ) + f(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+             */
+            f_xyzP1   = pow( (-f(xInd  -1, yInd, zIndP1) + f(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xyzM1   = pow( (-f(xInd  -1, yInd, zIndM1) + f(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xM1yz   = pow( (-f(xIndM1-1, yInd, zInd  ) + f(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xM1yzP1 = pow( (-f(xIndM1-1, yInd, zIndP1) + f(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            f_xM1yzM1 = pow( (-f(xIndM1-1, yInd, zIndM1) + f(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+            // One-sides stencils for these guys
+            f_xP1yz   = pow(
+                            (
+                                     f(xIndP1-2, yInd, zInd  )
+                             - (6.0)*f(xIndP1-1, yInd, zInd  )
+                             + (3.0)*f(xIndP1  , yInd, zInd  )
+                             + (2.0)*f(xIndP1+1, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzP1 = pow(
+                            (
+                                      f(xIndP1-2, yInd, zIndP1)
+                              - (6.0)*f(xIndP1-1, yInd, zIndP1)
+                              + (3.0)*f(xIndP1  , yInd, zIndP1)
+                              + (2.0)*f(xIndP1+1, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzM1 = pow(
+                            (
+                                     f(xIndP1-2, yInd, zIndM1)
+                             - (6.0)*f(xIndP1-1, yInd, zIndM1)
+                             + (3.0)*f(xIndP1  , yInd, zIndM1)
+                             + (2.0)*f(xIndP1+1, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            result(xInd,yInd,zInd) = arakawaDifferencing(f_xyzP1  ,
+                                                         f_xyzM1  ,
+                                                         f_xP1yz  ,
+                                                         f_xM1yz  ,
+                                                         f_xP1yzP1,
+                                                         f_xP1yzM1,
+                                                         f_xM1yzP1,
+                                                         f_xM1yzM1,
+                                                         g        ,
+                                                         xInd     ,
+                                                         yInd     ,
+                                                         zInd     ,
+                                                         zIndP1   ,
+                                                         zIndM1
+                                                        );
+        }
+    }
+
+    // Treatment of the first point
+    // That means that xP1 is a ghost/guard point
+    xInd = mesh->xend;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0;zInd<ncz;zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            f_xyzP1   = pow(
+                            (
+                                     f(xInd  -2, yInd, zIndP1)
+                             - (6.0)*f(xInd  -1, yInd, zIndP1)
+                             + (3.0)*f(xInd    , yInd, zIndP1)
+                             + (2.0)*f(xInd  +1, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xyzM1   = pow(
+                            (
+                                     f(xInd  -2, yInd, zIndM1)
+                             - (6.0)*f(xInd  -1, yInd, zIndM1)
+                             + (3.0)*f(xInd    , yInd, zIndM1)
+                             + (2.0)*f(xInd  +1, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yz   = pow(
+                            (
+                                     f(xIndM1-2, yInd, zInd  )
+                             - (6.0)*f(xIndM1-1, yInd, zInd  )
+                             + (3.0)*f(xIndM1  , yInd, zInd  )
+                             + (2.0)*f(xIndM1+1, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yzP1 = pow(
+                            (
+                                     f(xIndM1-2, yInd, zIndP1)
+                             - (6.0)*f(xIndM1-1, yInd, zIndP1)
+                             + (3.0)*f(xIndM1  , yInd, zIndP1)
+                             + (2.0)*f(xIndM1+1, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xM1yzM1 = pow(
+                            (
+                                     f(xIndM1-2, yInd, zIndM1)
+                             - (6.0)*f(xIndM1-1, yInd, zIndM1)
+                             + (3.0)*f(xIndM1  , yInd, zIndM1)
+                             + (2.0)*f(xIndM1+1, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            // Different one sided stencil as P1 is already a ghost point
+            f_xP1yz   = pow(
+                            (
+                             - ( 2.0)*f(xIndP1-3, yInd, zInd  )
+                             + ( 9.0)*f(xIndP1-2, yInd, zInd  )
+                             - (18.0)*f(xIndP1-1, yInd, zInd  )
+                             + (11.0)*f(xIndP1  , yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzP1 = pow(
+                            (
+                             - ( 2.0)*f(xIndP1-3, yInd, zIndP1)
+                             + ( 9.0)*f(xIndP1-2, yInd, zIndP1)
+                             - (18.0)*f(xIndP1-1, yInd, zIndP1)
+                             + (11.0)*f(xIndP1  , yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            f_xP1yzM1 = pow(
+                            (
+                             - ( 2.0)*f(xIndP1-3, yInd, zIndM1)
+                             + ( 9.0)*f(xIndP1-2, yInd, zIndM1)
+                             - (18.0)*f(xIndP1-1, yInd, zIndM1)
+                             + (11.0)*f(xIndP1  , yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            result(xInd,yInd,zInd) = arakawaDifferencing(f_xyzP1  ,
+                                                         f_xyzM1  ,
+                                                         f_xP1yz  ,
+                                                         f_xM1yz  ,
+                                                         f_xP1yzP1,
+                                                         f_xP1yzM1,
+                                                         f_xM1yzP1,
+                                                         f_xM1yzM1,
+                                                         g        ,
+                                                         xInd     ,
+                                                         yInd     ,
+                                                         zInd     ,
+                                                         zIndP1   ,
+                                                         zIndM1
+                                                        );
+        }
+    }
+
     return result;
+}
+
+// The arakawa diffrencing
+BoutReal arakawaDifferencing(
+                              BoutReal const & f_xyzP1  ,
+                              BoutReal const & f_xyzM1  ,
+                              BoutReal const & f_xP1yz  ,
+                              BoutReal const & f_xM1yz  ,
+                              BoutReal const & f_xP1yzP1,
+                              BoutReal const & f_xP1yzM1,
+                              BoutReal const & f_xM1yzP1,
+                              BoutReal const & f_xM1yzM1,
+                              Field3D  const & g        ,
+                              int      const & xInd     ,
+                              int      const & yInd     ,
+                              int      const & zInd     ,
+                              int      const & zIndP1   ,
+                              int      const & zIndM1
+                             )
+{
+            BoutReal Jpp;
+            BoutReal Jpx;
+            BoutReal Jxp;
+
+            // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
+            Jpp = 0.25*( (f_xyzP1                 - f_xyzM1               )*
+                         (g(xInd+1, yInd, zInd  ) - g(xInd-1, yInd, zInd  ) )
+                         -
+                         (f_xP1yz                 - f_xM1yz                )*
+                         (g(xInd  , yInd, zIndP1) - g(xInd  , yInd, zIndM1)) )
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // J+x
+            Jpx = 0.25*( g(xInd+1,yInd, zInd  )*(f_xP1yzP1 - f_xP1yzM1) -
+                         g(xInd-1,yInd, zInd  )*(f_xM1yzP1 - f_xM1yzM1) -
+                         g(xInd  ,yInd, zIndP1)*(f_xP1yzP1 - f_xM1yzP1) +
+                         g(xInd  ,yInd, zIndM1)*(f_xP1yzM1 - f_xM1yzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // Jx+
+            Jxp = 0.25*( g(xInd+1, yInd, zIndP1)*(f_xyzP1 - f_xP1yz) -
+                         g(xInd-1, yInd, zIndM1)*(f_xM1yz - f_xyzM1) -
+                         g(xInd-1, yInd, zIndP1)*(f_xyzP1 - f_xM1yz) +
+                         g(xInd+1, yInd, zIndM1)*(f_xP1yz - f_xyzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            return (Jpp + Jpx + Jxp) / 3.;
 }
