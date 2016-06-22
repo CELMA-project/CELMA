@@ -423,12 +423,19 @@ int Celma::convective(BoutReal t) {
         divExBAdvGradPerpPhiN = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
     }
     else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-              lowercase(ownOpType) == lowercase("2Brackets") ){
+              lowercase(ownOpType) == lowercase("2Brackets")   ||
+              lowercase(ownOpType) == lowercase("3Brackets")
+              ){
         vortDAdv  = - ownOp->vortDAdv(phi, vortD);
 
-        if (lowercase(ownOpType) == lowercase("2Brackets")){
+        if ( lowercase(ownOpType) == lowercase("2Brackets") ||
+             lowercase(ownOpType) == lowercase("3Brackets")
+           ){
             kinEnAdvN = - ownOp->kinEnAdvN(phi, n);
         }
+    }
+    else{
+        throw BoutException("ownOp type not implemented in the model");
     }
 
     parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
@@ -445,12 +452,19 @@ int Celma::convective(BoutReal t) {
         ddt(vortD) += divExBAdvGradPerpPhiN;
     }
     else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-              lowercase(ownOpType) == lowercase("2Brackets") ){
+              lowercase(ownOpType) == lowercase("2Brackets")   ||
+              lowercase(ownOpType) == lowercase("3Brackets")
+            ){
         ddt(vortD) += vortDAdv;
 
-        if (lowercase(ownOpType) == lowercase("2Brackets")){
+        if ( lowercase(ownOpType) == lowercase("2Brackets") ||
+             lowercase(ownOpType) == lowercase("3Brackets")
+           ){
             ddt(vortD) += kinEnAdvN;
         }
+    }
+    else{
+        throw BoutException("ownOp type not implemented in ddt of the model");
     }
 
     // Filtering highest modes
@@ -583,16 +597,6 @@ int Celma::diffusive(BoutReal t, bool linear){
         ;
     // Filtering highest modes
     ddt(uIPar) = ownFilter->ownFilter(ddt(uIPar));
-    // ************************************************************************
-
-
-    // Preparation
-    // ************************************************************************
-    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
-    // Set the ghost points in order to take DDY
-    ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
-    // We must communicate as we will take DDY
-    mesh->communicate(DivUIParNGradPerpPhi);
     // ************************************************************************
 
 
