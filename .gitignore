@@ -32,7 +32,7 @@
 
 # Backups
 *~
-*.bak
+*.bak*
 *.swp
 *.swo
 
