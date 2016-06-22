@@ -17,6 +17,8 @@
 #include <vecops.hxx>                     // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
 #include "../../common/c/include/ownBCs.hxx"
+// Gives own operators
+#include "../../common/c/include/ownOperators.hxx"
 
 class ArakawaOfDDX : public PhysicsModel {
 public:
@@ -48,6 +50,7 @@ private:
     // Other objects
     // *****************************************************************************
     OwnBCs ownBC;           // Class containing methods which sets the ghost points
+    OwnOperators *ownOp;    // Class containing methods with own operators
     // *****************************************************************************
     // ############################################################################
 };
