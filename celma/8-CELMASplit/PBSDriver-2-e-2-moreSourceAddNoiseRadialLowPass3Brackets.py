@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "onlyBracket"
+ownOpType           = "2Brackets"
 ownFilterType       = "radialLowPass"
 sAmp                = [0.020]
 saveDdt             = True
@@ -34,7 +34,7 @@ nz = 128
 # Set the temporal domain
 nout       = [300]
 timestep   = [10]
-directory  = "e-moreSource"
+directory  = "f-moreSource3Brackets"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -50,7 +50,7 @@ zSlice     = 0
 tSlice     = slice(280, 300)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-1-moreSourceAddNoiseRadialLowPassOnlyBracket"
+theRunName = "PBSDriver-2-e-2-moreSourceAddNoiseRadialLowPass3Brackets"
 # =============================================================================
 
 
