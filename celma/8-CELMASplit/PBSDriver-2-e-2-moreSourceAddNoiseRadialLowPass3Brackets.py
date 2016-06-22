@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "2Brackets"
+ownOpType           = "3Brackets"
 ownFilterType       = "radialLowPass"
 sAmp                = [0.020]
 saveDdt             = True
