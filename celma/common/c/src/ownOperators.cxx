@@ -89,6 +89,10 @@ OwnOperators* OwnOperators::createOperators(Options *options)
         output << "OwnOperators type set to '2Brackets'" << std::endl;
         return new OwnOp2Brackets(options);
     }
+    else if(lowercase(type) == lowercase("3Brackets")){
+        output << "OwnOperators type set to '3Brackets'" << std::endl;
+        return new OwnOp3Brackets(options);
+    }
     else {
         // Create a stream which we cast to a string
         std::ostringstream stream;
@@ -99,6 +103,7 @@ OwnOperators* OwnOperators::createOperators(Options *options)
                << "onlyBracket  - Only {phi, vortD} will be used. "
                                   "NOTE: Not consistent\n"
                << "2Brackets    - Consistent implementation using 2 brackets.\n"
+               << "3Brackets    - Consistent implementation using 3 brackets.\n"
                ;
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
@@ -123,6 +128,23 @@ Field3D OwnOperators::D3DX3(const Field3D &f, const BoutReal &t)
     throw BoutException("D3DX3 is only implemented in the simpleStupid class");
 
     return f;
+}
+
+/*!
+ * Only implemented in the 3Brackets class
+ *
+ * \param[in] phi The potential (not (DDX(phi)^2.0))
+ * \param[in] n   The density
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOperators::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOperators::ArakawaOfDDXf2g");
+
+    throw BoutException("D3DX3 is only implemented in the 3Brackets class");
+
+    return phi;
 }
 
 /*!
@@ -365,7 +387,7 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
                << "\n\n\n\n" << std::endl;
 
     }
-    else if !(lowercase(bndryFuncString).find("dirichlet") != string::npos){
+    else if (!(lowercase(bndryFuncString).find("dirichlet") != string::npos)){
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "neumann boundary condition not implemented in D3DX3\n"
@@ -760,7 +782,7 @@ Field3D OwnOp2Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
 }
 
 /*!
- * Calculates \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+ * Calculates \f$\{\phi, \Omega^D\}\f$
  *
  * \param[in] phi The potential
  * \param[in] n The density (not used here)
@@ -796,4 +818,362 @@ Field3D OwnOp2Brackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
     return result;
 }
 
+// OwnOp3Brackets
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which calls parent constructor and sets the bracket method
+ */
+OwnOp3Brackets::OwnOp3Brackets(Options *options) :
+    OwnOperators(options)
+{
+    TRACE("Halt in OwnOp3Brackets::OwnOp3Brackets");
+
+    bm = BRACKET_ARAKAWA;
+}
+
+/*!
+ * Not implemented in this child class
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOp3Brackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                       const Field3D &phi)
+{
+    TRACE("Halt in OwnOp3Brackets::div_uE_dot_grad_n_GradPerp_phi");
+
+    throw BoutException("div_uE_dot_grad_n_GradPerp_phi not used in the "
+                        "OwnOp3Brackets implementation");
+
+    return phi;
+}
+
+/*!
+ * Calculates \f$\{\phi, \Omega^D\}\f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp3Brackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
+{
+    TRACE("Halt in OwnOp3Brackets::vortDAdv");
+
+    return invJ*bracket(phi, vortD, bm);
+}
+
+/*!
+ * Calculates \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp3Brackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOp3Brackets::kinEnAdvN");
+
+    Field3D result;
+
+    result =         ArakawaOfDDXPhi2N(phi, n)
+             + invJ2*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
+           ;
+
+    // Multiply with B/2
+    return 0.5*invJ*result;
+}
+
+/*!
+ * Calculates \f$\{(\partial_\rho\phi)^2, n\}\f$ using a centered difference
+ * stencil for \f$(\partial_\rho\phi)^2\f$ in the center, and a third order
+ * one-sided stencils close to processor or domain boundaries.
+ *
+ * \param[in] phi The potential (not (DDX(phi)^2.0))
+ * \param[in] n   The density
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOp3Brackets::ArakawaOfDDXf2g");
+
+    Field3D result;
+
+    result.allocate();
+
+    ncz = mesh->ngz - 1;
+    /* Loop over all inner points:
+     * The Arakawa bracket requires evaluation of the field in x-1 and x+1. In
+     * our case, we are at the same time taking the derivative of the fields,
+     * which means that we need to calculate the derivatives in x-1 and x+1
+     * (i.e. the ghost points/guard cells). Hence, special treatment is needed
+     * for the points closest to the domain/processor boundary
+     */
+    xstart = mesh->xstart + 1;
+    xend   = mesh->xend   - 1;
+    for(xInd=xstart; xInd<=xend; xInd++){
+        xIndP1 = xInd + 1;
+        xIndM1 = xInd - 1;
+        for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+            for(int zInd=0;zInd<ncz;zInd++) {
+                zIndP1 = (zInd + 1) % ncz;
+                zIndM1 = (zInd - 1 + ncz) % ncz;
+
+                /* Boilerplate
+                 * phi_xyz = pow( (-phi(xInd  -1, yInd, zInd  ) + phi(xInd  +1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                 */
+                phi_xyzP1   = pow( (-phi(xInd  -1, yInd, zIndP1) + phi(xInd  +1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xyzM1   = pow( (-phi(xInd  -1, yInd, zIndM1) + phi(xInd  +1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xP1yz   = pow( (-phi(xIndP1-1, yInd, zInd  ) + phi(xIndP1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xM1yz   = pow( (-phi(xIndM1-1, yInd, zInd  ) + phi(xIndM1+1, yInd, zInd  ))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xP1yzP1 = pow( (-phi(xIndP1-1, yInd, zIndP1) + phi(xIndP1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xP1yzM1 = pow( (-phi(xIndP1-1, yInd, zIndM1) + phi(xIndP1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xM1yzP1 = pow( (-phi(xIndM1-1, yInd, zIndP1) + phi(xIndM1+1, yInd, zIndP1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+                phi_xM1yzM1 = pow( (-phi(xIndM1-1, yInd, zIndM1) + phi(xIndM1+1, yInd, zIndM1))/(2.0*mesh->dx(xInd,yInd)) , 2.0);
+
+                // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
+                Jpp = 0.25*( (phi_xyzP1               - phi_xyzM1               )*
+                             (n(xInd+1, yInd, zInd  ) - n(xInd-1, yInd, zInd  ) )
+                             -
+                             (phi_xP1yz               - phi_xM1yz                )*
+                             (n(xInd  , yInd, zIndP1) - n(xInd  , yInd, zIndM1)) )
+                  / (mesh->dx(xInd,yInd) * mesh->dz);
+
+                // J+x
+                Jpx = 0.25*( n(xInd+1,yInd, zInd  )*(phi_xP1yzP1 - phi_xP1yzM1) -
+                             n(xInd-1,yInd, zInd  )*(phi_xM1yzP1 - phi_xM1yzM1) -
+                             n(xInd  ,yInd, zIndP1)*(phi_xP1yzP1 - phi_xM1yzP1) +
+                             n(xInd  ,yInd, zIndM1)*(phi_xP1yzM1 - phi_xM1yzM1))
+                  / (mesh->dx(xInd,yInd) * mesh->dz);
+
+                // Jx+
+                Jxp = 0.25*( n(xInd+1, yInd, zIndP1)*(phi_xyzP1 - phi_xP1yz) -
+                             n(xInd-1, yInd, zIndM1)*(phi_xM1yz - phi_xyzM1) -
+                             n(xInd-1, yInd, zIndP1)*(phi_xyzP1 - phi_xM1yz) +
+                             n(xInd+1, yInd, zIndM1)*(phi_xP1yz - phi_xyzM1))
+                  / (mesh->dx(xInd,yInd) * mesh->dz);
+
+
+                result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
+            }
+        }
+    }
+
+    // Treatment of the first point
+    // That means that xM1 is a ghost/guard point
+    xInd = mesh->xstart;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0; zInd<ncz; zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            // Unsure why this needs to be one-sided, but is needed for convergence
+            phi_xyzP1   = pow(
+                            (
+                             - (2.0)*phi(xInd  -1, yInd, zIndP1)
+                             - (3.0)*phi(xInd    , yInd, zIndP1)
+                             + (6.0)*phi(xInd  +1, yInd, zIndP1)
+                             -       phi(xInd  +2, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xyzM1   = pow(
+                            (
+                             - (2.0)*phi(xInd  -1, yInd, zIndM1)
+                             - (3.0)*phi(xInd    , yInd, zIndM1)
+                             + (6.0)*phi(xInd  +1, yInd, zIndM1)
+                             -       phi(xInd  +2, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xP1yz   = pow(
+                            (
+                             - (2.0)*phi(xIndP1-1, yInd, zInd  )
+                             - (3.0)*phi(xIndP1  , yInd, zInd  )
+                             + (6.0)*phi(xIndP1+1, yInd, zInd  )
+                             -       phi(xIndP1+2, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xP1yzP1 = pow(
+                            (
+                             - (2.0)*phi(xIndP1-1, yInd, zIndP1)
+                             - (3.0)*phi(xIndP1  , yInd, zIndP1)
+                             + (6.0)*phi(xIndP1+1, yInd, zIndP1)
+                             -       phi(xIndP1+2, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xP1yzM1 = pow(
+                            (
+                             - (2.0)*phi(xIndP1-1, yInd, zIndM1)
+                             - (3.0)*phi(xIndP1  , yInd, zIndM1)
+                             + (6.0)*phi(xIndP1+1, yInd, zIndM1)
+                             -       phi(xIndP1+2, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            // Different one sided stencil as M1 is already a ghost point
+            phi_xM1yz   = pow(
+                            (
+                             - (11.0)*phi(xIndM1  , yInd, zInd  )
+                             + (18.0)*phi(xIndM1+1, yInd, zInd  )
+                             - ( 9.0)*phi(xIndM1+2, yInd, zInd  )
+                             + ( 2.0)*phi(xIndM1+3, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xM1yzP1 = pow(
+                            (
+                             - (11.0)*phi(xIndM1  , yInd, zIndP1)
+                             + (18.0)*phi(xIndM1+1, yInd, zIndP1)
+                             - ( 9.0)*phi(xIndM1+2, yInd, zIndP1)
+                             + ( 2.0)*phi(xIndM1+3, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xM1yzM1 = pow(
+                            (
+                             - (11.0)*phi(xIndM1  , yInd, zIndM1)
+                             + (18.0)*phi(xIndM1+1, yInd, zIndM1)
+                             - ( 9.0)*phi(xIndM1+2, yInd, zIndM1)
+                             + ( 2.0)*phi(xIndM1+3, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
+            Jpp = 0.25*( (phi_xyzP1               - phi_xyzM1               )*
+                         (n(xInd+1, yInd, zInd  ) - n(xInd-1, yInd, zInd  ) )
+                         -
+                         (phi_xP1yz               - phi_xM1yz                )*
+                         (n(xInd  , yInd, zIndP1) - n(xInd  , yInd, zIndM1)) )
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // J+x
+            Jpx = 0.25*( n(xInd+1,yInd, zInd  )*(phi_xP1yzP1 - phi_xP1yzM1) -
+                         n(xInd-1,yInd, zInd  )*(phi_xM1yzP1 - phi_xM1yzM1) -
+                         n(xInd  ,yInd, zIndP1)*(phi_xP1yzP1 - phi_xM1yzP1) +
+                         n(xInd  ,yInd, zIndM1)*(phi_xP1yzM1 - phi_xM1yzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // Jx+
+            Jxp = 0.25*( n(xInd+1, yInd, zIndP1)*(phi_xyzP1 - phi_xP1yz) -
+                         n(xInd-1, yInd, zIndM1)*(phi_xM1yz - phi_xyzM1) -
+                         n(xInd-1, yInd, zIndP1)*(phi_xyzP1 - phi_xM1yz) +
+                         n(xInd+1, yInd, zIndM1)*(phi_xP1yz - phi_xyzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+
+            result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
+        }
+    }
+
+    // Treatment of the last point
+    // That means that xP1 is a ghost/guard point
+    xInd = mesh->xend;
+    xIndP1 = xInd + 1;
+    xIndM1 = xInd - 1;
+    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(int zInd=0;zInd<ncz;zInd++) {
+            zIndP1 = (zInd + 1) % ncz;
+            zIndM1 = (zInd - 1 + ncz) % ncz;
+
+            // Unsure why this needs to be one-sided, but is needed for convergence
+            phi_xyzP1   = pow(
+                            (
+                                     phi(xInd  -2, yInd, zIndP1)
+                             - (6.0)*phi(xInd  -1, yInd, zIndP1)
+                             + (3.0)*phi(xInd    , yInd, zIndP1)
+                             + (2.0)*phi(xInd  +1, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xyzM1   = pow(
+                            (
+                                     phi(xInd  -2, yInd, zIndM1)
+                             - (6.0)*phi(xInd  -1, yInd, zIndM1)
+                             + (3.0)*phi(xInd    , yInd, zIndM1)
+                             + (2.0)*phi(xInd  +1, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xM1yz   = pow(
+                            (
+                                     phi(xIndM1-2, yInd, zInd  )
+                             - (6.0)*phi(xIndM1-1, yInd, zInd  )
+                             + (3.0)*phi(xIndM1  , yInd, zInd  )
+                             + (2.0)*phi(xIndM1+1, yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xM1yzP1 = pow(
+                            (
+                                     phi(xIndM1-2, yInd, zIndP1)
+                             - (6.0)*phi(xIndM1-1, yInd, zIndP1)
+                             + (3.0)*phi(xIndM1  , yInd, zIndP1)
+                             + (2.0)*phi(xIndM1+1, yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xM1yzM1 = pow(
+                            (
+                                     phi(xIndM1-2, yInd, zIndM1)
+                             - (6.0)*phi(xIndM1-1, yInd, zIndM1)
+                             + (3.0)*phi(xIndM1  , yInd, zIndM1)
+                             + (2.0)*phi(xIndM1+1, yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            // Different one sided stencil as P1 is already a ghost point
+            phi_xP1yz   = pow(
+                            (
+                             - ( 2.0)*phi(xIndP1-3, yInd, zInd  )
+                             + ( 9.0)*phi(xIndP1-2, yInd, zInd  )
+                             - (18.0)*phi(xIndP1-1, yInd, zInd  )
+                             + (11.0)*phi(xIndP1  , yInd, zInd  )
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xP1yzP1 = pow(
+                            (
+                             - ( 2.0)*phi(xIndP1-3, yInd, zIndP1)
+                             + ( 9.0)*phi(xIndP1-2, yInd, zIndP1)
+                             - (18.0)*phi(xIndP1-1, yInd, zIndP1)
+                             + (11.0)*phi(xIndP1  , yInd, zIndP1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+            phi_xP1yzM1 = pow(
+                            (
+                             - ( 2.0)*phi(xIndP1-3, yInd, zIndM1)
+                             + ( 9.0)*phi(xIndP1-2, yInd, zIndM1)
+                             - (18.0)*phi(xIndP1-1, yInd, zIndM1)
+                             + (11.0)*phi(xIndP1  , yInd, zIndM1)
+                            )/(6.0*mesh->dx(xInd,yInd)),
+                            2.0);
+
+            // J++ = DDZ(f)*DDX(g) - DDX(f)*DDZ(g)
+            Jpp = 0.25*( (phi_xyzP1                 - phi_xyzM1               )*
+                         (n(xInd+1, yInd, zInd  ) - n(xInd-1, yInd, zInd  ) )
+                         -
+                         (phi_xP1yz                 - phi_xM1yz                )*
+                         (n(xInd  , yInd, zIndP1) - n(xInd  , yInd, zIndM1)) )
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // J+x
+            Jpx = 0.25*( n(xInd+1,yInd, zInd  )*(phi_xP1yzP1 - phi_xP1yzM1) -
+                         n(xInd-1,yInd, zInd  )*(phi_xM1yzP1 - phi_xM1yzM1) -
+                         n(xInd  ,yInd, zIndP1)*(phi_xP1yzP1 - phi_xM1yzP1) +
+                         n(xInd  ,yInd, zIndM1)*(phi_xP1yzM1 - phi_xM1yzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+            // Jx+
+            Jxp = 0.25*( n(xInd+1, yInd, zIndP1)*(phi_xyzP1 - phi_xP1yz) -
+                         n(xInd-1, yInd, zIndM1)*(phi_xM1yz - phi_xyzM1) -
+                         n(xInd-1, yInd, zIndP1)*(phi_xyzP1 - phi_xM1yz) +
+                         n(xInd+1, yInd, zIndM1)*(phi_xP1yz - phi_xyzM1))
+              / (mesh->dx(xInd,yInd) * mesh->dz);
+
+
+            result(xInd,yInd,zInd) = (Jpp + Jpx + Jxp) / 3.;
+        }
+    }
+
+    return result;
+}
 #endif

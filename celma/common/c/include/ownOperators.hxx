@@ -8,6 +8,7 @@ class OwnOperators;
 class OwnOpSimpleStupid;
 class OwnOpOnlyBracket;
 class OwnOp2Brackets;
+class OwnOp3Brackets;
 
 // OwnOperators
 
@@ -77,7 +78,7 @@ class OwnOperators
          */
         virtual Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
                                                        const Field3D &phi) = 0;
-        //! Operator for \f$\{\phi, Omega^D\}\f$
+        //! Operator for \f$\{\phi, \Omega^D\}\f$
         virtual Field3D vortDAdv (const Field3D &phi, const Field3D &vortD) = 0;
         /*! Operator for
          * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
@@ -88,6 +89,10 @@ class OwnOperators
          * publicly accessable in just one of the child classes)
          */
         virtual Field3D D3DX3(const Field3D &f, const BoutReal &t = 0.0);
+        /*! Operator for \f$\{(\partial_\rho\phi)^2, n\}\f$ (must be declared virtual if it is to be
+         * publicly accessable in just one of the child classes)
+         */
+        virtual Field3D ArakawaOfDDXPhi2N(Field3D const &phi, Field3D const &n);
 
         // Auxiliary functions
         //! Getter for IncXbndry
@@ -245,6 +250,9 @@ class OwnOpOnlyBracket : public OwnOperators
  *
  * Inherit from OwnOperators through public inheritance.
  *
+ * \note Looks like this implementation gives small scales (what is called
+ *       "fake noodling" in Arakawas original paper)
+ *
  * \warning The following is only suitable if using a cylindrical Clebsch
  *          coordinate system
  *
@@ -276,6 +284,104 @@ class OwnOp2Brackets : public OwnOperators
          *       "udefined reference to `vtable for ...'"
          */
         virtual ~OwnOp2Brackets(){};
+};
+
+// OwnOp3Brackets
+
+/*!
+ * \class OwnOp3Brackets
+ *
+ * \brief Implementation of
+ *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+ *        using 3 brackets
+ *
+ * This implementation uses brackets for advection of \f$\Omega^D\f$.
+ * Further
+ *
+ * \f{eqnarray}{
+ * \frac{B}{2}
+ * \{\mathbf{u}_E\cdot\mathbf{u}_E, n\}
+ * =
+ * \frac{1}{J2}
+ * \{(\partial_\rho\phi)^2+\frac{1}{\rho^2}(\partial_\theta \phi)^2, n\}
+ * \f}
+ *
+ * This implemtation uses a modified arakawa bracket for the first term (as
+ * DDX(DDX(f)) is not convergent in this cylinder implementation), and a
+ * standard Arakawa bracket for the second term.
+ *
+ * Inherit from OwnOperators through public inheritance.
+ *
+ * \warning The following is only suitable if using a cylindrical Clebsch
+ *          coordinate system
+ *
+ * \author Michael Løiten
+ * \date 2016.07.22
+ */
+class OwnOp3Brackets : public OwnOperators
+{
+    private:
+        BRACKET_METHOD bm;   //!< The bracket method
+
+        /**@{*/
+        /*! Index used in Arakawa loop
+         *  xP1 denotes x + 1 from the point under consideration, whereas
+         *  zM1 denotes z - 1 from the point under consideration
+         */
+        int xInd;
+        int xIndP1;
+        int xIndM1;
+        int ncz;
+        int zIndP1;
+        int zIndM1;
+        int xstart;
+        int xend;
+        /**@}*/
+        /**@{*/
+        /*! Stencil points of the Arakawa bracket
+         *  xP1 denotes x + 1 from the point under consideration, whereas
+         *  zM1 denotes z - 1 from the point under consideration
+         */
+        BoutReal phi_xyzP1;
+        BoutReal phi_xyzM1;
+        BoutReal phi_xP1yz;
+        BoutReal phi_xM1yz;
+        BoutReal phi_xP1yzP1;
+        BoutReal phi_xP1yzM1;
+        BoutReal phi_xM1yzP1;
+        BoutReal phi_xM1yzM1;
+        /**@}*/
+        /**@{*/
+        //! Ways of combining the stencils (explained in Arakawa's paper)
+        BoutReal Jpp;
+        BoutReal Jpx;
+        BoutReal Jxp;
+        /**@}*/
+
+    public:
+        // Constructors
+        OwnOp3Brackets(Options *options);
+
+        //! Will throw error
+        Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                               const Field3D &phi);
+        //! Operator for \f$\{\phi, \Omega^D\}\f$
+        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
+        /*! Operator for
+         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+         * (only used in 2Brackets)
+         */
+        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
+
+        //! Arakawa bracket for \f$\{(\partial_\rho\phi)^2, n\}\f$
+        Field3D ArakawaOfDDXPhi2N(Field3D const &f, Field3D const &g);
+
+        //! Destructor
+        /* NOTE: {} in the end is needed
+         *       If else the compiler gives
+         *       "udefined reference to `vtable for ...'"
+         */
+        virtual ~OwnOp3Brackets(){};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file
