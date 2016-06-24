@@ -205,12 +205,19 @@ int Celma::init(bool restarting) {
             SAVE_REPEAT (divExBAdvGradPerpPhiN);
         }
         else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-                  lowercase(ownOpType) == lowercase("2Brackets") ){
+                  lowercase(ownOpType) == lowercase("2Brackets")   ||
+                  lowercase(ownOpType) == lowercase("3Brackets")
+                ){
             SAVE_REPEAT (vortDAdv);
 
-            if (lowercase(ownOpType) == lowercase("2Brackets")){
+            if (lowercase(ownOpType) == lowercase("2Brackets") ||
+                lowercase(ownOpType) == lowercase("3Brackets")
+               ){
                 SAVE_REPEAT (kinEnAdvN);
             }
+        }
+        else{
+            throw BoutException("ownOp save not implemented");
         }
         if(saveDdt){
             SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(uIPar), ddt(uEPar));

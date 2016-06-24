@@ -1176,4 +1176,5 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
 
     return result;
 }
+
 #endif
