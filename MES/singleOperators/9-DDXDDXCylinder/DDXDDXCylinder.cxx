@@ -6,7 +6,43 @@
  */
 
 #include "DDXDDXCylinder.hxx"
-#include "cxxRoutines/ownImplimentations.cxx"
+
+// Set xout ghost point of the resulting field of DDX
+// *****************************************************************************
+void xOutAfterDDX(Field3D &out, Field3D const &in){
+    /* Info:
+     * Set xout ghost point of the resulting field of DDX
+     *
+     * Input:
+     * in    - The field that was used to find out
+     * out   - DDX(in), but without the ghost point in xout
+     *
+     * Output:
+     * out- DDi(in), with the ghost point of xout set
+     */
+    TRACE("Halt in xOutAfterDDX");
+
+    if (mesh->lastX()){
+        /* NOTE: xend
+         *       xend = index value of last inner point on this processor
+         *       xend+1 = first guard point
+         */
+        int xInd = mesh->xend + 1;
+
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                out(xInd, yInd, zInd) =
+                    -      out(xInd-4, yInd, zInd)
+                    +  4.0*out(xInd-3, yInd, zInd)
+                    -  6.0*out(xInd-2, yInd, zInd)
+                    +  4.0*out(xInd-1, yInd, zInd)
+                      ;
+            }
+        }
+    }
+}
+// *****************************************************************************
 
 // Initialization of the physics
 // ############################################################################
@@ -43,7 +79,7 @@ int DDXDDXCylinder::init(bool restarting) {
     // ************************************************************************
     f.setBoundary("f");
     f.applyBoundary();
-    innerRhoCylinder(f);
+    ownBC.innerRhoCylinder(f);
     // ************************************************************************
 
     // Communicate before taking derivatives
@@ -52,7 +88,9 @@ int DDXDDXCylinder::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    DDXf = calcPartialRhoPhi(f);
+    DDXf = DDX(f);
+    ownBC.innerRhoCylinder(DDXf); // Set inner rho boundary
+    xOutAfterDDX(DDXf, f);      // Set outer rho boundary
     mesh->communicate(DDXf);
     S_num = DDX(DDXf);
 

@@ -15,8 +15,8 @@
 #include <derivs.hxx>                     // Gives the derivatives
 #include <difops.hxx>                     // Gives the diff options
 #include <vecops.hxx>                     // Gives the vec diff options
-#include "../../common/c/OwnBc.hxx"          // Gives method to set own BC
-#include "../../common/c/SetInnerRho.hxx"    // Gives method to set inner rho
+// Gives own boundaries (doing so by setting ghost points)
+#include "../../common/c/include/ownBCs.hxx"
 
 class DDXDDXCylinder : public PhysicsModel {
 public:
@@ -50,17 +50,9 @@ private:
     FieldGroup com_group;
     // *****************************************************************************
 
-    // Own operators
+    // Other objects
     // *****************************************************************************
-    Field3D calcPartialRhoPhi(const Field3D &phi);
-    // *****************************************************************************
-
-    // Auxiliary functions
-    // *****************************************************************************
-    void DDX_yup_and_ydown(const Field3D &in, Field3D &out);
-    void DDX_one_xz_plane_without_BC(Field3D const &in,
-                                     int const &y_ind,
-                                     Field3D &out);
+    OwnBCs ownBC;           // Class containing methods which sets the ghost points
     // *****************************************************************************
     // ############################################################################
 };

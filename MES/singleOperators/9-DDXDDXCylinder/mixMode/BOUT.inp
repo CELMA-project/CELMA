@@ -1,5 +1,5 @@
 #
-# Input file for  "DDXDDXCylinderClean/gaussianWSinAndParabola"
+# Input file for  "DDXDDXCylinder/mixMode"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -111,7 +111,7 @@ xl = x * geom:Lx            # x in range [0,Lx]
 # The function to test
 # =============================================================================
 [f]
-function = 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
+function = 1.85185185185185e-5*geom:xl^3*(-tanh(0.125*geom:xl - 1.25) + 1)*(sin(pi*geom:xl/15) + cos(pi*geom:xl/15) + cos(2*pi*geom:xl/15) + cos(pi*geom:xl/5))*cos(2*z) + 6
 
 # Boundaries
 bndry_xin   = none                     # Manual boundary found in the code
@@ -124,6 +124,6 @@ bndry_ydown = dirichlet_o4(f:function)
 # The analytic solution
 # =============================================================================
 [S]
-solution = 0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))^2*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*sqrt(2)*pi*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0621401661573018*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) - 0.000517834717977515*pi^2*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) - 0.00161823349367974*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.00103566943595503*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(z)*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.000517834717977515*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z)^2
+solution = 1.85185185185185e-5*geom:xl^3*(-tanh(0.125*geom:xl - 1.25) + 1)*(-pi^2*sin(pi*geom:xl/15)/225 - pi^2*cos(pi*geom:xl/15)/225 - 4*pi^2*cos(2*pi*geom:xl/15)/225 - pi^2*cos(pi*geom:xl/5)/25)*cos(2*z) + 2.31481481481481e-6*geom:xl^3*(-0.25*tanh(0.125*geom:xl - 1.25)^2 + 0.25)*(sin(pi*geom:xl/15) + cos(pi*geom:xl/15) + cos(2*pi*geom:xl/15) + cos(pi*geom:xl/5))*cos(2*z)*tanh(0.125*geom:xl - 1.25) + 3.7037037037037e-5*geom:xl^3*(0.125*tanh(0.125*geom:xl - 1.25)^2 - 0.125)*(-pi*sin(pi*geom:xl/15)/15 - 2*pi*sin(2*pi*geom:xl/15)/15 - pi*sin(pi*geom:xl/5)/5 + pi*cos(pi*geom:xl/15)/15)*cos(2*z) + 0.000111111111111111*geom:xl^2*(-tanh(0.125*geom:xl - 1.25) + 1)*(-pi*sin(pi*geom:xl/15)/15 - 2*pi*sin(2*pi*geom:xl/15)/15 - pi*sin(pi*geom:xl/5)/5 + pi*cos(pi*geom:xl/15)/15)*cos(2*z) + 0.000111111111111111*geom:xl^2*(0.125*tanh(0.125*geom:xl - 1.25)^2 - 0.125)*(sin(pi*geom:xl/15) + cos(pi*geom:xl/15) + cos(2*pi*geom:xl/15) + cos(pi*geom:xl/5))*cos(2*z) + 0.000111111111111111*geom:xl*(-tanh(0.125*geom:xl - 1.25) + 1)*(sin(pi*geom:xl/15) + cos(pi*geom:xl/15) + cos(2*pi*geom:xl/15) + cos(pi*geom:xl/5))*cos(2*z)
 # =============================================================================
 ##############################################################################
