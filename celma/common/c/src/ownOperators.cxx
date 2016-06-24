@@ -881,8 +881,8 @@ Field3D OwnOp3Brackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
 
     Field3D result;
 
-    result =         ArakawaOfDDXPhi2N(phi, n)
-             + invJ2*DDZ(phi)*bracket(DDZ(phi, true), n, bm)
+    result =   ArakawaOfDDXPhi2N(phi, n)
+             + bracket(pow(invJ*DDZ(phi, true), 2.0), n, bm)
            ;
 
     // Multiply with B/2
@@ -1176,4 +1176,100 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
 
     return result;
 }
+
+// OwnOp3BasicBrackets
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which calls parent constructor and sets the bracket method
+ */
+OwnOp3BasicBrackets::OwnOp3BasicBrackets(Options *options) :
+    OwnOperators(options)
+{
+    TRACE("Halt in OwnOp3BasicBrackets::OwnOp3BasicBrackets");
+
+    bm = BRACKET_ARAKAWA;
+}
+
+/*!
+ * Not implemented in this child class
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns phi (never reached)
+ */
+Field3D OwnOp3BasicBrackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                                       const Field3D &phi)
+{
+    TRACE("Halt in OwnOp3BasicBrackets::div_uE_dot_grad_n_GradPerp_phi");
+
+    throw BoutException("div_uE_dot_grad_n_GradPerp_phi not used in the "
+                        "OwnOp3BasicBrackets implementation");
+
+    return phi;
+}
+
+/*!
+ * Calculates \f$\{\phi, \Omega^D\}\f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp3BasicBrackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
+{
+    TRACE("Halt in OwnOp3BasicBrackets::vortDAdv");
+
+    return invJ*bracket(phi, vortD, bm);
+}
+
+/*!
+ * Calculates \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+ *
+ * \param[in] phi The potential
+ * \param[in] n The density (not used here)
+ *
+ * \returns result The result of the operation
+ */
+Field3D OwnOp3BasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
+{
+    TRACE("Halt in OwnOp3BasicBrackets::kinEnAdvN");
+
+    Field3D result;
+
+    // Calculate the derivative of phi
+    DDXPhi = DDX(phi);
+    // Reset inner boundary
+    ownBC.innerRhoCylinder(DDXPhi);
+    // Reset outer boundary
+    if (mesh->lastX()){
+        /* NOTE: xend
+         *       xend = index value of last inner point on this processor
+         *       xend+1 = first guard point
+         */
+        ghostIndX = mesh->xend + 1;
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                DDXPhi(ghostIndX, yInd, zInd) =
+                    -      DDXPhi(ghostIndX-4, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-3, yInd, zInd)
+                    -  6.0*DDXPhi(ghostIndX-2, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-1, yInd, zInd)
+                      ;
+            }
+        }
+    }
+
+    result =   bracket(pow(DDX(DDXPhi, true), 2.0), n, bm)
+             + bracket(pow(invJ*DDZ(phi, true), 2.0), n, bm)
+           ;
+
+    // Multiply with B/2
+    return 0.5*invJ*result;
+}
+
 #endif
