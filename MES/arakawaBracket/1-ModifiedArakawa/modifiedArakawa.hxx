@@ -1,4 +1,4 @@
-// *************** Simulation of ArakawaOfDDX *********************
+// *************** Simulation of modifiedArakawa *********************
 /* Geometry
  *  x - The radial coordinate (rho)      [nx and dx set from the grid file]
  *  y - The height of the cylinder (z)   [ny and dy set from the grid file]
@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __ArakawaOfDDX_H__
-#define __ArakawaOfDDX_H__
+#ifndef __modifiedArakawa_H__
+#define __modifiedArakawa_H__
 
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx>              // Gives field factory
@@ -20,10 +20,10 @@
 // Gives own operators
 #include "../../common/c/include/ownOperators.hxx"
 
-class ArakawaOfDDX : public PhysicsModel {
+class modifiedArakawa : public PhysicsModel {
 public:
     // Destructor
-    ~ArakawaOfDDX();
+    ~modifiedArakawa();
 protected:
     int init(bool restarting);
     int rhs(BoutReal t);

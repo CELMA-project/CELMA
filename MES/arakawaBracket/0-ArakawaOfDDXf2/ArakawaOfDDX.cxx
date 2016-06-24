@@ -12,11 +12,6 @@
 int ArakawaOfDDX::init(bool restarting) {
     TRACE("Halt in ArakawaOfDDXf2::init");
 
-    /* NOTE: Calls createOperators without making an object of OwnOperators.
-     *       The child is typecasted to the parent
-     */
-    ownOp = OwnOperators::createOperators();
-
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
 
@@ -63,8 +58,35 @@ int ArakawaOfDDX::init(bool restarting) {
 
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
+    // Calculate the derivative of phi
+    DDXPhi = DDX(phi);
+    // Reset inner boundary
+    ownBC.innerRhoCylinder(DDXPhi);
+    // Reset outer boundary
+    if (mesh->lastX()){
+        /* NOTE: xend
+         *       xend = index value of last inner point on this processor
+         *       xend+1 = first guard point
+         */
+        int ghostIndX = mesh->xend + 1;
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                DDXPhi(ghostIndX, yInd, zInd) =
+                    -      DDXPhi(ghostIndX-4, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-3, yInd, zInd)
+                    -  6.0*DDXPhi(ghostIndX-2, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-1, yInd, zInd)
+                      ;
+            }
+        }
+    }
+
+    // Communicate before taking new derivative
+    mesh->communicate(DDXPhi);
+
     // Calculate
-    S_num = ownOp->ArakawaOfDDXPhi2N(phi, n);
+    S_num = bracket(((DDXPhi)^(2.0)), n, bm);
 
     // Error in S
     e = S_num - S;
