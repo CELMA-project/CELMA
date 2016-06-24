@@ -11,4 +11,5 @@ Results:
 
 Conclusion:
 ===========
-Hmm...divergence found: NO CONVERGENCE
+Apparently diverges because DDX(f) is multivalued when rho -> 0
+See doubleDerivativeApparantConvergenceFail.ipynb for details

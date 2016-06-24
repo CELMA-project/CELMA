@@ -19,7 +19,7 @@ nx = [2**n+2 for n in range(4, 12)]
 
 # Additional options
 remove_old = True
-directory  = "gaussian"
+directory  = "mixMode"
 make       = True
 nproc      = 4
 # =============================================================================
