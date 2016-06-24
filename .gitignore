@@ -53,6 +53,7 @@ html/
 # CELMA-dev
 visualization/
 celma/*/celma
+celma/*/celmaSLEPc
 nx_*/
 nz_*/
 MES_results/
