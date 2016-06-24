@@ -1,0 +1,13 @@
+Copied from 1-ModifiedArakawa
+
+- Check that {(partial_rho phi)^2, n} is convergent
+
+Results:
+========
+- mixModeAndGaussian: Converges
+  + Note that phi is double symmetric, but n is not
+  + The symmetry of S does not coincide with phi
+
+Conclusion:
+===========
+Get expected convergece :D

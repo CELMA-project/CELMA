@@ -1,5 +1,5 @@
 #
-# Input file for  "ArakawaOfDDX/twoGaussians"
+# Input file for  "modifiedArakawa/twoGaussians"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
