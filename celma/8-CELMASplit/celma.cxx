@@ -204,14 +204,16 @@ int Celma::init(bool restarting) {
         if(lowercase(ownOpType) == lowercase("simpleStupid")){
             SAVE_REPEAT (divExBAdvGradPerpPhiN);
         }
-        else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-                  lowercase(ownOpType) == lowercase("2Brackets")   ||
-                  lowercase(ownOpType) == lowercase("3Brackets")
+        else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
+                  lowercase(ownOpType) == lowercase("2Brackets")      ||
+                  lowercase(ownOpType) == lowercase("3Brackets")      ||
+                  lowercase(ownOpType) == lowercase("3BasicBrackets")
                 ){
             SAVE_REPEAT (vortDAdv);
 
-            if (lowercase(ownOpType) == lowercase("2Brackets") ||
-                lowercase(ownOpType) == lowercase("3Brackets")
+            if (lowercase(ownOpType) == lowercase("2Brackets")      ||
+                lowercase(ownOpType) == lowercase("3Brackets")      ||
+                lowercase(ownOpType) == lowercase("3BasicBrackets")
                ){
                 SAVE_REPEAT (kinEnAdvN);
             }
@@ -429,14 +431,16 @@ int Celma::convective(BoutReal t) {
     if(lowercase(ownOpType) == lowercase("simpleStupid")){
         divExBAdvGradPerpPhiN = - ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
     }
-    else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-              lowercase(ownOpType) == lowercase("2Brackets")   ||
-              lowercase(ownOpType) == lowercase("3Brackets")
+    else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
+              lowercase(ownOpType) == lowercase("2Brackets")      ||
+              lowercase(ownOpType) == lowercase("3Brackets")      ||
+              lowercase(ownOpType) == lowercase("3BasicBrackets")
               ){
         vortDAdv  = - ownOp->vortDAdv(phi, vortD);
 
-        if ( lowercase(ownOpType) == lowercase("2Brackets") ||
-             lowercase(ownOpType) == lowercase("3Brackets")
+        if ( lowercase(ownOpType) == lowercase("2Brackets")       ||
+             lowercase(ownOpType) == lowercase("3Brackets")       ||
+             lowercase(ownOpType) == lowercase("3BasicBrackets")
            ){
             kinEnAdvN = - ownOp->kinEnAdvN(phi, n);
         }
@@ -458,14 +462,16 @@ int Celma::convective(BoutReal t) {
     if(lowercase(ownOpType) == lowercase("simpleStupid")){
         ddt(vortD) += divExBAdvGradPerpPhiN;
     }
-    else if ( lowercase(ownOpType) == lowercase("onlyBracket") ||
-              lowercase(ownOpType) == lowercase("2Brackets")   ||
-              lowercase(ownOpType) == lowercase("3Brackets")
+    else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
+              lowercase(ownOpType) == lowercase("2Brackets")      ||
+              lowercase(ownOpType) == lowercase("3Brackets")      ||
+              lowercase(ownOpType) == lowercase("3BasicBrackets")
             ){
         ddt(vortD) += vortDAdv;
 
-        if ( lowercase(ownOpType) == lowercase("2Brackets") ||
-             lowercase(ownOpType) == lowercase("3Brackets")
+        if ( lowercase(ownOpType) == lowercase("2Brackets")       ||
+             lowercase(ownOpType) == lowercase("3Brackets")       ||
+             lowercase(ownOpType) == lowercase("3BasicBrackets")
            ){
             ddt(vortD) += kinEnAdvN;
         }
