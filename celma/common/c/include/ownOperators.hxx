@@ -424,6 +424,7 @@ class OwnOp3BasicBrackets : public OwnOperators
     private:
         BRACKET_METHOD bm;  //!< The bracket method
         Field3D DDXPhi;     //!< \f$\partial_\rho \phi\f$
+        Field3D DDXDDXPhi;  //!< \f$\partial_\rho^2 \phi\f$
         OwnBCs ownBC;       //!< Needed for setting the inner rho
         int ghostIndX;      //!< Index for first outer ghostpoint in x
     public:
