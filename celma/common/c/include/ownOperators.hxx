@@ -3,12 +3,14 @@
 
 #include <bout.hxx>           // Includes all necessary classes and types
 #include <bout/constants.hxx> // Gives PI and TWOPI
+#include "ownBCs.hxx"         // Gives inner rho boundaries
 
 class OwnOperators;
 class OwnOpSimpleStupid;
 class OwnOpOnlyBracket;
 class OwnOp2Brackets;
 class OwnOp3Brackets;
+class OwnOp3BasicBrackets;
 
 // OwnOperators
 
@@ -306,9 +308,10 @@ class OwnOp2Brackets : public OwnOperators
  * \{(\partial_\rho\phi)^2+\frac{1}{\rho^2}(\partial_\theta \phi)^2, n\}
  * \f}
  *
- * This implemtation uses a modified arakawa bracket for the first term (as
- * DDX(DDX(f)) is not convergent in this cylinder implementation), and a
- * standard Arakawa bracket for the second term.
+ * This implemtation uses a modified Arakawa bracket for the first term. This
+ * approach makes the \f$\partial_\rho^2 f\f$ term in the bracket resemble the
+ * D2DX2(f) operator rather than DDX(DDX(f)). A standard Arakawa bracket for
+ * the second term.
  *
  * Inherit from OwnOperators through public inheritance.
  *
@@ -382,6 +385,68 @@ class OwnOp3Brackets : public OwnOperators
          *       "udefined reference to `vtable for ...'"
          */
         virtual ~OwnOp3Brackets(){};
+};
+
+// OwnOp3BasicBrackets
+
+/*!
+ * \class OwnOp3BasicBrackets
+ *
+ * \brief Implementation of
+ *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+ *        using 3 basic brackets
+ *
+ * This implementation uses brackets for advection of \f$\Omega^D\f$.
+ * Further
+ *
+ * \f{eqnarray}{
+ * \frac{B}{2}
+ * \{\mathbf{u}_E\cdot\mathbf{u}_E, n\}
+ * =
+ * \frac{1}{J2}
+ * \{(\partial_\rho\phi)^2+\frac{1}{\rho^2}(\partial_\theta \phi)^2, n\}
+ * \f}
+ *
+ * This implemtation uses an Arakawa bracket for these two terms.
+ * A field \f$f=\partial_\rho\phi\f$ is used as an input for the first term,
+ * where the boundary condition \f$f\f$ has been re-applied.
+ *
+ * Inherit from OwnOperators through public inheritance.
+ *
+ * \warning The following is only suitable if using a cylindrical Clebsch
+ *          coordinate system
+ *
+ * \author Michael Løiten
+ * \date 2016.07.23
+ */
+class OwnOp3BasicBrackets : public OwnOperators
+{
+    private:
+        BRACKET_METHOD bm;  //!< The bracket method
+        Field3D DDXPhi;     //!< \f$\partial_\rho \phi\f$
+        OwnBCs ownBC;       //!< Needed for setting the inner rho
+        int ghostIndX;      //!< Index for first outer ghostpoint in x
+    public:
+        // Constructors
+        OwnOp3BasicBrackets(Options *options);
+
+        //! Will throw error
+        Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+                                               const Field3D &phi);
+        //! Operator for \f$\{\phi, \Omega^D\}\f$
+        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
+        /*! Operator for
+         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+         * (only used in 2Brackets)
+         */
+        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
+
+        //! Destructor
+        /* NOTE: {} in the end is needed
+         *       If else the compiler gives
+         *       "udefined reference to `vtable for ...'"
+         */
+        virtual ~OwnOp3BasicBrackets(){};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file
