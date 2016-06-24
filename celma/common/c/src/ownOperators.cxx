@@ -93,17 +93,24 @@ OwnOperators* OwnOperators::createOperators(Options *options)
         output << "OwnOperators type set to '3Brackets'" << std::endl;
         return new OwnOp3Brackets(options);
     }
+    else if(lowercase(type) == lowercase("3BasicBrackets")){
+        output << "OwnOperators type set to '3BasicBrackets'" << std::endl;
+        return new OwnOp3BasicBrackets(options);
+    }
     else {
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "OwnOperators '"<< type << "' not implemented\n"
                << "Available operators:\n"
-               << "simpleStupid - Simple stupid implementation of "
-                                  "div_uE_dot_grad_n_GradPerp_phi\n"
-               << "onlyBracket  - Only {phi, vortD} will be used. "
-                                  "NOTE: Not consistent\n"
-               << "2Brackets    - Consistent implementation using 2 brackets.\n"
-               << "3Brackets    - Consistent implementation using 3 brackets.\n"
+               << "simpleStupid   - Simple stupid implementation of "
+                                    "div_uE_dot_grad_n_GradPerp_phi\n"
+               << "onlyBracket    - Only {phi, vortD} will be used. "
+                                    "NOTE: Not consistent\n"
+               << "2Brackets      - Consistent implementation using 2 brackets.\n"
+               << "3Brackets      - Consistent implementation using 3 brackets "
+                                    "with modified Arakawa.\n"
+               << "3BasicBrackets - Consistent implementation using 3 brackets "
+                                    "with basic Arakawa.\n"
                ;
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
@@ -882,7 +889,7 @@ Field3D OwnOp3Brackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
     Field3D result;
 
     result =   ArakawaOfDDXPhi2N(phi, n)
-             + bracket(pow(invJ*DDZ(phi, true), 2.0), n, bm)
+             + bracket(((invJ*DDZ(phi, true)^(2.0))), n, bm)
            ;
 
     // Multiply with B/2
@@ -1264,8 +1271,32 @@ Field3D OwnOp3BasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
         }
     }
 
-    result =   bracket(pow(DDX(DDXPhi, true), 2.0), n, bm)
-             + bracket(pow(invJ*DDZ(phi, true), 2.0), n, bm)
+    // Communicate before taking new derivative
+    mesh->communicate(DDXPhi);
+    DDXDDXPhi = DDX(DDXPhi);
+    // Reset inner boundary
+    ownBC.innerRhoCylinder(DDXDDXPhi);
+
+    if (mesh->lastX()){
+        ghostIndX = mesh->xend + 1;
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                DDXDDXPhi(ghostIndX, yInd, zInd) =
+                    -      DDXDDXPhi(ghostIndX-4, yInd, zInd)
+                    +  4.0*DDXDDXPhi(ghostIndX-3, yInd, zInd)
+                    -  6.0*DDXDDXPhi(ghostIndX-2, yInd, zInd)
+                    +  4.0*DDXDDXPhi(ghostIndX-1, yInd, zInd)
+                    ;
+            }
+        }
+    }
+
+    // Communicate before taking new derivative
+    mesh->communicate(DDXDDXPhi);
+
+    result =   bracket(((DDXDDXPhi)^(2.0)), n, bm)
+             + bracket(((invJ*DDZ(phi, true))^(2.0)), n, bm)
            ;
 
     // Multiply with B/2
