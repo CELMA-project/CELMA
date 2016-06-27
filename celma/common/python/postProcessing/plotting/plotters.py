@@ -344,7 +344,7 @@ class Plot1D(Plot):
                         set_data(self._xAx, line.field[tInd,:])
 
         timeString = self._plotNumberFormatter(self._t[tInd], None)
-        fig.suptitle(self._title + r'$\omega_{ci} = $' + timeString)
+        fig.suptitle(self._title + r'$\frac{1}{\omega_{ci}} = $' + timeString)
     #}}}
 
     #{{{_plotLines
@@ -801,7 +801,7 @@ class Plot2D(Plot):
         # Decorations
         self._ax1.set_xlabel(r'$\rho$', fontsize = self._latexSize)
         self._ax1.set_ylabel(r'$\rho$', fontsize = self._latexSize)
-        self._ax1.set_title (r'$\omega_{ci}=' + '{:g}'.format(self._t[tInd]) +\
+        self._ax1.set_title (r'$\frac{1}{\omega_{ci}} =' + '{:g}'.format(self._t[tInd]) +\
                              r' \quad z=' +\
                              '{:.2f}'.format(self._zVal) + r'$',\
                              fontsize = self._latexSize)
