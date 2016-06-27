@@ -1,0 +1,15 @@
+Copied from 8-DDXCylinderHighResCenter
+
+- Check that DDX(DDX(f)) is working in cylinder geometry with 4th order at
+  innermost point
+
+
+Results:
+========
+- gaussian: Diverge
+- gaussianWSinAndParabola: Diverge
+
+Conclusion:
+===========
+Apparently diverges because DDX(f) is multivalued when rho -> 0
+See doubleDerivativeApparantConvergenceFail.ipynb for details
