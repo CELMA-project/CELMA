@@ -144,8 +144,22 @@ Connect to jess
 cd /run/user/1000/gvfs/smb-share:server=jess.dtu.dk,share=mmag/CELMA-dev/celma/
 
 
+Quick-check variables
+---------------------
+!!! showdata does currently not work with --pylab, run only native ipython
+from boutdata import collect
+from boututils.showdata import showdata
+vortD = collect("vortD")
+showdata(vortD[5:10,:,0,:])
+
+
 Blow-up not visible in plot?
 ----------------------------
+import numpy as np
+from boutdata import collect
+vortD = collect("vortD")
+np.abs(vortD.max())
+np.where(np.isclose(vortD, np.abs(vortD.max())))
 fig, ax = plt.subplots()
 cax = ax.contourf(vort[2,:,:,14])
 cbar = fig.colorbar(cax)
