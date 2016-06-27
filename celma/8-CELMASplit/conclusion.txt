@@ -67,6 +67,9 @@ Adding noise with filter
 2-a-1.0 : Finished 31 steps, killed by walltime (12 h)
 2-a-2.0 : Finished 27 steps, killed by walltime (12 h)
 2-e-0   : Finished 79 steps, cvode timestep failed (8 h 56 m) - high perturbation in vort with small structures
+2-e-1   : Finished after 15 h 32 m, saturated turbulence
+2-e-2   : Finished 91 steps, cvode timestep failed (8 h 46 m)
+2-e-3   : Finished 99 steps, cvode timestep failed (9 h 09 m)
 
 
 Adding noise with hypervisc

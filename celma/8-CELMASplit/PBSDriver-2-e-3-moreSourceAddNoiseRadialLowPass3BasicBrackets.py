@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "3Brackets"
+ownOpType           = "3BasicBrackets"
 ownFilterType       = "radialLowPass"
 sAmp                = [0.020]
 saveDdt             = True
@@ -27,7 +27,7 @@ useHyperViscAzVortD = False
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-# restart      = None;
+restart      = None;
 restart_from = "e-moreSource/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_2Brackets_tag_1-e-0-moreSourceExpand_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = 128
@@ -47,10 +47,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(71, 91)
+tSlice     = slice(79, 99)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-2-moreSourceAddNoiseRadialLowPass3Brackets"
+theRunName = "2-e-3-moreSourceAddNoiseRadialLowPass3BasicBrackets"
 # =============================================================================
 
 
