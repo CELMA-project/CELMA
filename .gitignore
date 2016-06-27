@@ -66,12 +66,12 @@ MES/singleOperators/5-D3DX2DZCylinder/D3DX2DZCylinder
 MES/singleOperators/6-D3DZ2DXCylinder/D3DZ2DXCylinder
 MES/singleOperators/7-DDXCylinderWithJacobian/DDXCylinderWithJacobian
 MES/singleOperators/8*-DDXHighResCenter/DDXCylinderHighResCenter
-MES/singleOperators/failsDDXDDXCylinder/DDXDDXCylinder
-MES/singleOperators/failsDDXDDXCylinderClean/DDXDDXCylinderClean
+MES/singleOperators/9-DDXDDXCylinder/DDXDDXCylinder
 MES/singleOperators/failsDDXDDXHighResCenter*/DDXDDXCylinderHighResCenter
 MES/singleOperators/subconvergenceDDXCylinderWithJacobianOverJacobian/DDXCylinderWithJacobianOverJacobian
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
-MES/modifiedArakawa/1-ArakawaOfDDXf2/ArakawaOfDDX
+MES/arakawaBracket/0-ArakawaOfDDXf2/ArakawaOfDDX
+MES/arakawaBracket/1-ModifiedArakawa/modifiedArakawa
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 
 # Miscellaneous
