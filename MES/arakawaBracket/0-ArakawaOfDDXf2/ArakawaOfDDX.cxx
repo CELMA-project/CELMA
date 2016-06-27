@@ -1,0 +1,125 @@
+// *************** Simulation of ArakawaOfDDX *********************
+/* Geometry
+ *  x - The radial coordinate (rho)
+ *  y - The height of the cylinder (z)
+ *  z - The azimuthal coordinate (theta)
+ */
+
+#include "ArakawaOfDDX.hxx"
+
+// Initialization of the physics
+// ############################################################################
+int ArakawaOfDDX::init(bool restarting) {
+    TRACE("Halt in ArakawaOfDDXf2::init");
+
+    // Get the option (before any sections) in the BOUT.inp file
+    Options *options = Options::getRoot();
+
+    // Load from the geometry
+    // ************************************************************************
+    Options *geom = options->getSection("geom");
+    geom->get("Lx", Lx, 0.0);
+    // ************************************************************************
+
+    // Obtain the fields
+    // ************************************************************************
+    // phi
+    phi = FieldFactory::get()
+        ->create3D("phi:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+
+    // n
+    n = FieldFactory::get()
+        ->create3D("n:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+
+    // S
+    S = FieldFactory::get()
+        ->create3D("S:solution", Options::getRoot(), mesh, CELL_CENTRE, 0);
+    // ************************************************************************
+
+    // Add a FieldGroup to communicate
+    // ************************************************************************
+    // Only these fields will be taken derivatives of
+    com_group.add(phi);
+    com_group.add(n);
+    // ************************************************************************
+
+    // Set boundaries manually
+    // ************************************************************************
+    phi.setBoundary("phi");
+    phi.applyBoundary();
+    ownBC.innerRhoCylinder(phi);
+    n.setBoundary("n");
+    n.applyBoundary();
+    ownBC.innerRhoCylinder(n);
+    // ************************************************************************
+
+    // Communicate before taking derivatives
+    mesh->communicate(com_group);
+
+    output << "\n\n\n\n\n\n\nNow running test" << std::endl;
+
+    // Calculate the derivative of phi
+    DDXPhi = DDX(phi);
+    // Reset inner boundary
+    ownBC.innerRhoCylinder(DDXPhi);
+    // Reset outer boundary
+    if (mesh->lastX()){
+        /* NOTE: xend
+         *       xend = index value of last inner point on this processor
+         *       xend+1 = first guard point
+         */
+        int ghostIndX = mesh->xend + 1;
+        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                DDXPhi(ghostIndX, yInd, zInd) =
+                    -      DDXPhi(ghostIndX-4, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-3, yInd, zInd)
+                    -  6.0*DDXPhi(ghostIndX-2, yInd, zInd)
+                    +  4.0*DDXPhi(ghostIndX-1, yInd, zInd)
+                      ;
+            }
+        }
+    }
+
+    // Communicate before taking new derivative
+    mesh->communicate(DDXPhi);
+
+    // Calculate
+    S_num = bracket(((DDXPhi)^(2.0)), n, bm);
+
+    // Error in S
+    e = S_num - S;
+
+    // Save the variables
+    SAVE_ONCE (Lx);
+    SAVE_ONCE4(phi, n, S, S_num);
+    SAVE_ONCE (e);
+
+    // Finalize
+    dump.write();
+    dump.close();
+
+    output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
+
+    // Wait for all processors to write data
+    MPI_Barrier(BoutComm::get());
+
+    return 0;
+}
+// ############################################################################
+
+// Solving the equations
+// ############################################################################
+int ArakawaOfDDX::rhs(BoutReal t) {
+    return 0;
+}
+// ############################################################################
+
+// Create a simple main() function
+BOUTMAIN(ArakawaOfDDX);
+
+// Destructor
+ArakawaOfDDX::~ArakawaOfDDX(){
+    TRACE("ArakawaOfDDXf2::~ArakawaOfDDXf2");
+}
