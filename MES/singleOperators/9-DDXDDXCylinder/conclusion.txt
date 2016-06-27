@@ -1,0 +1,23 @@
+Copied from DDXDDXCylinder (now deleted, DDXDDXCylinder copied from DDXCylinder)
+
+- Check that DDX on DDX is working in cylinder geometry
+
+Results:
+========
+- gaussian:
+  + L2   = -0.5
+  + Linf = -1.00
+  + Error dominates at inner rho
+  + S looks good
+  !!! First derivative is mulivalued in rho = 0
+-mixMode:
+  + L2   = 2.0
+  + Linf = 2.0
+
+
+Conclusion:
+===========
+It may appear that this does not give proper convergence when one look at
+"gaussian", which is convergent for D2DX2(f), but not for DDX(DDX(f)).
+The reason why the convergence is not found is that DDX(f) is multivalued at
+rho = 0.
