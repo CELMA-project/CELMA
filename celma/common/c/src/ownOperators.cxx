@@ -1273,29 +1273,8 @@ Field3D OwnOp3BasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
 
     // Communicate before taking new derivative
     mesh->communicate(DDXPhi);
-    DDXDDXPhi = DDX(DDXPhi);
-    // Reset inner boundary
-    ownBC.innerRhoCylinder(DDXDDXPhi);
 
-    if (mesh->lastX()){
-        ghostIndX = mesh->xend + 1;
-        // Newton polynomial of fourth order (including boundary) evaluated at ghost
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                DDXDDXPhi(ghostIndX, yInd, zInd) =
-                    -      DDXDDXPhi(ghostIndX-4, yInd, zInd)
-                    +  4.0*DDXDDXPhi(ghostIndX-3, yInd, zInd)
-                    -  6.0*DDXDDXPhi(ghostIndX-2, yInd, zInd)
-                    +  4.0*DDXDDXPhi(ghostIndX-1, yInd, zInd)
-                    ;
-            }
-        }
-    }
-
-    // Communicate before taking new derivative
-    mesh->communicate(DDXDDXPhi);
-
-    result =   bracket(((DDXDDXPhi)^(2.0)), n, bm)
+    result =   bracket(((DDXPhi)^(2.0)), n, bm)
              + bracket(((invJ*DDZ(phi, true))^(2.0)), n, bm)
            ;
 
