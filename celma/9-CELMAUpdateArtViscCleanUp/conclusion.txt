@@ -1,0 +1,10 @@
+Copied from 8-CELMASplit
+
+- Made it impossible to run with simpleStupid and onlyBrackets
+- Fixed parallel artificial diffusion in density
+- Removed n in artificial dissipation of velocities
+- Runs do now have artifical dissipation in vortD
+
+Results:
+========
+a-data (copied and modified from g-doubleB)
