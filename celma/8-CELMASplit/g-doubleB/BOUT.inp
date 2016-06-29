@@ -1,5 +1,5 @@
 #
-# Input file for "8-CELMASplit/moreSource3Brackets"
+# Input file for "8-CELMASplit/doubleB"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -26,9 +26,9 @@ MYG = 1
 ###############################################################################
 [mesh]
 # Number of points
-nx = 16 + 2*MXG
+nx = 16*2 + 2*MXG
 ny = 24
-nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nz = 512           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -98,8 +98,8 @@ floats = false # floats = false => output in double
 # Geometry
 # =============================================================================
 [geom]
-Lx = 5                      # The length of x from boundary to boundary
-Ly = 100                    # The length of y from boundary to boundary
+Lx = 10                     # The length of x from boundary to boundary
+Ly = 200                    # The length of y from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
@@ -136,7 +136,7 @@ artViscPerpUIPar = artPerp
 artViscPerpVortD = 0.0
 
 # Azimuthal hyperdiffusion
-artHyperAzVortD = 0.1
+artHyperAzVortD = 1.0
 # =============================================================================
 
 # Switches
@@ -144,9 +144,9 @@ artHyperAzVortD = 0.1
 [switch]
 includeNoise        = false
 forceAddNoise       = false
-useHyperViscAzVortD = false
+useHyperViscAzVortD = true
 saveTerms           = true
-saveDdt             = false
+saveDdt             = true
 # =============================================================================
 
 # The source
@@ -154,7 +154,7 @@ saveDdt             = false
 [theSource]
 # Made as a gaussian function
 # The amplitude
-a = 0.05
+a = 0.02
 # Radial profile
 radialWidth     = 0.5*2*geom:Lx
 radialCentre    = 0
@@ -269,7 +269,7 @@ type = radialLowPass
 
 # *****************************************************************************
 [ownOperators]
-type    = 3Brackets
+type = 3BasicBrackets
 # *****************************************************************************
 # =============================================================================
 ##############################################################################
