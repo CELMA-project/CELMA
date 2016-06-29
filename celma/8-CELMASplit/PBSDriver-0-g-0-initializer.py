@@ -16,25 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "3Brackets"
-ownFilterType       = "radialLowPass"
-sAmp                = [0.020]
-saveDdt             = True
-includeNoise        = False
-forceAddNoise       = False
 useHyperViscAzVortD = False
+filtertype = 'none'
 # *****************************************************************************
-remove_old = False
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/ownFilters_type_radialLowPass_ownOperators_type_3Brackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_False_tag_2-e-2-moreSourceAddNoiseRadialLowPass3Brackets_0_theSource_a_0.02/"
 # Set the spatial domain
-nz = 128
+nz = 2
 # Set the temporal domain
-nout       = [100]
-timestep   = [1]
-directory  = "f-moreSource3Brackets"
+restart    = None
+remove_old = False
+nout       = [20]
+timestep   = [5e1]
+directory  = "g-doubleB"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -49,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "I2-e-2-moreSourceRadialLowPass3Brackets"
+theRunName = "0-g-0-initializer"
 # =============================================================================
 
 
@@ -83,16 +75,10 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
-                          ('tag',theRunName,0),\
-                          ('ownOperators', 'type', ownOpType    ),\
-                          ('ownFilters'  , 'type', ownFilterType),\
-                          ('theSource', 'a', sAmp               ),\
-                          ('switch'      , 'saveDdt'            , saveDdt      ),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ("tag",theRunName,0),\
+                          ("switch"    , "useHyperViscAzVortD", useHyperViscAzVortD),\
+                          ("ownFilters", "type"               , filtertype),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
