@@ -70,6 +70,54 @@ Adding noise with filter
 2-e-1   : Finished after 15 h 32 m, saturated turbulence
 2-e-2   : Finished 91 steps, cvode timestep failed (8 h 46 m)
 2-e-3   : Finished 99 steps, cvode timestep failed (9 h 09 m)
+..................................................
+Preventing crash by adding artificial dissipation
+.................................................
+Running with both filter and artVisc
+********
+nz = 128
+********
+2-e-3.1 viscAmp 1.0 : Finished after 16 h 52 m, saturated turbulence, but column more gathered then when running onlyBrackets
+2-e-3.1 viscAmp 0.5 : Finished 223 steps, then timestep failed (15h 19 min)
+2-e-3.1 viscAmp 0.1 : Finished 132 steps, then timestep failed (11h 47 min), check I2e31vA01
+********
+nz = 256
+********
+2-e-3.1 viscAmp 1.0 : Running
+2-e-3.1 viscAmp 0.5 : Running
+2-e-3.1 viscAmp 0.1 : Running
+Running with artVisc only
+********
+nz = 128
+********
+2-e-3.2 viscAmp 1.0 : Finished 227 step (16h 49), then timestep failed
+2-e-3.2 viscAmp 0.5 : Finished 209 step (11h 29), then timestep failed
+2-e-3.2 viscAmp 0.1 : Finished 125 step (10h), then timestep failed, check I2e32vA01
+********
+nz = 256
+********
+2-e-3.2 viscAmp 1.0 : Running
+2-e-3.2 viscAmp 0.5 : Running
+2-e-3.2 viscAmp 0.1 : Running
+.........................................................
+Comparing onlyBrackets filter with artificial dissipation
+.........................................................
+********
+nz = 128
+********
+2-e-2.1 viscAmp 1.0 : Finished after 16 h 11 m, modes growing, but NO turbulence
+2-e-2.1 viscAmp 0.5 : Finished after 15 h, 4 m, turbulence starting
+2-e-2.1 viscAmp 0.1 : Finished after 13 h, 11 m, saturated turbulence
+********
+nz = 256
+********
+2-e-2.1 viscAmp 1.0 : Running
+2-e-2.1 viscAmp 0.5 : Running
+2-e-2.1 viscAmp 0.1 : Running
+....................................
+Check that code can run ad infinitum
+....................................
+3-e-3.1 - Finishes 55 steps (3h 48m), then timestep fails - vortD gets a strong negative perturbation
 
 
 Adding noise with hypervisc
@@ -98,9 +146,14 @@ Check why fails
 ---------------
 I2-a-0.1 : Finished 1 step (36m), then cvode timestep failed, see fast perturb, trouble with min at [1,9,23,9], see snippet
 I2-e-0   : Finihsed 3 steps (3h 37m), then cvode timestep failed, see fast perturb out in the edge, trouble with min at [0,0,0,125]
+I2-e-2   : Finished 3 steps (1h 30m), then cvode timestep failed, bit unclear why blow up, but get big gradient vortD [3,13,0,38]
+I2-e-3   : Finished 6 steps (1h 33m), then cvode timestep failed, see small perturbation grow up in edge [6,16,0,31]
 I3-a-0.0 : Finihsed 3 steps (1h 17m), then cvode timestep failed, see small perturb, trouble at [2,9,23,1]
 I3-a-2.0 : !!! Troubles to start
 I3-a-2.1 : Finished 2 steps (46m), then cvode timestep failed, see fast perturb, trouble in source with min at [1,16,0,14], see snippet
+
+I2-e-3.1-VAmp0.1 : Running
+I2-e-3.2-VAmp0.1 : Running
 
 
 
