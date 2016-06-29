@@ -27,7 +27,7 @@ useHyperViscAzVortD = False
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-restart      = None;
+# restart      = None;
 restart_from = "e-moreSource/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_2Brackets_tag_1-e-0-moreSourceExpand_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = 128
