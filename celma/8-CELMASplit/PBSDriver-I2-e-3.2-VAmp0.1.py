@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "3BasicBrackets"
+ownOpType           = "BasicBrackets"
 ownFilterType       = "none"
 sAmp                = [0.020]
 saveDdt             = True
@@ -29,7 +29,7 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_0.1_ownFilters_type_none_ownOperators_type_3BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.2-moreSourceAddNoiseHypervisc3BasicBrackets_0_theSource_a_0.02/"
+restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_0.1_ownFilters_type_none_ownOperators_type_BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.2-moreSourceAddNoiseHyperviscBasicBrackets_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain

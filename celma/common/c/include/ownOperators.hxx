@@ -10,7 +10,7 @@ class OwnOpSimpleStupid;
 class OwnOpOnlyBracket;
 class OwnOp2Brackets;
 class OwnOp3Brackets;
-class OwnOp3BasicBrackets;
+class OwnOpBasicBrackets;
 
 // OwnOperators
 
@@ -387,10 +387,10 @@ class OwnOp3Brackets : public OwnOperators
         virtual ~OwnOp3Brackets(){};
 };
 
-// OwnOp3BasicBrackets
+// OwnOpBasicBrackets
 
 /*!
- * \class OwnOp3BasicBrackets
+ * \class OwnOpBasicBrackets
  *
  * \brief Implementation of
  *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
@@ -419,7 +419,7 @@ class OwnOp3Brackets : public OwnOperators
  * \author Michael Løiten
  * \date 2016.07.23
  */
-class OwnOp3BasicBrackets : public OwnOperators
+class OwnOpBasicBrackets : public OwnOperators
 {
     private:
         BRACKET_METHOD bm;  //!< The bracket method
@@ -428,7 +428,7 @@ class OwnOp3BasicBrackets : public OwnOperators
         int ghostIndX;      //!< Index for first outer ghostpoint in x
     public:
         // Constructors
-        OwnOp3BasicBrackets(Options *options);
+        OwnOpBasicBrackets(Options *options);
 
         //! Will throw error
         Field3D div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
@@ -446,7 +446,7 @@ class OwnOp3BasicBrackets : public OwnOperators
          *       If else the compiler gives
          *       "udefined reference to `vtable for ...'"
          */
-        virtual ~OwnOp3BasicBrackets(){};
+        virtual ~OwnOpBasicBrackets(){};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file
