@@ -16,22 +16,22 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "3BasicBrackets"
+ownOpType           = "BasicBrackets"
 ownFilterType       = "radialLowPass"
 sAmp                = [0.020]
 saveDdt             = True
-includeNoise        = False
-forceAddNoise       = False
+includeNoise        = True
+forceAddNoise       = True
 useHyperViscAzVortD = True
-artHyperAzVortD     = [1e0]
+artHyperAzVortD     = [1e-1, 5e-1, 1e0]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-restart      = None;
-restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_1.0_ownFilters_type_radialLowPass_ownOperators_type_3BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.1-moreSAddNRadialLPHyperV3BBrackets_0_theSource_a_0.02/"
+# restart      = None;
+restart_from = "e-moreSource/nout_20_timestep_5.0/nz_128/ownFilters_type_none_ownOperators_type_2Brackets_tag_1-e-0-moreSourceExpand_0_theSource_a_0.02/"
 # Set the spatial domain
-nz = [128]
+nz = [128, 256]
 # Set the temporal domain
 nout       = [300]
 timestep   = [10]
@@ -48,10 +48,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(35, 55)
+tSlice     = slice(280, 300)
 showPlot   = False
 savePlot   = True
-theRunName = "3-e-3.1-Restart2e31"
+theRunName = "2-e-3.1-moreSAddNRadialLPHyperV3BBrackets"
 # =============================================================================
 
 

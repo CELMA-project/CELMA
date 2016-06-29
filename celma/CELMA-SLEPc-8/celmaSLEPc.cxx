@@ -149,10 +149,13 @@ int CelmaSLEPc::init(bool restarting) {
      * Second keyword denotes the name in the field
      * Last keyword is "grow" and is set to 0
      */
-    fieldReader.add(uEPar0, "uEPar" , 0);
-    fieldReader.add(uIPar0, "uIPar" , 0);
-    fieldReader.add(lnN0  , "lnN"   , 0);
-    fieldReader.add(vortD0, "vortD" , 0);
+    fieldReader.add(uEPar0, "uEPar", 0);
+    fieldReader.add(uIPar0, "uIPar", 0);
+    fieldReader.add(lnN0  , "lnN"  , 0);
+    fieldReader.add(vortD0, "vortD", 0);
+    // Helper variables
+    fieldReader.add(vort0 , "vort0", 0);
+    fieldReader.add(phi0  , "phi0" , 0);
 
     // Get the read from directory, filename and extension
     // ........................................................................
@@ -212,6 +215,7 @@ int CelmaSLEPc::init(bool restarting) {
     // vort and phi
     SAVE_REPEAT2(vort, phi);
     SAVE_REPEAT4(vortD0, lnN0, uIPar0, uEPar0);
+    SAVE_REPEAT2(vort0, phi0);
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, uIPar, uEPar);
     //*************************************************************************

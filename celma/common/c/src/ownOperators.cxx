@@ -93,9 +93,9 @@ OwnOperators* OwnOperators::createOperators(Options *options)
         output << "OwnOperators type set to '3Brackets'" << std::endl;
         return new OwnOp3Brackets(options);
     }
-    else if(lowercase(type) == lowercase("3BasicBrackets")){
-        output << "OwnOperators type set to '3BasicBrackets'" << std::endl;
-        return new OwnOp3BasicBrackets(options);
+    else if(lowercase(type) == lowercase("BasicBrackets")){
+        output << "OwnOperators type set to 'BasicBrackets'" << std::endl;
+        return new OwnOpBasicBrackets(options);
     }
     else {
         // Create a stream which we cast to a string
@@ -109,7 +109,7 @@ OwnOperators* OwnOperators::createOperators(Options *options)
                << "2Brackets      - Consistent implementation using 2 brackets.\n"
                << "3Brackets      - Consistent implementation using 3 brackets "
                                     "with modified Arakawa.\n"
-               << "3BasicBrackets - Consistent implementation using 3 brackets "
+               << "BasicBrackets - Consistent implementation using 3 brackets "
                                     "with basic Arakawa.\n"
                ;
         std::string str =  stream.str();
@@ -1184,17 +1184,17 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
     return result;
 }
 
-// OwnOp3BasicBrackets
+// OwnOpBasicBrackets
 
 /*!
  * \brief Constructor
  *
  * Constructor which calls parent constructor and sets the bracket method
  */
-OwnOp3BasicBrackets::OwnOp3BasicBrackets(Options *options) :
+OwnOpBasicBrackets::OwnOpBasicBrackets(Options *options) :
     OwnOperators(options)
 {
-    TRACE("Halt in OwnOp3BasicBrackets::OwnOp3BasicBrackets");
+    TRACE("Halt in OwnOpBasicBrackets::OwnOpBasicBrackets");
 
     bm = BRACKET_ARAKAWA;
 }
@@ -1207,13 +1207,13 @@ OwnOp3BasicBrackets::OwnOp3BasicBrackets(Options *options) :
  *
  * \returns phi (never reached)
  */
-Field3D OwnOp3BasicBrackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
+Field3D OwnOpBasicBrackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
                                                        const Field3D &phi)
 {
-    TRACE("Halt in OwnOp3BasicBrackets::div_uE_dot_grad_n_GradPerp_phi");
+    TRACE("Halt in OwnOpBasicBrackets::div_uE_dot_grad_n_GradPerp_phi");
 
     throw BoutException("div_uE_dot_grad_n_GradPerp_phi not used in the "
-                        "OwnOp3BasicBrackets implementation");
+                        "OwnOpBasicBrackets implementation");
 
     return phi;
 }
@@ -1226,9 +1226,9 @@ Field3D OwnOp3BasicBrackets::div_uE_dot_grad_n_GradPerp_phi(const Field3D &n,
  *
  * \returns result The result of the operation
  */
-Field3D OwnOp3BasicBrackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
+Field3D OwnOpBasicBrackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
 {
-    TRACE("Halt in OwnOp3BasicBrackets::vortDAdv");
+    TRACE("Halt in OwnOpBasicBrackets::vortDAdv");
 
     return invJ*bracket(phi, vortD, bm);
 }
@@ -1241,9 +1241,9 @@ Field3D OwnOp3BasicBrackets::vortDAdv(const Field3D &phi, const Field3D &vortD)
  *
  * \returns result The result of the operation
  */
-Field3D OwnOp3BasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
+Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
 {
-    TRACE("Halt in OwnOp3BasicBrackets::kinEnAdvN");
+    TRACE("Halt in OwnOpBasicBrackets::kinEnAdvN");
 
     Field3D result;
 
@@ -1274,8 +1274,7 @@ Field3D OwnOp3BasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
     // Communicate before taking new derivative
     mesh->communicate(DDXPhi);
 
-    result =   bracket(((DDXPhi)^(2.0)), n, bm)
-             + bracket(((invJ*DDZ(phi, true))^(2.0)), n, bm)
+    result =   bracket( ((DDXPhi)^(2.0)) + ((invJ*DDZ(phi, true))^(2.0)), n, bm)
            ;
 
     // Multiply with B/2

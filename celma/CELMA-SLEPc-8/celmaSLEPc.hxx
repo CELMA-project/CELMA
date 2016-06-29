@@ -44,6 +44,8 @@ private:
     Field3D uEPar0, uIPar0; // Parallel velocities
     Field3D lnN0;           // Logarithm of density
     Field3D vortD0;         // Modified vorticity
+    // Helper variables
+    Field3D vort0, phi0;    // Vorticity and potential
     // *****************************************************************************
 
     // Non-evolved stored fields

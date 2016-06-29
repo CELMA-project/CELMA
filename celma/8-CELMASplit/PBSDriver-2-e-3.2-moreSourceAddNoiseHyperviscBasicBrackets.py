@@ -16,7 +16,7 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType           = "3BasicBrackets"
+ownOpType           = "BasicBrackets"
 ownFilterType       = "none"
 sAmp                = [0.020]
 saveDdt             = True
@@ -51,7 +51,7 @@ zSlice     = 0
 tSlice     = slice(280, 300)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-3.2-moreSourceAddNoiseHypervisc3BasicBrackets"
+theRunName = "2-e-3.2-moreSourceAddNoiseHyperviscBasicBrackets"
 # =============================================================================
 
 

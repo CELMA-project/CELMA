@@ -18,7 +18,7 @@ from postProcessing.plotting import combined1D2D
 # *****************************************************************************
 Lx = 10
 Ly = 100
-ownOpType = ["simpleStupid", "onlyBracket", "2Brackets", "3Brackets", "3BasicBrackets"]
+ownOpType = ["simpleStupid", "onlyBracket", "2Brackets", "3Brackets", "BasicBrackets"]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
