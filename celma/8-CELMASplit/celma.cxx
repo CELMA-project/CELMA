@@ -207,13 +207,13 @@ int Celma::init(bool restarting) {
         else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
                   lowercase(ownOpType) == lowercase("2Brackets")      ||
                   lowercase(ownOpType) == lowercase("3Brackets")      ||
-                  lowercase(ownOpType) == lowercase("3BasicBrackets")
+                  lowercase(ownOpType) == lowercase("BasicBrackets")
                 ){
             SAVE_REPEAT (vortDAdv);
 
             if (lowercase(ownOpType) == lowercase("2Brackets")      ||
                 lowercase(ownOpType) == lowercase("3Brackets")      ||
-                lowercase(ownOpType) == lowercase("3BasicBrackets")
+                lowercase(ownOpType) == lowercase("BasicBrackets")
                ){
                 SAVE_REPEAT (kinEnAdvN);
             }
@@ -434,13 +434,13 @@ int Celma::convective(BoutReal t) {
     else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
               lowercase(ownOpType) == lowercase("2Brackets")      ||
               lowercase(ownOpType) == lowercase("3Brackets")      ||
-              lowercase(ownOpType) == lowercase("3BasicBrackets")
+              lowercase(ownOpType) == lowercase("BasicBrackets")
               ){
         vortDAdv  = - ownOp->vortDAdv(phi, vortD);
 
         if ( lowercase(ownOpType) == lowercase("2Brackets")       ||
              lowercase(ownOpType) == lowercase("3Brackets")       ||
-             lowercase(ownOpType) == lowercase("3BasicBrackets")
+             lowercase(ownOpType) == lowercase("BasicBrackets")
            ){
             kinEnAdvN = - ownOp->kinEnAdvN(phi, n);
         }
@@ -465,13 +465,13 @@ int Celma::convective(BoutReal t) {
     else if ( lowercase(ownOpType) == lowercase("onlyBracket")    ||
               lowercase(ownOpType) == lowercase("2Brackets")      ||
               lowercase(ownOpType) == lowercase("3Brackets")      ||
-              lowercase(ownOpType) == lowercase("3BasicBrackets")
+              lowercase(ownOpType) == lowercase("BasicBrackets")
             ){
         ddt(vortD) += vortDAdv;
 
         if ( lowercase(ownOpType) == lowercase("2Brackets")       ||
              lowercase(ownOpType) == lowercase("3Brackets")       ||
-             lowercase(ownOpType) == lowercase("3BasicBrackets")
+             lowercase(ownOpType) == lowercase("BasicBrackets")
            ){
             ddt(vortD) += kinEnAdvN;
         }
