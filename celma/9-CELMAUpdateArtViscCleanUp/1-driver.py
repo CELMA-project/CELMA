@@ -11,22 +11,23 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combined1D2D
+from postProcessing.plotting import combined1D2D as postProcessDriver
+# from postProcessing.plotting import lnN2DDriver as postProcessDriver
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownOpType = ["simpleStupid", "onlyBracket", "2Brackets", "3Brackets", "BasicBrackets"]
-ownOpType = ["BasicBrackets"]
+# ownOpType = ["simpleStupid", "onlyBracket", "2Brackets", "3Brackets", "BasicBrackets"]
+ownOpType = ["3Brackets"]
 # *****************************************************************************
 # Set the temporal domain
 restart    = None
-remove_old = True
+remove_old = False
 nout       = 2
 timestep   = 1e-10
 directory  = "a-data"
 # Shall we make?
-make       = True
+make       = False
 # The number of processors
 nproc = 4
 # =============================================================================
@@ -39,6 +40,7 @@ yguards       = False
 xSlice        = 0
 ySlice        = 8
 zSlice        = 0
+tSlice        = slice(-2,None)
 showPlot      = False
 savePlot      = True
 useSubProcess = True
@@ -70,7 +72,7 @@ myRuns = basic_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old    ,\
-                     post_processing_function = combined1D2D,\
+                     post_processing_function = postProcessDriver,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
@@ -82,6 +84,7 @@ myRuns.execute_runs(\
                      xSlice        = xSlice       ,\
                      ySlice        = ySlice       ,\
                      zSlice        = zSlice       ,\
+                     tSlice        = tSlice       ,\
                      savePlot      = savePlot     ,\
                      showPlot      = showPlot     ,\
                      saveFolder    = saveFolder   ,\
