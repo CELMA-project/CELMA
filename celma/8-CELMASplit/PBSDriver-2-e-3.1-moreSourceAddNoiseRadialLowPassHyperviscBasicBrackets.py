@@ -51,7 +51,7 @@ zSlice     = 0
 tSlice     = slice(280, 300)
 showPlot   = False
 savePlot   = True
-theRunName = "2-e-3.1-moreSAddNRadialLPHyperV3BBrackets"
+theRunName = "2-e-3.1-moreSAddNRadialLPHyperVBBrackets"
 # =============================================================================
 
 
