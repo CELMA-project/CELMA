@@ -208,19 +208,20 @@ class Plot(object):
                     dx = collect('dx',\
                                  path=self._path, xguards = self._xguards,\
                                  info=False)
-                    dim = dx.shape[0]
+                    dimLen = dx.shape[0]
                 if dimension == 'y':
                     dy = collect('dy',\
                                  path=self._path, yguards = self._yguards,\
                                  info=False)
-                    dim = dy.shape[1]
+                    dimLen = dy.shape[1]
                 if dimension == 'z':
                     # Subtract 1, as MZ includes the last point
-                    dim = collect('MZ', path=self._path, info=False) - 1
+                    dimLen = collect('MZ', path=self._path, info=False) - 1
                 if dimension == 't':
-                    dim = collect('t_array', path=self._path, info=False)
+                    t = collect('t_array', path=self._path, info=False)
+                    dimLen = len(t)
                 # Subtract 1 in the end as indices counts from 0
-                curIndices.append(len(dim) - 1)
+                curIndices.append(dimLen - 1)
             else:
                 curIndices.append(curSlice.stop)
         elif curSlice is None:
@@ -236,23 +237,24 @@ class Plot(object):
                         dx = collect('dx',\
                                      path=self._path, xguards = self._xguards,\
                                      info=False)
-                        dim = dx.shape[0]
+                        dimLen = dx.shape[0]
                     if dimension == 'y':
                         dy = collect('dy',\
                                      path=self._path, yguards = self._yguards,\
                                      info=False)
-                        dim = dy.shape[1]
+                        dimLen = dy.shape[1]
                     if dimension == 'z':
                         # Subtract 1, as MZ includes the last point
-                        dim = collect('MZ', path=self._path, info=False) - 1
+                        dimLen = collect('MZ', path=self._path, info=False) - 1
                     if dimension == 't':
-                        dim = collect('t_array', path=self._path, info=False)
+                        t   = collect('t_array', path=self._path, info=False)
+                        dimLen = len(t)
                     # Subtract 1 in the end as indices counts from 0
-                    realInd = len(dim) + curIndices[ind] - 1
+                    realInd = dimLen + curIndices[ind] - 1
                     if realInd < 0:
                         message  = ("Index {0} out of range for {1}"
                                     ", as {1} has only {2} elements").\
-                            format(curIndices[ind], dimension, len(dim))
+                            format(curIndices[ind], dimension, dimLen)
                         raise IndexError(message)
                     curIndices[ind] = realInd
 
@@ -841,9 +843,11 @@ class Plot2D(Plot):
         # Decorations
         self._ax1.set_xlabel(r'$\rho$', fontsize = self._latexSize)
         self._ax1.set_ylabel(r'$\rho$', fontsize = self._latexSize)
+
+        timeString = self._plotNumberFormatter(self._t[tInd], None)
         ax1txt = self._ax1.text(0.5, 1.05,\
-                       r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
-                           r' \quad z=' +\
+                       r'$\omega_{ci}^{-1} =$' + timeString +\
+                           r'$ \quad z=' +\
                            '{:.2f}'.format(self._zVal) + r'$',\
                        horizontalalignment = 'center',\
                        verticalalignment = 'center',\
@@ -875,8 +879,8 @@ class Plot2D(Plot):
         self._ax2.set_xlabel(r'$\rho$', fontsize = self._latexSize)
         self._ax2.set_ylabel(r'$z$'   , fontsize = self._latexSize)
         ax2txt = self._ax2.text(0.5, 1.05,\
-                       r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
-                           r' \quad \theta=' +\
+                       r'$\omega_{ci}^{-1} =$' + timeString +\
+                           r'$ \quad \theta=' +\
                            '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
                        horizontalalignment = 'center',\
                        verticalalignment = 'center',\
