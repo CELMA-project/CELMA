@@ -92,7 +92,7 @@ private:
     BoutReal artViscParLnN, artViscParUEPar, artViscParUIPar;
     BoutReal artViscParVortD;
     // Perpendicular dissipation
-    BoutReal artViscPerpLnN, artViscPerpUEPar, artViscPerpUIPar;
+    BoutReal artViscPerpUEPar, artViscPerpUIPar;
     BoutReal artViscPerpVortD;
     // Azimuthal hyperviscosities
     BoutReal artHyperAzVortD;
