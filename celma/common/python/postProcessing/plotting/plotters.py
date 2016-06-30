@@ -175,10 +175,10 @@ class Plot(object):
         #}}}
 
         # Get proper indices
-        self._xind = self._getIndices(xSlice)
-        self._yind = self._getIndices(ySlice)
-        self._zind = self._getIndices(zSlice)
-        self._tind = self._getIndices(tSlice)
+        self._xind = self._getIndices(xSlice, 'x')
+        self._yind = self._getIndices(ySlice, 'y')
+        self._zind = self._getIndices(zSlice, 'z')
+        self._tind = self._getIndices(tSlice, 't')
         # Used if we are taking poloidal averages
         self._xSlice = xSlice
         self._ySlice = ySlice
@@ -194,7 +194,7 @@ class Plot(object):
     #}}}
 
     #{{{ _getIndices
-    def _getIndices(self, curSlice):
+    def _getIndices(self, curSlice, dimension):
         """
         Return the slice such that it can be given as an input to 'collect'
         """
@@ -203,13 +203,58 @@ class Plot(object):
             curIndices = []
             curIndices.append(curSlice.start)
             if curSlice.stop == None:
-                curIndices = None
+                # Find the last index
+                if dimension == 'x' or dimension == 'y':
+                    dx = collect('dx',\
+                                 path=self._path, xguards = self._xguards,\
+                                 info=False)
+                    dim = dx.shape[0]
+                if dimension == 'y':
+                    dy = collect('dy',\
+                                 path=self._path, yguards = self._yguards,\
+                                 info=False)
+                    dim = dy.shape[1]
+                if dimension == 'z':
+                    # Subtract 1, as MZ includes the last point
+                    dim = collect('MZ', path=self._path, info=False) - 1
+                if dimension == 't':
+                    dim = collect('t_array', path=self._path, info=False)
+                # Subtract 1 in the end as indices counts from 0
+                curIndices.append(len(dim) - 1)
             else:
                 curIndices.append(curSlice.stop)
         elif curSlice is None:
             curIndices = curSlice
         else:
             curIndices = [curSlice, curSlice]
+
+        # Check for negative indices
+        if curIndices is not None:
+            for ind in range(len(curIndices)):
+                if curIndices[ind] < 0:
+                    if dimension == 'x' or dimension == 'y':
+                        dx = collect('dx',\
+                                     path=self._path, xguards = self._xguards,\
+                                     info=False)
+                        dim = dx.shape[0]
+                    if dimension == 'y':
+                        dy = collect('dy',\
+                                     path=self._path, yguards = self._yguards,\
+                                     info=False)
+                        dim = dy.shape[1]
+                    if dimension == 'z':
+                        # Subtract 1, as MZ includes the last point
+                        dim = collect('MZ', path=self._path, info=False) - 1
+                    if dimension == 't':
+                        dim = collect('t_array', path=self._path, info=False)
+                    # Subtract 1 in the end as indices counts from 0
+                    realInd = len(dim) + curIndices[ind] - 1
+                    if realInd < 0:
+                        message  = ("Index {0} out of range for {1}"
+                                    ", as {1} has only {2} elements").\
+                            format(curIndices[ind], dimension, len(dim))
+                        raise IndexError(message)
+                    curIndices[ind] = realInd
 
         return curIndices
     #}}}
