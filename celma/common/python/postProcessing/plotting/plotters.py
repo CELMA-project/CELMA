@@ -17,6 +17,7 @@ from boutdata import collect
 from boututils.options import BOUTOptions
 import numpy as np
 import warnings
+import types
 
 # All post processing functions called by bout_runners must accept the
 # first argument from bout_runners (called 'folder' in
@@ -741,6 +742,10 @@ class Plot2D(Plot):
         self._fig.subplots_adjust(wspace=0.25)
         self._ax1.grid(True)
         self._ax2.grid(True)
+
+        # Create placeholder for colorbar and images
+        self._cbarPlane = None
+        self._images = []
         #}}}
 
     #{{{_plot2D
@@ -784,16 +789,6 @@ class Plot2D(Plot):
                                         vmin   = self._varMin,\
                                         levels = self._levels,\
                                         )
-        perpLine1 = self._ax1.plot(self._RTLine1XVals,\
-                                   self._RTLine1YVals,\
-                                   '--k'             ,\
-                                   linewidth = 1     ,\
-                                   )
-        perpLine2 = self._ax1.plot(self._RTLine2XVals,\
-                                   self._RTLine2YVals,\
-                                   '--k'             ,\
-                                   linewidth = 1     ,\
-                                   )
 
         # Draw the grids
         self._ax1.grid(b=True)
@@ -801,10 +796,14 @@ class Plot2D(Plot):
         # Decorations
         self._ax1.set_xlabel(r'$\rho$', fontsize = self._latexSize)
         self._ax1.set_ylabel(r'$\rho$', fontsize = self._latexSize)
-        self._ax1.set_title (r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
-                             r' \quad z=' +\
-                             '{:.2f}'.format(self._zVal) + r'$',\
-                             fontsize = self._latexSize)
+        ax1txt = self._ax1.text(0.5, 1.05,\
+                       r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
+                           r' \quad z=' +\
+                           '{:.2f}'.format(self._zVal) + r'$',\
+                       horizontalalignment = 'center',\
+                       verticalalignment = 'center',\
+                       fontsize = self._latexSize,\
+                       transform = self._ax1.transAxes)
 
         # Plot the parallel plane
         parPlane  = self._ax2.contourf(self._cyl.X_RZ       ,\
@@ -815,24 +814,14 @@ class Plot2D(Plot):
                                        vmin   = self._varMin,\
                                        levels = self._levels,\
                                        )
-        parPlane  = self._ax2.contourf(self._cyl.X_RZ_NEG   ,\
-                                       self._cyl.Y_RZ       ,\
-                                       Z_RZ_P_PI            ,\
-                                       cmap   = cm.RdYlBu_r ,\
-                                       vmax   = self._varMax,\
-                                       vmin   = self._varMin,\
-                                       levels = self._levels,\
-                                       )
-        parLine1 = self._ax2.plot(self._RZLine1XVals,\
-                                  self._RZLine1YVals,\
-                                  '--k'             ,\
-                                  linewidth = 1     ,\
-                                  )
-        parLine2 = self._ax2.plot(self._RZLine2XVals,\
-                                  self._RZLine2YVals,\
-                                  '--k'             ,\
-                                  linewidth = 1     ,\
-                                  )
+        parPlaneNeg  = self._ax2.contourf(self._cyl.X_RZ_NEG   ,\
+                                          self._cyl.Y_RZ       ,\
+                                          Z_RZ_P_PI            ,\
+                                          cmap   = cm.RdYlBu_r ,\
+                                          vmax   = self._varMax,\
+                                          vmin   = self._varMin,\
+                                          levels = self._levels,\
+                                          )
 
         # Draw the grids
         self._ax2.grid(b=True)
@@ -840,10 +829,15 @@ class Plot2D(Plot):
         # Decorations
         self._ax2.set_xlabel(r'$\rho$', fontsize = self._latexSize)
         self._ax2.set_ylabel(r'$z$'   , fontsize = self._latexSize)
-        self._ax2.set_title(r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
-                            r' \quad \theta=' +\
+        ax2txt = self._ax2.text(0.5, 1.05,\
+                       r'$\omega_{ci}^{-1} =' + '{:g}'.format(self._t[tInd]) +\
+                           r' \quad \theta=' +\
                            '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
-                           fontsize = self._latexSize)
+                       horizontalalignment = 'center',\
+                       verticalalignment = 'center',\
+                       fontsize = self._latexSize,\
+                       transform = self._ax2.transAxes)
+
 
         self._ax1.get_xaxis().set_major_formatter(\
             FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
@@ -862,18 +856,17 @@ class Plot2D(Plot):
         self._ax1.axis('equal')
         self._ax2.axis('equal')
 
-        # Make the colorbar
-        # format = '%.g' gave undesired results
-        try:
-            cbar = self._fig.colorbar(parPlane                          ,\
-                                      cax    = self._cBarAx             ,\
-                                      format = FuncFormatter(     \
-                                              self._plotNumberFormatter),\
-                                      )
-            cbar.set_label(r'$' + self._pltName + '$')
-        except RuntimeWarning:
-            message  = 'RuntimeError caught in cbar in ' + self._pltName
-            message += '. No cbar will be set!'
+        # Current API inconsistency fix
+        # (https://github.com/matplotlib/matplotlib/issues/6139):
+        addArtPerpPlane   = perpPlane.collections
+        addArtParPlane    = parPlane.collections
+        addArtParPlaneNeg = parPlaneNeg.collections
+
+        self._images.append(addArtPerpPlane + [ax1txt] +\
+                            addArtParPlane + addArtParPlaneNeg +[ax2txt])
+
+        if self._cbarPlane is None:
+            self._cbarPlane = parPlane
     #}}}
 
     #{{{plotDriver
@@ -895,6 +888,41 @@ class Plot2D(Plot):
 
         # Initial plot
         self._plot2D(0)
+
+        # The colorbar needs only to be plotted once
+        # Make the colorbar
+        # format = '%.g' gave undesired results
+        try:
+            cbar = self._fig.colorbar(self._cbarPlane                   ,\
+                                      cax    = self._cBarAx             ,\
+                                      format = FuncFormatter(     \
+                                              self._plotNumberFormatter),\
+                                      )
+            cbar.set_label(r'$' + self._pltName + '$')
+        except RuntimeWarning:
+            message  = 'RuntimeError caught in cbar in ' + self._pltName
+            message += '. No cbar will be set!'
+        # Lines needs only to be plotted once
+        parLine1 = self._ax2.plot(self._RZLine1XVals,\
+                                  self._RZLine1YVals,\
+                                  '--k'             ,\
+                                  linewidth = 1     ,\
+                                  )
+        parLine2 = self._ax2.plot(self._RZLine2XVals,\
+                                  self._RZLine2YVals,\
+                                  '--k'             ,\
+                                  linewidth = 1     ,\
+                                  )
+        perpLine1 = self._ax1.plot(self._RTLine1XVals,\
+                                   self._RTLine1YVals,\
+                                   '--k'             ,\
+                                   linewidth = 1     ,\
+                                   )
+        perpLine2 = self._ax1.plot(self._RTLine2XVals,\
+                                   self._RTLine2YVals,\
+                                   '--k'             ,\
+                                   linewidth = 1     ,\
+                                   )
 
         if self._savePlot:
             # Make a saveName by stripping the orgObj's plot name for bad
@@ -918,11 +946,15 @@ class Plot2D(Plot):
 
         # Animate if we have more than one frame
         if self._frames > 1:
-            anim = animation.FuncAnimation(self._fig            ,\
-                                           self._plot2D         ,\
-                                           frames = self._frames,\
-                                           blit   = False       ,\
-                                           )
+            # Create the plots
+            for tInd in range(1, self._frames):
+                self._plot2D(tInd)
+
+            # Animate
+            anim = animation.ArtistAnimation(self._fig            ,\
+                                             self._images         ,\
+                                             blit   = False       ,\
+                                             )
 
             if self._savePlot:
                 # Save the animation
