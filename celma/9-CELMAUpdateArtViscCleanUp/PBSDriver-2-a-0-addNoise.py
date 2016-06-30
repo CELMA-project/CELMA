@@ -18,12 +18,13 @@ from postProcessing.plotting import combinedDriver
 # *****************************************************************************
 includeNoise        = True
 forceAddNoise       = True
+useHyperViscAzVortD = [False, True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = " "
+restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_tag_1-a-0-expand_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
@@ -42,10 +43,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(280, 300)
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-0"
+theRunName = "2-a-0-addNoise"
 # =============================================================================
 
 
@@ -84,6 +85,7 @@ myRuns = PBS_runner(\
                           ('tag',theRunName,0),\
                           ('switch'      , 'includeNoise'       , includeNoise ),\
                           ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

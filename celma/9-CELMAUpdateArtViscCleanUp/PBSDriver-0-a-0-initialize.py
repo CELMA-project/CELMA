@@ -15,6 +15,9 @@ from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
+# *****************************************************************************
+ownFilterType = "none"
+# *****************************************************************************
 # Set the spatial domain
 nz = 2
 # Set the temporal domain
@@ -73,6 +76,7 @@ myRuns = PBS_runner(\
             restart    = restart,\
             additional = [
                           ('tag',theRunName,0),\
+                          ('ownFilters'  , 'type', ownFilterType),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

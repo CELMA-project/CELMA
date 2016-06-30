@@ -29,7 +29,7 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 restart      = None;
-restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_1.0_ownFilters_type_radialLowPass_ownOperators_type_BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.1-moreSAddNRadialLPHyperV3BBrackets_0_theSource_a_0.02/"
+restart_from = "f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_1.0_ownFilters_type_radialLowPass_ownOperators_type_BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.1-moreSAddNRadialLPHyperVBBrackets_0_theSource_a_0.02/"
 # Set the spatial domain
 nz = [128]
 # Set the temporal domain
@@ -48,7 +48,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(35, 55)
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
 theRunName = "3-e-3.1-Restart2e31"
