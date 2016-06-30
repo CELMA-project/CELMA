@@ -61,6 +61,12 @@ Expand
 1-e-0 : Finished after 18 m
 
 
+Lessen the parallel artificial viscosity
+----------------------------------------
+0-h-0 artPar 3e-2 : Failed before even finished 1 step
+0-h-0 artPar 3e-1 : Finished after 56 m, grid scale oscillation in parallel direction, comes from ue
+
+
 Adding noise with filter
 ------------------------
 2-a-0.0 : Finished 27 steps, killed by walltime (12 h)
@@ -83,9 +89,9 @@ nz = 128
 ********
 nz = 256
 ********
-2-e-3.1 viscAmp 1.0 : Running
-2-e-3.1 viscAmp 0.5 : Running
-2-e-3.1 viscAmp 0.1 : Running
+2-e-3.1 viscAmp 1.0 : Finished 120 steps, then timestep failed (19h 22 min)
+2-e-3.1 viscAmp 0.5 : Finished 109 steps, then timestep failed (20h 47 min)
+2-e-3.1 viscAmp 0.1 : Finished 103 steps, then timestep failed (16h 26 min), check I2e31vA01256
 Running with artVisc only
 ********
 nz = 128
@@ -96,9 +102,9 @@ nz = 128
 ********
 nz = 256
 ********
-2-e-3.2 viscAmp 1.0 : Running
-2-e-3.2 viscAmp 0.5 : Running
-2-e-3.2 viscAmp 0.1 : Running
+2-e-3.2 viscAmp 1.0 : Finished 121 steps (20h 55 min), then timestep failed
+2-e-3.2 viscAmp 0.5 : Finished 120 steps (21h 35 min), then timestep failed
+2-e-3.2 viscAmp 0.1 : Finished  99 steps (19h 27 min), then timestep failed, check I2e32vA01256
 .........................................................
 Comparing onlyBrackets filter with artificial dissipation
 .........................................................
@@ -142,6 +148,17 @@ Restarting with hypervisc
 5-a-1.1 : Finished after 20 h 33 m (300 steps) - Saturated turbulence
 
 
+
+Test
+----
+................
+Compare with 3e31
+................
+test-3-e-3.1-addingViscToVortD - Running
+test-3-e-3.1-artPerplnN0       - Failed after 3 timestep (1h 30 min)
+
+
+
 Check why fails
 ---------------
 I2-a-0.1 : Finished 1 step (36m), then cvode timestep failed, see fast perturb, trouble with min at [1,9,23,9], see snippet
@@ -152,8 +169,9 @@ I3-a-0.0 : Finihsed 3 steps (1h 17m), then cvode timestep failed, see small pert
 I3-a-2.0 : !!! Troubles to start
 I3-a-2.1 : Finished 2 steps (46m), then cvode timestep failed, see fast perturb, trouble in source with min at [1,16,0,14], see snippet
 
-I2-e-3.1-VAmp0.1 : Running
-I2-e-3.2-VAmp0.1 : Running
+I2-e-3.1-VAmp0.1   : Running
+I2-e-3.1-VAmp0.1256: Running
+I2-e-3.2-VAmp0.1   : Running
 
 
 
