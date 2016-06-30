@@ -109,7 +109,7 @@ OwnOperators* OwnOperators::createOperators(Options *options)
                << "2Brackets      - Consistent implementation using 2 brackets.\n"
                << "3Brackets      - Consistent implementation using 3 brackets "
                                     "with modified Arakawa.\n"
-               << "BasicBrackets - Consistent implementation using 3 brackets "
+               << "BasicBrackets - Consistent implementation using brackets "
                                     "with basic Arakawa.\n"
                ;
         std::string str =  stream.str();

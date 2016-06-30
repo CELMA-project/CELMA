@@ -120,6 +120,25 @@ int Celma::init(bool restarting) {
 
     // Azimuthal hyperviscosities
     artHyperAzVortD *= SQ(SQ(mesh->dz));
+
+    output << "Printing real artificial viscosity coefficients" << std::endl;
+    output << "***********************************************" << std::endl;
+    output << "Perpendicular (SQ(mesh->dx(0,0)) = "
+              << SQ(mesh->dx(0,0)) << "):" << std::endl;
+    output << "    For ln(n)   : (Not used in this model)" << std::endl;
+    output << "    For u_{e,\\|}: " << artViscPerpUEPar << std::endl;
+    output << "    For u_{i,\\|}: " << artViscPerpUIPar << std::endl;
+    output << "    For vortD   : "  << artViscPerpVortD << std::endl;
+    output << "Parallel (SQ(mesh->dy(0,0)) = "
+              << SQ(mesh->dy(0,0)) << "):" << std::endl;
+    output << "    For ln(n)   : "  << artViscParLnN << std::endl;
+    output << "    For u_{e,\\|}: " << artViscParUEPar << std::endl;
+    output << "    For u_{i,\\|}: " << artViscParUIPar << std::endl;
+    output << "    For vortD   : "  << artViscParVortD << std::endl;
+    output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
+              << SQ(SQ(mesh->dz)) << "):" << std::endl;
+    output << "    For vortD   : " << artHyperAzVortD << std::endl;
+    output << "***********************************************" << std::endl;
     // ************************************************************************
 
     // Load from the geometry
