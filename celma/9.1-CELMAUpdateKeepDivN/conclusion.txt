@@ -1,0 +1,10 @@
+Copied from 9-CELMAUpdateArtViscCleanUp
+
+- Re-added n in artificial dissipation of velocities
+
+Results:
+========
+a-data
+-------
+2-a-0 hyperV 0 : Running
+2-a-0 hyperV 1 : Running
