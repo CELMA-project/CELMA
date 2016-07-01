@@ -1,0 +1,12 @@
+Copied from 9.1-CELMAUpdateKeepDivN
+
+- Re-added old viscosity on ln_n
++ See conclusion 9 and 9.1 for details
+
+Results:
+========
+a-data
+-------
+a-0 nuEI 1.0: Accedentially also added visc in perp and parallel
+a-0 nuEI 0.1: Accedentially also added visc in perp and parallel
+a-1         : Running
