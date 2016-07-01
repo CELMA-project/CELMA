@@ -27,6 +27,7 @@ Finish ordering (best to worst)
 0-c-0 - Completed 2 steps, killed by walltime
 0-c-1 - Completed 2 steps, killed by walltime
 0-c-2 - Completed 2 steps, killed by walltime
+0-g-0 - 18m 18s
 
 
 Expanding to 128
@@ -76,9 +77,9 @@ Adding noise with filter
 2-e-1   : Finished after 15 h 32 m, saturated turbulence
 2-e-2   : Finished 91 steps, cvode timestep failed (8 h 46 m)
 2-e-3   : Finished 99 steps, cvode timestep failed (9 h 09 m)
-..................................................
-Preventing crash by adding artificial dissipation
-.................................................
+.........................................
+Preventing crash by adding hyperviscosity
+.........................................
 Running with both filter and artVisc
 ********
 nz = 128
@@ -105,21 +106,21 @@ nz = 256
 2-e-3.2 viscAmp 1.0 : Finished 121 steps (20h 55 min), then timestep failed
 2-e-3.2 viscAmp 0.5 : Finished 120 steps (21h 35 min), then timestep failed
 2-e-3.2 viscAmp 0.1 : Finished  99 steps (19h 27 min), then timestep failed, check I2e32vA01256
-.........................................................
-Comparing onlyBrackets filter with artificial dissipation
-.........................................................
+..............................................................................
+Comparing onlyBrackets filter with artificial dissipation (compare with 2-e-1)
+..............................................................................
 ********
 nz = 128
 ********
-2-e-2.1 viscAmp 1.0 : Finished after 16 h 11 m, modes growing, but NO turbulence
-2-e-2.1 viscAmp 0.5 : Finished after 15 h, 4 m, turbulence starting
-2-e-2.1 viscAmp 0.1 : Finished after 13 h, 11 m, saturated turbulence
+2-e-1.1 viscAmp 1.0 : Finished after 16 h 11 m, modes growing, but NO turbulence
+2-e-1.1 viscAmp 0.5 : Finished after 15 h, 4 m, turbulence starting
+2-e-1.1 viscAmp 0.1 : Finished after 13 h, 11 m, saturated turbulence
 ********
 nz = 256
 ********
-2-e-2.1 viscAmp 1.0 : Running
-2-e-2.1 viscAmp 0.5 : Running
-2-e-2.1 viscAmp 0.1 : Running
+2-e-1.1 viscAmp 1.0 : Finished after 42 h 58 m, all show saturated turbulence, hard to distinguish
+2-e-1.1 viscAmp 0.5 : Finished after 43 h 24 m, all show saturated turbulence, hard to distinguish
+2-e-1.1 viscAmp 0.1 : Finished after 36 h 15 m, all show saturated turbulence, hard to distinguish
 ....................................
 Check that code can run ad infinitum
 ....................................
@@ -154,8 +155,9 @@ Test
 ................
 Compare with 3e31
 ................
-test-3-e-3.1-addingViscToVortD - Running
-test-3-e-3.1-artPerplnN0       - Failed after 3 timestep (1h 30 min)
+test-3-e-3.1-addingViscToVortD hypervisc True  - Finished after 15 h 5 m (killed most of turbulence)
+test-3-e-3.1-addingViscToVortD hypervisc False - Running
+test-3-e-3.1-artPerplnN0 - Failed after 3 timestep (1h 30 min)
 
 
 
