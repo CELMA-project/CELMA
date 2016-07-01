@@ -125,7 +125,9 @@ nz = 256
 Check that code can run ad infinitum
 ....................................
 3-e-3.1 - Finishes 55 steps (3h 48m), then timestep fails - vortD gets a strong negative perturbation
-
+test-3-e-3.1-addingViscToVortD hypervisc True  - Finished after 15 h 5 m (killed most of turbulence after 20 time steps)
+test-3-e-3.1-addingViscToVortD hypervisc False - Running
+test-3-e-3.1-artPerplnN0 - Failed after 3 timestep (1h 30 min)
 
 Adding noise with hypervisc
 ---------------------------
@@ -147,17 +149,6 @@ Restarting with hypervisc
 3-a-2.1 : Finished 2 timesteps, then failed in Naulin solver (7h 41m) - Not apparent why from the plots
 4-a-1.1 : Finished after 5 h 59 m - Saturated turbulence
 5-a-1.1 : Finished after 20 h 33 m (300 steps) - Saturated turbulence
-
-
-
-Test
-----
-................
-Compare with 3e31
-................
-test-3-e-3.1-addingViscToVortD hypervisc True  - Finished after 15 h 5 m (killed most of turbulence)
-test-3-e-3.1-addingViscToVortD hypervisc False - Running
-test-3-e-3.1-artPerplnN0 - Failed after 3 timestep (1h 30 min)
 
 
 
