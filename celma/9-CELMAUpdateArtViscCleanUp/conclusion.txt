@@ -12,6 +12,6 @@ a-data (copied and modified from g-doubleB)
 0-a-0               : Finished after 32 min
 1-a-0               : Finished after 52 min
 2-a-0 hyperV 0      : Finished 48 steps, Naulin Solver failed after 8h 31m
-2-a-0 hyperV 1      : Finished 57 steps, Naulin Solver failed after 6h 15m
+2-a-0 hyperV 1      : Finished 57 steps, timestep failed after 6h 15m
 2.1-a-0-noViscVortD hyperV 0: Running
 2.1-a-0-noViscVortD hyperV 1: Running
