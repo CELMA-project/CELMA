@@ -1,0 +1,22 @@
+Copied from 0-DDXCylinder/
+
+- Check that D4DX4 is working in cylinder geometry
+
+Results:
+========
+With neumann boundary condition:
+Should formally only give 1st order convergence according to
+derivations/D4DX4/BW2ndOrderNeumann4thOrder.ipynb
+(should first deviate at 5th derivative)
+
+It is expected that the dirichlet_o4 does not give proper convergence when
+looking at the taylor expansion for extrapolation to the last grid point
+
+- gaussianNeumann        : Actually observed 2nd order convergence until machine precision
+- mixModeNeumann         : Actually observed 2nd order convergence until machine precision
+- gaussianWSinAndParabola: Convergence not observed (blow up last point)
+- gaussian               : Convergence not observed (blow up last point)
+
+Conclusion:
+===========
+Neumann: Convergence observed
