@@ -42,12 +42,12 @@ OwnOperators::OwnOperators(Options *option) :
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "Not enough inner points i the x-direction\n"
-               << "D3DX3 needs 4 inner points  x\n"
+               << "D3DX3 and D4DX4 needs 4 inner points x\n"
                << "Currently the number of inner points is "
                << mesh->ngx- 2*mesh->xstart;
 
         if (warnPoints){
-            output << "\n\n!!! WARNING" << stream << "\n\n" << std::endl;
+            output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
         }
         else{
             std::string str =  stream.str();
@@ -135,6 +135,92 @@ Field3D OwnOperators::D3DX3(const Field3D &f, const BoutReal &t)
     throw BoutException("D3DX3 is only implemented in the simpleStupid class");
 
     return f;
+}
+
+/*!
+ * 4th derivative in the \f$\rho\f$ direction using cylindrical geometry. As
+ * this is a wide stencil, extra care needs to be taken at the boundaries of a
+ * processor. A 4th order scheme (using one guard cell) is used of the points
+ * closest to the processor edges. This avoid the need of having two ghost
+ * points
+ *
+ * \param[in] f The original field
+ *
+ * \return result The result of the operation
+ *
+ * \note t is an input as the boundary may be time dependent
+ * \note A 3rd order stencil around the processor boundaries are chosen so that
+ *       the error doesn't dominate there
+ * \warning This is not made for staggered grids, and only tested with
+ *          neumann_o4 (which is supposed to only give 1st order
+ *          convergence)
+ */
+Field3D OwnOperators::D4DX4(const Field3D &f)
+{
+    TRACE("Halt in OwnOperators::D4DX4");
+    // Need to initialize Field3D
+    Field3D result = 0.0;
+    int xInd;
+
+    /* The stencil for the inner points
+     * mesh->xstart would need a second ghost point, so we start at
+     * mesh->xstart+1
+     * In similar manner mesh->xend would need a second ghost point, so we
+     * iterate up to mesh->xend-1
+     */
+    for(xInd = mesh->xstart+1; xInd <= mesh->xend-1; xInd++){
+        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                result(xInd, yInd, zInd) =
+                    (
+                          f(xInd-2, yInd, zInd)
+                    - 4.0*f(xInd-1, yInd, zInd)
+                    + 6.0*f(xInd  , yInd, zInd)
+                    - 4.0*f(xInd+1, yInd, zInd)
+                    +     f(xInd+2, yInd, zInd)
+                    )/pow(mesh->dx(xInd, yInd), 4.0)
+                    ;
+            }
+        }
+    }
+
+    // Loop for the innermost xpoint at this processor (2nd order)
+    xInd = mesh->xstart;
+    for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+        for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            // 2nd order for first point
+            result(xInd, yInd, zInd) =
+                (
+                   2.0*f(xInd-1, yInd, zInd)
+                -  9.0*f(xInd  , yInd, zInd)
+                + 16.0*f(xInd+1, yInd, zInd)
+                - 14.0*f(xInd+2, yInd, zInd)
+                +  6.0*f(xInd+3, yInd, zInd)
+                -      f(xInd+4, yInd, zInd)
+                )/(pow(mesh->dx(xInd, yInd), 4.0))
+                ;
+        }
+    }
+
+   // Loop for the outermost xpoint at this processor (2nd order)
+   xInd = mesh->xend;
+   for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+       for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+           // 2nd order for last point
+           result(xInd, yInd, zInd) =
+               (
+               -      f(xInd-4, yInd, zInd)
+               +  6.0*f(xInd-3, yInd, zInd)
+               - 14.0*f(xInd-2, yInd, zInd)
+               + 16.0*f(xInd-1, yInd, zInd)
+               -  9.0*f(xInd  , yInd, zInd)
+               +  2.0*f(xInd+1, yInd, zInd)
+               )/(pow(mesh->dx(xInd, yInd), 4.0))
+               ;
+       }
+   }
+
+    return result;
 }
 
 /*!
@@ -389,7 +475,7 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
     // Last argument in get is the default
     varOptions->get("bndry_xout", bndryFuncString, "");
     if (bndryFuncString == ""){
-        output << "\n\n\n\n" << "!!!WARNING!!!: No bndry_xout found in section "
+        output << "\n\n\n\n" << "!!!WARNING!!!\nNo bndry_xout found in section "
                << phiBndrySec << " D3DX3 will not work"
                << "\n\n\n\n" << std::endl;
 
@@ -397,7 +483,7 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
     else if (!(lowercase(bndryFuncString).find("dirichlet") != string::npos)){
         // Create a stream which we cast to a string
         std::ostringstream stream;
-        stream << "neumann boundary condition not implemented in D3DX3\n"
+        stream << "BC not implemented in D3DX3\n"
                << "Found:\n"
                << bndryFuncString
                << "\nin\n"

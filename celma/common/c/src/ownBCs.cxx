@@ -51,7 +51,7 @@ OwnBCs::OwnBCs(){
                << mesh->ngy - 2*mesh->ystart;
 
         if (warnPoints){
-            output << "\n\n!!! WARNING" << stream << "\n\n" << std::endl;
+            output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
         }
         else{
             std::string str =  stream.str();
@@ -271,7 +271,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
  *
- * \warning profile should not vary along the magnetic field
+ * \warning The profile should not vary along the magnetic field
  *          line, and should only vary along \$f\rho\$f
  */
 void OwnBCs::uEParSheath(Field3D &uEPar,
