@@ -67,6 +67,8 @@ MES/singleOperators/6-D3DZ2DXCylinder/D3DZ2DXCylinder
 MES/singleOperators/7-DDXCylinderWithJacobian/DDXCylinderWithJacobian
 MES/singleOperators/8*-DDXHighResCenter/DDXCylinderHighResCenter
 MES/singleOperators/9-DDXDDXCylinder/DDXDDXCylinder
+MES/singleOperators/9-DDXDDXCylinder/DDXDDXCylinder
+MES/singleOperators/10-D4DX4Cylinder/D4DX4Cylinder
 MES/singleOperators/failsDDXDDXHighResCenter*/DDXDDXCylinderHighResCenter
 MES/singleOperators/subconvergenceDDXCylinderWithJacobianOverJacobian/DDXCylinderWithJacobianOverJacobian
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
