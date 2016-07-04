@@ -188,6 +188,7 @@ def BOUT_print(the_vars, rational=False):
             the_vars[cur_var_key] = nsimplify(the_vars[cur_var_key])
         the_vars[cur_var_key] = exprToStr(the_vars[cur_var_key])
         the_vars[cur_var_key] = re.sub(r'\b' + "x" + r'\b', "geom:xl", the_vars[cur_var_key])
+        the_vars[cur_var_key] = re.sub(r'\b' + "y" + r'\b', "geom:yl", the_vars[cur_var_key])
         print("\n[{}]".format(cur_var_key))
         print(the_vars[cur_var_key])
 #}}}
