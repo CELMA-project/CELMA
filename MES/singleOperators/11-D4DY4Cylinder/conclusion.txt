@@ -1,0 +1,26 @@
+Copied from 10-D4DX4Cylinder/
+
+- Check that D4DY4 is working in cylinder geometry
+
+Results:
+========
+With neumann boundary condition:
+Should formally only give 1st order convergence according to
+derivations/D4DX4/BW2ndOrderNeumann4thOrder.ipynb
+(should first deviate at 5th derivative)
+
+It is expected that the dirichlet_o4 does not give proper convergence when
+looking at the taylor expansion for extrapolation to the last grid point
+
+- gaussianNeumann               : Actually observed 2nd order convergence until machine precision at 256 points
+- gaussianWSinAndParabolaNeumann: Actually observed 2nd order convergence until machine precision at 1024 points
+- highVarYNeumann               : Almost 2nd order observed after 256 points, small errors, but maybe not machine precision
+
+- gaussian                      : Actually observed 2nd order convergence until machine precision at 256 points
+- gaussianWSinAndParabola       : Actually observed 2nd order convergence until machine precision at 1024 points
+- highVarY                      : Almost 2nd order observed after 256 points, small errors, but maybe not machine precision
+
+Conclusion:
+===========
+Neumann: Convergence observed
+Dirichlet: Looks like converge (bad test functions?)
