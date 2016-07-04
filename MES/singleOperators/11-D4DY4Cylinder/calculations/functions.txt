@@ -1,0 +1,90 @@
+Gaussian with sinus and parabola
+======================================================================================================================================
+# Gaussian with sinus and parabola
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+
+# The gaussian
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+
+# A parabola
+# In cartesian coordinates, we have
+# ((x-x0)/Lx)^2
+
+
+wx = 0.5*Lx
+wy = 0.5*Ly
+x0 = 0.3*Lx
+y0 = 0.5*Ly
+the_vars['f'] = 100*sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))*\
+                exp(-(((x-x0)**2/(2*wx**2)) + ((y-y0)**2/(2*wy**2))))*\
+                ((x-x0)/Lx)**2
+
+
+
+
+[f]
+100*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(geom:yl - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60)
+
+[neumann]
+100*(geom:xl/30 - 0.3)^2*(-0.000177777777777778*geom:yl + 0.0133333333333333)*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(geom:yl - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 5*sqrt(2)*pi*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(geom:yl - 75.0)^2)*cos(sqrt(2)*pi*(geom:xl + geom:yl)/60)/3
+
+[S]
+(geom:xl - 9.0)^2*(-3240000*(6.32098765432099e-8*geom:yl - 4.74074074074074e-6)*(0.000177777777777778*geom:yl - 0.0133333333333333)*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 216000*sqrt(2)*pi*(6.32098765432099e-8*geom:yl - 4.74074074074074e-6)*cos(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 3240000*(0.000177777777777778*geom:yl - 0.0133333333333333)^4*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) - 216000*sqrt(2)*pi*(0.000177777777777778*geom:yl - 0.0133333333333333)^3*cos(sqrt(2)*pi*(geom:xl + geom:yl)/60) - 10800*pi^2*(0.000177777777777778*geom:yl - 0.0133333333333333)^2*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) - 2304.0*(0.000177777777777778*geom:yl - 0.0133333333333333)^2*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 38.4*sqrt(2)*pi*(0.000177777777777778*geom:yl - 0.0133333333333333)*cos(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 120*sqrt(2)*pi^3*(0.000177777777777778*geom:yl - 0.0133333333333333)*cos(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 0.3072*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) + 1.92*pi^2*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60) + pi^4*sin(sqrt(2)*pi*(geom:xl + geom:yl)/60))*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(geom:yl - 75.0)^2)/29160000
+======================================================================================================================================
+
+
+
+Gaussian
+======================================================================================================================================
+# The gaussian
+
+# In cartesian coordinates we would like
+# f = exp(-(1/(2*w^2))*((x-x0)^2 + (y-y0)^2))
+
+wx = 0.5*Lx
+wy = 0.9*Ly
+x0 = 0.3*Lx
+y0 = 0.8*Ly
+the_vars['f'] = 1e6*exp(-(((x-x0)**2/(2*wx**2)) + ((y-y0)**2/(2*wy**2))))
+
+
+
+[neumann]
+1000000.0*(-5.48696844993141e-5*geom:yl + 0.0065843621399177)*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 2.74348422496571e-5*(geom:yl - 120.0)^2)
+
+[f]
+1000000.0*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 2.74348422496571e-5*(geom:yl - 120.0)^2)
+
+[S]
+(-1000000.0*(6.02136455410855e-9*geom:yl - 7.22563746493026e-7)*(5.48696844993141e-5*geom:yl - 0.0065843621399177) + 1000000.0*(5.48696844993141e-5*geom:yl - 0.0065843621399177)^4 - 219.478737997257*(5.48696844993141e-5*geom:yl - 0.0065843621399177)^2 + 0.00903204683116282)*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 2.74348422496571e-5*(geom:yl - 120.0)^2)
+======================================================================================================================================
+
+
+
+High variation y
+======================================================================================================================================
+# High variation y
+
+the_vars['f'] = (sin(2*pi*(y/Ly)**2) + cos(2*pi*(y/Ly)**2)*sin(2*pi*(x/Lx))+\
+                 sin(3*pi*(y/Ly)**2+2) + cos(4*pi*(y/Ly)**2+1)*sin(3*pi*(x/Lx))+\
+                 sin(5*pi*(y/Ly)**2+1)*cos(3*pi*(x/Lx)+5)\
+                )
+
+
+[S]
+pi^2*(16*pi^2*geom:yl^4*sin(pi*geom:xl/15)*cos(pi*geom:yl^2/11250) + 256*pi^2*geom:yl^4*sin(pi*geom:xl/10)*cos(pi*geom:yl^2/5625 + 1) + 16*pi^2*geom:yl^4*sin(pi*geom:yl^2/11250) + 81*pi^2*geom:yl^4*sin(pi*geom:yl^2/7500 + 2) + 625*pi^2*geom:yl^4*sin(pi*geom:yl^2/4500 + 1)*cos(pi*geom:xl/10 + 5) + 540000*pi*geom:yl^2*sin(pi*geom:xl/15)*sin(pi*geom:yl^2/11250) + 4320000*pi*geom:yl^2*sin(pi*geom:xl/10)*sin(pi*geom:yl^2/5625 + 1) - 540000*pi*geom:yl^2*cos(pi*geom:yl^2/11250) - 8437500*pi*geom:yl^2*cos(pi*geom:xl/10 + 5)*cos(pi*geom:yl^2/4500 + 1) - 1822500*pi*geom:yl^2*cos(pi*geom:yl^2/7500 + 2) - 1518750000*sin(pi*geom:xl/15)*cos(pi*geom:yl^2/11250) - 6075000000*sin(pi*geom:xl/10)*cos(pi*geom:yl^2/5625 + 1) - 1518750000*sin(pi*geom:yl^2/11250) - 3417187500*sin(pi*geom:yl^2/7500 + 2) - 9492187500*sin(pi*geom:yl^2/4500 + 1)*cos(pi*geom:xl/10 + 5))/16018066406250000
+
+[neumann]
+-pi*geom:yl*sin(pi*geom:xl/15)*sin(pi*geom:yl^2/11250)/5625 - 2*pi*geom:yl*sin(pi*geom:xl/10)*sin(pi*geom:yl^2/5625 + 1)/5625 + pi*geom:yl*cos(pi*geom:yl^2/11250)/5625 + pi*geom:yl*cos(pi*geom:xl/10 + 5)*cos(pi*geom:yl^2/4500 + 1)/2250 + pi*geom:yl*cos(pi*geom:yl^2/7500 + 2)/3750
+
+[f]
+sin(pi*geom:xl/15)*cos(pi*geom:yl^2/11250) + sin(pi*geom:xl/10)*cos(pi*geom:yl^2/5625 + 1) + sin(pi*geom:yl^2/11250) + sin(pi*geom:yl^2/7500 + 2) + sin(pi*geom:yl^2/4500 + 1)*cos(pi*geom:xl/10 + 5)
+======================================================================================================================================

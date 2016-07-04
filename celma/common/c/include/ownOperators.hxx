@@ -49,6 +49,10 @@ class OwnOperators
         Field2D invJ2; //!< The inverse of the Jacobian raised to power 2
         Field2D invJ3; //!< The inverse of the Jacobian raised to power 3
         Field2D invJ4; //!< The inverse of the Jacobian raised to power 4
+
+        int xInd; //!< x-index
+        int yInd; //!< y-index
+        int zInd; //!< z-index
     public:
         // Constructors
         OwnOperators (Options *options);
@@ -61,6 +65,10 @@ class OwnOperators
         // Member functions
         //! Discretizes \f$\partial_\theta^3\f$
         Field3D D3DZ3(const Field3D &f);
+        //! Discretizes \f$\partial_\rho^4\f$
+        Field3D D4DX4(const Field3D &f);
+        //! Discretizes \f$\partial_\|^4\f$
+        Field3D D4DY4(const Field3D &f);
         //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
         Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
         //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry

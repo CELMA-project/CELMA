@@ -1,4 +1,4 @@
-// *************** Simulation of D3DX3Cylinder *********************
+// *************** Simulation of D4DY4Cylinder *********************
 /* Geometry
  *  x - The radial coordinate (rho)      [nx and dx set from the grid file]
  *  y - The height of the cylinder (z)   [ny and dy set from the grid file]
@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __D3DX3Cylinder_H__
-#define __D3DX3Cylinder_H__
+#ifndef __D4DY4Cylinder_H__
+#define __D4DY4Cylinder_H__
 
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx>              // Gives field factory
@@ -20,10 +20,10 @@
 // Gives own operators
 #include "../../common/c/include/ownOperators.hxx"
 
-class D3DX3Cylinder : public PhysicsModel {
+class D4DY4Cylinder : public PhysicsModel {
 public:
     // Destructor
-    ~D3DX3Cylinder();
+    ~D4DY4Cylinder();
 protected:
     int init(bool restarting);
     int rhs(BoutReal t);
@@ -39,7 +39,7 @@ private:
 
     // Constants
     // *****************************************************************************
-    BoutReal Lx;    // The box dimensions
+    BoutReal Lx, Ly;    // The box dimensions
     // *****************************************************************************
 
     // Make a field group to communicate
@@ -47,22 +47,10 @@ private:
     FieldGroup com_group;
     // *****************************************************************************
 
-    // Own operators
-    // *****************************************************************************
-    Field3D D3DX3(const Field3D &f,
-                  const BoutReal &t,
-                  FieldGenerator *bndryFuncGen);
-    // *****************************************************************************
-
     // Other objects
     // *****************************************************************************
     OwnBCs ownBC;        // Class containing methods which sets the ghost points
     OwnOperators *ownOp; // Class containing own differential operators
-    // *****************************************************************************
-
-    // Auxiliary objects
-    // *****************************************************************************
-    BoutReal globalLastXVal;  // Used in the boundary of D3DX3
     // *****************************************************************************
     // ############################################################################
 };
