@@ -7,6 +7,18 @@ Results:
 ========
 a-data
 -------
-a-0 nuEI 1.0: Accedentially also added visc in perp and parallel
-a-0 nuEI 0.1: Accedentially also added visc in perp and parallel
-a-1         : Running
+a-0 : Finished after 53 m - Looks OK
+a-1 : Finished after 56 m - Turbulence dies
+a-2 : Finished after 52 m - Less turbulence than original (easiest to see in Omega and OmegaD)
+a-3 artViscVortD 5e-3 : !Finer structures created - Finished 9 steps, then too small timesteps (1h 51m)
+a-3 artViscVortD 5e-4 : !Finer structures created - Finished 7 steps, then too small timesteps (1h 48m)
+a-3 artViscVortD 5e-5 : !Finer structures created - Finished 6 steps, then too small timesteps (1h 43m)
+a-4 artViscVortD 5e-3 : Finished after 58 m - Not big difference between runs (a bit less trubulence in OmegaD)
+a-4 artViscVortD 5e-4 : Finished after 55 m - Not big difference between runs
+a-4 artViscVortD 5e-5 : Finished after 56 m - Not big difference between runs
+
+
+Conclusion
+----------
+Added perp vort in vortD - turbulence dies
+Taking away hypervisc creates finer structures
