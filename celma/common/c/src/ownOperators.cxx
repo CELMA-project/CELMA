@@ -42,12 +42,32 @@ OwnOperators::OwnOperators(Options *option) :
         // Create a stream which we cast to a string
         std::ostringstream stream;
         stream << "Not enough inner points i the x-direction\n"
-               << "D3DX3 needs 4 inner points  x\n"
+               << "D3DX3 and D4DX4 needs 4 inner points x\n"
                << "Currently the number of inner points is "
                << mesh->ngx- 2*mesh->xstart;
 
         if (warnPoints){
-            output << "\n\n!!! WARNING" << stream << "\n\n" << std::endl;
+            output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
+        }
+        else{
+            std::string str =  stream.str();
+            // Cast the stream to a const char in order to use it in BoutException
+            const char* message = str.c_str();
+            throw BoutException(message);
+        }
+    }
+
+    if (mesh->ngy - 2*mesh->ystart < 4){
+
+        // Create a stream which we cast to a string
+        std::ostringstream stream;
+        stream << "Not enough inner points i the y-direction\n"
+               << "D4DY4 needs 4 inner points x\n"
+               << "Currently the number of inner points is "
+               << mesh->ngy- 2*mesh->ystart;
+
+        if (warnPoints){
+            output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
         }
         else{
             std::string str =  stream.str();
@@ -135,6 +155,170 @@ Field3D OwnOperators::D3DX3(const Field3D &f, const BoutReal &t)
     throw BoutException("D3DX3 is only implemented in the simpleStupid class");
 
     return f;
+}
+
+/*!
+ * 4th derivative in the \f$\rho\f$ direction using cylindrical geometry. As
+ * this is a wide stencil, extra care needs to be taken at the boundaries of a
+ * processor. A 2nd order scheme (using one guard cell) is used of the points
+ * closest to the processor edges. This avoids the need of having two ghost
+ * points.
+ *
+ * \param[in] f The original field
+ *
+ * \return result The result of the operation
+ *
+ * \warning This is not made for staggered grids.
+ * \warning Convergence for dirichlet boundary condition needs higher order
+ *          than dirichlet_o4.
+ */
+Field3D OwnOperators::D4DX4(const Field3D &f)
+{
+    TRACE("Halt in OwnOperators::D4DX4");
+    // Need to initialize Field3D
+    Field3D result = 0.0;
+
+    /* The stencil for the inner points
+     * mesh->xstart would need a second ghost point, so we start at
+     * mesh->xstart+1
+     * In similar manner mesh->xend would need a second ghost point, so we
+     * iterate up to mesh->xend-1
+     */
+    for(xInd = mesh->xstart+1; xInd <= mesh->xend-1; xInd++){
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                result(xInd, yInd, zInd) =
+                    (
+                          f(xInd-2, yInd, zInd)
+                    - 4.0*f(xInd-1, yInd, zInd)
+                    + 6.0*f(xInd  , yInd, zInd)
+                    - 4.0*f(xInd+1, yInd, zInd)
+                    +     f(xInd+2, yInd, zInd)
+                    )/pow(mesh->dx(xInd, yInd), 4.0)
+                    ;
+            }
+        }
+    }
+
+    // Loop for the innermost xpoint at this processor (2nd order)
+    xInd = mesh->xstart;
+    for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+        for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            // 2nd order for first point
+            result(xInd, yInd, zInd) =
+                (
+                   2.0*f(xInd-1, yInd, zInd)
+                -  9.0*f(xInd  , yInd, zInd)
+                + 16.0*f(xInd+1, yInd, zInd)
+                - 14.0*f(xInd+2, yInd, zInd)
+                +  6.0*f(xInd+3, yInd, zInd)
+                -      f(xInd+4, yInd, zInd)
+                )/(pow(mesh->dx(xInd, yInd), 4.0))
+                ;
+        }
+    }
+
+   // Loop for the outermost xpoint at this processor (2nd order)
+   xInd = mesh->xend;
+   for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+       for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+           // 2nd order for last point
+           result(xInd, yInd, zInd) =
+               (
+               -      f(xInd-4, yInd, zInd)
+               +  6.0*f(xInd-3, yInd, zInd)
+               - 14.0*f(xInd-2, yInd, zInd)
+               + 16.0*f(xInd-1, yInd, zInd)
+               -  9.0*f(xInd  , yInd, zInd)
+               +  2.0*f(xInd+1, yInd, zInd)
+               )/(pow(mesh->dx(xInd, yInd), 4.0))
+               ;
+       }
+   }
+
+    return result;
+}
+
+/*!
+ * 4th derivative in the parallel direction using cylindrical geometry. As
+ * this is a wide stencil, extra care needs to be taken at the boundaries of a
+ * processor. A 2nd order scheme (using one guard cell) is used of the points
+ * closest to the processor edges. This avoids the need of having two ghost
+ * points.
+ *
+ * \param[in] f The original field
+ *
+ * \return result The result of the operation
+ *
+ * \warning This is not made for staggered grids.
+ * \warning Convergence for dirichlet boundary condition needs higher order
+ *          than dirichlet_o4.
+ */
+Field3D OwnOperators::D4DY4(const Field3D &f)
+{
+    TRACE("Halt in OwnOperators::D4DY4");
+    // Need to initialize Field3D
+    Field3D result = 0.0;
+
+    /* The stencil for the inner points
+     * mesh->ystart would need a second ghost point, so we start at
+     * mesh->ystart+1
+     * In similar manner mesh->xend would need a second ghost point, so we
+     * iterate up to mesh->yend-1
+     */
+    for(xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+        for(yInd = mesh->ystart+1; yInd <= mesh->yend-1; yInd++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                result(xInd, yInd, zInd) =
+                    (
+                          f(xInd, yInd-2, zInd)
+                    - 4.0*f(xInd, yInd-1, zInd)
+                    + 6.0*f(xInd, yInd  , zInd)
+                    - 4.0*f(xInd, yInd+1, zInd)
+                    +     f(xInd, yInd+2, zInd)
+                    )/pow(mesh->dy(xInd, yInd), 4.0)
+                    ;
+            }
+        }
+    }
+
+    // Loop for the innermost xpoint at this processor (2nd order)
+    yInd = mesh->ystart;
+    for(xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+        for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            // 2nd order for first point
+            result(xInd, yInd, zInd) =
+                (
+                   2.0*f(xInd, yInd-1, zInd)
+                -  9.0*f(xInd, yInd  , zInd)
+                + 16.0*f(xInd, yInd+1, zInd)
+                - 14.0*f(xInd, yInd+2, zInd)
+                +  6.0*f(xInd, yInd+3, zInd)
+                -      f(xInd, yInd+4, zInd)
+                )/(pow(mesh->dy(xInd, yInd), 4.0))
+                ;
+        }
+    }
+
+   // Loop for the outermost xpoint at this processor (2nd order)
+   yInd = mesh->yend;
+   for(xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+       for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
+           // 2nd order for last point
+           result(xInd, yInd, zInd) =
+               (
+               -      f(xInd, yInd-4, zInd)
+               +  6.0*f(xInd, yInd-3, zInd)
+               - 14.0*f(xInd, yInd-2, zInd)
+               + 16.0*f(xInd, yInd-1, zInd)
+               -  9.0*f(xInd, yInd  , zInd)
+               +  2.0*f(xInd, yInd+1, zInd)
+               )/(pow(mesh->dy(xInd, yInd), 4.0))
+               ;
+       }
+   }
+
+    return result;
 }
 
 /*!
@@ -389,15 +573,15 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
     // Last argument in get is the default
     varOptions->get("bndry_xout", bndryFuncString, "");
     if (bndryFuncString == ""){
-        output << "\n\n\n\n" << "!!!WARNING!!!: No bndry_xout found in section "
-               << phiBndrySec << " D3DX3 will not work"
+        output << "\n\n\n\n" << "!!!WARNING!!!\nNo bndry_xout found in section '"
+               << phiBndrySec << "'. D3DX3 will not work"
                << "\n\n\n\n" << std::endl;
 
     }
     else if (!(lowercase(bndryFuncString).find("dirichlet") != string::npos)){
         // Create a stream which we cast to a string
         std::ostringstream stream;
-        stream << "neumann boundary condition not implemented in D3DX3\n"
+        stream << "BC not implemented in D3DX3\n"
                << "Found:\n"
                << bndryFuncString
                << "\nin\n"
@@ -438,7 +622,7 @@ OwnOpSimpleStupid::OwnOpSimpleStupid(Options *options, string &phiBndrySec) :
  * this is a wide stencil, extra care needs to be taken at the boundaries of a
  * processor.  A 3rd order scheme (using one guard cell) is used of the points
  * closest to the processor edges, and a 3rd order scheme **not** using the
- * last guard cell is used for xout. This avoid the need of having two ghost
+ * last guard cell is used for xout. This avoids the need of having two ghost
  * points
  *
  * \param[in] f The original field
@@ -475,9 +659,9 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
     else{
         xend = mesh->xend-1;
     }
-    for(int xInd = mesh->xstart+1; xInd <= xend; xInd++){
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+    for(xInd = mesh->xstart+1; xInd <= xend; xInd++){
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 result(xInd, yInd, zInd) =
                     (
                     - 0.5*f(xInd-2, yInd, zInd)
@@ -491,9 +675,9 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
     }
 
     // Loop for the innermost xpoint at this processor (3rd order)
-    int xInd = mesh->xstart;
-    for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
-        for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+    xInd = mesh->xstart;
+    for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+        for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
             // 3rd order for first point
             result(xInd, yInd, zInd) =
                 (
@@ -512,9 +696,9 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
     // last x-points
     if(mesh->lastX()){
         // Last point
-        int xInd = mesh->xend;
+        xInd = mesh->xend;
         // Calculate the x half-way between guard cell and grid cell
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
             // Calculate the y for the current yIndex
             /* NOTE:
              * For a local index, globalY returns the global value between 0
@@ -525,7 +709,7 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
              * rest of the code.
              */
             y = mesh->GlobalY(yInd)*TWOPI;
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 // Getting the on the boundary
                 valBndry = bndryFuncGen->generate(globalLastXVal,
                                              y,
@@ -561,9 +745,9 @@ Field3D OwnOpSimpleStupid::D3DX3(const Field3D &f,
     else{
         // We are not on the last x-processor, so we only need to take care of
         // the last point
-        int xInd = mesh->xend;
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+        xInd = mesh->xend;
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 // 3rd order for first point
                 result(xInd, yInd, zInd) =
                     (
@@ -927,8 +1111,8 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
     for(xInd=xstart; xInd<=xend; xInd++){
         xIndP1 = xInd + 1;
         xIndM1 = xInd - 1;
-        for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
-            for(int zInd=0;zInd<ncz;zInd++) {
+        for(yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+            for(zInd=0;zInd<ncz;zInd++) {
                 zIndP1 = (zInd + 1) % ncz;
                 zIndM1 = (zInd - 1 + ncz) % ncz;
 
@@ -977,8 +1161,8 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
     xInd = mesh->xstart;
     xIndP1 = xInd + 1;
     xIndM1 = xInd - 1;
-    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
-        for(int zInd=0; zInd<ncz; zInd++) {
+    for(yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(zInd=0; zInd<ncz; zInd++) {
             zIndP1 = (zInd + 1) % ncz;
             zIndM1 = (zInd - 1 + ncz) % ncz;
 
@@ -1081,8 +1265,8 @@ Field3D OwnOp3Brackets::ArakawaOfDDXPhi2N(const Field3D &phi, const Field3D &n)
     xInd = mesh->xend;
     xIndP1 = xInd + 1;
     xIndM1 = xInd - 1;
-    for(int yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
-        for(int zInd=0;zInd<ncz;zInd++) {
+    for(yInd=mesh->ystart; yInd<=mesh->yend; yInd++){
+        for(zInd=0;zInd<ncz;zInd++) {
             zIndP1 = (zInd + 1) % ncz;
             zIndM1 = (zInd - 1 + ncz) % ncz;
 
@@ -1259,8 +1443,8 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n)
          */
         ghostIndX = mesh->xend + 1;
         // Newton polynomial of fourth order (including boundary) evaluated at ghost
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 DDXPhi(ghostIndX, yInd, zInd) =
                     -      DDXPhi(ghostIndX-4, yInd, zInd)
                     +  4.0*DDXPhi(ghostIndX-3, yInd, zInd)
