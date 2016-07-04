@@ -47,7 +47,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(-200, -100)
+tSlice     = slice(0, 40)
 showPlot   = False
 savePlot   = True
 theRunName = "test-3-e-3.1-adding-visc"
@@ -65,8 +65,8 @@ BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
-post_process_walltime = '2:00:00'
-post_process_queue    = 'workq'
+post_process_walltime = '0:29:00'
+post_process_queue    = 'xpresq'
 post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 

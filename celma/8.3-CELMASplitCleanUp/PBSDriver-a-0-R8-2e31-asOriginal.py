@@ -17,7 +17,8 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 useHyperViscAzVortD = True
-artViscParVortD     = 0
+artViscParVortD  = 0.0
+artViscPerpVortD = 0.0
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -45,7 +46,7 @@ zSlice     = 0
 tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "a-1-R8-2e31-addViscOnlyPerp"
+theRunName = "a-0-R8-2e31-asOriginal"
 # =============================================================================
 
 
@@ -82,8 +83,9 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('cst'         , 'artViscParVortD'     ,artViscParVortD),\
+                          ('switch', 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'   , 'artViscParVortD'    , artViscParVortD),\
+                          ('cst'   , 'artViscPerpVortD'   , artViscPerpVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
