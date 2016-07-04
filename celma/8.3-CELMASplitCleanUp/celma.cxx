@@ -60,7 +60,7 @@ int Celma::init(bool restarting) {
     cst->get("artViscParUEPar",  artViscParUEPar,  0.0);
     cst->get("artViscParUIPar",  artViscParUIPar,  0.0);
     cst->get("artViscParVortD",  artViscParVortD,  0.0);
-    cst->get("artViscPerpLnN",   artViscPerpLnN,    0.0);
+    cst->get("artViscPerpLnN",   artViscPerpLnN,   0.0);
     cst->get("artViscPerpUEPar", artViscPerpUEPar, 0.0);
     cst->get("artViscPerpUIPar", artViscPerpUIPar, 0.0);
     cst->get("artViscPerpVortD", artViscPerpVortD, 0.0);
@@ -115,6 +115,7 @@ int Celma::init(bool restarting) {
     /* NOTE: Chosen independent of dz
      *       This makes artVisc constant when expanding restarts
      */
+    artViscPerpLnN   *= SQ(mesh->dx(0,0));
     artViscPerpUEPar *= SQ(mesh->dx(0,0));
     artViscPerpUIPar *= SQ(mesh->dx(0,0));
     artViscPerpVortD *= SQ(mesh->dx(0,0));
@@ -209,7 +210,7 @@ int Celma::init(bool restarting) {
     SAVE_ONCE5(a, bRho, bZ, cRho, cZ);
     SAVE_ONCE2(Lx, Ly);
     SAVE_ONCE4(artViscParLnN, artViscParUEPar, artViscParUIPar, artViscParVortD);
-    SAVE_ONCE3(artViscPerpUEPar, artViscPerpUIPar, artViscPerpVortD);
+    SAVE_ONCE4(artViscPerpLnN, artViscPerpUEPar, artViscPerpUIPar, artViscPerpVortD);
     // Fields
     SAVE_ONCE2(S, dampingProfile);
     // Variables to be saved repeatedly
@@ -559,8 +560,8 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uEPar
     // ************************************************************************
-    uEParParArtVisc = artViscParUEPar*D2DY2(uEPar)/n;
-    uEParPerpArtVisc   = artViscPerpUEPar*Laplace_perp(uEPar)/n;
+    uEParParArtVisc  =   (artViscParUEPar/n)*D2DY2(uEPar);
+    uEParPerpArtVisc =   (artViscPerpUEPar/n)*Laplace_perp(uEPar);
 
     ddt(uEPar) =
           uEParParArtVisc
@@ -573,8 +574,8 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uIPar
     // ************************************************************************
-    uIParParArtVisc = artViscParUIPar*D2DY2(uIPar)/n;
-    uIParPerpArtVisc   = artViscPerpUIPar*Laplace_perp(uIPar)/n;
+    uIParParArtVisc  =   (artViscParUIPar/n)*D2DY2(uIPar);
+    uIParPerpArtVisc =   (artViscPerpUIPar/n)*Laplace_perp(uIPar);
 
     ddt(uIPar) =
           uIParParArtVisc

@@ -78,6 +78,7 @@ int Celma::init(bool restarting) {
     switches->get("saveDdt"            , saveDdt            , false);
     switches->get("saveTerms"          , saveTerms          , true );
     noiseAdded = false;
+    // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){
         output << "\n\n!!!!Warning!!!\n"
                << "restarting = true, includeNoise = true, forceAddNoise = false\n"
@@ -120,7 +121,7 @@ int Celma::init(bool restarting) {
     output << "    For vortD   : "  << artViscPerpVortD << std::endl;
     output << "Parallel (SQ(mesh->dy(0,0)) = "
               << SQ(mesh->dy(0,0)) << "):" << std::endl;
-    output << "    For ln(n)   : "  << artViscParLnN << std::endl;
+    output << "    For ln(n)   : "  << artViscParLnN   << std::endl;
     output << "    For u_{e,\\|}: " << artViscParUEPar << std::endl;
     output << "    For u_{i,\\|}: " << artViscParUIPar << std::endl;
     output << "    For vortD   : "  << artViscParVortD << std::endl;
@@ -590,10 +591,9 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in lnNPar
     // ************************************************************************
-    lnNRes         =   (0.51*nuEI/mu) *
-                         (Laplace_perp(lnN)+gradPerpLnN*gradPerpLnN);
-    lnNParArtVisc  =   artViscParLnN*D2DY2(lnN);
-    lnNPerpArtVisc =   artViscPerpLnN*Laplace_perp(lnN);
+    lnNRes         = (0.51*nuEI/mu)*(Laplace_perp(lnN)+gradPerpLnN*gradPerpLnN);
+    lnNParArtVisc  = artViscParLnN*D2DY2(lnN);
+    lnNPerpArtVisc = artViscPerpLnN*Laplace_perp(lnN);
     ddt(lnN) =
           lnNRes
         + lnNParArtVisc
