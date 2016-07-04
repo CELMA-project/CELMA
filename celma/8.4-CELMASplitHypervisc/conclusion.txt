@@ -1,0 +1,15 @@
+Copied from 8.3-CELMASplitCleanUp/
+
+- Removed 1/n from u viscosity
+- Made all viscosities changeable between hypervisc and normal visc
+
+Results:
+========
+a-data
+-------
+Not run yet
+
+
+Conclusion
+----------
+
