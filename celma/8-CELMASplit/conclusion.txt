@@ -222,8 +222,16 @@ Blow-up not visible in plot?
 import numpy as np
 from boutdata import collect
 vortD = collect("vortD")
-np.abs(vortD.max())
-np.where(np.isclose(vortD, np.abs(vortD.max())))
+VAMax = np.abs(vortD.max())
+VMin  = vortD.min()
+VAMin = np.abs(vortD.min())
+if VAMax > VAMin:
+    print("Max abs value is positive")
+    loc = np.where(np.isclose(vortD, VAMax))
+else:
+    print("Max abs value is negative")
+    loc = np.where(np.isclose(vortD, VMin))
+print(loc)
 fig, ax = plt.subplots()
 cax = ax.contourf(vort[2,:,:,14])
 cbar = fig.colorbar(cax)
