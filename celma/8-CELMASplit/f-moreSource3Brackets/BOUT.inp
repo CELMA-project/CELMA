@@ -28,7 +28,7 @@ MYG = 1
 # Number of points
 nx = 16 + 2*MXG
 ny = 24
-nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nz = 128           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -119,9 +119,9 @@ nuIN = 0.0
 
 # Parallel artificial dissipation
 artPar = 5.0
-artViscParLnN    = artPar # Density
-artViscParUEPar  = artPar # Electron velocity
-artViscParUIPar  = artPar # Ion velocity
+artViscParLnN   = artPar # Density
+artViscParUEPar = artPar # Electron velocity
+artViscParUIPar = artPar # Ion velocity
 # Vorticity
 # Should be 0, as parallel current [ue and ui] is known to all orders, i.e. no
 # drifts
