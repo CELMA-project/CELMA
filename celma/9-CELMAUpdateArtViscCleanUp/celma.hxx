@@ -55,11 +55,11 @@ private:
     // uEPar fields
     Field3D uEParAdv, uEParParAdv, gradPhiLnN;
     Field3D uEParRes, ueNeutral, ueSrc;
-    Field3D uEParParArtViscNoN, uEParPerpArtVisc;
+    Field3D uEParParArtViscNoN, uEParPerpArtViscNoN;
     // uIPar fields
     Field3D uIParAdv, uIParParAdv, gradPhi;
     Field3D uIParRes, uiNeutral, uiSrc;
-    Field3D uIParParArtViscNoN, uIParPerpArtVisc;
+    Field3D uIParParArtViscNoN, uIParPerpArtViscNoN;
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
     Field3D parDerDivUIParNGradPerpPhi;
