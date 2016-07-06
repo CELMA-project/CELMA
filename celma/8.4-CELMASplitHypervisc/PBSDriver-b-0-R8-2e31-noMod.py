@@ -16,9 +16,6 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-useHyperViscAzVortD = True
-artViscParVortD     = 0
-artViscPerpVortD    = [5e-3, 5e-4, 5e-5]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -28,9 +25,9 @@ restart_from = "../8-CELMASplit/f-moreSource3Brackets/nout_300_timestep_10/nz_12
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [20, 300]
-timestep   = [10, 10]
-directory  = "a-data"
+nout       = [20, 20]
+timestep   = [1, 10]
+directory  = "b-normalPar"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,10 +40,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(-20, None)
+tSlice     = None
 showPlot   = False
 savePlot   = True
-theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
+theRunName = "b-0-R8-2e31-noMod"
 # =============================================================================
 
 
@@ -56,7 +53,7 @@ theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -83,9 +80,6 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('cst'         , 'artViscParVortD'     ,artViscParVortD),\
-                          ('cst'         , 'artViscPerpVortD'    ,artViscPerpVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

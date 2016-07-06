@@ -1,5 +1,5 @@
 #
-# Input file for "8.3-CELMASplitCleanUp/data"
+# Input file for "8.4-CELMASplitHypervisc/data"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -144,7 +144,6 @@ artHyperAzVortD = 1.0
 [switch]
 includeNoise        = false
 forceAddNoise       = false
-useHyperViscAzVortD = false
 saveTerms           = true
 saveDdt             = true
 # =============================================================================

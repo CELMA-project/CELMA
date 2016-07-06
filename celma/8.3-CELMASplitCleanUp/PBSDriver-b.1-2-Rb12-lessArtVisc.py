@@ -17,20 +17,21 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 useHyperViscAzVortD = True
-artViscParVortD     = 0
-artViscPerpVortD    = [5e-3, 5e-4, 5e-5]
+artViscParVortD  = 0.0
+artViscPerpVortD = 0.0
+artPar = [5.0/4]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "../8-CELMASplit/f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_1.0_ownFilters_type_radialLowPass_ownOperators_type_BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.1-moreSAddNRadialLPHyperVBBrackets_0_theSource_a_0.02/"
+restart_from = "b.1-longerNeumannO4/nout_300_timestep_10/nz_128/cst_artPar_2.5_cst_artViscParVortD_0.0_cst_artViscPerpVortD_0.0_switch_useHyperViscAzVortD_True_tag_b.1-1-Rb10-lessArtViscPar_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [20, 300]
-timestep   = [10, 10]
-directory  = "a-data"
+nout       = [300]
+timestep   = [10]
+directory  = "b.1-longerNeumannO4"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,10 +44,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(-20, None)
+tSlice     = None
 showPlot   = False
 savePlot   = True
-theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
+theRunName = "b.1-2-Rb12-lessArtVisc"
 # =============================================================================
 
 
@@ -56,7 +57,7 @@ theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -83,9 +84,10 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('cst'         , 'artViscParVortD'     ,artViscParVortD),\
-                          ('cst'         , 'artViscPerpVortD'    ,artViscPerpVortD),\
+                          ('switch', 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'   , 'artViscParVortD'    , artViscParVortD),\
+                          ('cst'   , 'artViscPerpVortD'   , artViscPerpVortD),\
+                          ('cst'   , 'artPar'             , artPar),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
