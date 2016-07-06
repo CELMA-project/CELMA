@@ -17,8 +17,8 @@ from postProcessing.plotting import combinedDriver
 # =============================================================================
 # *****************************************************************************
 useHyperViscAzVortD = True
-artViscParVortD     = 0
-artViscPerpVortD    = [5e-3, 5e-4, 5e-5]
+artViscParVortD  = 0.0
+artViscPerpVortD = 0.0
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -30,7 +30,7 @@ nz = 128
 # Set the temporal domain
 nout       = [20, 300]
 timestep   = [10, 10]
-directory  = "a-data"
+directory  = "b-longer"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -46,7 +46,7 @@ zSlice     = 0
 tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
+theRunName = "b-0-R8-2e31-testAsOriginal"
 # =============================================================================
 
 
@@ -56,7 +56,7 @@ theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -83,9 +83,9 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('cst'         , 'artViscParVortD'     ,artViscParVortD),\
-                          ('cst'         , 'artViscPerpVortD'    ,artViscPerpVortD),\
+                          ('switch', 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'   , 'artViscParVortD'    , artViscParVortD),\
+                          ('cst'   , 'artViscPerpVortD'   , artViscPerpVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
