@@ -58,11 +58,11 @@ def allMainFields2DDriver(path                ,\
         #{{{ Function call through subprocess
         if timeFolder is None:
             # Create the savepath if not already set
-            additional = ['visualization', saveFolder]
+            prePaths = ['visualization', saveFolder]
             saveString, timeFolder = getSaveString(''                     ,\
                                                    path                   ,\
                                                    timeFolder = timeFolder,\
-                                                   additional = additional,\
+                                                   prePaths   = prePaths  ,\
                                                    )
 
         # Make an array of processes
