@@ -220,11 +220,11 @@ int Celma::init(bool restarting) {
         SAVE_REPEAT3(lnNUeAdv, srcN, lnNParArtVisc);
         // uEPar terms
         SAVE_REPEAT3(uEParAdv, uEParParAdv, gradPhiLnN);
-        SAVE_REPEAT4(uEParRes, ueSrc, uEParParArtViscNoN, uEParPerpArtVisc);
+        SAVE_REPEAT4(uEParRes, ueSrc, uEParParArtViscNoN, uEParPerpArtViscNoN);
         SAVE_REPEAT (ueNeutral);
         // uIPar terms
         SAVE_REPEAT3(uIParAdv, uIParParAdv, gradPhi);
-        SAVE_REPEAT4(uIParRes, uiSrc, uIParParArtViscNoN, uIParPerpArtVisc);
+        SAVE_REPEAT4(uIParRes, uiSrc, uIParParArtViscNoN, uIParPerpArtViscNoN);
         SAVE_REPEAT (uiNeutral);
         // Vorticity terms
         SAVE_REPEAT2(vortNeutral, potNeutral);
@@ -556,12 +556,12 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uEPar
     // ************************************************************************
-    uEParParArtViscNoN = artViscParUEPar*D2DY2(uEPar);
-    uEParPerpArtVisc   = artViscPerpUEPar*Laplace_perp(uEPar);
+    uEParParArtViscNoN  = artViscParUEPar*D2DY2(uEPar);
+    uEParPerpArtViscNoN = artViscPerpUEPar*Laplace_perp(uEPar);
 
     ddt(uEPar) =
           uEParParArtViscNoN
-        + uEParPerpArtVisc
+        + uEParPerpArtViscNoN
         ;
     // Filtering highest modes
     ddt(uEPar) = ownFilter->ownFilter(ddt(uEPar));
@@ -570,12 +570,12 @@ int Celma::diffusive(BoutReal t, bool linear){
 
     // Terms in uIPar
     // ************************************************************************
-    uIParParArtViscNoN = artViscParUIPar*D2DY2(uIPar);
-    uIParPerpArtVisc   = artViscPerpUIPar*Laplace_perp(uIPar);
+    uIParParArtViscNoN  = artViscParUIPar*D2DY2(uIPar);
+    uIParPerpArtViscNoN = artViscPerpUIPar*Laplace_perp(uIPar);
 
     ddt(uIPar) =
           uIParParArtViscNoN
-        + uIParPerpArtVisc
+        + uIParPerpArtViscNoN
         ;
     // Filtering highest modes
     ddt(uIPar) = ownFilter->ownFilter(ddt(uIPar));
