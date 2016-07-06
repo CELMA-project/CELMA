@@ -327,9 +327,10 @@ class Plot1D(Plot):
              (kwargs['zSlice'] == slice(0,None) and\
               kwargs['xSlice'] == slice(0,None)):
             message = "2 slices were given, although only 1 is possible"
-            raise RuntimeError(message)
+            raise ValueError(message)
 
         # Get the x-axis of the plot
+        self._direction = None
         #{{{x-direction
         if kwargs['xSlice'] == slice(0,None):
             self._xAx = self._rho
@@ -368,6 +369,15 @@ class Plot1D(Plot):
             # Set direction (used in save)
             self._direction = 'theta'
         #}}}
+
+        if self._direction is None:
+            message = ("Improper slicing:\n"
+                       "xSlice={}\n"
+                       "ySlice={}\n"
+                       "zSlice={}\n").format(kwargs['xSlice'],\
+                                             kwargs['ySlice'],\
+                                             kwargs['zSlice'])
+            raise ValueError(message)
 
         # Set the input data
         self._marker = marker
@@ -681,7 +691,7 @@ class Plot2D(Plot):
            (ySlice == slice(0,None)) and\
            (zSlice == slice(0,None)):
             message = "3 slices were given, although only 2 is possible"
-            raise RuntimeError(message)
+            raise ValueError(message)
 
         # Make it possible to filter warnings (f.ex if no variation in the data)
         warnings.filterwarnings('error')
