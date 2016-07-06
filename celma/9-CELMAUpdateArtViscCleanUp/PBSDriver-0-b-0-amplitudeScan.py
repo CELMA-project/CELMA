@@ -16,21 +16,17 @@ from postProcessing.plotting import combinedDriver
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-useHyperViscAzVortD = True
-artViscParVortD     = 0
-artViscPerpVortD    = [5e-3, 5e-4, 5e-5]
+ownFilterType = "none"
+soureAmp = [0.0175, 0.015, 0.0125]
 # *****************************************************************************
 remove_old = False
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "../8-CELMASplit/f-moreSource3Brackets/nout_300_timestep_10/nz_128/cst_artHyperAzVortD_1.0_ownFilters_type_radialLowPass_ownOperators_type_BasicBrackets_switch_forceAddNoise_True_switch_includeNoise_True_switch_saveDdt_True_switch_useHyperViscAzVortD_True_tag_2-e-3.1-moreSAddNRadialLPHyperVBBrackets_0_theSource_a_0.02/"
+restart    = None;
 # Set the spatial domain
-nz = 128
+nz = 1
 # Set the temporal domain
-nout       = [20, 300]
-timestep   = [10, 10]
-directory  = "a-data"
+nout       = [20]
+timestep   = [5e1]
+directory  = "b-longerNeumannO4"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,10 +39,9 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
+theRunName = "0-b-0-amplitudeScan"
 # =============================================================================
 
 
@@ -56,7 +51,7 @@ theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -80,12 +75,10 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('cst'         , 'artViscParVortD'     ,artViscParVortD),\
-                          ('cst'         , 'artViscPerpVortD'    ,artViscPerpVortD),\
+                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('theSource'   , 'a'   , soureAmp),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -118,7 +111,6 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
-                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
