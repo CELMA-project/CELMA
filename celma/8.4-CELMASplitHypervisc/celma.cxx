@@ -37,7 +37,7 @@ Field3D Celma::parNormalVisc(const BoutReal &D, const Field3D &f)
 
 // Initialization of the physics
 // ############################################################################
-int Celma::init(bool restarting) 
+int Celma::init(bool restarting)
 {
     TRACE("Halt in Celma::init");
 
@@ -144,35 +144,35 @@ int Celma::init(bool restarting)
     // dx and dy are Field2D (0th index is ghost, but gives no problems)
     artViscParLnN   *= SQ(mesh->dy(0,0));
     if (useHyperParLnN){
-        artViscParLnN *= SQ(mesh->dy(0,0)); 
+        artViscParLnN *= SQ(mesh->dy(0,0));
         lnNParVisc = &Celma::parHyperVisc;
     }
-    else{ 
+    else{
         lnNParVisc = &Celma::parNormalVisc;
     }
     artViscParUEPar *= SQ(mesh->dy(0,0));
-    if (useHyperParUEPar){ 
-        artViscParUEPar *= SQ(mesh->dy(0,0)); 
-        uEParParVisc = &Celma::parHyperVisc; 
+    if (useHyperParUEPar){
+        artViscParUEPar *= SQ(mesh->dy(0,0));
+        uEParParVisc = &Celma::parHyperVisc;
     }
     else{
-        uEParParVisc = &Celma::parNormalVisc; 
+        uEParParVisc = &Celma::parNormalVisc;
     }
     artViscParUIPar *= SQ(mesh->dy(0,0));
     if (useHyperParUIPar){
-        artViscParUIPar *= SQ(mesh->dy(0,0)); 
-        uIParParVisc = &Celma::parHyperVisc; 
+        artViscParUIPar *= SQ(mesh->dy(0,0));
+        uIParParVisc = &Celma::parHyperVisc;
     }
     else{
-        uIParParVisc = &Celma::parNormalVisc; 
+        uIParParVisc = &Celma::parNormalVisc;
     }
     artViscParVortD *= SQ(mesh->dy(0,0));
     if (useHyperParVortD){
-        artViscParVortD *= SQ(mesh->dy(0,0)); 
-        vortDParVisc = &Celma::parHyperVisc; 
+        artViscParVortD *= SQ(mesh->dy(0,0));
+        vortDParVisc = &Celma::parHyperVisc;
     }
     else{
-        vortDParVisc = &Celma::parNormalVisc; 
+        vortDParVisc = &Celma::parNormalVisc;
     }
 
     // The perpednicular diffusion is in our model
@@ -181,35 +181,35 @@ int Celma::init(bool restarting)
      */
     artViscPerpLnN   *= SQ(mesh->dx(0,0));
     if (useHyperPerpLnN){
-        artViscPerpLnN *= SQ(mesh->dx(0,0)); 
+        artViscPerpLnN *= SQ(mesh->dx(0,0));
         lnNPerpVisc = &Celma::perpHyperVisc;
     }
-    else{ 
+    else{
         lnNPerpVisc = &Celma::perpNormalVisc;
     }
     artViscPerpUEPar *= SQ(mesh->dx(0,0));
-    if (useHyperPerpUEPar){ 
-        artViscPerpUEPar *= SQ(mesh->dx(0,0)); 
-        uEParPerpVisc = &Celma::perpHyperVisc; 
+    if (useHyperPerpUEPar){
+        artViscPerpUEPar *= SQ(mesh->dx(0,0));
+        uEParPerpVisc = &Celma::perpHyperVisc;
     }
     else{
-        uEParPerpVisc = &Celma::perpNormalVisc; 
+        uEParPerpVisc = &Celma::perpNormalVisc;
     }
     artViscPerpUIPar *= SQ(mesh->dx(0,0));
     if (useHyperPerpUIPar){
-        artViscPerpUIPar *= SQ(mesh->dx(0,0)); 
-        uIParPerpVisc = &Celma::perpHyperVisc; 
+        artViscPerpUIPar *= SQ(mesh->dx(0,0));
+        uIParPerpVisc = &Celma::perpHyperVisc;
     }
     else{
-        uIParPerpVisc = &Celma::perpNormalVisc; 
+        uIParPerpVisc = &Celma::perpNormalVisc;
     }
     artViscPerpVortD *= SQ(mesh->dx(0,0));
     if (useHyperPerpVortD){
-        artViscPerpVortD *= SQ(mesh->dx(0,0)); 
-        vortDPerpVisc = &Celma::perpHyperVisc; 
+        artViscPerpVortD *= SQ(mesh->dx(0,0));
+        vortDPerpVisc = &Celma::perpHyperVisc;
     }
     else{
-        vortDPerpVisc = &Celma::perpNormalVisc; 
+        vortDPerpVisc = &Celma::perpNormalVisc;
     }
 
 
@@ -338,7 +338,7 @@ int Celma::init(bool restarting)
  * Will be stepped forward explicitly
  */
 // NOTE: The convective part is called first, then the diffusive part
-int Celma::convective(BoutReal t) 
+int Celma::convective(BoutReal t)
 {
     TRACE("Halt in Celma::convective");
 
