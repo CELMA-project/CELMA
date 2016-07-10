@@ -54,6 +54,7 @@ html/
 visualization/
 celma/*/celma
 celma/*/celmaSLEPc
+celmaCurMom/*/celmaCurMom
 nx_*/
 ny_*/
 nz_*/

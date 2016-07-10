@@ -6,6 +6,7 @@ https://svn.fysik.dtu.dk/mmag/Code-developement/BOUT/
 Current implementation works with the latest commit of BOUT++ version 3
 
 * celma: Folder with the codes
+* celmaCurMom: CELMA codes where the current and parallel momentum is solved
 * derivation: Derivation of operators and boundaries
 * MES: Checking if implementation is convergent
 * parameters: Typical parameters
