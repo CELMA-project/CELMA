@@ -77,7 +77,6 @@ private:
     // *****************************************************************************
     Field3D n;               // Density
     Field3D uIPar, uEPar;    // Parallel currents
-    Field3D dampingProfile;  // Radial profile
     Field3D S;               // Particle source
     Field3D invJ;            // 1/J (used in front of the bracket operator)
     Vector3D gradPerpLnN;    // gradPerpLnN
