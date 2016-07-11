@@ -11,21 +11,27 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combined1D2D as postProcess
+from postProcessing.plotting import combinedDriver as postProcess
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownFilterType = "none"
-sourceAmp     = [1e-1, 5e-2, 3.5e-2, 2.5e-2, 2e-2, 1.75e-2, 1.5e-2, ,1.35e-2, 1.3e-2, 1.275e-2, 1.25e-2, 1.1e-2, 1e-2]
+includeNoise        = True
+forceAddNoise       = True
+artViscParVortD     = 0.0
+artViscPerpVortD    = 0.0
+useHyperViscAzVortD = [True]
 # *****************************************************************************
-# Set the spatial domain
-nz = 1
-# Set the temporal domain
-restart    = None
 remove_old = False
-timestep   = [1e2]
-nout       = [20]
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_5/nz_128/ownFilters_type_none_tag_1-a-0-expand_0/"
+# Set the spatial domain
+nz = 128
+# Set the temporal domain
+nout       = [20, 60]
+timestep   = [10, 10]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -39,9 +45,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "TestSourceAmp"
+theRunName = "2.1-a-0-linearPhaseNotArtViscVortD"
 # =============================================================================
 
 
@@ -51,7 +58,7 @@ theRunName = "TestSourceAmp"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '03:00:00'
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -75,10 +82,14 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters', 'type', ownFilterType),\
-                          ('theSource' , 'a'   , sourceAmp),\
+                          ('switch', 'includeNoise'       , includeNoise ),\
+                          ('switch', 'forceAddNoise'      , forceAddNoise),\
+                          ('switch', 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'   , 'artViscParVortD'    , artViscParVortD ),\
+                          ('cst'   , 'artViscPerpVortD'   , artViscPerpVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -111,6 +122,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\

@@ -150,7 +150,7 @@ saveDdt             = true
 [theSource]
 # Made as a gaussian function
 # The amplitude (found to make n.max() approx 1 in steady state)
-a = 8.9e-3
+a = 1.275e-2
 # Radial profile
 radialWidth     = 0.5*2*geom:Lx
 radialCentre    = 0
