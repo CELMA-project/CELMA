@@ -22,7 +22,7 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_50.0/nz_2/ownFilters_type_none_tag_0-a-0-initialize_0/"
+restart_from = "a-data/nout_20_timestep_100.0/nz_1/ownFilters_type_none_tag_0-a-0-initialize_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
