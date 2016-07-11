@@ -16,8 +16,10 @@ Also: Density drops
 
 a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
 ---------------------------------------------------------------
-0a0 !!!NOTE: Run to 2000!!! - Finished after 15 m
-1a0                         - To be run
+0a0 !!!NOTE: Run to 2000!!! : Finished after 14 m looks ok
+1a0   : Finished after 13 m looks ok, a bit high current
+2a0   : Finished after 33 m, can see a two mode
+2.1a0 : Finished after 17 m, can see modes growing up
 
 
 
