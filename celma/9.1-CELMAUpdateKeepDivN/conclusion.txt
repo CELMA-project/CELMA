@@ -8,3 +8,18 @@ a-data
 -------
 2-a-0 hyperV 0 : Running
 2-a-0 hyperV 1 : Running
+
+b-longerNeumannO4
+-----------------
+## Short run
+b-0 : Finished after 1 min
+      n becomes less diffuse
+## Long run
+b-0 : Finished 2 steps (< 5 min), then timestep failed (59 min)
+      n becomes less diffuse
+      ue gets some high perturbation on edge
+
+## v2 restart
+b-0-R8.3b10v2 : Finished 17 timesteps in 57 mins
+    Have high vort somewhere in the system
+    Do not observe the ue perturbations
