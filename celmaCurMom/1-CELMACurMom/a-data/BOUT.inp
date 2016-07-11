@@ -119,17 +119,17 @@ nuIN = 0.0
 
 # Parallel artificial dissipation
 artPar = 5.0
-artViscParLnN   = artPar # Density
-artViscParJpar = artPar # Electron velocity
+artViscParLnN     = artPar # Density
+artViscParJpar    = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
-artViscParVortD = artPar # Modified vorticity
+artViscParVortD   = artPar # Modified vorticity
 
 # Perpendicular diffusion
 artPerp = 5e-2
-artViscPerpLnN   = artPerp
-artViscPerpJPar  = artPerp
-artViscPerpUIPar = artPerp
-artViscPerpVortD = artPerp
+artViscPerpLnN     = artPerp
+artViscPerpJPar    = artPerp
+artViscPerpMomDens = artPerp
+artViscPerpVortD   = artPerp
 
 # Azimuthal hyperdiffusion
 artHyperAzVortD = 1.0

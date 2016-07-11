@@ -35,14 +35,15 @@ def allMainFields2DDriver(path                ,\
     #}}}
 
     functions = [\
-                 lnN2DDriver  ,\
-                 uEPar2DDriver,\
-                 uIPar2DDriver,\
-                 vortD2DDriver,\
-                 vort2DDriver ,\
-                 phi2DDriver  ,\
-                 n2DDriver    ,\
-                 jPar2DDriver ,\
+                 lnN2DDriver    ,\
+                 uEPar2DDriver  ,\
+                 uIPar2DDriver  ,\
+                 momDens2DDriver,\
+                 jPar2DDriver   ,\
+                 vortD2DDriver  ,\
+                 vort2DDriver   ,\
+                 phi2DDriver    ,\
+                 n2DDriver      ,\
                 ]
 
     if useSubProcess:
@@ -260,6 +261,74 @@ def vort2DDriver(path             ,\
     return timeFolder
 #}}}
 
+#{{{jPar2DDriver
+def jPar2DDriver(path             ,\
+                timeFolder = None,\
+                **kwargs):
+    #{{{docstring
+    """
+    Driver for the jPar field.
+
+    Specific jPar input:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    Specific jPar output:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    For more details, see single2DDriver
+    """
+    #}}}
+
+    varName = 'jPar'
+    pltName = r'j_\parallel'
+
+    # Do the plot
+    timeFolder = single2DDriver(path                   ,\
+                                varName                ,\
+                                pltName    = pltName   ,\
+                                timeFolder = timeFolder,\
+                                **kwargs)
+
+    return timeFolder
+
+#}}}
+
+#{{{momDens2DDriver
+def momDens2DDriver(path             ,\
+                    timeFolder = None,\
+                    **kwargs):
+    #{{{docstring
+    """
+    Driver for the jPar field.
+
+    Specific jPar input:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    Specific jPar output:
+    timeFolder - The name of the timefolder
+                 Enables several plots to be put into same timeFolder
+
+    For more details, see single2DDriver
+    """
+    #}}}
+
+    varName = 'momDensPar'
+    pltName = r'nu_{i,\parallel}'
+
+    # Do the plot
+    timeFolder = single2DDriver(path                   ,\
+                                varName                ,\
+                                pltName    = pltName   ,\
+                                timeFolder = timeFolder,\
+                                **kwargs)
+
+    return timeFolder
+
+#}}}
+
 #{{{phi2DDriver
 def phi2DDriver(path             ,\
                 timeFolder = None,\
@@ -339,81 +408,6 @@ def n2DDriver(path             ,\
         n = np.exp(lnN)
 
         return n
-    #}}}
-
-    # Do the plot
-    timeFolder = single2DDriver(path                   ,\
-                                varName                ,\
-                                pltName    = pltName   ,\
-                                timeFolder = timeFolder,\
-                                varFunc    = varFunc   ,\
-                                **kwargs)
-
-    return timeFolder
-#}}}
-
-#{{{jPar2DDriver
-def jPar2DDriver(path             ,\
-                timeFolder = None,\
-                **kwargs):
-    #{{{docstring
-    """
-    Driver for the jPar field.
-
-    Specific jPar input:
-    timeFolder - The name of the timefolder
-                 Enables several plots to be put into same timeFolder
-
-    Specific jPar output:
-    timeFolder - The name of the timefolder
-                 Enables several plots to be put into same timeFolder
-
-    For more details, see single2DDriver
-    """
-    #}}}
-
-    varName = None
-    pltName = r'j_\parallel'
-
-    #{{{varFunc
-    def varFunc(path    = None,\
-                yguards = None,\
-                xguards = None,\
-                tind    = None,\
-                **kwargs):
-        """
-        Function which returns the parallel current variable.
-
-        This function will be called in plotters.Plot2D
-        """
-
-        lnN = collect("lnN"               ,\
-                      path    = path      ,\
-                      yguards = yguards   ,\
-                      xguards = xguards   ,\
-                      tind    = tind      ,\
-                      info    = False     ,\
-                      )
-
-        uEPar = collect("uEPar"             ,\
-                        path    = path      ,\
-                        yguards = yguards   ,\
-                        xguards = xguards   ,\
-                        tind    = tind      ,\
-                        info    = False     ,\
-                        )
-
-        uIPar = collect("uIPar"             ,\
-                        path    = path      ,\
-                        yguards = yguards   ,\
-                        xguards = xguards   ,\
-                        tind    = tind      ,\
-                        info    = False     ,\
-                        )
-
-        jPar = np.exp(lnN)*(uIPar - uEPar)
-
-        return jPar
     #}}}
 
     # Do the plot

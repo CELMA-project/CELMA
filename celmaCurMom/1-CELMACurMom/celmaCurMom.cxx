@@ -51,20 +51,20 @@ int CelmaCurMom::init(bool restarting) {
     Options *cst = options->getSection("cst");
     // Storing the variables with the following syntax
     // sectionName->get("nameInInp", varNameInCxx, defaultVal)
-    cst->get("mu",               mu,               0.0);
-    cst->get("Lambda",           Lambda,           0.0);
-    cst->get("nuEI",             nuEI,             0.0);
-    cst->get("nuEN",             nuEN,             0.0);
-    cst->get("nuIN",             nuIN,             0.0);
-    cst->get("artViscParLnN",    artViscParLnN,    0.0);
-    cst->get("artViscParJpar",  artViscParJpar,  0.0);
-    cst->get("artViscParMomDens",  artViscParMomDens,  0.0);
-    cst->get("artViscParVortD",  artViscParVortD,  0.0);
-    cst->get("artViscPerpLnN",   artViscPerpLnN,   0.0);
-    cst->get("artViscPerpJPar", artViscPerpJPar, 0.0);
+    cst->get("mu"                , mu                , 0.0);
+    cst->get("Lambda"            , Lambda            , 0.0);
+    cst->get("nuEI"              , nuEI              , 0.0);
+    cst->get("nuEN"              , nuEN              , 0.0);
+    cst->get("nuIN"              , nuIN              , 0.0);
+    cst->get("artViscParLnN"     , artViscParLnN     , 0.0);
+    cst->get("artViscParJpar"    , artViscParJpar    , 0.0);
+    cst->get("artViscParMomDens" , artViscParMomDens , 0.0);
+    cst->get("artViscParVortD"   , artViscParVortD   , 0.0);
+    cst->get("artViscPerpLnN"    , artViscPerpLnN    , 0.0);
+    cst->get("artViscPerpJPar"   , artViscPerpJPar   , 0.0);
     cst->get("artViscPerpMomDens", artViscPerpMomDens, 0.0);
-    cst->get("artViscPerpVortD", artViscPerpVortD, 0.0);
-    cst->get("artHyperAzVortD",  artHyperAzVortD,  0.0);
+    cst->get("artViscPerpVortD"  , artViscPerpVortD  , 0.0);
+    cst->get("artHyperAzVortD"   , artHyperAzVortD   , 0.0);
     // ************************************************************************
 
     // Get the source constants
@@ -127,16 +127,16 @@ int CelmaCurMom::init(bool restarting) {
     output << "***********************************************" << std::endl;
     output << "Perpendicular (SQ(mesh->dx(0,0)) = "
               << SQ(mesh->dx(0,0)) << "):" << std::endl;
-    output << "    For ln(n)   : "  << artViscPerpLnN   << std::endl;
-    output << "    For u_{e,\\|}: " << artViscPerpJPar << std::endl;
-    output << "    For u_{i,\\|}: " << artViscPerpMomDens << std::endl;
-    output << "    For vortD   : "  << artViscPerpVortD << std::endl;
+    output << "    For ln(n)    : "  << artViscPerpLnN     << std::endl;
+    output << "    For j_{\\|}   : " << artViscPerpJPar    << std::endl;
+    output << "    For nu_{i,\\|}: " << artViscPerpMomDens << std::endl;
+    output << "    For vortD    : "  << artViscPerpVortD   << std::endl;
     output << "Parallel (SQ(mesh->dy(0,0)) = "
               << SQ(mesh->dy(0,0)) << "):" << std::endl;
-    output << "    For ln(n)   : "  << artViscParLnN   << std::endl;
-    output << "    For u_{e,\\|}: " << artViscParJpar << std::endl;
-    output << "    For u_{i,\\|}: " << artViscParMomDens << std::endl;
-    output << "    For vortD   : "  << artViscParVortD << std::endl;
+    output << "    For ln(n)    : "  << artViscParLnN     << std::endl;
+    output << "    For j_{\\|}   : " << artViscParJpar    << std::endl;
+    output << "    For nu_{i,\\|}: " << artViscParMomDens << std::endl;
+    output << "    For vortD    : "  << artViscParVortD   << std::endl;
     output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
               << SQ(SQ(mesh->dz)) << "):" << std::endl;
     output << "    For vortD   : " << artHyperAzVortD << std::endl;
@@ -233,6 +233,8 @@ int CelmaCurMom::init(bool restarting) {
         SAVE_REPEAT3(divParCur, vortDParArtVisc, vortDPerpArtVisc);
         SAVE_REPEAT (parDerDivUIParNGradPerpPhi);
         SAVE_REPEAT2(vortDAdv, kinEnAdvN);
+        // Helping fields
+        SAVE_REPEAT2(uIPar, uEPar);
 
         if(saveDdt){
             SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(momDensPar), ddt(jPar));
@@ -579,8 +581,8 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear){
     // Terms in momDensPar
     // ************************************************************************
     densDiffusion      = 0.51*nuEI*(uIPar/mu)*Laplace_perp(n);
-    momDensParArtVisc  = (artViscParMomDens/n)*D2DY2(momDensPar);
-    momDensPerpArtVisc = (artViscPerpMomDens/n)*Laplace_perp(momDensPar);
+    momDensParArtVisc  = (artViscParMomDens)*D2DY2(momDensPar);
+    momDensPerpArtVisc = (artViscPerpMomDens)*Laplace_perp(momDensPar);
 
     ddt(momDensPar) =
           densDiffusion
