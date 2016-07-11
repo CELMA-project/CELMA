@@ -18,19 +18,18 @@ from postProcessing.plotting import combinedDriver as postProcess
 # *****************************************************************************
 includeNoise        = True
 forceAddNoise       = True
-useHyperViscAzVortD = [False, True]
+useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "
-"
+restart_from = "a-data/nout_20_timestep_5/nz_128/ownFilters_type_none_tag_1-a-0-expand_0/"
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [20]
-timestep   = [10]
+nout       = [20, 60]
+timestep   = [10, 10]
 directory  = "a-data"
 # Shall we make?
 make       = False
