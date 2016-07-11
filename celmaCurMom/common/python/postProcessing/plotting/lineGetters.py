@@ -82,7 +82,7 @@ def getJParFields(path):
     r'2u_{e,\parallel}\partial_{\parallel}\left(nu_{e,\parallel}\right)'))
     jPar.lines.append(Line('jParRes'                                    ,\
     r'-0.51\nu_{ei}j_\parallel'                                         ))
-    jPar.lines.append(Line('elPressure'                                 ,\
+    jPar.lines.append(Line('muElPressure'                               ,\
     r'\mu T_e\partial_{\parallel}n'                                     ))
     jPar.lines.append(Line('elField'                                    ,\
     r'-\mu n \partial_{\parallel}\phi'                                  ))
@@ -113,7 +113,7 @@ def momDensParFields(path):
     r'- u_{e,\parallel}\partial_{\parallel}'                       +\
     r'\left(n\left[u_{i,\parallel}+u_{e,\parallel}\right]\right)'  ))
     momDensPar.lines.append(Line('elPressure'                      ,\
-    r'\mu T_e\partial_{\parallel}n'                                ))
+    r'-T_e\partial_{\parallel}n'                                   ))
     momDensPar.lines.append(Line('neutralIRes'                     ,\
     r'-n\nu_{in}u_{i,\parallel}'                                   ))
     momDensPar.lines.append(Line('densDiffusion'                   ,\
