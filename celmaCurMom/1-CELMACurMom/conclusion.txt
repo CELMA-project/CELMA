@@ -4,6 +4,25 @@ Copied from 8.3-CELMACURMOMSplitCleanUp
 
 Results:
 ========
+
+
+Currently something strange with the parallel current, ddt is high, originates
+from the mu*n*phi term
+
+Also: Density drops
+
+
+
+
 a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
 ---------------------------------------------------------------
-Not run yet
+0a0 !!!NOTE: Run to 2000!!! - Finished after 15 m
+1a0                         - To be run
+
+
+
+Tests
+-----
+TestEquilibriumChange         - Finished after 1m,
+TestEquilibriumParArtViscScan - Got see-saw patterns, and still problem with high parallel current
+TestRestartInitialize.py      - To be run
