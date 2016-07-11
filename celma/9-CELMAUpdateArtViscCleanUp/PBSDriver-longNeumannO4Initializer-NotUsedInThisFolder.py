@@ -11,26 +11,24 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combinedDriver as postProcess
+from postProcessing.plotting import combined1D2D as postProcess
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-includeNoise        = True
-forceAddNoise       = True
-useHyperViscAzVortD = [False, True]
+ownFilterType = "none"
+useHyperViscAzVortD = False
+artViscParVortD  = 0.0
+artViscPerpVortD = 0.0
 # *****************************************************************************
 remove_old = False
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "a-data/nout_20_timestep_5.0/nz_128/ownFilters_type_none_tag_1-a-0-expand_0/"
+restart      = None;
 # Set the spatial domain
-nz = 128
+nz = 1
 # Set the temporal domain
-nout       = [300]
-timestep   = [10]
-directory  = "a-data"
+nout       = [20]
+timestep   = [101]
+directory  = "b-longerNeumannO4"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -46,7 +44,7 @@ zSlice     = 0
 tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-0-addNoise"
+theRunName = "longNeumannO4Initializer"
 # =============================================================================
 
 
@@ -56,7 +54,7 @@ theRunName = "2-a-0-addNoise"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '48:00:00'
+BOUT_walltime         = '00:30:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -80,12 +78,12 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('switch', 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'   , 'artViscParVortD'    , artViscParVortD),\
+                          ('cst'   , 'artViscPerpVortD'   , artViscPerpVortD),\
+                          ('ownFilters'  , 'type', ownFilterType),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -106,7 +104,7 @@ myRuns = PBS_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = combinedDriver,\
+                     post_processing_function = postProcess,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
