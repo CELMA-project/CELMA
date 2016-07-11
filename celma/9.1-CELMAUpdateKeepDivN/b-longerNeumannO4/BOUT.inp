@@ -1,5 +1,5 @@
 #
-# Input file for "9-CELMAUpdateArtViscCleanUp/longerNeumannO4"
+# Input file for "9.1-CELMAUpdateKeepDivN/longerNeumannO4"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
