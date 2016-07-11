@@ -11,24 +11,27 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import parDriver as postDriver
+from postProcessing.plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownFilterType = "none"
-# No saveFolderFunc implemented yet, must be run seperately in order to
-# get distinguised folders
-soureAmp = [0.0175, 0.015, 0.0125, 1e-2, 9e-3, 8.95e-3, 8.9e-3, 8.75e-3, 8.5e-3, 8e-3, 7.5e-3]
-soureAmp = [8.95e-3]
+useHyperViscAzVortD = True
+artViscParVortD  = 0.0
+artViscPerpVortD = 0.0
+sAmp             = 0.02
+nuEI             = [1.5e-2, 2e-2]
 # *****************************************************************************
 remove_old = False
-restart    = None;
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "../8.3-CELMASplitCleanUp/b.1-longerNeumannO4/nout_20_timestep_10/nz_128/cst_artViscParVortD_0.0_cst_artViscPerpVortD_0.0_switch_useHyperViscAzVortD_True_tag_b.1-0-R8-2e31-testAsOriginalNeumannO4_0/"
 # Set the spatial domain
-nz = 1
+nz = 128
 # Set the temporal domain
-nout       = [20]
-timestep   = [5e1]
+nout       = [20, 20]
+timestep   = [1, 10]
 directory  = "b-longerNeumannO4"
 # Shall we make?
 make       = False
@@ -40,11 +43,12 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = slice(0, None)
+ySlice     = 8
 zSlice     = 0
+tSlice     = None
 showPlot   = False
 savePlot   = True
-theRunName = "0-b-0-amplitudeScan"
+theRunName = "b-3-R8.3b10v2-likeOriginalHigherCollScan"
 # =============================================================================
 
 
@@ -54,7 +58,7 @@ theRunName = "0-b-0-amplitudeScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '03:00:00'
+BOUT_walltime         = '04:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -78,10 +82,14 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters'  , 'type', ownFilterType),\
-                          ('theSource'   , 'a'   , soureAmp),\
+                          ('switch'    , 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                          ('cst'       , 'artViscParVortD'    , artViscParVortD),\
+                          ('cst'       , 'artViscPerpVortD'   , artViscPerpVortD),\
+                          ('cst'       , 'nuEI'               , nuEI),\
+                          ('theSource' , 'a'                  , sAmp),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -102,7 +110,7 @@ myRuns = PBS_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = postDriver,\
+                     post_processing_function = combinedDriver,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
@@ -114,7 +122,9 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
-                     saveFolder     = theRunName        ,\
+                     saveFolderFunc = "scanWTagSaveFunc",\
+                     theRunName     = theRunName        ,\
                     )
 # =============================================================================
