@@ -41,10 +41,10 @@ make       = False
 # =============================================================================
 xguards    = False
 yguards    = False
-xSlice     = 0
-ySlice     = 8
-zSlice     = 0
-tSlice     = None
+xSlice     = 16
+ySlice     = 1
+zSlice     = 5
+tSlice     = slice(-10, None)
 showPlot   = False
 savePlot   = True
 theRunName = "b.1-2-Rb12-lessArtVisc"
