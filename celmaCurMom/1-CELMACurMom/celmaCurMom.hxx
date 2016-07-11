@@ -55,10 +55,10 @@ private:
     // jPar fields
     Field3D jParAdv, uIParAdvSum, uEParDoubleAdv;
     Field3D jParRes, elField;
-    Field3D elPressure, neutralERes, neutralIRes;
+    Field3D muElPressure, neutralERes, neutralIRes;
     Field3D jParParArtVisc, jParPerpArtVisc;
     // momDensPar fields
-    Field3D momDensAdv, densDiffusion;
+    Field3D momDensAdv, elPressure, densDiffusion;
     Field3D momDensParArtVisc, momDensPerpArtVisc;
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
