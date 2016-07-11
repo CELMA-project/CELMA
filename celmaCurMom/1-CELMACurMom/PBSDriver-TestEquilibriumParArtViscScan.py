@@ -18,8 +18,8 @@ from postProcessing.plotting import combined1D2D as postProcess
 
 # *****************************************************************************
 ownFilterType = "none"
-artViscParJPar    = 5e-5
-artViscParMomDens = 5e-5
+artViscParJPar    = [5e-5, 5e-3, 5e-1]
+artViscParMomDens = [5e-5, 5e-3, 5e-1]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -31,7 +31,7 @@ nz = 1
 # Set the temporal domain
 nout       = [21]
 timestep   = [5]
-directory  = "a-data"
+directory  = "b-compareEquilibrium"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -84,6 +84,8 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('ownFilters', 'type', ownFilterType),\
+                         ],\
+            series_add = [
                           ('cst'       , 'artViscParJPar'   , artViscParJPar),\
                           ('cst'       , 'artViscParMomDens', artViscParMomDens),\
                          ],\

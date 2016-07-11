@@ -23,6 +23,6 @@ a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
 
 Tests
 -----
-TestEquilibriumChange         - Finished after 1m,
-TestEquilibriumParArtViscScan - Got see-saw patterns, and still problem with high parallel current
-TestRestartInitialize.py      - To be run
+TestEquilibriumChange         : Finished after 1m,
+TestEquilibriumParArtViscScan : Too low viscosities gives see-saw patterns
+TestRestartInitialize.py      : Will be run if longer one wants to approach the real steady state better
