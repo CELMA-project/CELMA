@@ -428,7 +428,7 @@ int CelmaCurMom::convective(BoutReal t)
     // ************************************************************************
     momDensAdv   = - invJ*bracket(phi, momDensPar, bm);
  // uIParAdvSum calculated above
-    elPressure   = DDY(n);
+    elPressure   = - DDY(n);
  // neutralIRes calculated above
 
     ddt(momDensPar) =
