@@ -44,7 +44,7 @@ b-longer/
 b-0 : Finished after 34 m - More turbulence, more plasma in column, higher par art visc (347), ue very turbulent (max min 10)
 
 ## As original long run (but longer)
-b-0 : Finished after 4h 5m - OK turbulence, more plasma in column, higher par art visc (347), ue very turbulent (max min 10)
+b-0 : Finished after 4h 5m - OK turbulence, more plasma in column, higher par art visc (347), ue very turbulent (max 2 min -2 - -4 in last time steps)
 
 
 
@@ -55,6 +55,10 @@ b.1-longerNeumannO4
 -------------------
 Note that these runs are running WITHOUT viscosities in the vorticity
 
+## Use for comparison
+b.1-0.1-Rb10   : 20*1 timesteps finished in 1 m, 20*5 timesteps finished in  6m, looks good
+b.1-0.1-Rb10v2 : 20*1 timesteps finished in 1 m, 20*5 timesteps finished in 13m, looks good
+
 ## As original short run (but longer)
 b-1 : Finished after 32 m - More turbulence, more plasma in column, higher par art visc (347), ue very turbulent (max min 10) overall the same behaviour as b, but starting to differ (chaotic?)
 
@@ -64,7 +68,10 @@ b-1 : Finished after 4 h 11 m - More plasma in column, higher par art visc
 ## Less art visc par
 b.1-1 artPar 5/2: Finished after 4h 1m
 b.1-1 artPar 5/4: Finished 5 steps (1h 20m), then timestep failed
-b.2-1 artPar 5/4: Finished 5 steps (1h 20m), then timestep failed
+b.2-1 artPar 5/4: Finished 164 steps (3h 25m), then timestep failed,
+                  max(abs(vortD)) happens at [160, 16, 1, 4] (5 before last time-step), can see no problem in the field
+                  max(abs(uE)) happens at [165, 16, 1, 5] large dip in the field, could be reason from blow-up, observe high mu(phi-ln(n))
+
 
 
 
