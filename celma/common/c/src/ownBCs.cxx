@@ -219,7 +219,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * \f}
  *
  * where
- *      * \f$c_s = \sqrt{T_e} = 1\f$ (\f$T_e\f$ is normalized)
+ *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\fc_s\f$ is normalized)
  *      * \f$_B\f$ denotes a value at the boundary
  *      * \f$p\f$ is the profile
  * This gives
@@ -309,6 +309,160 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
         }
     }
 }
+
+/*!
+ * This function will set the ghost point of jPar according to
+ * the sheath boundary condition.
+ *
+ * \param[in] jPar    The field to set the ghost point for
+ * \param[in] uEPar   The parallel electron velocity
+ * \param[in] uIPar   The parallel ion velocity
+ * \param[in] phi     The current potential
+ * \param[in] n       The density
+ * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
+ * \param[in] phiRef  The reference potential compared to the ground
+ *                    (0 by default)
+ *
+ * \param[out] jPar The field after the ghost point has been set
+ *
+ * \note Although we know \f$u_{i, \|, B}\f$ exact, we are here setting the
+ *       ghost point, so we need the value at the ghost point as an input
+ *
+ * ## Explanation of the procedure:
+ *
+ * We have that
+ *
+ * \f{eqnarray}{
+ * u_{e, \|, B} &= (c_s\exp(\Lambda-(\phi_{Ref} + \phi_B)/T_e))\\
+ * u_{i, \|, B} &= c_s
+ * \f}
+ *
+ * where
+ *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\fc_s\f$ is normalized)
+ *      * \f$_B\f$ denotes a value at the boundary
+ * This gives
+ *
+ * \f{eqnarray}{
+ * n_B(u_{i, \|, B} - u_{e, \|, B}) =
+ * n_B(u_{i, \|, B}-\exp(\Lambda-(\phi_{Ref} + \phi_B)))
+ * \f}
+ *
+ * We will use a 4th order boundary polynomial to interpolate \f$u_{e,\|}\f$
+ * and \f$\phi\f$ to the value at the boundary, as this resides half between
+ * grid points. For a field \f$f\f$, this gives
+ *
+ * \f{eqnarray}{
+ * f_B = (5f_{i} + 15f_{i-1} - 5f_{i-2} + f_{i-3})/16
+ * \f}
+ *
+ * where \f$f_{i}\f$ denotes the value at the last inner point
+ *
+ * This gives
+ *
+ * \f{eqnarray}{
+ * (5u_{e, \|, i} + 15 u_{e, \|, i-1} - 5 u_{e, \|, i-2} + u_{e, \|, i-3})/16
+ * =
+ * \exp(\Lambda
+ *      - ((\phi_{Ref} + 5 \phi_{i} + 15 \phi_{i-1} - 5\phi_{i-2} + \phi_{i-3})
+ *         /16)
+ * )p
+ * \f}
+ *
+ * Which rearranged gives
+ *
+ * \f{eqnarray}{
+ * u_{e, \|, i}
+ * =
+ * (16/5)\exp(\Lambda
+ *      - ((\phi_{Ref} + 5 \phi_{i} + 15 \phi_{i-1} - 5\phi_{i-2} + \phi_{i-3})
+ *         /16)
+ * )p
+ * - 3 u_{e, \|, i-1} + u_{e, \|, i-2} - (1/5)u_{e, \|, i-3}
+ * \f}
+ *
+ * \par Sources:
+ * 1. Eq (26) in Loizu et al Pop 19-2012, using
+ *      * \f$\theta_N = \theta_{\phi} = \theta_{Te} = 0 \f$ due to
+ *        \f$\alpha = \pi/2\f$
+ *      * \f$\Lambda = \ln(\mu/2\pi)\f$
+ *      * \f$\eta_m = (\phi_{MPE} - \phi_W)/Te\f$
+ *      * \f$phi_{MPE} = phi_{CSE}\f$ since we do not have a magnetic presheath
+ * 2. Eq (26) in Naulin et al PoP 15-2008
+ * 3. Equation F.6 in Tiago's PhD 2007
+ */
+void OwnBCs::jParSheath(Field3D &jPar,
+                         const Field3D &uEPar,
+                         const Field3D &uIPar,
+                         const Field3D &phi,
+                         const Field3D &n,
+                         const BoutReal &Lambda,
+                         const BoutReal &phiRef)
+{
+    TRACE("Halt in OwnBCs::jParSheath");
+
+    if (mesh->lastY()){
+        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                jPar(xInd, firstUpperYGhost, zInd) =
+                    n(xInd, firstUpperYGhost, zInd)*(
+                       uIPar(xInd, firstUpperYGhost, zInd)
+                     - (
+                         exp(
+                               Lambda
+                             - (  phiRef
+                                + (
+                                  +  5.0*phi(xInd, firstUpperYGhost,   zInd)
+                                  + 15.0*phi(xInd, firstUpperYGhost-1, zInd)
+                                  -  5.0*phi(xInd, firstUpperYGhost-2, zInd)
+                                  +      phi(xInd, firstUpperYGhost-3, zInd)
+                                  )/16.0
+                               )
+                            ) * (16.0/5.0)
+                         -       3.0*uEPar(xInd, firstUpperYGhost-1, zInd)
+                         +           uEPar(xInd, firstUpperYGhost-2, zInd)
+                         - (1.0/5.0)*uEPar(xInd, firstUpperYGhost-3, zInd)
+                       )
+                    )
+                    ;
+            }
+        }
+    }
+}
+
+/*!
+ * This function will set the ghost point of momDensPar according to the sheath
+ * boundary condition.
+ *
+ * \param[in] momDensPar The field to set the ghost point for
+ * \param[in] uIPar      The parallel ion velocity
+ * \param[in] n          The density
+ *
+ * \param[out] momDensPar The field after the ghost point has been set
+ *
+ * \note Although we know \f$u_{i, \|, B}\f$ exact, we are here setting the
+ *       ghost point, so we need the value at the ghost point as an input
+ *
+ * ## Explanation of the procedure:
+ * As we have sat BC's on both \f$u_{i, \|, B}\f$ and \f$n\f$, we simply need
+ * to multiply them together at the ghost point
+ */
+void OwnBCs::parDensMomSheath(Field3D &momDensPar,
+                              const Field3D &uIPar,
+                              const Field3D &n)
+{
+    TRACE("Halt in OwnBCs::parDensMomSheath");
+
+    if (mesh->lastY()){
+        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                momDensPar(xInd, firstUpperYGhost, zInd) =
+                    n(xInd, firstUpperYGhost, zInd)*
+                    uIPar(xInd, firstUpperYGhost, zInd);
+            }
+        }
+    }
+}
+
 
 /*!
  * This function will set the ghost point of f according to

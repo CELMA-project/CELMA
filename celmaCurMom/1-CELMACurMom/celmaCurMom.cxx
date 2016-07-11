@@ -9,7 +9,8 @@
 
 // Initialization of the physics
 // ############################################################################
-int CelmaCurMom::init(bool restarting) {
+int CelmaCurMom::init(bool restarting)
+{
     TRACE("Halt in CelmaCurMom::init");
 
     // Get the option (before any sections) in the BOUT.inp file
@@ -106,19 +107,19 @@ int CelmaCurMom::init(bool restarting) {
     // ************************************************************************
     // SQ is squaring the expression
     // dx and dy are Field2D (0th index is ghost, but gives no problems)
-    artViscParLnN   *= SQ(mesh->dy(0,0));
-    artViscParJpar *= SQ(mesh->dy(0,0));
+    artViscParLnN     *= SQ(mesh->dy(0,0));
+    artViscParJpar    *= SQ(mesh->dy(0,0));
     artViscParMomDens *= SQ(mesh->dy(0,0));
-    artViscParVortD *= SQ(mesh->dy(0,0));
+    artViscParVortD   *= SQ(mesh->dy(0,0));
 
     // The perpednicular diffusion is in our model
     /* NOTE: Chosen independent of dz
      *       This makes artVisc constant when expanding restarts
      */
-    artViscPerpLnN   *= SQ(mesh->dx(0,0));
-    artViscPerpJPar *= SQ(mesh->dx(0,0));
+    artViscPerpLnN     *= SQ(mesh->dx(0,0));
+    artViscPerpJPar    *= SQ(mesh->dx(0,0));
     artViscPerpMomDens *= SQ(mesh->dx(0,0));
-    artViscPerpVortD *= SQ(mesh->dx(0,0));
+    artViscPerpVortD   *= SQ(mesh->dx(0,0));
 
     // Azimuthal hyperviscosities
     artHyperAzVortD *= SQ(SQ(mesh->dz));
@@ -155,10 +156,6 @@ int CelmaCurMom::init(bool restarting) {
     // The source (obtained from the input)
     S = FieldFactory::get()
       ->create3D("theSource:S", Options::getRoot(), mesh, CELL_CENTRE, 0);
-
-    // The radial profile (obtained from the input)
-    dampingProfile = FieldFactory::get()
-      ->create3D("dampProf:profile", Options::getRoot(), mesh, CELL_CENTRE, 0);
 
     // The initial potential (obtained from the input)
     phi = FieldFactory::get()
@@ -201,6 +198,12 @@ int CelmaCurMom::init(bool restarting) {
     comGroup.add(vortD);
     // ************************************************************************
 
+    // Specify BC for n and uIPar (used to set BC for jPar and momDensPar)
+    // ************************************************************************
+    n    .setBoundary("n"    );
+    uIPar.setBoundary("uIPar");
+    // ************************************************************************
+
     // Specify what values should be stored in the .dmp file
     // ************************************************************************
     // Variables to be saved once
@@ -212,7 +215,7 @@ int CelmaCurMom::init(bool restarting) {
     SAVE_ONCE4(artViscParLnN, artViscParJpar, artViscParMomDens, artViscParVortD);
     SAVE_ONCE4(artViscPerpLnN, artViscPerpJPar, artViscPerpMomDens, artViscPerpVortD);
     // Fields
-    SAVE_ONCE2(S, dampingProfile);
+    SAVE_ONCE(S);
     // Variables to be saved repeatedly
     // vort and phi
     SAVE_REPEAT2(vort, phi);
@@ -255,7 +258,8 @@ int CelmaCurMom::init(bool restarting) {
  * Will be stepped forward explicitly
  */
 // NOTE: The convective part is called first, then the diffusive part
-int CelmaCurMom::convective(BoutReal t) {
+int CelmaCurMom::convective(BoutReal t)
+{
     TRACE("Halt in CelmaCurMom::convective");
 
     if (includeNoise && !noiseAdded){
@@ -353,9 +357,14 @@ int CelmaCurMom::convective(BoutReal t) {
      * - Extrapolation is used instead.
      */
     ownBC.extrapolateYGhost(phi);
-    // Use the sheath boundary condition with constant Te for uEPar at SE
+    // Set BC on n and uIPar
+    n    .applyBoundary();
+    uIPar.applyBoundary();
+    // Use the sheath boundary condition with constant Te for jPar at SE
     // Here we have phiRef = Lambda
-    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda, dampingProfile);
+    ownBC.jParSheath(uEPar, uIPar, phi, n, Lambda, Lambda);
+    // Set the BC for momDensPar
+    ownBC.parDensMomSheath(momDensPar, uIPar, n);
     // ************************************************************************
 
     // Communicate before taking derivatives
@@ -481,7 +490,8 @@ int CelmaCurMom::convective(BoutReal t) {
  * iterations pr timestep. Therefore, one should have the inversion algorithm
  * here as well
  */
-int CelmaCurMom::diffusive(BoutReal t, bool linear){
+int CelmaCurMom::diffusive(BoutReal t, bool linear)
+{
     TRACE("Halt in CelmaCurMom::diffusive");
 
     // Manually specifying rho inner ghost points
@@ -541,9 +551,14 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear){
      * - Extrapolation is used instead.
      */
     ownBC.extrapolateYGhost(phi);
-    // Use the sheath boundary condition with constant Te for uEPar at SE
+    // Set BC on n and uIPar
+    n    .applyBoundary();
+    uIPar.applyBoundary();
+    // Use the sheath boundary condition with constant Te for jPar at SE
     // Here we have phiRef = Lambda
-    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda, dampingProfile);
+    ownBC.jParSheath(uEPar, uIPar, phi, n, Lambda, Lambda);
+    // Set the BC for momDensPar
+    ownBC.parDensMomSheath(momDensPar, uIPar, n);
     // ************************************************************************
 
     // Communicate before taking derivatives

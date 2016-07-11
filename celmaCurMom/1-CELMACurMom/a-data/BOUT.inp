@@ -140,7 +140,7 @@ artHyperAzVortD = 1.0
 [switch]
 includeNoise        = false
 forceAddNoise       = false
-useHyperViscAzVortD = false
+useHyperViscAzVortD = true
 saveTerms           = true
 saveDdt             = true
 # =============================================================================
@@ -166,18 +166,11 @@ S = a*radialProf*parProf
 # =============================================================================
 
 
-# Damping profile
-# =============================================================================
-[dampProf]
-profile  = 1.0
-# =============================================================================
-
-
 # Logarithm of the density
 # =============================================================================
 [lnN]
-scale       = 1.0
-function    = 0.0
+scale    = 1.0
+function = 0.0
 
 # Boundaries
 bndry_xin   = none             # Manual boundary found in the code
@@ -187,11 +180,12 @@ bndry_ydown = neumann_o4(0.0)  # Do not allow gradients at the source
 # =============================================================================
 
 
-# Parallel electron velocity
+# Parallel current
 # =============================================================================
-[uEPar]
+[jPar]
 scale       = 1.0
-function    = uIPar:function
+function    = 0.0               # Assuming no difference in currents
+
 # Boundaries
 bndry_xin   = none              # Manual boundary found in code
 bndry_xout  = neumann_o4(0.0)   # Set to neumann
@@ -200,28 +194,18 @@ bndry_ydown = dirichlet_o4(0.0) # Stagnation point
 # =============================================================================
 
 
-# Parallel ion velocity
+# Parallel denisty momentum
 # =============================================================================
-[uIPar]
-scale       = 1.0
-eq          = geom:yl^2/geom:Ly^2
-# Multiply with the radial profile of the source, and the damping profile
-function = eq * dampProf:profile
+[momDensPar]
+scale = 1.0
+uIPar = geom:yl/geom:Ly     # Assuming linear velocity profile
+function = exp(lnN:function)*uIPar
 
 # Boundaries
 bndry_xin   = none              # Manual boundary found in code
 bndry_xout  = neumann_o4(0.0)   # Set to neumann
-# Due to differences in velocity, not all yup are at the ion sound speed
-bndry_yup   = dirichlet_o4(dampProf:profile)
-bndry_ydown = dirichlet_o4(0.0)  # Stagnation point
-# =============================================================================
-
-
-# The potential phi
-# =============================================================================
-[phi]
-# Boundaries of the iterative scheme set in the Naulin solver
-function    = 0.0
+bndry_yup   = none              # Set manually in the code
+bndry_ydown = dirichlet_o4(0.0) # Stagnation point
 # =============================================================================
 
 
@@ -235,6 +219,34 @@ bndry_xin   = none              # Manual boundary found in the code
 bndry_xout  = neumann_o4(0.0)   # Set to neumann
 bndry_yup   = neumann_o4(0.0)
 bndry_ydown = neumann_o4(0.0)   # Location of density source
+# =============================================================================
+
+
+# The density n
+# =============================================================================
+[n]
+# Boundaries used when setting jPar and momDensPar
+bndry_xin   = none
+bndry_xout  = none
+bndry_yup   = neumann_o4(0.0)
+bndry_ydown = none
+# =============================================================================
+
+# The parallel ion velocity
+# =============================================================================
+[uIPar]
+# Boundaries used when setting jPar and momDensPar
+bndry_xin   = none
+bndry_xout  = none
+bndry_yup   = dirichlet_o4(1.0) # Sheath BC
+bndry_ydown = none
+# =============================================================================
+
+# The potential phi
+# =============================================================================
+[phi]
+# Boundaries of the iterative scheme set in the Naulin solver
+function    = 0.0
 # =============================================================================
 
 
