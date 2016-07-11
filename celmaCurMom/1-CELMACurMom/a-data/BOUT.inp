@@ -120,7 +120,7 @@ nuIN = 0.0
 # Parallel artificial dissipation
 artPar = 5.0
 artViscParLnN     = artPar # Density
-artViscParJpar    = artPar # Electron velocity
+artViscParJPar    = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
 artViscParVortD   = artPar # Modified vorticity
 
@@ -149,8 +149,8 @@ saveDdt             = true
 # =============================================================================
 [theSource]
 # Made as a gaussian function
-# The amplitude
-a = 0.02
+# The amplitude (found to make n.max() approx 1 in steady state)
+a = 8.9e-3
 # Radial profile
 radialWidth     = 0.5*2*geom:Lx
 radialCentre    = 0

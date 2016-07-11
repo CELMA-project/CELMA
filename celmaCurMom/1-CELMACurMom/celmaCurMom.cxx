@@ -194,6 +194,8 @@ int CelmaCurMom::init(bool restarting)
     comGroup.add(n);
     comGroup.add(momDensPar);
     comGroup.add(jPar);
+    comGroup.add(uEPar);
+    comGroup.add(uIPar);
     comGroup.add(phi);
     comGroup.add(vortD);
     // ************************************************************************
@@ -226,10 +228,10 @@ int CelmaCurMom::init(bool restarting)
         // jPar terms
         SAVE_REPEAT3(jParAdv, uIParAdvSum, uEParDoubleAdv);
         SAVE_REPEAT2(jParRes, elField);
-        SAVE_REPEAT3(elPressure, neutralERes, neutralIRes);
+        SAVE_REPEAT3(muElPressure, neutralERes, neutralIRes);
         SAVE_REPEAT2(jParParArtVisc, jParPerpArtVisc);
         // momDensPar terms
-        SAVE_REPEAT (momDensAdv);
+        SAVE_REPEAT2(momDensAdv, elPressure);
         SAVE_REPEAT3(densDiffusion, momDensParArtVisc, momDensPerpArtVisc);
         // Vorticity terms
         SAVE_REPEAT2(vortNeutral, potNeutral);
@@ -362,7 +364,8 @@ int CelmaCurMom::convective(BoutReal t)
     uIPar.applyBoundary();
     // Use the sheath boundary condition with constant Te for jPar at SE
     // Here we have phiRef = Lambda
-    ownBC.jParSheath(uEPar, uIPar, phi, n, Lambda, Lambda);
+    ownBC.jParSheath (jPar, uEPar, uIPar, phi, n, Lambda, Lambda);
+    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda);
     // Set the BC for momDensPar
     ownBC.parDensMomSheath(momDensPar, uIPar, n);
     // ************************************************************************
@@ -401,7 +404,7 @@ int CelmaCurMom::convective(BoutReal t)
     uIParAdvSum    = - Vpar_Grad_par(uIPar, n*(uIPar + uEPar));
     uEParDoubleAdv = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParRes        = - 0.51*nuEI*jPar;
-    elPressure     = mu*DDY(n);
+    muElPressure   = mu*DDY(n);
     elField        = - mu*n*DDY(phi);
     neutralERes    = n*nuEN*uEPar;
     neutralIRes    = - n*nuIN*uIPar;
@@ -411,7 +414,7 @@ int CelmaCurMom::convective(BoutReal t)
         + uIParAdvSum
         + uEParDoubleAdv
         + jParRes
-        + elPressure
+        + muElPressure
         + elField
         + neutralERes
         + neutralIRes
@@ -425,7 +428,7 @@ int CelmaCurMom::convective(BoutReal t)
     // ************************************************************************
     momDensAdv   = - invJ*bracket(phi, momDensPar, bm);
  // uIParAdvSum calculated above
- // elPressure  calculated above
+    elPressure   = DDY(n);
  // neutralIRes calculated above
 
     ddt(momDensPar) =
@@ -554,9 +557,11 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
     // Set BC on n and uIPar
     n    .applyBoundary();
     uIPar.applyBoundary();
-    // Use the sheath boundary condition with constant Te for jPar at SE
+    // Use the sheath boundary condition with constant Te for jPar and
+    // uEPar at SE
     // Here we have phiRef = Lambda
-    ownBC.jParSheath(uEPar, uIPar, phi, n, Lambda, Lambda);
+    ownBC.jParSheath (jPar, uEPar, uIPar, phi, n, Lambda, Lambda);
+    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda);
     // Set the BC for momDensPar
     ownBC.parDensMomSheath(momDensPar, uIPar, n);
     // ************************************************************************
