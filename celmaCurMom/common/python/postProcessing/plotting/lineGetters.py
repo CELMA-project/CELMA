@@ -18,18 +18,19 @@ def getMainFields(path):
     mainFields = Organizer("mainFields", path = path)
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
-    mainFields.lines.append(Line('lnN'  , r'\ln(n)'         , plotPos=0))
+    mainFields.lines.append(Line('lnN'        , r'\ln(n)'          , plotPos=0))
+    mainFields.lines.append(Line('jPar'       , r'j_{\parallel}'   , plotPos=8))
+    mainFields.lines.append(Line('momDensPar' , r'nu_{i,\parallel}', plotPos=1))
+    mainFields.lines.append(Line('vortD'      , r'\Omega^D'        , plotPos=3))
+    # Helping field
     mainFields.lines.append(Line('uIPar', r'u_{i,\parallel}', plotPos=6))
     mainFields.lines.append(Line('uEPar', r'u_{e,\parallel}', plotPos=4))
-    mainFields.lines.append(Line('vortD', r'\Omega^D'       , plotPos=3))
-    # Helping field
-    mainFields.lines.append(Line('phi'  , r'\phi'           , plotPos=1))
-    mainFields.lines.append(Line('S'    , r'S'              , plotPos=7))
+    mainFields.lines.append(Line('phi'  , r'\phi'           , plotPos=7))
+    mainFields.lines.append(Line('S'    , r'S'              , plotPos=9))
     mainFields.lines.append(Line('vort' , r'\Omega'         , plotPos=5))
     # Extra lines
     # FIXME: This API is not so intuitive, consider change
-    mainFields.extraLines['jPar'] = Line('jPar', r'j_\parallel', plotPos=8)
-    mainFields.extraLines['n'   ] = Line('n'   , r'n'          , plotPos=2)
+    mainFields.extraLines['n'] = Line('n'   , r'n'          , plotPos=2)
 
     return mainFields
 #}}}
@@ -45,7 +46,7 @@ def getLnNFields(path):
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
     lnN.lines.append(Line('lnNAdv'                             ,\
-        r'-\frac{1}{J}\{\phi,\ln(n)\}'                         ))
+        r'-\frac{1}{JB}\{\phi,\ln(n)\}'                        ))
     lnN.lines.append(Line('lnNRes'                             ,\
         r'\frac{0.51\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n) +'+\
         r'\left[\nabla_\perp\ln(n)\right]^2\right)'            ))
@@ -63,74 +64,68 @@ def getLnNFields(path):
     return lnN
 #}}}
 
-#{{{getUEParFields
-def getUEParFields(path):
+#{{{getJParFields
+def getJParFields(path):
     """
-    Prepares the uEPar fields
+    Prepares the jPar fields
     """
 
     # Making the orgObj instance
-    uEPar = Organizer(r"u_{e,\parallel}", useCombinedPlot=True, path = path)
+    jPar = Organizer(r"j_{\parallel}", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
-    uEPar.lines.append(Line('uEParAdv'                                     ,\
-    r'-\frac{1}{J}\{\phi,u_{e,\parallel}\}'                                ))
-    uEPar.lines.append(Line('uEParParAdv'                                  ,\
-    r'- u_{e,\parallel}\partial_{\parallel}u_{e,\parallel}'                ))
-    uEPar.lines.append(Line('gradPhiLnN'                                   ,\
-    r'\mu\partial_\parallel\left( \phi - \ln(n)\right)'                    ))
-    uEPar.lines.append(Line('uEParRes'                                     ,\
-    r'-0.51\nu_{ei}\left(u_{e,\parallel}-u_{i,\parallel} \right)'          ))
-    uEPar.lines.append(Line('ueSrc'                                        ,\
-    r'-\frac{S u_{e,\parallel}}{n}'                                        ))
-    uEPar.lines.append(Line('ueNeutral'                                    ,\
-    r'-\nu_{en}u_{e,\parallel}'                                            ))
-    uEPar.lines.append(Line('uEParPerpArtVisc'                             ,\
-    r'D_{u_{e,\parallel}, \perp}'                                          +\
-    r'\frac{\partial^2_{\parallel}u_{e,\parallel}}{n}'                     ))
-    uEPar.lines.append(Line('uEParParArtVisc'                              ,\
-    r'D_{u_{e,\parallel}, \parallel}'                                      +\
-    r'\frac{\partial^2_{\parallel}u_{e,\parallel}}{n}'                     ))
-    uEPar.lines.append(Line('uEParPerpArtViscNoN'                          ,\
-    r'D_{u_{e,\parallel}, \perp}\nabla^2_\perp u_{e,\parallel}'            ))
-    uEPar.lines.append(Line('uEParParArtViscNoN'                           ,\
-    r'D_{u_{e,\parallel}, \parallel} \partial^2_{\parallel}u_{e,\parallel}'))
+    jPar.lines.append(Line('jParAdv'                                    ,\
+    r'-\frac{1}{JB}\{\phi,j_{\parallel}\}'                              ))
+    jPar.lines.append(Line('uIParAdvSum'                                ,\
+    r'- u_{e,\parallel}\partial_{\parallel}'                            +\
+    r'\left(n\left[u_{i,\parallel}+u_{e,\parallel}\right]\right)'       ))
+    jPar.lines.append(Line('uEParDoubleAdv'                             ,\
+    r'2u_{e,\parallel}\partial_{\parallel}\left(nu_{e,\parallel}\right)'))
+    jPar.lines.append(Line('jParRes'                                    ,\
+    r'-0.51\nu_{ei}j_\parallel'                                         ))
+    jPar.lines.append(Line('elPressure'                                 ,\
+    r'\mu T_e\partial_{\parallel}n'                                     ))
+    jPar.lines.append(Line('elField'                                    ,\
+    r'-\mu n \partial_{\parallel}\phi'                                  ))
+    jPar.lines.append(Line('neutralERes'                                ,\
+    r'n\nu_{en}u_{e,\parallel}'                                         ))
+    jPar.lines.append(Line('neutralIRes'                                ,\
+    r'-n\nu_{in}u_{i,\parallel}'                                        ))
+    jPar.lines.append(Line('jParPerpArtVisc'                            ,\
+    r'D_{j_{\parallel}, \perp}\nabla^2_\perp j_{\parallel}'             ))
+    jPar.lines.append(Line('jParParArtVisc'                             ,\
+    r'D_{j_{\parallel}, \parallel} \partial^2_{\parallel}j_{\parallel}' ))
 
-    return uEPar
+    return jPar
 #}}}
 
-#{{{getUIParFields
-def getUIParFields(path):
+#{{{momDensParFields
+def momDensParFields(path):
     """
-    Prepares the uIPar fields
+    Prepares the n*momDensPar fields
     """
 
     # Making the orgObj instance
-    uIPar = Organizer(r"u_{i,\parallel}", useCombinedPlot=True, path = path)
+    momDensPar = Organizer(r"(nu_{i,\parallel})", useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
-    uIPar.lines.append(Line('uIParAdv'                                    ,\
-             r'-\frac{1}{J}\{\phi,u_{i,\parallel}\}'                      ))
-    uIPar.lines.append(Line('uIParParAdv'                                 ,\
-             r'-u_{i,\parallel}\partial_{\parallel}u_{i,\parallel}'       ))
-    uIPar.lines.append(Line('gradPhi'                                     ,\
-             r'-\partial_\parallel\phi'                                   ))
-    uIPar.lines.append(Line('uIParRes'                                    ,\
-             r'-0.51\nu_{ei}\left(u_{i,\parallel}-u_{e,\parallel} \right)'))
-    uIPar.lines.append(Line('uiNeutral'                                   ,\
-             r'-\nu_{in}u_{i,\parallel}'                                  ))
-    uIPar.lines.append(Line('uiSrc'                                       ,\
-             r'-\frac{S u_{i,\parallel}}{n}'                              ))
-    uIPar.lines.append(Line('uIParPerpArtVisc'                            ,\
-             r'D_{u_i,\perp}'                                             +\
-             r'\frac{\partial^2_{\parallel}u_{i,\parallel}}{n}'           ))
-    uIPar.lines.append(Line('uIParParArtVisc'                             ,\
-             r'D_{u_i,\parallel}'                                         +\
-             r'\frac{\partial^2_{\parallel}u_{i,\parallel}}{n}'           ))
-    uIPar.lines.append(Line('uIParPerpArtViscNoN'                         ,\
-             r'D_{u_{i,\parallel}, \perp}\nabla^2_\perp u_{i,\parallel}'  ))
-    uIPar.lines.append(Line('uIParParArtViscNoN'                          ,\
-             r'D_{u_i,\parallel} \partial^2_{\parallel}u_{i,\parallel}'   ))
+    momDensPar.lines.append(Line('momDensAdv'                      ,\
+    r'-\frac{1}{JB}\{\phi, nu_{i,\parallel}\}'                     ))
+    momDensPar.lines.append(Line('uIParAdvSum'                     ,\
+    r'- u_{e,\parallel}\partial_{\parallel}'                       +\
+    r'\left(n\left[u_{i,\parallel}+u_{e,\parallel}\right]\right)'  ))
+    momDensPar.lines.append(Line('elPressure'                      ,\
+    r'\mu T_e\partial_{\parallel}n'                                ))
+    momDensPar.lines.append(Line('neutralIRes'                     ,\
+    r'-n\nu_{in}u_{i,\parallel}'                                   ))
+    momDensPar.lines.append(Line('densDiffusion'                   ,\
+    r'0.51\frac{\nu_{ei}}{\mu}u_{i,\parallel}\nabla_\perp^2n'      ))
+    momDensPar.lines.append(Line('momDensPerpArtVisc'              ,\
+             r'D_{nu_i,\perp}'                                     +\
+             r'\nabla^2_{\perp}\left(nu_{i,\parallel}\right)'      ))
+    momDensPar.lines.append(Line('momDensParArtVisc'               ,\
+             r'D_{nu_i,\parallel}'                                 +\
+             r'\partial^2_{\parallel}nu_{i,\parallel}'             ))
 
-    return uIPar
+    return momDensPar
 #}}}
 
 #{{{getVortDFields
@@ -146,13 +141,8 @@ def getVortDFields(path):
          r'-\nu_{in}n\Omega'                                       ))
     vortD.lines.append(Line('potNeutral'                           ,\
          r'-\nu_{in}\nabla_\perp \phi \cdot \nabla_\perp n'        ))
-    vortD.lines.append(Line('divExBAdvGradPerpPhiN'                ,\
-         r'-\nabla\cdot\left('                                     +\
-         r'\mathbf{u}_E \cdot\nabla'                               +\
-         r'\left[ n \nabla_\perp \phi \right]'                     +\
-         r'\right)'                                                ))
     vortD.lines.append(Line('vortDAdv'                             ,\
-         r'-\frac{1}{J}\{\phi, \Omega^D\}'                         ))
+         r'-\frac{1}{JB}\{\phi, \Omega^D\}'                        ))
     vortD.lines.append(Line('kinEnAdvN'                            ,\
          r'-\frac{1}{2J}\{\mathbf{u}_E \cdot\mathbf{u}_E, n\}'     ))
     vortD.lines.append(Line('parDerDivUIParNGradPerpPhi'           ,\
@@ -160,12 +150,8 @@ def getVortDFields(path):
          r'u_{i,\parallel} '                                       +\
          r'n \nabla_\perp \phi'                                    +\
          r'\right)'                                                ))
-    vortD.lines.append(Line('nGradUiUe'                            ,\
-         r'n\partial_\parallel (u_{i,\parallel}-u_{e,\parallel})'  ))
-    vortD.lines.append(Line('uiUeGradN'                            ,\
-        r'(u_{i,\parallel}-u_{e,\parallel})\partial_{\parallel}n'  ))
     vortD.lines.append(Line('divParCur'                            ,\
-        r'\partial_{\parallel}(n[u_{i,\parallel}-u_{e,\parallel}])'))
+        r'\partial_{\parallel}j_{\parallel}'                       ))
     vortD.lines.append(Line('vortDParArtVisc'                      ,\
          r'D_{\Omega^D} \partial^2_{\parallel}\Omega^D'            ))
     vortD.lines.append(Line('vortDPerpArtVisc'                     ,\

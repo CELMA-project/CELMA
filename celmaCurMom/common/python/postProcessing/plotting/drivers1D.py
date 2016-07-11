@@ -8,8 +8,8 @@ from .plotters import Plot1D
 from .getStrings import getSaveString
 from .lineGetters import (getMainFields,\
                           getLnNFields,\
-                          getUEParFields,\
-                          getUIParFields,\
+                          getJParFields,\
+                          momDensParFields,\
                           getVortDFields,\
                          )
 import matplotlib.pyplot as plt
@@ -148,8 +148,8 @@ def perpDriver(path                ,\
     # Initiate the pltNames and timeFolder
     pltNames   = ["mainFields" ,\
                   "lnNFields"  ,\
-                  "uEParFields",\
-                  "uIParFields",\
+                  "jParFields",\
+                  "momDensParFields",\
                   "vortDFields",\
                   ]
 
@@ -245,8 +245,8 @@ def parDriver(path                ,\
     # Initiate the pltNames and timeFolder
     pltNames   = ["mainFields" ,\
                   "lnNFields"  ,\
-                  "uEParFields",\
-                  "uIParFields",\
+                  "jParFields",\
+                  "momDensParFields",\
                   "vortDFields",\
                   ]
 
@@ -377,10 +377,10 @@ def single1DDriver(path                      ,\
         orgObj = getMainFields(path)
     elif pltName == "lnNFields":
         orgObj = getLnNFields(path)
-    elif pltName == "uEParFields":
-        orgObj = getUEParFields(path)
-    elif pltName == "uIParFields":
-        orgObj = getUIParFields(path)
+    elif pltName == "jParFields":
+        orgObj = getJParFields(path)
+    elif pltName == "momDensParFields":
+        orgObj = momDensParFields(path)
     elif pltName == "vortDFields":
         orgObj = getVortDFields(path)
     else:
@@ -406,14 +406,7 @@ def single1DDriver(path                      ,\
                 uEPar = line.field
             if line.name == 'uIPar':
                 uIPar = line.field
-        # Create the jPar line (the first extra line)
-        orgObj.extraLines['jPar'].field = np.exp(lnN)*(uIPar - uEPar)
-        if orgObj.extraLines['jPar'].plotPos:
-            orgObj.lines.insert(orgObj.extraLines['jPar'].plotPos,\
-                                orgObj.extraLines['jPar'])
-        else:
-            orgObj.lines.append(orgObj.extraLines['jPar'])
-        # Create the n line (the second extra line)
+        # Create the n line (second extra line)
         orgObj.extraLines['n'].field = np.exp(lnN)
         if orgObj.extraLines['n'].plotPos:
             orgObj.lines.insert(orgObj.extraLines['n'].plotPos,\
