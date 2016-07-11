@@ -1,0 +1,9 @@
+Copied from 8.3-CELMACURMOMSplitCleanUp
+
+- Reformulated to evolve parallel current and total parallel momentum
+
+Results:
+========
+a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
+---------------------------------------------------------------
+Not run yet

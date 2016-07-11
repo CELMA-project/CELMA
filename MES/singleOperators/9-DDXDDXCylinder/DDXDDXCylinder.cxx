@@ -29,7 +29,7 @@ void xOutAfterDDX(Field3D &out, Field3D const &in){
          */
         int xInd = mesh->xend + 1;
 
-        // Newton polynomial of fourth order (including boundary) evaluated at ghost
+        // Newton polynomial of fourth order evaluated at ghost
         for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
             for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 out(xInd, yInd, zInd) =
