@@ -17,18 +17,16 @@ from postProcessing.plotting import combined1D2D as postProcess
 # =============================================================================
 # *****************************************************************************
 ownFilterType = "none"
+sourceAmp     = [1e-1, 5e-2, 3.5e-2, 2.5e-2, 2e-2, 1.75e-2, 1e-2]
 # *****************************************************************************
-remove_old = False
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "b-compareEquilibrium/nout_20_timestep_100.0/nz_1/ownFilters_type_none_tag_0-a-0-initialize_0/"
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
-timestep   = [2e2]
+restart    = None
+remove_old = False
+timestep   = [5e1]
 nout       = [20]
-directory  = "b-compareEquilibrium"
+directory  = "a-data"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -43,7 +41,7 @@ ySlice     = 8
 zSlice     = 0
 showPlot   = False
 savePlot   = True
-theRunName = "TestRestartInitialize"
+theRunName = "TestSourceAmp"
 # =============================================================================
 
 
@@ -77,10 +75,10 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('ownFilters', 'type', ownFilterType),\
+                          ('theSource' , 'a'   , sourceAmp),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
