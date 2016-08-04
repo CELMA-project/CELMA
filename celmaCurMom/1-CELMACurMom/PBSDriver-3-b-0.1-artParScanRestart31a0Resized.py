@@ -18,7 +18,7 @@ from postProcessing.plotting import combinedDriver as postProcess
 # *****************************************************************************
 includeNoise        = False
 forceAddNoise       = False
-artPar              = [4.0]
+artPar              = [1.0, 1.0e-1]
 useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
@@ -31,9 +31,9 @@ nx = 16*2 + 2
 ny = 24*2
 nz = 128*2
 # Set the temporal domain
-nout       = [0]
-timestep   = [1e-10]
-directory  = "test-PBSResize"
+nout       = [100]
+timestep   = [30]
+directory  = "b-noArtVortD"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -46,10 +46,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = None
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "TestResize6"
+theRunName = "3-b-0.1-artParScanRestart31a0Resized"
 # =============================================================================
 
 
@@ -59,7 +59,7 @@ theRunName = "TestResize6"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 20
-BOUT_walltime         = '00:10:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
