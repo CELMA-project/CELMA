@@ -11,24 +11,27 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combined1D2D as postProcess
+from postProcessing.plotting import combinedDriver as postProcess
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownFilterType = "none"
+includeNoise        = False
+forceAddNoise       = False
+artPar              = [2.5, 1.0, 1.0e-1]
+useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "b-compareEquilibrium/nout_20_timestep_100.0/nz_1/ownFilters_type_none_tag_0-a-0-initialize_0/"
+restart_from = "a-data/nout_300_timestep_10/nz_128/cst_artViscParVortD_0.0_cst_artViscPerpVortD_0.0_switch_forceAddNoise_False_switch_includeNoise_False_switch_useHyperViscAzVortD_True_tag_3.1-a-0-longRestartNoArtViscVortD_0/"
 # Set the spatial domain
-nz = 1
+nz = 128
 # Set the temporal domain
-timestep   = [2e2]
-nout       = [20]
-directory  = "test-compareEquilibrium"
+nout       = [100]
+timestep   = [30]
+directory  = "c-wArtVortD"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,9 +44,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "TestRestartInitialize"
+theRunName = "3-c-0-artParScanRestart31a0"
 # =============================================================================
 
 
@@ -53,7 +57,7 @@ theRunName = "TestRestartInitialize"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '03:00:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -80,7 +84,10 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('switch', 'includeNoise'       , includeNoise ),\
+                          ('switch', 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('cst'   , 'artPar'             ,artPar),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -113,6 +120,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
