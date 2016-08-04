@@ -28,7 +28,7 @@ nz = 1
 # Set the temporal domain
 nout       = [21]
 timestep   = [5]
-directory  = "b-compareEquilibrium"
+directory  = "test-compareEquilibrium"
 # Shall we make?
 make       = False
 # =============================================================================
