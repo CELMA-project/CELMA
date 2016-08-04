@@ -24,6 +24,9 @@ b-noArtVortD
 3b0 artPar 1.0    : Timestep failed after 5 steps (1h 23m), more turbulence than 3b0 artPar 2.5, blow-up not apparent
 3b0 artPar 1.0e-1 : Timestep failed after 3 steps (1h 24m), more turbulence than 3b0 artPar 1.0, blow-up not apparent
 
+3b0.1 artPar 1.0    : Running
+3b0.1 artPar 1.0e-1 : Running
+
 c-wArtVortD (the same as a-data, but new folder in order to separate)
 ---------------------------------------------------------------------
 3c0 artPar 2.5    : Finished after 2h 45m, looks like turbulence ceases
@@ -31,9 +34,6 @@ c-wArtVortD (the same as a-data, but new folder in order to separate)
 3c0 artPar 1.0e-1 : Timestep failed after 17 steps (3h 20m) fine-structure destroyed, going to a new mode?
 
 
-
-
-!!! TRY ME: Expand the runs before restarting
 
 
 
