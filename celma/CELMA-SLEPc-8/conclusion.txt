@@ -1,0 +1,38 @@
+Copied from 8-CELMASplit/
+
+- Removed addnoise
+- Removed possibility of save intermediate terms
+
+Dilemma
+========
+- How to deal with phi?
+  * Full phi is found from non-linear inversion of vortD
+  * Full phi can also be found from vort (linear)
+    + vort is not evolved in time...or...is it?
+
+Regression: we need also to linearize ddt(vortD)
+Assume that the equilibrium does not evolve with time
+Notice: Get a term:
+ddt(n1 grad_perp(phi0)) = grad_perp(phi0)*ddt(n1)+n1**ddt(grad_perp(phi0))
+                        = grad_perp(phi0)*ddt(n1)
+!!! This means that ddt(vortD) goes to ddt(vort)
+As we have vort, we can find phi (the full phi)
+??? Does it make sense to split phi into phi0 and phi1?
+In simple drift wave:
+
+Eureka:
+- Will now have a perturbed vort and a background vort
+  * The background vort would need to be imported
+    + Which means that it needs to be saved
+    + One could:
+        1 - Run until steady state nz=1
+        2 - Expand run (run a few timesteps
+        3 - Run for one timestep, and save all variables
+        4 - Read the variable into SLEPc
+
+
+
+
+
+Results:
+========
