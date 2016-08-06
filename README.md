@@ -11,4 +11,4 @@ Current implementation works with the latest commit of BOUT++ version 3
 * MES: Checking if implementation is convergent
 * parameters: Typical parameters
 
-Branch: SLEPSc - implementation of linearized equation using with the SLEPSc solver
+Branch: addingMonitors - adding monitors which are easier to implement in C++ than python
