@@ -3,6 +3,6 @@
 HOME	= $(shell echo ~)
 BOUT_TOP	= $(HOME)/BOUT-dev
 
-SOURCEC		= celmaSLEPc.cxx
+SOURCEC		= celmaCurMom.cxx
 
 include $(BOUT_TOP)/make.config

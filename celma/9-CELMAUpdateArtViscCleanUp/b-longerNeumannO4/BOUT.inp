@@ -1,5 +1,5 @@
 #
-# Input file for "8-CELMASLEPCSplit/f-moreSource3Brackets"
+# Input file for "9-CELMAUpdateArtViscCleanUp/longerNeumannO4"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -28,7 +28,7 @@ MYG = 1
 # Number of points
 nx = 16 + 2*MXG
 ny = 24
-nz = 32*4         # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nz = 128           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -99,7 +99,7 @@ floats = false # floats = false => output in double
 # =============================================================================
 [geom]
 Lx = 5                      # The length of x from boundary to boundary
-Ly = 100                    # The length of y from boundary to boundary
+Ly = 200                    # The length of y from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
@@ -119,38 +119,37 @@ nuIN = 0.0
 
 # Parallel artificial dissipation
 artPar = 5.0
-artViscParLnN    = artPar # Density
-artViscParUEPar  = artPar # Electron velocity
-artViscParUIPar  = artPar # Ion velocity
-# Vorticity
-# Should be 0, as parallel current [ue and ui] is known to all orders, i.e. no
-# drifts
-artViscParVortD  = 0.0
+artViscParLnN   = artPar # Density
+artViscParUEPar = artPar # Electron velocity
+artViscParUIPar = artPar # Ion velocity
+artViscParVortD = artPar # Modified vorticity
 
 # Perpendicular diffusion
 artPerp = 5e-2
-artViscPerpLnN   = artPerp
 artViscPerpUEPar = artPerp
 artViscPerpUIPar = artPerp
-# Should be zero due to gyroviscous cancellation
-artViscPerpVortD = 0.0
+artViscPerpVortD = artPerp
 
 # Azimuthal hyperdiffusion
-artHyperAzVortD = 0.1
+artHyperAzVortD = 1.0
 # =============================================================================
 
 # Switches
 # =============================================================================
 [switch]
+includeNoise        = false
+forceAddNoise       = false
 useHyperViscAzVortD = false
+saveTerms           = true
+saveDdt             = true
 # =============================================================================
 
 # The source
 # =============================================================================
 [theSource]
 # Made as a gaussian function
-# The amplitude
-a = 0.05
+# The amplitude (found to make n.max() approx 1 in steady state)
+a = 8.9e-3
 # Radial profile
 radialWidth     = 0.5*2*geom:Lx
 radialCentre    = 0
@@ -181,9 +180,9 @@ function    = 0.0
 
 # Boundaries
 bndry_xin   = none             # Manual boundary found in the code
-bndry_xout  = neumann_o2(0.0)  # Set to neumann
-bndry_yup   = neumann_o2(0.0)  # Assume zero gradients at sheat
-bndry_ydown = neumann_o2(0.0)  # Do not allow gradients at the source
+bndry_xout  = neumann_o4(0.0)  # Set to neumann
+bndry_yup   = neumann_o4(0.0)  # Assume zero gradients at sheat
+bndry_ydown = neumann_o4(0.0)  # Do not allow gradients at the source
 # =============================================================================
 
 
@@ -194,7 +193,7 @@ scale       = 1.0
 function    = uIPar:function
 # Boundaries
 bndry_xin   = none              # Manual boundary found in code
-bndry_xout  = neumann_o2(0.0)   # Set to neumann
+bndry_xout  = neumann_o4(0.0)   # Set to neumann
 bndry_yup   = none              # Set in the source code
 bndry_ydown = dirichlet_o4(0.0) # Stagnation point
 # =============================================================================
@@ -210,7 +209,7 @@ function = eq * dampProf:profile
 
 # Boundaries
 bndry_xin   = none              # Manual boundary found in code
-bndry_xout  = neumann_o2(0.0)   # Set to neumann
+bndry_xout  = neumann_o4(0.0)   # Set to neumann
 # Due to differences in velocity, not all yup are at the ion sound speed
 bndry_yup   = dirichlet_o4(dampProf:profile)
 bndry_ydown = dirichlet_o4(0.0)  # Stagnation point
@@ -232,9 +231,9 @@ scale       = 1.0
 function    = 0.0               # Initial vorticity (set in the code)
 # Boundaries
 bndry_xin   = none              # Manual boundary found in the code
-bndry_xout  = neumann_o2(0.0)   # Set to neumann
-bndry_yup   = neumann_o2(0.0)
-bndry_ydown = neumann_o2(0.0)   # Location of density source
+bndry_xout  = neumann_o4(0.0)   # Set to neumann
+bndry_yup   = neumann_o4(0.0)
+bndry_ydown = neumann_o4(0.0)   # Location of density source
 # =============================================================================
 
 
@@ -265,7 +264,7 @@ type = radialLowPass
 
 # *****************************************************************************
 [ownOperators]
-type    = 3Brackets
+type = BasicBrackets
 # *****************************************************************************
 # =============================================================================
 ##############################################################################
