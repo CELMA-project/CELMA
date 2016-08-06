@@ -28,6 +28,5 @@ Original forumlation is used here
 * 8.4-CELMASplitHypervisc - As 8.3, but made viscosities changable to hyper viscosities
 * 9-CELMAUpdateArtViscCleanUp - Not damp on evolved variables, but rather at density, added artificial viscosity on OmegaD
 * 9.1-CELMAUpdateKeepDivN - Same as 9, but changed artificial viscosity for parallel currents
-* CELMA-SLEPc-8 - Under developement: Solving using SLEPSc
 * common - python post processing and own implementations to BOUT++
 * initialProfiles - A trial to analytically calculate the initial profiles
