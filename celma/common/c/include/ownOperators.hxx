@@ -402,7 +402,7 @@ class OwnOp3Brackets : public OwnOperators
  *
  * \brief Implementation of
  *        \f$\nabla\cdot_(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
- *        using 3 basic brackets
+ *        using 2 basic brackets
  *
  * This implementation uses brackets for advection of \f$\Omega^D\f$.
  * Further
