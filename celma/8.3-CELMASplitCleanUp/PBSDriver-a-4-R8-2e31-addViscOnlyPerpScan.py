@@ -28,8 +28,8 @@ restart_from = "../8-CELMASplit/f-moreSource3Brackets/nout_300_timestep_10/nz_12
 # Set the spatial domain
 nz = 128
 # Set the temporal domain
-nout       = [20]
-timestep   = [10]
+nout       = [20, 300]
+timestep   = [10, 10]
 directory  = "a-data"
 # Shall we make?
 make       = False
@@ -43,7 +43,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8
 zSlice     = 0
-tSlice     = None
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
 theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
@@ -56,7 +56,7 @@ theRunName = "a-4-R8-2e31-addViscOnlyPerpScan"
 nproc                 = 24
 BOUT_nodes            = 2
 BOUT_ppn              = 12
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1

@@ -1,4 +1,4 @@
-// *************** Simulation of CelmaSLEPc *********************
+// *************** Simulation of CelmaCurMom *********************
 /* Geometry
  *  x - The radial coordinate (rho)      [nx and dx set from the grid file]
  *  y - The height of the cylinder (z)   [ny and dy set from the grid file]
@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __CELMASLEPC_H__
-#define __CELMASLEPC_H__
+#ifndef __CELMACURMOM_H__
+#define __CELMACURMOM_H__
 
 #include <bout/physicsmodel.hxx>
 #include <invert_laplace.hxx>                   // Gives invert laplace option
@@ -21,31 +21,25 @@
 #include "../common/c/include/ownOperators.hxx"
 // Gives own laplacian inversions
 #include "../common/c/include/ownLaplacianInversions.hxx"
+// Gives the noise generator
+#include "../common/c/include/noiseGenerator.hxx"
 // Gives own lowPass filter
 #include "../common/c/include/ownFilters.hxx"
 
-class CelmaSLEPc : public PhysicsModel
+class CelmaCurMom : public PhysicsModel
 {
 protected:
     int init(bool restarting);
-    int rhs(BoutReal t);
+    int convective(BoutReal t);
+    int diffusive(BoutReal t, bool linear);
 private:
     // Global variable initialization
     // ############################################################################
     // Evolved variables
     // *****************************************************************************
-    Field3D uEPar, uIPar;     // Parallel velocities
-    Field3D lnN;              // Logarithm of density
-    Field3D vortD;            // Modified vorticity
-    // *****************************************************************************
-
-    // Equilibrium profiles
-    // *****************************************************************************
-    Field3D uEPar0, uIPar0; // Parallel velocities
-    Field3D lnN0;           // Logarithm of density
-    Field3D vortD0;         // Modified vorticity
-    // Helper variables
-    Field3D vort0, phi0;    // Vorticity and potential
+    Field3D jPar, momDensPar;     // Parallel velocities
+    Field3D lnN;               // Logarithm of density
+    Field3D vortD;              // Vorticity like quantity
     // *****************************************************************************
 
     // Non-evolved stored fields
@@ -58,17 +52,17 @@ private:
     // lnN fields
     Field3D lnNAdv, lnNRes, gradUEPar;
     Field3D lnNUeAdv, srcN, lnNParArtVisc, lnNPerpArtVisc;
-    // uEPar fields
-    Field3D uEParAdv, uEParParAdv, gradPhiLnN;
-    Field3D uEParRes, ueNeutral, ueSrc;
-    Field3D uEParParArtVisc, uEParPerpArtVisc;
-    // uIPar fields
-    Field3D uIParAdv, uIParParAdv, gradPhi;
-    Field3D uIParRes, uiNeutral, uiSrc;
-    Field3D uIParParArtVisc, uIParPerpArtVisc;
+    // jPar fields
+    Field3D jParAdv, uIParAdvSum, uEParDoubleAdv;
+    Field3D jParRes, elField;
+    Field3D muElPressure, neutralERes, neutralIRes;
+    Field3D jParParArtVisc, jParPerpArtVisc;
+    // momDensPar fields
+    Field3D momDensAdv, elPressure, densDiffusion;
+    Field3D momDensParArtVisc, momDensPerpArtVisc;
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
-    Field3D divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi;
+    Field3D parDerDivUIParNGradPerpPhi;
     Field3D vortDAdv, kinEnAdvN;
     Field3D divParCur, vortDParArtVisc, vortDPerpArtVisc;
     Field3D vortDhyperVisc;
@@ -82,7 +76,7 @@ private:
     // Auxiliary fields
     // *****************************************************************************
     Field3D n;               // Density
-    Field3D dampingProfile;  // Radial profile
+    Field3D uIPar, uEPar;    // Parallel currents
     Field3D S;               // Particle source
     Field3D invJ;            // 1/J (used in front of the bracket operator)
     Vector3D gradPerpLnN;    // gradPerpLnN
@@ -95,10 +89,10 @@ private:
     BoutReal a, bRho, bZ, cRho, cZ; // Variables used in the source term
     BoutReal Lx, Ly;                // The box dimensions
     // Parallel aritifical dissipation
-    BoutReal artViscParLnN, artViscParUEPar, artViscParUIPar;
+    BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
     BoutReal artViscParVortD;
     // Perpendicular dissipation
-    BoutReal artViscPerpLnN, artViscPerpUEPar, artViscPerpUIPar;
+    BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
     BoutReal artViscPerpVortD;
     // Azimuthal hyperviscosities
     BoutReal artHyperAzVortD;
@@ -116,20 +110,17 @@ private:
     // Switches
     // *****************************************************************************
     string  ownOpType;           // Type of own operators
+    bool saveDdt;             // If ddt's should be saved
+    bool saveTerms;           // If terms should be saved
+    bool includeNoise;        // Include noise
+    bool forceAddNoise;       // Add noise on restart as well
+    bool noiseAdded;          // A check whether the noise is added or not
     bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
     // *****************************************************************************
 
     // Make a field group to communicate
     // *****************************************************************************
     FieldGroup comGroup;
-    // *****************************************************************************
-
-    // Option to read equilibrium
-    // *****************************************************************************
-    string readFromDir;
-    string readFromExtension;
-    string readFromFileName;
-    Datafile fieldReader;
     // *****************************************************************************
     // ############################################################################
 };
