@@ -10,3 +10,5 @@ Current implementation works with the latest commit of BOUT++ version 3
 * derivation: Derivation of operators and boundaries
 * MES: Checking if implementation is convergent
 * parameters: Typical parameters
+
+Branch: SLEPSc - implementation of linearized equation using with the SLEPSc solver
