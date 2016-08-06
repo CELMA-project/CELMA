@@ -18,8 +18,10 @@ from postProcessing.plotting import combinedDriver as postProcess
 # *****************************************************************************
 includeNoise        = False
 forceAddNoise       = False
-artPar              = [2.5, 1.0, 1.0e-1]
+artPerp             = [2.0e-1]
+artPar              = [10.0, 4.0, 4.0e-1]
 useHyperViscAzVortD = [True]
+artHyperAzVortD     = 16
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -49,7 +51,7 @@ zSlice     = 0
 tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "3-b-0.1-artParScanRestart31a0Resized"
+theRunName = "3-b-0.3-artParScanRestart31a0ResizedOldArtViscOldHyper"
 # =============================================================================
 
 
@@ -59,7 +61,7 @@ theRunName = "3-b-0.1-artParScanRestart31a0Resized"
 nproc                 = 96
 BOUT_nodes            = 5
 BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '48:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -91,7 +93,9 @@ myRuns = PBS_runner(\
                           ('switch', 'includeNoise'       , includeNoise ),\
                           ('switch', 'forceAddNoise'      ,forceAddNoise),\
                           ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('cst'   , 'artPerp'            ,artPerp),\
                           ('cst'   , 'artPar'             ,artPar),\
+                          ('cst'   , 'arthyperazvortd' ,artHyperAzVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
