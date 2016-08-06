@@ -17,6 +17,7 @@ a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
 3.1a0 : Finished after 2 h 27 m, good turbulence, looks like spin a bit slower than original CELMA
 4.1a0 : Finished after 10 h 22 m, good turbulence
 
+
 b-noArtVortD
 ------------
 3b0 artPar 4.0    : Finished after 2h 12m, more turbulence than 41a0
@@ -24,8 +25,20 @@ b-noArtVortD
 3b0 artPar 1.0    : Timestep failed after 5 steps (1h 23m), more turbulence than 3b0 artPar 2.5, blow-up not apparent
 3b0 artPar 1.0e-1 : Timestep failed after 3 steps (1h 24m), more turbulence than 3b0 artPar 1.0, blow-up not apparent
 
+3-b-0.0-31a0Resized        : Worked, but small errors in interpolations made fields bad at the z-ends, due to small errors
+3-b-0.0-31a0ResizedNearest : ln_n - worse, j|| - better, nui|| - better, vortD - worse, but better gradients
+
+3b0.1 artPar 2.5    : Running
 3b0.1 artPar 1.0    : Running
 3b0.1 artPar 1.0e-1 : Running
+
+3b0.2 artPar 10.0   : Running
+3b0.2 artPar 4.0    : Running
+3b0.2 artPar 4.0e-1 : Running
+
+3b0.3 artPar 10.0   : Running
+3b0.3 artPar 4.0    : Running
+3b0.3 artPar 4.0e-1 : Running
 
 c-wArtVortD (the same as a-data, but new folder in order to separate)
 ---------------------------------------------------------------------
