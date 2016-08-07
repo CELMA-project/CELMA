@@ -26,6 +26,10 @@ int energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT)
     Field3D polAvgUIPar;
 
     // Call the functions
+    // FIXME: THESE ARE NOT GLOBAL VARIABLES...HOW TO MAKE THE MONITOR SEE
+    // THEM?
+    // IDEA: CONSTRUCTOR WHICH TAKES THE CLASS/OBJECT AS INPUT
+    // IDEA: fullE must be in the model
     fullEnergy(fullE, n, phi, uEPar, uIPar);
     // Calculate averages
     polAvgN = polAvg(n);
@@ -39,8 +43,8 @@ int energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT)
 }
 
 /*!
- * Returns the poloidal average of a field 
- * 
+ * Returns the poloidal average of a field
+ *
  * \param[in] f     The field to take the average of
  * \param[in] xInd  The rho index to take the average at
  * \param[in] yInd  The parallel index to take the average at
