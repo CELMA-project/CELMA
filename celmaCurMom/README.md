@@ -8,4 +8,5 @@ running and post-processing.
 Original forumlation is used here
 
 * 1-CELMACurMom - Original code, copied from `celma/8.3-CELMASplitCleanUp`
+* 2-CELMACurMomWMonitors - As 1, but added monitors
 * common - python post processing and own implementations to BOUT++
