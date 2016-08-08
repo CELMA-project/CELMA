@@ -18,21 +18,21 @@ from postProcessing.plotting import combinedDriver as postProcess
 # *****************************************************************************
 includeNoise        = False
 forceAddNoise       = False
-artPar              = [2.5, 1.0, 1.0e-1]
+artPar              = [2.5]
 useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "b-noArtVortD/nout_0_timestep_1e-10/nx_34_ny_48_nz_256/cst_artPar_2.5_switch_forceAddNoise_False_switch_includeNoise_False_switch_useHyperViscAzVortD_True_tag_3-b-0.0-31a0Resized_0/"
+restart_from = "a-data/nout_300_timestep_10/nz_128/cst_artViscParVortD_0.0_cst_artViscPerpVortD_0.0_switch_forceAddNoise_False_switch_includeNoise_False_switch_useHyperViscAzVortD_True_tag_3.1-a-0-longRestartNoArtViscVortD_0/"
 # Set the spatial domain
 nx = 16*2 + 2
 ny = 24*2
 nz = 128*2
 # Set the temporal domain
-nout       = [100]
-timestep   = [30]
+nout       = [0]
+timestep   = [1e-10]
 directory  = "b-noArtVortD"
 # Shall we make?
 make       = False
@@ -49,17 +49,17 @@ zSlice     = 0
 tSlice     = None
 showPlot   = False
 savePlot   = True
-theRunName = "3-b-0.1-artParScanRestart31a0Resized"
+theRunName = "3-b-0.0.3.1-31a0Resized"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 96
-BOUT_nodes            = 5
-BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 16
+BOUT_walltime         = '00:05:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
