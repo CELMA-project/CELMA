@@ -18,6 +18,8 @@ a-data (copied from 8.3-CELMACURMOMSplitCleanUp/b.1-longerNeumannO4/)
 4.1a0 : Finished after 10 h 22 m, good turbulence
 
 
+
+
 b-noArtVortD
 ------------
 3b0 artPar 4.0    : Finished after 2h 12m, more turbulence than 41a0
@@ -25,20 +27,63 @@ b-noArtVortD
 3b0 artPar 1.0    : Timestep failed after 5 steps (1h 23m), more turbulence than 3b0 artPar 2.5, blow-up not apparent
 3b0 artPar 1.0e-1 : Timestep failed after 3 steps (1h 24m), more turbulence than 3b0 artPar 1.0, blow-up not apparent
 
+More points (leads to lower viscosities due to lower grid dstance)
+..................................................................
 3-b-0.0-31a0Resized        : Worked, but small errors in interpolations made fields bad at the z-ends, due to small errors
 3-b-0.0-31a0ResizedNearest : ln_n - worse, j|| - better, nui|| - better, vortD - worse, but better gradients
+3-b-0.0.3.1-31a0Resized    : Resizing for different domain splits
+3-b-0.0.3.2-31a0Resized    : Resizing for different domain splits
 
-3b0.1 artPar 2.5    : Running
-3b0.1 artPar 1.0    : Running
-3b0.1 artPar 1.0e-1 : Running
+3b0.1 artPar 2.5    : Finished 1 step (12 h), then reached walltime, no grid-size oscillations
+3b0.1 artPar 1.0    : Finished 1 step (5h 26m), then timestep failed, not apparent why
+3b0.1 artPar 1.0e-1 : Finished 1 step (6h 39m), then timestep failed, grid-size oscillation in j, coming from ue non-linearity?
 
-3b0.2 artPar 10.0   : Running
-3b0.2 artPar 4.0    : Running
-3b0.2 artPar 4.0e-1 : Running
+3b0.2 artPar 10.0   : Finished after 25 h 30 m, ok turbulence (looks like a shaky dancer) !!! Grid-size oscillations in j and vort
+3b0.2 artPar 4.0    : Failed after 3 steps (6h 34m), finer structures, not apparent why fails
+3b0.2 artPar 4.0e-1 : Failed after 3 steps (6h 36m), finer structures, not apparent why fails
 
-3b0.3 artPar 10.0   : Running
-3b0.3 artPar 4.0    : Running
-3b0.3 artPar 4.0e-1 : Running
+Proper hypervisc
+................
+96 procs
+........
+3b0.3 artPar 10.0   : Finished after 23 h 8 m (communication over 58%), ok turbulence (looks like a shaky dancer) !!! Grid-size oscillations in j and vort at source side, looks a bit different than other solutions
+3b0.3 artPar 4.0    : Finished 89 steps, then killed by walltime (48h) (communication around 40%)
+3b0.3 artPar 4.0e-1 : Finished 6 steps, then killed by walltime (48h) (communication around 40%), completely different turbulence, more coherent? Something happening in the vorticity
+
+48 procs
+........
+3b0.3.1 artPar 10.0   : Finished after 22 h 58 m (communication around 15%), ok turbulence (looks like a shaky dancer) !!! Grid-size oscillations in j and vort at source side, looks a bit different than other solutions
+3b0.3.1 artPar 4.0    : Running
+3b0.3.1 artPar 4.0e-1 : Failed after 6 steps (11h 5m), timestep failed (communication around 15%), completely different turbulence, more coherent? Something happening in the vorticity
+
+64 procs
+........
+3b0.3.2 artPar 10.0   : Finished after 22 h 1 m (communication over 35%), ok turbulence (looks like a shaky dancer) !!! Grid-size oscillations in j and vort at source side, looks a bit different than other solutions
+3b0.3.2 artPar 4.0    : Finished after 33 h 41 m (communication over 35%), finer structure (looks like shaky dancer)!!! Grid-size oscillations in j and vort at source side
+3b0.3.2 artPar 4.0e-1 : Failed after 6 steps (12h 8m), timestep failed (communication over 35%), completely different turbulence, more coherent? Something happening in the vorticity
+
+NOTE: The filter allows more modes azimuthally
+Conclusion: Could run with lower artPar due to higher number of points
+Conclusion: CELMA runs currently best on 48 procs/possible to speed-up with reducing communications (if possible)
+
+Low art visc vortD
+..................
+artPar 4.0
+..........
+3b10 perpVortD 0.0    parVortD 0.0    : - (see above)
+3b10 perpVortD 4.0e-1 parVortD 0.0    : Running
+3b10 perpVortD 0.0    parVortD 2.0e-1 : Running
+3b10 perpVortD 4.0e-1 parVortD 2.0e-1 : Running
+
+artPar 0.4
+..........
+3b10 perpVortD 0.0    parVortD 0.0    : - (see above)
+3b10 perpVortD 4.0e-1 parVortD 0.0    : Running
+3b10 perpVortD 0.0    parVortD 2.0e-1 : Running
+3b10 perpVortD 4.0e-1 parVortD 2.0e-1 : Running
+
+
+
 
 c-wArtVortD (the same as a-data, but new folder in order to separate)
 ---------------------------------------------------------------------
