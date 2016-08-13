@@ -13,16 +13,16 @@ import os
 #{{{perform_MES_test
 def perform_MES_test(\
                      paths,\
-                     extension     = 'png' ,\
-                     show_plot     = False ,\
-                     xz_error_plot = False ,\
-                     xy_error_plot = False ,\
-                     use_dx        = True  ,\
-                     use_dy        = True  ,\
-                     use_dz        = True  ,\
-                     y_plane       = None  ,\
-                     z_plane       = None  ,\
-                     yguards       = False ,\
+                     extension     = 'png',\
+                     show_plot     = False,\
+                     xz_error_plot = False,\
+                     xy_error_plot = False,\
+                     use_dx        = True ,\
+                     use_dy        = True ,\
+                     use_dz        = True ,\
+                     y_plane       = None ,\
+                     z_plane       = None ,\
+                     yguards       = False,\
                      ):
     """Collects the data members belonging to a convergence plot"""
 
@@ -35,7 +35,7 @@ def perform_MES_test(\
 
     # Loop over the runs in order to collect
     for path in paths:
-        # Collect n_solution - n_numerical
+        # Collect the error field
         error_field = collect('e', path=path, info=False,\
                               xguards = False, yguards = yguards)
 
@@ -43,10 +43,12 @@ def perform_MES_test(\
             # Pick the last time point
             error_field = error_field[-1]
 
-        # Add the error field
+        # Add the error field to data
         Lx = collect('Lx', path=path, info=False)
-        dx = collect('dx', path=path, info=False)
-        dy = collect('dy', path=path, info=False)
+        dx = collect('dx', path=path, info=False,\
+                           xguards = False, yguards = yguards)
+        dy = collect('dy', path=path, info=False,\
+                           xguards = False, yguards = yguards)
         dz = collect('dz', path=path, info=False)
         data['error_field'].append({'field':abs(error_field),\
                                     'Lx':Lx                 ,\
@@ -63,17 +65,11 @@ def perform_MES_test(\
         max_spacings = []
         # Collect the spacings
         if use_dx:
-            dx_spacing = collect("dx", path=path, info=False,\
-                                 xguards = False, yguards = False)
-            max_spacings.append(np.max(dx_spacing))
+            max_spacings.append(np.max(dx))
         if use_dy:
-            dy_spacing = collect("dy", path=path, info=False,\
-                                 xguards = False, yguards = False)
-            max_spacings.append(np.max(dy_spacing))
+            max_spacings.append(np.max(dy))
         if use_dz:
-            dz_spacing = collect("dz", path=path, info=False,\
-                                 xguards = False, yguards = False)
-            max_spacings.append(np.max(dz_spacing))
+            max_spacings.append(np.max(dz))
 
         # Store the spacing in the data
         data['spacing'].append(np.max(max_spacings))
@@ -220,7 +216,7 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
 
     ax = fig.add_subplot(111)
 
-    # Plot errore
+    # Plot errors
     # Plot the error-space plot for the 2-norm
     ax.plot(data['spacing'], data['error_2'], 'b-o', label=r'$L_2$')
     # Plot the error-space plot for the inf-norm
