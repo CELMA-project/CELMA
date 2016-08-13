@@ -1,0 +1,11 @@
+Copied from MMS/singleOperators/0-DDXCylinder/
+
+- Check that the volume integral is properly working
+
+Results:
+========
+- sumSines: To be run
+
+Conclusion:
+===========
+To be run
