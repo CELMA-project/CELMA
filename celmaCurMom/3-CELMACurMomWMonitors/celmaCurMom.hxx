@@ -58,6 +58,11 @@ public:
     Vector3D gradPerpLnN;    // gradPerpLnN
     // *****************************************************************************
 
+    // Monitors
+    // *****************************************************************************
+    BoutReal kinE;
+    // *****************************************************************************
+
     // Additional methods and solvers
     // *****************************************************************************
     OwnOperators *ownOp;            // Pointer to the chosen operators class
@@ -110,11 +115,11 @@ private:
 
     // Additional methods and solvers
     // *****************************************************************************
-    BRACKET_METHOD bm;              // The bracket method
-    OwnBCs ownBC;                   // Class containing methods which sets the ghost points
-    OwnLaplacianInversions ownLapl; // Class containing own laplacian
-    OwnFilters *ownFilter;          // Pointer to the chosen filter class
-    ownMonitors<CelmaCurMom> ownMon;             // Own monitors
+    BRACKET_METHOD bm;               // The bracket method
+    OwnBCs ownBC;                    // Class containing methods which sets the ghost points
+    OwnLaplacianInversions ownLapl;  // Class containing own laplacian
+    OwnFilters *ownFilter;           // Pointer to the chosen filter class
+    ownMonitors<CelmaCurMom> ownMon; // Own monitors
     // *****************************************************************************
 
     // Switches

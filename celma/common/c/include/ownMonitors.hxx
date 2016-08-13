@@ -41,6 +41,14 @@ public:
     // Monitors
     //! Energy monitor
     static int energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT);
+
+    // Functions
+    //! Calculates the kinetic energy
+    static void kinEnergy(BoutReal &kinE      ,
+                          Field3D const &n    ,
+                          Field3D const &phi  ,
+                          Field3D const &uEPar,
+                          Field3D const &uIPar);
 };
 
 /* NOTE: Reason for definition
