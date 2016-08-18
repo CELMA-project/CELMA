@@ -10,7 +10,7 @@ common_dir = os.path.abspath('./../../')
 # Sys path is a list of system paths
 sys.path.append(common_dir)
 
-from common.python.postProcessingMESIntegral import perform_MES_test as postProcess
+from common.python.postProcessingMESVolIntegral import perform_MES_test as postProcess
 
 # The options for the run
 # =============================================================================

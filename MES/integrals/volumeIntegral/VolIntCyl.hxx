@@ -15,7 +15,7 @@
 // Gives own boundaries (doing so by setting ghost points)
 #include "../../common/c/include/ownBCs.hxx"
 // Give the integrators
-#include "../../common/c/include/helperFunctions.hxx"
+#include "../../common/c/include/helpers.hxx"
 
 class VolIntCyl : public PhysicsModel {
 public:
@@ -52,6 +52,7 @@ private:
     // Other objects
     // *****************************************************************************
     OwnBCs ownBC;           // Class containing methods which sets the ghost points
+    Helpers helper;         // Helper class
     // *****************************************************************************
     // ############################################################################
 };
