@@ -110,20 +110,40 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 
 # The function to test
 # =============================================================================
-[f]
-function = 2.37269930690753e-5*sin(3.0*z) + 2.37269930690753e-5*sin(geom:xl/5 + 2.0) + 2.37269930690753e-5*sin(0.4*geom:xl + 2.1) + 2.37269930690753e-5*sin(0.6*geom:xl + 0.5) + 2.37269930690753e-5*sin(geom:yl/200 + 0.1) + 2.37269930690753e-5*sin(0.01*geom:yl + 1) + 2.37269930690753e-5*sin(0.0125*geom:yl + 0.3) + 2.37269930690753e-5*sin(z + 2.0) + 2.37269930690753e-5*sin(2.0*z + 2.1)
+[vx]
+function = 7.70510083921872e-5*sin(3.0*z) + 7.70510083921872e-5*sin(geom:yl/200 + 0.1) + 7.70510083921872e-5*sin(0.01*geom:yl + 1) + 7.70510083921872e-5*sin(0.0125*geom:yl + 0.3) + 7.70510083921872e-5*sin(z + 2.0) + 7.70510083921872e-5*sin(2.0*z + 2.1)
 
 # Boundaries
 bndry_xin   = none                     # Manual boundary found in the code
-bndry_xout  = dirichlet_o4(f:function)
-bndry_yup   = dirichlet_o4(f:function)
-bndry_ydown = dirichlet_o4(f:function)
+bndry_xout  = dirichlet_o4(vx:function)
+bndry_yup   = dirichlet_o4(vx:function)
+bndry_ydown = dirichlet_o4(vx:function)
+
+[vy]
+function = 0.0206184463372274*sin(3.0*z) + 0.0206184463372274*sin(geom:xl/5 + 2.0) + 0.0206184463372274*sin(0.4*geom:xl + 2.1) + 0.0206184463372274*sin(0.6*geom:xl + 0.5) + 0.0206184463372274*sin(z + 2.0) + 0.0206184463372274*sin(2.0*z + 2.1)
+
+# Boundaries
+bndry_xin   = none                     # Manual boundary found in the code
+bndry_xout  = dirichlet_o4(vy:function)
+bndry_yup   = dirichlet_o4(vy:function)
+bndry_ydown = dirichlet_o4(vy:function)
+
+[vz]
+function = 0.0
+
+# Boundaries
+bndry_xin   = none                     # Manual boundary found in the code
+bndry_xout  = dirichlet_o4(vz:function)
+bndry_yup   = dirichlet_o4(vz:function)
+bndry_ydown = dirichlet_o4(vz:function)
 # =============================================================================
 
 
 # The analytic solution
 # =============================================================================
 [S]
-solution = 1.0
+S_Xout  =   0.999999999999998
+S_Yup   =   0.999999999999999
+S_YDown = - 0.999999999999999
 # =============================================================================
 ##############################################################################
