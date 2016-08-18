@@ -44,8 +44,8 @@ Field3D const polAvg(const Field3D &f)
  * c) )
  *
  * \f{eqnarray}{
- * \iiint f d^3R
- * = \iiint f J du^1 du^2 du^3
+ * \int\int\int f d^3R
+ * = \int\int\int f J du^1 du^2 du^3
  * \simeq \sum_{u^3}\sum_{u^2}\sum_{u^1} f J du^1 du^2 du^3
  * \f}
  *
@@ -105,9 +105,9 @@ void volumeIntegral(Field3D const &f, BoutReal &result)
  * b) )
  *
  * \f{eqnarray}{
- *   \iint \mathbf{v} \cdot d\mathbf{S}(\text{in} u^i = \text{constant})
- * = \iint \mathbf{v} \cdot d\mathbf{S}(i)
- * = \iint \mathbf{v} \cdot (\pm J du^j du^k \mathbf{e}^i)
+ *   \int\int \mathbf{v} \cdot d\mathbf{S}(\mathrm{in} u^i = \mathrm{constant})
+ * = \int\int \mathbf{v} \cdot d\mathbf{S}(i)
+ * = \int\int \mathbf{v} \cdot (\pm J du^j du^k \mathbf{e}^i)
  * \simeq \sum_{u^k}\sum_{u^j} \mathbf{v} \cdot (\pm J du^j du^k \mathbf{e}^i)
  * \f}
  *
@@ -119,15 +119,15 @@ void volumeIntegral(Field3D const &f, BoutReal &result)
  * \param[in] results   std::vector to store the results in
  *                      result[0] - integral over v on the xin surface
  *                      result[1] - integral over v on the xout surface
- *                      result[2] - integral over v on the yup surface
- *                      result[3] - integral over v on the ydown surface
+ *                      result[2] - integral over v on the ydown surface
+ *                      result[3] - integral over v on the yup surface
  *
  *
  * \param[out] results  The result of the integration
  *                      result[0] - integral over v on the xin surface
  *                      result[1] - integral over v on the xout surface
- *                      result[2] - integral over v on the yup surface
- *                      result[3] - integral over v on the ydown surface
+ *                      result[2] - integral over v on the ydown surface
+ *                      result[3] - integral over v on the yup surface
  *
  * \note There are no integral on the z-surfaces as these are periodic.
  *
@@ -161,14 +161,14 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         // Make the dS vectors
         dSXin   = 0.0;
         dSXout  = 0.0;
-        dSYup   = 0.0;
         dSYdown = 0.0;
+        dSYup   = 0.0;
 
         // Referring to the components
         dSXin  .covariant = true;
         dSXout .covariant = true;
-        dSYup  .covariant = true;
         dSYdown.covariant = true;
+        dSYup  .covariant = true;
 
         // Vector is pointing in the direction of negative x
         dSXin  .x = - mesh->J*mesh->dy*mesh->dz;
@@ -180,24 +180,29 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         dSXout .y = 0.0;
         dSXout .z = 0.0;
 
-        // Vector is pointing in the direction of negative y
-        dSYup  .x = 0.0;
-        dSYup  .y = - mesh->J*mesh->dx*mesh->dz;
-        dSYup  .z = 0.0;
-
         // Vector is pointing in the direction of positive y
         dSYdown.x = 0.0;
         dSYdown.y = mesh->J*mesh->dx*mesh->dz;
         dSYdown.z = 0.0;
 
+        // Vector is pointing in the direction of negative y
+        dSYup  .x = 0.0;
+        dSYup  .y = - mesh->J*mesh->dx*mesh->dz;
+        dSYup  .z = 0.0;
+
         initialized = true;
     }
 
-    // Reset values
-    vDotDSXin   = 0.0;
-    vDotDSXout  = 0.0;
-    vDotDSYup   = 0.0;
-    vDotDSYdown = 0.0;
+    // Guard
+    if (results.size() != 4 ){
+        throw BoutException("'results' must have length 4");
+    }
+
+    // Calculate values
+    vDotDSXin   = v*dSXin;
+    vDotDSXout  = v*dSXout;
+    vDotDSYdown = v*dSYdown;
+    vDotDSYup   = v*dSYup;
 
     for (std::vector<BoutReal>::iterator it = results.begin();
          it != results.end();
@@ -210,8 +215,8 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
      * These will be be collected by MPI_Allreduce.
      * localResult[0] - integral over v on the xin surface
      * localResult[1] - integral over v on the xout surface
-     * localResult[2] - integral over v on the yup surface
-     * localResult[3] - integral over v on the ydown surface
+     * localResult[2] - integral over v on the ydown surface
+     * localResult[3] - integral over v on the yup surface
      */
     std::vector<BoutReal> localResults (4, 0.0);
 

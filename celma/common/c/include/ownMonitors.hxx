@@ -12,7 +12,7 @@
  *       http://stackoverflow.com/questions/1474416/c-passing-a-class-as-a-parameter
  */
 template<class PhysicsClass>
-class ownMonitors
+class OwnMonitors
 {
 private:
     //! Declaration of model (needed for accessing members of the PhysicsClass)
@@ -56,7 +56,7 @@ public:
  *       http://stackoverflow.com/questions/7092765/what-does-it-mean-to-have-an-undefined-reference-to-a-static-member
  */
 //! The model definition
-template<class PhysicsClass> PhysicsClass* ownMonitors<PhysicsClass>::model;
+template<class PhysicsClass> PhysicsClass* OwnMonitors<PhysicsClass>::model;
 
 #include "../src/ownMonitors.cxx"
 
