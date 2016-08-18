@@ -65,7 +65,7 @@ int SurfEdgeIntCyl::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    // surfaceEdgeIntegral(v, results);
+    helper.surfaceEdgeIntegral(v, results);
     S_Xout_num  = results[1];
     S_Ydown_num = results[2];
     S_Yup_num   = results[3];

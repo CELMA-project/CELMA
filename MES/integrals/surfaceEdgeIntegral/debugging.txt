@@ -1,0 +1,34 @@
+Checked MPI_Allreduce - Works
+    output << "localResult.size()="<< localResults.size() << std::endl;
+    // Sum the data from the processors, and store it in results
+     for (std::vector<BoutReal>::iterator it = localResults.begin();
+         it != localResults.end();
+         ++it)
+    {
+        output << "localResult["<< it - localResults.begin()<<"]=" << *it << std::endl;
+    }
+
+Checking input field - Looks like vector is well initialized with init_profile
+Compare fields (analytic and numeric) - !!!!! Mistake found !!! Forgot to set scale !!!
+
+[delme]
+# vy
+f = geom:xl*(0.0206184463372274*sin(3.0*z) + 0.0206184463372274*sin(geom:xl/5 + 2.0) + 0.0206184463372274*sin(0.4*geom:xl + 2.1) + 0.0206184463372274*sin(0.6*geom:xl + 0.5) + 0.0206184463372274*sin(z + 2.0) + 0.0206184463372274*sin(2.0*z + 2.1))
+
+    // Delme
+    Field3D delme = FieldFactory::get()
+        ->create3D("delme:f", Options::getRoot(), mesh, CELL_CENTRE, 0);
+    Field3D vyx = v.y*mesh->J;
+    Field3D diff = delme - vyx;
+    SAVE_ONCE (delme);
+    SAVE_ONCE (vyx);
+    SAVE_ONCE (diff);
+    // Finalize
+    dump.write();
+    dump.close();
+
+    output << "\nwritten diff!!!\n\n\n\n\n\n" << std::endl;
+
+    // Wait for all processors to write data
+    MPI_Barrier(BoutComm::get());
+    throw BoutException("Killed");
