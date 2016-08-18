@@ -4,51 +4,62 @@ import ycm_core
 """
 Configure file for you complete me.
 
-The following assumes that
-    1. BOUT-dev is installed in the $HOME directory
-    2. PETSc version petsc-3.5.4 is installed in the $HOME directory
-    3. python 2.7 is installed under anaconda3 in the $HOME directory
-       under the environment py27
+Fill in specific directories in order to make work.
 """
 
-# NOTE: It could be that YCM-Generator works, while standing in BOUT-dev
-#       directory and typing
-#       ./config_gen.py $(HOME)/BOUT-dev/ --compiler="$(HOME)/.vim/bundle/YCM-Generator/fake-toolchain/Unix/clang" --configure_opts="--with-checks=3 --with-track --with-debug --with-petsc" --verbose
-#       One gets that clang is not able to build cxx files
+# NOTE: Previous trials wit YCM-Generator has not succeeded
 
-# Get the home directory
-home = os.path.expanduser("~")
-petsc = os.path.join(home, "petsc-3.5.4")
-
-# NOTE: The following flags are those which are printed out when running
-#       make after configuring
+# Specific directiries
+home     = os.path.expanduser("~")
+petsc    = os.path.join(home, "petsc-3.5.4")
+slepc    = os.path.join(home, "slepc-3.4.4")
+boutTop  = os.path.join(home, "BOUT-dev")
+anaconda = os.path.join(home, "anaconda3")
 
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
 # CHANGE THIS LIST OF FLAGS. YES, THIS IS THE DROID YOU HAVE BEEN LOOKING FOR.
 flags = [
-# BOUT++ Flags
+# BOUT++ Flags (found in make.config)
+# NOTE: There is no problem with having extra unused flags here
+# NOTE: The flags can be a bit scattered, look carefully
+# NOTE: Extra flags can which are hard to find can printed when making BOUT-dev
 '-DCHECK=3',
 '-DSIGHANDLE',
 '-DTRACK',
 '-DNCDF',
 '-DBOUT_HAS_PETSC',
-'-DBOUT_HAS_PETSC_3_5',
+'-DBOUT_HAS_PETSC_3_4',
+'-DBOUT_HAS_SLEPC',
+'-DBOUT_HAS_SLEPC_3_4',
 '-DBOUT_HAS_IDA',
 '-DBOUT_HAS_CVODE',
 '-DCVODEINT=long',
 '-DIDAINT=long',
 '-DBOUT_HAS_PVODE',
-# BOUT++ Flags Added by me (these are needed in order to make it run)
-'-I{}/BOUT-dev'.format(home),
-'-I{}/BOUT-dev/include'.format(home),
-# PETSc Flags
-'-I../include',
+'-I{}/local/include'.format(home),
+'-I{}/include'.format(boutTop),
+'-I{}/lib'.format(boutTop),
+'-I{}'.format(boutTop), # FIXME: This can probably be removed
+'-lfftw3',
+'-lnetcdf',
+'-lnetcdf_c++',
+'-L{}/local/lib'.format(home),
+'-lsundials_ida',
+'-lsundials_nvecparallel',
+'-lsundials_cvode',
+'-L{}/lib'.format(boutTop),
+'-lpvode',
+'-lpvpre',
+'-lm',
+'-lbout++',
+# From make in BOUT-dev
 '-I{}/include'.format(petsc),
 '-I{}/arch-linux2-cxx-debug/include'.format(petsc),
-'-I{}/anaconda3/envs/py27/include'.format(home),
-# CVODE flags
-'-I{}/local/include'.format(home),
+'-I{}/include'.format(anaconda),
+'-I{}'.format(slepc),
+'-I{}/arch-linux2-cxx-debug/include'.format(slepc),
+'-I{}/include'.format(slepc),
 ]
 
 
