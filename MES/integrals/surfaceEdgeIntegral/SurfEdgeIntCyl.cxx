@@ -21,28 +21,42 @@ int SurfEdgeIntCyl::init(bool restarting) {
     geom->get("Lx", Lx, 0.0);
     // ************************************************************************
 
+    // Load from the geometry
+    // ************************************************************************
+    Options *switches = options->getSection("switches");
+    switches->get("saveFields", saveFields, false);
+    // ************************************************************************
+
     // Obtain the fields
     // ************************************************************************
-    // f
-    f = FieldFactory::get()
-        ->create3D("f:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+    // See initialprofiles.cxx for creation of vectors
+    // v
+    v.covariant = false; // Referring to the components
+    initial_profile("v", v);
 
     // S
     Options *SOpt = options->getSection("S");
-    SOpt->get("solution", S, 0.0);
+    SOpt->get("S_Xout" , S_Xout , 0.0);
+    SOpt->get("S_Yup"  , S_Yup  , 0.0);
+    SOpt->get("S_Ydown", S_Ydown, 0.0);
+    // Add them to the result vector
     // ************************************************************************
 
     // Add a FieldGroup to communicate
     // ************************************************************************
     // Only these fields will be taken derivatives of
-    com_group.add(f);
+    com_group.add(v);
     // ************************************************************************
 
     // Set boundaries manually
     // ************************************************************************
-    f.setBoundary("f");
-    f.applyBoundary();
-    ownBC.innerRhoCylinder(f);
+    v.x.setBoundary("vx");
+    v.y.setBoundary("vy");
+    v.z.setBoundary("vz");
+    v.applyBoundary();
+    ownBC.innerRhoCylinder(v.x);
+    ownBC.innerRhoCylinder(v.y);
+    ownBC.innerRhoCylinder(v.z);
     // ************************************************************************
 
     // Communicate before taking derivatives
@@ -51,15 +65,25 @@ int SurfEdgeIntCyl::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    volumeIntegral(f, S_num);
+    // surfaceEdgeIntegral(v, results);
+    S_Xout_num  = results[1];
+    S_Ydown_num = results[2];
+    S_Yup_num   = results[3];
 
     // Error in S
-    e = S_num - S;
+    e_Xout  = S_Xout_num  - S_Xout;
+    e_Ydown = S_Ydown_num - S_Ydown;
+    e_Yup   = S_Yup_num   - S_Yup;
 
     // Save the variables
     SAVE_ONCE2(Lx, Ly);
-    SAVE_ONCE3(e, S, S_num);
-    SAVE_ONCE (f);
+    SAVE_ONCE3(S_Xout_num, S_Ydown_num, S_Yup_num);
+    SAVE_ONCE3(S_Xout,     S_Ydown,     S_Yup);
+    SAVE_ONCE3(e_Xout,     e_Ydown,     e_Yup);
+
+    if(saveFields){
+        SAVE_ONCE(v);
+    }
 
     // Finalize
     dump.write();
