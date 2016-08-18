@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post processing which performs MES for the integration routines"""
+"""Post processing which performs MES for the volume routines"""
 
 from boutdata import collect
 import matplotlib.pyplot as plt
@@ -59,7 +59,7 @@ def perform_MES_test(\
     # Sort the data
     data = sort_data(data)
 
-    # Find the order of convergence in the 2 norm and infinity norm
+    # Find the order of convergence
     order = get_order(data)
 
     # Get the root name of the path (used for saving files)
