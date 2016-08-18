@@ -1,7 +1,49 @@
-#ifndef __HELPERFUNCTIONS_CXX__
-#define __HELPERFUNCTIONS_CXX__
+#ifndef __HELPERS_CXX__
+#define __HELPERS_CXX__
 
-#include "../include/helperFunctions.hxx"
+#include "../include/helpers.hxx"
+
+/*!
+ * \brief Constructor
+ *
+ * Constructor which sets the private member data used in the
+ * surfaceEdgeIntegral. Note that localResults will be initialized to a vector
+ * with 4 entries with value 0.0
+ */
+Helpers::Helpers() : vDotDSXin   (0.0),
+                     vDotDSXout  (0.0),
+                     vDotDSYdown (0.0),
+                     vDotDSYup   (0.0),
+                     localResults(4, 0.0)
+{
+    TRACE("Halt in Helpers::Helpers");
+
+    // Referring to the components
+    dSXin  .covariant = true;
+    dSXout .covariant = true;
+    dSYdown.covariant = true;
+    dSYup  .covariant = true;
+
+    // Vector is pointing in the direction of negative x
+    dSXin  .x = - mesh->J*mesh->dy*mesh->dz;
+    dSXin  .y = 0.0;
+    dSXin  .z = 0.0;
+
+    // Vector is pointing in the direction of positive x
+    dSXout .x = mesh->J*mesh->dy*mesh->dz;
+    dSXout .y = 0.0;
+    dSXout .z = 0.0;
+
+    // Vector is pointing in the direction of negative y
+    dSYdown.x = 0.0;
+    dSYdown.y = - mesh->J*mesh->dx*mesh->dz;
+    dSYdown.z = 0.0;
+
+    // Vector is pointing in the direction of positive y
+    dSYup  .x = 0.0;
+    dSYup  .y = mesh->J*mesh->dx*mesh->dz;
+    dSYup  .z = 0.0;
+}
 
 /*!
  * Returns the poloidal average of a field
@@ -10,24 +52,24 @@
  *
  * \returns result The poloidal average of the field
  */
-Field3D const polAvg(const Field3D &f)
+Field3D const Helpers::polAvg(const Field3D &f)
 {
-    TRACE("Halt in polAvg");
+    TRACE("Halt in Helpers::polAvg");
 
     Field3D result = 0.0;
     BoutReal avg;
 
-    for(int xInd = mesh->xstart+1; xInd <= mesh->xend-1; xInd++){
-        for(int yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
+    for(xInd = mesh->xstart+1; xInd <= mesh->xend-1; xInd++){
+        for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
             // Find the average
             avg = 0.0;
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 avg += f(xInd, yInd, zInd);
             }
             avg /= (mesh->ngz - 1);
 
             // Subtract the average from the field
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+            for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
                 result(xInd, yInd, zInd) = f(xInd, yInd, zInd) - avg ;
             }
         }
@@ -56,9 +98,9 @@ Field3D const polAvg(const Field3D &f)
  *
  * \param[out] result The volume integral of field f
  */
-void volumeIntegral(Field3D const &f, BoutReal &result)
+void Helpers::volumeIntegral(Field3D const &f, BoutReal &result)
 {
-    TRACE("Halt in volumeIntegral");
+    TRACE("Halt in Helpers::volumeIntegral");
 
     // Make a local variable (which will be collected by MPI_Allreduce)
     BoutReal localResult = 0.0;
@@ -76,9 +118,9 @@ void volumeIntegral(Field3D const &f, BoutReal &result)
      *       < instead of <= in the loop.
      */
     // We loop over the processor domain
-    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
-        for (int yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
-            for (int zInd = 0; zInd < mesh->ngz - 1; zInd ++){
+    for (xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
+        for (yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
+            for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
                 localResult +=
                     f       (xInd, yInd, zInd) *
                     mesh->J (xInd, yInd)       *
@@ -134,91 +176,25 @@ void volumeIntegral(Field3D const &f, BoutReal &result)
  * \warning Only to be used when the surface is located half between the grid
  *          points.
  */
-void surfaceEdgeIntegral(Vector3D const &v             ,
-                         std::vector<BoutReal> &results)
+void Helpers::surfaceEdgeIntegral(Vector3D const &v,
+                                 std::vector<BoutReal> &results)
 {
-    TRACE("Halt in surfaceEdgeIntegral");
-
-    // NOTE: Local statics are not destroyed when a function ends
-    static bool initialized = false;
-
-    static Vector3D dSXin  ; // Inner x edge surface
-    static Vector3D dSXout ; // Outer x edge surface
-    static Vector3D dSYup  ; // Upper y edge surface
-    static Vector3D dSYdown; // Lower y edge surface
-
-    static Field3D vDotDSXin  ; // Inner x edge surface
-    static Field3D vDotDSXout ; // Outer x edge surface
-    static Field3D vDotDSYup  ; // Upper y edge surface
-    static Field3D vDotDSYdown; // Lower y edge surface
-
-    static int xInd; // Looping index
-    static int yInd; // Looping index
-    static int zInd; // Looping index
-
-    // Need to call the following only once
-    if (!initialized) {
-        // Make the dS vectors
-        dSXin   = 0.0;
-        dSXout  = 0.0;
-        dSYdown = 0.0;
-        dSYup   = 0.0;
-
-        // Referring to the components
-        dSXin  .covariant = true;
-        dSXout .covariant = true;
-        dSYdown.covariant = true;
-        dSYup  .covariant = true;
-
-        // Vector is pointing in the direction of negative x
-        dSXin  .x = - mesh->J*mesh->dy*mesh->dz;
-        dSXin  .y = 0.0;
-        dSXin  .z = 0.0;
-
-        // Vector is pointing in the direction of positive x
-        dSXout .x = mesh->J*mesh->dy*mesh->dz;
-        dSXout .y = 0.0;
-        dSXout .z = 0.0;
-
-        // Vector is pointing in the direction of positive y
-        dSYdown.x = 0.0;
-        dSYdown.y = mesh->J*mesh->dx*mesh->dz;
-        dSYdown.z = 0.0;
-
-        // Vector is pointing in the direction of negative y
-        dSYup  .x = 0.0;
-        dSYup  .y = - mesh->J*mesh->dx*mesh->dz;
-        dSYup  .z = 0.0;
-
-        initialized = true;
-    }
+    TRACE("Halt in Helpers::surfaceEdgeIntegral");
 
     // Guard
     if (results.size() != 4 ){
         throw BoutException("'results' must have length 4");
     }
 
-    // Calculate values
-    vDotDSXin   = v*dSXin;
-    vDotDSXout  = v*dSXout;
-    vDotDSYdown = v*dSYdown;
-    vDotDSYup   = v*dSYup;
-
+    // Reset results
     for (std::vector<BoutReal>::iterator it = results.begin();
          it != results.end();
          ++it)
     {
         *it = 0.0;
+        // it - results.begin() is the current index
+        localResults[it - results.begin()] = 0.0;
     }
-
-    /* Declare and define 4 local variables with values 0.0
-     * These will be be collected by MPI_Allreduce.
-     * localResult[0] - integral over v on the xin surface
-     * localResult[1] - integral over v on the xout surface
-     * localResult[2] - integral over v on the ydown surface
-     * localResult[3] - integral over v on the yup surface
-     */
-    std::vector<BoutReal> localResults (4, 0.0);
 
     /* NOTE: Addressing "off by one" looping over the local range
      *       We want to loop starting from (and including) mesh->@start to (and
@@ -232,7 +208,6 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
      *       the input file. To account for the counting from 0, we simply use
      *       < instead of <= in the loop.
      */
-
     if(mesh->firstX()){
         vDotDSXin = v*dSXin;
         // Loop through the inner boundary points
@@ -240,15 +215,16 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         for (yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
                 // Extrapolate to the edge using a 4th order stencil
-                localResults[0] +=   35.0*vDotDSXin(xInd  , yInd, zInd)
-                                   - 35.0*vDotDSXin(xInd+1, yInd, zInd)
-                                   + 21.0*vDotDSXin(xInd+2, yInd, zInd)
-                                   -  5.0*vDotDSXin(xInd+3, yInd, zInd)
+                localResults[0] += vDotDSXin(xInd, yInd, zInd)
+//                localResults[0] +=   35.0*vDotDSXin(xInd  , yInd, zInd)
+//                                   - 35.0*vDotDSXin(xInd+1, yInd, zInd)
+//                                   + 21.0*vDotDSXin(xInd+2, yInd, zInd)
+//                                   -  5.0*vDotDSXin(xInd+3, yInd, zInd)
                                    ;
             }
         }
         // The last part of the extrapolation
-        localResults[0] /= 16.0;
+//        localResults[0] /= 16.0;
     }
     if(mesh->lastX()){
         vDotDSXout = v*dSXout;
@@ -257,15 +233,16 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         for (yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
                 // Extrapolate to the edge using a 4th order stencil
-                localResults[1] +=   35.0*vDotDSXout(xInd  , yInd, zInd)
-                                   - 35.0*vDotDSXout(xInd-1, yInd, zInd)
-                                   + 21.0*vDotDSXout(xInd-2, yInd, zInd)
-                                   -  5.0*vDotDSXout(xInd-3, yInd, zInd)
+                localResults[1] += vDotDSXout(xInd, yInd, zInd)
+//                localResults[1] +=   35.0*vDotDSXout(xInd  , yInd, zInd)
+//                                   - 35.0*vDotDSXout(xInd-1, yInd, zInd)
+//                                   + 21.0*vDotDSXout(xInd-2, yInd, zInd)
+//                                   -  5.0*vDotDSXout(xInd-3, yInd, zInd)
                                    ;
             }
         }
         // The last part of the extrapolation
-        localResults[1] /= 16.0;
+ //       localResults[1] /= 16.0;
     }
     if(mesh->firstY()){
         vDotDSYdown = v*dSYdown;
@@ -273,15 +250,16 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         yInd = mesh->ystart;
         for (xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                localResults[2] +=   35.0*vDotDSYdown(xInd, yInd  , zInd)
-                                   - 35.0*vDotDSYdown(xInd, yInd+1, zInd)
-                                   + 21.0*vDotDSYdown(xInd, yInd+2, zInd)
-                                   -  5.0*vDotDSYdown(xInd, yInd+3, zInd)
+                localResults[2] += vDotDSYdown(xInd, yInd, zInd)
+//                localResults[2] +=   35.0*vDotDSYdown(xInd, yInd  , zInd)
+//                                   - 35.0*vDotDSYdown(xInd, yInd+1, zInd)
+//                                   + 21.0*vDotDSYdown(xInd, yInd+2, zInd)
+//                                   -  5.0*vDotDSYdown(xInd, yInd+3, zInd)
                                    ;
             }
         }
         // The last part of the extrapolation
-        localResults[2] /= 16.0;
+//        localResults[2] /= 16.0;
     }
     if(mesh->lastY()){
         vDotDSYup = v*dSYup;
@@ -289,21 +267,29 @@ void surfaceEdgeIntegral(Vector3D const &v             ,
         yInd = mesh->yend;
         for (xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                localResults[3] +=   35.0*vDotDSYup(xInd, yInd  , zInd)
-                                   - 35.0*vDotDSYup(xInd, yInd-1, zInd)
-                                   + 21.0*vDotDSYup(xInd, yInd-2, zInd)
-                                   -  5.0*vDotDSYup(xInd, yInd-3, zInd)
+                localResults[3] += vDotDSYup(xInd, yInd, zInd);
+//                localResults[3] +=   35.0*vDotDSYup(xInd, yInd  , zInd)
+//                                   - 35.0*vDotDSYup(xInd, yInd-1, zInd)
+//                                   + 21.0*vDotDSYup(xInd, yInd-2, zInd)
+//                                   -  5.0*vDotDSYup(xInd, yInd-3, zInd)
                                    ;
             }
         }
         // The last part of the extrapolation
-        localResults[3] /= 16.0;
+//        localResults[3] /= 16.0;
     }
 
+    output << "localResult.size()="<< localResults.size() << std::endl;
     // Sum the data from the processors, and store it in results
-    MPI_Allreduce(&localResults, &results,
-                  4, MPI_DOUBLE, MPI_SUM, BoutComm::get());
+     for (std::vector<BoutReal>::iterator it = localResults.begin();
+         it != localResults.end();
+         ++it)
+    {
+        output << "localResult["<< it - localResults.begin()<<"]=" << *it << std::endl;
+    }
 
+    MPI_Allreduce(localResults.data(), results.data(),
+                  4, MPI_DOUBLE, MPI_SUM, BoutComm::get());
 }
 
 #endif
