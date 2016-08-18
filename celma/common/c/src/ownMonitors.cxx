@@ -10,10 +10,10 @@
  * \param[in] model Object with the simulated model
  */
 template<class PhysicsClass>
-void ownMonitors<PhysicsClass>::create(PhysicsClass *inputModel)
+void OwnMonitors<PhysicsClass>::create(PhysicsClass *inputModel)
 {
 
-    TRACE("Halt in ownMonitors::create");
+    TRACE("Halt in OwnMonitors::create");
 
     model = inputModel;
 }
@@ -36,9 +36,9 @@ void ownMonitors<PhysicsClass>::create(PhysicsClass *inputModel)
  * \returns 0 On success
  */
 template<class PhysicsClass>
-int ownMonitors<PhysicsClass>::energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT)
+int OwnMonitors<PhysicsClass>::energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT)
 {
-    TRACE("Halt in ownMonitors<PhysicsClass>::energyIntMon");
+    TRACE("Halt in OwnMonitors<PhysicsClass>::energyIntMon");
 
     // Call the fillEnergy function
     int lol;
@@ -83,13 +83,13 @@ int ownMonitors<PhysicsClass>::energyIntMon(Solver *solver, BoutReal simtime, in
  * \param[out] kinE   Variable where the kinetic energy is stored
  */
 template<class PhysicsClass>
-void ownMonitors<PhysicsClass>::kinEnergy(BoutReal &kinE      ,
+void OwnMonitors<PhysicsClass>::kinEnergy(BoutReal &kinE      ,
                                           Field3D const &n    ,
                                           Field3D const &phi  ,
                                           Field3D const &uEPar,
                                           Field3D const &uIPar)
 {
-    TRACE("Halt in ownMonitors<PhysicsClass>::kinEnergy");
+    TRACE("Halt in OwnMonitors<PhysicsClass>::kinEnergy");
 }
 
 #endif
