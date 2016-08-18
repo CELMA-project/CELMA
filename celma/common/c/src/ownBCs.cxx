@@ -12,7 +12,8 @@
  *          should only be used for the processors using the respective
  *          boundaries
  */
-OwnBCs::OwnBCs(){
+OwnBCs::OwnBCs()
+{
     TRACE("Halt in OwnBCs::OwnBCs");
 
     // Set the piIndex
