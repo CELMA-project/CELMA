@@ -7,7 +7,7 @@ Results:
 - sumSines    : Looks to be converging, but not in z
 - sumSinesHat : Looks to be converging, but not in z
 - zHat        : Gives convergence
-- zSumSines   : Does not converge in z (small errors though)
+- zSines      : Does not converge in z (small errors though)
 
 Conclusion:
 ===========
