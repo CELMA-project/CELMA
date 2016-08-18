@@ -39,9 +39,8 @@ def perform_MES_test(\
         dy = collect('dy', path=path, info=False)
         dz = collect('dz', path=path, info=False)
 
-        # The error is stored in a np.array in collect, and must be cast
-        # to a float in order to use "format" later on
-        data['error'].append(float(error))
+        # We are only interested in the absolute value
+        data['error'].append(np.abs(error))
 
         # We are interested in the max of the spacings, so we make
         # an appendable list

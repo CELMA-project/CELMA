@@ -16,7 +16,7 @@ from common.python.postProcessingMESIntegral import perform_MES_test as postProc
 # =============================================================================
 # Additional options
 remove_old  = False
-directory   = "sumSines"
+directory   = "sumSinesHat"
 make        = False
 nproc       = 4
 maxNumber   = 512

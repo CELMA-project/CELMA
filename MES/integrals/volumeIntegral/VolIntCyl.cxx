@@ -21,6 +21,12 @@ int VolIntCyl::init(bool restarting) {
     geom->get("Lx", Lx, 0.0);
     // ************************************************************************
 
+    // Load from the geometry
+    // ************************************************************************
+    Options *switches = options->getSection("switches");
+    switches->get("saveFields", saveFields, false);
+    // ************************************************************************
+
     // Obtain the fields
     // ************************************************************************
     // f
@@ -59,7 +65,9 @@ int VolIntCyl::init(bool restarting) {
     // Save the variables
     SAVE_ONCE2(Lx, Ly);
     SAVE_ONCE3(e, S, S_num);
-    SAVE_ONCE (f);
+    if(saveFields){
+        SAVE_ONCE (f);
+    }
 
     // Finalize
     dump.write();
