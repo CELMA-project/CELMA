@@ -52,7 +52,7 @@ private:
     // Other objects
     // *****************************************************************************
     OwnBCs ownBC;           // Class containing methods which sets the ghost points
-    Helpers helper;         // Helper class
+    VolumeIntegral volInt;  // Helper class
     // *****************************************************************************
     // ############################################################################
 };
