@@ -23,7 +23,7 @@ int SurfEdgeIntCyl::init(bool restarting) {
 
     // Load from the geometry
     // ************************************************************************
-    Options *switches = options->getSection("switches");
+    Options *switches = options->getSection("switch");
     switches->get("saveFields", saveFields, false);
     // ************************************************************************
 
@@ -64,8 +64,29 @@ int SurfEdgeIntCyl::init(bool restarting) {
 
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
+    // Setup the surface integrator
+    surfInt.setSurfaces(false, true, true, true);
+    // Get mesh-options
+    MXG = mesh->getMXG();
+    MYG = mesh->getMYG();
+    xIndInner = 0;   // Not needed
+    yIndLower = MYG; // Indexing starts from 0
+    /* NOTE: GlobalNx and GlobalNy are defined in the same way
+     *       They count from the first ghost through the inner
+     *       points to the last ghost points.
+     *       As they are indices, we subtract by 1
+     *       We want the last inner point, so we subtract by MXG/MYG
+     */
+    xIndOuter = mesh->GlobalNx - 1 - MXG;
+    yIndUpper = mesh->GlobalNy - 1 - MYG;
+
     // Calculate the integral
-    helper.surfaceEdgeIntegral(v, results);
+    surfInt.surfaceEdgeIntegral(v,
+                                xIndInner,
+                                xIndOuter,
+                                yIndLower,
+                                yIndUpper,
+                                results);
     S_Xout_num  = results[1];
     S_Ydown_num = results[2];
     S_Yup_num   = results[3];

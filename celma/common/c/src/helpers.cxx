@@ -4,57 +4,15 @@
 #include "../include/helpers.hxx"
 
 /*!
- * \brief Constructor
- *
- * Constructor which sets the private member data used in the
- * surfaceEdgeIntegral. Note that localResults will be initialized to a vector
- * with 4 entries with value 0.0
- */
-Helpers::Helpers() : vDotDSXin   (0.0),
-                     vDotDSXout  (0.0),
-                     vDotDSYdown (0.0),
-                     vDotDSYup   (0.0),
-                     localResults(4, 0.0)
-{
-    TRACE("Halt in Helpers::Helpers");
-
-    // Referring to the components
-    dSXin  .covariant = true;
-    dSXout .covariant = true;
-    dSYdown.covariant = true;
-    dSYup  .covariant = true;
-
-    // Vector is pointing in the direction of negative x
-    dSXin  .x = - mesh->J*mesh->dy*mesh->dz;
-    dSXin  .y = 0.0;
-    dSXin  .z = 0.0;
-
-    // Vector is pointing in the direction of positive x
-    dSXout .x = mesh->J*mesh->dy*mesh->dz;
-    dSXout .y = 0.0;
-    dSXout .z = 0.0;
-
-    // Vector is pointing in the direction of negative y
-    dSYdown.x = 0.0;
-    dSYdown.y = - mesh->J*mesh->dx*mesh->dz;
-    dSYdown.z = 0.0;
-
-    // Vector is pointing in the direction of positive y
-    dSYup  .x = 0.0;
-    dSYup  .y = mesh->J*mesh->dx*mesh->dz;
-    dSYup  .z = 0.0;
-}
-
-/*!
  * Returns the poloidal average of a field
  *
  * \param[in] f     The field to take the average of
  *
  * \returns result The poloidal average of the field
  */
-Field3D const Helpers::polAvg(const Field3D &f)
+Field3D const PolAvg::polAvg(const Field3D &f)
 {
-    TRACE("Halt in Helpers::polAvg");
+    TRACE("Halt in PolAvg::polAvg");
 
     Field3D result = 0.0;
     BoutReal avg;
@@ -98,9 +56,9 @@ Field3D const Helpers::polAvg(const Field3D &f)
  *
  * \param[out] result The volume integral of field f
  */
-void Helpers::volumeIntegral(Field3D const &f, BoutReal &result)
+void VolumeIntegral::volumeIntegral(Field3D const &f, BoutReal &result)
 {
-    TRACE("Halt in Helpers::volumeIntegral");
+    TRACE("Halt in VolumeIntegral::volumeIntegral");
 
     // Make a local variable (which will be collected by MPI_Allreduce)
     BoutReal localResult = 0.0;
@@ -139,11 +97,74 @@ void Helpers::volumeIntegral(Field3D const &f, BoutReal &result)
 }
 
 /*!
- * Returns the surface integral of a vector field at the edge of the domain
- * using the rectangle rule in 3D, and that the surface is half between
- * grid-points.
+ * \brief Constructor
  *
- * We have that the surface integral is given by (see D'Haeseleer chapter 2.5.4
+ * Constructor which sets the private member data used in the
+ * surfaceEdgeIntegral. Note that localResults will be initialized to a vector
+ * with 4 entries with value 0.0
+ */
+SurfaceIntegral::SurfaceIntegral() : vDotDSXin   (0.0),
+                                     vDotDSXout  (0.0),
+                                     vDotDSYdown (0.0),
+                                     vDotDSYup   (0.0),
+                                     localResults(4, 0.0),
+                                     useInner_   (true),
+                                     useOuter_   (true),
+                                     useLower_   (true),
+                                     useUpper_   (true)
+{
+    TRACE("SurfaceIntegral::SurfaceIntegral");
+
+    // Referring to the components
+    dSXin  .covariant = true;
+    dSXout .covariant = true;
+    dSYdown.covariant = true;
+    dSYup  .covariant = true;
+
+    // Vector is pointing in the direction of negative x
+    dSXin  .x = - mesh->J*mesh->dy*mesh->dz;
+    dSXin  .y = 0.0;
+    dSXin  .z = 0.0;
+
+    // Vector is pointing in the direction of positive x
+    dSXout .x = mesh->J*mesh->dy*mesh->dz;
+    dSXout .y = 0.0;
+    dSXout .z = 0.0;
+
+    // Vector is pointing in the direction of negative y
+    dSYdown.x = 0.0;
+    dSYdown.y = - mesh->J*mesh->dx*mesh->dz;
+    dSYdown.z = 0.0;
+
+    // Vector is pointing in the direction of positive y
+    dSYup  .x = 0.0;
+    dSYup  .y = mesh->J*mesh->dx*mesh->dz;
+    dSYup  .z = 0.0;
+
+    MXG = mesh->getMXG();
+    MYG = mesh->getMYG();
+}
+
+void SurfaceIntegral::setSurfaces(bool useInner,
+                                  bool useOuter,
+                                  bool useLower,
+                                  bool useUpper)
+{
+    useInner_ = useInner;
+    useOuter_ = useOuter;
+    useLower_ = useLower;
+    useUpper_ = useUpper;
+}
+
+/*!
+ * Returns the surface integral of a vector field at the edge of the domain
+ * using the rectangle rule in 3D. Note that the volume element \f$dS\f$
+ * is not spanned by four points, but rather the surface encapsulating
+ * the point under consideration (i.e. by the four lines running
+ * parallelly with the coordinate lines, but is half a grid size away
+ * from the point in the four directions)
+ *
+ * We have that the surface integral is given by (see D'Haeseleer chapter 2.5.49
  * b) )
  *
  * \f{eqnarray}{
@@ -158,6 +179,10 @@ void Helpers::volumeIntegral(Field3D const &f, BoutReal &result)
  * the normal of the surface (from equation 2.5.49 b in D'Haeseleer)
  *
  * \param[in] v         The vector field integrated over
+ * \param[in] xIndInner Global index for the x-index to use for the -x surface
+ * \param[in] xIndOuter Global index for the x-index to use for the +x surface
+ * \param[in] yIndLower Global index for the y-index to use for the -y surface
+ * \param[in] yIndUpper Global index for the y-index to use for the +y surface
  * \param[in] results   std::vector to store the results in
  *                      result[0] - integral over v on the xin surface
  *                      result[1] - integral over v on the xout surface
@@ -172,14 +197,15 @@ void Helpers::volumeIntegral(Field3D const &f, BoutReal &result)
  *                      result[3] - integral over v on the yup surface
  *
  * \note There are no integral on the z-surfaces as these are periodic.
- *
- * \warning Only to be used when the surface is located half between the grid
- *          points.
  */
-void Helpers::surfaceEdgeIntegral(Vector3D const &v,
-                                 std::vector<BoutReal> &results)
+void SurfaceIntegral::surfaceEdgeIntegral(Vector3D const &v,
+                                          int const &xIndInner,
+                                          int const &xIndOuter,
+                                          int const &yIndLower,
+                                          int const &yIndUpper,
+                                          std::vector<BoutReal> &results)
 {
-    TRACE("Halt in Helpers::surfaceEdgeIntegral");
+    TRACE("Halt in SurfaceIntegral::surfaceEdgeIntegral");
 
     // Guard
     if (results.size() != 4 ){
@@ -208,84 +234,56 @@ void Helpers::surfaceEdgeIntegral(Vector3D const &v,
      *       the input file. To account for the counting from 0, we simply use
      *       < instead of <= in the loop.
      */
-    if(mesh->firstX()){
+    /* NOTE: YLOCAL/YGLOBAL different than XLOCAL/XGLOBAL
+     *       They differ by an extra +/- MYG in YLOCAL/YGLOBAL
+     *       As the input in this function are pure global indices
+     *       (which counts from the first ghost through the inner
+     *       points to the last ghost points), the YLOCAL/YGLOBAL will
+     *       be subtracted/added with MYG to add up for the discrepancy
+     */
+    if(mesh->IS_MYPROC(xIndInner, mesh->YGLOBAL(mesh->ystart + MYG)) && useInner_){
+        // Cast to local indices
+        xIndInnerLoc = mesh->XLOCAL(xIndInner);
+        // Loop through the inner surface
         vDotDSXin = v*dSXin;
-        // Loop through the inner boundary points
-        xInd = mesh->xstart;
         for (yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                // Extrapolate to the edge using a 4th order stencil
-                localResults[0] += vDotDSXin(xInd, yInd, zInd)
-//                localResults[0] +=   35.0*vDotDSXin(xInd  , yInd, zInd)
-//                                   - 35.0*vDotDSXin(xInd+1, yInd, zInd)
-//                                   + 21.0*vDotDSXin(xInd+2, yInd, zInd)
-//                                   -  5.0*vDotDSXin(xInd+3, yInd, zInd)
-                                   ;
+                localResults[0] += vDotDSXin(xIndInnerLoc, yInd, zInd);
             }
         }
-        // The last part of the extrapolation
-//        localResults[0] /= 16.0;
     }
-    if(mesh->lastX()){
+    if(mesh->IS_MYPROC(xIndOuter, mesh->YGLOBAL(mesh->ystart + MYG)) && useOuter_){
+        // Cast to local indices
+        xIndOuterLoc = mesh->XLOCAL(xIndOuter);
+        // Loop through the outer surface
         vDotDSXout = v*dSXout;
-        // Loop through the outer boundary points
-        xInd = mesh->xend;
         for (yInd = mesh->ystart; yInd <= mesh->yend; yInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                // Extrapolate to the edge using a 4th order stencil
-                localResults[1] += vDotDSXout(xInd, yInd, zInd)
-//                localResults[1] +=   35.0*vDotDSXout(xInd  , yInd, zInd)
-//                                   - 35.0*vDotDSXout(xInd-1, yInd, zInd)
-//                                   + 21.0*vDotDSXout(xInd-2, yInd, zInd)
-//                                   -  5.0*vDotDSXout(xInd-3, yInd, zInd)
-                                   ;
+                localResults[1] += vDotDSXout(xIndOuterLoc, yInd, zInd);
             }
         }
-        // The last part of the extrapolation
- //       localResults[1] /= 16.0;
     }
-    if(mesh->firstY()){
+    if(mesh->IS_MYPROC(mesh->XGLOBAL(mesh->xstart), yIndLower) && useLower_){
+        // Cast to local indices
+        yIndLowerLoc = mesh->YLOCAL(yIndLower - MYG);
+        // Loop through the lower surface
         vDotDSYdown = v*dSYdown;
-        // Loop through the lower boundary points
-        yInd = mesh->ystart;
         for (xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                localResults[2] += vDotDSYdown(xInd, yInd, zInd)
-//                localResults[2] +=   35.0*vDotDSYdown(xInd, yInd  , zInd)
-//                                   - 35.0*vDotDSYdown(xInd, yInd+1, zInd)
-//                                   + 21.0*vDotDSYdown(xInd, yInd+2, zInd)
-//                                   -  5.0*vDotDSYdown(xInd, yInd+3, zInd)
-                                   ;
+                localResults[2] += vDotDSYdown(xInd, yIndLowerLoc, zInd);
             }
         }
-        // The last part of the extrapolation
-//        localResults[2] /= 16.0;
     }
-    if(mesh->lastY()){
+    if(mesh->IS_MYPROC(mesh->XGLOBAL(mesh->xstart), yIndUpper) && useUpper_){
+        // Cast to local indices
+        yIndUpperLoc = mesh->YLOCAL(yIndUpper -MYG);
+        // Loop through the upper surface
         vDotDSYup = v*dSYup;
-        // Loop through the upper boundary points
-        yInd = mesh->yend;
         for (xInd = mesh->xstart; xInd <= mesh->xend; xInd ++){
             for (zInd = 0; zInd < mesh->ngz - 1; zInd ++){
-                localResults[3] += vDotDSYup(xInd, yInd, zInd);
-//                localResults[3] +=   35.0*vDotDSYup(xInd, yInd  , zInd)
-//                                   - 35.0*vDotDSYup(xInd, yInd-1, zInd)
-//                                   + 21.0*vDotDSYup(xInd, yInd-2, zInd)
-//                                   -  5.0*vDotDSYup(xInd, yInd-3, zInd)
-                                   ;
+                localResults[3] += vDotDSYup(xInd, yIndUpperLoc, zInd);
             }
         }
-        // The last part of the extrapolation
-//        localResults[3] /= 16.0;
-    }
-
-    output << "localResult.size()="<< localResults.size() << std::endl;
-    // Sum the data from the processors, and store it in results
-     for (std::vector<BoutReal>::iterator it = localResults.begin();
-         it != localResults.end();
-         ++it)
-    {
-        output << "localResult["<< it - localResults.begin()<<"]=" << *it << std::endl;
     }
 
     MPI_Allreduce(localResults.data(), results.data(),

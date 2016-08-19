@@ -49,6 +49,17 @@ private:
     bool saveFields;
     // *****************************************************************************
 
+    // Monitor
+    // *****************************************************************************
+    int xIndInner;
+    int xIndOuter;
+    int yIndLower;
+    int yIndUpper;
+    int MXG;
+    int MYG;
+    // *****************************************************************************
+
+
     // Make a field group to communicate
     // *****************************************************************************
     FieldGroup com_group;
@@ -56,8 +67,8 @@ private:
 
     // Other objects
     // *****************************************************************************
-    OwnBCs ownBC;           // Class containing methods which sets the ghost points
-    Helpers helper;         // Helper class
+    OwnBCs ownBC;            // Class containing methods which sets the ghost points
+    SurfaceIntegral surfInt; // Surface integration class
     // *****************************************************************************
     // ############################################################################
 };

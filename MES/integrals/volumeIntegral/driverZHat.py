@@ -15,9 +15,9 @@ from common.python.postProcessingMESVolIntegral import perform_MES_test as postP
 # The options for the run
 # =============================================================================
 # Additional options
-remove_old  = False
+remove_old  = True
 directory   = "zHat"
-make        = False
+make        = True
 nproc       = 4
 maxNumber   = 512
 fromToRange = range(4, 9)
