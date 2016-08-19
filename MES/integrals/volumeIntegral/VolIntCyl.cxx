@@ -23,7 +23,7 @@ int VolIntCyl::init(bool restarting) {
 
     // Load from the geometry
     // ************************************************************************
-    Options *switches = options->getSection("switches");
+    Options *switches = options->getSection("switch");
     switches->get("saveFields", saveFields, false);
     // ************************************************************************
 
@@ -57,7 +57,7 @@ int VolIntCyl::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    helper.volumeIntegral(f, S_num);
+    volInt.volumeIntegral(f, S_num);
 
     // Error in S
     e = S_num - S;
