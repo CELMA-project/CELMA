@@ -95,20 +95,20 @@ dz_runs = basic_runner(\
 
 # Perform the runs
 # =============================================================================
-#dx_runs.execute_runs(\
-#                     remove_old = remove_old,\
-#                     # Set the proper directory
-#                     post_processing_function = postProcess,\
-#                     post_process_after_every_run = False,\
-#                     # Below are the kwargs arguments being passed to
-#                     # the post processing function
-#                     show_plot     = False,\
-#                     use_dx        = True ,\
-#                     use_dy        = False,\
-#                     use_dz        = False,\
-#                     extension     = 'pdf',\
-#                    )
-#
+dx_runs.execute_runs(\
+                     remove_old = remove_old,\
+                     # Set the proper directory
+                     post_processing_function = postProcess,\
+                     post_process_after_every_run = False,\
+                     # Below are the kwargs arguments being passed to
+                     # the post processing function
+                     show_plot     = False,\
+                     use_dx        = True ,\
+                     use_dy        = False,\
+                     use_dz        = False,\
+                     extension     = 'pdf',\
+                    )
+
 dy_runs.execute_runs(\
                      remove_old = remove_old,\
                      # Set the proper directory
@@ -123,17 +123,17 @@ dy_runs.execute_runs(\
                      extension     = 'pdf',\
                     )
 
-#dz_runs.execute_runs(\
-#                     remove_old = remove_old,\
-#                     # Set the proper directory
-#                     post_processing_function = postProcess,\
-#                     post_process_after_every_run = False,\
-#                     # Below are the kwargs arguments being passed to
-#                     # the post processing function
-#                     show_plot     = False,\
-#                     use_dx        = False,\
-#                     use_dy        = False,\
-#                     use_dz        = True ,\
-#                     extension     = 'pdf',\
-#                    )
+dz_runs.execute_runs(\
+                     remove_old = remove_old,\
+                     # Set the proper directory
+                     post_processing_function = postProcess,\
+                     post_process_after_every_run = False,\
+                     # Below are the kwargs arguments being passed to
+                     # the post processing function
+                     show_plot     = False,\
+                     use_dx        = False,\
+                     use_dy        = False,\
+                     use_dz        = True ,\
+                     extension     = 'pdf',\
+                    )
 # =============================================================================
