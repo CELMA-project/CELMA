@@ -256,7 +256,7 @@ def do_plot(data, full_folder, name, extension, show_plot, directions):
     #{{{dy
     if "dy" in full_folder:
         ax.plot(data['spacing'], data['e_Xout'], 'b-o',\
-                label=r'$\mathrm{Error outer plate}$')
+                label=r'Error outer plate')
 
         # Plot the order (see explanaition in postProcessingMES.py)
         ax.plot(\
