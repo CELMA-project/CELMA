@@ -32,3 +32,16 @@ f = geom:xl*(0.0206184463372274*sin(3.0*z) + 0.0206184463372274*sin(geom:xl/5 + 
     // Wait for all processors to write data
     MPI_Barrier(BoutComm::get());
     throw BoutException("Killed");
+
+
+Seem to not get convergence in z.....
+* [X] Check that dz is present in dS
+* [X] Check that looping to ngz
+* [ ] Check that dz is changing in the constructor
+* [X] Check that zInd is present in loop
+* [X] Check that zInd is present in variable on loop over
+* [X] Check that dz is collected
+* [X] Check that dz is used in post process
+* [X] Check that use_dz is set
+
+- Get in the end 1st order convergence, satisfied for now
