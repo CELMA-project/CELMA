@@ -41,7 +41,8 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix (-1 is non periodic, >ny is periodic)
+# Position of the separatrix 
+# Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
 ixseps2 = -1
