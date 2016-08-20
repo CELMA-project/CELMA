@@ -90,13 +90,13 @@ class SurfaceIntegral : private Helpers
         bool useLower_; //!< If the downer surface should be used (pointing in -y)
         bool useUpper_; //!< If the upper surface should be used (pointing in +y)
 
-        int xIndInnerLoc; //<! Global xIndInner index on current processor
-        int xIndOuterLoc; //<! Global xIndOuter index on current processor
-        int yIndLowerLoc; //<! Global yIndLower index on current processor
-        int yIndUpperLoc; //<! Global yIndUpper index on current processor
+        int xIndInnerLoc; //!< Global xIndInner index on current processor
+        int xIndOuterLoc; //!< Global xIndOuter index on current processor
+        int yIndLowerLoc; //!< Global yIndLower index on current processor
+        int yIndUpperLoc; //!< Global yIndUpper index on current processor
 
-        int MXG; //<! Number of ghost points in x
-        int MYG; //<! Number of ghost points in y
+        int MXG; //!< Number of ghost points in x
+        int MYG; //!< Number of ghost points in y
 
     public:
         // Constructor
