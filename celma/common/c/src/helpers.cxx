@@ -183,17 +183,17 @@ void SurfaceIntegral::setSurfaces(bool useInner,
  * \param[in] xIndOuter Global index for the x-index to use for the +x surface
  * \param[in] yIndLower Global index for the y-index to use for the -y surface
  * \param[in] yIndUpper Global index for the y-index to use for the +y surface
- * \param[in] results   std::vector to store the results in
- *                      result[0] - integral over v on the xin surface
- *                      result[1] - integral over v on the xout surface
- *                      result[2] - integral over v on the ydown surface
+ * \param[in] results   std::vector to store the results in\n
+ *                      result[0] - integral over v on the xin surface\n
+ *                      result[1] - integral over v on the xout surface\n
+ *                      result[2] - integral over v on the ydown surface\n
  *                      result[3] - integral over v on the yup surface
  *
  *
- * \param[out] results  The result of the integration
- *                      result[0] - integral over v on the xin surface
- *                      result[1] - integral over v on the xout surface
- *                      result[2] - integral over v on the ydown surface
+ * \param[out] results  The result of the integration\n
+ *                      result[0] - integral over v on the xin surface\n
+ *                      result[1] - integral over v on the xout surface\n
+ *                      result[2] - integral over v on the ydown surface\n
  *                      result[3] - integral over v on the yup surface
  *
  * \note There are no integral on the z-surfaces as these are periodic.
