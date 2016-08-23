@@ -7,6 +7,16 @@
 
 #include "celmaCurMom.hxx"
 
+// Constructor
+// ############################################################################
+CelmaCurMom::CelmaCurMom() : kinEE      (3, 0.0),
+                             kinEI      (3, 0.0),
+                             outflowE   (3, 0.0),
+                             outflowI   (3, 0.0)
+{
+}
+// ############################################################################
+
 // Initialization of the physics
 // ############################################################################
 int CelmaCurMom::init(bool restarting)
@@ -43,12 +53,6 @@ int CelmaCurMom::init(bool restarting)
      *       The child is typecasted to the parent
      */
     ownFilter = OwnFilters::createFilter();
-    // ************************************************************************
-
-    // Create the monitors
-    // ************************************************************************
-    ownMon.create(this);
-    solver->addMonitor(ownMon.energyIntMon);
     // ************************************************************************
 
     // Get the constants
@@ -92,6 +96,8 @@ int CelmaCurMom::init(bool restarting)
     switches->get("forceAddNoise"      , forceAddNoise      , false);
     switches->get("saveDdt"            , saveDdt            , false);
     switches->get("saveTerms"          , saveTerms          , true );
+    switches->get("monitorEnergy"      , monitorEnergy      , true );
+    switches->get("monitoroutflow"     , monitoroutflow     , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){
@@ -250,6 +256,23 @@ int CelmaCurMom::init(bool restarting)
         if(saveDdt){
             SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(momDensPar), ddt(jPar));
         }
+    }
+    // Monitor variables to be solved for
+    if(monitorEnergy){
+        dump.add(kinEE[0], "perpKinEE", 1);
+        dump.add(kinEE[1], "parKinEE" , 1);
+        dump.add(kinEE[2], "totKinEE" , 1);
+        dump.add(kinEI[0], "perpKinEI", 1);
+        dump.add(kinEI[1], "parKinEI" , 1);
+        dump.add(kinEI[2], "totKinEI" , 1);
+    }
+    if(monitoroutflow){
+        dump.add(outflowE[0], "perpOutFlowE", 1);
+        dump.add(outflowE[1], "parOutFlowE" , 1);
+        dump.add(outflowE[2], "totOutFlowE" , 1);
+        dump.add(outflowI[0], "perpOutFlowI", 1);
+        dump.add(outflowI[1], "parOutFlowI" , 1);
+        dump.add(outflowI[2], "totOutFlowI" , 1);
     }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
@@ -634,6 +657,26 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
     // Filtering highest modes
     ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
     // ************************************************************************
+    return 0;
+}
+// ############################################################################
+
+// Monitor every output timestep
+// ############################################################################
+int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
+{
+    TRACE("Halt in CelmaCurMom::outputMonitor");
+
+    if(monitorEnergy || monitoroutflow){
+        // Calculate the poloidal average
+        if(monitorEnergy){
+            YOU ARE HERE
+        }
+        if (monitoroutflow){
+
+        }
+    }
+
     return 0;
 }
 // ############################################################################

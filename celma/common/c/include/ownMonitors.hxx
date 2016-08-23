@@ -1,62 +1,34 @@
-#ifndef __HELPERFUNCTIONS_H__
-#define __HELPERFUNCTIONS_H__
+#ifndef __OWNMONITORS_H__
+#define __OWNMONITORS_H__
 
 #include <bout.hxx>
+#include "helpers.hxx"
 
-/* NOTE: Using a template class
- *       As we do not know the name of the physics class in advance, we
- *       implement this class as a template. This is because we need the
- *       derived class' "model" in order to access data members stored in that
- *       class.
- *       See
- *       http://stackoverflow.com/questions/1474416/c-passing-a-class-as-a-parameter
+/*!
+ * \class OwnMonitors
+ *
+ * \brief Class containing monitor functions
+ *
+ * \author Michael Løiten
+ * \date 2016.08.20
  */
-template<class PhysicsClass>
 class OwnMonitors
 {
 private:
-    //! Declaration of model (needed for accessing members of the PhysicsClass)
-    static PhysicsClass *model;
-
+    VolumeIntegral volInt;
+    SurfaceIntegral surfInt;
 public:
-    // Constructors
-    /* NOTE: Using default constructor
-     *       The model is created without arguments in solver.hxx
-     *       Thus,
-     *
-     *       classB m_input;
-     *       classA classA(classB input) : m_input(input){};
-     *
-     *       would not work, as the physicsmodel is creating the object
-     *       without arguments (and is not using list initialization)
-     *       One could therefore either make an own main, or use "creators"
-     *       as constructors (as used here)
-     *
-     *       http://stackoverflow.com/questions/7761676/calling-constructor-of-a-class-member-in-constructor
-     */
-
-    //! Alternative to a constructor
-    void create(PhysicsClass *model);
-
-    // Monitors
-    //! Energy monitor
-    static int energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT);
-
     // Functions
     //! Calculates the kinetic energy
-    static void kinEnergy(BoutReal &kinE      ,
-                          Field3D const &n    ,
-                          Field3D const &phi  ,
-                          Field3D const &uEPar,
-                          Field3D const &uIPar);
+    void kinEnergy(Field3D  const &n          ,
+                   Vector3D const &GradPerpPhi,
+                   Field3D  const &uPar       ,
+                   std::vector<BoutReal> *kinE);
+
+    //! Calculates the outflow rate
+    void outflowRate(Field3D const &f, BoutReal *outflowR);
 };
 
-/* NOTE: Reason for definition
- *       See
- *       http://stackoverflow.com/questions/7092765/what-does-it-mean-to-have-an-undefined-reference-to-a-static-member
- */
-//! The model definition
-template<class PhysicsClass> PhysicsClass* OwnMonitors<PhysicsClass>::model;
 
 #include "../src/ownMonitors.cxx"
 
