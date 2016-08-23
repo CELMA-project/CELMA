@@ -12,5 +12,6 @@ Current implementation works with the latest commit of BOUT++ version 3
 * parameters: Typical parameters
 
 Branch: newMonitors - adding monitors using the PhysicsModule monitors
+
 Status: Developement - Not actively worked on ATM, as the monitors may be
                        superfluous at current time
