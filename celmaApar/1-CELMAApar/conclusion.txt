@@ -1,0 +1,11 @@
+Copied from 1-CELMACurMom
+
+- Added the A_\| correction
+
+Results:
+========
+
+
+a-data (copied from ...)
+------------------------
+Not run yet
