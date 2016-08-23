@@ -35,6 +35,11 @@ protected:
     int convective(BoutReal t);
     int diffusive(BoutReal t, bool linear);
 public:
+    // Constructor
+    // ############################################################################
+    CelmaCurMom();
+    // ############################################################################
+
     // Variable initialization
     // ############################################################################
     // Evolved variables
@@ -115,11 +120,12 @@ private:
 
     // Additional methods and solvers
     // *****************************************************************************
-    BRACKET_METHOD bm;               // The bracket method
-    OwnBCs ownBC;                    // Class containing methods which sets the ghost points
-    OwnLaplacianInversions ownLapl;  // Class containing own laplacian
-    OwnFilters *ownFilter;           // Pointer to the chosen filter class
-    ownMonitors<CelmaCurMom> ownMon; // Own monitors
+    BRACKET_METHOD bm;              // The bracket method
+    OwnBCs ownBC;                   // Class containing methods which sets the ghost points
+    OwnLaplacianInversions ownLapl; // Class containing own laplacian
+    OwnFilters *ownFilter;          // Pointer to the chosen filter class
+    ownMonitors ownMon;             // Own monitors
+    int outputMonitor(BoutReal simtime, int iter, int NOUT);    // Monitors every output
     // *****************************************************************************
 
     // Switches
@@ -131,6 +137,16 @@ private:
     bool forceAddNoise;       // Add noise on restart as well
     bool noiseAdded;          // A check whether the noise is added or not
     bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
+    bool monitorEnergy;       // If energy should be monitored
+    bool monitoroutflow;      // If energy should be monitored
+    // *****************************************************************************
+
+    // Monitor variables
+    // *****************************************************************************
+    std::vector<BoutReal> kinEE;       // Kinetic energy
+    std::vector<BoutReal> kinEI;       // Kinetic energy
+    std::vector<BoutReal> outflowE;    // Density out flow monitor
+    std::vector<BoutReal> outflowI;    // Density out flow monitor
     // *****************************************************************************
 
     // Make a field group to communicate
