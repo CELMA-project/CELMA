@@ -4,92 +4,106 @@
 #include "../include/ownMonitors.hxx"
 
 /*!
- * This function is used instead of a constructor as a PhysicsModel object is
- * used as an input.
- *
- * \param[in] model Object with the simulated model
- */
-template<class PhysicsClass>
-void OwnMonitors<PhysicsClass>::create(PhysicsClass *inputModel)
-{
-
-    TRACE("Halt in OwnMonitors::create");
-
-    model = inputModel;
-}
-
-/*!
- * The energy monitor is a wrapper which calls functions which
- * calculates the monitored energy. The monitors accept only the input
- * arguments listed.
- *
- * \note This must be defined as static in order to get the correct type
- *       (remember that static members belong to the class rather than the
- *       object)
- *       http://stackoverflow.com/questions/15841338/c-unresolved-overloaded-function-type
- *
- * \param[in] solver   Pointer to the solver
- * \param[in] simtime  Current time
- * \param[in] iter     Current iteration
- * \param[in] NOUT     Number of outputs
- *
- * \returns 0 On success
- */
-template<class PhysicsClass>
-int OwnMonitors<PhysicsClass>::energyIntMon(Solver *solver, BoutReal simtime, int iter, int NOUT)
-{
-    TRACE("Halt in OwnMonitors<PhysicsClass>::energyIntMon");
-
-    // Call the fillEnergy function
-    int lol;
-    kinEnergy(model->kinE, model->n, model->phi, model->uEPar, model->uIPar);
-
-    std::cout << model->phi(0,0,0) << std::endl;
-//    // Call the functions
-//    // FIXME:
-//    See 6.2 for previous monitors
-//    kinE must be in the model
-//    fullEnergy(kinE, n, phi, uEPar, uIPar);
-//    // Calculate averages
-//    polAvgN = polAvg(n);
-//    polAvgN = polAvg(phi);
-//    polAvgN = polAvg(uEPar);
-//    polAvgN = polAvg(uIPar);
-//    // Calculate energy in fluctuations
-//    polAvgEnergy(polAvgE, n, phi, uEPar, uIPar);
-
-    return 0;
-}
-
-/*!
- * The energy monitor is a wrapper which calls functions which
- * calculates the monitored energy. The monitors accept only the input
- * arguments listed.
- *
- * \note This must be defined as static in order for the static energyIntMon to
- *       see it
- *       http://stackoverflow.com/questions/15235526/the-static-keyword-and-its-various-uses-in-c
+ * Calculates the kinetic energy of the system
  *
  * ## Derivation
- * For a single particle, we have \f$E_{kin} = \frac{1}{2}m\mathbf{v}^2\f$,
- * whereas for a fluid, we have \f$E_{kin} = \frac{1}{2}m\int n\mathbf{u}^2 dV\f$
+ * For a single particle, we have
  *
- * \param[in] kinE    Variable where the kinetic energy will be stored
+ * \f{eqnarray}{
+ * E_{kin} = \frac{1}{2}m\mathbf{v}^2,
+ * \f}
+ *
+ * which means that for a fluid, we have
+ *
+ * \f{eqnarray}{
+ * E_{kin}=\frac{1}{2}m\int n\mathbf{u}^2 dV
+ * \f}
+ *
+ * Due to gyroviscous cancelation, we have that to first order, only the
+ * ExB-drift is carrying particles. This gives
+ *
+ * \f{eqnarray}{
+ * E_{kin,\alpha} =& \frac{1}{2}m_{\alpha}\int
+ *                      n\mathbf{u}_E^2
+ *                      + n\mathbf{u}_{\alpha}^2 dV\\
+ *                =& \frac{1}{2}m_{\alpha}\int
+ *                      n\left(\frac{-\nabla_\perp\times\mathbf{b}}{B}\right)^2
+ *                      + n\mathbf{u}_{\alpha}^2 dV\\
+ *                =& \frac{1}{2}m_{\alpha}\int
+ *                      n\left(\left[\frac{-\nabla_\perp}{B}\right]^2
+ *                      + [\mathbf{u}_{\alpha}]^2\right) dV
+ * \f}
+ *
+ * where we have used (V.4) in D'Haeseleer, and where \f$\alpha\f$ is the
+ * particle species. Normalizing using
+ * \f$\tilde{E}_{kin,\alpha} = \frac{E_{kin,\alpha}}{m_ic_s}\f$ and Bohm
+ * normalization yields (dropping tilde)
+ *
+ * \f{eqnarray}{
+ * E_{kin,\alpha} =& \frac{1}{2}\frac{m_{\alpha}}{m_i}\int
+ *                  n\left(\left[\nabla_\perp\right]^2
+ *                  + [\mathbf{u}_{\alpha}]^2\right) dV
+ * \f}
+ *
+ * \warning This function does not multiply with \f$\frac{m_{\alpha}}{m_i}\f$.
+ *
  * \param[in] n       The density
  * \param[in] phi     The potential
- * \param[in] uEPar   The parallel electron velocity
- * \param[in] uIPar   The parallel ion velocity
+ * \param[in] uPar    The parallel velocity of species \f$\alpha\f$
+ * \param[in] kinE    Variable where the kinetic energy will be stored\n
+ *                    kinE[0] - The perpendicular kinetic energy\n
+ *                    kinE[1] - The parallel kinetic energy\n
+ *                    kinE[2] - The total kinetic energy\n
  *
  * \param[out] kinE   Variable where the kinetic energy is stored
+ *                    kinE[0] - The perpendicular kinetic energy\n
+ *                    kinE[1] - The parallel kinetic energy\n
+ *                    kinE[2] - The total kinetic energy\n
  */
-template<class PhysicsClass>
-void OwnMonitors<PhysicsClass>::kinEnergy(BoutReal &kinE      ,
-                                          Field3D const &n    ,
-                                          Field3D const &phi  ,
-                                          Field3D const &uEPar,
-                                          Field3D const &uIPar)
+void OwnMonitors::kinEnergy(Field3D  const &n          ,
+                            Vector3D const &GradPerpPhi,
+                            Field3D  const &uPar       ,
+                            std::vector<BoutReal> *kinE)
 {
-    TRACE("Halt in OwnMonitors<PhysicsClass>::kinEnergy");
+    TRACE("Halt in OwnMonitors::kinEnergy");
+
+    // Guard
+    if ((*kinE).size() != 3){
+        throw BoutException("'kinE' must have length 3");
+    }
+
+    // Reset result
+    for (std::vector<BoutReal>::iterator it = kinE->begin();
+         it != kinE->end();
+         ++it)
+    {
+        *it = 0.0;
+    }
+
+    // Calculate the perpendicular kinetic energy
+    volInt.volumeIntegral(0.5*n*Grad_perp(phi)*Grad_perp(phi), (*kinE)[0]);
+    // Calculate the parallel kinetic energy
+    volInt.volumeIntegral(0.5*n*SQ(uPar), (*kinE)[1]);
+    // Calculate the total kinetic energy
+    (*kinE)[2] = (*kinE)[0] + (*kinE)[1];
+}
+
+/*!
+ * Monitors the outflow rate of a field f
+ *
+ * Status: Under developement
+ *
+ * \param[in] f         The field to measure the flow of
+ * \param[in] outflowR  Variable to store the outflow
+ *
+ * \param[out] outflowR  The outflow rate of f
+ */
+void OwnMonitors::outflowRate(Field3D  const &f, BoutReal *outflowR)
+{
+    TRACE("OwnMonitors::outflowRate");
+
+    // Guard
+    throw BoutException("outflowRate not implemented");
 }
 
 #endif

@@ -1,6 +1,8 @@
 Copied from 1-CELMACurMom
 
 - Added monitors
+- NOTE: f = f_tilde + f_bar => fg = (f_tilde + f_bar)*(g_tilde + g_bar) =>
+        split in average and fluctating will miss the mix terms
 
 Results:
 ========
