@@ -1,0 +1,15 @@
+Copied from 1-CELMACurMom
+
+- Added monitors
+
+Results:
+========
+
+a-data (copied from 1-CELMACurMom/a-data 3.1a0)
+-----------------------------------------------
+1a0 : Finished after 17 m 52 s
+
+b-IMEX
+------
+1b0IMEX maxorder 3 :
+1b0IMEX maxorder 4 :
