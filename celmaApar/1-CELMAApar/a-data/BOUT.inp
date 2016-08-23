@@ -126,14 +126,14 @@ artPar = 5.0
 artViscParLnN     = artPar # Density
 artViscParJMPar   = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
-artViscParVortD   = artPar # Modified vorticity
+artViscParVortD   = 1.0e-1 # Modified vorticity
 
 # Perpendicular diffusion
 artPerp = 5e-2
 artViscPerpLnN     = artPerp
 artViscPerpJMPar   = artPerp
 artViscPerpMomDens = artPerp
-artViscPerpVortD   = artPerp
+artViscPerpVortD   = 0.0
 
 # Azimuthal hyperdiffusion
 artHyperAzVortD = 1.0
