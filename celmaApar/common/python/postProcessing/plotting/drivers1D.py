@@ -8,7 +8,7 @@ from .plotters import Plot1D
 from .getStrings import getSaveString
 from .lineGetters import (getMainFields,\
                           getLnNFields,\
-                          getjMPar,\
+                          getJMPar,\
                           momDensParFields,\
                           getVortDFields,\
                          )
@@ -378,7 +378,7 @@ def single1DDriver(path                      ,\
     elif pltName == "lnNFields":
         orgObj = getLnNFields(path)
     elif pltName == "jMPar":
-        orgObj = getjMPar(path)
+        orgObj = getJMPar(path)
     elif pltName == "momDensParFields":
         orgObj = momDensParFields(path)
     elif pltName == "vortDFields":

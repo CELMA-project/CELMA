@@ -109,6 +109,9 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # Constants
 # =============================================================================
 [cst]
+# The plasma beta
+beta = 4e-4
+
 # Hydrogren values for mu and Lambda
 mu     = 1836.36
 Lambda = log(sqrt(mu/(2.0*pi)))

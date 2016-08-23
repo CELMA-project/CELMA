@@ -37,7 +37,7 @@ ySlice        = 8
 zSlice        = 0
 showPlot      = False
 savePlot      = True
-useSubProcess = False
+useSubProcess = True
 saveFolder    = "laptop"
 # =============================================================================
 

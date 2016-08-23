@@ -75,30 +75,30 @@ def getJMPar(path):
     """
 
     # Making the orgObj instance
-    jMPar = Organizer(r"j_{\parallel}+\mu n A_{\parallel}",\
+    jMPar = Organizer(r"j_{\parallel}^M",\
                    useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     jMPar.lines.append(Line('jParAdv'                                      ,\
-    r'-\frac{1}{JB}\{\phi,j_{\parallel}\}'                              ))
+    r'-\frac{1}{JB}\{\phi,j_{\parallel}\}'                                 ))
     jMPar.lines.append(Line('uIParAdvSum'                                  ,\
-    r'- u_{e,\parallel}\partial_{\parallel}'                            +\
-    r'\left(n\left[u_{i,\parallel}+u_{e,\parallel}\right]\right)'       ))
+    r'- u_{e,\parallel}\partial_{\parallel}'                               +\
+    r'\left(n\left[u_{i,\parallel}+u_{e,\parallel}\right]\right)'          ))
     jMPar.lines.append(Line('uEParDoubleAdv'                               ,\
-    r'2u_{e,\parallel}\partial_{\parallel}\left(nu_{e,\parallel}\right)'))
+    r'2u_{e,\parallel}\partial_{\parallel}\left(nu_{e,\parallel}\right)'   ))
     jMPar.lines.append(Line('jParRes'                                      ,\
-    r'-0.51\nu_{ei}j_\parallel'                                         ))
+    r'-0.51\nu_{ei}j_\parallel'                                            ))
     jMPar.lines.append(Line('nGradParPhiLnN'                               ,\
-    r'\mu n \partial_{\parallel}\left(T_en-\phi\right)'                 ))
+    r'\mu n \partial_{\parallel}\left(T_en-\phi\right)'                    ))
     jMPar.lines.append(Line('AParDdtLnN'                                   ,\
-    r'\mu n A_{\parallel} \partial_t \ln(n)'                            ))
+    r'\mu n A_{\parallel} \partial_t \ln(n)'                               ))
     jMPar.lines.append(Line('neutralERes'                                  ,\
-    r'n\nu_{en}u_{e,\parallel}'                                         ))
+    r'n\nu_{en}u_{e,\parallel}'                                            ))
     jMPar.lines.append(Line('neutralIRes'                                  ,\
-    r'-n\nu_{in}u_{i,\parallel}'                                        ))
-    jMPar.lines.append(Line('jParPerpArtVisc'                              ,\
-    r'D_{j_{\parallel}, \perp}\nabla^2_\perp j_{\parallel}'             ))
-    jMPar.lines.append(Line('jParParArtVisc'                               ,\
-    r'D_{j_{\parallel}, \parallel} \partial^2_{\parallel}j_{\parallel}' ))
+    r'-n\nu_{in}u_{i,\parallel}'                                           ))
+    jMPar.lines.append(Line('jMParPerpArtVisc'                             ,\
+    r'D_{j_{\parallel}^M, \perp}\nabla^2_\perp j_{\parallel}%M'            ))
+    jMPar.lines.append(Line('jMParParArtVisc'                              ,\
+    r'D_{j_{\parallel}^M, \parallel} \partial^2_{\parallel}j_{\parallel}^M'))
 
     return jMPar
 #}}}
