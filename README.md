@@ -12,5 +12,7 @@ Current implementation works with the latest commit of BOUT++ version 3
 * MES: Checking if implementation is convergent
 * parameters: Typical parameters
 
+Branch: IMEX - trying speed-up using IMEX
+=======
 Branch: aPar - Implementing A|| corrections
 Status: Active

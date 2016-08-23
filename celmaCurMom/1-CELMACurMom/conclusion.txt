@@ -53,7 +53,7 @@ Proper hypervisc
 48 procs
 ........
 3b0.3.1 artPar 10.0   : Finished after 22 h 58 m (communication around 15%), ok turbulence (looks like a shaky dancer) !!! Grid-size oscillations in j and vort at source side, looks a bit different than other solutions
-3b0.3.1 artPar 4.0    : Running
+3b0.3.1 artPar 4.0    : Finished after 37 h 43 m (communication around 15%), finer structure (looks like shaky dancer) !!! Grid-size oscillations in j and vort at source side
 3b0.3.1 artPar 4.0e-1 : Failed after 6 steps (11h 5m), timestep failed (communication around 15%), completely different turbulence, more coherent? Something happening in the vorticity
 
 64 procs
@@ -63,6 +63,7 @@ Proper hypervisc
 3b0.3.2 artPar 4.0e-1 : Failed after 6 steps (12h 8m), timestep failed (communication over 35%), completely different turbulence, more coherent? Something happening in the vorticity
 
 NOTE: The filter allows more modes azimuthally
+NOTE: The communications are taken for the 0th processor, processors in the middle are expected to have larger communication times
 Conclusion: Could run with lower artPar due to higher number of points
 Conclusion: CELMA runs currently best on 48 procs/possible to speed-up with reducing communications (if possible)
 
@@ -70,18 +71,63 @@ Low art visc vortD
 ..................
 artPar 4.0
 ..........
-3b10 perpVortD 0.0    parVortD 0.0    : - (see above)
-3b10 perpVortD 4.0e-1 parVortD 0.0    : Running
-3b10 perpVortD 0.0    parVortD 2.0e-1 : Running
-3b10 perpVortD 4.0e-1 parVortD 2.0e-1 : Running
+3b10 perpVortD 0.0    parVortD 0.0    : (see above 3b03 series)
+3b10 perpVortD 2.0e-1 parVortD 0.0    : Finished after 35 h 12 m - Coherent, then turbulent, then coherent, no grid size oscillation
+3b10 perpVortD 0.0    parVortD 1.0e-1 : Finished after 32 h 08 m - Rather turbulent, no grid size oscillations
+3b10 perpVortD 2.0e-1 parVortD 1.0e-1 : Finished after 33 h 20 m - Mostly coherent, only small "outburst", no grid size oscillations
 
 artPar 0.4
 ..........
-3b10 perpVortD 0.0    parVortD 0.0    : - (see above)
-3b10 perpVortD 4.0e-1 parVortD 0.0    : Running
-3b10 perpVortD 0.0    parVortD 2.0e-1 : Running
-3b10 perpVortD 4.0e-1 parVortD 2.0e-1 : Running
+TODO: CHECK THESE!!!
 
+3b10 perpVortD 0.0    parVortD 0.0    : (see above 3b03 series)
+3b10 perpVortD 2.0e-1 parVortD 0.0    : Finished 67 steps, then reached walltime (48 h)
+3b10 perpVortD 0.0    parVortD 1.0e-1 : Timestep failed after 6 steps (10 h 34 m)
+3b10 perpVortD 2.0e-1 parVortD 1.0e-1 : Finished 70 steps, then reached walltime (48 h)
+
+
+TODO: Write conclusion once these are done (looks like vortDPerp 2.0e-1 is too high (killing the turbulence))
+
+Compare to see if see saw patterns can be detected at an earlier stage
+......................................................................
+!!!!!!!!!!!!!! YOU ARE HERE: MAKE NEW WHICH RUNS LONGER, CHECK ONLY vortDPerp 0 - vortDPar 0
+
+3b0.3.1.1 artPar 10.0   :
+3b0.3.1.1 artPar 4.0    :
+3b0.3.1.1 artPar 4.0e-1 : Oscillations in the vorticities (not in jPar), but not at grid size scale yet
+
+artPar 4.0
+..........
+3b101 perpVortD 0.0    parVortD 0.0    : Grid-size oscillations not visible
+3b101 perpVortD 2.0e-1 parVortD 0.0    :
+3b101 perpVortD 0.0    parVortD 1.0e-1 :
+3b101 perpVortD 2.0e-1 parVortD 1.0e-1 : Not completely coherent yet
+
+artPar 0.4
+..........
+3b101 perpVortD 0.0    parVortD 0.0    : Grid-size oscillations not visible
+3b101 perpVortD 2.0e-1 parVortD 0.0    :
+3b101 perpVortD 0.0    parVortD 1.0e-1 :
+3b101 perpVortD 2.0e-1 parVortD 1.0e-1 :
+
+
+
+
+!!!!!!!!!!!!!!!!!YOU ARE HERE!!!!!!!!!!!!!!!
+Don't need new runs to see when see-saw, can see it by collecting from old runs
+
+
+
+
+CONCLUSION: Although interpolation not perfect and gives very high ddt(jPar) (due to errors and mu)
+            this is not the cause of the grid size oscillation
+CONCLUSION: 200 omega_ci^-1 not enough for fundamental physics changes. Try to run to 600 omega_ci instead
+
+
+
+!!!!!!!!!!!!!!!!!!! YOU ARE HERE: You are comparing runs to see if there are any see-saw patterns
+! At the same time you are calculating the energy integrals, maybe check Kundu
+for potential energy (pressure energy), also physics exchange
 
 
 
