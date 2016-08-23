@@ -39,7 +39,7 @@ def allMainFields2DDriver(path                ,\
                  uEPar2DDriver      ,\
                  uIPar2DDriver      ,\
                  momDens2DDriver    ,\
-                 JParMuNAPar2DDriver,\
+                 JMPar2DDriver,\
                  vortD2DDriver      ,\
                  vort2DDriver       ,\
                  phi2DDriver        ,\
@@ -263,19 +263,19 @@ def vort2DDriver(path             ,\
     return timeFolder
 #}}}
 
-#{{{JParMuNAPar2DDriver
-def JParMuNAPar2DDriver(path             ,\
+#{{{JMPar2DDriver
+def JMPar2DDriver(path             ,\
                         timeFolder = None,\
                         **kwargs):
     #{{{docstring
     """
-    Driver for the jParMuNAPar field.
+    Driver for the jMPar field.
 
-    Specific jParMuNAPar input:
+    Specific jMPar input:
     timeFolder - The name of the timefolder
                  Enables several plots to be put into same timeFolder
 
-    Specific jParMuNAPar output:
+    Specific jMPar output:
     timeFolder - The name of the timefolder
                  Enables several plots to be put into same timeFolder
 
@@ -283,8 +283,8 @@ def JParMuNAPar2DDriver(path             ,\
     """
     #}}}
 
-    varName = 'jParMuNAPar'
-    pltName = r'j_\parallel + \mu n A_\parallel '
+    varName = 'jMPar'
+    pltName = r'j^M_\parallel'
 
     # Do the plot
     timeFolder = single2DDriver(path                   ,\
