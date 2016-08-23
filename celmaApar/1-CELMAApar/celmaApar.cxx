@@ -64,6 +64,7 @@ int CelmaApar::init(bool restarting)
     Options *cst = options->getSection("cst");
     // Storing the variables with the following syntax
     // sectionName->get("nameInInp", varNameInCxx, defaultVal)
+    cst->get("beta"              , beta              , 0.0);
     cst->get("mu"                , mu                , 0.0);
     cst->get("Lambda"            , Lambda            , 0.0);
     cst->get("nuEI"              , nuEI              , 0.0);
@@ -364,7 +365,7 @@ int CelmaApar::convective(BoutReal t)
     uEParDoubleAdv = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParRes        = - 0.51*nuEI*jPar;
     nGradParPhiLnN = mu*n*DDY(lnN - phi);
-    AParDdtLnN     = mu*n*APar*ddt(lnN);
+    AParDdtLnN     = 0.5*beta*mu*n*APar*ddt(lnN);
     neutralERes    = n*nuEN*uEPar;
     neutralIRes    = - n*nuIN*uIPar;
 
@@ -597,7 +598,7 @@ void CelmaApar::timeStepInitializer()
 
     // Calculate jPar and obtain APar
     // ************************************************************************
-    jPar = jMPar - mu*n*APar;
+    jPar = jMPar - 0.5*beta*mu*n*APar;
     // Set BC on jPar
     jPar.applyBoundary();
     ownBC.innerRhoCylinder(jPar);
