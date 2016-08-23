@@ -34,6 +34,7 @@
 *~
 *.bak*
 *.swp
+*.swm
 *.swo
 
 # Python
@@ -79,6 +80,8 @@ MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 MES/arakawaBracket/0-ArakawaOfDDXf2/ArakawaOfDDX
 MES/arakawaBracket/1-ModifiedArakawa/modifiedArakawa
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
+MES/integrals/volumeIntegral/VolIntCyl
+MES/integrals/surfaceEdgeIntegral/SurfEdgeIntCyl
 
 # Miscellaneous
 *delme*
