@@ -99,7 +99,8 @@ private:
 
     // Temporary fields
     // *****************************************************************************
-    Field3D DivUIParNGradPerpPhi;
+    Field3D divUIParNGradPerpPhi;
+    Vector3D gradPerpPhi;
     // *****************************************************************************
 
     // Constants
@@ -124,7 +125,7 @@ private:
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
     OwnFilters *ownFilter;          // Pointer to the chosen filter class
-    ownMonitors ownMon;             // Own monitors
+    OwnMonitors ownMon;             // Own monitors
     int outputMonitor(BoutReal simtime, int iter, int NOUT);    // Monitors every output
     // *****************************************************************************
 
@@ -145,8 +146,6 @@ private:
     // *****************************************************************************
     std::vector<BoutReal> kinEE;       // Kinetic energy
     std::vector<BoutReal> kinEI;       // Kinetic energy
-    std::vector<BoutReal> outflowE;    // Density out flow monitor
-    std::vector<BoutReal> outflowI;    // Density out flow monitor
     // *****************************************************************************
 
     // Make a field group to communicate

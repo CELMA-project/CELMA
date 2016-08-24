@@ -16,7 +16,6 @@ class OwnMonitors
 {
 private:
     VolumeIntegral volInt;
-    SurfaceIntegral surfInt;
 public:
     // Functions
     //! Calculates the kinetic energy
@@ -24,9 +23,6 @@ public:
                    Vector3D const &GradPerpPhi,
                    Field3D  const &uPar       ,
                    std::vector<BoutReal> *kinE);
-
-    //! Calculates the outflow rate
-    void outflowRate(Field3D const &f, BoutReal *outflowR);
 };
 
 
