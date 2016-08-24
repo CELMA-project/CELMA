@@ -61,7 +61,7 @@
  *                    kinE[2] - The total kinetic energy\n
  */
 void OwnMonitors::kinEnergy(Field3D  const &n          ,
-                            Vector3D const &GradPerpPhi,
+                            Vector3D const &gradPerpPhi,
                             Field3D  const &uPar       ,
                             std::vector<BoutReal> *kinE)
 {
@@ -81,29 +81,11 @@ void OwnMonitors::kinEnergy(Field3D  const &n          ,
     }
 
     // Calculate the perpendicular kinetic energy
-    volInt.volumeIntegral(0.5*n*Grad_perp(phi)*Grad_perp(phi), (*kinE)[0]);
+    volInt.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi, (*kinE)[0]);
     // Calculate the parallel kinetic energy
     volInt.volumeIntegral(0.5*n*SQ(uPar), (*kinE)[1]);
     // Calculate the total kinetic energy
     (*kinE)[2] = (*kinE)[0] + (*kinE)[1];
-}
-
-/*!
- * Monitors the outflow rate of a field f
- *
- * Status: Under developement
- *
- * \param[in] f         The field to measure the flow of
- * \param[in] outflowR  Variable to store the outflow
- *
- * \param[out] outflowR  The outflow rate of f
- */
-void OwnMonitors::outflowRate(Field3D  const &f, BoutReal *outflowR)
-{
-    TRACE("OwnMonitors::outflowRate");
-
-    // Guard
-    throw BoutException("outflowRate not implemented");
 }
 
 #endif
