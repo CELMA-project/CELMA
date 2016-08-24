@@ -10,9 +10,7 @@
 // Constructor
 // ############################################################################
 CelmaCurMom::CelmaCurMom() : kinEE      (3, 0.0),
-                             kinEI      (3, 0.0),
-                             outflowE   (3, 0.0),
-                             outflowI   (3, 0.0)
+                             kinEI      (3, 0.0)
 {
 }
 // ############################################################################
@@ -266,14 +264,6 @@ int CelmaCurMom::init(bool restarting)
         dump.add(kinEI[1], "parKinEI" , 1);
         dump.add(kinEI[2], "totKinEI" , 1);
     }
-    if(monitoroutflow){
-        dump.add(outflowE[0], "perpOutFlowE", 1);
-        dump.add(outflowE[1], "parOutFlowE" , 1);
-        dump.add(outflowE[2], "totOutFlowE" , 1);
-        dump.add(outflowI[0], "perpOutFlowI", 1);
-        dump.add(outflowI[1], "parOutFlowI" , 1);
-        dump.add(outflowI[2], "totOutFlowI" , 1);
-    }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
     //*************************************************************************
@@ -473,21 +463,23 @@ int CelmaCurMom::convective(BoutReal t)
 
     // Preparation
     // ************************************************************************
-    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
+    divUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
     // Set the ghost points in order to take DDY
-    ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
+    ownBC.extrapolateYGhost(divUIParNGradPerpPhi);
     // We must communicate as we will take DDY
-    mesh->communicate(DivUIParNGradPerpPhi);
+    mesh->communicate(divUIParNGradPerpPhi);
+    // Saving gradPerpPhi for use in monitors
+    gradPerpPhi = ownOp->Grad_perp(phi);
     // ************************************************************************
 
 
     // Terms in vorticity
     // ************************************************************************
     vortNeutral = - nuIN*n*vort;
-    potNeutral  = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
+    potNeutral  = - nuIN*gradPerpPhi*ownOp->Grad_perp(n);
     vortDAdv    = - ownOp->vortDAdv(phi, vortD);
     kinEnAdvN   = - ownOp->kinEnAdvN(phi, n);
-    parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
+    parDerDivUIParNGradPerpPhi = - DDY(divUIParNGradPerpPhi);
     divParCur                  =   DDY(jPar);
 
     ddt(vortD) =
@@ -667,14 +659,9 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
 {
     TRACE("Halt in CelmaCurMom::outputMonitor");
 
-    if(monitorEnergy || monitoroutflow){
-        // Calculate the poloidal average
-        if(monitorEnergy){
-            YOU ARE HERE
-        }
-        if (monitoroutflow){
-
-        }
+    if(monitorEnergy){
+        ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
+        ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
     }
 
     return 0;
