@@ -1,0 +1,14 @@
+Copied from MMS/singleOperators/0-DDXCylinder/
+
+- Check that the volume integral is properly working
+
+Results:
+========
+- sumSines    : Looks to be converging, but not in z
+- sumSinesHat : Looks to be converging, but not in z
+- zHat        : Gives convergence
+- zSines      : Does not converge in z (small errors though)
+
+Conclusion:
+===========
+To be run
