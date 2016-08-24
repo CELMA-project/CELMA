@@ -1,9 +1,8 @@
 # celma
 
 Folder with the different versions of the code.
-
-Each run of each group has its own driver. `bout_runners` is used for running
-and post-processing.
+Each run of group of run has its own driver, and uses `bout_runners` for
+running and post-processing.
 
 Original forumlation is used here
 
