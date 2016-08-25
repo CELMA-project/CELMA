@@ -69,65 +69,25 @@ Conclusion: CELMA runs currently best on 48 procs/possible to speed-up with redu
 
 Low art visc vortD
 ..................
-artPar 4.0
-..........
+artPar 4.0 (=> Dpar = 69.4)
+...........................
 3b10 perpVortD 0.0    parVortD 0.0    : (see above 3b03 series)
 3b10 perpVortD 2.0e-1 parVortD 0.0    : Finished after 35 h 12 m - Coherent, then turbulent, then coherent, no grid size oscillation
 3b10 perpVortD 0.0    parVortD 1.0e-1 : Finished after 32 h 08 m - Rather turbulent, no grid size oscillations
 3b10 perpVortD 2.0e-1 parVortD 1.0e-1 : Finished after 33 h 20 m - Mostly coherent, only small "outburst", no grid size oscillations
 
-artPar 0.4
-..........
-TODO: CHECK THESE!!!
-
+artPar 0.4 (=> Dpar = 6.94)
+...........................
 3b10 perpVortD 0.0    parVortD 0.0    : (see above 3b03 series)
-3b10 perpVortD 2.0e-1 parVortD 0.0    : Finished 67 steps, then reached walltime (48 h)
-3b10 perpVortD 0.0    parVortD 1.0e-1 : Timestep failed after 6 steps (10 h 34 m)
-3b10 perpVortD 2.0e-1 parVortD 1.0e-1 : Finished 70 steps, then reached walltime (48 h)
-
-
-TODO: Write conclusion once these are done (looks like vortDPerp 2.0e-1 is too high (killing the turbulence))
-
-Compare to see if see saw patterns can be detected at an earlier stage
-......................................................................
-!!!!!!!!!!!!!! YOU ARE HERE: MAKE NEW WHICH RUNS LONGER, CHECK ONLY vortDPerp 0 - vortDPar 0
-
-3b0.3.1.1 artPar 10.0   :
-3b0.3.1.1 artPar 4.0    :
-3b0.3.1.1 artPar 4.0e-1 : Oscillations in the vorticities (not in jPar), but not at grid size scale yet
-
-artPar 4.0
-..........
-3b101 perpVortD 0.0    parVortD 0.0    : Grid-size oscillations not visible
-3b101 perpVortD 2.0e-1 parVortD 0.0    :
-3b101 perpVortD 0.0    parVortD 1.0e-1 :
-3b101 perpVortD 2.0e-1 parVortD 1.0e-1 : Not completely coherent yet
-
-artPar 0.4
-..........
-3b101 perpVortD 0.0    parVortD 0.0    : Grid-size oscillations not visible
-3b101 perpVortD 2.0e-1 parVortD 0.0    :
-3b101 perpVortD 0.0    parVortD 1.0e-1 :
-3b101 perpVortD 2.0e-1 parVortD 1.0e-1 :
-
-
-
-
-!!!!!!!!!!!!!!!!!YOU ARE HERE!!!!!!!!!!!!!!!
-Don't need new runs to see when see-saw, can see it by collecting from old runs
-
-
+3b10 perpVortD 2.0e-1 parVortD 0.0    : Finished 67 steps, then reached walltime (48 h) - Turbulent, then coherent (a bit) then turbulent - OK profiles, some oscillations on helping fields (ue dz ue type)
+3b10 perpVortD 0.0    parVortD 1.0e-1 : Timestep failed after 6 steps (10 h 34 m) - Turbulence, then spreads out, not obviuos why crashes, although looks like grid size oscillation in Omegas
+3b10 perpVortD 2.0e-1 parVortD 1.0e-1 : Finished 70 steps, then reached walltime (48 h) - Starts coherent, then very turbulent - OK profiles, some oscillations on helping fields (ue dz ue type)
 
 
 CONCLUSION: Although interpolation not perfect and gives very high ddt(jPar) (due to errors and mu)
             this is not the cause of the grid size oscillation
-CONCLUSION: 200 omega_ci^-1 not enough for fundamental physics changes. Try to run to 600 omega_ci instead
+CONCLUSION: Looks like have some coherent phases
 
-
-
-!!!!!!!!!!!!!!!!!!! YOU ARE HERE: You are comparing runs to see if there are any see-saw patterns
-! At the same time you are calculating the energy integrals, maybe check Kundu
-for potential energy (pressure energy), also physics exchange
 
 
 
@@ -139,6 +99,23 @@ c-wArtVortD (the same as a-data, but new folder in order to separate)
 
 
 
+d-findGoodParam
+----------------
+3d0.0 artViscParVortD artViscParVortD 1e-1: Finished after 7 h 52 m - No gridsize oscillations in jPar, maybe a bit wobbly vortD
+3d0.0 artViscParVortD artViscParVortD 1e-2: Finished after 8 h 02 m - No gridsize oscillations in jPar, maybe a bit wobbly vortD
+3d0.0 artViscParVortD artViscParVortD 1e-3: Finished after 7 h 59 m - Starting to become wobbly in helper fields
+
+Using artViscParVortD 1e-2 (=> DParVort = 0.173611)
+3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 22 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 46 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 46 m
+
+Using artViscParVortD 1e-3 (=> DParVort = 0.0173611)
+3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 14 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 35 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 31 m
+
+CONCLUSION:
 
 
 Tests
