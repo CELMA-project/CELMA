@@ -1,0 +1,68 @@
+#
+# Input file for  "parameters/data"
+#
+# x - The radial coordinate (rho)
+# y - The height of the cylinder (z)
+# z - The azimuthal coordinate (theta)
+
+# Root options
+###############################################################################
+nout = 0            # Number of output timesteps
+timestep = 1e-3     # Time between outputs
+
+dump_format="nc"   # Write NetCDF format files
+
+# Number of guard cells
+MXG = 0
+MYG = 0
+###############################################################################
+
+
+# Mesh options
+###############################################################################
+[mesh]
+# Number of points
+nx = 4
+ny = 1
+nz = 1
+###############################################################################
+
+
+# Solver settings
+###############################################################################
+[solver]
+# In principle it is the same what we set this to (as long as it doesn't raises
+# error) as we here are not stepping forward in time)
+# PVODE raises an error if no fields are being solved for
+# Therefore set to euler solver which does not get this error
+type = euler
+###############################################################################
+
+
+# Specifying the output
+###############################################################################
+[output]
+floats = false # floats = false => output in double
+###############################################################################
+
+
+# Settings for the variables
+###############################################################################
+# Geometry
+# =============================================================================
+[geom]
+radius = 0.025 # The length of x from boundary to boundary in [m]
+len    = 1.40  # The length of y from boundary to boundary in [m]
+# =============================================================================
+
+
+# Input
+# =============================================================================
+[input]
+n0  = 5.0e17 # m^-3
+Te0 = 14.0   # eV
+Ti0 = 7.0    # eV
+B0  = 1.0e-1 # T
+S   = 1.0e24 # m^-3s^-1
+# =============================================================================
+##############################################################################

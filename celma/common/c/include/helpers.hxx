@@ -39,7 +39,7 @@ class PolAvg : private Helpers
 };
 
 /*!
- * \class Volume integral
+ * \class volumeIntegral
  *
  * \brief Class containing volume integration
  *
