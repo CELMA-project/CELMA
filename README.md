@@ -10,6 +10,6 @@ Current implementation works with the latest commit of BOUT++ version 3
 * celmaApar: CELMA codes where the $A_\|$ is accounted for
 * derivation: Derivation of operators and boundaries
 * MES: Checking if implementation is convergent
-* parameters: Typical parameters
+* parameters: Calculation of typical parameters
 
 Branch: master - Running and stable with latest BOUT-dev commit
