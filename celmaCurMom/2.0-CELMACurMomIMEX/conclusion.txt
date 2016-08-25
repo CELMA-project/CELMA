@@ -11,5 +11,5 @@ a-data (copied from 1-CELMACurMom/a-data 3.1a0)
 
 b-IMEX
 ------
-1b0IMEX maxorder 3 :
-1b0IMEX maxorder 4 :
+1b0IMEX maxorder 3 : Finished after 1 h 9 m
+1b0IMEX maxorder 4 : Finished after 3 h 0 m (killed by walltime)

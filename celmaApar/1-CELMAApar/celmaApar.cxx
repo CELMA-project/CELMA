@@ -218,7 +218,6 @@ int CelmaApar::init(bool restarting)
     comGroup.add(uEPar);
     comGroup.add(uIPar);
     comGroup.add(phi);
-    comGroup.add(APar);
     comGroup.add(vortD);
     // ************************************************************************
 
@@ -598,7 +597,7 @@ void CelmaApar::timeStepInitializer()
 
     // Calculate jPar and obtain APar
     // ************************************************************************
-    jPar = jMPar - 0.5*beta*mu*n*APar;
+    jPar = jMPar - 0.5*beta*mu*n*APar; // jMPar = jPar + 0.5*beta*mu*n*APar
     // Set BC on jPar
     jPar.applyBoundary();
     ownBC.innerRhoCylinder(jPar);
@@ -607,6 +606,8 @@ void CelmaApar::timeStepInitializer()
     ownBC.jParSheath (jPar, uEPar, uIPar, phi, n, Lambda, Lambda);
     // Obtaining APar
     APar = AParSolver->solve(jPar);
+    // Filter
+    APar = ownFilter->ownFilter(APar);
     // ************************************************************************
 
     // Communicate before taking derivatives
