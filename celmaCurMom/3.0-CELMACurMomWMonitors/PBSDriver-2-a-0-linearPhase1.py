@@ -11,23 +11,27 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combined1D2D as postProcess
+from postProcessing.plotting import combinedDriver as postProcess
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-ownFilterType = "none"
+includeNoise        = True
+forceAddNoise       = True
+saveTerms           = False
+useHyperViscAzVortD = [True]
 # *****************************************************************************
-# Set the spatial domain
-nz = 1
+remove_old = False
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_5/nz_256/ownFilters_type_none_tag_1-a-0-expand_0/"
 # Set the temporal domain
-restart    = None
-remove_old = True
-timestep   = [1e2]
-nout       = [20]
+nout       = [100]
+timestep   = [1]
 directory  = "a-data"
 # Shall we make?
-make       = True
+make       = False
 # =============================================================================
 
 
@@ -36,21 +40,22 @@ make       = True
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 8
+ySlice     = 8*2
 zSlice     = 0
+tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-initialize"
+theRunName = "2-a-0-linearPhase1"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
-BOUT_nodes            = 2
-BOUT_ppn              = 12
-BOUT_walltime         = '03:00:00'
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 16
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -66,17 +71,19 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
-            # Set spatial domain
-            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('switch'      , 'includeNoise'       , includeNoise ),\
+                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -109,6 +116,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\

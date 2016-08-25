@@ -1,5 +1,5 @@
 #
-# Input file for "1-CELMACurMom/data"
+# Input file for "1-CELMACurMom/findGoodParam"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -26,9 +26,9 @@ MYG = 1
 ###############################################################################
 [mesh]
 # Number of points
-nx = 16 + 2*MXG
-ny = 24
-nz = 128           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nx = 32 + 2*MXG
+ny = 48
+nz = 256           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -41,7 +41,7 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix 
+# Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
@@ -119,21 +119,21 @@ nuEN = 0.0
 nuIN = 0.0
 
 # Parallel artificial dissipation
-artPar = 5.0
+artPar = 4.0
 artViscParLnN     = artPar # Density
 artViscParJPar    = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
-artViscParVortD   = artPar # Modified vorticity
+artViscParVortD   = 1.0e-1 # Modified vorticity
 
 # Perpendicular diffusion
-artPerp = 5e-2
+artPerp = 2.0e-1
 artViscPerpLnN     = artPerp
 artViscPerpJPar    = artPerp
 artViscPerpMomDens = artPerp
-artViscPerpVortD   = artPerp
+artViscPerpVortD   = 0.0
 
 # Azimuthal hyperdiffusion
-artHyperAzVortD = 1.0
+artHyperAzVortD = 16.0
 # =============================================================================
 
 # Switches

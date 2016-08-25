@@ -22,12 +22,12 @@ ownFilterType = "none"
 nz = 1
 # Set the temporal domain
 restart    = None
-remove_old = True
+remove_old = False
 timestep   = [1e2]
 nout       = [20]
 directory  = "a-data"
 # Shall we make?
-make       = True
+make       = False
 # =============================================================================
 
 
@@ -36,8 +36,9 @@ make       = True
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 8
+ySlice     = 8*2
 zSlice     = 0
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
 theRunName = "0-a-0-initialize"
@@ -47,9 +48,9 @@ theRunName = "0-a-0-initialize"
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
-BOUT_nodes            = 2
-BOUT_ppn              = 12
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 16
 BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -109,6 +110,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
