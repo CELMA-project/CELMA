@@ -19,15 +19,19 @@ from postProcessing.plotting import combined1D2D as postProcess
 ownFilterType = "none"
 # *****************************************************************************
 # Set the spatial domain
-nz = 1
+nz = 256
 # Set the temporal domain
-restart    = None
-remove_old = True
-timestep   = [1e2]
+remove_old = False
+restart    = "overwrite"
+# Uncomment this if you just want to plot
+# restart      = None;
+restart_from = "a-data/nout_20_timestep_100.0/nz_1/ownFilters_type_none_tag_0-a-0-initialize_0/"
+# Set the temporal domain
 nout       = [20]
+timestep   = [5]
 directory  = "a-data"
 # Shall we make?
-make       = True
+make       = False
 # =============================================================================
 
 
@@ -36,20 +40,21 @@ make       = True
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 8
+ySlice     = 8*2
 zSlice     = 0
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-initialize"
+theRunName = "1-a-0-expand"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 24
-BOUT_nodes            = 2
-BOUT_ppn              = 12
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 16
 BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
@@ -74,6 +79,7 @@ myRuns = PBS_runner(\
             # Copy the source file
             make       = make  ,\
             restart    = restart,\
+            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('ownFilters'  , 'type', ownFilterType),\
@@ -109,6 +115,7 @@ myRuns.execute_runs(\
                      xSlice         = xSlice            ,\
                      ySlice         = ySlice            ,\
                      zSlice         = zSlice            ,\
+                     tSlice         = tSlice            ,\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
