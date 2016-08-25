@@ -83,6 +83,7 @@ MES/arakawaBracket/1-ModifiedArakawa/modifiedArakawa
 MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 MES/integrals/volumeIntegral/VolIntCyl
 MES/integrals/surfaceEdgeIntegral/SurfEdgeIntCyl
+paramparameters/c++/params
 
 # Miscellaneous
 *delme*
