@@ -95,7 +95,6 @@ int CelmaCurMom::init(bool restarting)
     switches->get("saveDdt"            , saveDdt            , false);
     switches->get("saveTerms"          , saveTerms          , true );
     switches->get("monitorEnergy"      , monitorEnergy      , true );
-    switches->get("monitoroutflow"     , monitoroutflow     , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){

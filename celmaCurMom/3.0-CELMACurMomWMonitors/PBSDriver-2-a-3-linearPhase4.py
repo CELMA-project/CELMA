@@ -23,7 +23,7 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/"
+restart_from = "a-data/nout_100_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-2-linearPhase3_0/"
 # Set the temporal domain
 nout       = [100]
 timestep   = [1]
@@ -43,7 +43,7 @@ zSlice     = 0
 tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-1-linearPhase2"
+theRunName = "2-a-3-linearPhase4"
 # =============================================================================
 
 
@@ -53,7 +53,7 @@ theRunName = "2-a-1-linearPhase2"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
