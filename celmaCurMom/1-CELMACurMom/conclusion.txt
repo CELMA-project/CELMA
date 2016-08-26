@@ -106,16 +106,16 @@ d-findGoodParam
 3d0.0 artViscParVortD artViscParVortD 1e-3: Finished after 7 h 59 m - Starting to become wobbly in helper fields
 
 Using artViscParVortD 1e-2 (=> DParVort = 0.173611)
-3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 22 m
-3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 46 m
-3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 46 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 22 m - Ok turbulence, not grid size oscillation, a bit grid oscillation in vortD2D
+3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 46 m - Ok turbulence, maybe a bit grid size oscillation in helping fields, more gridsize oscillation in vortD2D
+3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 46 m - Ok turbulence, maybe a bit grid size oscillation in helping fields, even more gridsize oscillation in vortD2D
 
 Using artViscParVortD 1e-3 (=> DParVort = 0.0173611)
-3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 14 m
-3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 35 m
-3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 31 m
+3d1.0 artViscParVortD artViscPerpVortD 1e-2: Finished after 7 h 14 m - Ok turbulence (maybe a bit coarser then the others), !!!much less grid size oscillation in vortD, grid size oscillations in the helper fields, small grid size in main fields
+3d1.0 artViscParVortD artViscPerpVortD 1e-3: Finished after 7 h 35 m - Ok turbulence, grid size oscillations in the helper fields, small grid size in main fields
+3d1.0 artViscParVortD artViscPerpVortD 1e-4: Finished after 7 h 31 m - Ok turbulence, grid size oscillation staring on almost all fields
 
-CONCLUSION:
+CONCLUSION: Looks like artViscParVortD = artViscPerpVortD = 1e-2 may be the best bet when fighting grid size oscillations
 
 
 Tests
