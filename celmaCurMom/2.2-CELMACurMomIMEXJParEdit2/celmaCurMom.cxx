@@ -7,14 +7,6 @@
 
 #include "celmaCurMom.hxx"
 
-// Constructor
-// ############################################################################
-CelmaCurMom::CelmaCurMom() : kinEE      (3, 0.0),
-                             kinEI      (3, 0.0)
-{
-}
-// ############################################################################
-
 // Initialization of the physics
 // ############################################################################
 int CelmaCurMom::init(bool restarting)
@@ -94,7 +86,6 @@ int CelmaCurMom::init(bool restarting)
     switches->get("forceAddNoise"      , forceAddNoise      , false);
     switches->get("saveDdt"            , saveDdt            , false);
     switches->get("saveTerms"          , saveTerms          , true );
-    switches->get("monitorEnergy"      , monitorEnergy      , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){
@@ -254,15 +245,6 @@ int CelmaCurMom::init(bool restarting)
             SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(momDensPar), ddt(jPar));
         }
     }
-    // Monitor variables to be solved for
-    if(monitorEnergy){
-        dump.add(kinEE[0], "perpKinEE", 1);
-        dump.add(kinEE[1], "parKinEE" , 1);
-        dump.add(kinEE[2], "totKinEE" , 1);
-        dump.add(kinEI[0], "perpKinEI", 1);
-        dump.add(kinEI[1], "parKinEI" , 1);
-        dump.add(kinEI[2], "totKinEI" , 1);
-    }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
     //*************************************************************************
@@ -283,14 +265,6 @@ int CelmaCurMom::convective(BoutReal t)
     TRACE("Halt in CelmaCurMom::convective");
 
     if (includeNoise && !noiseAdded){
-        /* NOTE: Positioning of includeNoise
-         *
-         * As the convective part is calculated first, the addnoise routine
-         * will only be needed here.
-         *
-         * If the add noise is going to be called when doing a restart, the
-         * includeNoise must be added in the rhs
-         */
         // Class containing the noise generators
         // Calls the constructor with default arguments
         NoiseGenerator noise("geom", 3);
@@ -403,20 +377,16 @@ int CelmaCurMom::convective(BoutReal t)
     // ************************************************************************
     jParAdv        = - invJ*bracket(phi, jPar, bm);
     uIParAdvSum    = - Vpar_Grad_par(uIPar, n*(uIPar + uEPar));
-    uEParDoubleAdv = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParRes        = - 0.51*nuEI*jPar;
-    muElPressure   = mu*DDY(n);
-    elField        = - mu*n*DDY(phi);
+    muElPressure    = mu*DDY(n);
     neutralERes    = n*nuEN*uEPar;
     neutralIRes    = - n*nuIN*uIPar;
 
     ddt(jPar) =
           jParAdv
         + uIParAdvSum
-        + uEParDoubleAdv
         + jParRes
         + muElPressure
-        + elField
         + neutralERes
         + neutralIRes
         ;
@@ -445,23 +415,21 @@ int CelmaCurMom::convective(BoutReal t)
 
     // Preparation
     // ************************************************************************
-    divUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
+    DivUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
     // Set the ghost points in order to take DDY
-    ownBC.extrapolateYGhost(divUIParNGradPerpPhi);
+    ownBC.extrapolateYGhost(DivUIParNGradPerpPhi);
     // We must communicate as we will take DDY
-    mesh->communicate(divUIParNGradPerpPhi);
-    // Saving gradPerpPhi for use in monitors
-    gradPerpPhi = ownOp->Grad_perp(phi);
+    mesh->communicate(DivUIParNGradPerpPhi);
     // ************************************************************************
 
 
     // Terms in vorticity
     // ************************************************************************
     vortNeutral = - nuIN*n*vort;
-    potNeutral  = - nuIN*gradPerpPhi*ownOp->Grad_perp(n);
+    potNeutral  = - nuIN*ownOp->Grad_perp(phi)*ownOp->Grad_perp(n);
     vortDAdv    = - ownOp->vortDAdv(phi, vortD);
     kinEnAdvN   = - ownOp->kinEnAdvN(phi, n);
-    parDerDivUIParNGradPerpPhi = - DDY(divUIParNGradPerpPhi);
+    parDerDivUIParNGradPerpPhi = - DDY(DivUIParNGradPerpPhi);
     divParCur                  =   DDY(jPar);
 
     ddt(vortD) =
@@ -589,11 +557,15 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
 
     // Terms in jPar
     // ************************************************************************
+    elField         = - mu*n*DDY(phi);
+    uEParDoubleAdv  = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParParArtVisc  = (artViscParJpar)*D2DY2(jPar);
     jParPerpArtVisc = (artViscPerpJPar)*Laplace_perp(jPar);
 
     ddt(jPar) =
-          jParParArtVisc
+        + uEParDoubleAdv
+        + elField
+        + jParParArtVisc
         + jParPerpArtVisc
         ;
     // Filtering highest modes
@@ -631,21 +603,6 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
     // Filtering highest modes
     ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
     // ************************************************************************
-    return 0;
-}
-// ############################################################################
-
-// Monitor every output timestep
-// ############################################################################
-int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
-{
-    TRACE("Halt in CelmaCurMom::outputMonitor");
-
-    if(monitorEnergy){
-        ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
-        ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
-    }
-
     return 0;
 }
 // ############################################################################
