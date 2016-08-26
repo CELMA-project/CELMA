@@ -26,6 +26,8 @@ class Parameters
         BoutReal const Ti0_;    //<! Ion temperature [eV]
         BoutReal const B0_;     //<! Magnetic field [T]
         BoutReal const S_ ;     //<! Particle source [m^-3s^-1]
+        BoutReal const nuEN_;   //<! Electron neutral frequency
+        BoutReal const nuIN_;   //<! Ion neutral frequency
 
         // Converted
         BoutReal Ti0J;
@@ -58,9 +60,9 @@ class Parameters
         BoutReal nuII;       //<! Ion ion frequency
 
         // Additional parameters
-        BoutReal nuS;  //<! Particle creation frequency
-        BoutReal beta; //<! Plasma beta
-        BoutReal mu;   //<! Mass ratio
+        BoutReal beta;   //<! Plasma beta
+        BoutReal mu;     //<! Mass ratio
+        BoutReal Lambda; //<! \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\rigth)\f$
 
         // Parallel viscosities
         BoutReal eta0I; //<! Viscosity parameter ion eta 0
@@ -72,7 +74,9 @@ class Parameters
 
         // Normalized parameters
         BoutReal nuEINorm;  //<! Normalized nuEI
-        BoutReal nuSNorm;   //<! Normalized nuS
+        BoutReal nuENNorm;  //<! Normalized nuEI
+        BoutReal nuINNorm;  //<! Normalized nuEI
+        BoutReal SNorm;     //<! Normalized S
         BoutReal eta0INorm; //<! Normalized eta0I
         BoutReal eta2INorm; //<! Normalized eta2I
         BoutReal eta4INorm; //<! Normalized eta4I
@@ -86,6 +90,7 @@ class Parameters
         int const nameWidth;    //<! Text width for names
         int const numberWidth;  //<! Text width for numbers
         int const unitsWidth;   //<! Text width for units
+        int const precision;    //<! The precision of the prints
 
     public:
         // Constructor
@@ -95,7 +100,9 @@ class Parameters
                    BoutReal const &Te0,
                    BoutReal const &Ti0,
                    BoutReal const &B0,
-                   BoutReal const &S
+                   BoutReal const &S,
+                   BoutReal const &nuEN,
+                   BoutReal const &nuIN
                    );
 
         //! Prints the table
@@ -113,12 +120,18 @@ class Parameters
         BoutReal getLy() const;
         //! Obtain the electron ion collision frequency
         BoutReal getNuEI() const;
-        //! Obtain the particle creation frequency
-        BoutReal getNuS() const;
+        //! Obtain the electron neutral collision frequency
+        BoutReal getNuEN() const;
+        //! Obtain the ion neutral collision frequency
+        BoutReal getNuIN() const;
+        //! Obtain the normalized particle creation rate
+        BoutReal getSNorm() const;
         //! Obtain the plasma beta
         BoutReal getBeta() const;
         //! Obtain the mass ratio
         BoutReal getMu() const;
+        //! Obtain Lambda
+        BoutReal getLambda() const;
         //! Obtain the ion gyration frequency
         BoutReal getOmCI() const;
         //! Obtain the hybrid radius

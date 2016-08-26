@@ -86,6 +86,8 @@ def getJParFields(path):
     r'\mu T_e\partial_{\parallel}n'                                     ))
     jPar.lines.append(Line('elField'                                    ,\
     r'-\mu n \partial_{\parallel}\phi'                                  ))
+    jPar.lines.append(Line('gradPhiLnN'                                 ,\
+    r'\mu n\partial_{\parallel}\left(T_e \ln(n) - \phi \right)'         ))
     jPar.lines.append(Line('neutralERes'                                ,\
     r'n\nu_{en}u_{e,\parallel}'                                         ))
     jPar.lines.append(Line('neutralIRes'                                ,\

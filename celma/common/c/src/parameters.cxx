@@ -23,11 +23,16 @@ Parameters::Parameters(BoutReal const &radius,
                        BoutReal const &Te0,
                        BoutReal const &Ti0,
                        BoutReal const &B0,
-                       BoutReal const &S
+                       BoutReal const &S,
+                       BoutReal const &nuEN,
+                       BoutReal const &nuIN
                        )
-: radius_(radius), len_(len), n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
+: radius_(radius), len_(len),
+  n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
+  nuEN_(nuEN), nuIN_(nuIN),
   separatorLen(49), separator(' '),
-  nameWidth(15), numberWidth(15), unitsWidth(16)
+  nameWidth(15), numberWidth(15), unitsWidth(16),
+  precision(4)
 {
     TRACE("Parameters::Parameters");
 
@@ -92,10 +97,9 @@ Parameters::Parameters(BoutReal const &radius,
            coloumbLog*(1.0/pow(vThE, 3.0));
 
     // Additional parameters
-    nuS  = S/ne;
-    beta = ne*(Te0J+((N+2.0)/N)*Ti0J)/(pow(B0_, 2.0)/(2.0*mu0));
-    mu   = mp/me;
-    nuS      = S/ne;
+    beta   = ne*(Te0J+((N+2.0)/N)*Ti0J)/(pow(B0_, 2.0)/(2.0*mu0));
+    mu     = mp/me;
+    Lambda = log(pow(mu/(2.0*PI), 0.5));
 
     // Parallel viscosities
     /* Helander, Sigmar:
@@ -110,8 +114,10 @@ Parameters::Parameters(BoutReal const &radius,
     eta4E = 2.0*(n0*Te0J)/(2.0*omCE);
 
     // Normalized parameters
-    nuEINorm = nuEI/omCI;
-    nuSNorm  = nuS/omCI;
+    nuEINorm  = nuEI/omCI;
+    SNorm     = S/(n0_*omCI);
+    nuENNorm  = nuEN_/omCI;
+    nuINNorm  = nuIN_/omCI;
     /* Normalization can be found by looking at parallel momentum
      * equation
      */
@@ -129,8 +135,14 @@ Parameters::Parameters(BoutReal const &radius,
     if(nuEINorm >= 1.0){
         throw BoutException("Normalized nuEI broke drift approximation");
     }
-    if(nuSNorm >= 1.0){
-        throw BoutException("Normalized nuSNorm broke drift approximation");
+    if(SNorm >= 1.0){
+        throw BoutException("Normalized SNorm broke drift approximation");
+    }
+    if(nuENNorm >= 1.0){
+        throw BoutException("Normalized nuENNorm broke drift approximation");
+    }
+    if(nuINNorm >= 1.0){
+        throw BoutException("Normalized nuINNorm broke drift approximation");
     }
 }
 
@@ -149,30 +161,37 @@ void Parameters::printTable() const
     printVar("Ti0"   , Ti0_    , "eV"      );
     printVar("Te0"   , Te0_    , "eV"      );
     printVar("S"     , S_      , "m^-3s^-1");
+    printVar("nuEN"  , nuEN_   , "s^-1"    );
+    printVar("nuEI"  , nuIN_   , "s^-1"    );
     printVar("radius", radius_ , "m"       );
     printVar("len"   , len_    , "m"       );
     output << std::string(separatorLen, '-') << std::endl;
     output << "CONVERTED UNITS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("Lx"   , Lx    , "-" );
-    printVar("Ly"   , Ly    , "-" );
-    printVar("Ly/Lx", Ly/Lx , "-" );
-    printVar("Ti0"  , Ti0J  , "J");
-    printVar("Te0"  , Te0J  , "J");
+    printVar("Ti0"  , Ti0J , "J");
+    printVar("Te0"  , Te0J , "J");
+    printVar("Ly/Lx", Ly/Lx, "-");
     output << std::string(separatorLen, '-') << std::endl;
     output << "CODE INPUT" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("mu"  , mu  , "-"   );
-    printVar("nuEI", nuEI, "s^-1");
-    printVar("nuS" , nuS , "s^-1");
-    printVar("beta", beta, "-"   );
+    printVar("Lx"       , Lx      , "-");
+    printVar("Ly"       , Ly      , "-");
+    printVar("mu"       , mu      , "-");
+    printVar("Lambda"   , Lambda  , "-");
+    printVar("beta"     , beta    , "-");
+    printVar("nuEI/omCI", nuEINorm, "-");
+    printVar("S/n*omCI ", SNorm   , "-");
+    printVar("nuEN/omCI", nuENNorm, "-");
+    printVar("nuIN/omCI", nuINNorm, "-");
     output << std::string(separatorLen, '-') << std::endl;
     output << "PLOT SPECIFIC" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
     printVar("rhoS", rhoS, "-"   );
     printVar("omCI", omCI, "s^-1");
     output << std::string(separatorLen, '-') << std::endl;
-    output << std::string(separatorLen, '-') << std::endl;
+    output << std::endl;
+    output << std::string(separatorLen, '/') << std::endl;
+    output << std::endl;
     output << "THERMAL QUANTITIES" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
     printVar("cS"  , cS  , "m s^-1");
@@ -200,6 +219,8 @@ void Parameters::printTable() const
     printVar("nuIE"      , nuIE      , "s^-1"       );
     printVar("nuEE"      , nuEE      , "s^-1"       );
     printVar("nuII"      , nuII      , "s^-1"       );
+    printVar("nuEN"      , nuEN_     , "s^-1"       );
+    printVar("nuIN"      , nuIN_     , "s^-1"       );
     printVar("eta0I"     , eta0I     , "kg m^-1s^-1");
     printVar("eta2I"     , eta2I     , "kg m^-1s^-1");
     printVar("eta4I"     , eta4I     , "kg m^-1s^-1");
@@ -209,14 +230,16 @@ void Parameters::printTable() const
     output << std::string(separatorLen, '-') << std::endl;
     output << "ADDITIONAL PARAMETERS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("nuS" , nuS , "s^-1");
-    printVar("beta", beta, "-"   );
-    printVar("mu"  , mu  , "-"   );
+    printVar("beta"  , beta  , "-"   );
+    printVar("mu"    , mu    , "-"   );
+    printVar("Lambda", Lambda, "-"   );
     output << std::string(separatorLen, '-') << std::endl;
     output << "NORMALIZED PARAMETERS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("nuEI/rhoS", nuEINorm , "-");
-    printVar("nuS/omCI" , nuSNorm  , "-");
+    printVar("nuEI/omCI", nuEINorm , "-");
+    printVar("nuEN/omCI", nuENNorm , "-");
+    printVar("nuIN/omCI", nuINNorm , "-");
+    printVar("S/n0*omCI", SNorm    , "-");
     printVar("eta0INorm", eta0INorm, "-");
     printVar("eta2INorm", eta2INorm, "-");
     printVar("eta4INorm", eta4INorm, "-");
@@ -230,9 +253,9 @@ void Parameters::printTable() const
 /*!
  * Prints each variable
  *
- * \param[in] name  Name  of the variable
- * \param[in] val   Value of the variable
- * \param[in] units   Units of the variable
+ * \param[in] name      Name  of the variable
+ * \param[in] val       Value of the variable
+ * \param[in] units     Units of the variable
  */
 void Parameters::printVar(std::string const &name,
                           BoutReal    const &val,
@@ -249,7 +272,7 @@ void Parameters::printVar(std::string const &name,
            << std::setw(numberWidth)
            << std::setfill(separator)
            << std::scientific
-           << std::setprecision(3)
+           << std::setprecision(precision)
            << val
            << std::left
            << std::setw(unitsWidth)
@@ -262,7 +285,7 @@ void Parameters::printVar(std::string const &name,
 /*!
  * Returns the normalized domain radius
  *
- * \param[out] Lx in [-]
+ * \param[out] Lx The normalized version of the radius
  */
 BoutReal Parameters::getLx() const
 {
@@ -271,9 +294,9 @@ BoutReal Parameters::getLx() const
 }
 
 /*!
- * Returns the normalized domain frequency
+ * Returns the normalized domain length
  *
- * \param[out] Ly in [-]
+ * \param[out] Ly The normalized version of the length
  */
 BoutReal Parameters::getLy() const
 {
@@ -282,9 +305,9 @@ BoutReal Parameters::getLy() const
 }
 
 /*!
- * Returns the ion gyration frequency
+ * Returns the electron ion collision frequency
  *
- * \param[out] nuEI in [s^-1]
+ * \param[out] nuEI The normalized version of nuEI
  */
 BoutReal Parameters::getNuEI() const
 {
@@ -293,9 +316,43 @@ BoutReal Parameters::getNuEI() const
 }
 
 /*!
+ * Returns the electron neutral collision frequency
+ *
+ * \param[out] nuEN The normalized version of nuIN
+ */
+BoutReal Parameters::getNuEN() const
+{
+    TRACE("Parameters::getNuEN");
+    return nuENNorm;
+}
+
+/*!
+ * Returns the ion neutral collision frequency
+ *
+ * \param[out] nuIN The normalized version of nuIN
+ */
+BoutReal Parameters::getNuIN() const
+{
+
+    TRACE("Parameters::getNuIN");
+    return nuINNorm;
+}
+
+/*!
+ * Returns the normalized particle creation rate
+ *
+ * \param[out] SNorm The normalized S a.k.a normalized /f$/nu_S/f$
+ */
+BoutReal Parameters::getSNorm() const
+{
+    TRACE("Parameters::getMu");
+    return SNorm;
+}
+
+/*!
  * Returns the mass ratio
  *
- * \param[out] mu
+ * \param[out] mu /f$\frac{m_i}{m_e}/f$
  */
 BoutReal Parameters::getMu() const
 {
@@ -304,20 +361,20 @@ BoutReal Parameters::getMu() const
 }
 
 /*!
- * Returns the particle creation frequency
+ * Returns the Lambda
  *
- * \param[out] nuS in [s^-1]
+ * \param[out] Lambda \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\rigth)\f$
  */
-BoutReal Parameters::getNuS() const
+BoutReal Parameters::getLambda() const
 {
-    TRACE("Parameters::getNuS");
-    return nuS;
+    TRACE("Parameters::getLambda");
+    return Lambda;
 }
 
 /*!
  * Returns the plasma beta
  *
- * \param[out] beta
+ * \param[out] beta The plasma beta
  */
 BoutReal Parameters::getBeta() const
 {
@@ -328,7 +385,7 @@ BoutReal Parameters::getBeta() const
 /*!
  * Returns the ion gyration frequency
  *
- * \param[out] omCI in [s^-1]
+ * \param[out] omCI The ion gyration frequency in [s^-1]
  */
 BoutReal Parameters::getOmCI() const
 {
@@ -339,7 +396,7 @@ BoutReal Parameters::getOmCI() const
 /*!
  * Returns the hybrid radius
  *
- * \param[out] rhoS in [m]
+ * \param[out] rhoS The hybrid radius in [m]
  */
 BoutReal Parameters::getRhoS() const
 {

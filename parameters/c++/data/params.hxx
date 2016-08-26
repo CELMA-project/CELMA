@@ -31,20 +31,18 @@ private:
     // Input parameters
     // *****************************************************************************
     BoutReal n0;
-    BoutReal Ti0;
-    BoutReal Te0;
+    BoutReal Ti0, Te0;
     BoutReal B0;
+    BoutReal nuENUnormalized, nuINUnormalized;
     BoutReal S;
     // *****************************************************************************
 
     // Output parameters
     // *****************************************************************************
-    BoutReal nuEI;
-    BoutReal mu;
-    BoutReal nuS;
+    BoutReal nuEI, nuEN, nuIN, SNorm;
+    BoutReal mu, Lambda;
     BoutReal beta;
-    BoutReal omCI;
-    BoutReal rhoS;
+    BoutReal omCI, rhoS;
     // *****************************************************************************
     // ############################################################################
 };
