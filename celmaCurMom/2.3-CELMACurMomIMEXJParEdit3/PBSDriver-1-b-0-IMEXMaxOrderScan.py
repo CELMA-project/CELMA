@@ -16,18 +16,24 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-saveTerms           = False
+includeNoise        = False
+forceAddNoise       = False
+artViscParVortD     = 0.0
+artViscPerpVortD    = 0.0
 useHyperViscAzVortD = [True]
+maxorder            = [3]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/"
+restart_from = "../1-CELMACurMom/a-data/nout_20_timestep_10/nz_128/cst_artViscParVortD_0.0_cst_artViscPerpVortD_0.0_switch_forceAddNoise_True_switch_includeNoise_True_switch_useHyperViscAzVortD_True_tag_2.1-a-0-linearPhaseNoArtViscVortD_0/"
+# Set the spatial domain
+nz = 128
 # Set the temporal domain
 nout       = [100]
 timestep   = [1]
-directory  = "a-data"
+directory  = "b-IMEX"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,22 +44,22 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 8*2
+ySlice     = 8
 zSlice     = 0
 tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-1-linearPhase2"
+theRunName = "1-b-0-IMEX"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 48
-BOUT_nodes            = 3
-BOUT_ppn              = 16
-BOUT_walltime         = '12:00:00'
+nproc                 = 24
+BOUT_nodes            = 2
+BOUT_ppn              = 20
+BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -69,6 +75,8 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            # Set spatial domain
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -78,8 +86,12 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
+                          ('switch'      , 'includeNoise'       , includeNoise ),\
+                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
                           ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('switch'      , 'saveTerms'          ,saveTerms),\
+                          ('cst'         , 'artViscParVortD'    , artViscParVortD ),\
+                          ('cst'         , 'artViscPerpVortD'   , artViscPerpVortD),\
+                          ('solver'      , 'maxorder'           , maxorder),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
