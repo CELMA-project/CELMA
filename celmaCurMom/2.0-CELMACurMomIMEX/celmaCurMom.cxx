@@ -272,23 +272,6 @@ int CelmaCurMom::convective(BoutReal t)
          *
          * If the add noise is going to be called when doing a restart, the
          * includeNoise must be added in the rhs
-         *
-         * int main(int argc, char **argv)
-         *    # Solver *solver = Solver::create();
-         *    # solver->setModel(model);                  # Call of model init
-         *    # solver->addMonitor(bout_monitor, Solver::BACK);
-         *    # solver->outputVars(dump);                 # Call of load restart files
-         *    # solver->solve();
-         *int Solver::solve(int NOUT, BoutReal TIMESTEP)
-         *int PvodeSolver::init(bool restarting, int nout, BoutReal tstep)
-         *    # Around line 83 there is the call
-         *    # if(Solver::init(restarting, nout, tstep)){
-         *    # This loads the restart files
-         *void solver_f(integer N, BoutReal t, N_Vector u, N_Vector udot, void *f_data
-         *PvodeSolver::rhs(int N, BoutReal t, BoutReal *udata, BoutReal *dudata)
-         *Solver::run_rhs(BoutReal t)
-         *int PhysicsModel::runRHS(BoutReal time)
-         *int CelmaCurMom::rhs(BoutReal t)
          */
         // Class containing the noise generators
         // Calls the constructor with default arguments
