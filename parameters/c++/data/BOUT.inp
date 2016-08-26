@@ -51,18 +51,20 @@ floats = false # floats = false => output in double
 # Geometry
 # =============================================================================
 [geom]
-radius = 0.025 # The length of x from boundary to boundary in [m]
-len    = 1.40  # The length of y from boundary to boundary in [m]
+radius = 0.07 # The length of x from boundary to boundary in [m]
+len    = 4.50 # The length of y from boundary to boundary in [m]
 # =============================================================================
 
 
 # Input
 # =============================================================================
 [input]
-n0  = 5.0e17 # m^-3
-Te0 = 14.0   # eV
-Ti0 = 7.0    # eV
-B0  = 1.0e-1 # T
-S   = 1.0e24 # m^-3s^-1
+n0              = 5.0e17 # m^-3
+Te0             = 14.0   # eV
+Ti0             = 7.0    # eV
+B0              = 1.0e-1 # T
+S               = 1.0e24 # m^-3s^-1
+nuENUnormalized = 0.0    # s^-1
+nuINUnormalized = 0.0    # s^-1
 # =============================================================================
 ##############################################################################
