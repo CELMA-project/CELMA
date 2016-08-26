@@ -1,0 +1,71 @@
+KIWI-ish
+----------------------------------------------------
+These parameters are somewhat close to previous runs
+
+[geom]
+radius = 0.025 # The length of x from boundary to boundary in [m]
+len    = 1.40  # The length of y from boundary to boundary in [m]
+
+[input]
+n0              = 5.0e17 # m^-3
+Te0             = 14.0   # eV
+Ti0             = 7.0    # eV
+B0              = 1.0e-1 # T
+S               = 1.0e24 # m^-3s^-1
+nuENUnormalized = 0.0    # s^-1
+nuINUnormalized = 0.0    # s^-1
+
+Gives
+
+Lx             4.8296e+00
+Ly             2.7046e+02
+nuEI/omCI      5.3717e-02
+rhoS           5.1764e-03
+omCI           9.5788e+06
+
+Problem: RhoS almost at system size
+
+
+
+
+Could be run until
+B0 = 5.0e-2
+
+Gives
+Lx             2.4148e+00
+Ly             1.3523e+02
+nuEI/omCI      1.0743e-01
+rhoS           1.0353e-02
+omCI           4.7894e+06
+----------------------------------------------------
+
+
+
+VIENETA-ish
+----------------------------------------------------
+[geom]
+radius = 0.07 # The length of x from boundary to boundary in [m]
+len    = 4.50 # The length of y from boundary to boundary in [m]
+
+B0              = 1.0e-1 # T
+
+Gives
+
+Lx             1.3523e+01
+Ly             8.6933e+02
+nuS/omCI       2.0879e-01
+rhoS           5.1764e-03
+omCI           9.5788e+06
+
+
+
+Could be run until
+B0              = 1.0e-1 # T
+
+Gives
+Lx             6.7614e+00
+Ly             4.3466e+02
+nuEI/omCI      1.0743e-0
+rhoS           1.0353e-02
+omCI           4.7894e+06
+----------------------------------------------------
