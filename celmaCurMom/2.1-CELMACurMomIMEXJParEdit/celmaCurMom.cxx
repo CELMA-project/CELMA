@@ -377,20 +377,14 @@ int CelmaCurMom::convective(BoutReal t)
     // ************************************************************************
     jParAdv        = - invJ*bracket(phi, jPar, bm);
     uIParAdvSum    = - Vpar_Grad_par(uIPar, n*(uIPar + uEPar));
-    uEParDoubleAdv = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParRes        = - 0.51*nuEI*jPar;
-    muElPressure   = mu*DDY(n);
-    elField        = - mu*n*DDY(phi);
     neutralERes    = n*nuEN*uEPar;
     neutralIRes    = - n*nuIN*uIPar;
 
     ddt(jPar) =
           jParAdv
         + uIParAdvSum
-        + uEParDoubleAdv
         + jParRes
-        + muElPressure
-        + elField
         + neutralERes
         + neutralIRes
         ;
@@ -561,11 +555,17 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
 
     // Terms in jPar
     // ************************************************************************
+    muElPressure    = mu*DDY(n);
+    elField         = - mu*n*DDY(phi);
+    uEParDoubleAdv  = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
     jParParArtVisc  = (artViscParJpar)*D2DY2(jPar);
     jParPerpArtVisc = (artViscPerpJPar)*Laplace_perp(jPar);
 
     ddt(jPar) =
-          jParParArtVisc
+          muElPressure
+        + uEParDoubleAdv
+        + elField
+        + jParParArtVisc
         + jParPerpArtVisc
         ;
     // Filtering highest modes
