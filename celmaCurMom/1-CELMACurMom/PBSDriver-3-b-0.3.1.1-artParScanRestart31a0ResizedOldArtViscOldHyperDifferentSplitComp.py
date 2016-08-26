@@ -16,7 +16,12 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-artViscParVortD = [1.0e-1, 1.0e-2, 1.0e-3]
+includeNoise        = False
+forceAddNoise       = False
+artPerp             = [2.0e-1]
+artPar              = [10.0, 4.0, 4.0e-1]
+useHyperViscAzVortD = [True]
+artHyperAzVortD     = 16
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
@@ -24,11 +29,13 @@ restart    = "overwrite"
 # restart      = None;
 restart_from = "b-noArtVortD/nout_0_timestep_1e-10/nx_34_ny_48_nz_256/cst_artPar_2.5_switch_forceAddNoise_False_switch_includeNoise_False_switch_useHyperViscAzVortD_True_tag_3-b-0.0.3.1-31a0Resized_0/"
 # Set the spatial domain
+nx = 16*2 + 2
+ny = 24*2
 nz = 128*2
 # Set the temporal domain
-nout       = [22]
-timestep   = [30]
-directory  = "d-findGoodParam"
+nout       = [100]
+timestep   = [2]
+directory  = "b-noArtVortD"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -41,10 +48,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-20, None)
+tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "3-d-0.0-ViscParScanRestart31a0"
+theRunName = "3-b-0.3.1.1-artParScanRestart31a0ResizedOldArtViscOldHyperDifferentSplitComp"
 # =============================================================================
 
 
@@ -54,7 +61,7 @@ theRunName = "3-d-0.0-ViscParScanRestart31a0"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '24:00:00'
+BOUT_walltime         = '12:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -70,6 +77,10 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            # Set spatial domain
+            nx         = nx,\
+            ny         = ny,\
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -79,7 +90,12 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('cst'   , 'artViscParVortD'    ,artViscParVortD),\
+                          ('switch', 'includeNoise'       , includeNoise ),\
+                          ('switch', 'forceAddNoise'      ,forceAddNoise),\
+                          ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('cst'   , 'artPerp'            ,artPerp),\
+                          ('cst'   , 'artPar'             ,artPar),\
+                          ('cst'   , 'arthyperazvortd' ,artHyperAzVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
