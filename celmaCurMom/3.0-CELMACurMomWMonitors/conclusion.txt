@@ -13,4 +13,7 @@ a-data (copied from 1-CELMACurMom/d-findGoodParam/)
 0a0 - Finished after 1h 40m, mostly OK, but ue gets a boundary layer perpendiculary, kinE looks to be working
 1a0 - Finished after 2h 48m, looks OK, but still boundary layer
 2a0 - Finished after 3h 36m, a 9 mode growing up
-2a1 - Running
+2a1 - Finished after 3h 52m
+2a2 -
+2a3 -
+2a4 - Finished after 1h 10m, onset to non-linear phase

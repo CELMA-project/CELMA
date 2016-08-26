@@ -16,16 +16,15 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-saveTerms           = False
 useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/"
+restart_from = "a-data/nout_100_timestep_1/switch_useHyperViscAzVortD_True_tag_2-a-4-linearPhase5_0"
 # Set the temporal domain
-nout       = [100]
+nout       = [300]
 timestep   = [1]
 directory  = "a-data"
 # Shall we make?
@@ -43,7 +42,7 @@ zSlice     = 0
 tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-1-linearPhase2"
+theRunName = "3-a-0-turbulentPhase"
 # =============================================================================
 
 
@@ -53,7 +52,7 @@ theRunName = "2-a-1-linearPhase2"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -79,7 +78,6 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

@@ -16,18 +16,19 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-saveTerms           = False
-useHyperViscAzVortD = [True]
+artViscParVortD = [1.0e-1, 1.0e-2, 1.0e-3]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/"
+restart_from = "b-noArtVortD/nout_0_timestep_1e-10/nx_34_ny_48_nz_256/cst_artPar_2.5_switch_forceAddNoise_False_switch_includeNoise_False_switch_useHyperViscAzVortD_True_tag_3-b-0.0.3.1-31a0Resized_0/"
+# Set the spatial domain
+nz = 128*2
 # Set the temporal domain
-nout       = [100]
-timestep   = [1]
-directory  = "a-data"
+nout       = [22]
+timestep   = [30]
+directory  = "d-findGoodParam"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -40,10 +41,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-5, None)
+tSlice     = slice(-20, None)
 showPlot   = False
 savePlot   = True
-theRunName = "2-a-1-linearPhase2"
+theRunName = "3-d-0.0-ViscParScanRestart31a0"
 # =============================================================================
 
 
@@ -53,7 +54,7 @@ theRunName = "2-a-1-linearPhase2"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '12:00:00'
+BOUT_walltime         = '24:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -78,8 +79,7 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('switch'      , 'saveTerms'          ,saveTerms),\
+                          ('cst'   , 'artViscParVortD'    ,artViscParVortD),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
