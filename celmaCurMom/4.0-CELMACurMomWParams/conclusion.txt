@@ -1,0 +1,14 @@
+Copied from 1-CELMACurMom
+
+- Reverted split to rhs (found that IMEX is currently not robust enough)
+- Combined lnN and phi to the same derivative in jPar
+- Cleaned up in BOUT.inp
+- Added input routine
+- Changed source to flat
+
+Results:
+========
+
+a-data (copied from ...)
+---------------------------------------------------
+Not run yet
