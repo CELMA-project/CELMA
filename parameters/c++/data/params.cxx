@@ -20,29 +20,37 @@ int Params::init(bool restarting) {
     // Load the input
     // ************************************************************************
     Options *input = options->getSection("input");
-    input->get("n0" , n0 , 0.0);
-    input->get("Te0", Te0, 0.0);
-    input->get("Ti0", Ti0, 0.0);
-    input->get("B0" , B0 , 0.0);
-    input->get("S"  , S  , 0.0);
+    input->get("n0"             , n0             , 0.0);
+    input->get("Te0"            , Te0            , 0.0);
+    input->get("Ti0"            , Ti0            , 0.0);
+    input->get("B0"             , B0             , 0.0);
+    input->get("S"              , S              , 0.0);
+    input->get("nuENUnormalized", nuENUnormalized, 0.0);
+    input->get("nuINUnormalized", nuINUnormalized, 0.0);
     // ************************************************************************
 
-    Parameters params(radius, len, n0, Te0, Ti0, B0, S);
+    Parameters params(radius, len, n0, Te0, Ti0, B0, S,
+                      nuENUnormalized, nuINUnormalized);
 
     // Get the variables
     // ************************************************************************
-    Lx   = params.getLx();
-    Ly   = params.getLy();
-    nuEI = params.getNuEI();
-    mu   = params.getMu();
-    nuS  = params.getNuS();
-    beta = params.getBeta();
-    omCI = params.getOmCI();
-    rhoS = params.getRhoS();
+    Lx     = params.getLx();
+    Ly     = params.getLy();
+    nuEI   = params.getNuEI();
+    nuEN   = params.getNuEN();
+    nuIN   = params.getNuIN();
+    SNorm  = params.getSNorm();
+    mu     = params.getMu();
+    Lambda = params.getLambda();
+    beta   = params.getBeta();
+    omCI   = params.getOmCI();
+    rhoS   = params.getRhoS();
     // ************************************************************************
 
     output << "\n\n\n\n\n\n\nSaving" << std::endl;
-    SAVE_ONCE4(nuEI, mu, nuS, beta);
+    SAVE_ONCE2(Lx, Ly);
+    SAVE_ONCE4(nuEI, nuEN, nuIN, SNorm);
+    SAVE_ONCE3(mu, Lambda, beta);
     SAVE_ONCE2(omCI, rhoS);
 
     // Finalize
