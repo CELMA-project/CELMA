@@ -15,16 +15,14 @@ int CelmaCurMom::init(bool restarting)
 
     // Initialize non-standard BOUT++ objects
     initializeOwnObjects();
-
     // Set the input
     setAndSaveParameters();
-
+    // Print points per rhoS
+    printPointsPerRhoS();
     // Set the source
     setAndSaveSource();
-
     // Set the switches
     setSwithces(restarting);
-
     // Set and save the viscosities
     setAndSaveViscosities();
 
@@ -396,22 +394,99 @@ void CelmaCurMom::setAndSaveParameters()
     // ************************************************************************
 }
 
+void CelmaCurMom::printPointsPerRhoS()
+{
+    TRACE("Halt in CelmaCurMom::printPointsPerRhoS");
+
+    // Get the option (before any sections) in the BOUT.inp file
+    int MXG;
+    BoutReal pointsPerRhoSRadially;
+    BoutReal pointsPerRhoSParallely;
+    BoutReal pointsPerRhoSAzimuthally;
+    BoutReal minPointsPerRhoSXZ;
+    BoutReal minPointsPerRhoSY;
+
+    Options *root = Options::getRoot();
+    root->get("MXG", MXG, 0);
+
+    if (MXG == 0){
+        throw BoutException("No MXG found, please specify.");
+    }
+    if (MYG == 0){
+        throw BoutException("No MYG found, please specify.");
+    }
+
+    // dx = Lx/(nx-2*MXG) => nx = (Lx/dx) + 2*MXG
+    pointsPerRhoSRadially = ((Lx/mesh->dx) + 2*MXG)/rhoS;
+    // dy = Ly/ny => ny = Ly/dy
+    pointsPerRhoSParallely = (Ly/mesh->dy)/rhoS;
+    // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
+    pointsPerRhoSAzimuthally = (mesh->ngz - 1)/(2.0*PI*Lx);
+
+    root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,2.5);
+    root->getSection("geom")->get("minPointsPerRhoSY" ,minPointsPerRhoSY ,1e-3);
+
+    if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
+        std::ostringstream stream;
+        stream << "Minimum points per rhoS not fulfilled in x.\n"
+               << "Limit is         " << minPointsPerRhoSXZ << "\n"
+               << "Current value is " << pointsPerRhoSRadially << "\n";
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+        throw BoutException(message);
+    }
+    if (pointsPerRhoSAzimuthally < minPointsPerRhoSXZ){
+        std::ostringstream stream;
+        stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
+               << "Limit is         " << minPointsPerRhoSXZ << "\n"
+               << "Current value is " << pointsPerRhoSAzimuthally << "\n";
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+        throw BoutException(message);
+    }
+    if (pointsPerRhoSParallely < minPointsPerRhoSY){
+        std::ostringstream stream;
+        stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
+               << "Limit is         " << minPointsPerRhoSY << "\n"
+               << "Current value is " << pointsPerRhoSParallely << "\n";
+        std::string str =  stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+        throw BoutException(message);
+    }
+
+    output << '\n' << std::cout;
+    output << "Points per rhoS in x = " << pointsPerRhoSRadially << std::cout;
+    output << "Points per rhoS on outer circumference = "
+           << pointsPerRhoSAzimuthally << std::cout;
+    output << "Points per rhoS in y = " << pointsPerRhoSRadially << std::cout;
+    output << '\n' << std::cout;
+}
+
 void CelmaCurMom::setAndSaveSource()
 {
     TRACE("Halt in CelmaCurMom::setAndSaveSource");
+
+    BoutReal radialWidth, radialCentre, radialSteepness;
+    BoutReal parallelWidth, parallelCentre, parallelSteepness;
 
     // Get the source constants, save them and create the source
     // ************************************************************************
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
 
-    Options *src = options->getSection("src");
-    src->get("bRho", bRho, 0.0);
-    src->get("bZ",   bZ,   0.0);
-    src->get("cRho", cRho, 0.0);
-    src->get("cZ",   cZ,   0.0);
+    Options *thesource = options->getSection("thesource");
+    thesource->get("radialWidth"      , radialWidth      , 0.0);
+    thesource->get("radialCentre"     , radialCentre     , 0.0);
+    thesource->get("radialSteepness"  , radialSteepness  , 0.0);
+    thesource->get("parallelWidth"    , parallelWidth    , 0.0);
+    thesource->get("parallelCentre"   , parallelCentre   , 0.0);
+    thesource->get("parallelSteepness", parallelSteepness, 0.0);
 
-    SAVE_ONCE4(bRho, bZ, cRho, cZ);
+    SAVE_ONCE3(radialWidth  , radialCentre  , radialSteepness  );
+    SAVE_ONCE3(parallelWidth, parallelCentre, parallelSteepness);
 
     // The source (obtained from the input, and multiplied with SNorm)
     S = SNorm*
@@ -426,6 +501,14 @@ void CelmaCurMom::setAndSaveSource()
 void CelmaCurMom::setSwithces(bool &restarting)
 {
     TRACE("Halt in CelmaCurMom::setSwithces");
+
+    bool saveDdt;             // If ddt's should be saved
+    bool saveTerms;           // If terms should be saved
+    bool includeNoise;        // Include noise
+    bool forceAddNoise;       // Add noise on restart as well
+    bool noiseAdded;          // A check whether the noise is added or not
+    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
+    bool monitorEnergy;       // If energy should be monitored
 
     // Get the switches
     // ************************************************************************
@@ -460,6 +543,15 @@ void CelmaCurMom::setSwithces(bool &restarting)
 void CelmaCurMom::setAndSaveViscosities()
 {
     TRACE("Halt in CelmaCurMom::setAndSaveViscosities");
+
+    // Parallel aritifical dissipation
+    BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
+    BoutReal artViscParVortD;
+    // Perpendicular dissipation
+    BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
+    BoutReal artViscPerpVortD;
+    // Azimuthal hyperviscosities
+    BoutReal artHyperAzVortD;
 
     // Get and save the viscosities
     // ************************************************************************
@@ -515,6 +607,37 @@ void CelmaCurMom::setAndSaveViscosities()
               << SQ(SQ(mesh->dz)) << "):" << std::endl;
     output << "    For vortD   : " << artHyperAzVortD << std::endl;
     output << "***********************************************" << std::endl;
+
+    // Guards
+    std::vector<BoutReal> perpVisc (4, 0.0);
+    perpVisc.push_back(artViscPerpLnN    );
+    perpVisc.push_back(artViscPerpJPar   );
+    perpVisc.push_back(artViscPerpMomDens);
+    perpVisc.push_back(artViscPerpVortD  );
+
+    for (std::vector<BoutReal>::iterator it = perpVisc.begin();
+         it != perpVisc.end();
+         ++it){
+        if(*it > nuEI){
+            throw BoutException("One of the perpendicular viscosities "
+                                "is larger than nuEI");
+        }
+    }
+
+    std::vector<BoutReal> parVisc (4, 0.0);
+    perpVisc.push_back(artViscParLnN    );
+    perpVisc.push_back(artViscParJpar   );
+    perpVisc.push_back(artViscParMomDens);
+    perpVisc.push_back(artViscParVortD  );
+
+    for (std::vector<BoutReal>::iterator it = perpVisc.begin();
+         it != perpVisc.end();
+         ++it){
+        if(*it > 100.0*eta0INorm){
+            throw BoutException("One of the parallel viscosities "
+                                "is 100.0 times larger than eta0I");
+        }
+    }
 
     SAVE_ONCE2(artViscParLnN, artViscParJpar);
     SAVE_ONCE2(artViscParMomDens, artViscParVortD);

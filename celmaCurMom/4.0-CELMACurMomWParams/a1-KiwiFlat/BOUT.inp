@@ -143,7 +143,7 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 
 # Viscosities
 # =============================================================================
-[viscosities]
+[visc]
 # Parallel artificial viscosity
 artPar = 4.0
 artViscParLnN     = artPar # Density
