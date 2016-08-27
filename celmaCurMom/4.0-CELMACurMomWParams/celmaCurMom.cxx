@@ -335,17 +335,18 @@ void CelmaCurMom::setAndSaveParameters()
 
     // Get the variables
     // ************************************************************************
-    LxParam = params.getLx();
-    LyParam = params.getLy();
-    nuEI    = params.getNuEI();
-    nuEN    = params.getNuEN();
-    nuIN    = params.getNuIN();
-    SNorm   = params.getSNorm();
-    mu      = params.getMu();
-    Lambda  = params.getLambda();
-    beta    = params.getBeta();
-    omCI    = params.getOmCI();
-    rhoS    = params.getRhoS();
+    LxParam   = params.getLx();
+    LyParam   = params.getLy();
+    nuEI      = params.getNuEI();
+    nuEN      = params.getNuEN();
+    nuIN      = params.getNuIN();
+    SNorm     = params.getSNorm();
+    mu        = params.getMu();
+    Lambda    = params.getLambda();
+    beta      = params.getBeta();
+    omCI      = params.getOmCI();
+    rhoS      = params.getRhoS();
+    eta0INorm = params.getEta0I();
     // ************************************************************************
 
     // Check that Lx and LxParams is the same up until the fourt decimal point
@@ -412,19 +413,16 @@ void CelmaCurMom::printPointsPerRhoS()
     if (MXG == 0){
         throw BoutException("No MXG found, please specify.");
     }
-    if (MYG == 0){
-        throw BoutException("No MYG found, please specify.");
-    }
 
     // dx = Lx/(nx-2*MXG) => nx = (Lx/dx) + 2*MXG
-    pointsPerRhoSRadially = ((Lx/mesh->dx) + 2*MXG)/rhoS;
+    pointsPerRhoSRadially = ((Lx/mesh->dx(0, 0)) + 2*MXG)/Lx;
     // dy = Ly/ny => ny = Ly/dy
-    pointsPerRhoSParallely = (Ly/mesh->dy)/rhoS;
+    pointsPerRhoSParallely = 1.0/mesh->dy(0 ,0);
     // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
     pointsPerRhoSAzimuthally = (mesh->ngz - 1)/(2.0*PI*Lx);
 
-    root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,2.5);
-    root->getSection("geom")->get("minPointsPerRhoSY" ,minPointsPerRhoSY ,1e-3);
+    root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,4.0);
+    root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.5e-1);
 
     if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
         std::ostringstream stream;
@@ -457,12 +455,14 @@ void CelmaCurMom::printPointsPerRhoS()
         throw BoutException(message);
     }
 
-    output << '\n' << std::cout;
-    output << "Points per rhoS in x = " << pointsPerRhoSRadially << std::cout;
+    output << '\n' << std::string(51, '*') << std::endl;
+    output << "Points per rhoS in x                   = "
+           << pointsPerRhoSRadially << std::endl;
     output << "Points per rhoS on outer circumference = "
-           << pointsPerRhoSAzimuthally << std::cout;
-    output << "Points per rhoS in y = " << pointsPerRhoSRadially << std::cout;
-    output << '\n' << std::cout;
+           << pointsPerRhoSAzimuthally << std::endl;
+    output << "Points per rhoS in y                   = "
+           << pointsPerRhoSParallely << std::endl;
+    output << std::string(51, '*') << '\n' << std::endl;
 }
 
 void CelmaCurMom::setAndSaveSource()
@@ -502,14 +502,6 @@ void CelmaCurMom::setSwithces(bool &restarting)
 {
     TRACE("Halt in CelmaCurMom::setSwithces");
 
-    bool saveDdt;             // If ddt's should be saved
-    bool saveTerms;           // If terms should be saved
-    bool includeNoise;        // Include noise
-    bool forceAddNoise;       // Add noise on restart as well
-    bool noiseAdded;          // A check whether the noise is added or not
-    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
-    bool monitorEnergy;       // If energy should be monitored
-
     // Get the switches
     // ************************************************************************
     // Get the option (before any sections) in the BOUT.inp file
@@ -533,7 +525,7 @@ void CelmaCurMom::setSwithces(bool &restarting)
         includeNoise = false;
         noiseAdded = true; // For extra safety measurements
     }
-    // Set artificial dissipation to 0 if useHyperViscAzVortD is false
+    // Set artificial viscosities to 0 if useHyperViscAzVortD is false
     if (!useHyperViscAzVortD){
         artHyperAzVortD = 0.0;
     }
@@ -543,15 +535,6 @@ void CelmaCurMom::setSwithces(bool &restarting)
 void CelmaCurMom::setAndSaveViscosities()
 {
     TRACE("Halt in CelmaCurMom::setAndSaveViscosities");
-
-    // Parallel aritifical dissipation
-    BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
-    BoutReal artViscParVortD;
-    // Perpendicular dissipation
-    BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
-    BoutReal artViscPerpVortD;
-    // Azimuthal hyperviscosities
-    BoutReal artHyperAzVortD;
 
     // Get and save the viscosities
     // ************************************************************************
