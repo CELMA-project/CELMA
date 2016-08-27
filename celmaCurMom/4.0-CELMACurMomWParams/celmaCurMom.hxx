@@ -98,6 +98,18 @@ private:
     Field3D vortDhyperVisc;
     // *****************************************************************************
 
+    // Artificial viscosities
+    // *****************************************************************************
+    // Parallel aritifical viscosities
+    BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
+    BoutReal artViscParVortD;
+    // Perpendicular viscosities
+    BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
+    BoutReal artViscPerpVortD;
+    // Azimuthal hyperviscosities
+    BoutReal artHyperAzVortD;
+    // *****************************************************************************
+
     // Temporary fields
     // *****************************************************************************
     Field3D divUIParNGradPerpPhi;
@@ -131,6 +143,11 @@ private:
     BoutReal omCI, rhoS;
     // *****************************************************************************
 
+    // Helping variables
+    // *****************************************************************************
+    BoutReal eta0INorm; // Viscous coefficient
+    // *****************************************************************************
+
     // Additional methods and solvers
     // *****************************************************************************
     string ownOpType;               // Type of own operators
@@ -142,8 +159,19 @@ private:
     int outputMonitor(BoutReal simtime, int iter, int NOUT);    // Monitors every output
     // *****************************************************************************
 
-    // Switches
+    // Input switches
     // *****************************************************************************
+    bool saveDdt;             // If ddt's should be saved
+    bool saveTerms;           // If terms should be saved
+    bool includeNoise;        // Include noise
+    bool forceAddNoise;       // Add noise on restart as well
+    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
+    bool monitorEnergy;       // If energy should be monitored
+    // *****************************************************************************
+
+    // Runtime switches
+    // *****************************************************************************
+    bool noiseAdded;          // A check whether the noise is added or not
     // *****************************************************************************
 
     // Monitor variables
