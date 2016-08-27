@@ -136,6 +136,8 @@ class Parameters
         BoutReal getOmCI() const;
         //! Obtain the hybrid radius
         BoutReal getRhoS() const;
+        //! Obtain the zz component of the ion viscosity
+        BoutReal getEta0I() const;
 };
 
 #include "../src/parameters.cxx"

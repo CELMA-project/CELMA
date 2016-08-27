@@ -131,25 +131,9 @@ private:
     BoutReal omCI, rhoS;
     // *****************************************************************************
 
-    // Source parameters
-    // *****************************************************************************
-    BoutReal bRho, bZ, cRho, cZ; // Variables used in the source term
-    // *****************************************************************************
-
-    // Viscosities
-    // *****************************************************************************
-    // Parallel aritifical dissipation
-    BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
-    BoutReal artViscParVortD;
-    // Perpendicular dissipation
-    BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
-    BoutReal artViscPerpVortD;
-    // Azimuthal hyperviscosities
-    BoutReal artHyperAzVortD;
-    // *****************************************************************************
-
     // Additional methods and solvers
     // *****************************************************************************
+    string ownOpType;               // Type of own operators
     BRACKET_METHOD bm;              // The bracket method
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
@@ -160,14 +144,6 @@ private:
 
     // Switches
     // *****************************************************************************
-    string ownOpType;         // Type of own operators
-    bool saveDdt;             // If ddt's should be saved
-    bool saveTerms;           // If terms should be saved
-    bool includeNoise;        // Include noise
-    bool forceAddNoise;       // Add noise on restart as well
-    bool noiseAdded;          // A check whether the noise is added or not
-    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
-    bool monitorEnergy;       // If energy should be monitored
     // *****************************************************************************
 
     // Monitor variables
@@ -185,6 +161,7 @@ private:
     // *****************************************************************************
     void initializeOwnObjects();
     void setAndSaveParameters();
+    void printPointsPerRhoS();
     void setAndSaveSource();
     void setSwithces(bool &restarting);
     void setAndSaveViscosities();
