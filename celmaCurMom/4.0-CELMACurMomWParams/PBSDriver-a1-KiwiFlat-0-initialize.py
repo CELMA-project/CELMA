@@ -17,6 +17,15 @@ from postProcessing.plotting import combined1D2D as postProcess
 # =============================================================================
 # *****************************************************************************
 ownFilterType = "none"
+#Sn = [1.0e24, 1.0e23, 1.0e22]
+#Sn = [7.0e22, 5e22, 2e22]
+#Sn = [4.0e22, 3e22, 2e22]
+#Sn = [3.5e22]
+# Sn = [3.9e22, 3.8e22, 3.75e22]
+#Sn = [4.4e22, 4.5e22, 4.6e22]
+#Sn = [5e22, 5.2e22, 5.6e22]
+#Sn = [5.3e22, 5.4e22, 5.5e22]
+Sn = [5.6e22]
 # *****************************************************************************
 # Set the spatial domain
 nz = 1
@@ -24,8 +33,8 @@ nz = 1
 restart    = None
 remove_old = False
 timestep   = [1e2]
-nout       = [20]
-directory  = "a-data"
+nout       = [40]
+directory  = "a1-KiwiFlat"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -38,10 +47,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-20, None)
+tSlice     = slice(-10, None)
 showPlot   = False
 savePlot   = True
-theRunName = "0-a-0-initialize"
+theRunName = "a1-KiwiFlat-0-initialize"
 # =============================================================================
 
 
@@ -78,6 +87,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('ownFilters'  , 'type', ownFilterType),\
+                          ('input'  , 'Sn', Sn),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

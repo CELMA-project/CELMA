@@ -162,7 +162,7 @@ void Parameters::printTable() const
     printVar("Te0"   , Te0_    , "eV"      );
     printVar("S"     , S_      , "m^-3s^-1");
     printVar("nuEN"  , nuEN_   , "s^-1"    );
-    printVar("nuEI"  , nuIN_   , "s^-1"    );
+    printVar("nuIN"  , nuIN_   , "s^-1"    );
     printVar("radius", radius_ , "m"       );
     printVar("len"   , len_    , "m"       );
     output << std::string(separatorLen, '-') << std::endl;
@@ -186,7 +186,7 @@ void Parameters::printTable() const
     output << std::string(separatorLen, '-') << std::endl;
     output << "PLOT SPECIFIC" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("rhoS", rhoS, "-"   );
+    printVar("rhoS", rhoS, "m"   );
     printVar("omCI", omCI, "s^-1");
     output << std::string(separatorLen, '-') << std::endl;
     output << std::endl;
@@ -402,6 +402,18 @@ BoutReal Parameters::getRhoS() const
 {
     TRACE("Parameters::getRhoS");
     return rhoS;
+}
+
+/*!
+ * Returns normalized version of /f$\eta_0^i/f$
+ *
+ * \param[out] eta0INorm The normalized viscosity coefficient
+ */
+BoutReal Parameters::getEta0I() const
+{
+
+    TRACE("Parameters::getEta0I");
+    return eta0INorm;
 }
 
 #endif
