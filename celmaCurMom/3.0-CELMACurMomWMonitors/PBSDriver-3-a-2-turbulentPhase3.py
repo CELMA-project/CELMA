@@ -16,13 +16,14 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
+saveTerms           = False
 useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_300_timestep_1/switch_useHyperViscAzVortD_True_tag_3-a-1-turbulentPhase2_0/"
+restart_from = "a-data/nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-1-turbulentPhase2_0/"
 # Set the temporal domain
 nout       = [300]
 timestep   = [1]
@@ -78,6 +79,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
