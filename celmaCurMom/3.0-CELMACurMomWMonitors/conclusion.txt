@@ -19,4 +19,8 @@ a-data (copied from 1-CELMACurMom/d-findGoodParam/)
 2a4 - Finished after 1h 10m, -> 2600 omci^-1 onset to non-linear phase (starts around 2550 omci^-1), ~3e-1
 3a0 - Finished after 3h 46m, -> 2900 omci^-1 Turbulence level at ~3e-1
 3a1 - Finished after 3h 33m, -> 3300 omci^-1 Turbulence level at ~3e-1
-3a2 - Running
+3a2 - Finished after 3h 10m, -> 3500 omci^-1 Turbulence level at ~3e-1
+3a3 - Finished after 3h 02m, -> 3800 omci^-1 Turbulence level at ~3e-1
+3a4 - Finished after 3h 06m, -> 4100 omci^-1 Turbulence level at ~3.2e-1
+3a5 - Finished after 9h 59m, -> 5100 omci^-1 Turbulence level at ~3.5e-1
+3a6 - Running -> 6100 omci^-1 Turbulence level at

@@ -23,9 +23,9 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-2-turbulentPhase3_0/"
+restart_from = "a-data/nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-4-turbulentPhase5_0/"
 # Set the temporal domain
-nout       = [300]
+nout       = [1000]
 timestep   = [1]
 directory  = "a-data"
 # Shall we make?
@@ -43,7 +43,7 @@ zSlice     = 0
 tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "3-a-3-turbulentPhase4"
+theRunName = "3-a-5-turbulentPhase6"
 # =============================================================================
 
 
@@ -53,7 +53,7 @@ theRunName = "3-a-3-turbulentPhase4"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '14:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
