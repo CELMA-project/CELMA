@@ -8,7 +8,7 @@ from bout_runners.bout_runners import basic_runner
 # =============================================================================
 # Additional options
 remove_old = True
-make       = True
+make       = False
 nproc      = 4
 # =============================================================================
 
