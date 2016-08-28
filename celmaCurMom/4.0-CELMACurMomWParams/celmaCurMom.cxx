@@ -422,7 +422,7 @@ void CelmaCurMom::printPointsPerRhoS()
     pointsPerRhoSAzimuthally = (mesh->ngz - 1)/(2.0*PI*Lx);
 
     root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,4.0);
-    root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.5e-1);
+    root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.0e-1);
 
     if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
         std::ostringstream stream;
@@ -434,7 +434,7 @@ void CelmaCurMom::printPointsPerRhoS()
         const char* message = str.c_str();
         throw BoutException(message);
     }
-    if (pointsPerRhoSAzimuthally < minPointsPerRhoSXZ){
+    if (mesh->ngz > 3 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ){
         std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
                << "Limit is         " << minPointsPerRhoSXZ << "\n"
@@ -446,7 +446,7 @@ void CelmaCurMom::printPointsPerRhoS()
     }
     if (pointsPerRhoSParallely < minPointsPerRhoSY){
         std::ostringstream stream;
-        stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
+        stream << "Minimum points per rhoS not fulfilled in y.\n"
                << "Limit is         " << minPointsPerRhoSY << "\n"
                << "Current value is " << pointsPerRhoSParallely << "\n";
         std::string str =  stream.str();
@@ -572,8 +572,8 @@ void CelmaCurMom::setAndSaveViscosities()
     // Azimuthal hyperviscosities
     artHyperAzVortD *= SQ(SQ(mesh->dz));
 
-    output << "Printing real artificial viscosity coefficients" << std::endl;
-    output << "***********************************************" << std::endl;
+    output << "\nPrinting real artificial viscosity coefficients" << std::endl;
+    output << "***********************************************"   << std::endl;
     output << "Perpendicular (SQ(mesh->dx(0,0)) = "
               << SQ(mesh->dx(0,0)) << "):" << std::endl;
     output << "    For ln(n)    : "  << artViscPerpLnN     << std::endl;
@@ -589,7 +589,7 @@ void CelmaCurMom::setAndSaveViscosities()
     output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
               << SQ(SQ(mesh->dz)) << "):" << std::endl;
     output << "    For vortD   : " << artHyperAzVortD << std::endl;
-    output << "***********************************************" << std::endl;
+    output << "***********************************************\n" << std::endl;
 
     // Guards
     std::vector<BoutReal> perpVisc (4, 0.0);

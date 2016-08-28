@@ -60,7 +60,7 @@ omCI           9.5788e+06
 
 
 Could be run until
-B0              = 1.0e-1 # T
+B0              = 5.0e-2 # T
 
 Gives
 Lx             6.7614e+00

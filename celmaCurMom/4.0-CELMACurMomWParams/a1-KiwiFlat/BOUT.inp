@@ -28,7 +28,7 @@ MYG = 1
 [mesh]
 # Number of points
 nx = 32 + 2*MXG
-ny = 48
+ny = 66
 nz = 256           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
