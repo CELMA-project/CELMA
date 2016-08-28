@@ -12,3 +12,17 @@ Results:
 a-data (copied from ...)
 ---------------------------------------------------
 Not run yet
+
+
+Looks like low B fills the whole column
+both if source go to end and if not
+
+A bit of a mystery still...does seem to change anything when B is changing
+Also, when changed machine, nothing really happened
+
+Still try: Higher artificial perp...but wait...these are also comparable
+
+Things left:
+* Ratio
+* Len of cyl
+* A bit higher collisionality
