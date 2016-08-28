@@ -1,19 +1,51 @@
+Old parameters
+----------------------------------------------------
+Close as possible to previos runs
+
+[geom]
+radius = 0.02588 # The length of x from boundary to boundary in [m]
+len    = 1.03528 # The length of y from boundary to boundary in [m]
+
+[input]
+n0              = 1.0e17 # m^-3
+Te0             = 14.0   # eV
+Ti0             = 7.0    # eV
+B0              = 1.0e-1 # T
+S               = 1.0e22 # m^-3s^-1
+nuENUnormalized = 0.0    # s^-1
+nuINUnormalized = 0.0    # s^-1
+
+Gives
+
+Lx             4.9996e+00
+Ly             2.0000e+02
+mu             1.8362e+03
+Lambda         2.8388e+00
+beta           1.0335e-04
+nuEI/omCI      1.1363e-02
+
+rhoS           5.1764e-03
+omCI           9.5788e+06
+----------------------------------------------------
+
+
+
 KIWI-ish
 ----------------------------------------------------
 These parameters are somewhat close to previous runs
 
 [geom]
-radius = 0.025 # The length of x from boundary to boundary in [m]
-len    = 1.40  # The length of y from boundary to boundary in [m]
+radius = 0.025 # the length of x from boundary to boundary in [m]
+len    = 1.40  # the length of y from boundary to boundary in [m]
 
 [input]
 n0              = 5.0e17 # m^-3
-Te0             = 14.0   # eV
-Ti0             = 7.0    # eV
-B0              = 1.0e-1 # T
-S               = 1.0e24 # m^-3s^-1
-nuENUnormalized = 0.0    # s^-1
-nuINUnormalized = 0.0    # s^-1
+te0             = 14.0   # ev
+ti0             = 7.0    # ev
+b0              = 1.0e-1 # t
+s               = 1.0e24 # m^-3s^-1
+nuenunormalized = 0.0    # s^-1
+nuinunormalized = 0.0    # s^-1
 
 Gives
 
