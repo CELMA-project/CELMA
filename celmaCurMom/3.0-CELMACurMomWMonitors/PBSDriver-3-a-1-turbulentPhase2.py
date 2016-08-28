@@ -16,6 +16,7 @@ from postProcessing.plotting import combinedDriver as postProcess
 # The options for the run
 # =============================================================================
 # *****************************************************************************
+saveTerms           = False
 useHyperViscAzVortD = [True]
 # *****************************************************************************
 remove_old = False
@@ -78,6 +79,7 @@ myRuns = PBS_runner(\
             additional = [
                           ('tag',theRunName,0),\
                           ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                          ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
