@@ -309,10 +309,10 @@ BoutReal Parameters::getLy() const
  *
  * \param[out] nuEI The normalized version of nuEI
  */
-BoutReal Parameters::getNuEI() const
+BoutReal Parameters::getNuEINorm() const
 {
     TRACE("Parameters::getNuEI");
-    return nuEI;
+    return nuEINorm;
 }
 
 /*!
@@ -320,7 +320,7 @@ BoutReal Parameters::getNuEI() const
  *
  * \param[out] nuEN The normalized version of nuIN
  */
-BoutReal Parameters::getNuEN() const
+BoutReal Parameters::getNuENNorm() const
 {
     TRACE("Parameters::getNuEN");
     return nuENNorm;
@@ -331,7 +331,7 @@ BoutReal Parameters::getNuEN() const
  *
  * \param[out] nuIN The normalized version of nuIN
  */
-BoutReal Parameters::getNuIN() const
+BoutReal Parameters::getNuINNorm() const
 {
 
     TRACE("Parameters::getNuIN");
@@ -409,7 +409,7 @@ BoutReal Parameters::getRhoS() const
  *
  * \param[out] eta0INorm The normalized viscosity coefficient
  */
-BoutReal Parameters::getEta0I() const
+BoutReal Parameters::getEta0INorm() const
 {
 
     TRACE("Parameters::getEta0I");
