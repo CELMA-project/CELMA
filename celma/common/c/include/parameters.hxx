@@ -119,11 +119,11 @@ class Parameters
         //! Obtain the domain length
         BoutReal getLy() const;
         //! Obtain the electron ion collision frequency
-        BoutReal getNuEI() const;
+        BoutReal getNuEINorm() const;
         //! Obtain the electron neutral collision frequency
-        BoutReal getNuEN() const;
+        BoutReal getNuENNorm() const;
         //! Obtain the ion neutral collision frequency
-        BoutReal getNuIN() const;
+        BoutReal getNuINNorm() const;
         //! Obtain the normalized particle creation rate
         BoutReal getSNorm() const;
         //! Obtain the plasma beta
@@ -137,7 +137,7 @@ class Parameters
         //! Obtain the hybrid radius
         BoutReal getRhoS() const;
         //! Obtain the zz component of the ion viscosity
-        BoutReal getEta0I() const;
+        BoutReal getEta0INorm() const;
 };
 
 #include "../src/parameters.cxx"
