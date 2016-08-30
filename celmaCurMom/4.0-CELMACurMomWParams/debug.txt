@@ -1,0 +1,31 @@
+Problem: Flat profiles found
+
+Checked:
+Kiwi
+[!] High B - Bad profiles
+[!] Low B - Bad profiles
+Vieneta
+[!] Different machine - Bad profiles
+[x] Initialization is the same
+[x] Equations are the same
+[x] Art visc are the same
+[x] Source is the same
+[x] Boundaries are the same in inputs
+[X] Does new formulation of jPar term makes difference? -Minor
+[X] Checking that inp files are the same
+[x] Check that the initial timestep routine is the same
+[x] Check that init is the same
+[x] Check if split makes a difference - didn't
+[x] Check if artVortZ makes a difference - didn't...read, but then changed
+[x] Compare log files - Couldn't see any difference
+Original machine
+[x] Completely original - Good profiles
+[x] Remade to rhs (including merging of two terms) - Good profiles
+[x] Everything except params - GoodProfiles
+[!] Nothing but params function - Bad profiles
+[x] Nothing but params hack all - Good profiles
+[x] Nothing but params hack all minus Mu and Lambda - Good profiles
+[x] Nothing but params hack all minus Lx and Ly - Good profiles
+[!] Nothing but params hack all minus nuEI - Bad profiles
+
+!!! Bug found: getNuEI returned not normalized versions
