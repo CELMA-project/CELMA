@@ -23,4 +23,14 @@ a-data (copied from 1-CELMACurMom/d-findGoodParam/)
 3a3 - Finished after 3h 02m, -> 3800 omci^-1 Turbulence level at ~3e-1
 3a4 - Finished after 3h 06m, -> 4100 omci^-1 Turbulence level at ~3.2e-1
 3a5 - Finished after 9h 59m, -> 5100 omci^-1 Turbulence level at ~3.5e-1
-3a6 - Running -> 6100 omci^-1 Turbulence level at
+3a6 - Finished after 11h 22m, -> 6100 omci^-1 Turbulence level at ~2.7e-1
+3a7 - Finished after 10h 17m, -> 7100 omci^-1 Turbulence level at ~2.5e-1
+3a8 - Finished after 9h 53m, -> 8100 omci^-1 Turbulence level at ~3e-1
+
+
+NOTE:
+In linear phase: Makes "jumps" in fourier modes upon restart
+This is not so visible in non-linear phase
+Check if fft normalizes - No
+Note that this jump is mostly visible in the log plot, as the restart differs
+with 1.0e-5
