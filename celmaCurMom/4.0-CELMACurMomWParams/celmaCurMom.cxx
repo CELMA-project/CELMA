@@ -337,16 +337,16 @@ void CelmaCurMom::setAndSaveParameters()
     // ************************************************************************
     LxParam   = params.getLx();
     LyParam   = params.getLy();
-    nuEI      = params.getNuEI();
-    nuEN      = params.getNuEN();
-    nuIN      = params.getNuIN();
+    nuEI      = params.getNuEINorm();
+    nuEN      = params.getNuENNorm();
+    nuIN      = params.getNuINNorm();
     SNorm     = params.getSNorm();
     mu        = params.getMu();
     Lambda    = params.getLambda();
     beta      = params.getBeta();
     omCI      = params.getOmCI();
     rhoS      = params.getRhoS();
-    eta0INorm = params.getEta0I();
+    eta0INorm = params.getEta0INorm();
     // ************************************************************************
 
     // Check that Lx and LxParams is the same up until the fourt decimal point
@@ -392,6 +392,9 @@ void CelmaCurMom::setAndSaveParameters()
     SAVE_ONCE2(Lx, Ly);
     SAVE_ONCE4(nuEI, nuEN, nuIN, SNorm);
     SAVE_ONCE2(mu, Lambda);
+    SAVE_ONCE (beta);
+    SAVE_ONCE2(omCI, rhoS);
+    SAVE_ONCE (eta0INorm);
     // ************************************************************************
 }
 
@@ -525,10 +528,6 @@ void CelmaCurMom::setSwithces(bool &restarting)
         includeNoise = false;
         noiseAdded = true; // For extra safety measurements
     }
-    // Set artificial viscosities to 0 if useHyperViscAzVortD is false
-    if (!useHyperViscAzVortD){
-        artHyperAzVortD = 0.0;
-    }
     // ************************************************************************
 }
 
@@ -569,6 +568,12 @@ void CelmaCurMom::setAndSaveViscosities()
     artViscPerpMomDens *= SQ(mesh->dx(0,0));
     artViscPerpVortD   *= SQ(mesh->dx(0,0));
 
+    // Set artificial viscosities to 0 if useHyperViscAzVortD is false
+    if (!useHyperViscAzVortD){
+        output << "Setting artHyperAzVortD = 0.0 as useHyperViscAzVortD = False"
+               << std::endl;
+        artHyperAzVortD = 0.0;
+    }
     // Azimuthal hyperviscosities
     artHyperAzVortD *= SQ(SQ(mesh->dz));
 

@@ -25,11 +25,11 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a-data/nout_20_timestep_100.0/nz_1/ownFilters_type_none_tag_0-a-0-initialize_0/"
+restart_from = "a1-KiwiFlat/nout_20_timestep_200.0/nz_1/ownFilters_type_none_tag_a1-KiwiFlat-0-initialize_0/"
 # Set the temporal domain
-nout       = [20]
-timestep   = [5]
-directory  = "a-data"
+timestep   = [50]
+nout       = [2]
+directory  = "a1-KiwiFlat"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -42,10 +42,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-20, None)
+tSlice     = slice(-2, None)
 showPlot   = False
 savePlot   = True
-theRunName = "1-a-0-expand"
+theRunName = "a1-KiwiFlat-1-expand"
 # =============================================================================
 
 
@@ -55,7 +55,7 @@ theRunName = "1-a-0-expand"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '03:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -77,6 +77,7 @@ myRuns = PBS_runner(\
             nout       = nout  ,\
             timestep   = timestep,\
             # Copy the source file
+            cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
             restart_from = restart_from,\
