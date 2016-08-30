@@ -625,6 +625,7 @@ class Plot1D(Plot):
         if self._showPlot:
             plt.show()
 
+        plt.close()
         return timeFolder
     #}}}
 #}}}
@@ -1035,6 +1036,7 @@ class Plot2D(Plot):
         if self._showPlot:
             plt.show()
 
+        plt.close()
         return timeFolder
     #}}}
 #}}}
