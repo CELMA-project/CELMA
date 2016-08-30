@@ -1,5 +1,5 @@
 #
-# Input file for "4.0-CELMACurMomWParams/KiwiFlat"
+# Input file for "4.0-CELMACurMomWParams/VienetaFlat"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -27,8 +27,8 @@ MYG = 1
 ###############################################################################
 [mesh]
 # Number of points
-nx = 32 + 2*MXG
-ny = 66
+nx = 68 + 2*MXG
+ny = 100
 nz = 256           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
@@ -118,23 +118,23 @@ saveDdt             = true
 # Input
 # =============================================================================
 [input]
-radius          = 0.025    # The length of x from boundary to boundary in [m]
-len             = 1.40     # The length of y from boundary to boundary in [m]
-n0              = 5.0e17   # m^-3
-Te0             = 14.0     # eV
-Ti0             = 7.0      # eV
-B0              = 1.0e-1   # T
-Sn              = 2.25e22  # m^-3s^-1
-nuENUnormalized = 0.0      # s^-1
-nuINUnormalized = 0.0      # s^-1
+radius          = 0.07   # The length of x from boundary to boundary in [m]
+len             = 4.50   # The length of y from boundary to boundary in [m]
+n0              = 5.0e17 # m^-3
+Te0             = 14.0   # eV
+Ti0             = 7.0    # eV
+B0              = 1.0e-1 # T
+Sn              = 6.5e21 # m^-3s^-1
+nuENUnormalized = 0.0    # s^-1
+nuINUnormalized = 0.0    # s^-1
 # =============================================================================
 
 
 # Geometry
 # =============================================================================
 [geom]
-Lx =   4.8296 # The normalized radius (must agree with radius up to fourth decimal)
-Ly = 270.4579 # The normalized length (must agree with len up to fourth decimal)
+Lx =  13.5229 # The normalized radius (must agree with radius up to fourth decimal)
+Ly = 869.3288 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]

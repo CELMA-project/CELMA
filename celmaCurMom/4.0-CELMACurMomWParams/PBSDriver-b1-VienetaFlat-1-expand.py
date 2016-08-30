@@ -11,25 +11,25 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combinedDriver as postProcess
+from postProcessing.plotting import combined1D2D as postProcess
 
 # The options for the run
 # =============================================================================
 # *****************************************************************************
-includeNoise        = True
-forceAddNoise       = True
-saveTerms           = False
-useHyperViscAzVortD = [True]
+ownFilterType = "none"
 # *****************************************************************************
+# Set the spatial domain
+nz = 256
+# Set the temporal domain
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "a1-KiwiFlat/nout_2_timestep_50/nz_256/ownFilters_type_none_tag_a1-KiwiFlat-1-expand_0/"
+restart_from = "b1-VienetaFlat/nout_5_timestep_2000/nz_1/ownFilters_type_none_tag_b1-VienetaFlat-0-initialize_0/"
 # Set the temporal domain
-nout       = [500]
-timestep   = [1]
-directory  = "a1-KiwiFlat"
+timestep   = [50]
+nout       = [2]
+directory  = "b1-VienetaFlat"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -42,20 +42,20 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-5, None)
+tSlice     = slice(-2, None)
 showPlot   = False
 savePlot   = True
-theRunName = "a1-KiwiFlat-2-linearPhase1"
+theRunName = "b1-VienetaFlat-1-expand"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 48
-BOUT_nodes            = 3
-BOUT_ppn              = 16
-BOUT_walltime         = '48:00:00'
+nproc                 = 80
+BOUT_nodes            = 4
+BOUT_ppn              = 20
+BOUT_walltime         = '10:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -71,6 +71,8 @@ post_process_run_name = 'post' + theRunName.capitalize()
 myRuns = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
+            # Set spatial domain
+            nz         = nz,\
             # Set temporal domain
             nout       = nout  ,\
             timestep   = timestep,\
@@ -81,10 +83,7 @@ myRuns = PBS_runner(\
             restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('switch'      , 'includeNoise'       , includeNoise ),\
-                          ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
-                          ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                          ('switch'      , 'saveTerms'          ,saveTerms),\
+                          ('ownFilters'  , 'type', ownFilterType),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
