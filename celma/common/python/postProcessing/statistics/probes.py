@@ -9,6 +9,8 @@ from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
 from boutdata import collect
 from .polAvg import polAvg
+from .collectiveCollect import collectiveCollect
+from .derivatives import DDZ, findLargestRadialGrad
 
 #{{{class Probes
 class Probes(object):
@@ -21,7 +23,8 @@ class Probes(object):
 
     #{{{Constructor
     def __init__(self, var, varName, time,\
-                 steadyStatePath=None, radialProbeIndices=None):
+                 steadyStatePath=None, radialProbeIndices=None,\
+                 collectPath=None):
         """
         Constructor for the Probes class
 
@@ -33,7 +36,7 @@ class Probes(object):
             Name of the variable.
         time : array
             The time array
-        steadyStatePath : string
+        steadyStatePath : str
             What path to use when collecting J. If radialProbeIndices is
             None, this will also be the path for finding the largest
             gradient. Default is None.
@@ -41,7 +44,19 @@ class Probes(object):
             What radial indices to probe. If set to None, it will be
             selected from the largest gradient in the steady state
             variable.
+        collectPath : str
+            Path to collect J from. Not effective if steadyStatePath is set.
         """
+
+        # Guard
+        if steadyStatePath is None and radialProbeIndices is None:
+            message = ("steadyStatePath and radialProbeIndices cannot "
+                       "be None simultaneously")
+            raise ValueError(message)
+        if steadyStatePath is None and collectPath is None:
+            message = ("steadyStatePath and collectPath cannot "
+                       "be None simultaneously")
+            raise ValueError(message)
 
         self._var  = var
         self._time = time
@@ -49,24 +64,23 @@ class Probes(object):
         # Find the fluctuations in var
         self._varFluct = var - polAvg(var)
 
-        if varName == "lnN":
-            self._varName = "n"
-        else:
-            self._varName = varName
+        self._varName = varName
+        if varName == "n":
+            varName = "lnN"
 
-        if steadyStatePath is None:
-            collectPath = paths[0]
-        else:
+        if collectPath is None:
             collectPath = steadyStatePath
 
         # Set the Jacobian
-        self._J = collect("J", path=collectPath, xguards=False, yguards=False)
+        # Contains the ghost points as we are using this in DDZ
+        self._J = collect("J", path=collectPath,\
+                          xguards=True, yguards=True, info=False)
 
         if radialProbeIndices == None:
             # Note that the ghost cells are collected, as we are taking
             # derivatives of the field
             self._varSteadyState =\
-                collect(self._varName, path=collectPath,\
+                collect(varName, path=collectPath,\
                         xguards=True, yguards=True, info=False)
 
             if self._varName == "n":
@@ -114,13 +128,15 @@ class Probes(object):
 
         for xInd in self._xInds:
             for zInd in self._zInds:
-                self._timeTraceOfVar["{}{}{}".format(xInd, yInd, zInd)] =\
-                        self._var[:, xInd, yInd, zInd]
-                self._timeTraceOfVarFluct["{}{}{}".format(xInd, yInd, zInd)] =\
-                        self._varFluct[:, xInd, yInd, zInd]
+                self._timeTraceOfVar\
+                        ["{}{}{}".format(xInd, self._yInd, zInd)] =\
+                            self._var[:, xInd, self._yInd, zInd]
+                self._timeTraceOfVarFluct\
+                        ["{}{}{}".format(xInd, self._yInd, zInd)] =\
+                            self._varFluct[:, xInd, self._yInd, zInd]
 
                 # Initialize the result as a dictionary
-                self.results["{}{}{}".format(xInd, yInd, zInd)] = {}
+                self.results["{}{}{}".format(xInd, self._yInd, zInd)] = {}
     #}}}
 
     #{{{calcStatsMoments
@@ -150,13 +166,13 @@ class Probes(object):
             for yInd in self._yInds:
                 for zInd in self._zInds:
                     key = "{}{}{}".format(xInd, yInd, zInd)
-                    self.results[key]['mean'] =\
+                    self.results[key]["mean"] =\
                         self._timeTraceOfVarFluct[key].mean()
-                    self.results[key]['var'] =\
+                    self.results[key]["var"] =\
                         self._timeTraceOfVarFluct[key].var()
-                    self.results[key]['kurtosis'] =\
+                    self.results[key]["kurtosis"] =\
                         kurtosis(self._timeTraceOfVarFluct[key])
-                    self.results[key]['skew'] =\
+                    self.results[key]["skew"] =\
                         skew(self._timeTraceOfVarFluct[key])
     #}}}
 
@@ -199,17 +215,17 @@ class Probes(object):
                 for zInd in self._zInds:
                     key = "{}{}{}".format(xInd, yInd, zInd)
 
-                    self.results[key]['pdfX'], bins =\
+                    self.results[key]["pdfX"], bins =\
                               np.histogram(self._timeTraceOfVarFluct,\
                                            bins="auto",\
                                            density=True)
                     # Initialize y
-                    self.results[key]['pdfY'] =\
-                            np.zeros(self.results[key]['pdfX'].size)
+                    self.results[key]["pdfY"] =\
+                            np.zeros(self.results[key]["pdfX"].size)
 
-                    for k in range(self.results[key]['pdfX'].size):
+                    for k in range(self.results[key]["pdfX"].size):
                         # Only the bin edges are saved. Interpolate to the center of the bin
-                        self.results[key]['pdfY'] = 0.5*(bins[k]+bins[k+1])
+                        self.results[key]["pdfY"] = 0.5*(bins[k]+bins[k+1])
     #}}}
 
     #{{{calcPSDs
@@ -261,9 +277,9 @@ class Probes(object):
 
                     # window = None => window = "boxcar"
                     # scaling = density gives the correct units
-                    self.results[key]['psdX'], self.results[key]['psdY'] =\
+                    self.results[key]["psdX"], self.results[key]["psdY"] =\
                         periodogram(self._timeTraceOfVarFluct[key],\
-                                    fs=fs, window=None, scaling='density')
+                                    fs=fs, window=None, scaling="density")
     #}}}
 
     # TODO: FIXME: Resolve the issue of fluctuations
@@ -332,16 +348,14 @@ class Probes(object):
         # Find the fluctuating velocity
         uFluct = u - polAvg(u)
 
-        # Initialize the fluxed
-        varFlux = fluctVarFlux = np.zeros(u.shape)
 
         for xInd in self._xInds:
             for yInd in self._yInds:
                 for zInd in self._zInds:
                     key = "{}{}{}".format(xInd, yInd, zInd)
-                    self.results[key]['varFlux' + uName.capitalize()] =\
+                    self.results[key]["varFlux" + uName.capitalize()] =\
                         self._timeTraceOfVar[key] * u[:, xInd, yInd, zInd]
-                    self.results[key]['varFluxFluct' + uName.capitalize()] =\
+                    self.results[key]["varFluxFluct" + uName.capitalize()] =\
                         self._timeTraceOfVarFluct[key] * uFluct[:, xInd, yInd, zInd]
     #}}}
 
@@ -376,7 +390,7 @@ class Probes(object):
                     np.abs(np.fft.fft(self._varFluct[xInd][yInd], axis=-1))
                 for zInd in self._zInds:
                     key = "{}{}{}".format(xInd, yInd, zInd)
-                    self.results[key]['zFFT'] = varFluctFFT
+                    self.results[key]["zFFT"] = varFluctFFT
     #}}}
 #}}}
 
@@ -429,31 +443,40 @@ class PerpPlaneProbes(Probes):
             variable.
         """
 
+        # Guard
         if steadyStatePath is None and radialProbeIndices is None:
             message = ("steadyStatePath and radialProbeIndices cannot "
                        "be None simultaneously")
             raise ValueError(message)
 
+        if varName == "n":
+            varName = "lnN"
+
         # Collect the variable
-        var, time = collectiveCollect(paths, [varName, 't_array'],\
-                                      collectGhost = False,\
-                                      yInd = [yInd, yInd],\
-                                      )
+        varTimeDict = collectiveCollect(paths, [varName, "t_array"],\
+                                        collectGhost = False,\
+                                        yInd = [yInd, yInd],\
+                                        )
+
+        var  = varTimeDict[varName]
+        time = varTimeDict["t_array"]
+
+        if varName == "n":
+            var = np.exp(var)
 
         # Collect and recalculate the time
         if physicalUnits:
-            n0   = collect(paths[-1], 'n0')
-            Te0  = collect(paths[-1], 'Te0')
-            Ti0  = collect(paths[-1], 'Ti0')
-            B0   = collect(paths[-1], 'B0')
-            omCI = collect(paths[-1], 'omCI')
-            rhoS = collect(paths[-1], 'rhoS')
+            self.n0   = collect("n0" ,  path = paths[-1])
+            self.Te0  = collect("Te0",  path = paths[-1])
+            self.Ti0  = collect("Ti0",  path = paths[-1])
+            self.B0   = collect("B0" ,  path = paths[-1])
+            self.omCI = collect("omCI", path = paths[-1])
+            self.rhoS = collect("rhoS", path = paths[-1])
 
-            time /= omCI
+            time /= self.omCI
 
         # Call the parent class
-        super().__init__(self,\
-                         var,\
+        super().__init__(var,\
                          varName,\
                          time,\
                          steadyStatePath,\
@@ -462,21 +485,32 @@ class PerpPlaneProbes(Probes):
         self._yInd = yInd
 
         if radialProbeIndices is None:
+            self._MXG = collect("MXG", path = paths[-1])
+            dx = collect("dx", path = paths[-1], info = False)
             # Find the max gradient of the variable
-            maxGrad, maxGradInd =\
-                findLargestGrad(self._varSteadyState[0,:,self._yInd, 0],\
-                                self._yInd)
-            self._radialProbesIndices =\
-                self.getRadialProbeIndices(self._yInd, nProbes)
+            _, maxGradInd =\
+                findLargestRadialGrad(\
+                  self._varSteadyState[0:1, :, self._yInd:self._yInd+1, 0:1],\
+                  dx,\
+                  self._MXG)
+            self.radialProbesIndices =\
+                self.getRadialProbeIndices(maxGradInd, nProbes)
         else:
-            self._radialProbesIndices = radialProbeIndices
+            self.radialProbesIndices = radialProbeIndices
 
         # Get the radial ExB drift for this plane
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
                                 yInd = [self._yInd, self._yInd],\
                                 )["phi"]
-        self._radialExB = getRadialExBVelocityZPlane(phi, self._yInd)
+
+        # The ExB velocity for a Clebsch system can be found in section B.5.1
+        # in the BOUT++ coordinates manual. However, the cylindrical
+        # coordinate system is not a Clebsch system, but the metric overlaps.
+        # In order to get the cylindrical coordinates ExB, we must multiply
+        # the ExB velocity in BOUT++ with B (i.e. divide by rho). Thus, the
+        # radial ExB velocity is the cylindrical theta derivative of phi
+        self._radialExB = DDZ(phi, self._J)
     #}}}
 
     #{{{getRadialProbeIndices
@@ -500,28 +534,28 @@ class PerpPlaneProbes(Probes):
         """
 
         # Find out if we are above half
+        innerLen = self._var.shape[1] - 2*self._MXG
         pctOfInd = indexIn/innerLen
 
         # We here find the span of available indices to put the probes at
         if pctOfInd < 0.5:
             indexSpan = indexIn
         else:
-            innerLen = len(var) - 2*MXG
             indexSpan = innerLen - indexIn
 
         # Floor in order not to get indices out of bounds
-        halfNProbes = np.floor((nProbes - 1)/2)
+        halfNProbes = int(np.floor((nProbes - 1)/2))
 
         # Pad with one probe which we do not use
         halfNProbes += 1
 
         # Index sepration from indexIn
         # Floor in order not to get indices out of bounds
-        indexSep = np.floor(indexSpan/halfNProbes)
+        indexSep = int(np.floor(indexSpan/halfNProbes))
 
         indices = [indexIn]
 
-        for i in range(halfNProbes):
+        for i in range(1, halfNProbes):
             # Insert before
             indices.insert(0, indexIn - i*indexSep)
             # Insert after
