@@ -34,7 +34,7 @@ def collectEnergy(paths):
                  "totKinEI",\
                 ]
 
-    energies = collectFromSeveral(paths, varStrings)
+    energies = collectiveCollect(paths, varStrings)
 
     return energies
 #}}}
@@ -63,7 +63,7 @@ def plotEnergies(paths, speciesType, showPlot = False):
     # TODO: Make plots nice
 
     # Collect the energies
-    energies = collectEnergy(path)
+    energies = collectEnergy(paths)
 
     if speciesType == "electron":
         searchStrings = ["EE"]
