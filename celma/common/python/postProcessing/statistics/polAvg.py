@@ -4,6 +4,8 @@
 Contains function for taking poloidal average
 """
 
+import numpy as np
+
 #{{{polAvg
 def polAvg(f):
     """
@@ -15,15 +17,16 @@ def polAvg(f):
           poloidal slice.
 
     Output
-    f   - The field after taking the poloidal average
+    out   - The field after taking the poloidal average
     """
 
     tLen, xLen, yLen, zLen = f.shape
+    out = np.zeros(f.shape)
 
     for t in range(tLen):
         for x in range(xLen):
             for y in range(yLen):
-                f[t,x,y,:] -= f[t,x,y,:].mean()
+                out[t,x,y,:] = f[t,x,y,:] - f[t,x,y,:].mean()
 
-    return f
+    return out
 #}}}
