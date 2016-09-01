@@ -71,9 +71,8 @@ def collectiveCollect(paths, varStrings,\
             # correct dimensions
             if data[var] is None:
                 data[var] = localVar
-
-            data[var] = np.concatenate((data[var], localVar), axis=0)
-
+            else:
+                data[var] = np.concatenate((data[var], localVar), axis=0)
 
     return data
 #}}}
