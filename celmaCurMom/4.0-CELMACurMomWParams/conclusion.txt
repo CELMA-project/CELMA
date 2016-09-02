@@ -11,13 +11,18 @@ Results:
 
 a1-KiwiFlat
 -----------
-a1-KiwiFlat-0-initialize   - 4000 omci^-1 - 1h 46 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
-a1-KiwiFlat-1-expand       - 4100 omci^-1 - 3h 44 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
-a1-KiwiFlat-2-linearPhase1 - 4700 omci^-1 - Running
+a1-KiwiFlat-0-initialize      - 4000 omci^-1 - 01h 46 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
+a1-KiwiFlat-1-expand          - 4100 omci^-1 - 03h 44 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
+a1-KiwiFlat-2-linearPhase1    - 4700 omci^-1 - 14h 03 m - Turbulence level around 3e-1, radial gridsize oscillations in Om and OmD
+a1-KiwiFlat-3-turbulentPhase1 - 9700 omci^-1 - 34h 40 m - Turbulence level around 3.5e-1, radial gridsize oscillations in Om and OmD
 
 
 
 b1-VienetaFlat
 --------------
-b1-VienetaFlat-0-initialize - 10000 omci^-1 - 6h 50 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-6
-b1-VienetaFlat-1-expand     - 11000 omci^-1 - Running
+b1-VienetaFlat-0-initialize   - 10000 omci^-1 - 6h 50 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-6
+b1-VienetaFlat-1-expand       - 10010 omci^-1 - 2h 53 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-6. NOTE: Longer expand took forever, exceeded walltime of 24 hours
+b1-VienetaFlat-2-linearPhase1 - 11010 omci^-1 - Running
+
+
+b1-VienetaFlat-1-expand     - 10100 omci^-1 - 6h 49 m - Rerunning as kMaxCurrent at inner rho is equal or below to 0

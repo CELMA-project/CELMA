@@ -256,6 +256,9 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
         ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
         ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
     }
+    if(monitorN){
+        ownMon.totalN(n, &N);
+    }
 
     return 0;
 }
@@ -388,6 +391,8 @@ void CelmaCurMom::setAndSaveParameters()
         throw BoutException(message);
     }
 
+    // Save the input
+    SAVE_ONCE5(n0, Te0, Ti0, B0, Sn);
     // Save the variables
     SAVE_ONCE2(Lx, Ly);
     SAVE_ONCE4(nuEI, nuEN, nuIN, SNorm);
@@ -424,7 +429,7 @@ void CelmaCurMom::printPointsPerRhoS()
     // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
     pointsPerRhoSAzimuthally = (mesh->ngz - 1)/(2.0*PI*Lx);
 
-    root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,4.0);
+    root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,3.0);
     root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.0e-1);
 
     if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
