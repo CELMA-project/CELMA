@@ -29,7 +29,7 @@ MYG = 1
 # Number of points
 nx = 68 + 2*MXG
 ny = 100
-nz = 256           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nz = 512           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
