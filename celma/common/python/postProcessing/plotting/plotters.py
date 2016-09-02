@@ -7,6 +7,7 @@ Contains class for plotting
 from ..statistics import polAvg
 from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
+from scipy import constants
 from matplotlib import get_backend
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
@@ -43,6 +44,7 @@ class Plot(object):
                  ySlice     = slice(0,None),\
                  zSlice     = slice(0,None),\
                  tSlice     = None         ,\
+                 physicalU  = False        ,\
                  polAvg     = False        ,\
                  showPlot   = False        ,\
                  savePlot   = True         ,\
@@ -53,18 +55,19 @@ class Plot(object):
         The constructor sets the member data
 
         Input:
-        path         - The path to collect from
-        xguards      - If xguards should be included when collecting
-        yguards      - If yguards should be included when collecting
-        xSlice       - How the data will be sliced in x
-        ySlice       - How the data will be sliced in y
-        zSlice       - How the data will be sliced in z
-        tSlice       - How the data will be sliced in t
-        polAvg       - Whether or not to perform a poloidal average of
-                       the data
-        showPlot     - If the plot should be displayed
-        savePlot     - If plot should be saved
-        saveFolder   - Name of the folder to save plots in
+        path       - The path to collect from
+        xguards    - If xguards should be included when collecting
+        yguards    - If yguards should be included when collecting
+        xSlice     - How the data will be sliced in x
+        ySlice     - How the data will be sliced in y
+        zSlice     - How the data will be sliced in z
+        tSlice     - How the data will be sliced in t
+        physicalU  - If the physical units should be plotted
+        polAvg     - Whether or not to perform a poloidal average of
+                     the data
+        showPlot   - If the plot should be displayed
+        savePlot   - If plot should be saved
+        saveFolder - Name of the folder to save plots in
         """
         #}}}
 
@@ -75,6 +78,7 @@ class Plot(object):
         self._showPlot   = showPlot
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
+        self._physicalU  = physicalU
 
         #{{{ Set the plot style
         self._titleSize = 30
@@ -179,13 +183,62 @@ class Plot(object):
         self._yind = self._getIndices(ySlice, 'y')
         self._zind = self._getIndices(zSlice, 'z')
         self._tind = self._getIndices(tSlice, 't')
+
+        if (xSlice.step is not None):
+            message = ("{0}{1}WARNING: xSlice.step not implemented.\n"
+                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
+            print(message)
+            xSlice.step = None
+        if (ySlice.step is not None):
+            message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
+                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
+            print(message)
+            ySlice.step = None
+        if (zSlice.step is not None):
+            message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
+                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
+            print(message)
+            zSlice.step = None
+
         # Used if we are taking poloidal averages
         self._xSlice = xSlice
         self._ySlice = ySlice
         self._zSlice = zSlice
+        # Used to chop the data
+        self._tSlice = tSlice
 
         # Get the time
         self._t = collect('t_array', path=self._path, tind=self._tind, info=False)
+
+        # Slice in t
+        if self._tSlice.step is not None:
+            self._t = self._t[::self._tSlice.step]
+
+        # Convert to physical units
+        if self._physicalU:
+            try:
+                self._omCI = collect('omCI', path=self._path, info=False)
+                self._rhoS = collect('rhoS', path=self._path, info=False)
+                self._n0   = collect('n0'  , path=self._path, info=False)
+                self._Te0  = collect('Te0' , path=self._path, info=False)
+                self._Ti0  = collect('Ti0' , path=self._path, info=False)
+                self._B0   = collect('B0'  , path=self._path, info=False)
+                self._Sn   = collect('Sn'  , path=self._path, info=False)
+
+            except ValueError:
+                # An OSError is thrown if the file is not found
+                message = ("{0}{1}WARNING: Normalized quantities not found. "
+                           "The time remains normalized".format("\n"*3,"!"*3))
+                print(message)
+
+                # Reset physicalU
+                self._physicalU = False
+
+        # Convert to physical units
+        if self._physicalU:
+            self._t   /= self._omCI
+            self._rho *= self._rhoS
+            self._z   *= self._rhoS
 
         self._frames = len(self._t)
 
@@ -277,6 +330,46 @@ class Plot(object):
         tickString += '}$'
 
         return tickString
+    #}}}
+
+    #{{{_calculatePhysical
+    def _calculatePhysical(self, varName, var)
+        # Calculate back to physical units
+        if varName == "n":
+            self._variable *= self._n0
+            self._units = r"$\mathrm{m}^{-3}$"
+        elif varName == "vort":
+            self._variable *= self._omCI
+            self._units = r"$\mathrm{s}^{-1}$"
+        elif varName == "vortD":
+            self._variable *= self._omCI*self_n0
+            self._units = r"$\mathrm{m}^{-3}\mathrm{s}^{-1}$"
+        elif varName == "phi":
+            self._variable *=
+            self._units = r"$\mathrm{J}\mathrm{C}^{-1}$"
+        elif varName == "jPar":
+            self._variable *= constants.value(u'elementary charge')*\
+                              self._n0*\
+                              self.rhoS*self._omCI
+            self._units = r"$\mathrm{C}\mathrm{s}^{-1}$"
+        elif varName == "momDensPar":
+            # momDensPar is divided by m_i, so we need to multiply
+            # by m_i again here
+            self._variable *= constants.value(u'proton mass')*\
+                              self.rhoS*self._omCI*self._n0
+            self._units = r"$\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}$"
+        elif varName == "uIPar":
+            self._variable *= self.rhoS*self._omCI
+            self._units = r"$\mathrm{m}\mathrm{s}^{-1}$"
+        elif varName == "uEPar":
+            self._variable *= self.rhoS*self._omCI
+            self._units = r"$\mathrm{m}\mathrm{s}^{-1}$"
+        elif varName == "S":
+            self._variable *= self._omCI*self_n0
+            self._units = r"$\mathrm{m}^{-3}\mathrm{s}^{-1}$"
+        else:
+            self._units = ""
+    return var
     #}}}
 #}}}
 
@@ -498,23 +591,14 @@ class Plot1D(Plot):
         if self._polAvg:
             # We need to collect the whole field if we would like to do
             # poloidal averages
-            try:
-                line.field = collect(line.name,\
-                                     path    = self._path   ,\
-                                     xguards = self._xguards,\
-                                     yguards = self._yguards,\
-                                     tind    = self._tind   ,\
-                                     info    = False)
+            line.field = collect(line.name,\
+                                 path    = self._path   ,\
+                                 xguards = self._xguards,\
+                                 yguards = self._yguards,\
+                                 tind    = self._tind   ,\
+                                 info    = False)
             except ValueError:
-                # FIXME: What is the point of this?
-                # I just added the below
-                line.field = collect(line.name,\
-                                     path    = self._path   ,\
-                                     xguards = self._xguards,\
-                                     yguards = self._yguards,\
-                                     tind    = self._tind   ,\
-                                     info    = False)
-                # pass
+                pass
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
@@ -531,6 +615,7 @@ class Plot1D(Plot):
                      self._ySlice,\
                      self._zSlice,\
                     ]
+
         else:
             try:
                 line.field = collect(line.name,\
@@ -553,6 +638,15 @@ class Plot1D(Plot):
                 field[:]   = line.field
                 line.field = field
 
+        # Slice in t
+        if self._tSlice.step is not None:
+            line.field = line.field[::self._tSlice.step]
+
+        if self._physicalU:
+            line.field =\
+                    self._calculatePhysical(self, line.name, line.field)
+            line.label += r" [{}]".format(self._units)
+
         # Flatten the variables except the time dimension
         # -1 => total size divided by product of all other listed dimensions
         line.field = line.field.reshape(line.field.shape[0], -1)
@@ -572,6 +666,11 @@ class Plot1D(Plot):
         Output
         timeFolder - The timefolder used when eventually saving the plot
         """
+
+        # Turn off calculation of physical units if you are not dealing
+        # with main fields
+        if orgObj.pltName != "mainFields":
+            self._physicalU = False
 
         # Initial plot
         self._plotLines(fig, orgObj, 0)
@@ -728,12 +827,20 @@ class Plot2D(Plot):
                                      info    = False     ,\
                                      **kwargs)
 
+        # Slice in t
+        if self._tSlice.step is not None:
+            self._variable = self._variable[::self._tSlice.step]
+
         if self._polAvg:
             self._variable = polAvg(self._variable)
 
         # Add the last theta slice
         self._variable =\
                 self._cyl.addLastThetaSlice(self._variable, len(self._t))
+
+        if self._physicalU:
+            self._variable =\
+                    self._calculatePhysical(self, varName, self._variable)
 
         if xguards:
             # Remove the inner ghost points from the variable
@@ -852,12 +959,22 @@ class Plot2D(Plot):
         self._ax1.grid(b=True)
 
         # Decorations
-        self._ax1.set_xlabel(r'$\rho$', fontsize = self._latexSize)
-        self._ax1.set_ylabel(r'$\rho$', fontsize = self._latexSize)
-
         timeString = self._plotNumberFormatter(self._t[tInd], None)
+
+        if self._physicalU:
+            perpPosTxt = r'$\rho [m]$'
+            parPosTxt  = r'$z [m]$'
+            timeTxt    = r'$t ={} [s]$'.format(timeString)
+        else:
+            perpPosTxt = r'$\rho []$'
+            parPosTxt  = r'$z []$'
+            timeTxt    = r'$\omega_{ci}^{-1} = {}$'.format(timeString)
+
+        self._ax1.set_xlabel(perpPosTxT, fontsize = self._latexSize)
+        self._ax1.set_ylabel(perpPosTxT, fontsize = self._latexSize)
+
         ax1txt = self._ax1.text(0.5, 1.05,\
-                       r'$\omega_{ci}^{-1} =$' + timeString +\
+                       timeTxt +\
                            r'$ \quad z=' +\
                            '{:.2f}'.format(self._zVal) + r'$',\
                        horizontalalignment = 'center',\
@@ -887,10 +1004,10 @@ class Plot2D(Plot):
         self._ax2.grid(b=True)
 
         # Decorations
-        self._ax2.set_xlabel(r'$\rho$', fontsize = self._latexSize)
-        self._ax2.set_ylabel(r'$z$'   , fontsize = self._latexSize)
+        self._ax2.set_xlabel(perpPosTxT, fontsize = self._latexSize)
+        self._ax2.set_ylabel(parPosTxt , fontsize = self._latexSize)
         ax2txt = self._ax2.text(0.5, 1.05,\
-                       r'$\omega_{ci}^{-1} =$' + timeString +\
+                       timeTxt +\
                            r'$ \quad \theta=' +\
                            '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
                        horizontalalignment = 'center',\
@@ -958,7 +1075,11 @@ class Plot2D(Plot):
                                       format = FuncFormatter(     \
                                               self._plotNumberFormatter),\
                                       )
-            cbar.set_label(r'$' + self._pltName + '$')
+            if self._physicalU:
+                cbarName = r'${} [{}]$'.format(self._pltName, self._units)
+            else:
+                cbarName = r'${} []$'.format(self._pltName)
+            cbar.set_label(label = cbarName, size = titlesize)
         except RuntimeWarning:
             message  = 'RuntimeError caught in cbar in ' + self._pltName
             message += '. No cbar will be set!'
