@@ -90,11 +90,11 @@ class Probes(object):
         self._MXG = collect('MXG', path = collectPath,\
                             xguards = True, yguards = True, info = False)
 
-        nPoints = dx.shape[0]
-        dx      = dx[0,0]
+        nPoints  = self._dx.shape[0]
+        dx       = self._dx[0,0]
 
-        innerPoints = nPoints - 2*MXG
-        self.rho = dx * np.array(np.arange(0.5, innerPoints))
+        innerPoints = nPoints - 2*self._MXG
+        self.rho    = dx * np.array(np.arange(0.5, innerPoints))
 
         # Insert the first and last grid point due to the guards
         self.rho = np.insert(self.rho, 0, - 0.5*dx)
@@ -127,7 +127,7 @@ class Probes(object):
         # Subtract the unused plane
         innerPoints = MZ - 1
 
-        self._theta = self._dz * np.array(np.arange(0.0, innerPoints))
+        self.theta = dz * np.array(np.arange(0.0, innerPoints))
         #}}}
 
         if radialProbeIndices == None:
@@ -177,14 +177,14 @@ class Probes(object):
         self._xInds = xInds
         if self.yInd is not None:
             # If the perpPlaneClass has selected the variable
-            thetaInds = [yInd]
-            yInds     = [0]
+            actualYInds = [self.yInd]
+            yInds       = [0]
         else:
-            thetaInds = [yInds]
+            actualYInds = [yInds]
 
-        self._yInds     = yInds
-        self._thetaInds = thetaInds
-        self._zInds     = zInds
+        self._yInds       = yInds
+        self._actualYInds = actualYInds
+        self._zInds       = zInds
 
         # Copy the coordinates so that they will have the same
         # dimensions as timetraces
@@ -197,24 +197,27 @@ class Probes(object):
         self.z     = {}
 
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
                     # Initialize the time traces
                     self._timeTraceOfVar\
-                            ["{},{},{}".format(xInd, thetaInd, zInd)] =\
+                            ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._var[:, xInd, yInd, zInd]
 
                     self._timeTraceOfVarFluct\
-                            ["{},{},{}".format(xInd, thetaInd, zInd)] =\
+                            ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._varFluct[:, xInd, yInd, zInd]
 
                     # Initialize the result as a dictionary
-                    self.results["{},{},{}".format(xInd, yInd, zInd)] = {}
+                    self.results["{},{},{}".format(xInd, actualYInd, zInd)] = {}
 
                     # Set the coordinates
-                    self.rho  ["{},{},{}".format(xInd, yInd, zInd)] = rho  [xInd]
-                    self.theta["{},{},{}".format(xInd, yInd, zInd)] = theta[thetaInds]
-                    self.z    ["{},{},{}".format(xInd, yInd, zInd)] = z    [zInd]
+                    self.rho["{},{},{}".format(xInd, actualYInd, zInd)] =\
+                        rho[xInd]
+                    self.theta["{},{},{}".format(xInd, actualYInd, zInd)] =\
+                        theta[zInd]
+                    self.z["{},{},{}".format(xInd, actualYInd, zInd)] =\
+                        z[actualYInd]
     #}}}
 
     #{{{calcStatsMoments
@@ -241,9 +244,9 @@ class Probes(object):
         """
 
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, thetaInd, zInd)
+                    key = "{},{},{}".format(xInd, actualYInd, zInd)
                     self.results[key]["mean"] =\
                         self._timeTraceOfVarFluct[key].mean()
                     self.results[key]["var"] =\
@@ -289,9 +292,9 @@ class Probes(object):
         # http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
         # http://stackoverflow.com/questions/36150257/probability-distribution-function-python/36248810
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, thetaInd, zInd)
+                    key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     self.results[key]["pdfY"], bins =\
                               np.histogram(self._timeTraceOfVarFluct[key],\
@@ -349,9 +352,9 @@ class Probes(object):
 
         fs = self._time[1] - self._time[0]
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, thetaInd, zInd)
+                    key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     # window = None => window = "boxcar"
                     # scaling = density gives the correct units
@@ -428,9 +431,9 @@ class Probes(object):
 
 
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, thetaInd, zInd)
+                    key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     self.results[key]["varFlux" + uName.capitalize()] =\
                         self._timeTraceOfVar[key] * u[:, xInd, yInd, zInd]
@@ -465,13 +468,13 @@ class Probes(object):
             raise RuntimeError(message)
 
         for xInd in self._xInds:
-            for yInd, thetaInd in zip(self._yInds, self._thetaInds):
+            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 varFFT =\
                     np.abs(np.fft.fft(\
                         self._var[:, xInd:xInd+1, yInd:yInd+1,:],\
                         axis=-1))
                 for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, thetaInd, zInd)
+                    key = "{},{},{}".format(xInd, actualYInd, zInd)
                     self.results[key]["zFFT"] = varFFT
     #}}}
 #}}}
@@ -551,14 +554,20 @@ class PerpPlaneProbes(Probes):
 
         # Collect and recalculate the time
         if physicalUnits:
-            self.n0   = collect("n0" ,  path = paths[-1])
-            self.Te0  = collect("Te0",  path = paths[-1])
-            self.Ti0  = collect("Ti0",  path = paths[-1])
-            self.B0   = collect("B0" ,  path = paths[-1])
-            self.omCI = collect("omCI", path = paths[-1])
-            self.rhoS = collect("rhoS", path = paths[-1])
+            try:
+                self.n0   = collect("n0" ,  path = paths[-1])
+                self.Te0  = collect("Te0",  path = paths[-1])
+                self.Ti0  = collect("Ti0",  path = paths[-1])
+                self.B0   = collect("B0" ,  path = paths[-1])
+                self.omCI = collect("omCI", path = paths[-1])
+                self.rhoS = collect("rhoS", path = paths[-1])
 
-            time /= self.omCI
+                time /= self.omCI
+            except ValueError:
+                # An OSError is thrown if the file is not found
+                message = ("{0}{1}WARNING: Normalized quantities not found. "
+                           "The time remains normalized".format("\n"*3,"!"*3))
+                print(message)
 
         # Call the parent class
         super().__init__(var,\
