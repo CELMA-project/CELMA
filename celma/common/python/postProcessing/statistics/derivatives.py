@@ -112,6 +112,7 @@ def findLargestRadialGrad(var, dx, MXG = None):
 
     ddxVar = DDX(var, dx)
 
+    # nanmax excludes the NaNs
     maxGradInds = np.where(np.abs(ddxVar) == np.nanmax(np.abs(ddxVar)))
 
     maxGrad = ddxVar[maxGradInds]
