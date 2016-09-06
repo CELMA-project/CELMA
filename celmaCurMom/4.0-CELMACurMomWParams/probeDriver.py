@@ -8,7 +8,7 @@ import pickle
 commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
-from postProcessing.statistics import PerpPlaneProbes
+from statistics import PerpPlaneProbes
 
 # paths = [\
 # "a-data/nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/",\
