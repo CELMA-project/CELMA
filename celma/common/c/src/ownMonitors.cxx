@@ -88,4 +88,18 @@ void OwnMonitors::kinEnergy(Field3D  const &n          ,
     (*kinE)[2] = (*kinE)[0] + (*kinE)[1];
 }
 
+/*!
+ * Calculates the total particle number of the system
+ *
+ * \param[in] n       The density
+ * \param[in] N       Variable where the total particle number is stored
+ *
+ * \param[out] N      The total particle number
+ */
+void OwnMonitors::totalN(Field3D  const &n, BoutReal *N)
+{
+    TRACE("Halt in OwnMonitors::kinEnergy");
+
+    volInt.volumeIntegral(n, *N);
+}
 #endif

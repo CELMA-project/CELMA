@@ -23,6 +23,9 @@ public:
                    Vector3D const &GradPerpPhi,
                    Field3D  const &uPar       ,
                    std::vector<BoutReal> *kinE);
+
+    //! Calculates the kinetic energy
+    void totalN(Field3D  const &n, BoutReal *N);
 };
 
 
