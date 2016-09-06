@@ -36,9 +36,9 @@ int Params::init(bool restarting) {
     // ************************************************************************
     Lx     = params.getLx();
     Ly     = params.getLy();
-    nuEI   = params.getNuEI();
-    nuEN   = params.getNuEN();
-    nuIN   = params.getNuIN();
+    nuEI   = params.getNuEINorm();
+    nuEN   = params.getNuENNorm();
+    nuIN   = params.getNuINNorm();
     SNorm  = params.getSNorm();
     mu     = params.getMu();
     Lambda = params.getLambda();
