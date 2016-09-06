@@ -17,19 +17,18 @@ from postProcessing.plotting import combined1D2D as postProcess
 # =============================================================================
 # *****************************************************************************
 ownFilterType = "none"
+B0 = [9.0e-2  , 8.0e-2   , 7.0e-2 , 6.0e-2  , 5.0e-2  ]
+Lx = [4.3466  , 3.8637   , 3.3807 , 2.8978  , 2.4148  ]
+Ly = [243.4121, 216.3663, 189.3205, 162.2747, 135.2289]
 # *****************************************************************************
 # Set the spatial domain
-nz = 512
+nz = 1
 # Set the temporal domain
+restart    = None
 remove_old = False
-restart    = "overwrite"
-# Uncomment this if you just want to plot
-# restart      = None;
-restart_from = "b1-VienetaFlat/nout_5_timestep_2000/nz_1/ownFilters_type_none_tag_b1-VienetaFlat-0-initialize_0/"
-# Set the temporal domain
-timestep   = [5]
+timestep   = [2e3]
 nout       = [2]
-directory  = "b1-VienetaFlat"
+directory  = "a1-KiwiFlat"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -45,17 +44,17 @@ zSlice     = 0
 tSlice     = slice(-2, None)
 showPlot   = False
 savePlot   = True
-theRunName = "b1-VienetaFlat-1-expand"
+theRunName = "a1-KiwiFlat-scanB0-0-initialize"
 # =============================================================================
 
 
 # The PBS options
 # =============================================================================
 # Specify the numbers used for the BOUT runs
-nproc                 = 80
-BOUT_nodes            = 4
-BOUT_ppn              = 20
-BOUT_walltime         = '12:00:00'
+nproc                 = 48
+BOUT_nodes            = 3
+BOUT_ppn              = 16
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -80,10 +79,14 @@ myRuns = PBS_runner(\
             cpy_source = True  ,\
             make       = make  ,\
             restart    = restart,\
-            restart_from = restart_from,\
             additional = [
                           ('tag',theRunName,0),\
                           ('ownFilters'  , 'type', ownFilterType),\
+                         ],\
+            series_add = [
+                          ('input', 'B0', B0),\
+                          ('geom', 'Lx', Lx),\
+                          ('geom', 'Ly', Ly),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\

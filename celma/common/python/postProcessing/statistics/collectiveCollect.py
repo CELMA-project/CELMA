@@ -4,23 +4,8 @@
 Contains function which collects a variable over several output timesteps
 """
 
-
-# Collctive collect
-paths = [\
-"nout_100_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-0-linearPhase1_0/",\
-"nout_100_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-1-linearPhase2_0/",\
-"nout_100_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-2-linearPhase3_0/",\
-"nout_100_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_2-a-3-linearPhase4_0/",\
-"nout_100_timestep_1/switch_useHyperViscAzVortD_True_tag_2-a-4-linearPhase5_0/",\
-"nout_300_timestep_1/switch_useHyperViscAzVortD_True_tag_3-a-0-turbulentPhase_0/",\
-"nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-1-turbulentPhase2_0/",\
-"nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-2-turbulentPhase3_0/",\
-"nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-3-turbulentPhase4_0/",\
-"nout_300_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-4-turbulentPhase5_0/",\
-"nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-5-turbulentPhase6_0/",\
-"nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-6-turbulentPhase7_0/",\
-"nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_3-a-7-turbulentPhase8_0/",\
-        ]
+import numpy as np
+from boutdata import collect
 
 #{{{collectiveCollect
 def collectiveCollect(paths, varStrings,\
@@ -57,22 +42,37 @@ def collectiveCollect(paths, varStrings,\
         A dictionary of the concatenated variables
     """
 
-    data = {var: np.array([]) for var in varStrings}
+    # Initialize the data
+    data = {var: None for var in varStrings}
 
     for path in paths:
         for var in varStrings:
-            # Make a local var which is reused for every interation,
-            # then concatenate the dictionary
-            localVar =\
-                collect(var,path=path,\
-                        tind = tInd,\
-                        xind = xInd,\
-                        yind = yInd,\
-                        zind = zInd,\
-                        xguards=guards,\
-                        yguards=guards,\
-                        info=False)
-            data[var] = np.concatenate((data[var], localVar))
+
+            try:
+                # Make a local var which is reused for every interation,
+                # then concatenate the dictionary
+                localVar =\
+                    collect(var,\
+                            path     = path        ,\
+                            tind     = tInd        ,\
+                            xind     = xInd        ,\
+                            yind     = yInd        ,\
+                            zind     = zInd        ,\
+                            xguards  = collectGhost,\
+                            yguards  = collectGhost,\
+                            info     = False        )
+            except OSError:
+                # An OSError is thrown if the file is not found
+                raise ValueError("No collectable files found in {}".\
+                                 format(path))
+
+
+            # Set data[var] to localVar the first time in order to get the
+            # correct dimensions
+            if data[var] is None:
+                data[var] = localVar
+            else:
+                data[var] = np.concatenate((data[var], localVar), axis=0)
 
     return data
 #}}}

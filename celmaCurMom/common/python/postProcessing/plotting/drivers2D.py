@@ -407,7 +407,7 @@ def n2DDriver(path             ,\
 
         n = np.exp(lnN)
 
-        return n
+        return pltName, n
     #}}}
 
     # Do the plot
