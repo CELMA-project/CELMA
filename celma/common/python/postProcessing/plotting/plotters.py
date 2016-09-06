@@ -272,9 +272,14 @@ class Plot(object):
         """
 
         tickString = '${:g}'.format(val)
-        tickString = tickString.replace('e+', r'\cdot 10^{')
-        tickString = tickString.replace('e-', r'\cdot 10^{-')
-        tickString += '}$'
+        if "e+" in tickString:
+            tickString = tickString.replace('e+', r'\cdot 10^{')
+            tickString += '}$'
+        elif "e-" in tickString:
+            tickString = tickString.replace('e-', r'\cdot 10^{-')
+            tickString += '}$'
+        else:
+            tickString += '$'
 
         return tickString
     #}}}
