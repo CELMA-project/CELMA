@@ -11,5 +11,6 @@ Current implementation works with the latest commit of BOUT++ version 3
 * derivation: Derivation of operators and boundaries
 * MES: Checking if implementation is convergent
 * parameters: Calculation of typical parameters
+* toolbox: Scripts and functions which are not essential to the runs
 
 Branch: master - Running and stable with latest BOUT-dev commit
