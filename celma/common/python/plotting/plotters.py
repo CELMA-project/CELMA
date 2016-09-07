@@ -184,21 +184,24 @@ class Plot(object):
         self._zind = self._getIndices(zSlice, 'z')
         self._tind = self._getIndices(tSlice, 't')
 
-        if (xSlice.step is not None):
-            message = ("{0}{1}WARNING: xSlice.step not implemented.\n"
-                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
-            print(message)
-            xSlice.step = None
-        if (ySlice.step is not None):
-            message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
-                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
-            print(message)
-            ySlice.step = None
-        if (zSlice.step is not None):
-            message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
-                       "Setting to None{1}{0}".format("\n"*3, "!"*3))
-            print(message)
-            zSlice.step = None
+        if type(xSlice) == slice:
+            if (xSlice.step is not None):
+                message = ("{0}{1}WARNING: xSlice.step not implemented.\n"
+                           "Setting to None{1}{0}".format("\n"*3, "!"*3))
+                print(message)
+                xSlice.step = None
+        if type(ySlice) == slice:
+            if (ySlice.step is not None):
+                message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
+                           "Setting to None{1}{0}".format("\n"*3, "!"*3))
+                print(message)
+                ySlice.step = None
+        if type(zSlice) == slice:
+            if (zSlice.step is not None):
+                message = ("{0}{1}WARNING: ySlice.step not implemented.\n"
+                           "Setting to None{1}{0}".format("\n"*3, "!"*3))
+                print(message)
+                zSlice.step = None
 
         # Used if we are taking poloidal averages
         self._xSlice = xSlice
@@ -337,44 +340,69 @@ class Plot(object):
         return tickString
     #}}}
 
-    #{{{_calculatePhysical
-    def _calculatePhysical(self, varName, var)
-        # Calculate back to physical units
-        if varName == "n":
-            self._variable *= self._n0
-            self._units = r"$\mathrm{m}^{-3}$"
-        elif varName == "vort":
-            self._variable *= self._omCI
-            self._units = r"$\mathrm{s}^{-1}$"
-        elif varName == "vortD":
-            self._variable *= self._omCI*self_n0
-            self._units = r"$\mathrm{m}^{-3}\mathrm{s}^{-1}$"
-        elif varName == "phi":
-            self._variable *=
-            self._units = r"$\mathrm{J}\mathrm{C}^{-1}$"
-        elif varName == "jPar":
-            self._variable *= constants.value(u'elementary charge')*\
-                              self._n0*\
-                              self.rhoS*self._omCI
-            self._units = r"$\mathrm{C}\mathrm{s}^{-1}$"
-        elif varName == "momDensPar":
-            # momDensPar is divided by m_i, so we need to multiply
-            # by m_i again here
-            self._variable *= constants.value(u'proton mass')*\
-                              self.rhoS*self._omCI*self._n0
-            self._units = r"$\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}$"
-        elif varName == "uIPar":
-            self._variable *= self.rhoS*self._omCI
-            self._units = r"$\mathrm{m}\mathrm{s}^{-1}$"
-        elif varName == "uEPar":
-            self._variable *= self.rhoS*self._omCI
-            self._units = r"$\mathrm{m}\mathrm{s}^{-1}$"
-        elif varName == "S":
-            self._variable *= self._omCI*self_n0
-            self._units = r"$\mathrm{m}^{-3}\mathrm{s}^{-1}$"
+    #{{{_getUnitsAndSetPhysical
+    def _getUnitsAndSetPhysical(self, varName, var):
+        if self._physicalU:
+            # Calculate back to physical units
+            if varName == "n":
+                self._variable *= self._n0
+                self._units = r"\mathrm{m}^{-3}"
+            elif varName == "vort":
+                self._variable *= self._omCI
+                self._units = r"\mathrm{s}^{-1}"
+            elif varName == "vortD":
+                self._variable *= self._omCI*self._n0
+                self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
+            elif varName == "phi":
+                self._variable *= self._Te0/constants.value(u'elementary charge')
+                self._units = r"\mathrm{J}\mathrm{C}^{-1}"
+            elif varName == "jPar":
+                self._variable *= constants.value(u'elementary charge')*\
+                                  self._n0*\
+                                  self.rhoS*self._omCI
+                self._units = r"\mathrm{C}\mathrm{s}^{-1}"
+            elif varName == "momDensPar":
+                # momDensPar is divided by m_i, so we need to multiply
+                # by m_i again here
+                self._variable *= constants.value(u'proton mass')*\
+                                  self.rhoS*self._omCI*self._n0
+                self._units = r"\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}"
+            elif varName == "uIPar":
+                self._variable *= self.rhoS*self._omCI
+                self._units = r"\mathrm{m}\mathrm{s}^{-1}"
+            elif varName == "uEPar":
+                self._variable *= self.rhoS*self._omCI
+                self._units = r"\mathrm{m}\mathrm{s}^{-1}"
+            elif varName == "S":
+                self._variable *= self._omCI*self._n0
+                self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
+            else:
+                self._units = " "
         else:
-            self._units = ""
-    return var
+            # Calculate back to physical units
+            if varName == "n":
+                self._units = r"/n_0"
+            elif varName == "vort":
+                self._units = r"/\omega_{{ci}}"
+            elif varName == "vortD":
+                self._units = r"/\omega_{{ci}}n_0"
+            elif varName == "phi":
+                self._units = r" q/T_{{e,0}}"
+            elif varName == "jPar":
+                self._units = r"/n_0c_sq"
+            elif varName == "momDensPar":
+                # by m_i again here
+                self._units = r"/m_in_0c_s"
+            elif varName == "uIPar":
+                self._units = r"/c_s"
+            elif varName == "uEPar":
+                self._units = r"/c_s"
+            elif varName == "S":
+                self._units = r"/\omega_{{ci}}n_0"
+            else:
+                self._units = " "
+
+        return var
     #}}}
 #}}}
 
@@ -596,12 +624,13 @@ class Plot1D(Plot):
         if self._polAvg:
             # We need to collect the whole field if we would like to do
             # poloidal averages
-            line.field = collect(line.name,\
-                                 path    = self._path   ,\
-                                 xguards = self._xguards,\
-                                 yguards = self._yguards,\
-                                 tind    = self._tind   ,\
-                                 info    = False)
+            try:
+                line.field = collect(line.name,\
+                                     path    = self._path   ,\
+                                     xguards = self._xguards,\
+                                     yguards = self._yguards,\
+                                     tind    = self._tind   ,\
+                                     info    = False)
             except ValueError:
                 pass
 
@@ -647,10 +676,11 @@ class Plot1D(Plot):
         if self._tSlice.step is not None:
             line.field = line.field[::self._tSlice.step]
 
+        line.field =\
+                self._getUnitsAndSetPhysical(line.name, line.field)
+
         if self._physicalU:
-            line.field =\
-                    self._calculatePhysical(self, line.name, line.field)
-            line.label += r" [{}]".format(self._units)
+            line.label += r" $[{}]$".format(self._units)
 
         # Flatten the variables except the time dimension
         # -1 => total size divided by product of all other listed dimensions
@@ -825,12 +855,12 @@ class Plot2D(Plot):
                                      info    = False     ,\
                                      )
         else:
-            self._variable = varFunc(path    = path      ,\
-                                     yguards = yguards   ,\
-                                     xguards = xguards   ,\
-                                     tind    = self._tind,\
-                                     info    = False     ,\
-                                     **kwargs)
+            varName, self._variable = varFunc(path    = path      ,\
+                                              yguards = yguards   ,\
+                                              xguards = xguards   ,\
+                                              tind    = self._tind,\
+                                              info    = False     ,\
+                                              **kwargs)
 
         # Slice in t
         if self._tSlice.step is not None:
@@ -843,9 +873,8 @@ class Plot2D(Plot):
         self._variable =\
                 self._cyl.addLastThetaSlice(self._variable, len(self._t))
 
-        if self._physicalU:
-            self._variable =\
-                    self._calculatePhysical(self, varName, self._variable)
+        self._variable =\
+                self._getUnitsAndSetPhysical(varName, self._variable)
 
         if xguards:
             # Remove the inner ghost points from the variable
@@ -967,25 +996,27 @@ class Plot2D(Plot):
         timeString = self._plotNumberFormatter(self._t[tInd], None)
 
         if self._physicalU:
-            perpPosTxt = r'$\rho [m]$'
-            parPosTxt  = r'$z [m]$'
-            timeTxt    = r'$t ={} [s]$'.format(timeString)
+            perpPosTxt  = r'$\rho [m]$'
+            parPosTxt   = r'$z [m]$'
+            fixedParTxt = '{:.2f} [m]'.format(self._zVal)
+            timeTxt     = r'$t ={} [s]$'.format(timeString)
         else:
-            perpPosTxt = r'$\rho []$'
-            parPosTxt  = r'$z []$'
-            timeTxt    = r'$\omega_{ci}^{-1} = {}$'.format(timeString)
+            perpPosTxt  = r'$\rho/\rho_S$'
+            parPosTxt   = r'$z/\rho_S$'
+            fixedParTxt = '{:.2f}'.format(self._zVal)
+            # Double brackets for escape
+            timeTxt     = r'$t\omega_{{ci}} =$ {}'.format(timeString)
 
-        self._ax1.set_xlabel(perpPosTxT, fontsize = self._latexSize)
-        self._ax1.set_ylabel(perpPosTxT, fontsize = self._latexSize)
+        self._ax1.set_xlabel(perpPosTxt, fontsize = self._latexSize)
+        self._ax1.set_ylabel(perpPosTxt, fontsize = self._latexSize)
 
-        ax1txt = self._ax1.text(0.5, 1.05,\
-                       timeTxt +\
-                           r'$ \quad z=' +\
-                           '{:.2f}'.format(self._zVal) + r'$',\
-                       horizontalalignment = 'center',\
-                       verticalalignment = 'center',\
-                       fontsize = self._latexSize,\
-                       transform = self._ax1.transAxes)
+        self._ax1txt = self._ax1.text(0.5, 1.05,\
+                                      timeTxt +\
+                                          r'$ \quad z=' + fixedParTxt + r'$',\
+                                      horizontalalignment = 'center',\
+                                      verticalalignment = 'center',\
+                                      fontsize = self._latexSize,\
+                                      transform = self._ax1.transAxes)
 
         # Plot the parallel plane
         parPlane  = self._ax2.contourf(self._cyl.X_RZ       ,\
@@ -1009,16 +1040,16 @@ class Plot2D(Plot):
         self._ax2.grid(b=True)
 
         # Decorations
-        self._ax2.set_xlabel(perpPosTxT, fontsize = self._latexSize)
+        self._ax2.set_xlabel(perpPosTxt, fontsize = self._latexSize)
         self._ax2.set_ylabel(parPosTxt , fontsize = self._latexSize)
-        ax2txt = self._ax2.text(0.5, 1.05,\
-                       timeTxt +\
-                           r'$ \quad \theta=' +\
-                           '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
-                       horizontalalignment = 'center',\
-                       verticalalignment = 'center',\
-                       fontsize = self._latexSize,\
-                       transform = self._ax2.transAxes)
+        self._ax2txt = self._ax2.text(0.5, 1.05,\
+                            timeTxt +\
+                                r'$ \quad \theta=' +\
+                                '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
+                            horizontalalignment = 'center',\
+                            verticalalignment = 'center',\
+                            fontsize = self._latexSize,\
+                            transform = self._ax2.transAxes)
 
 
         self._ax1.get_xaxis().set_major_formatter(\
@@ -1044,8 +1075,8 @@ class Plot2D(Plot):
         addArtParPlane    = parPlane.collections
         addArtParPlaneNeg = parPlaneNeg.collections
 
-        self._images.append(addArtPerpPlane + [ax1txt] +\
-                            addArtParPlane + addArtParPlaneNeg +[ax2txt])
+        self._images.append(addArtPerpPlane + [self._ax1txt] +\
+                            addArtParPlane + addArtParPlaneNeg +[self._ax2txt])
 
         if self._cbarPlane is None:
             self._cbarPlane = parPlane
@@ -1083,32 +1114,41 @@ class Plot2D(Plot):
             if self._physicalU:
                 cbarName = r'${} [{}]$'.format(self._pltName, self._units)
             else:
-                cbarName = r'${} []$'.format(self._pltName)
-            cbar.set_label(label = cbarName, size = titlesize)
+                cbarName = r'${}{}$'.format(self._pltName, self._units)
+
+            cbar.set_label(label = cbarName, size = self._titleSize + 5)
+
         except RuntimeWarning:
             message  = 'RuntimeError caught in cbar in ' + self._pltName
             message += '. No cbar will be set!'
         # Lines needs only to be plotted once
-        parLine1 = self._ax2.plot(self._RZLine1XVals,\
-                                  self._RZLine1YVals,\
-                                  '--k'             ,\
-                                  linewidth = 1     ,\
-                                  )
-        parLine2 = self._ax2.plot(self._RZLine2XVals,\
-                                  self._RZLine2YVals,\
-                                  '--k'             ,\
-                                  linewidth = 1     ,\
-                                  )
-        perpLine1 = self._ax1.plot(self._RTLine1XVals,\
-                                   self._RTLine1YVals,\
-                                   '--k'             ,\
-                                   linewidth = 1     ,\
-                                   )
-        perpLine2 = self._ax1.plot(self._RTLine2XVals,\
-                                   self._RTLine2YVals,\
-                                   '--k'             ,\
-                                   linewidth = 1     ,\
-                                   )
+        # Par line 1
+        self._ax2.plot(self._RZLine1XVals,\
+                       self._RZLine1YVals,\
+                       '--k'             ,\
+                       linewidth = 1     ,\
+                       )
+        # Par line 2
+        self._ax2.plot(self._RZLine2XVals,\
+                       self._RZLine2YVals,\
+                       '--k'             ,\
+                       linewidth = 1     ,\
+                       )
+        # Perp line 1
+        self._ax1.plot(self._RTLine1XVals,\
+                       self._RTLine1YVals,\
+                       '--k'             ,\
+                       linewidth = 1     ,\
+                       )
+        # Perp line 2
+        self._ax1.plot(self._RTLine2XVals,\
+                       self._RTLine2YVals,\
+                       '--k'             ,\
+                       linewidth = 1     ,\
+                       )
+
+        # Need to specify rect in order to have top text
+        self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
 
         if self._savePlot:
             # Make a saveName by stripping the orgObj's plot name for bad
@@ -1146,7 +1186,12 @@ class Plot2D(Plot):
                 # Save the animation
                 anim.save(saveString + '.gif'              ,\
                           writer         = 'imagemagick'   ,\
-                          savefig_kwargs = {'pad_inches':0},\
+                          savefig_kwargs =\
+                            {'pad_inches'         :0       ,\
+                             'bbox_extra_artists' :(cbar,\
+                                                   self._ax1txt,\
+                                                   self._ax2txt),\
+                             'bbox_inches'        :'tight'},\
                           )
                 print("Saved to {}.gif".format(saveString))
         else:
