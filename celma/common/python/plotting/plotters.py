@@ -18,6 +18,7 @@ from boutdata import collect
 from boututils.options import BOUTOptions
 import numpy as np
 import warnings
+import types
 
 # All post processing functions called by bout_runners must accept the
 # first argument from bout_runners (called 'folder' in
