@@ -35,6 +35,7 @@ def restart_from_func(dmp_folder, **kwargs):
         One of the arguments (given as kwargs to execute_runs) is
         one_of_the_restart_paths_in_scan.
     """
+
     # Ensure that the variable is set
     one_of_the_restart_paths_in_scan =\
             kwargs["one_of_the_restart_paths_in_scan"]
@@ -68,13 +69,12 @@ def restart_from_func(dmp_folder, **kwargs):
         # Find the first index of val
         ind = splitted.index(valName)
         # The value is found to the right of the variable
-        values[valName] = dmp_folder[ind[0]+1]
+        values[valName] = splitted[ind+1]
 
     # Insert the values into the restart_template string using the
     # values dictionary
     restart_from = restart_template.format(values)
 
-    import pdb; pdb.set_trace()
     return restart_from
 #}}}
 
