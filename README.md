@@ -5,6 +5,7 @@ https://svn.fysik.dtu.dk/mmag/Code-developement/BOUT/
 
 Current implementation works with the latest commit of BOUT++ version 3
 
+* additionalPlots: Additional plots related to the CELMA code
 * celma: Folder with the codes
 * celmaCurMom: CELMA codes where the current and parallel momentum is solved
 * celmaApar: CELMA codes where the $A_\|$ is accounted for
