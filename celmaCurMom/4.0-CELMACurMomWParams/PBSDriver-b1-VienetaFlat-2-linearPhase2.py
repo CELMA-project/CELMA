@@ -7,11 +7,11 @@ import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common/python')
+commonDir = os.path.abspath('./../common/')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from plotting import combinedDriver as postProcess
+from python.plotting import combinedDriver as postProcess
 
 # The options for the run
 # =============================================================================
@@ -40,7 +40,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-2, None)
+tSlice     = slice(None, None, 10)
 showPlot   = False
 savePlot   = True
 theRunName = "b1-VienetaFlat-2-linearPhase2"

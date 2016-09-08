@@ -446,24 +446,27 @@ class Probes(object):
 
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
-                avgFlux      = polAvg(self._var[:, xInd, yInd, :]*\
-                                      u[:, xInd, yInd, :])
-                avgFluxAvg   = polAvg(self._varAvg[:, xInd, yInd, :]*\
-                                      uAvg  [:, xInd, yInd, :])
-                avgFluxFluct = polAvg(self._varFluct[:, xInd, yInd, :]*\
-                                      uFluct[:, xInd, yInd, :])
+                avgFlux      = polAvg(\
+                                self._var     [:,xInd:xInd+1,yInd:yInd+1,:]*\
+                                u             [:,xInd:xInd+1,yInd:yInd+1,:])
+                avgFluxAvg   = polAvg(\
+                                self._varAvg  [:,xInd:xInd+1,yInd:yInd+1,:]*\
+                                uAvg          [:,xInd:xInd+1,yInd:yInd+1,:])
+                avgFluxFluct = polAvg(\
+                                self._varFluct[:,xInd:xInd+1,yInd:yInd+1,:]*\
+                                uFluct        [:,xInd:xInd+1,yInd:yInd+1,:])
                 for zInd in self._zInds:
 
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
 
-                    self.results[key]["varFlux" + uName.capitalize()] =\
-                        avgFlux[:, zInd]
+                    self.results[key]["varAvgFlux" + uName.capitalize()] =\
+                        avgFlux[:, 0, 0, zInd]
 
-                    self.results[key]["varFluxAvg" + uName.capitalize()] =\
-                        avgFluxAvg[:, zInd]
+                    self.results[key]["varAvgFluxAvg" + uName.capitalize()] =\
+                        avgFluxAvg[:, 0, 0, zInd]
 
-                    self.results[key]["varFluxFluct" + uName.capitalize()] =\
-                        avgFluxFluct[:, zInd]
+                    self.results[key]["varAvgFluxFluct" + uName.capitalize()] =\
+                        avgFluxFluct[:, 0, 0, zInd]
     #}}}
 
     #{{{calcFFTs
