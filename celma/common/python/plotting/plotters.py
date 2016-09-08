@@ -4,7 +4,7 @@
 Contains class for plotting
 """
 
-from ..statistics import polAvg
+from ..statsAndSignals import polAvg
 from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
 from scipy import constants
