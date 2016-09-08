@@ -41,7 +41,7 @@ class Probes(object):
             The time array
         tIndSaturatedTurb : [int|None]
             Index at where the turbulence saturates. This can be found
-            from plotting self.results[index]['zFFT'] after calculation
+            from CELMAPython.plotting self.results[index]['zFFT'] after calculation
         steadyStatePath : str
             What path to use when collecting J. If radialProbeIndices is
             None, this will also be the path for finding the largest
@@ -551,7 +551,7 @@ class PerpPlaneProbes(Probes):
             the quantities in physical units. Default is False.
         tIndSaturatedTurb : [int|None]
             Index at where the turbulence saturates. This can be found
-            from plotting self.results[index]['zFFT'] after calculation
+            from CELMAPython.plotting self.results[index]['zFFT'] after calculation
         steadyStatePath : string
             What path to use when collecting J. If radialProbeIndices is
             None, this will also be the path for finding the largest
