@@ -14,17 +14,20 @@ from .derivatives import DDZ, findLargestRadialGrad
 
 #{{{class Probes
 class Probes(object):
+    #{{{docstring
     """
     Parent class which stores the Jacobian J, the variable and the
     time traces.
 
     Contains analysis functions.
     """
+    #}}}
 
     #{{{Constructor
     def __init__(self, var, varName, time, tIndSaturatedTurb=None,\
                  steadyStatePath=None, radialProbeIndices=None,\
                  collectPath=None):
+        #{{{docstring
         """
         Constructor for the Probes class
 
@@ -51,6 +54,7 @@ class Probes(object):
             Path to collect J and the coordinates from. Not effective
             if steadyStatePath is set.
         """
+        #}}}
 
         # Guard
         if steadyStatePath is None and radialProbeIndices is None:
@@ -67,7 +71,8 @@ class Probes(object):
         self.fluctTime = time[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
-        self._varFluct = var - polAvg(var)
+        self._varAvg   = polAvg(var)
+        self._varFluct = var - self._varAvg
 
         # Clip the fluctuation part
         self._varFluct = self._varFluct[tIndSaturatedTurb:,:,:,:]
@@ -147,6 +152,7 @@ class Probes(object):
         # Set uninitialized variables to None
         self.results             = None
         self.timeTraceOfVar      = None
+        self.timeTraceOfVarAvg   = None
         self.timeTraceOfVarFluct = None
         self._xInds              = None
         self.yInd                = None
@@ -156,6 +162,7 @@ class Probes(object):
 
     #{{{initializeInputOutput
     def initializeInputOutput(self, xInds, yInds, zInds):
+        #{{{docstring
         """
         Get the time trace and the fluctuation time trace.
         Initializes the results dictionary.
@@ -170,9 +177,11 @@ class Probes(object):
         zInds : array
             z indices for the time trace
         """
+        #}}}
 
         self.results             = {}
         self.timeTraceOfVar      = {}
+        self.timeTraceOfVarAvg   = {}
         self.timeTraceOfVarFluct = {}
 
         self._xInds = xInds
@@ -205,6 +214,10 @@ class Probes(object):
                             ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._var[:, xInd, yInd, zInd]
 
+                    self.timeTraceOfVarAvg\
+                            ["{},{},{}".format(xInd, actualYInd, zInd)] =\
+                                self._varAvg[:, xInd, yInd, zInd]
+
                     self.timeTraceOfVarFluct\
                             ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._varFluct[:, xInd, yInd, zInd]
@@ -223,6 +236,7 @@ class Probes(object):
 
     #{{{calcStatsMoments
     def calcStatsMoments(self):
+        #{{{docstring
         """
         Calculates the first statistical moments.
 
@@ -243,6 +257,7 @@ class Probes(object):
             The skewness of the the fluctuations for each time (is 0 for
             a normal distribution)
         """
+        #}}}
 
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
@@ -260,6 +275,7 @@ class Probes(object):
 
     #{{{calcPDFs
     def calcPDFs(self):
+        #{{{docstring
         """
         Calculates the probability distribution function (PDF) of the
         fluctuations.
@@ -279,6 +295,7 @@ class Probes(object):
         pdfY : float
             The counts of the PDF
         """
+        #}}}
 
         # Guard
         if self.results is None:
@@ -312,6 +329,7 @@ class Probes(object):
 
     #{{{calcPSDs
     def calcPSDs(self):
+        #{{{docstring
         """
         Estimates the power spectral density (PSD) of the fluctuations
         in a non-parametric way (no assumption for the model of the
@@ -344,6 +362,7 @@ class Probes(object):
         psdY : float
             The power spectral density measured in variableUnits**2/Hz
         """
+        #}}}
 
         # Guard
         if self.results is None:
@@ -364,42 +383,28 @@ class Probes(object):
                                     fs=fs, window=None, scaling="density")
     #}}}
 
-    # TODO: FIXME: Resolve the issue of fluctuations
-    #{{{calcFluxThroughVolumeElement
-    def calcFluxThroughVolumeElement(self, u, uName):
+    #{{{calcAvgFluxThroughVolumeElement
+    def calcAvgFluxThroughVolumeElement(self, u, uName):
+        #{{{docstring
         """
-        Gives the radial flux through a volume element.
+        Gives the average flux through a volume element.
 
         Note that this is different from the total flux through a surface,
         which is the surface integral of the same quantity.
         However, this is usually the flux through a voluem element which are
         measured with probes in experiments.
 
-        The flux of the variable and the flux of the fluctuating quantity is
-        returned.
-
-        FIXME: Resolve two next paragraphs
         A note on poloidal averaging:
-        ab = (a_avg + a_fluct)(b_avg + b_fluct)
-           =  a_avg b_avg + a_avg b_fluct + a_fluct b_ avg + a_fluct b_fluct
-        Usually we are looking at time averaged quantities of this
-        (ab)_avg = (a_avg b_avg)_avg + (a_avg b_fluct)_avg + (a_fluct b_ avg)_avg + (a_fluct b_fluct)_avg
-        (a_avg b_avg)_avg = a_avg b_avg
-        (a_fluct)_avg = 0 if a is truly random, and a sufficient average is taken
-        c(a_fluct)_avg = 0
-        b_avg = constant => (a_avg b_fluct)_avg = 0
-
-        We are doing a poloidal average
-        Assume no preferred direction => poloidal average is comparable to a
-        time average long enough for the averages to be the same (turbulence
-        have "walked" around poloidally)
-
+        -----------------------------
+        <ab> = < (<a> + a_fluct)(<b> + b_fluct) >
+             = < <a> <b>+ a_fluct<b> + <a> b_fluct + a_fluct b_fluct>
+             = < <a> <b> > + < a_fluct<b> > + < <a> b_fluct> + <a_fluct b_fluct>
+             = < <a> <b> > + <b>< a_fluct > + <a>< b_fluct> + <a_fluct b_fluct>
+             = < <a> <b> > + <b>0 + <a>0 + <a_fluct b_fluct>
+             = < <a> <b> > + <a_fluct b_fluct>
 
         Parameters
         ----------
-        var : array
-            The variable to find the flux of (the xInd and yInd must be
-            specified)
         u : array
             The velocity of the flux in the direction of the flux (xInd and yInd must
             be specified)
@@ -411,15 +416,22 @@ class Probes(object):
         The output will be stored in the keys (specified below) under
         self._result[indexString], where indexString is the string of
         the index under consideration.
+        Notice that the result will be the same for every z-index for a
+        fixed x- and y-index.
 
         varFlux* : array
-            The flux at the (xInd, yInd, zInd) position for each time.
-        fluctVarFlux* : array
-            The flux arising from the fluctuation at the (xInd, yInd, zInd)
-            position for each time.
+            The average flux at the (xInd, yInd, zInd) position for each
+            time.
+        varFluxAvg* : array
+            The average flux arising from the averaged fields at the (xInd,
+            yInd, zInd) position for each time.
+        varFluxFluct* : array
+            The average flux arising from the fluctuations at the (xInd,
+            yInd, zInd) position for each time.
 
         * The keys below will be appended with uName.
         """
+        #}}}
 
         # Guard
         if self.results is None:
@@ -428,24 +440,34 @@ class Probes(object):
             raise RuntimeError(message)
 
         # Find the fluctuating velocity
-        uFluct = u - polAvg(u)
-
+        uAvg         = polAvg(u)
+        uFluct       = u - uAvg
 
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
+                avgFlux      = polAvg(self._var[:, xInd, yInd, :]*\
+                                      u[:, xInd, yInd, :])
+                avgFluxAvg   = polAvg(self._varAvg[:, xInd, yInd, :]*\
+                                      uAvg  [:, xInd, yInd, :])
+                avgFluxFluct = polAvg(self._varFluct[:, xInd, yInd, :]*\
+                                      uFluct[:, xInd, yInd, :])
                 for zInd in self._zInds:
+
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     self.results[key]["varFlux" + uName.capitalize()] =\
-                        self.timeTraceOfVar[key] * u[:, xInd, yInd, zInd]
+                        avgFlux[:, zInd]
+
+                    self.results[key]["varFluxAvg" + uName.capitalize()] =\
+                        avgFluxAvg[:, zInd]
 
                     self.results[key]["varFluxFluct" + uName.capitalize()] =\
-                        self.timeTraceOfVarFluct[key] *\
-                        uFluct[:self._tIndSaturatedTurb, xInd, yInd, zInd]
+                        avgFluxFluct[:, zInd]
     #}}}
 
     #{{{calcFFTs
     def calcFFTs(self):
+        #{{{docstring
         """
         Calculates the FFT of the poloidal profile belonging to the
         point under consideration.
@@ -461,6 +483,7 @@ class Probes(object):
             result will be the same for every z-index for a fixed x- and
             y-index.
         """
+        #}}}
 
         # Guard
         if self.results is None:
@@ -482,6 +505,7 @@ class Probes(object):
 
 #{{{class PerpPlaneProbes
 class PerpPlaneProbes(Probes):
+    #{{{docstring
     """
     Child class of probes. Calls probes constructor, finds
     radialProbeIndice based on highest gradient (if not set).
@@ -490,11 +514,13 @@ class PerpPlaneProbes(Probes):
     This class makes it possible to collect only a z-plane instead of
     the whole 3D variable.
     """
+    #}}}
 
     #{{{Constructor
     def __init__(self, varName, paths, yInd,\
                  nProbes=5, physicalUnits=False, tIndSaturatedTurb=None,\
                  steadyStatePath=None, radialProbeIndices=None):
+        #{{{docstring
         """
         Constructor for the PerpPlaneProbes class
 
@@ -531,6 +557,7 @@ class PerpPlaneProbes(Probes):
             selected from the largest gradient in the steady state
             variable.
         """
+        #}}}
 
         # Guard
         if steadyStatePath is None and radialProbeIndices is None:
@@ -609,6 +636,7 @@ class PerpPlaneProbes(Probes):
 
     #{{{getRadialProbeIndices
     def getRadialProbeIndices(self, indexIn, nProbes = 5):
+        #{{{docstring
         """
         Get rho indices for nProbes located in an symmetric, equidistant way
         around the input indexIn
@@ -626,6 +654,7 @@ class PerpPlaneProbes(Probes):
         indices : list
             A list of the rho index to put the probes on (including indexIn)
         """
+        #}}}
 
         # Find out if we are above half
         innerLen = self._var.shape[1] - 2*self._MXG
