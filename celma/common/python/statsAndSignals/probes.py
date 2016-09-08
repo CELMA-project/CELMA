@@ -62,14 +62,15 @@ class Probes(object):
                        "be None simultaneously")
             raise ValueError(message)
 
-        self._var  = var
-        self._time = time
+        self._var      = var
+        self.time      = time
+        self.fluctTime = time[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
         self._varFluct = var - polAvg(var)
 
         # Clip the fluctuation part
-        self._varFluct = self._varFluct[:tIndSaturatedTurb,:,:,:]
+        self._varFluct = self._varFluct[tIndSaturatedTurb:,:,:,:]
 
         if varName == "n":
             collectVarName = "lnN"
@@ -144,13 +145,13 @@ class Probes(object):
         self._tIndSaturatedTurb = tIndSaturatedTurb
 
         # Set uninitialized variables to None
-        self.results              = None
-        self._timeTraceOfVar      = None
-        self._timeTraceOfVarFluct = None
-        self._xInds               = None
-        self.yInd                 = None
-        self._yInds               = None
-        self._zInds               = None
+        self.results             = None
+        self.timeTraceOfVar      = None
+        self.timeTraceOfVarFluct = None
+        self._xInds              = None
+        self.yInd                = None
+        self._yInds              = None
+        self._zInds              = None
     #}}}
 
     #{{{initializeInputOutput
@@ -170,9 +171,9 @@ class Probes(object):
             z indices for the time trace
         """
 
-        self.results              = {}
-        self._timeTraceOfVar      = {}
-        self._timeTraceOfVarFluct = {}
+        self.results             = {}
+        self.timeTraceOfVar      = {}
+        self.timeTraceOfVarFluct = {}
 
         self._xInds = xInds
         if self.yInd is not None:
@@ -200,11 +201,11 @@ class Probes(object):
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
                     # Initialize the time traces
-                    self._timeTraceOfVar\
+                    self.timeTraceOfVar\
                             ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._var[:, xInd, yInd, zInd]
 
-                    self._timeTraceOfVarFluct\
+                    self.timeTraceOfVarFluct\
                             ["{},{},{}".format(xInd, actualYInd, zInd)] =\
                                 self._varFluct[:, xInd, yInd, zInd]
 
@@ -248,13 +249,13 @@ class Probes(object):
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
                     self.results[key]["mean"] =\
-                        self._timeTraceOfVarFluct[key].mean()
+                        self.timeTraceOfVarFluct[key].mean()
                     self.results[key]["var"] =\
-                        self._timeTraceOfVarFluct[key].var()
+                        self.timeTraceOfVarFluct[key].var()
                     self.results[key]["kurtosis"] =\
-                        kurtosis(self._timeTraceOfVarFluct[key])
+                        kurtosis(self.timeTraceOfVarFluct[key])
                     self.results[key]["skew"] =\
-                        skew(self._timeTraceOfVarFluct[key])
+                        skew(self.timeTraceOfVarFluct[key])
     #}}}
 
     #{{{calcPDFs
@@ -297,7 +298,7 @@ class Probes(object):
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     self.results[key]["pdfY"], bins =\
-                              np.histogram(self._timeTraceOfVarFluct[key],\
+                              np.histogram(self.timeTraceOfVarFluct[key],\
                                            bins="auto",\
                                            density=True)
                     # Initialize y
@@ -350,7 +351,7 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
-        fs = self._time[1] - self._time[0]
+        fs = self.time[1] - self.time[0]
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
@@ -359,7 +360,7 @@ class Probes(object):
                     # window = None => window = "boxcar"
                     # scaling = density gives the correct units
                     self.results[key]["psdX"], self.results[key]["psdY"] =\
-                        periodogram(self._timeTraceOfVarFluct[key],\
+                        periodogram(self.timeTraceOfVarFluct[key],\
                                     fs=fs, window=None, scaling="density")
     #}}}
 
@@ -436,10 +437,10 @@ class Probes(object):
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
 
                     self.results[key]["varFlux" + uName.capitalize()] =\
-                        self._timeTraceOfVar[key] * u[:, xInd, yInd, zInd]
+                        self.timeTraceOfVar[key] * u[:, xInd, yInd, zInd]
 
                     self.results[key]["varFluxFluct" + uName.capitalize()] =\
-                        self._timeTraceOfVarFluct[key] *\
+                        self.timeTraceOfVarFluct[key] *\
                         uFluct[:self._tIndSaturatedTurb, xInd, yInd, zInd]
     #}}}
 
