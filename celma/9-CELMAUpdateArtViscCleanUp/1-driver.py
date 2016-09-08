@@ -11,8 +11,8 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from plotting import combined1D2D as postProcessDriver
-# from plotting import lnN2DDriver as postProcessDriver
+from CELMAPython.plotting import combined1D2D as postProcessDriver
+# from CELMAPython.plotting import lnN2DDriver as postProcessDriver
 
 # The options for the run
 # =============================================================================
