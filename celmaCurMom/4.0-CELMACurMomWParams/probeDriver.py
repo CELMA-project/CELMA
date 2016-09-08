@@ -47,7 +47,7 @@ ppp.initializeInputOutput(ppp.radialProbesIndices, [ppp.yInd], [0])
 ppp.calcStatsMoments()
 ppp.calcPDFs()
 ppp.calcPSDs()
-ppp.calcFluxThroughVolumeElement(ppp.radialExB, "ExB")
+ppp.calcAvgFluxThroughVolumeElement(ppp.radialExB, "ExB")
 ppp.calcFFTs()
 
 # Pickle the result
