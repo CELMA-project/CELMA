@@ -12,7 +12,7 @@ commonDir = os.path.abspath('./../common/python')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from postProcessing.plotting import combinedDriver
+from plotting import combinedDriver
 
 # The options for the run
 # =============================================================================
