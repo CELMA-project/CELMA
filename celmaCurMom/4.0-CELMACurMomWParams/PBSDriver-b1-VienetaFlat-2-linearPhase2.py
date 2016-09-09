@@ -11,7 +11,7 @@ commonDir = os.path.abspath('./../common/')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from python.plotting import combinedDriver as postProcess
+from CELMAPython.plotting import combinedDriver as postProcess
 
 # The options for the run
 # =============================================================================
@@ -22,7 +22,7 @@ useHyperViscAzVortD = [True]
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-# restart      = None;
+restart      = None;
 restart_from = "b1-VienetaFlat/nout_1000_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_b1-VienetaFlat-2-linearPhase1_0/"
 # Set the temporal domain
 nout       = [1000]
@@ -40,7 +40,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(None, None, 10)
+tSlice     = slice(0, 230, 10)
 showPlot   = False
 savePlot   = True
 theRunName = "b1-VienetaFlat-2-linearPhase2"
@@ -58,8 +58,8 @@ BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
-post_process_walltime = '0:29:00'
-post_process_queue    = 'xpresq'
+post_process_walltime = '03:00:00'
+post_process_queue    = 'workq'
 post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
