@@ -214,8 +214,9 @@ class Plot(object):
         self._t = collect('t_array', path=self._path, tind=self._tind, info=False)
 
         # Slice in t
-        if self._tSlice.step is not None:
-            self._t = self._t[::self._tSlice.step]
+        if self._tSlice is not None:
+            if self._tSlice.step is not None:
+                self._t = self._t[::self._tSlice.step]
 
         # Convert to physical units
         if self._physicalU:
@@ -673,8 +674,9 @@ class Plot1D(Plot):
                 line.field = field
 
         # Slice in t
-        if self._tSlice.step is not None:
-            line.field = line.field[::self._tSlice.step]
+        if self._tSlice is not None:
+            if self._tSlice.step is not None:
+                line.field = line.field[::self._tSlice.step]
 
         line.field =\
                 self._getUnitsAndSetPhysical(line.name, line.field)
@@ -863,8 +865,9 @@ class Plot2D(Plot):
                                               **kwargs)
 
         # Slice in t
-        if self._tSlice.step is not None:
-            self._variable = self._variable[::self._tSlice.step]
+        if self._tSlice is not None:
+            if self._tSlice.step is not None:
+                self._variable = self._variable[::self._tSlice.step]
 
         if self._subPolAvg:
             self._variable = self._variable - polAvg(self._variable)
