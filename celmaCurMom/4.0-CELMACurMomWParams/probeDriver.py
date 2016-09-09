@@ -5,7 +5,7 @@
 import os, sys
 import pickle
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common/python')
+commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 from statsAndSignals import PerpPlaneProbes
