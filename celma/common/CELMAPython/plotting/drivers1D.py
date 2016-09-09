@@ -319,7 +319,7 @@ def single1DDriver(path                      ,\
                    ySlice     = slice(0,None),\
                    zSlice     = slice(0,None),\
                    tSlice     = None         ,\
-                   polAvg     = False        ,\
+                   subPolAvg  = False        ,\
                    showPlot   = False        ,\
                    savePlot   = True         ,\
                    saveFolder = None         ,\
@@ -339,9 +339,8 @@ def single1DDriver(path                      ,\
     ySlice     - How to slice in y
     zSlice     - How to slice in z
     tSlice     - How to slice in t
-    polAvg     - Whether or not to perform a poloidal average of
-                 the data
-    showPlot   - If the plot is to be displayed
+    subPolAvg  - Whether or not the poloidal average should be
+                 subtracted from the data
     savePlot   - If the plot is to be saved
     saveFolder - Name of save folder
     pltName    - Name of plot to make
@@ -363,7 +362,7 @@ def single1DDriver(path                      ,\
                      ySlice     = ySlice    ,\
                      zSlice     = zSlice    ,\
                      tSlice     = tSlice    ,\
-                     polAvg     = polAvg    ,\
+                     subPolAvg  = subPolAvg ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\

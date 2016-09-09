@@ -124,7 +124,7 @@ def combinedDriver(path                          ,\
                               'varyMaxMin'     :varyMaxMin    ,\
                               'useSubProcess'  :useSubProcess ,\
                               'timeFolder'     :timeFolder    ,\
-                              'polAvg'         :False         ,\
+                              'subPolAvg'      :False         ,\
                               **kwargs
                              }
                     )
@@ -149,7 +149,7 @@ def combinedDriver(path                          ,\
                               'varyMaxMin'     :varyMaxMin    ,\
                               'useSubProcess'  :useSubProcess ,\
                               'timeFolder'     :timeFolder    ,\
-                              'polAvg'         :True          ,\
+                              'subPolAvg'      :True          ,\
                               **kwargs
                              }
                     )
@@ -177,7 +177,7 @@ def combinedDriver(path                          ,\
                                   varyMaxMin      = varyMaxMin    ,\
                                   useSubProcess   = useSubProcess ,\
                                   timeFolder      = timeFolder    ,\
-                                  polAvg          = False         ,\
+                                  subPolAvg       = False         ,\
                                   **kwargs)
 
         # Plots with poloidal average
@@ -198,7 +198,7 @@ def combinedDriver(path                          ,\
                                   varyMaxMin      = varyMaxMin    ,\
                                   useSubProcess   = useSubProcess ,\
                                   timeFolder      = timeFolder    ,\
-                                  polAvg          = True          ,\
+                                  subPolAvg       = True          ,\
                                   **kwargs)
         #}}}
 
@@ -214,7 +214,7 @@ def combined1D2D(path                          ,\
                  ySlice         = slice(0,None),\
                  zSlice         = slice(0,None),\
                  tSlice         = None         ,\
-                 polAvg         = False         ,\
+                 subPolAvg      = False        ,\
                  showPlot       = False        ,\
                  savePlot       = True         ,\
                  saveFolder     = None         ,\
@@ -238,8 +238,8 @@ def combined1D2D(path                          ,\
     ySlice         - How to slice in y
     zSlice         - How to slice in z
     tSlice         - How to slice in t
-    polAvg         - Whether or not to perform a poloidal average of
-                     the data
+    subPolAvg      - Whether or not the poloidal average should be
+                     subtracted from the data
     showPlot       - If the plot is to be displayed
     savePlot       - If the plot is to be saved
     saveFolder     - Name of save folder
@@ -312,7 +312,7 @@ def combined1D2D(path                          ,\
                               'ySlice'       :ySlice       ,\
                               'zSlice'       :zSlice       ,\
                               'tSlice'       :tSlice       ,\
-                              'polAvg'       :polAvg       ,\
+                              'subPolAvg'    :subPolAvg    ,\
                               'showPlot'     :showPlot     ,\
                               'savePlot'     :savePlot     ,\
                               'saveFolder'   :saveFolder   ,\
@@ -331,7 +331,7 @@ def combined1D2D(path                          ,\
                               'ySlice'       :ySlice       ,\
                               'zSlice'       :zSlice       ,\
                               'tSlice'       :tSlice       ,\
-                              'polAvg'       :polAvg       ,\
+                              'subPolAvg'    :subPolAvg    ,\
                               'showPlot'     :showPlot     ,\
                               'savePlot'     :savePlot     ,\
                               'saveFolder'   :saveFolder   ,\
@@ -357,7 +357,7 @@ def combined1D2D(path                          ,\
                                    ySlice        = ySlice       ,\
                                    zSlice        = zSlice       ,\
                                    tSlice        = tSlice       ,\
-                                   polAvg        = polAvg       ,\
+                                   subPolAvg     = subPolAvg    ,\
                                    showPlot      = showPlot     ,\
                                    savePlot      = savePlot     ,\
                                    saveFolder    = saveFolder   ,\
@@ -372,7 +372,7 @@ def combined1D2D(path                          ,\
                                            ySlice        = ySlice       ,\
                                            zSlice        = zSlice       ,\
                                            tSlice        = tSlice       ,\
-                                           polAvg        = polAvg       ,\
+                                           subPolAvg     = subPolAvg    ,\
                                            showPlot      = showPlot     ,\
                                            savePlot      = savePlot     ,\
                                            saveFolder    = saveFolder   ,\
