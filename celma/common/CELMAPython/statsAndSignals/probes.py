@@ -383,7 +383,6 @@ class Probes(object):
                                     fs=fs, window=None, scaling="density")
     #}}}
 
-# FIXME: Bug here
     #{{{calcAvgFluxThroughVolumeElement
     def calcAvgFluxThroughVolumeElement(self, u, uName):
         #{{{docstring

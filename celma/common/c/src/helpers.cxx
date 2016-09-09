@@ -8,7 +8,7 @@
  *
  * \param[in] f     The field to take the average of
  *
- * \returns result The poloidal average of the field
+ * \returns result  The poloidal average of the field
  */
 Field3D const PolAvg::polAvg(const Field3D &f)
 {
@@ -26,9 +26,9 @@ Field3D const PolAvg::polAvg(const Field3D &f)
             }
             avg /= (mesh->ngz - 1);
 
-            // Subtract the average from the field
+            // Fill the poloidal points with the average
             for(zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                result(xInd, yInd, zInd) = f(xInd, yInd, zInd) - avg ;
+                result(xInd, yInd, zInd) = avg;
             }
         }
     }
