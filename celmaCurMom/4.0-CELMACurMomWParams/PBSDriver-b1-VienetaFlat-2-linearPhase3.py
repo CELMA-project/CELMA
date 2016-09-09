@@ -7,7 +7,7 @@ import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common/python')
+commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -40,7 +40,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-2, None)
+tSlice     = slice(0, 900, 10)
 showPlot   = False
 savePlot   = True
 theRunName = "b1-VienetaFlat-2-linearPhase3"
@@ -58,8 +58,8 @@ BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
-post_process_walltime = '0:29:00'
-post_process_queue    = 'xpresq'
+post_process_walltime = '05:00:00'
+post_process_queue    = 'workq'
 post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
