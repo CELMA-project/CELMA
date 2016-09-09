@@ -30,8 +30,8 @@ Parameters::Parameters(BoutReal const &radius,
 : radius_(radius), len_(len),
   n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
   nuEN_(nuEN), nuIN_(nuIN),
-  separatorLen(49), separator(' '),
-  nameWidth(15), numberWidth(15), unitsWidth(16),
+  separatorLen(57), separator(' '),
+  nameWidth(23), numberWidth(15), unitsWidth(16),
   precision(4)
 {
     TRACE("Parameters::Parameters");
@@ -132,6 +132,9 @@ Parameters::Parameters(BoutReal const &radius,
     printTable();
 
     // Guard
+    if(coloumbLog <= 1.0){
+        throw BoutException("Coloumb Logarithm under 1.0. Theory fails.");
+    }
     if(nuEINorm >= 1.0){
         throw BoutException("Normalized nuEI broke drift approximation");
     }
@@ -174,15 +177,17 @@ void Parameters::printTable() const
     output << std::string(separatorLen, '-') << std::endl;
     output << "CODE INPUT" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("Lx"       , Lx      , "-");
-    printVar("Ly"       , Ly      , "-");
-    printVar("mu"       , mu      , "-");
-    printVar("Lambda"   , Lambda  , "-");
-    printVar("beta"     , beta    , "-");
-    printVar("nuEI/omCI", nuEINorm, "-");
-    printVar("S/n*omCI ", SNorm   , "-");
-    printVar("nuEN/omCI", nuENNorm, "-");
-    printVar("nuIN/omCI", nuINNorm, "-");
+    printVar("Lx"                   , Lx       , "-");
+    printVar("Ly"                   , Ly       , "-");
+    printVar("mu"                   , mu       , "-");
+    printVar("Lambda"               , Lambda   , "-");
+    printVar("beta"                 , beta     , "-");
+    printVar("nuEI/omCI"            , nuEINorm , "-");
+    printVar("S/n*omCI "            , SNorm    , "-");
+    printVar("nuEN/omCI"            , nuENNorm , "-");
+    printVar("nuIN/omCI"            , nuINNorm , "-");
+    printVar("eta0I/(mi*n0*rhoS*cS)", eta0INorm, "-");
+    printVar("eta0E/(mi*n0*rhoS*cS)", eta0ENorm, "-");
     output << std::string(separatorLen, '-') << std::endl;
     output << "PLOT SPECIFIC" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
@@ -236,16 +241,16 @@ void Parameters::printTable() const
     output << std::string(separatorLen, '-') << std::endl;
     output << "NORMALIZED PARAMETERS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
-    printVar("nuEI/omCI", nuEINorm , "-");
-    printVar("nuEN/omCI", nuENNorm , "-");
-    printVar("nuIN/omCI", nuINNorm , "-");
-    printVar("S/n0*omCI", SNorm    , "-");
-    printVar("eta0INorm", eta0INorm, "-");
-    printVar("eta2INorm", eta2INorm, "-");
-    printVar("eta4INorm", eta4INorm, "-");
-    printVar("eta0ENorm", eta0ENorm, "-");
-    printVar("eta2ENorm", eta2ENorm, "-");
-    printVar("eta4ENorm", eta4ENorm, "-");
+    printVar("nuEI/omCI"            , nuEINorm , "-");
+    printVar("nuEN/omCI"            , nuENNorm , "-");
+    printVar("nuIN/omCI"            , nuINNorm , "-");
+    printVar("S/n0*omCI"            , SNorm    , "-");
+    printVar("eta0I/(mi*n0*rhoS*cS)", eta0INorm, "-");
+    printVar("eta2I/(mi*n0*rhoS*cS)", eta2INorm, "-");
+    printVar("eta4I/(mi*n0*rhoS*cS)", eta4INorm, "-");
+    printVar("eta0E/(mi*n0*rhoS*cS)", eta0ENorm, "-");
+    printVar("eta2E/(mi*n0*rhoS*cS)", eta2ENorm, "-");
+    printVar("eta4E/(mi*n0*rhoS*cS)", eta4ENorm, "-");
     output << std::string(separatorLen, '-') << std::endl;
     output << "\n" << std::endl;
 }
@@ -414,6 +419,18 @@ BoutReal Parameters::getEta0INorm() const
 
     TRACE("Parameters::getEta0I");
     return eta0INorm;
+}
+
+/*!
+ * Returns normalized version of /f$\eta_0^e/f$
+ *
+ * \param[out] eta0ENorm The normalized viscosity coefficient
+ */
+BoutReal Parameters::getEta0ENorm() const
+{
+
+    TRACE("Parameters::getEta0E");
+    return eta0ENorm;
 }
 
 #endif
