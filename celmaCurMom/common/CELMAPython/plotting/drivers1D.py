@@ -319,7 +319,7 @@ def single1DDriver(path                      ,\
                    ySlice     = slice(0,None),\
                    zSlice     = slice(0,None),\
                    tSlice     = None         ,\
-                   polAvg     = False        ,\
+                   subPolAvg  = False        ,\
                    physicalU  = False        ,\
                    showPlot   = False        ,\
                    savePlot   = True         ,\
@@ -340,8 +340,8 @@ def single1DDriver(path                      ,\
     ySlice     - How to slice in y
     zSlice     - How to slice in z
     tSlice     - How to slice in t
-    polAvg     - Whether or not to perform a poloidal average of
-                 the data
+    subPolAvg  - Whether or not the poloidal average should be
+                 subtracted from the data
     physicalU  - If the physical units should be plotted
     showPlot   - If the plot is to be displayed
     savePlot   - If the plot is to be saved
@@ -366,7 +366,7 @@ def single1DDriver(path                      ,\
                      zSlice     = zSlice    ,\
                      tSlice     = tSlice    ,\
                      physicalU  = False     ,\
-                     polAvg     = polAvg    ,\
+                     subPolAvg  = subPolAvg    ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\

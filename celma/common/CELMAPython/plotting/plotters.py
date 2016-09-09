@@ -45,7 +45,7 @@ class Plot(object):
                  zSlice     = slice(0,None),\
                  tSlice     = None         ,\
                  physicalU  = False        ,\
-                 polAvg     = False        ,\
+                 subPolAvg  = False        ,\
                  showPlot   = False        ,\
                  savePlot   = True         ,\
                  saveFolder = None         ,\
@@ -63,8 +63,8 @@ class Plot(object):
         zSlice     - How the data will be sliced in z
         tSlice     - How the data will be sliced in t
         physicalU  - If the physical units should be plotted
-        polAvg     - Whether or not to perform a poloidal average of
-                     the data
+        subPolAvg  - Whether or not the poloidal average should be
+                     subtracted from the data
         showPlot   - If the plot should be displayed
         savePlot   - If plot should be saved
         saveFolder - Name of the folder to save plots in
@@ -245,8 +245,8 @@ class Plot(object):
 
         self._frames = len(self._t)
 
-        # Set polAvg option
-        self._polAvg = polAvg
+        # Set subPolAvg option
+        self._subPolAvg = subPolAvg
     #}}}
 
     #{{{ _getIndices
@@ -621,7 +621,7 @@ class Plot1D(Plot):
     def collectLine(self, line):
         """Collects the data for one line and reshapes it"""
 
-        if self._polAvg:
+        if self._subPolAvg:
             # We need to collect the whole field if we would like to do
             # poloidal averages
             try:
@@ -642,8 +642,8 @@ class Plot1D(Plot):
                 field[:]   = line.field
                 line.field = field
 
-            # Take the poloidal average, and slice the result
-            line.field = polAvg(line.field) \
+            # Subtract the poloidal average, and slice the result
+            line.field = (line.field - polAvg(line.field)) \
                     [:,\
                      self._xSlice,\
                      self._ySlice,\
@@ -719,8 +719,8 @@ class Plot1D(Plot):
             saveName = saveName.replace("^", "")
             fileName = saveName + '-' + self._direction
             prePaths = ['visualization', self._saveFolder]
-            if self._polAvg:
-                postPaths = 'polAvg'
+            if self._subPolAvg:
+                postPaths = 'subPolAvg'
             else:
                 postPaths = []
             saveString, timeFolder = getSaveString(fileName               ,\
@@ -866,8 +866,8 @@ class Plot2D(Plot):
         if self._tSlice.step is not None:
             self._variable = self._variable[::self._tSlice.step]
 
-        if self._polAvg:
-            self._variable = polAvg(self._variable)
+        if self._subPolAvg:
+            self._variable = self._variable - polAvg(self._variable)
 
         # Add the last theta slice
         self._variable =\
@@ -1159,8 +1159,8 @@ class Plot2D(Plot):
             saveName = saveName.replace("^", "")
             fileName = saveName + '-2D'
             prePaths = ['visualization', self._saveFolder]
-            if self._polAvg:
-                postPaths = 'polAvg'
+            if self._subPolAvg:
+                postPaths = 'subPolAvg'
             else:
                 postPaths = []
             saveString, timeFolder = getSaveString(fileName               ,\
