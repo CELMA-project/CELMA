@@ -92,6 +92,9 @@ def getJParFields(path):
     r'n\nu_{en}u_{e,\parallel}'                                         ))
     jPar.lines.append(Line('neutralIRes'                                ,\
     r'-n\nu_{in}u_{i,\parallel}'                                        ))
+    jPar.lines.append(Line('jParVisc'                                   ,\
+             r'-\frac{4}{3}\mu\eta_{e,0}'                               +\
+             r'\partial^2_{\parallel}u_{e,\parallel}'                   ))
     jPar.lines.append(Line('jParPerpArtVisc'                            ,\
     r'D_{j_{\parallel}, \perp}\nabla^2_\perp j_{\parallel}'             ))
     jPar.lines.append(Line('jParParArtVisc'                             ,\
@@ -120,6 +123,11 @@ def momDensParFields(path):
     r'-n\nu_{in}u_{i,\parallel}'                                   ))
     momDensPar.lines.append(Line('densDiffusion'                   ,\
     r'0.51\frac{\nu_{ei}}{\mu}u_{i,\parallel}\nabla_\perp^2n'      ))
+    momDensPar.lines.append(Line('momDensVisc'                     ,\
+             r'\frac{4}{3}\left('                                  +\
+             r'\eta_{i,0} \partial^2_{\parallel}u_{i,\parallel}'   +\
+             r'+\eta_{e,0} \partial^2_{\parallel}u_{e,\parallel}'  +\
+             r'\right)'                                            ))
     momDensPar.lines.append(Line('momDensPerpArtVisc'              ,\
              r'D_{nu_i,\perp}'                                     +\
              r'\nabla^2_{\perp}\left(nu_{i,\parallel}\right)'      ))
