@@ -23,9 +23,9 @@ remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
 # restart      = None;
-restart_from = "b1-VienetaFlat/nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_b1-VienetaFlat-2-linearPhase2_0/"
+restart_from = "b1-VienetaFlat/nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_b1-VienetaFlat-2-linearPhase3_0/"
 # Set the temporal domain
-nout       = [1000]
+nout       = [5000]
 timestep   = [1]
 directory  = "b1-VienetaFlat"
 # Shall we make?
@@ -40,10 +40,10 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(800, 899, 10)
+tSlice     = slice(-5, None)
 showPlot   = False
 savePlot   = True
-theRunName = "b1-VienetaFlat-2-linearPhase3"
+theRunName = "b1-VienetaFlat-3-turbulentPhase1"
 # =============================================================================
 
 
