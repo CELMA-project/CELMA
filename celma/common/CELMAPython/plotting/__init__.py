@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-"""
-Init-file for plotting
-"""
+""" Init-file for the plotting package """
 
 from .driversCombined import combinedDriver, combined1D2D
 from .drivers1D import single1DDriver, parDriver, perpDriver, parPerpDriver
@@ -16,12 +14,8 @@ from .drivers2D import (single2DDriver       ,\
                         phi2DDriver          ,\
                        )
 
-import matplotlib.pyplot as plt
-
-# Set proper backend
+# Try to import functions which are not present in all common folders
 try:
-    plt.figure(0)
-except RuntimeError:
-    plt.switch_backend('Agg')
-    plt.figure(0)
-plt.close(0)
+    from .drivers2D import jPar2DDriver, momDens2DDriver
+except:
+    pass
