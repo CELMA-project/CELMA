@@ -365,8 +365,8 @@ def single1DDriver(path                      ,\
                      ySlice     = ySlice    ,\
                      zSlice     = zSlice    ,\
                      tSlice     = tSlice    ,\
-                     physicalU  = False     ,\
-                     subPolAvg  = subPolAvg    ,\
+                     physicalU  = physicalU ,\
+                     subPolAvg  = subPolAvg ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\
@@ -416,6 +416,17 @@ def single1DDriver(path                      ,\
                                 orgObj.extraLines['n'])
         else:
             orgObj.lines.append(orgObj.extraLines['n'])
+
+    # Get the correct units and numbers
+    for line in orgObj.lines:
+        line.field =\
+                plotter._getUnitsAndSetPhysical(line.name, line.field)
+
+        if plotter.physicalU:
+            if line.name == "momDensPar":
+                line.label = "$m_i$" + line.label
+            if pltName == "mainFields":
+                line.label += r" $[{}]$".format(plotter._units)
 
     # Do the plot
     timeFolder = plotter.plotDriver(fig, orgObj, timeFolder=timeFolder)

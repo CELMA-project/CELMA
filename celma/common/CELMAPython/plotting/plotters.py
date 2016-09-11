@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 """
-Contains class for plotting
+Contains classes for plotting the fields
 """
 
 from ..statsAndSignals import polAvg
 from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
-from scipy import constants
+import scipy.constants as cst
 from matplotlib import get_backend
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
@@ -18,11 +18,13 @@ from boutdata import collect
 from boututils.options import BOUTOptions
 import numpy as np
 import warnings
-import types
 
 # All post processing functions called by bout_runners must accept the
 # first argument from bout_runners (called 'folder' in
 # __call_post_processing_function)
+
+# TODO: xlabels etc. can be more generalized, also across classes. This
+#       will easen maintainance of the code
 
 #{{{class Plot
 class Plot(object):
@@ -54,7 +56,7 @@ class Plot(object):
         """
         The constructor sets the member data
 
-        Input:
+        Parameters:
         path       - The path to collect from
         xguards    - If xguards should be included when collecting
         yguards    - If yguards should be included when collecting
@@ -78,7 +80,8 @@ class Plot(object):
         self._showPlot   = showPlot
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
-        self._physicalU  = physicalU
+        # Public as used in the driver
+        self.physicalU   = physicalU
 
         #{{{ Set the plot style
         self._titleSize = 30
@@ -219,7 +222,7 @@ class Plot(object):
                 self._t = self._t[::self._tSlice.step]
 
         # Convert to physical units
-        if self._physicalU:
+        if self.physicalU:
             try:
                 self._omCI = collect('omCI', path=self._path, info=False)
                 self._rhoS = collect('rhoS', path=self._path, info=False)
@@ -236,10 +239,10 @@ class Plot(object):
                 print(message)
 
                 # Reset physicalU
-                self._physicalU = False
+                self.physicalU = False
 
         # Convert to physical units
-        if self._physicalU:
+        if self.physicalU:
             self._t   /= self._omCI
             self._rho *= self._rhoS
             self._z   *= self._rhoS
@@ -328,12 +331,14 @@ class Plot(object):
         pos - The position (needed as input from FuncFormatter)
         """
 
-        tickString = '${:g}'.format(val)
+        tickString = '${:.3g}'.format(val)
         if "e+" in tickString:
-            tickString = tickString.replace('e+', r'\cdot 10^{')
+            tickString = tickString.replace('e+' , r'\cdot 10^{')
+            tickString = tickString.replace('e+0', r'\cdot 10^{')
             tickString += '}$'
         elif "e-" in tickString:
-            tickString = tickString.replace('e-', r'\cdot 10^{-')
+            tickString = tickString.replace('e-' , r'\cdot 10^{-')
+            tickString = tickString.replace('e-0', r'\cdot 10^{-')
             tickString += '}$'
         else:
             tickString += '$'
@@ -343,39 +348,36 @@ class Plot(object):
 
     #{{{_getUnitsAndSetPhysical
     def _getUnitsAndSetPhysical(self, varName, var):
-        if self._physicalU:
+        if self.physicalU:
             # Calculate back to physical units
             if varName == "n":
-                self._variable *= self._n0
+                var *= self._n0
                 self._units = r"\mathrm{m}^{-3}"
             elif varName == "vort":
-                self._variable *= self._omCI
+                var *= self._omCI
                 self._units = r"\mathrm{s}^{-1}"
             elif varName == "vortD":
-                self._variable *= self._omCI*self._n0
+                var *= self._omCI*self._n0
                 self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
             elif varName == "phi":
-                self._variable *= self._Te0/constants.value(u'elementary charge')
+                var *= self._Te0/cst.e
                 self._units = r"\mathrm{J}\mathrm{C}^{-1}"
             elif varName == "jPar":
-                self._variable *= constants.value(u'elementary charge')*\
-                                  self._n0*\
-                                  self.rhoS*self._omCI
+                var *= cst.m_p*self._n0*self._rhoS*self._omCI
                 self._units = r"\mathrm{C}\mathrm{s}^{-1}"
             elif varName == "momDensPar":
                 # momDensPar is divided by m_i, so we need to multiply
                 # by m_i again here
-                self._variable *= constants.value(u'proton mass')*\
-                                  self.rhoS*self._omCI*self._n0
+                var *= cst.m_p*self._rhoS*self._omCI*self._n0
                 self._units = r"\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}"
             elif varName == "uIPar":
-                self._variable *= self.rhoS*self._omCI
+                var *= self._rhoS*self._omCI
                 self._units = r"\mathrm{m}\mathrm{s}^{-1}"
             elif varName == "uEPar":
-                self._variable *= self.rhoS*self._omCI
+                var *= self._rhoS*self._omCI
                 self._units = r"\mathrm{m}\mathrm{s}^{-1}"
             elif varName == "S":
-                self._variable *= self._omCI*self._n0
+                var *= self._omCI*self._n0
                 self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
             else:
                 self._units = " "
@@ -463,10 +465,16 @@ class Plot1D(Plot):
             self._xAx = self._rho
 
             # Set the label and the title
-            self._xlabel = r'$\rho$'
-            self._title  = r'$\theta_i={0},$ $z_i={1}$  '.\
-                    format(kwargs['zSlice'], kwargs['ySlice'])
+            if self.physicalU:
+                self._xlabel = r'$\rho$ $[m]$'
+                self._title  = r'$\theta={:.2g}^{{\circ}},$ $z={:.2g}$ $m$  '
+            else:
+                self._xlabel = r'$\rho/\rho_s$'
+                self._title  = r'$\theta={:.2g}^{{\circ}},$ $z/\rho_s={:.2g}$  '
 
+            self._title = self._title.\
+                            format(self._theta[kwargs['zSlice']]*(180/np.pi),\
+                                   self._z    [kwargs['ySlice']])
             # Set direction (used in save)
             self._direction = 'radial'
         #}}}
@@ -476,9 +484,16 @@ class Plot1D(Plot):
             self._xAx = self._z
 
             # Set the label and the title
-            self._xlabel = r'$z$'
-            self._title  = r'$\rho_i={0}$, $\theta_i={1}$  '.\
-                    format(kwargs['xSlice'], kwargs['zSlice'])
+            if self.physicalU:
+                self._xlabel = r'$z$ $[m]$'
+                self._title  = r'$\rho={:.2g}$ $m$, $\theta={:.2g}^{{\circ}}$ '
+            else:
+                self._xlabel = r'$z/\rho_s$'
+                self._title  = r'$\rho/\rho_s={:.2g}$, $\theta={:.2g}^{{\circ}}$ '
+
+            self._title = self._title.\
+                        format(self._rho  [kwargs['xSlice']],\
+                               self._theta[kwargs['zSlice']]*(180/np.pi))
 
             # Set direction (used in save)
             self._direction = 'parallel'
@@ -489,9 +504,16 @@ class Plot1D(Plot):
             self._xAx = self._theta
 
             # Set the label and the title
-            self._xlabel = r'$\theta$'
-            self._title  = r'$\rho={0}$, $z_i={1}$  '.\
-                    format(kwargs['xSlice'], kwargs['ySlice'])
+            if self.physicalU:
+                self._xlabel = r'$\theta$'
+                self._title  = r'$\rho={:.2g}$ $m$, $z={:.2g}$ $m$  '
+            else:
+                self._xlabel = r'$\theta$'
+                self._title  = r'$\rho/\rho_s={:.2g}$, $z/rho_s={:.2g}$  '
+
+            self._title = self._title.\
+                        format(self._rho[kwargs['xSlice']],\
+                               self._z  [kwargs['ySlice']])
 
             # Set direction (used in save)
             self._direction = 'theta'
@@ -505,6 +527,11 @@ class Plot1D(Plot):
                                              kwargs['ySlice'],\
                                              kwargs['zSlice'])
             raise ValueError(message)
+
+        if self.physicalU:
+            self._timeTxt     = r'$t =${} $s$'
+        else:
+            self._timeTxt     = '$t\\omega_{{ci}} =$ {}'
 
         # Set the input data
         self._marker = marker
@@ -529,7 +556,8 @@ class Plot1D(Plot):
                         set_data(self._xAx, line.field[tInd,:])
 
         timeString = self._plotNumberFormatter(self._t[tInd], None)
-        fig.suptitle(self._title + r'$\omega_{ci}^{-1} = $' + timeString)
+        curTimeTxt = self._timeTxt.format(timeString)
+        fig.suptitle(self._title + curTimeTxt)
     #}}}
 
     #{{{_plotLines
@@ -596,7 +624,7 @@ class Plot1D(Plot):
                 FuncFormatter(self._plotNumberFormatter)\
                                                    )
             line.ax.get_xaxis().set_major_formatter(\
-                FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
+                FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
             # Set grid
             line.ax.grid(b = True)
@@ -678,12 +706,6 @@ class Plot1D(Plot):
             if self._tSlice.step is not None:
                 line.field = line.field[::self._tSlice.step]
 
-        line.field =\
-                self._getUnitsAndSetPhysical(line.name, line.field)
-
-        if self._physicalU:
-            line.label += r" $[{}]$".format(self._units)
-
         # Flatten the variables except the time dimension
         # -1 => total size divided by product of all other listed dimensions
         line.field = line.field.reshape(line.field.shape[0], -1)
@@ -707,7 +729,7 @@ class Plot1D(Plot):
         # Turn off calculation of physical units if you are not dealing
         # with main fields
         if orgObj.pltName != "mainFields":
-            self._physicalU = False
+            self.physicalU = False
 
         # Initial plot
         self._plotLines(fig, orgObj, 0)
@@ -751,17 +773,17 @@ class Plot1D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                plt.savefig(saveString + '.png'  ,\
-                            transparent = False  ,\
-                            bbox_inches = 'tight',\
-                            pad_inches  = 0      ,\
-                            )
+                self._fig.savefig(saveString + '.png'  ,\
+                                  transparent = False  ,\
+                                  bbox_inches = 'tight',\
+                                  pad_inches  = 0      ,\
+                                  )
                 print("Saved to {}.png".format(saveString))
 
         if self._showPlot:
-            plt.show()
+            self._fig.show()
 
-        plt.close()
+        plt.close(self._fig)
         return timeFolder
     #}}}
 #}}}
@@ -918,29 +940,29 @@ class Plot2D(Plot):
         # Calculate the numerical value of the theta angle and the z value
         thetaRad         = self._dz*self._zind[-1]
         thetaPPi         = thetaRad + np.pi
-        self._zVal       = zStart + self._yind[-1]*self._dy
+        self._zVal       = self._z[self._ySlice]
         self._thetaDeg   = thetaRad*(180/np.pi)
 
         # Set coordinates for the lines which indicate how the data is
         # sliced
         # Organized in start and stop pairs
         # We need two lines due to the center of the cylinder
-        self._RTLine1XVals = (rhoStart*np.cos(thetaRad), rhoEnd*np.cos(thetaRad))
-        self._RTLine1YVals = (rhoStart*np.sin(thetaRad), rhoEnd*np.sin(thetaRad))
-        self._RTLine2XVals = (rhoStart*np.cos(thetaPPi), rhoEnd*np.cos(thetaPPi))
-        self._RTLine2YVals = (rhoStart*np.sin(thetaPPi), rhoEnd*np.sin(thetaPPi))
-        self._RZLine1XVals = (-rhoEnd                  , -rhoStart              )
-        self._RZLine1YVals = (self._zVal               , self._zVal             )
-        self._RZLine2XVals = (rhoStart                 , rhoEnd                 )
-        self._RZLine2YVals = (self._zVal               , self._zVal             )
+        self._RTLine1XVals=(rhoStart*np.cos(thetaRad), rhoEnd*np.cos(thetaRad))
+        self._RTLine1YVals=(rhoStart*np.sin(thetaRad), rhoEnd*np.sin(thetaRad))
+        self._RTLine2XVals=(rhoStart*np.cos(thetaPPi), rhoEnd*np.cos(thetaPPi))
+        self._RTLine2YVals=(rhoStart*np.sin(thetaPPi), rhoEnd*np.sin(thetaPPi))
+        self._RZLine1XVals=(-rhoEnd                  , -rhoStart              )
+        self._RZLine1YVals=(self._zVal               , self._zVal             )
+        self._RZLine2XVals=(rhoStart                 , rhoEnd                 )
+        self._RZLine2YVals=(self._zVal               , self._zVal             )
 
         # Create the figure and axis
         pltSize      = (30,15)
         gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
         self._fig    = plt.figure(figsize = pltSize)
-        self._ax1    = plt.subplot(gs[0])
-        self._ax2    = plt.subplot(gs[1])
-        self._cBarAx = plt.subplot(gs[2])
+        self._ax1    = self._fig.add_subplot(gs[0])
+        self._ax2    = self._fig.add_subplot(gs[1])
+        self._cBarAx = self._fig.add_subplot(gs[2])
         self._fig.subplots_adjust(wspace=0.25)
         self._ax1.grid(True)
         self._ax2.grid(True)
@@ -998,15 +1020,15 @@ class Plot2D(Plot):
         # Decorations
         timeString = self._plotNumberFormatter(self._t[tInd], None)
 
-        if self._physicalU:
-            perpPosTxt  = r'$\rho [m]$'
-            parPosTxt   = r'$z [m]$'
-            fixedParTxt = '{:.2f} [m]'.format(self._zVal)
-            timeTxt     = r'$t ={} [s]$'.format(timeString)
+        if self.physicalU:
+            perpPosTxt  = r'$\rho$ $[m]$'
+            parPosTxt   = r'$z$ $[m]$'
+            fixedParTxt = '{:.2g}$ $m'.format(self._z[self._ySlice])
+            timeTxt     = r'$t=$ {} $s$'.format(timeString)
         else:
-            perpPosTxt  = r'$\rho/\rho_S$'
-            parPosTxt   = r'$z/\rho_S$'
-            fixedParTxt = '{:.2f}'.format(self._zVal)
+            perpPosTxt  = r'$\rho/\rho_s$'
+            parPosTxt   = r'$z/\rho_s$'
+            fixedParTxt = '{:.2g}'.format(self._z[self._ySlice])
             # Double brackets for escape
             timeTxt     = r'$t\omega_{{ci}} =$ {}'.format(timeString)
 
@@ -1014,8 +1036,7 @@ class Plot2D(Plot):
         self._ax1.set_ylabel(perpPosTxt, fontsize = self._latexSize)
 
         self._ax1txt = self._ax1.text(0.5, 1.05,\
-                                      timeTxt +\
-                                          r'$ \quad z=' + fixedParTxt + r'$',\
+                                      r'$z=' + fixedParTxt + r'$',\
                                       horizontalalignment = 'center',\
                                       verticalalignment = 'center',\
                                       fontsize = self._latexSize,\
@@ -1046,8 +1067,7 @@ class Plot2D(Plot):
         self._ax2.set_xlabel(perpPosTxt, fontsize = self._latexSize)
         self._ax2.set_ylabel(parPosTxt , fontsize = self._latexSize)
         self._ax2txt = self._ax2.text(0.5, 1.05,\
-                            timeTxt +\
-                                r'$ \quad \theta=' +\
+                                r'$\theta=' +\
                                 '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
                             horizontalalignment = 'center',\
                             verticalalignment = 'center',\
@@ -1056,19 +1076,21 @@ class Plot2D(Plot):
 
 
         self._ax1.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
+            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
         self._ax1.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
+            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
         self._ax2.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
+            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
         self._ax2.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:d}$'.format(int(val)))\
+            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
 
         # Make the axis equal
+        # FIXME: Make it an option to not plot ax2 equal => can see ||
+        #        structures
         self._ax1.axis('equal')
         self._ax2.axis('equal')
 
@@ -1078,8 +1100,19 @@ class Plot2D(Plot):
         addArtParPlane    = parPlane.collections
         addArtParPlaneNeg = parPlaneNeg.collections
 
+        # Text for the figure. Could append this to the figure itself,
+        # but it seems to be easier to just add it to an axis due to
+        # animation
+        self._figTxt = self._ax1.text(1.10, 1.05,\
+                                      timeTxt,\
+                                      horizontalalignment = 'center',\
+                                      verticalalignment = 'center',\
+                                      fontsize = self._latexSize,\
+                                      transform = self._ax1.transAxes)
+
         self._images.append(addArtPerpPlane + [self._ax1txt] +\
-                            addArtParPlane + addArtParPlaneNeg +[self._ax2txt])
+                            addArtParPlane + addArtParPlaneNeg +\
+                            [self._ax2txt] + [self._figTxt])
 
         if self._cbarPlane is None:
             self._cbarPlane = parPlane
@@ -1114,8 +1147,8 @@ class Plot2D(Plot):
                                       format = FuncFormatter(     \
                                               self._plotNumberFormatter),\
                                       )
-            if self._physicalU:
-                cbarName = r'${} [{}]$'.format(self._pltName, self._units)
+            if self.physicalU:
+                cbarName = r'${}$ $[{}]$'.format(self._pltName, self._units)
             else:
                 cbarName = r'${}{}$'.format(self._pltName, self._units)
 
@@ -1200,17 +1233,17 @@ class Plot2D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                plt.savefig(saveString + '.png'  ,\
-                            transparent = False  ,\
-                            bbox_inches = 'tight',\
-                            pad_inches  = 0      ,\
-                            )
+                self._fig.savefig(saveString + '.png'  ,\
+                                  transparent = False  ,\
+                                  bbox_inches = 'tight',\
+                                  pad_inches  = 0      ,\
+                                  )
                 print("Saved to {}.png".format(saveString))
 
         if self._showPlot:
-            plt.show()
+            self._fig.show()
 
-        plt.close()
+        plt.close(self._fig)
         return timeFolder
     #}}}
 #}}}
