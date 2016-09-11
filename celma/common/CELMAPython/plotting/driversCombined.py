@@ -318,6 +318,7 @@ def combined1D2D(path                          ,\
                               'saveFolder'   :saveFolder   ,\
                               'timeFolder'   :timeFolder   ,\
                               'useSubProcess':useSubProcess,\
+                              **kwargs
                              }
                     )
 
@@ -340,6 +341,7 @@ def combined1D2D(path                          ,\
                               'varyMaxMin'   :varyMaxMin   ,\
                               'timeFolder'   :timeFolder   ,\
                               'useSubProcess':useSubProcess,\
+                              **kwargs
                              }
                     )
 
@@ -363,6 +365,7 @@ def combined1D2D(path                          ,\
                                    saveFolder    = saveFolder   ,\
                                    timeFolder    = timeFolder   ,\
                                    useSubProcess = useSubProcess,\
+                                   **kwargs
                                    )
         # Do the 2D plots
         timeFolder = allMainFields2DDriver(path                         ,\
@@ -381,6 +384,7 @@ def combined1D2D(path                          ,\
                                            varyMaxMin    = varyMaxMin   ,\
                                            timeFolder    = timeFolder   ,\
                                            useSubProcess = useSubProcess,\
+                                           **kwargs
                                           )
         #}}}
 

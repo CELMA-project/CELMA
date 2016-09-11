@@ -431,6 +431,7 @@ def single2DDriver(path                      ,\
                    zSlice     = slice(0,None),\
                    tSlice     = None         ,\
                    subPolAvg  = False        ,\
+                   physicalU  = False        ,\
                    showPlot   = False        ,\
                    savePlot   = True         ,\
                    saveFolder = None         ,\
@@ -485,6 +486,7 @@ def single2DDriver(path                      ,\
                      zSlice     = zSlice    ,\
                      tSlice     = tSlice    ,\
                      subPolAvg  = subPolAvg ,\
+                     physicalU  = physicalU ,\
                      showPlot   = showPlot  ,\
                      savePlot   = savePlot  ,\
                      saveFolder = saveFolder,\
