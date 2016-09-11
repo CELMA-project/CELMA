@@ -4,6 +4,7 @@
 Contains classes for plotting the fields
 """
 
+from .. import titleSize
 from ..statsAndSignals import polAvg
 from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
@@ -25,6 +26,7 @@ import warnings
 
 # TODO: xlabels etc. can be more generalized, also across classes. This
 #       will easen maintainance of the code
+# TODO: Move drivers to own folder
 
 #{{{class Plot
 class Plot(object):
@@ -35,6 +37,7 @@ class Plot(object):
 
     * Setting the collect options
     * Formation of ticks
+    * Preparation of xlabel, ylabel and title
     """
 
     #{{{Constructor
@@ -54,22 +57,40 @@ class Plot(object):
                 ):
         #{{{docstring
         """
-        The constructor sets the member data
+        The constructor:
 
-        Parameters:
-        path       - The path to collect from
-        xguards    - If xguards should be included when collecting
-        yguards    - If yguards should be included when collecting
-        xSlice     - How the data will be sliced in x
-        ySlice     - How the data will be sliced in y
-        zSlice     - How the data will be sliced in z
-        tSlice     - How the data will be sliced in t
-        physicalU  - If the physical units should be plotted
-        subPolAvg  - Whether or not the poloidal average should be
-                     subtracted from the data
-        showPlot   - If the plot should be displayed
-        savePlot   - If plot should be saved
-        saveFolder - Name of the folder to save plots in
+        1. Sets the plot style
+        2. Calcuates rho, theta and z
+        3. Collects the time
+        4. Collects normalizing parameters if set
+
+        Parameters
+        ----------
+        path : str
+            The path to collect from.
+        xguards : bool
+            If xguards should be included when collecting.
+        yguards : bool
+            If yguards should be included when collecting.
+        xSlice : slice
+            How the data will be sliced in x.
+        ySlice : slice
+            How the data will be sliced in y.
+        zSlice : slice
+            How the data will be sliced in z.
+        tSlice : slice
+            How the data will be sliced in t.
+        physicalU : bool
+            If the physical or normalized units should be plotted.
+        subPolAvg : vool
+            Whether or not the poloidal average should be.
+            subtracted from the data.
+        showPlot : bool
+            If the plot should be displayed.
+        savePlot : bool
+            If plot should be saved.
+        saveFolder : str
+            Name of the folder to save plots in.
         """
         #}}}
 
@@ -82,16 +103,6 @@ class Plot(object):
         self._saveFolder = saveFolder
         # Public as used in the driver
         self.physicalU   = physicalU
-
-        #{{{ Set the plot style
-        self._titleSize = 30
-        plt.rc("font",   size      = 30)
-        plt.rc("axes",   labelsize = 25, titlesize = self._titleSize)
-        plt.rc("xtick",  labelsize = 25)
-        plt.rc("ytick",  labelsize = 25)
-        plt.rc("legend", fontsize  = 20)
-        plt.rc("lines",  linewidth = 2)
-        #}}}
 
         # Get the coordinates
         #{{{rho
@@ -251,12 +262,35 @@ class Plot(object):
 
         # Set subPolAvg option
         self._subPolAvg = subPolAvg
+
+        # Prepare the labels
+        if self.physicalU:
+            self._timeTxt   = r'$t =${} $s$'
+            self._rhoPosTxt = r'$\rho$ $[m]$'
+            self._zPosTxt   = r'$z$ $[m]$'
+        else:
+            self._timeTxt   = '$t\\omega_{{ci}} =$ {}'
+            self._rhoPosTxt = r'$\rho/\rho_s$'
+            self._zPosTxt   = r'$z/\rho_s$'
+
     #}}}
 
     #{{{ _getIndices
     def _getIndices(self, curSlice, dimension):
         """
         Return the slice such that it can be given as an input to 'collect'
+
+        Parameters
+        ----------
+        curSlice : [slice | int | None]
+            Current slice to use
+        dimension : ['x' | 'y' | 'z' | 't']
+            The dimension to slice in
+
+        Returns
+        -------
+        curIndices : list
+            A list of the start and the stop values in the slice
         """
 
         if type(curSlice) == slice:
@@ -321,14 +355,18 @@ class Plot(object):
         return curIndices
     #}}}
 
+# FIXME: This can be generalized for all plots
     #{{{_plotNumberFormatter
     def _plotNumberFormatter(self, val, pos):
         """
         Formatting numbers in the plot
 
-        Input
-        val - The value
-        pos - The position (needed as input from FuncFormatter)
+        Parameters
+        ----------
+        val : float
+            The value.
+        pos : [None | float]
+            The position (needed as input from FuncFormatter).
         """
 
         tickString = '${:.3g}'.format(val)
@@ -346,8 +384,25 @@ class Plot(object):
         return tickString
     #}}}
 
+# FIXME: Can this be genralized more?
     #{{{_getUnitsAndSetPhysical
     def _getUnitsAndSetPhysical(self, varName, var):
+        """
+        Calculates physical parameters from the normalized if
+        self.physicalU is set, sets self._units.
+
+        Parameters
+        ----------
+        varName : str
+            Name of the variable.
+        var : array
+            The variable.
+
+        Returns
+        -------
+        var : array
+            The variable after eventual processing
+        """
         if self.physicalU:
             # Calculate back to physical units
             if varName == "n":
@@ -413,11 +468,14 @@ class Plot(object):
 class Plot1D(Plot):
     """
     Class for plotting the results of the CELMA code in 1D.
-    Inherits from the Plot class
+    The lines to plot are prepared in the Line class, and the Organizer
+    class.
+
+    Inherits from the Plot class.
 
     Handles:
 
-    * Collection of the variables
+    * Collection of the variables throug the lines
     * Plotting of the variables
     * Animation of the variables
     """
@@ -429,12 +487,20 @@ class Plot1D(Plot):
                  **kwargs):
         #{{{docstring
         """
-        The constructor sets the member data
+        This constructor:
 
-        Input specific for Plot1D:
-        marker  - The type of marker to be used in the plot
+        1. Calls the parent constructor
+        2. Get the proper 1D slice
+        3. Sets the marker
 
-        For the other input, refer to the docstring of the Plot class
+        Parameters
+        ----------
+        *args : positional arguments
+            See the constructor of Plot for details.
+        marker : str
+            The type of marker to be used in the plot.
+        **kwargs : keyword arguments
+            See the constructor of Plot for details.
         """
         #}}}
 
@@ -460,6 +526,7 @@ class Plot1D(Plot):
 
         # Get the x-axis of the plot
         self._direction = None
+# FIXME: Check if this can go to the parent constructor
         #{{{x-direction
         if kwargs['xSlice'] == slice(0,None):
             self._xAx = self._rho
@@ -528,11 +595,6 @@ class Plot1D(Plot):
                                              kwargs['zSlice'])
             raise ValueError(message)
 
-        if self.physicalU:
-            self._timeTxt     = r'$t =${} $s$'
-        else:
-            self._timeTxt     = '$t\\omega_{{ci}} =$ {}'
-
         # Set the input data
         self._marker = marker
     #}}}
@@ -543,6 +605,15 @@ class Plot1D(Plot):
         Function which updates the data.
 
         As blitting is False, there is no reason to return the lines
+
+        Parameters
+        ----------
+        tInd : int
+            The current t index.
+        orgObj : Organizer object
+            Contains the lines.
+        fig : figure
+            The figure to plot on.
         """
 
         # Plot the lines
@@ -555,6 +626,7 @@ class Plot1D(Plot):
                 orgObj.combLineLineObjs[ind].\
                         set_data(self._xAx, line.field[tInd,:])
 
+        # Set the title
         timeString = self._plotNumberFormatter(self._t[tInd], None)
         curTimeTxt = self._timeTxt.format(timeString)
         fig.suptitle(self._title + curTimeTxt)
@@ -563,12 +635,16 @@ class Plot1D(Plot):
     #{{{_plotLines
     def _plotLines(self, fig, orgObj, tInd):
         """
-        Plots the other lines into the combined line plot
+        Plots the lines into the combined line plot.
 
-        Input
-        fig    - The figure
-        orgObj - Organizer object
-        tInd   - The time index to plot for
+        Parameters
+        ----------
+        fig : figure
+            The figure.
+        orgObj : Organizer object
+            Contains the lines.
+        tInd
+            The time index to plot for.
         """
 
         # Plot the lines, and collect the max and min values
@@ -623,6 +699,7 @@ class Plot1D(Plot):
             line.ax.get_yaxis().set_major_formatter(\
                 FuncFormatter(self._plotNumberFormatter)\
                                                    )
+# FIXME: Generalize
             line.ax.get_xaxis().set_major_formatter(\
                 FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
                                                    )
@@ -648,7 +725,14 @@ class Plot1D(Plot):
 
     #{{{collectLine
     def collectLine(self, line):
-        """Collects the data for one line and reshapes it"""
+        """
+        Collects the data for one line and reshapes it.
+
+        Parameters
+        ----------
+        line : Line object
+            Line object to set the field to
+        """
 
         if self._subPolAvg:
             # We need to collect the whole field if we would like to do
@@ -716,14 +800,20 @@ class Plot1D(Plot):
         """
         Function which drives the plotting.
 
-        Input
-        fig        - The figure
-        orgObj     - The organization object
-        timeFolder - Name of the timeFolder (if none is given, one is
-                     going to be made)
+        Parameters
+        ----------
+        fig : figure
+            The figure to plot on.
+        orgObj : Organizer object
+            The organization object.
+        timeFolder : str
+            Name of the timeFolder (if none is given, one is going to be
+            made).
 
-        Output
-        timeFolder - The timefolder used when eventually saving the plot
+        Returns
+        -------
+        timeFolder : str
+            The timefolder used when eventually saving the plot.
         """
 
         # Turn off calculation of physical units if you are not dealing
@@ -783,7 +873,7 @@ class Plot1D(Plot):
         if self._showPlot:
             self._fig.show()
 
-        plt.close(self._fig)
+        plt.close(fig)
         return timeFolder
     #}}}
 #}}}
@@ -807,9 +897,6 @@ class Plot2D(Plot):
                  varName                   ,\
                  xguards    = False        ,\
                  yguards    = False        ,\
-                 xSlice     = slice(0,None),\
-                 ySlice     = slice(0,None),\
-                 zSlice     = slice(0,None),\
                  varMax     = None         ,\
                  varMin     = None         ,\
                  varyMaxMin = False        ,\
@@ -817,22 +904,38 @@ class Plot2D(Plot):
                  **kwargs):
         #{{{docstring
         """
-        The constructor sets the member data
+        This constructor:
 
-        Specific input for Plot2D
-        varName    - Name of the field which is going to be collected
-        varMax     - Setting a hard upper limit z-axis in the plot
-        varMin     - Setting a hard lower limit z-axis in the plot
-        varyMaxMin - Whether or not the limits of the z-axis should be
-                     set to the max/min of the current timestep or not
-        xguards    - If xguards should be included when collecting
-        yguards    - If yguards should be included when collecting
-        xSlice     - How the data will be sliced in x
-        ySlice     - How the data will be sliced in y
-        zSlice     - How the data will be sliced in z
-        varFunc    - Function which returns the variable (used if
-                     variables is not collectable)
-        For more details, refer to the docstring of the Plot class
+        1. Builds the mesh from the CylinderMesh class
+        2. Either:
+            1. Collects the variable
+            2. Calculates the variable form varFunc if set
+        3. Calculates the physical units if physicalU is set
+        4. Sets the lines which shows how the data is sliced
+        5. Initializes the plot
+
+        Parameters
+        ----------
+        path : str
+            Path to collect from
+        varName : str
+            Name of the field which is going to be collected.
+        varMax : [None | float]
+            Setting a hard upper limit z-axis in the plot.
+        varMin : [None | float]
+            Setting a hard lower limit z-axis in the plot.
+        varyMaxMin : bool
+            Whether or not the limits of the z-axis should be
+            set to the max/min of the current timestep or not.
+        xguards : bool
+            If xguards was used when collecting (used to set the mesh).
+        yguards : bool
+            If yguards was used when collecting (used to set the mesh).
+        varFunc : [None | function]
+            Function which returns the variable (used if variables is
+            not collectable)
+        **kwargs : keyword arguments
+            See the constructor of Plot for details.
         """
         #}}}
 
@@ -840,15 +943,12 @@ class Plot2D(Plot):
         super(Plot2D, self).__init__(path   ,\
                                      xguards,\
                                      yguards,\
-                                     xSlice ,\
-                                     ySlice ,\
-                                     zSlice ,\
                                      **kwargs)
 
         # Check that the indices are properly set
-        if (xSlice == slice(0,None)) and\
-           (ySlice == slice(0,None)) and\
-           (zSlice == slice(0,None)):
+        if (kwargs['xSlice'] == slice(0,None)) and\
+           (kwargs['ySlice'] == slice(0,None)) and\
+           (kwargs['zSlice'] == slice(0,None)):
             message = "3 slices were given, although only 2 is possible"
             raise ValueError(message)
 
@@ -932,10 +1032,31 @@ class Plot2D(Plot):
         else:
             self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
 
+        self._setLines()
+
+        # Create the figure and axis
+        pltSize      = (30,15)
+        gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+        self._fig    = plt.figure(figsize = pltSize)
+        self._ax1    = self._fig.add_subplot(gs[0])
+        self._ax2    = self._fig.add_subplot(gs[1])
+        self._cBarAx = self._fig.add_subplot(gs[2])
+        self._fig.subplots_adjust(wspace=0.25)
+        self._ax1.grid(True)
+        self._ax2.grid(True)
+
+        # Create placeholder for colorbar and images
+        self._cbarPlane = None
+        self._images = []
+        #}}}
+
+    #{{{setLines
+    def _setLines(self):
+        """ Set the lines which shows where the data is sliced"""
+
         # The slice lines we are plotting
         rhoStart = self._rho[0]
         rhoEnd   = self._rho[-1]
-        zStart   = self._z  [0]
 
         # Calculate the numerical value of the theta angle and the z value
         thetaRad         = self._dz*self._zind[-1]
@@ -955,22 +1076,7 @@ class Plot2D(Plot):
         self._RZLine1YVals=(self._zVal               , self._zVal             )
         self._RZLine2XVals=(rhoStart                 , rhoEnd                 )
         self._RZLine2YVals=(self._zVal               , self._zVal             )
-
-        # Create the figure and axis
-        pltSize      = (30,15)
-        gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
-        self._fig    = plt.figure(figsize = pltSize)
-        self._ax1    = self._fig.add_subplot(gs[0])
-        self._ax2    = self._fig.add_subplot(gs[1])
-        self._cBarAx = self._fig.add_subplot(gs[2])
-        self._fig.subplots_adjust(wspace=0.25)
-        self._ax1.grid(True)
-        self._ax2.grid(True)
-
-        # Create placeholder for colorbar and images
-        self._cbarPlane = None
-        self._images = []
-        #}}}
+    #}}}
 
     #{{{_plot2D
     def _plot2D(self, tInd):
@@ -978,8 +1084,10 @@ class Plot2D(Plot):
         """
         Performs the actual plotting
 
-        Input:
-        tInd - The index to plot for
+        Parameters
+        ----------
+        tInd : int
+            The index to plot for.
         """
         #}}}
 
@@ -1014,34 +1122,6 @@ class Plot2D(Plot):
                                         levels = self._levels,\
                                         )
 
-        # Draw the grids
-        self._ax1.grid(b=True)
-
-        # Decorations
-        timeString = self._plotNumberFormatter(self._t[tInd], None)
-
-        if self.physicalU:
-            perpPosTxt  = r'$\rho$ $[m]$'
-            parPosTxt   = r'$z$ $[m]$'
-            fixedParTxt = '{:.2g}$ $m'.format(self._z[self._ySlice])
-            timeTxt     = r'$t=$ {} $s$'.format(timeString)
-        else:
-            perpPosTxt  = r'$\rho/\rho_s$'
-            parPosTxt   = r'$z/\rho_s$'
-            fixedParTxt = '{:.2g}'.format(self._z[self._ySlice])
-            # Double brackets for escape
-            timeTxt     = r'$t\omega_{{ci}} =$ {}'.format(timeString)
-
-        self._ax1.set_xlabel(perpPosTxt, fontsize = self._latexSize)
-        self._ax1.set_ylabel(perpPosTxt, fontsize = self._latexSize)
-
-        self._ax1txt = self._ax1.text(0.5, 1.05,\
-                                      r'$z=' + fixedParTxt + r'$',\
-                                      horizontalalignment = 'center',\
-                                      verticalalignment = 'center',\
-                                      fontsize = self._latexSize,\
-                                      transform = self._ax1.transAxes)
-
         # Plot the parallel plane
         parPlane  = self._ax2.contourf(self._cyl.X_RZ       ,\
                                        self._cyl.Y_RZ       ,\
@@ -1061,18 +1141,55 @@ class Plot2D(Plot):
                                           )
 
         # Draw the grids
+        self._ax1.grid(b=True)
         self._ax2.grid(b=True)
 
-        # Decorations
-        self._ax2.set_xlabel(perpPosTxt, fontsize = self._latexSize)
-        self._ax2.set_ylabel(parPosTxt , fontsize = self._latexSize)
+        # x and y labels
+        self._ax1.set_xlabel(self._rhoPosTxt, fontsize = self._latexSize)
+        self._ax1.set_ylabel(self._rhoPosTxt, fontsize = self._latexSize)
+        self._ax2.set_xlabel(self._rhoPosTxt, fontsize = self._latexSize)
+        self._ax2.set_ylabel(self._zPosTxt  , fontsize = self._latexSize)
+
+
+        # Title preparation
+        if self.physicalU:
+            fixedParTxt = '{:.2g}$ $m'.format(self._z[self._ySlice])
+        else:
+            fixedParTxt = '{:.2g}'.format(self._z[self._ySlice])
+        timeString = self._plotNumberFormatter(self._t[tInd], None)
+        timeTxt = self._timeTxt.format(timeString)
+
+        # Titles
+        ax1Title = r'$z= {}$'.format(fixedParTxt)
+        ax2Title = r'$\theta={:.0f}^{{\circ}}$'.format(self._thetaDeg)
+
+        # Title axis 1
+        self._ax1txt = self._ax1.text(0.5, 1.05,\
+                                      ax1Title,\
+                                      horizontalalignment = 'center',\
+                                      verticalalignment = 'center',\
+                                      fontsize = self._latexSize,\
+                                      transform = self._ax1.transAxes)
+
+        # Title axis 2
         self._ax2txt = self._ax2.text(0.5, 1.05,\
-                                r'$\theta=' +\
-                                '{:.0f}'.format(self._thetaDeg) + r'^{\circ}$',\
+                            ax2Title,\
                             horizontalalignment = 'center',\
                             verticalalignment = 'center',\
                             fontsize = self._latexSize,\
                             transform = self._ax2.transAxes)
+
+        # Title mid
+        # Text for the figure. Could append this to the figure itself,
+        # but it seems to be easier to just add it to an axis due to
+        # animation
+        self._figTxt = self._ax1.text(1.10, 1.05,\
+                                      timeTxt,\
+                                      horizontalalignment = 'center',\
+                                      verticalalignment = 'center',\
+                                      fontsize = self._latexSize,\
+                                      transform = self._ax1.transAxes)
+
 
 
         self._ax1.get_xaxis().set_major_formatter(\
@@ -1100,16 +1217,7 @@ class Plot2D(Plot):
         addArtParPlane    = parPlane.collections
         addArtParPlaneNeg = parPlaneNeg.collections
 
-        # Text for the figure. Could append this to the figure itself,
-        # but it seems to be easier to just add it to an axis due to
-        # animation
-        self._figTxt = self._ax1.text(1.10, 1.05,\
-                                      timeTxt,\
-                                      horizontalalignment = 'center',\
-                                      verticalalignment = 'center',\
-                                      fontsize = self._latexSize,\
-                                      transform = self._ax1.transAxes)
-
+        # Put images together
         self._images.append(addArtPerpPlane + [self._ax1txt] +\
                             addArtParPlane + addArtParPlaneNeg +\
                             [self._ax2txt] + [self._figTxt])
@@ -1123,14 +1231,18 @@ class Plot2D(Plot):
         """
         Function which drived the plotting.
 
-        Input
-        pltName    - Name of the plot written in LaTeX format, but
-                     without the $
-        timeFolder - Name of the timeFolder (if none is given, one is
-                     going to be made)
+        Parameters
+        ----------
+        pltName : str
+            Name of the plot written in LaTeX format, but without the $.
+        timeFolder : str
+            Name of the timeFolder (if none is given, one is going to be
+            made).
 
-        Output
-        timeFolder - The timefolder used when eventually saving the plot
+        Returns
+        --------
+        timeFolder : str
+            The timefolder used when eventually saving the plot.
         """
 
         self._pltName = pltName
@@ -1152,7 +1264,7 @@ class Plot2D(Plot):
             else:
                 cbarName = r'${}{}$'.format(self._pltName, self._units)
 
-            cbar.set_label(label = cbarName, size = self._titleSize + 5)
+            cbar.set_label(label = cbarName, size = titleSize + 5)
 
         except RuntimeWarning:
             message  = 'RuntimeError caught in cbar in ' + self._pltName
@@ -1233,12 +1345,12 @@ class Plot2D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                self._fig.savefig(saveString + '.png'  ,\
+                self._fig.savefig(saveString + '.pdf'  ,\
                                   transparent = False  ,\
                                   bbox_inches = 'tight',\
                                   pad_inches  = 0      ,\
                                   )
-                print("Saved to {}.png".format(saveString))
+                print("Saved to {}.pdf".format(saveString))
 
         if self._showPlot:
             self._fig.show()
