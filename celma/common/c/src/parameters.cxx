@@ -133,6 +133,7 @@ Parameters::Parameters(BoutReal const &radius,
 
     // Guard
     if(coloumbLog <= 1.0){
+        // Huba, J.D. - NRL PLASMA FORMULARY 2013
         throw BoutException("Coloumb Logarithm under 1.0. Theory fails.");
     }
     if(nuEINorm >= 1.0){
