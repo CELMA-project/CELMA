@@ -242,7 +242,7 @@ class Drivers1D(PostProcessorDriver):
 
         # Get the correct units and numbers
         for line in orgObj.lines:
-            line.field, units =\
+            line.field, _, units =\
                     physicalUnitsConverter(line.field,\
                                            line.name,\
                                            self._convertToPhysical,\
