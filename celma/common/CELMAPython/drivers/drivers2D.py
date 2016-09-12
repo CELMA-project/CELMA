@@ -139,15 +139,15 @@ class Drivers2D(PostProcessorDriver):
 
             if self._varName == "n":
                 #{{{n
-                    lnN = collect("lnN"                  ,\
-                                  path    = self._path   ,\
-                                  yguards = self._yguards,\
-                                  xguards = self._xguards,\
-                                  tind    = self._tind   ,\
-                                  info    = False        ,\
-                                  )
+                lnN = collect("lnN"                  ,\
+                              path    = self._path   ,\
+                              yguards = self._yguards,\
+                              xguards = self._xguards,\
+                              tind    = self._tind   ,\
+                              info    = False        ,\
+                              )
 
-                    self._var = np.exp(lnN)
+                self._var = np.exp(lnN)
                 #}}}
             if self._varName == "jPar":
                 #{{{jPar
@@ -196,6 +196,7 @@ class Drivers2D(PostProcessorDriver):
                              varMax            = self._varMax           ,\
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
+                             yEqual            = self._yEqual           ,\
                             )
 
         plotter.plotDriver(self._pltName, savePath = self._savePath)

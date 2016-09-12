@@ -61,10 +61,10 @@ def physicalUnitsConverter(var, varName, convertToPhysical, convDict):
     var : array
         The variable after eventual processing.
     normalization : str
-        The normalization which will be plotted  (does not contain $ for
+        The normalization which will be plotted. Does not contain $ for
         LaTeX. An empty string is returned if convertToPhysical is True.
     units : str
-        The units which will be plotted (does not contain $ for
+        The units which will be plotted. Does not contains $ for
         LaTeX. An empty string is returned if convertToPhysical is False.
     """
     #}}}
@@ -113,7 +113,7 @@ def physicalUnitsConverter(var, varName, convertToPhysical, convDict):
         else:
             units = " "
     else:
-        untis = ""
+        units = ""
         # Return normalization
         if varName == "n":
             normalization = r"/n_0"
