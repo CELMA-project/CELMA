@@ -11,18 +11,19 @@ commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotting import combined1D2D as postProcessing
+from CELMAPython.drivers import postBoutRunner
+# from CELMAPython.drivers import postBoutRunner
 
 # The options for the run
 # =============================================================================
 # Set the temporal domain
 restart    = None
-remove_old = True
+remove_old = False
 nout       = 2
 timestep   = 1e-10
 directory  = "a1-KiwiFlat"
 # Shall we make?
-make       = True
+make       = False
 # The number of processors
 nproc = 4
 # =============================================================================
@@ -63,13 +64,14 @@ myRuns = basic_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old    ,\
-                     post_processing_function = postProcessing,\
+                     post_processing_function = postBoutRunner,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                      xguards       = xguards      ,\
                      yguards       = yguards      ,\
                      xSlice        = xSlice       ,\
@@ -80,5 +82,7 @@ myRuns.execute_runs(\
                      saveFolder    = saveFolder   ,\
                      physicalU     = physicalU    ,\
                      useSubProcess = useSubProcess,\
+                    # varName = "jPar",\
+                    # pltName = "j_\|",\
                     )
 # =============================================================================

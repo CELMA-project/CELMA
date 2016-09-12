@@ -11,8 +11,8 @@ commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotting import combined1D2D as postProcess
-from CELMAPython.plotting import combinedDriver as postProcess2
+from CELMAPython.drivers import postBoutRunner
+from CELMAPython.drivers import postBoutRunner
 
 # If you just want to post-process
 justPostProcess = False
@@ -111,13 +111,14 @@ initRunner = PBS_runner(\
 
 dmp_folders, PBS_ids = initRunner.execute_runs(\
                          remove_old               = remove_old,\
-                         post_processing_function = postProcess,\
+                         post_processing_function = postBoutRunner,\
                          # This function will be called every time after
                          # performing a run
                          post_process_after_every_run = True,\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -190,7 +191,7 @@ expandRunner = PBS_runner(\
 
 dmp_folders, PBS_ids = expandRunner.execute_runs(\
                          remove_old               = remove_old  ,\
-                         post_processing_function = postProcess2,\
+                         post_processing_function = postBoutRunner,\
                          # Declare dependencies
                          job_dependencies = PBS_ids,\
                          # This function will be called every time after
@@ -199,6 +200,7 @@ dmp_folders, PBS_ids = expandRunner.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -272,7 +274,7 @@ linearRun = PBS_runner(\
 
 dmp_folders, PBS_ids = linearRun.execute_runs(\
                          remove_old               = remove_old,\
-                         post_processing_function = postProcess2,\
+                         post_processing_function = postBoutRunner,\
                          # Declare dependencies
                          job_dependencies = PBS_ids,\
                          # This function will be called every time after
@@ -281,6 +283,7 @@ dmp_folders, PBS_ids = linearRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -342,7 +345,7 @@ turboRun = PBS_runner(\
 
 _, _ = turboRun.execute_runs(\
                          remove_old               = remove_old,\
-                         post_processing_function = postProcess2,\
+                         post_processing_function = postBoutRunner,\
                          # Declare dependencies
                          job_dependencies = PBS_ids,\
                          # This function will be called every time after
@@ -351,6 +354,7 @@ _, _ = turboRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
