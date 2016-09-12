@@ -2,8 +2,8 @@
 
 """ Contains method specific for the fields stored in the CELMA model """
 
-from ..plotting import Organizer
-from ..plotting import Line
+from ..fieldPlotters import Organizer
+from ..fieldPlotters import Line
 
 #{{{getOrgObjFromModel
 def getOrgObjFromModel(path, pltName):

@@ -4,8 +4,9 @@
 Contains drivers for plotting 1D plots
 """
 
+from ..plotHelpers import physicalUnitsConverter
 from ..modelSpecific import getOrgObjFromModel, labelNames
-from ..plotting import Plot1D
+from ..fieldPlotters import Plot1D
 from .postProcessorDriver import PostProcessorDriver
 import numpy as np
 from multiprocessing import Process
@@ -175,19 +176,19 @@ class Drivers1D(PostProcessorDriver):
         """
 
         # Make the plotter object
-        plotter = Plot1D(self._path                   ,\
-                         xguards    = self._xguards   ,\
-                         yguards    = self._yguards   ,\
-                         marker     = self._marker    ,\
-                         xSlice     = self._xSlice    ,\
-                         ySlice     = self._ySlice    ,\
-                         zSlice     = self._zSlice    ,\
-                         tSlice     = self._tSlice    ,\
-                         physicalU  = self._physicalU ,\
-                         subPolAvg  = self._subPolAvg ,\
-                         showPlot   = self._showPlot  ,\
-                         savePlot   = self._savePlot  ,\
-                         saveFolder = self._saveFolder,\
+        plotter = Plot1D(self._path                                  ,\
+                         xguards           = self._xguards           ,\
+                         yguards           = self._yguards           ,\
+                         marker            = self._marker            ,\
+                         xSlice            = self._xSlice            ,\
+                         ySlice            = self._ySlice            ,\
+                         zSlice            = self._zSlice            ,\
+                         tSlice            = self._tSlice            ,\
+                         convertToPhysical = self._convertToPhysical ,\
+                         subPolAvg         = self._subPolAvg         ,\
+                         showPlot          = self._showPlot          ,\
+                         savePlot          = self._savePlot          ,\
+                         saveFolder        = self._saveFolder        ,\
                         )
 
         # Get the organization object (will depend on the model used (i.e.
@@ -241,14 +242,18 @@ class Drivers1D(PostProcessorDriver):
 
         # Get the correct units and numbers
         for line in orgObj.lines:
-            line.field =\
-                    plotter._getUnitsAndSetPhysical(line.name, line.field)
+            line.field, units =\
+                    physicalUnitsConverter(line.field,\
+                                           line.name,\
+                                           self._convertToPhysical,\
+                                           plotter.convDict)
 
-            if plotter.physicalU:
+
+            if plotter.convertToPhysical:
                 if line.name == "momDensPar":
                     line.label = "$m_i$" + line.label
                 if self._labelName == "mainFields":
-                    line.label += r" $[{}]$".format(plotter._units)
+                    line.label += r" $[{}]$".format(units)
 
         # Do the plot
         plotter.plotDriver(fig, orgObj, savePath = self._savePath)
