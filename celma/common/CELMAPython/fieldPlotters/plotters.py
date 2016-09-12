@@ -4,10 +4,9 @@
 Contains classes for plotting the fields
 """
 
-from .. import titleSize
+from ..plotHelpers import titleSize, plotNumberFormatter, physicalUnitsConverter
 from ..statsAndSignals import polAvg
 from .cylinderMesh import CylinderMesh
-import scipy.constants as cst
 from matplotlib import get_backend
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
@@ -24,7 +23,6 @@ import warnings
 # first argument from bout_runners (called "folder" in
 # __call_post_processing_function)
 
-
 #{{{class Plot
 class Plot(object):
     """
@@ -38,19 +36,19 @@ class Plot(object):
     """
 
     #{{{Constructor
-    def __init__(self                      ,\
-                 path                      ,\
-                 xguards    = False        ,\
-                 yguards    = False        ,\
-                 xSlice     = slice(0,None),\
-                 ySlice     = slice(0,None),\
-                 zSlice     = slice(0,None),\
-                 tSlice     = None         ,\
-                 physicalU  = False        ,\
-                 subPolAvg  = False        ,\
-                 showPlot   = False        ,\
-                 savePlot   = True         ,\
-                 saveFolder = None         ,\
+    def __init__(self                             ,\
+                 path                             ,\
+                 xguards           = False        ,\
+                 yguards           = False        ,\
+                 xSlice            = slice(0,None),\
+                 ySlice            = slice(0,None),\
+                 zSlice            = slice(0,None),\
+                 tSlice            = None         ,\
+                 convertToPhysical = False        ,\
+                 subPolAvg         = False        ,\
+                 showPlot          = False        ,\
+                 savePlot          = True         ,\
+                 saveFolder        = None         ,\
                 ):
         #{{{docstring
         """
@@ -77,7 +75,7 @@ class Plot(object):
             How the data will be sliced in z.
         tSlice : slice
             How the data will be sliced in t.
-        physicalU : bool
+        convertToPhysical : bool
             If the physical or normalized units should be plotted.
         subPolAvg : vool
             Whether or not the poloidal average should be.
@@ -99,7 +97,7 @@ class Plot(object):
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
         # Public as used in the driver
-        self.physicalU   = physicalU
+        self.convertToPhysical = convertToPhysical
 
         # Get the coordinates
         #{{{rho
@@ -231,15 +229,13 @@ class Plot(object):
                 self._t = self._t[::self._tSlice.step]
 
         # Convert to physical units
-        if self.physicalU:
+        if self.convertToPhysical:
             try:
-                self._omCI = collect("omCI", path=self._path, info=False)
-                self._rhoS = collect("rhoS", path=self._path, info=False)
-                self._n0   = collect("n0"  , path=self._path, info=False)
-                self._Te0  = collect("Te0" , path=self._path, info=False)
-                self._Ti0  = collect("Ti0" , path=self._path, info=False)
-                self._B0   = collect("B0"  , path=self._path, info=False)
-                self._Sn   = collect("Sn"  , path=self._path, info=False)
+                normalizers = ["omCI", "rhoS", "n0", "Te0"]
+                self.convDict = {}
+                for normalizer in normalizers:
+                    self.convDict[normalizer] =\
+                            collect(normalizer, path=self._path, info=False)
 
             except ValueError:
                 # An OSError is thrown if the file is not found
@@ -247,14 +243,18 @@ class Plot(object):
                            "The time remains normalized".format("\n"*3,"!"*3))
                 print(message)
 
-                # Reset physicalU
-                self.physicalU = False
+                # Reset convertToPhysical
+                self.convertToPhysical = False
 
-        # Convert to physical units
-        if self.physicalU:
-            self._t   /= self._omCI
-            self._rho *= self._rhoS
-            self._z   *= self._rhoS
+        self._t, _ =\
+                physicalUnitsConverter(self._t, "t",\
+                                       self.convertToPhysical, self.convDict)
+        self._rho, _ =\
+                physicalUnitsConverter(self._rho, "rho",\
+                                       self.convertToPhysical, self.convDict)
+        self._z, _ =\
+                physicalUnitsConverter(self._z, "z",\
+                                       self.convertToPhysical, self.convDict)
 
         self._frames = len(self._t)
 
@@ -262,7 +262,7 @@ class Plot(object):
         self._subPolAvg = subPolAvg
 
         # Prepare the labels
-        if self.physicalU:
+        if self.convertToPhysical:
             self._timeTxt   = r"$t =${} $s$"
             self._rhoPosTxt = r"$\rho$ $[m]$"
             self._zPosTxt   = r"$z$ $[m]$"
@@ -270,7 +270,6 @@ class Plot(object):
             self._timeTxt   = "$t\\omega_{{ci}} =$ {}"
             self._rhoPosTxt = r"$\rho/\rho_s$"
             self._zPosTxt   = r"$z/\rho_s$"
-
     #}}}
 
     #{{{ _getIndices
@@ -352,114 +351,6 @@ class Plot(object):
 
         return curIndices
     #}}}
-
-# FIXME: This can be generalized for all plots
-    #{{{_plotNumberFormatter
-    def _plotNumberFormatter(self, val, pos):
-        """
-        Formatting numbers in the plot
-
-        Parameters
-        ----------
-        val : float
-            The value.
-        pos : [None | float]
-            The position (needed as input from FuncFormatter).
-        """
-
-        tickString = "${:.3g}".format(val)
-        if "e+" in tickString:
-            tickString = tickString.replace("e+" , r"\cdot 10^{")
-            tickString = tickString.replace("e+0", r"\cdot 10^{")
-            tickString += "}$"
-        elif "e-" in tickString:
-            tickString = tickString.replace("e-" , r"\cdot 10^{-")
-            tickString = tickString.replace("e-0", r"\cdot 10^{-")
-            tickString += "}$"
-        else:
-            tickString += "$"
-
-        return tickString
-    #}}}
-
-# FIXME: Can this be genralized more?
-    #{{{_getUnitsAndSetPhysical
-    def _getUnitsAndSetPhysical(self, varName, var):
-        """
-        Calculates physical parameters from the normalized if
-        self.physicalU is set, sets self._units.
-
-        Parameters
-        ----------
-        varName : str
-            Name of the variable.
-        var : array
-            The variable.
-
-        Returns
-        -------
-        var : array
-            The variable after eventual processing
-        """
-        if self.physicalU:
-            # Calculate back to physical units
-            if varName == "n":
-                var *= self._n0
-                self._units = r"\mathrm{m}^{-3}"
-            elif varName == "vort":
-                var *= self._omCI
-                self._units = r"\mathrm{s}^{-1}"
-            elif varName == "vortD":
-                var *= self._omCI*self._n0
-                self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
-            elif varName == "phi":
-                var *= self._Te0/cst.e
-                self._units = r"\mathrm{J}\mathrm{C}^{-1}"
-            elif varName == "jPar":
-                var *= cst.m_p*self._n0*self._rhoS*self._omCI
-                self._units = r"\mathrm{C}\mathrm{s}^{-1}"
-            elif varName == "momDensPar":
-                # momDensPar is divided by m_i, so we need to multiply
-                # by m_i again here
-                var *= cst.m_p*self._rhoS*self._omCI*self._n0
-                self._units = r"\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}"
-            elif varName == "uIPar":
-                var *= self._rhoS*self._omCI
-                self._units = r"\mathrm{m}\mathrm{s}^{-1}"
-            elif varName == "uEPar":
-                var *= self._rhoS*self._omCI
-                self._units = r"\mathrm{m}\mathrm{s}^{-1}"
-            elif varName == "S":
-                var *= self._omCI*self._n0
-                self._units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
-            else:
-                self._units = " "
-        else:
-            # Calculate back to physical units
-            if varName == "n":
-                self._units = r"/n_0"
-            elif varName == "vort":
-                self._units = r"/\omega_{{ci}}"
-            elif varName == "vortD":
-                self._units = r"/\omega_{{ci}}n_0"
-            elif varName == "phi":
-                self._units = r" q/T_{{e,0}}"
-            elif varName == "jPar":
-                self._units = r"/n_0c_sq"
-            elif varName == "momDensPar":
-                # by m_i again here
-                self._units = r"/m_in_0c_s"
-            elif varName == "uIPar":
-                self._units = r"/c_s"
-            elif varName == "uEPar":
-                self._units = r"/c_s"
-            elif varName == "S":
-                self._units = r"/\omega_{{ci}}n_0"
-            else:
-                self._units = " "
-
-        return var
-    #}}}
 #}}}
 
 #{{{class Plot1D
@@ -530,7 +421,7 @@ class Plot1D(Plot):
             self._xAx = self._rho
 
             # Set the label and the title
-            if self.physicalU:
+            if self.convertToPhysical:
                 self._xlabel = r"$\rho$ $[m]$"
                 self._title  = r"$\theta={:.2g}^{{\circ}},$ $z={:.2g}$ $m$  "
             else:
@@ -549,7 +440,7 @@ class Plot1D(Plot):
             self._xAx = self._z
 
             # Set the label and the title
-            if self.physicalU:
+            if self.convertToPhysical:
                 self._xlabel = r"$z$ $[m]$"
                 self._title  = r"$\rho={:.2g}$ $m$, $\theta={:.2g}^{{\circ}}$ "
             else:
@@ -570,7 +461,7 @@ class Plot1D(Plot):
             self._xAx = self._theta
 
             # Set the label and the title
-            if self.physicalU:
+            if self.convertToPhysical:
                 self._xlabel = r"$\theta$"
                 self._title  = r"$\rho={:.2g}$ $m$, $z={:.2g}$ $m$  "
             else:
@@ -626,7 +517,7 @@ class Plot1D(Plot):
                         set_data(self._xAx, line.field[tInd,:])
 
         # Set the title
-        timeString = self._plotNumberFormatter(self._t[tInd], None)
+        timeString = plotNumberFormatter(self._t[tInd], None)
         curTimeTxt = self._timeTxt.format(timeString)
         fig.suptitle(self._title + curTimeTxt)
     #}}}
@@ -697,7 +588,7 @@ class Plot1D(Plot):
             line.ax.get_yaxis().get_major_formatter().set_useOffset(False)
             # Use own fuction to deal with ticks
             line.ax.get_yaxis().set_major_formatter(\
-                FuncFormatter(self._plotNumberFormatter)\
+                FuncFormatter(plotNumberFormatter)\
                                                    )
 # FIXME: Generalize
             line.ax.get_xaxis().set_major_formatter(\
@@ -813,7 +704,7 @@ class Plot1D(Plot):
         # Turn off calculation of physical units if you are not dealing
         # with main fields
         if orgObj.pltName != "mainFields":
-            self.physicalU = False
+            self.convertToPhysical = False
 
         # Initial plot
         self._plotLines(fig, orgObj, 0)
@@ -895,7 +786,7 @@ class Plot2D(Plot):
         2. Either:
             1. Collects the variable
             2. Calculates the variable form varFunc if set
-        3. Calculates the physical units if physicalU is set
+        3. Calculates the physical units if convertToPhysical is set
         4. Sets the lines which shows how the data is sliced
         5. Initializes the plot
 
@@ -978,8 +869,12 @@ class Plot2D(Plot):
         self._variable =\
                 self._cyl.addLastThetaSlice(self._variable, len(self._t))
 
-        self._variable =\
-                self._getUnitsAndSetPhysical(varName, self._variable)
+        self._variable, self._units =\
+                physicalUnitsConverter(self._variable,\
+                                       varName,\
+                                       self.convertToPhysical,\
+                                       self.convDict,\
+                                       )
 
         if xguards:
             # Remove the inner ghost points from the variable
@@ -1132,11 +1027,11 @@ class Plot2D(Plot):
 
 
         # Title preparation
-        if self.physicalU:
+        if self.convertToPhysical:
             fixedParTxt = "{:.2g}$ $m".format(self._z[self._ySlice])
         else:
             fixedParTxt = "{:.2g}".format(self._z[self._ySlice])
-        timeString = self._plotNumberFormatter(self._t[tInd], None)
+        timeString = plotNumberFormatter(self._t[tInd], None)
         timeTxt = self._timeTxt.format(timeString)
 
         # Titles
@@ -1231,9 +1126,9 @@ class Plot2D(Plot):
             cbar = self._fig.colorbar(self._cbarPlane                   ,\
                                       cax    = self._cBarAx             ,\
                                       format = FuncFormatter(     \
-                                              self._plotNumberFormatter),\
+                                              plotNumberFormatter),\
                                       )
-            if self.physicalU:
+            if self.convertToPhysical:
                 cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
             else:
                 cbarName = r"${}{}$".format(self._pltName, self._units)

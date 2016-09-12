@@ -17,21 +17,21 @@ class PostProcessorDriver(object):
     """
 
     #{{{Constructor
-    def __init__(self                          ,\
-                 path                          ,\
-                 xguards        = False        ,\
-                 yguards        = False        ,\
-                 xSlice         = slice(0,None),\
-                 ySlice         = slice(0,None),\
-                 zSlice         = slice(0,None),\
-                 tSlice         = None         ,\
-                 physicalU      = False        ,\
-                 subPolAvg      = False        ,\
-                 showPlot       = False        ,\
-                 savePlot       = True         ,\
-                 saveFolder     = None         ,\
-                 saveFolderFunc = None         ,\
-                 useSubProcess  = True         ,\
+    def __init__(self                             ,\
+                 path                             ,\
+                 xguards           = False        ,\
+                 yguards           = False        ,\
+                 xSlice            = slice(0,None),\
+                 ySlice            = slice(0,None),\
+                 zSlice            = slice(0,None),\
+                 tSlice            = None         ,\
+                 convertToPhysical = False        ,\
+                 subPolAvg         = False        ,\
+                 showPlot          = False        ,\
+                 savePlot          = True         ,\
+                 saveFolder        = None         ,\
+                 saveFolderFunc    = None         ,\
+                 useSubProcess     = True         ,\
                 ):
         #{{{docstring
         """
@@ -53,7 +53,7 @@ class PostProcessorDriver(object):
             How the data will be sliced in z.
         tSlice : slice
             How the data will be sliced in t.
-        physicalU : bool
+        convertToPhysical : bool
             If the physical or normalized units should be plotted.
         subPolAvg : bool
             If the poloidal average should be subtracted from the data
@@ -73,19 +73,19 @@ class PostProcessorDriver(object):
         #}}}
 
         # Set the member data
-        self._path          = path
-        self._xguards       = xguards
-        self._yguards       = yguards
-        self._xSlice        = xSlice
-        self._ySlice        = ySlice
-        self._zSlice        = zSlice
-        self._tSlice        = tSlice
-        self._physicalU     = physicalU
-        self._subPolAvg     = subPolAvg
-        self._showPlot      = showPlot
-        self._savePlot      = savePlot
-        self._saveFolder    = saveFolder
-        self._useSubProcess = useSubProcess
+        self._path              = path
+        self._xguards           = xguards
+        self._yguards           = yguards
+        self._xSlice            = xSlice
+        self._ySlice            = ySlice
+        self._zSlice            = zSlice
+        self._tSlice            = tSlice
+        self._convertToPhysical = convertToPhysical
+        self._subPolAvg         = subPolAvg
+        self._showPlot          = showPlot
+        self._savePlot          = savePlot
+        self._saveFolder        = saveFolder
+        self._useSubProcess     = useSubProcess
 
         #{{{Set the saveFolder
         if saveFolderFunc is not None:
