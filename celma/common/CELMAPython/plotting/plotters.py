@@ -6,7 +6,6 @@ Contains classes for plotting the fields
 
 from .. import titleSize
 from ..statsAndSignals import polAvg
-from .getStrings import getSaveString
 from .cylinderMesh import CylinderMesh
 import scipy.constants as cst
 from matplotlib import get_backend
@@ -18,15 +17,13 @@ import matplotlib.cm as cm
 from boutdata import collect
 from boututils.options import BOUTOptions
 import numpy as np
+import os
 import warnings
 
 # All post processing functions called by bout_runners must accept the
-# first argument from bout_runners (called 'folder' in
+# first argument from bout_runners (called "folder" in
 # __call_post_processing_function)
 
-# TODO: xlabels etc. can be more generalized, also across classes. This
-#       will easen maintainance of the code
-# TODO: Move drivers to own folder
 
 #{{{class Plot
 class Plot(object):
@@ -106,12 +103,12 @@ class Plot(object):
 
         # Get the coordinates
         #{{{rho
-        dx = collect('dx'             ,\
+        dx = collect("dx"             ,\
                      path    = path   ,\
                      xguards = xguards,\
                      yguards = yguards,\
                      info    = False)
-        MXG = collect('MXG'            ,\
+        MXG = collect("MXG"            ,\
                       path    = path   ,\
                       xguards = xguards,\
                       yguards = yguards,\
@@ -131,7 +128,7 @@ class Plot(object):
         myOpts = BOUTOptions(path)
         # Read in geom offset
         try:
-            offset = eval(myOpts.geom['offset'])
+            offset = eval(myOpts.geom["offset"])
             spacing = "\n"*3
             print("{0}!!!WARNING: 'offset' found in BOUT.inp, "
                   "running as annulus!!!{0}".format(spacing))
@@ -147,12 +144,12 @@ class Plot(object):
         #}}}
 
         #{{{z
-        dy  = collect('dy'             ,\
+        dy  = collect("dy"             ,\
                       path    = path   ,\
                       xguards = xguards,\
                       yguards = yguards,\
                       info    = False)
-        MYG = collect('MYG'            ,\
+        MYG = collect("MYG"            ,\
                       path    = path   ,\
                       xguards = xguards,\
                       yguards = yguards,\
@@ -175,12 +172,12 @@ class Plot(object):
         #}}}
 
         #{{{theta
-        self._dz = collect('dz'             ,\
+        self._dz = collect("dz"             ,\
                            path    = path   ,\
                            xguards = xguards,\
                            yguards = yguards,\
                            info    = False)
-        MZ       = collect('MZ'             ,\
+        MZ       = collect("MZ"             ,\
                            path    = path   ,\
                            xguards = xguards,\
                            yguards = yguards,\
@@ -193,10 +190,10 @@ class Plot(object):
         #}}}
 
         # Get proper indices
-        self._xind = self._getIndices(xSlice, 'x')
-        self._yind = self._getIndices(ySlice, 'y')
-        self._zind = self._getIndices(zSlice, 'z')
-        self._tind = self._getIndices(tSlice, 't')
+        self._xind = self._getIndices(xSlice, "x")
+        self._yind = self._getIndices(ySlice, "y")
+        self._zind = self._getIndices(zSlice, "z")
+        self._tind = self._getIndices(tSlice, "t")
 
         if type(xSlice) == slice:
             if (xSlice.step is not None):
@@ -225,7 +222,8 @@ class Plot(object):
         self._tSlice = tSlice
 
         # Get the time
-        self._t = collect('t_array', path=self._path, tind=self._tind, info=False)
+        self._t =\
+            collect("t_array", path=self._path, tind=self._tind, info=False)
 
         # Slice in t
         if self._tSlice is not None:
@@ -235,13 +233,13 @@ class Plot(object):
         # Convert to physical units
         if self.physicalU:
             try:
-                self._omCI = collect('omCI', path=self._path, info=False)
-                self._rhoS = collect('rhoS', path=self._path, info=False)
-                self._n0   = collect('n0'  , path=self._path, info=False)
-                self._Te0  = collect('Te0' , path=self._path, info=False)
-                self._Ti0  = collect('Ti0' , path=self._path, info=False)
-                self._B0   = collect('B0'  , path=self._path, info=False)
-                self._Sn   = collect('Sn'  , path=self._path, info=False)
+                self._omCI = collect("omCI", path=self._path, info=False)
+                self._rhoS = collect("rhoS", path=self._path, info=False)
+                self._n0   = collect("n0"  , path=self._path, info=False)
+                self._Te0  = collect("Te0" , path=self._path, info=False)
+                self._Ti0  = collect("Ti0" , path=self._path, info=False)
+                self._B0   = collect("B0"  , path=self._path, info=False)
+                self._Sn   = collect("Sn"  , path=self._path, info=False)
 
             except ValueError:
                 # An OSError is thrown if the file is not found
@@ -265,26 +263,26 @@ class Plot(object):
 
         # Prepare the labels
         if self.physicalU:
-            self._timeTxt   = r'$t =${} $s$'
-            self._rhoPosTxt = r'$\rho$ $[m]$'
-            self._zPosTxt   = r'$z$ $[m]$'
+            self._timeTxt   = r"$t =${} $s$"
+            self._rhoPosTxt = r"$\rho$ $[m]$"
+            self._zPosTxt   = r"$z$ $[m]$"
         else:
-            self._timeTxt   = '$t\\omega_{{ci}} =$ {}'
-            self._rhoPosTxt = r'$\rho/\rho_s$'
-            self._zPosTxt   = r'$z/\rho_s$'
+            self._timeTxt   = "$t\\omega_{{ci}} =$ {}"
+            self._rhoPosTxt = r"$\rho/\rho_s$"
+            self._zPosTxt   = r"$z/\rho_s$"
 
     #}}}
 
     #{{{ _getIndices
     def _getIndices(self, curSlice, dimension):
         """
-        Return the slice such that it can be given as an input to 'collect'
+        Return the slice such that it can be given as an input to "collect"
 
         Parameters
         ----------
         curSlice : [slice | int | None]
             Current slice to use
-        dimension : ['x' | 'y' | 'z' | 't']
+        dimension : ["x" | "y" | "z" | "t"]
             The dimension to slice in
 
         Returns
@@ -298,21 +296,21 @@ class Plot(object):
             curIndices.append(curSlice.start)
             if curSlice.stop == None:
                 # Find the last index
-                if dimension == 'x' or dimension == 'y':
-                    dx = collect('dx',\
+                if dimension == "x" or dimension == "y":
+                    dx = collect("dx",\
                                  path=self._path, xguards = self._xguards,\
                                  info=False)
                     dimLen = dx.shape[0]
-                if dimension == 'y':
-                    dy = collect('dy',\
+                if dimension == "y":
+                    dy = collect("dy",\
                                  path=self._path, yguards = self._yguards,\
                                  info=False)
                     dimLen = dy.shape[1]
-                if dimension == 'z':
+                if dimension == "z":
                     # Subtract 1, as MZ includes the last point
-                    dimLen = collect('MZ', path=self._path, info=False) - 1
-                if dimension == 't':
-                    t = collect('t_array', path=self._path, info=False)
+                    dimLen = collect("MZ", path=self._path, info=False) - 1
+                if dimension == "t":
+                    t = collect("t_array", path=self._path, info=False)
                     dimLen = len(t)
                 # Subtract 1 in the end as indices counts from 0
                 curIndices.append(dimLen - 1)
@@ -327,21 +325,21 @@ class Plot(object):
         if curIndices is not None:
             for ind in range(len(curIndices)):
                 if curIndices[ind] < 0:
-                    if dimension == 'x' or dimension == 'y':
-                        dx = collect('dx',\
+                    if dimension == "x" or dimension == "y":
+                        dx = collect("dx",\
                                      path=self._path, xguards = self._xguards,\
                                      info=False)
                         dimLen = dx.shape[0]
-                    if dimension == 'y':
-                        dy = collect('dy',\
+                    if dimension == "y":
+                        dy = collect("dy",\
                                      path=self._path, yguards = self._yguards,\
                                      info=False)
                         dimLen = dy.shape[1]
-                    if dimension == 'z':
+                    if dimension == "z":
                         # Subtract 1, as MZ includes the last point
-                        dimLen = collect('MZ', path=self._path, info=False) - 1
-                    if dimension == 't':
-                        t   = collect('t_array', path=self._path, info=False)
+                        dimLen = collect("MZ", path=self._path, info=False) - 1
+                    if dimension == "t":
+                        t   = collect("t_array", path=self._path, info=False)
                         dimLen = len(t)
                     # Subtract 1 in the end as indices counts from 0
                     realInd = dimLen + curIndices[ind] - 1
@@ -369,17 +367,17 @@ class Plot(object):
             The position (needed as input from FuncFormatter).
         """
 
-        tickString = '${:.3g}'.format(val)
+        tickString = "${:.3g}".format(val)
         if "e+" in tickString:
-            tickString = tickString.replace('e+' , r'\cdot 10^{')
-            tickString = tickString.replace('e+0', r'\cdot 10^{')
-            tickString += '}$'
+            tickString = tickString.replace("e+" , r"\cdot 10^{")
+            tickString = tickString.replace("e+0", r"\cdot 10^{")
+            tickString += "}$"
         elif "e-" in tickString:
-            tickString = tickString.replace('e-' , r'\cdot 10^{-')
-            tickString = tickString.replace('e-0', r'\cdot 10^{-')
-            tickString += '}$'
+            tickString = tickString.replace("e-" , r"\cdot 10^{-")
+            tickString = tickString.replace("e-0", r"\cdot 10^{-")
+            tickString += "}$"
         else:
-            tickString += '$'
+            tickString += "$"
 
         return tickString
     #}}}
@@ -510,89 +508,90 @@ class Plot1D(Plot):
         # Check that the indices are properly set
         # Note that this is set after super, as super will check for bad
         # input
-        if (kwargs['xSlice'] == slice(0,None)) and\
-           (kwargs['ySlice'] == slice(0,None)) and\
-           (kwargs['zSlice'] == slice(0,None)):
+        if (type(kwargs["xSlice"]) is slice) and\
+           (type(kwargs["ySlice"]) is slice) and\
+           (type(kwargs["zSlice"]) is slice):
             message = "3 slices were given, although only 1 is possible"
             raise RuntimeError(message)
-        elif (kwargs['xSlice'] == slice(0,None) and\
-              kwargs['ySlice'] == slice(0,None)) or\
-             (kwargs['ySlice'] == slice(0,None) and\
-              kwargs['zSlice'] == slice(0,None)) or\
-             (kwargs['zSlice'] == slice(0,None) and\
-              kwargs['xSlice'] == slice(0,None)):
+        elif (type(kwargs["xSlice"]) == slice and\
+              type(kwargs["ySlice"]) == slice) or\
+             (type(kwargs["ySlice"]) == slice and\
+              type(kwargs["zSlice"]) == slice) or\
+             (type(kwargs["zSlice"]) == slice and\
+              type(kwargs["xSlice"]) == slice):
             message = "2 slices were given, although only 1 is possible"
             raise ValueError(message)
 
         # Get the x-axis of the plot
         self._direction = None
-# FIXME: Check if this can go to the parent constructor
+        # FIXME: Check if this can go to the parent constructor
         #{{{x-direction
-        if kwargs['xSlice'] == slice(0,None):
+        if kwargs["xSlice"] == slice(0,None):
             self._xAx = self._rho
 
             # Set the label and the title
             if self.physicalU:
-                self._xlabel = r'$\rho$ $[m]$'
-                self._title  = r'$\theta={:.2g}^{{\circ}},$ $z={:.2g}$ $m$  '
+                self._xlabel = r"$\rho$ $[m]$"
+                self._title  = r"$\theta={:.2g}^{{\circ}},$ $z={:.2g}$ $m$  "
             else:
-                self._xlabel = r'$\rho/\rho_s$'
-                self._title  = r'$\theta={:.2g}^{{\circ}},$ $z/\rho_s={:.2g}$  '
+                self._xlabel = r"$\rho/\rho_s$"
+                self._title  = r"$\theta={:.2g}^{{\circ}},$ $z/\rho_s={:.2g}$ "
 
             self._title = self._title.\
-                            format(self._theta[kwargs['zSlice']]*(180/np.pi),\
-                                   self._z    [kwargs['ySlice']])
+                            format(self._theta[kwargs["zSlice"]]*(180/np.pi),\
+                                   self._z    [kwargs["ySlice"]])
             # Set direction (used in save)
-            self._direction = 'radial'
+            self._direction = "radial"
         #}}}
 
         #{{{y-direction
-        if kwargs['ySlice'] == slice(0,None):
+        if kwargs["ySlice"] == slice(0,None):
             self._xAx = self._z
 
             # Set the label and the title
             if self.physicalU:
-                self._xlabel = r'$z$ $[m]$'
-                self._title  = r'$\rho={:.2g}$ $m$, $\theta={:.2g}^{{\circ}}$ '
+                self._xlabel = r"$z$ $[m]$"
+                self._title  = r"$\rho={:.2g}$ $m$, $\theta={:.2g}^{{\circ}}$ "
             else:
-                self._xlabel = r'$z/\rho_s$'
-                self._title  = r'$\rho/\rho_s={:.2g}$, $\theta={:.2g}^{{\circ}}$ '
+                self._xlabel = r"$z/\rho_s$"
+                self._title  =\
+                    r"$\rho/\rho_s={:.2g}$, $\theta={:.2g}^{{\circ}}$ "
 
             self._title = self._title.\
-                        format(self._rho  [kwargs['xSlice']],\
-                               self._theta[kwargs['zSlice']]*(180/np.pi))
+                        format(self._rho  [kwargs["xSlice"]],\
+                               self._theta[kwargs["zSlice"]]*(180/np.pi))
 
             # Set direction (used in save)
-            self._direction = 'parallel'
+            self._direction = "parallel"
         #}}}
 
         #{{{z-direction
-        if kwargs['zSlice'] == slice(0,None):
+        if kwargs["zSlice"] == slice(0,None):
             self._xAx = self._theta
 
             # Set the label and the title
             if self.physicalU:
-                self._xlabel = r'$\theta$'
-                self._title  = r'$\rho={:.2g}$ $m$, $z={:.2g}$ $m$  '
+                self._xlabel = r"$\theta$"
+                self._title  = r"$\rho={:.2g}$ $m$, $z={:.2g}$ $m$  "
             else:
-                self._xlabel = r'$\theta$'
-                self._title  = r'$\rho/\rho_s={:.2g}$, $z/rho_s={:.2g}$  '
+                self._xlabel = r"$\theta$"
+                self._title  = r"$\rho/\rho_s={:.2g}$, $z/rho_s={:.2g}$  "
 
             self._title = self._title.\
-                        format(self._rho[kwargs['xSlice']],\
-                               self._z  [kwargs['ySlice']])
+                        format(self._rho[kwargs["xSlice"]],\
+                               self._z  [kwargs["ySlice"]])
 
             # Set direction (used in save)
-            self._direction = 'theta'
+            self._direction = "theta"
         #}}}
 
         if self._direction is None:
             message = ("Improper slicing:\n"
                        "xSlice={}\n"
                        "ySlice={}\n"
-                       "zSlice={}\n").format(kwargs['xSlice'],\
-                                             kwargs['ySlice'],\
-                                             kwargs['zSlice'])
+                       "zSlice={}\n").format(kwargs["xSlice"],\
+                                             kwargs["ySlice"],\
+                                             kwargs["zSlice"])
             raise ValueError(message)
 
         # Set the input data
@@ -687,12 +686,13 @@ class Plot1D(Plot):
             if line.bottomAx:
                 line.ax.set_xlabel(self._xlabel)
             else:
-                line.ax.tick_params(labelbottom='off')
+                line.ax.tick_params(labelbottom="off")
 
-            line.ax.legend(loc='upper right', fancybox=True, framealpha=0.5, numpoints=1)
+            line.ax.legend(loc="upper right", fancybox=True,\
+                           framealpha=0.5, numpoints=1)
             # Avoid ticks collision
-            line.ax.yaxis.set_major_locator(MaxNLocator(prune='both'))
-            line.ax.locator_params(axis='y', tight=True, nbins=6)
+            line.ax.yaxis.set_major_locator(MaxNLocator(prune="both"))
+            line.ax.locator_params(axis="y", tight=True, nbins=6)
             # Avoid silly top value
             line.ax.get_yaxis().get_major_formatter().set_useOffset(False)
             # Use own fuction to deal with ticks
@@ -701,7 +701,7 @@ class Plot1D(Plot):
                                                    )
 # FIXME: Generalize
             line.ax.get_xaxis().set_major_formatter(\
-                FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
+                FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
                                                    )
             # Set grid
             line.ax.grid(b = True)
@@ -718,7 +718,7 @@ class Plot1D(Plot):
         fig.subplots_adjust(hspace=0, wspace=0.35)
         # Full screen plots
         # http://stackoverflow.com/questions/12439588/how-to-maximize-a-plt-show-window-using-python
-        if get_backend() == 'QT4Agg':
+        if get_backend() == "QT4Agg":
             figManager = plt.get_current_fig_manager()
             figManager.window.showMaximized()
     #}}}
@@ -796,7 +796,7 @@ class Plot1D(Plot):
     #}}}
 
     #{{{plotDriver
-    def plotDriver(self, fig, orgObj, timeFolder):
+    def plotDriver(self, fig, orgObj, savePath = "."):
         """
         Function which drives the plotting.
 
@@ -806,14 +806,8 @@ class Plot1D(Plot):
             The figure to plot on.
         orgObj : Organizer object
             The organization object.
-        timeFolder : str
-            Name of the timeFolder (if none is given, one is going to be
-            made).
-
-        Returns
-        -------
-        timeFolder : str
-            The timefolder used when eventually saving the plot.
+        savePath : str
+            Path to save file to.
         """
 
         # Turn off calculation of physical units if you are not dealing
@@ -825,24 +819,16 @@ class Plot1D(Plot):
         self._plotLines(fig, orgObj, 0)
 
         if self._savePlot:
+            if not os.path.exists(savePath):
+                os.makedirs(savePath)
             # Make a saveName by stripping the orgObj's plot name for bad
             # characters
-            saveName = orgObj.pltName.replace("\\", "")
-            saveName = saveName.replace("{", "")
-            saveName = saveName.replace("}", "")
-            saveName = saveName.replace("^", "")
-            fileName = saveName + '-' + self._direction
-            prePaths = ['visualization', self._saveFolder]
-            if self._subPolAvg:
-                postPaths = 'subPolAvg'
-            else:
-                postPaths = []
-            saveString, timeFolder = getSaveString(fileName               ,\
-                                                   self._path             ,\
-                                                   timeFolder = timeFolder,\
-                                                   prePaths   = prePaths  ,\
-                                                   postPaths  = postPaths ,\
-                                                   )
+            saveName   = orgObj.pltName.replace("\\", "")
+            saveName   = saveName.replace("{", "")
+            saveName   = saveName.replace("}", "")
+            saveName   = saveName.replace("^", "")
+            fileName   = saveName + "-" + self._direction
+            fileName = os.path.join(savePath, fileName)
 
         # Animate if we have more than one frame
         if self._frames > 1:
@@ -855,26 +841,25 @@ class Plot1D(Plot):
 
             if self._savePlot:
                 # Save the animation
-                anim.save(saveString + '.gif'              ,\
-                          writer         = 'imagemagick'   ,\
-                          savefig_kwargs = {'pad_inches':0},\
+                anim.save(fileName + ".gif"              ,\
+                          writer         = "imagemagick"   ,\
+                          savefig_kwargs = {"pad_inches":0},\
                           )
-                print("Saved to {}.gif".format(saveString))
+                print("Saved to {}.gif".format(fileName))
         else:
             if self._savePlot:
                 # Save the figure
-                self._fig.savefig(saveString + '.png'  ,\
+                self._fig.savefig(fileName + ".pdf"  ,\
                                   transparent = False  ,\
-                                  bbox_inches = 'tight',\
+                                  bbox_inches = "tight",\
                                   pad_inches  = 0      ,\
                                   )
-                print("Saved to {}.png".format(saveString))
+                print("Saved to {}.pdf".format(fileName))
 
         if self._showPlot:
             self._fig.show()
 
         plt.close(fig)
-        return timeFolder
     #}}}
 #}}}
 
@@ -895,12 +880,12 @@ class Plot2D(Plot):
     def __init__(self                      ,\
                  path                      ,\
                  varName                   ,\
+                 var        = None         ,\
                  xguards    = False        ,\
                  yguards    = False        ,\
                  varMax     = None         ,\
                  varMin     = None         ,\
                  varyMaxMin = False        ,\
-                 varFunc    = None         ,\
                  **kwargs):
         #{{{docstring
         """
@@ -919,7 +904,10 @@ class Plot2D(Plot):
         path : str
             Path to collect from
         varName : str
-            Name of the field which is going to be collected.
+            Name of the field which is going to be collected (if var is
+            not given).
+        var : [None | array]
+            The variable to plot.
         varMax : [None | float]
             Setting a hard upper limit z-axis in the plot.
         varMin : [None | float]
@@ -931,9 +919,6 @@ class Plot2D(Plot):
             If xguards was used when collecting (used to set the mesh).
         yguards : bool
             If yguards was used when collecting (used to set the mesh).
-        varFunc : [None | function]
-            Function which returns the variable (used if variables is
-            not collectable)
         **kwargs : keyword arguments
             See the constructor of Plot for details.
         """
@@ -946,14 +931,14 @@ class Plot2D(Plot):
                                      **kwargs)
 
         # Check that the indices are properly set
-        if (kwargs['xSlice'] == slice(0,None)) and\
-           (kwargs['ySlice'] == slice(0,None)) and\
-           (kwargs['zSlice'] == slice(0,None)):
+        if (kwargs["xSlice"] == slice(0,None)) and\
+           (kwargs["ySlice"] == slice(0,None)) and\
+           (kwargs["zSlice"] == slice(0,None)):
             message = "3 slices were given, although only 2 is possible"
             raise ValueError(message)
 
         # Make it possible to filter warnings (f.ex if no variation in the data)
-        warnings.filterwarnings('error')
+        warnings.filterwarnings("error")
 
         # Set member data from the index
         self._varyMaxMin = varyMaxMin
@@ -970,7 +955,7 @@ class Plot2D(Plot):
 
         # Collect the full variable
         # Stored as an ndarray with the indices [t,x,y,z] (=[t,rho,z,theta])
-        if varFunc is None:
+        if var is None:
             self._variable = collect(varName             ,\
                                      path    = path      ,\
                                      yguards = yguards   ,\
@@ -979,12 +964,7 @@ class Plot2D(Plot):
                                      info    = False     ,\
                                      )
         else:
-            varName, self._variable = varFunc(path    = path      ,\
-                                              yguards = yguards   ,\
-                                              xguards = xguards   ,\
-                                              tind    = self._tind,\
-                                              info    = False     ,\
-                                              **kwargs)
+            self._variable = var
 
         # Slice in t
         if self._tSlice is not None:
@@ -1153,29 +1133,29 @@ class Plot2D(Plot):
 
         # Title preparation
         if self.physicalU:
-            fixedParTxt = '{:.2g}$ $m'.format(self._z[self._ySlice])
+            fixedParTxt = "{:.2g}$ $m".format(self._z[self._ySlice])
         else:
-            fixedParTxt = '{:.2g}'.format(self._z[self._ySlice])
+            fixedParTxt = "{:.2g}".format(self._z[self._ySlice])
         timeString = self._plotNumberFormatter(self._t[tInd], None)
         timeTxt = self._timeTxt.format(timeString)
 
         # Titles
-        ax1Title = r'$z= {}$'.format(fixedParTxt)
-        ax2Title = r'$\theta={:.0f}^{{\circ}}$'.format(self._thetaDeg)
+        ax1Title = r"$z= {}$".format(fixedParTxt)
+        ax2Title = r"$\theta={:.0f}^{{\circ}}$".format(self._thetaDeg)
 
         # Title axis 1
         self._ax1txt = self._ax1.text(0.5, 1.05,\
                                       ax1Title,\
-                                      horizontalalignment = 'center',\
-                                      verticalalignment = 'center',\
+                                      horizontalalignment = "center",\
+                                      verticalalignment = "center",\
                                       fontsize = self._latexSize,\
                                       transform = self._ax1.transAxes)
 
         # Title axis 2
         self._ax2txt = self._ax2.text(0.5, 1.05,\
                             ax2Title,\
-                            horizontalalignment = 'center',\
-                            verticalalignment = 'center',\
+                            horizontalalignment = "center",\
+                            verticalalignment = "center",\
                             fontsize = self._latexSize,\
                             transform = self._ax2.transAxes)
 
@@ -1185,31 +1165,31 @@ class Plot2D(Plot):
         # animation
         self._figTxt = self._ax1.text(1.10, 1.05,\
                                       timeTxt,\
-                                      horizontalalignment = 'center',\
-                                      verticalalignment = 'center',\
+                                      horizontalalignment = "center",\
+                                      verticalalignment = "center",\
                                       fontsize = self._latexSize,\
                                       transform = self._ax1.transAxes)
 
 
 
         self._ax1.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
+            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
                                                    )
         self._ax1.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
+            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
                                                    )
         self._ax2.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
+            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
                                                    )
         self._ax2.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:'${:.2g}$'.format(val))\
+            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
                                                    )
 
         # Make the axis equal
         # FIXME: Make it an option to not plot ax2 equal => can see ||
         #        structures
-        self._ax1.axis('equal')
-        self._ax2.axis('equal')
+        self._ax1.axis("equal")
+        self._ax2.axis("equal")
 
         # Current API inconsistency fix
         # (https://github.com/matplotlib/matplotlib/issues/6139):
@@ -1227,7 +1207,7 @@ class Plot2D(Plot):
     #}}}
 
     #{{{plotDriver
-    def plotDriver(self, pltName, timeFolder):
+    def plotDriver(self, pltName, savePath = "."):
         """
         Function which drived the plotting.
 
@@ -1235,14 +1215,8 @@ class Plot2D(Plot):
         ----------
         pltName : str
             Name of the plot written in LaTeX format, but without the $.
-        timeFolder : str
-            Name of the timeFolder (if none is given, one is going to be
-            made).
-
-        Returns
-        --------
-        timeFolder : str
-            The timefolder used when eventually saving the plot.
+        savePath : str
+            Path to save file to.
         """
 
         self._pltName = pltName
@@ -1252,7 +1226,7 @@ class Plot2D(Plot):
 
         # The colorbar needs only to be plotted once
         # Make the colorbar
-        # format = '%.g' gave undesired results
+        # format = "%.g" gave undesired results
         try:
             cbar = self._fig.colorbar(self._cbarPlane                   ,\
                                       cax    = self._cBarAx             ,\
@@ -1260,38 +1234,38 @@ class Plot2D(Plot):
                                               self._plotNumberFormatter),\
                                       )
             if self.physicalU:
-                cbarName = r'${}$ $[{}]$'.format(self._pltName, self._units)
+                cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
             else:
-                cbarName = r'${}{}$'.format(self._pltName, self._units)
+                cbarName = r"${}{}$".format(self._pltName, self._units)
 
             cbar.set_label(label = cbarName, size = titleSize + 5)
 
         except RuntimeWarning:
-            message  = 'RuntimeError caught in cbar in ' + self._pltName
-            message += '. No cbar will be set!'
+            message  = "RuntimeError caught in cbar in " + self._pltName
+            message += ". No cbar will be set!"
         # Lines needs only to be plotted once
         # Par line 1
         self._ax2.plot(self._RZLine1XVals,\
                        self._RZLine1YVals,\
-                       '--k'             ,\
+                       "--k"             ,\
                        linewidth = 1     ,\
                        )
         # Par line 2
         self._ax2.plot(self._RZLine2XVals,\
                        self._RZLine2YVals,\
-                       '--k'             ,\
+                       "--k"             ,\
                        linewidth = 1     ,\
                        )
         # Perp line 1
         self._ax1.plot(self._RTLine1XVals,\
                        self._RTLine1YVals,\
-                       '--k'             ,\
+                       "--k"             ,\
                        linewidth = 1     ,\
                        )
         # Perp line 2
         self._ax1.plot(self._RTLine2XVals,\
                        self._RTLine2YVals,\
-                       '--k'             ,\
+                       "--k"             ,\
                        linewidth = 1     ,\
                        )
 
@@ -1299,24 +1273,17 @@ class Plot2D(Plot):
         self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
 
         if self._savePlot:
+            # Make dir if not exists
+            if not os.path.exists(savePath):
+                os.makedirs(savePath)
             # Make a saveName by stripping the orgObj's plot name for bad
             # characters
             saveName = pltName.replace("\\", "")
             saveName = saveName.replace("{", "")
             saveName = saveName.replace("}", "")
             saveName = saveName.replace("^", "")
-            fileName = saveName + '-2D'
-            prePaths = ['visualization', self._saveFolder]
-            if self._subPolAvg:
-                postPaths = 'subPolAvg'
-            else:
-                postPaths = []
-            saveString, timeFolder = getSaveString(fileName               ,\
-                                                   self._path             ,\
-                                                   timeFolder = timeFolder,\
-                                                   prePaths   = prePaths  ,\
-                                                   postPaths  = postPaths ,\
-                                                   )
+            fileName = saveName + "-2D"
+            fileName = os.path.join(savePath, fileName)
 
         # Animate if we have more than one frame
         if self._frames > 1:
@@ -1332,30 +1299,29 @@ class Plot2D(Plot):
 
             if self._savePlot:
                 # Save the animation
-                anim.save(saveString + '.gif'              ,\
-                          writer         = 'imagemagick'   ,\
+                anim.save(fileName + ".gif"              ,\
+                          writer         = "imagemagick"   ,\
                           savefig_kwargs =\
-                            {'pad_inches'         :0       ,\
-                             'bbox_extra_artists' :(cbar,\
+                            {"pad_inches"         :0       ,\
+                             "bbox_extra_artists" :(cbar,\
                                                    self._ax1txt,\
                                                    self._ax2txt),\
-                             'bbox_inches'        :'tight'},\
+                             "bbox_inches"        :"tight"},\
                           )
-                print("Saved to {}.gif".format(saveString))
+                print("Saved to {}.gif".format(fileName))
         else:
             if self._savePlot:
                 # Save the figure
-                self._fig.savefig(saveString + '.pdf'  ,\
+                self._fig.savefig(fileName + ".pdf"  ,\
                                   transparent = False  ,\
-                                  bbox_inches = 'tight',\
+                                  bbox_inches = "tight",\
                                   pad_inches  = 0      ,\
                                   )
-                print("Saved to {}.pdf".format(saveString))
+                print("Saved to {}.pdf".format(fileName))
 
         if self._showPlot:
             self._fig.show()
 
         plt.close(self._fig)
-        return timeFolder
     #}}}
 #}}}
