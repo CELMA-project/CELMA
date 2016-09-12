@@ -96,6 +96,7 @@ class Plot(object):
         self._showPlot   = showPlot
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
+        self._subPolAvg  = subPolAvg
         # Public as used in the driver
         self.convertToPhysical = convertToPhysical
 
@@ -185,6 +186,9 @@ class Plot(object):
         innerPoints = MZ - 1
 
         self._theta = self._dz * np.array(np.arange(0.0, innerPoints))
+
+        # Convert to degrees
+        self._theta * (180/np.pi)
         #}}}
 
         # Get proper indices
@@ -228,11 +232,14 @@ class Plot(object):
             if self._tSlice.step is not None:
                 self._t = self._t[::self._tSlice.step]
 
+        # Set frames
+        self._frames = len(self._t)
+
         # Convert to physical units
+        self.convDict = {}
         if self.convertToPhysical:
             try:
                 normalizers = ["omCI", "rhoS", "n0", "Te0"]
-                self.convDict = {}
                 for normalizer in normalizers:
                     self.convDict[normalizer] =\
                             collect(normalizer, path=self._path, info=False)
@@ -246,30 +253,37 @@ class Plot(object):
                 # Reset convertToPhysical
                 self.convertToPhysical = False
 
-        self._t, _ =\
+        # Process values, and get normalization and units
+        self._t, tNormalization, tUnits =\
                 physicalUnitsConverter(self._t, "t",\
                                        self.convertToPhysical, self.convDict)
-        self._rho, _ =\
+        self._rho, rhoNormalization, rhoUnits =\
                 physicalUnitsConverter(self._rho, "rho",\
                                        self.convertToPhysical, self.convDict)
-        self._z, _ =\
+        self._z, zNormalization, zUnits =\
                 physicalUnitsConverter(self._z, "z",\
                                        self.convertToPhysical, self.convDict)
 
-        self._frames = len(self._t)
+        # String formatting
+        self._tTxtDict   = {"normalization":tNormalization  , "units":tUnits}
+        self._rhoTxtDict = {"normalization":rhoNormalization, "units":rhoUnits}
+        self._zTxtDict   = {"normalization":zNormalization  , "units":zUnits}
 
-        # Set subPolAvg option
-        self._subPolAvg = subPolAvg
+        self._rhoTxt   = r"$\rho{0[normalization]}$".format(self._rhoTxtDict)
+        self._thetaTxt = r"$\theta={:d}^{{\circ}}$"
+        self._zTxt     = r"$z{0[normalization]}$".format(self._zTxtDict)
 
-        # Prepare the labels
-        if self.convertToPhysical:
-            self._timeTxt   = r"$t =${} $s$"
-            self._rhoPosTxt = r"$\rho$ $[m]$"
-            self._zPosTxt   = r"$z$ $[m]$"
-        else:
-            self._timeTxt   = "$t\\omega_{{ci}} =$ {}"
-            self._rhoPosTxt = r"$\rho/\rho_s$"
-            self._zPosTxt   = r"$z/\rho_s$"
+        # Expand the dictionaries
+        self._rhoTxtDict['rhoTxt'] = self._rhoTxt
+        self._zTxtDict['zTxt']     = self._zTxt
+
+        self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".format(self._rhoTxtDict)
+        self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$"  .format(self._zTxtDict)
+
+        self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
+        self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
+        self._tTxt        =\
+            r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
     #}}}
 
     #{{{ _getIndices
@@ -415,62 +429,55 @@ class Plot1D(Plot):
 
         # Get the x-axis of the plot
         self._direction = None
-        # FIXME: Check if this can go to the parent constructor
         #{{{x-direction
-        if kwargs["xSlice"] == slice(0,None):
-            self._xAx = self._rho
-
+        if type(kwargs["xSlice"]) == slice:
+            # Update dict
+            self._zTxtDict['value'] =\
+                plotNumberFormatter(self._z[kwargs["ySlice"]], None)
+            # Set values
+            thetaTxt = self._thetaTxt .format(int(self._theta[kwargs["zSlice"]]))
+            zTxt     = self._constZTxt.format(self._zTxtDict)
             # Set the label and the title
-            if self.convertToPhysical:
-                self._xlabel = r"$\rho$ $[m]$"
-                self._title  = r"$\theta={:.2g}^{{\circ}},$ $z={:.2g}$ $m$  "
-            else:
-                self._xlabel = r"$\rho/\rho_s$"
-                self._title  = r"$\theta={:.2g}^{{\circ}},$ $z/\rho_s={:.2g}$ "
+            self._xAx    = self._rho
+            self._xlabel = self._rhoTxtLabel
+            self._title  = "{}   {}  ".format(thetaTxt, zTxt)
 
-            self._title = self._title.\
-                            format(self._theta[kwargs["zSlice"]]*(180/np.pi),\
-                                   self._z    [kwargs["ySlice"]])
             # Set direction (used in save)
             self._direction = "radial"
         #}}}
 
         #{{{y-direction
-        if kwargs["ySlice"] == slice(0,None):
-            self._xAx = self._z
-
+        if type(kwargs["ySlice"]) == slice:
+            # Update dict
+            self._rhoTxtDict['value'] =\
+                plotNumberFormatter(self._rho[kwargs["xSlice"]], None)
+            # Set values
+            thetaTxt = self._thetaTxt.format(int(self._theta[kwargs["zSlice"]]))
+            rhoTxt   = self._constRhoTxt.format(self._rhoTxtDict)
             # Set the label and the title
-            if self.convertToPhysical:
-                self._xlabel = r"$z$ $[m]$"
-                self._title  = r"$\rho={:.2g}$ $m$, $\theta={:.2g}^{{\circ}}$ "
-            else:
-                self._xlabel = r"$z/\rho_s$"
-                self._title  =\
-                    r"$\rho/\rho_s={:.2g}$, $\theta={:.2g}^{{\circ}}$ "
-
-            self._title = self._title.\
-                        format(self._rho  [kwargs["xSlice"]],\
-                               self._theta[kwargs["zSlice"]]*(180/np.pi))
+            self._xAx    = self._z
+            self._xlabel = self._zTxtLabel
+            self._title  = "{}   {}  ".format(rhoTxt, thetaTxt)
 
             # Set direction (used in save)
             self._direction = "parallel"
         #}}}
 
         #{{{z-direction
-        if kwargs["zSlice"] == slice(0,None):
-            self._xAx = self._theta
+        if type(kwargs["zSlice"]) == slice:
 
+            # Update dicts
+            self._rhoTxtDict['value'] =\
+                plotNumberFormatter(self._rho[kwargs["xSlice"]], None)
+            self._zTxtDict['value'] =\
+                plotNumberFormatter(self._z [kwargs["ySlice"]], None)
+            # Set values
+            rhoTxt = self._constRhoTxt.format(self._rhoTxtDict)
+            zTxt   = self._constZTxt  .format(self._zTxtDict)
             # Set the label and the title
-            if self.convertToPhysical:
-                self._xlabel = r"$\theta$"
-                self._title  = r"$\rho={:.2g}$ $m$, $z={:.2g}$ $m$  "
-            else:
-                self._xlabel = r"$\theta$"
-                self._title  = r"$\rho/\rho_s={:.2g}$, $z/rho_s={:.2g}$  "
-
-            self._title = self._title.\
-                        format(self._rho[kwargs["xSlice"]],\
-                               self._z  [kwargs["ySlice"]])
+            self._xAx    = r"$\theta$"
+            self._xlabel = self._zTxtLabel
+            self._title  = "{}   {}   ".format(rhoTxt, zTxt)
 
             # Set direction (used in save)
             self._direction = "theta"
@@ -517,9 +524,10 @@ class Plot1D(Plot):
                         set_data(self._xAx, line.field[tInd,:])
 
         # Set the title
-        timeString = plotNumberFormatter(self._t[tInd], None)
-        curTimeTxt = self._timeTxt.format(timeString)
-        fig.suptitle(self._title + curTimeTxt)
+        # Update the dictionary
+        self._tTxtDict['value'] = plotNumberFormatter(self._t[tInd], None)
+        curTimeTxt = self._tTxt.format(self._tTxtDict)
+        fig.suptitle("{}{}".format(self._title, curTimeTxt))
     #}}}
 
     #{{{_plotLines
@@ -588,12 +596,10 @@ class Plot1D(Plot):
             line.ax.get_yaxis().get_major_formatter().set_useOffset(False)
             # Use own fuction to deal with ticks
             line.ax.get_yaxis().set_major_formatter(\
-                FuncFormatter(plotNumberFormatter)\
-                                                   )
-# FIXME: Generalize
+                FuncFormatter(plotNumberFormatter))
+
             line.ax.get_xaxis().set_major_formatter(\
-                FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
-                                                   )
+                FuncFormatter(plotNumberFormatter))
             # Set grid
             line.ax.grid(b = True)
 
@@ -768,15 +774,16 @@ class Plot2D(Plot):
     """
 
     #{{{Constructor
-    def __init__(self                      ,\
-                 path                      ,\
-                 varName                   ,\
-                 var        = None         ,\
-                 xguards    = False        ,\
-                 yguards    = False        ,\
-                 varMax     = None         ,\
-                 varMin     = None         ,\
-                 varyMaxMin = False        ,\
+    def __init__(self              ,\
+                 path              ,\
+                 varName           ,\
+                 var        = None ,\
+                 xguards    = False,\
+                 yguards    = False,\
+                 varMax     = None ,\
+                 varMin     = None ,\
+                 varyMaxMin = False,\
+                 yEqual     = True ,\
                  **kwargs):
         #{{{docstring
         """
@@ -806,10 +813,9 @@ class Plot2D(Plot):
         varyMaxMin : bool
             Whether or not the limits of the z-axis should be
             set to the max/min of the current timestep or not.
-        xguards : bool
-            If xguards was used when collecting (used to set the mesh).
-        yguards : bool
-            If yguards was used when collecting (used to set the mesh).
+        yEqual : bool
+            Whether or not the parallel plot should be plotted with axis
+            equal or not.
         **kwargs : keyword arguments
             See the constructor of Plot for details.
         """
@@ -835,6 +841,7 @@ class Plot2D(Plot):
         self._varyMaxMin = varyMaxMin
         self._varMax     = varMax
         self._varMin     = varMin
+        self._yEqual     = yEqual
 
         # Set additional plot properties
         self._latexSize = 35
@@ -869,7 +876,7 @@ class Plot2D(Plot):
         self._variable =\
                 self._cyl.addLastThetaSlice(self._variable, len(self._t))
 
-        self._variable, self._units =\
+        self._variable, _, self._units =\
                 physicalUnitsConverter(self._variable,\
                                        varName,\
                                        self.convertToPhysical,\
@@ -1020,23 +1027,21 @@ class Plot2D(Plot):
         self._ax2.grid(b=True)
 
         # x and y labels
-        self._ax1.set_xlabel(self._rhoPosTxt, fontsize = self._latexSize)
-        self._ax1.set_ylabel(self._rhoPosTxt, fontsize = self._latexSize)
-        self._ax2.set_xlabel(self._rhoPosTxt, fontsize = self._latexSize)
-        self._ax2.set_ylabel(self._zPosTxt  , fontsize = self._latexSize)
-
+        self._ax1.set_xlabel(self._rhoTxtLabel, fontsize = self._latexSize)
+        self._ax1.set_ylabel(self._rhoTxtLabel, fontsize = self._latexSize)
+        self._ax2.set_xlabel(self._rhoTxtLabel, fontsize = self._latexSize)
+        self._ax2.set_ylabel(self._zTxtLabel  , fontsize = self._latexSize)
 
         # Title preparation
-        if self.convertToPhysical:
-            fixedParTxt = "{:.2g}$ $m".format(self._z[self._ySlice])
-        else:
-            fixedParTxt = "{:.2g}".format(self._z[self._ySlice])
-        timeString = plotNumberFormatter(self._t[tInd], None)
-        timeTxt = self._timeTxt.format(timeString)
+        self._zTxtDict["value"] =\
+                plotNumberFormatter(self._z[self._ySlice], None)
+        self._tTxtDict["value"] =\
+                plotNumberFormatter(self._t[tInd], None)
 
         # Titles
-        ax1Title = r"$z= {}$".format(fixedParTxt)
-        ax2Title = r"$\theta={:.0f}^{{\circ}}$".format(self._thetaDeg)
+        ax1Title  = self._constZTxt.format(self._zTxtDict)
+        ax2Title  = self._thetaTxt .format(int(self._thetaDeg))
+        timeTitle = self._tTxt.format(self._tTxtDict)
 
         # Title axis 1
         self._ax1txt = self._ax1.text(0.5, 1.05,\
@@ -1059,32 +1064,25 @@ class Plot2D(Plot):
         # but it seems to be easier to just add it to an axis due to
         # animation
         self._figTxt = self._ax1.text(1.10, 1.05,\
-                                      timeTxt,\
+                                      timeTitle,\
                                       horizontalalignment = "center",\
                                       verticalalignment = "center",\
                                       fontsize = self._latexSize,\
                                       transform = self._ax1.transAxes)
 
-
-
         self._ax1.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
-                                                   )
+            FuncFormatter(plotNumberFormatter))
         self._ax1.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
-                                                   )
+            FuncFormatter(plotNumberFormatter))
         self._ax2.get_xaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
-                                                   )
+            FuncFormatter(plotNumberFormatter))
         self._ax2.get_yaxis().set_major_formatter(\
-            FuncFormatter(lambda val, pos:"${:.2g}$".format(val))\
-                                                   )
+            FuncFormatter(plotNumberFormatter))
 
         # Make the axis equal
-        # FIXME: Make it an option to not plot ax2 equal => can see ||
-        #        structures
         self._ax1.axis("equal")
-        self._ax2.axis("equal")
+        if self._yEqual:
+            self._ax2.axis("equal")
 
         # Current API inconsistency fix
         # (https://github.com/matplotlib/matplotlib/issues/6139):

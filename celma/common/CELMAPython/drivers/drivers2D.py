@@ -26,7 +26,7 @@ class Drivers2D(PostProcessorDriver):
                  varMax     = None,\
                  varMin     = None,\
                  varyMaxMin = None,\
-                 timeFolder = None,\
+                 yEqual     = True ,\
                  **kwargs):
         #{{{docstring
         """
@@ -67,7 +67,7 @@ class Drivers2D(PostProcessorDriver):
         self._varMax     = varMax
         self._varMin     = varMin
         self._varyMaxMin = varyMaxMin
-        self._timeFolder = timeFolder
+        self._yEqual     = yEqual
     #}}}
 
     #{{{allMainFields2DDriver
@@ -122,6 +122,7 @@ class Drivers2D(PostProcessorDriver):
                              varMax            = self._varMax           ,\
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
+                             yEqual            = self._yEqual           ,\
                             )
         except (KeyError, ValueError) as collectError:
 
