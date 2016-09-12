@@ -11,7 +11,7 @@ commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotting import combined1D2D as postProcess
+from CELMAPython.drivers import postBoutRunner
 
 # The options for the run
 # =============================================================================
@@ -74,13 +74,14 @@ myRuns = basic_runner(\
 # =============================================================================
 myRuns.execute_runs(\
                      remove_old               = remove_old,\
-                     post_processing_function = postProcess,\
+                     post_processing_function = postBoutRunner,\
                      # This function will be called every time after
                      # performing a run
                      post_process_after_every_run = True,\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
+                     driverName        = "plot1D2DAndFluctDriver",\
                      xguards        = xguards           ,\
                      yguards        = yguards           ,\
                      xSlice         = xSlice            ,\
