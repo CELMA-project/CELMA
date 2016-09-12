@@ -41,7 +41,8 @@ class Probes(object):
             The time array
         tIndSaturatedTurb : [int|None]
             Index at where the turbulence saturates. This can be found
-            from CELMAPython.plotting self.results[index]['zFFT'] after calculation
+            from CELMAPython.plotting self.results[index]["zFFT"] after
+            calculation
         steadyStatePath : str
             What path to use when collecting J. If radialProbeIndices is
             None, this will also be the path for finding the largest
@@ -91,9 +92,9 @@ class Probes(object):
         # Sets the normalized coordinates
         # Get the coordinates
         #{{{rho
-        self._dx = collect('dx', path = collectPath,\
+        self._dx = collect("dx", path = collectPath,\
                            xguards = True, yguards = True, info = False)
-        self._MXG = collect('MXG', path = collectPath,\
+        self._MXG = collect("MXG", path = collectPath,\
                             xguards = True, yguards = True, info = False)
 
         nPoints  = self._dx.shape[0]
@@ -108,9 +109,9 @@ class Probes(object):
         #}}}
 
         #{{{z
-        dy = collect('dy', path = collectPath,\
+        dy = collect("dy", path = collectPath,\
                      xguards = True, yguards = True, info = False)
-        MYG = collect('MYG', path = collectPath,\
+        MYG = collect("MYG", path = collectPath,\
                       xguards = True, yguards = True, info = False)
 
         nPoints  = dy.shape[1]
@@ -125,9 +126,9 @@ class Probes(object):
         #}}}
 
         #{{{theta
-        dz = collect('dz', path = collectPath,\
+        dz = collect("dz", path = collectPath,\
                      xguards = True, yguards = True, info = False)
-        MZ = collect('MZ', path = collectPath,\
+        MZ = collect("MZ", path = collectPath,\
                      xguards = True, yguards = True, info = False)
 
         # Subtract the unused plane
@@ -550,7 +551,8 @@ class PerpPlaneProbes(Probes):
             the quantities in physical units. Default is False.
         tIndSaturatedTurb : [int|None]
             Index at where the turbulence saturates. This can be found
-            from CELMAPython.plotting self.results[index]['zFFT'] after calculation
+            from CELMAPython.plotting self.results[index]["zFFT"] after
+            calculation
         steadyStatePath : string
             What path to use when collecting J. If radialProbeIndices is
             None, this will also be the path for finding the largest
