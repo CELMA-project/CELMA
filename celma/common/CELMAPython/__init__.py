@@ -17,6 +17,6 @@ plt.rc("lines",  linewidth = 2)
 try:
     plt.figure(0)
 except RuntimeError:
-    plt.switch_backend('Agg')
+    plt.switch_backend("Agg")
     plt.figure(0)
 plt.close(0)
