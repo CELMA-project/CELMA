@@ -60,13 +60,17 @@ def physicalUnitsConverter(var, varName, convertToPhysical, convDict):
     -------
     var : array
         The variable after eventual processing.
+    normalization : str
+        The normalization which will be plotted  (does not contain $ for
+        LaTeX. An empty string is returned if convertToPhysical is True.
     units : str
         The units which will be plotted (does not contain $ for
-        LaTeX.
+        LaTeX. An empty string is returned if convertToPhysical is False.
     """
     #}}}
 
     if convertToPhysical:
+        normalization = ""
         # Calculate back to physical units
         if varName == "n":
             var *= convDict["n0"]
@@ -109,34 +113,34 @@ def physicalUnitsConverter(var, varName, convertToPhysical, convDict):
         else:
             units = " "
     else:
-        # Calculate back to physical units
+        untis = ""
+        # Return normalization
         if varName == "n":
-            units = r"/n_0"
+            normalization = r"/n_0"
         elif varName == "vort":
-            units = r"/\omega_{{ci}}"
+            normalization = r"/\omega_{{ci}}"
         elif varName == "vortD":
-            units = r"/\omega_{{ci}}n_0"
+            normalization = r"/\omega_{{ci}}n_0"
         elif varName == "phi":
-            units = r" q/T_{{e,0}}"
+            normalization = r" q/T_{{e,0}}"
         elif varName == "jPar":
-            units = r"/n_0c_sq"
+            normalization = r"/n_0c_sq"
         elif varName == "momDensPar":
-            # by m_i again here
-            units = r"/m_in_0c_s"
+            normalization = r"/m_in_0c_s"
         elif varName == "uIPar":
-            units = r"/c_s"
+            normalization = r"/c_s"
         elif varName == "uEPar":
-            units = r"/c_s"
+            normalization = r"/c_s"
         elif varName == "S":
-            units = r"/\omega_{{ci}}n_0"
+            normalization = r"/\omega_{{ci}}n_0"
         elif varName == "t":
-            units = r"\omega_{{ci}}"
+            normalization = r"\omega_{{ci}}"
         elif varName == "rho":
-            units = r"/\rho_s"
+            normalization = r"/\rho_s"
         elif varName == "z":
-            units = r"/\rho_s"
+            normalization = r"/\rho_s"
         else:
-            units = " "
+            normalization = " "
 
-    return var, units
+    return var, normalization, units
 #}}}
