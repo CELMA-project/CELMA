@@ -143,10 +143,10 @@ class Organizer(object):
         for lineNr, line in enumerate(self.lines):
             if lineNr == 0:
                 # Need an initial line
-                line.ax = plt.subplot(gs[lineNr])
+                line.ax = fig.add_subplot(gs[lineNr])
                 firstAx = line.ax
             else:
-                line.ax = plt.subplot(gs[lineNr], sharex=firstAx)
+                line.ax = fig.add_subplot(gs[lineNr], sharex=firstAx)
 
         for col in range(1, self._cols+1):
             self.lines[-col].bottomAx = True
