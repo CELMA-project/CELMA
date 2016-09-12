@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from ..plotting import Organizer
-from ..plotting import Line
+from ..fieldPlotters import Organizer
+from ..fieldPlotters import Line
 
 """ Contains method specific for the fields stored in the CELMA model """
 
