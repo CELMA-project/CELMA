@@ -217,14 +217,14 @@ class Drivers1D(PostProcessorDriver):
                     if line.name == "uIPar":
                         uIPar = line.field
 
-                    # Create the jPar line
-                    orgObj.extraLines["jPar"].field =\
-                        np.exp(lnN)*(uIPar - uEPar)
-                    if orgObj.extraLines["jPar"].plotPos:
-                        orgObj.lines.insert(orgObj.extraLines["jPar"].plotPos,\
-                                            orgObj.extraLines["jPar"])
-                    else:
-                        orgObj.lines.append(orgObj.extraLines["jPar"])
+                # Create the jPar line
+                orgObj.extraLines["jPar"].field =\
+                    np.exp(lnN)*(uIPar - uEPar)
+                if orgObj.extraLines["jPar"].plotPos:
+                    orgObj.lines.insert(orgObj.extraLines["jPar"].plotPos,\
+                                        orgObj.extraLines["jPar"])
+                else:
+                    orgObj.lines.append(orgObj.extraLines["jPar"])
 
             if "n" not in labelNames:
                 # Find lnN, uEPar and uIPar

@@ -277,13 +277,24 @@ class Plot(object):
         self._rhoTxtDict['rhoTxt'] = self._rhoTxt
         self._zTxtDict['zTxt']     = self._zTxt
 
-        self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".format(self._rhoTxtDict)
-        self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$"  .format(self._zTxtDict)
+        if self.convertToPhysical:
+            self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".\
+                    format(self._rhoTxtDict)
+            self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$".\
+                    format(self._zTxtDict)
 
-        self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
-        self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
-        self._tTxt        =\
-            r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
+            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
+            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
+            self._tTxt        =\
+                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
+        else:
+            self._rhoTxtLabel = "{0[rhoTxt]}".format(self._rhoTxtDict)
+            self._zTxtLabel   = "{0[zTxt]}"  .format(self._zTxtDict)
+
+            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]}"
+            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]}"
+            self._tTxt        =\
+                r"$t{0[normalization]}$ $=$ {0[value]}"
     #}}}
 
     #{{{ _getIndices
@@ -611,6 +622,11 @@ class Plot1D(Plot):
             # Set the y-axis limits
             orgObj.combLine.ax.set_ylim(allMin, allMax)
 
+        # Set the title
+        self._tTxtDict['value'] = plotNumberFormatter(self._t[0], None)
+        curTimeTxt = self._tTxt.format(self._tTxtDict)
+        fig.suptitle("{}{}".format(self._title, curTimeTxt))
+
         # Adjust the subplots
         fig.subplots_adjust(hspace=0, wspace=0.35)
         # Full screen plots
@@ -746,11 +762,11 @@ class Plot1D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                self._fig.savefig(fileName + ".pdf"  ,\
-                                  transparent = False  ,\
-                                  bbox_inches = "tight",\
-                                  pad_inches  = 0      ,\
-                                  )
+                fig.savefig(fileName + ".pdf"  ,\
+                            transparent = False  ,\
+                            bbox_inches = "tight",\
+                            pad_inches  = 0      ,\
+                            )
                 print("Saved to {}.pdf".format(fileName))
 
         if self._showPlot:
