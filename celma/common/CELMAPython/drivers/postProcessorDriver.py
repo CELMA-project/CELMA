@@ -4,6 +4,7 @@
 Contains the post processing driver class
 """
 
+from .saveFolderFuncs import scanWTagSaveFunc
 from matplotlib.pylab import plt
 import datetime
 import os
@@ -95,15 +96,15 @@ class PostProcessorDriver(object):
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
             if saveFolderFunc == 'scanWTagSaveFunc':
-                saveFolderFunc = scanWTagSaveFunc(path                   ,\
-                                                  xguards    = xguards   ,\
-                                                  yguards    = yguards   ,\
-                                                  xSlice     = xSlice    ,\
-                                                  ySlice     = ySlice    ,\
-                                                  zSlice     = zSlice    ,\
-                                                  tSlice     = tSlice    ,\
-                                                  saveFolder = saveFolder,\
-                                                  **kwargs)
+                saveFolder = scanWTagSaveFunc(path                   ,\
+                                              xguards    = xguards   ,\
+                                              yguards    = yguards   ,\
+                                              xSlice     = xSlice    ,\
+                                              ySlice     = ySlice    ,\
+                                              zSlice     = zSlice    ,\
+                                              tSlice     = tSlice    ,\
+                                              saveFolder = saveFolder,\
+                                              **kwargs)
             else:
                 message  = "{0}Warning: saveFolderFunc '{1}' not found, "
                 message += "falling back to standard implementation{0}"
@@ -117,7 +118,7 @@ class PostProcessorDriver(object):
         self._timeFolder = self._getTime()
 
         # Create the savepath
-        saveDirs = [os.path.dirname(self._path),\
+        saveDirs = [os.path.split(self._path)[0],\
                     'visualization',\
                     saveFolder,\
                     self._timeFolder]
