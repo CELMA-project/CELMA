@@ -128,7 +128,7 @@ class Drivers2D(PostProcessorDriver):
 
             # Get the tind
             if self._tSlice is not None:
-                self._tind.append(self._tSlice.start)
+                self._tind = [self._tSlice.start]
                 if self._tSlice.stop == None:
                     t = collect("t_array", path=self._path, info=False)
                     dimLen = len(t)
