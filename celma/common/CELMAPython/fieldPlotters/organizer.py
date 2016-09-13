@@ -125,8 +125,8 @@ class Organizer(object):
         # If a combined line is to be plotted
         if self.useCombinedPlot:
             # Make a line object
-            self.combLine = Line(name  = 'combinedLine'               ,\
-                                 label = r'\partial_t ' + self.pltName,\
+            self.combLine = Line(name  = 'ddt({})'.format(self.pltName),\
+                                 label = r'\partial_t ' + self.pltName ,\
                                  )
             # Make the lastline black, and append it to the lines
             self.combLine.color = 'k'
@@ -169,16 +169,30 @@ class Organizer(object):
     #}}}
 
     #{{{makeCombinedLine
-    def makeCombinedLine(self):
+    def makeCombinedLine(self, plotter):
         """
         Makes a combined line.
         To be called after all other lines are collected.
-        """
-        # Initialize the field
-        self.combLine.field = np.zeros(self.lines[0].field.shape)
 
-        for line in self.lines:
-            self.combLine.field += line.field
+        The routine will first try to collect ddt of the labelName. If
+        this is not available, a sum of the lines is used instead.
+
+        Parameters
+        ----------
+        plotter : plotter object
+            Containing the collectLine function
+        """
+
+        try:
+            plotter.collectLine(self.combLine.field)
+        except OSError:
+            # OSError is thrown if filed is not found
+
+            # Initialize the field
+            self.combLine.field = np.zeros(self.lines[0].field.shape)
+
+            for line in self.lines:
+                self.combLine.field += line.field
 
         # Re-add the combLine to the list
         self.lines.append(self.combLine)
