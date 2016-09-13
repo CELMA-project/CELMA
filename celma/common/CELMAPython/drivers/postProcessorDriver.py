@@ -94,7 +94,7 @@ class PostProcessorDriver(object):
         if saveFolderFunc is not None:
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
-            if saveFolder == 'scanWTagSaveFunc':
+            if saveFolderFunc == 'scanWTagSaveFunc':
                 saveFolderFunc = scanWTagSaveFunc(path                   ,\
                                                   xguards    = xguards   ,\
                                                   yguards    = yguards   ,\
