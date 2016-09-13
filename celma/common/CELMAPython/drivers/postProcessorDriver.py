@@ -32,6 +32,7 @@ class PostProcessorDriver(object):
                  saveFolder        = None         ,\
                  saveFolderFunc    = None         ,\
                  useSubProcess     = True         ,\
+                 **kwargs
                 ):
         #{{{docstring
         """
@@ -69,6 +70,8 @@ class PostProcessorDriver(object):
         useSubProcess : bool
             Whether each plot will be made by a new sub process, or the
             plots should be made in series.
+        **kwargs : keyword arguments
+            Additional keyword arguments given as input to saveFolderFunc.
         """
         #}}}
 
@@ -92,19 +95,20 @@ class PostProcessorDriver(object):
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
             if saveFolder == 'scanWTagSaveFunc':
-                saveFolder = scanWTagSaveFunc(path                   ,\
-                                              xguards    = xguards   ,\
-                                              yguards    = yguards   ,\
-                                              xSlice     = xSlice    ,\
-                                              ySlice     = ySlice    ,\
-                                              zSlice     = zSlice    ,\
-                                              tSlice     = tSlice    ,\
-                                              saveFolder = saveFolder,\
-                                              **kwargs)
+                saveFolderFunc = scanWTagSaveFunc(path                   ,\
+                                                  xguards    = xguards   ,\
+                                                  yguards    = yguards   ,\
+                                                  xSlice     = xSlice    ,\
+                                                  ySlice     = ySlice    ,\
+                                                  zSlice     = zSlice    ,\
+                                                  tSlice     = tSlice    ,\
+                                                  saveFolder = saveFolder,\
+                                                  **kwargs)
             else:
                 message  = "{0}Warning: saveFolderFunc '{1}' not found, "
                 message += "falling back to standard implementation{0}"
                 print(message.format("\n"*3, saveFolderFunc))
+                saveFolder = "-".join(path.split('/')[::-1])
         else:
             if saveFolder is None:
                 saveFolder = "-".join(path.split('/')[::-1])
