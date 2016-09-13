@@ -989,18 +989,6 @@ class Plot2D(Plot):
         """
         #}}}
 
-        # If we want the max and min to vary
-        if self._varyMaxMin:
-            # Update the max and min
-            self._varMax = np.max(self.Z_RT)
-            self._varMin = np.min(self.Z_RT)
-            # Update the levels
-            self._levels = np.linspace(self._varMin   ,\
-                                       self._varMax   ,\
-                                       self._nCont    ,\
-                                       endpoint = True,\
-                                       )
-
         # Check that levels are rising
         if not(self._levels is None):
             if len(self._levels) > 1 and np.amin(np.diff(self._levels)) <= 0.0:
@@ -1009,6 +997,20 @@ class Plot2D(Plot):
         Z_RT      = self._Z_RT     [tInd, :, :]
         Z_RZ      = self._Z_RZ     [tInd, :, :]
         Z_RZ_P_PI = self._Z_RZ_P_PI[tInd, :, :]
+
+        # If we want the max and min to vary
+        if self._varyMaxMin:
+            # Update the max and min
+            self._varMax =\
+                np.max([np.max(Z_RT),np.max(Z_RZ),np.max(Z_RZ_P_PI)])
+            self._varMin =\
+                np.max([np.min(Z_RT),np.min(Z_RZ),np.min(Z_RZ_P_PI)])
+            # Update the levels
+            self._levels = np.linspace(self._varMin   ,\
+                                       self._varMax   ,\
+                                       self._nCont    ,\
+                                       endpoint = True,\
+                                       )
 
         # Plot the perpendicular plane
         perpPlane  = self._ax1.contourf(self._cyl.X_RT       ,\
@@ -1111,8 +1113,28 @@ class Plot2D(Plot):
                             addArtParPlane + addArtParPlaneNeg +\
                             [self._ax2txt] + [self._figTxt])
 
-        if self._cbarPlane is None:
+        if self._cbarPlane is None and self._varyMaxMin == False:
             self._cbarPlane = parPlane
+        # FIXME: You are here
+        elif self._varyMaxMin == True:
+            try:
+                cbar = self._fig.colorbar(self._cbarPlane            ,\
+                                          cax    = self._cBarAx      ,\
+                                          format = FuncFormatter(     \
+                                                  plotNumberFormatter),\
+                                          )
+                if self.convertToPhysical:
+                    cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
+                else:
+                    cbarName = r"${}{}$".format(self._pltName, self._units)
+
+                cbar.set_label(label = cbarName, size = titleSize + 5)
+
+                self._images.append([cbar.collections])
+            except RuntimeWarning:
+                # Warning will have been printed in the init
+                pass
+
     #}}}
 
     #{{{plotDriver
@@ -1137,8 +1159,8 @@ class Plot2D(Plot):
         # Make the colorbar
         # format = "%.g" gave undesired results
         try:
-            cbar = self._fig.colorbar(self._cbarPlane                   ,\
-                                      cax    = self._cBarAx             ,\
+            cbar = self._fig.colorbar(self._cbarPlane            ,\
+                                      cax    = self._cBarAx      ,\
                                       format = FuncFormatter(     \
                                               plotNumberFormatter),\
                                       )
@@ -1152,6 +1174,7 @@ class Plot2D(Plot):
         except RuntimeWarning:
             message  = "RuntimeError caught in cbar in " + self._pltName
             message += ". No cbar will be set!"
+
         # Lines needs only to be plotted once
         # Par line 1
         self._ax2.plot(self._RZLine1XVals,\
