@@ -58,7 +58,8 @@ def getLnNFields(path):
     """
 
     # Making the orgObj instance
-    lnN = Organizer(r"\ln(n)", useCombinedPlot=True, path = path)
+    lnN = Organizer(r"\ln(n)", combLineName="lnN",\
+                    useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     # Evolved fields
     lnN.lines.append(Line("lnNAdv"                             ,\
@@ -87,7 +88,8 @@ def getJParFields(path):
     """
 
     # Making the orgObj instance
-    jPar = Organizer(r"j_{\parallel}", useCombinedPlot=True, path = path)
+    jPar = Organizer(r"j_{\parallel}", combLineName = "jPar",\
+                     useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     jPar.lines.append(Line("jParAdv"                                    ,\
     r"-\frac{1}{JB}\{\phi,j_{\parallel}\}"                              ))
@@ -126,7 +128,7 @@ def momDensParFields(path):
     """
 
     # Making the orgObj instance
-    momDensPar = Organizer(r"(nu_{i,\parallel})",
+    momDensPar = Organizer(r"(nu_{i,\parallel})", combLineName = "momDensPar",\
                            useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     momDensPar.lines.append(Line("momDensAdv"                      ,\
@@ -162,7 +164,8 @@ def getVortDFields(path):
     """
 
     # Making the orgObj instance
-    vortD = Organizer(r"\Omega^D", useCombinedPlot=True, path = path)
+    vortD = Organizer(r"\Omega^D", combLineName="vortD",\
+                      useCombinedPlot=True, path = path)
     # Making lines in the pattern name, lable, plotPos
     vortD.lines.append(Line("vortNeutral"                          ,\
          r"-\nu_{in}n\Omega"                                       ))

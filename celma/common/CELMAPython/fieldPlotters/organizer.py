@@ -29,6 +29,7 @@ class Organizer(object):
     #{{{Constructor
     def __init__(self                    ,\
                  pltName                 ,\
+                 combLineName    = None  ,\
                  cols            = 2     ,\
                  useCombinedPlot = False ,\
                  path            = "data",\
@@ -36,16 +37,26 @@ class Organizer(object):
         """
         The constructor initializes the list of lines
 
-        pltName         - Name of the plot written in LaTeX format, but
-                          without the $
-        cols            - The total number of columns to be used in the plot
-        useCombinedPlot - Toggles if a plot of combined lines are to be plotted
+        Parameters
+        ----------
+        pltName : str
+            Name of the plot written in LaTeX format, but without the $
+        combLineName : [None | str]
+            If the string is set, then the organizer will try to collect
+            ddt(combLineName) in makeCombinedLine.
+        cols : int
+            The total number of columns to be used in the plot
+        useCombinedPlot : bool
+            Toggles if a plot of combined lines are to be plotted
+        path : str
+            Path to collect from
         """
 
         # Set member data from input
         self._cols           = cols
         self.useCombinedPlot = useCombinedPlot
         self.pltName         = pltName
+        self.combLineName    = combLineName
 
         # Initialize non-input members
         self._pltSize             = (18,12)
@@ -125,11 +136,11 @@ class Organizer(object):
         # If a combined line is to be plotted
         if self.useCombinedPlot:
             # Make a line object
-            self.combLine = Line(name  = 'ddt({})'.format(self.pltName),\
-                                 label = r'\partial_t ' + self.pltName ,\
+            self.combLine = Line(name  = "ddt({})".format(self.combLineName),\
+                                 label = r"\partial_t " + self.pltName ,\
                                  )
             # Make the lastline black, and append it to the lines
-            self.combLine.color = 'k'
+            self.combLine.color = "k"
             self.lines.append(self.combLine)
 
         # Calculate the number of rows
@@ -184,7 +195,7 @@ class Organizer(object):
         """
 
         try:
-            plotter.collectLine(self.combLine.field)
+            plotter.collectLine(self.combLine)
         except OSError:
             # OSError is thrown if filed is not found
 
