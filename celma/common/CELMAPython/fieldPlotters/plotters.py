@@ -49,6 +49,7 @@ class Plot(object):
                  showPlot          = False        ,\
                  savePlot          = True         ,\
                  saveFolder        = None         ,\
+                 extension         = "png"        ,\
                 ):
         #{{{docstring
         """
@@ -86,6 +87,8 @@ class Plot(object):
             If plot should be saved.
         saveFolder : str
             Name of the folder to save plots in.
+        extension : str
+            Extension of the plot (if the animation is not used)
         """
         #}}}
 
@@ -97,6 +100,7 @@ class Plot(object):
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
         self._subPolAvg  = subPolAvg
+        self._extension  = extension
         # Public as used in the driver
         self.convertToPhysical = convertToPhysical
 
@@ -762,12 +766,12 @@ class Plot1D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                fig.savefig(fileName + ".pdf"  ,\
+                fig.savefig("{}.{}".format(fileName, self._extension),\
                             transparent = False  ,\
                             bbox_inches = "tight",\
                             pad_inches  = 0      ,\
                             )
-                print("Saved to {}.pdf".format(fileName))
+                print("Saved to {}.{}".format(fileName, self._extension))
 
         if self._showPlot:
             self._fig.show()
@@ -790,16 +794,16 @@ class Plot2D(Plot):
     """
 
     #{{{Constructor
-    def __init__(self              ,\
-                 path              ,\
-                 varName           ,\
-                 var        = None ,\
-                 xguards    = False,\
-                 yguards    = False,\
-                 varMax     = None ,\
-                 varMin     = None ,\
-                 varyMaxMin = False,\
-                 yEqual     = True ,\
+    def __init__(self                     ,\
+                 path                     ,\
+                 varName                  ,\
+                 var               = None ,\
+                 xguards           = False,\
+                 yguards           = False,\
+                 varMax            = None ,\
+                 varMin            = None ,\
+                 varyMaxMin        = False,\
+                 axisEqualParallel = True ,\
                  **kwargs):
         #{{{docstring
         """
@@ -829,7 +833,7 @@ class Plot2D(Plot):
         varyMaxMin : bool
             Whether or not the limits of the z-axis should be
             set to the max/min of the current timestep or not.
-        yEqual : bool
+        axisEqualParallel : bool
             Whether or not the parallel plot should be plotted with axis
             equal or not.
         **kwargs : keyword arguments
@@ -854,10 +858,10 @@ class Plot2D(Plot):
         warnings.filterwarnings("error")
 
         # Set member data from the index
-        self._varyMaxMin = varyMaxMin
-        self._varMax     = varMax
-        self._varMin     = varMin
-        self._yEqual     = yEqual
+        self._varyMaxMin        = varyMaxMin
+        self._varMax            = varMax
+        self._varMin            = varMin
+        self._axisEqualParallel = axisEqualParallel
 
         # Set additional plot properties
         self._latexSize = 35
@@ -1099,7 +1103,7 @@ class Plot2D(Plot):
 
         # Make the axis equal
         self._ax1.axis("equal")
-        if self._yEqual:
+        if self._axisEqualParallel:
             self._ax2.axis("equal")
 
         # Current API inconsistency fix
@@ -1113,27 +1117,30 @@ class Plot2D(Plot):
                             addArtParPlane + addArtParPlaneNeg +\
                             [self._ax2txt] + [self._figTxt])
 
-        if self._cbarPlane is None and self._varyMaxMin == False:
+        if self._cbarPlane is None:
             self._cbarPlane = parPlane
-        # FIXME: You are here
-        elif self._varyMaxMin == True:
-            try:
-                cbar = self._fig.colorbar(self._cbarPlane            ,\
-                                          cax    = self._cBarAx      ,\
-                                          format = FuncFormatter(     \
-                                                  plotNumberFormatter),\
-                                          )
-                if self.convertToPhysical:
-                    cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
-                else:
-                    cbarName = r"${}{}$".format(self._pltName, self._units)
-
-                cbar.set_label(label = cbarName, size = titleSize + 5)
-
-                self._images.append([cbar.collections])
-            except RuntimeWarning:
-                # Warning will have been printed in the init
-                pass
+#        # FIXME: You are here
+#        if self._cbarPlane is None and self._varyMaxMin == False:
+#            self._cbarPlane = parPlane
+#
+#        elif self._varyMaxMin == True:
+#            try:
+#                cbar = self._fig.colorbar(self._cbarPlane            ,\
+#                                          cax    = self._cBarAx      ,\
+#                                          format = FuncFormatter(     \
+#                                                  plotNumberFormatter),\
+#                                          )
+#                if self.convertToPhysical:
+#                    cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
+#                else:
+#                    cbarName = r"${}{}$".format(self._pltName, self._units)
+#
+#                cbar.set_label(label = cbarName, size = titleSize + 5)
+#
+#                self._images.append([cbar.collections])
+#            except RuntimeWarning:
+#                # Warning will have been printed in the init
+#                pass
 
     #}}}
 
@@ -1174,6 +1181,7 @@ class Plot2D(Plot):
         except RuntimeWarning:
             message  = "RuntimeError caught in cbar in " + self._pltName
             message += ". No cbar will be set!"
+            print(message)
 
         # Lines needs only to be plotted once
         # Par line 1
@@ -1244,12 +1252,12 @@ class Plot2D(Plot):
         else:
             if self._savePlot:
                 # Save the figure
-                self._fig.savefig(fileName + ".pdf"  ,\
+                self._fig.savefig("{}.{}".format(fileName, self._extension),\
                                   transparent = False  ,\
                                   bbox_inches = "tight",\
                                   pad_inches  = 0      ,\
                                   )
-                print("Saved to {}.pdf".format(fileName))
+                print("Saved to {}.{}".format(fileName, self._extension))
 
         if self._showPlot:
             self._fig.show()

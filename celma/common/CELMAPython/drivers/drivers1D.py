@@ -203,7 +203,7 @@ class Drivers1D(PostProcessorDriver):
             plotter.collectLine(line)
 
         if orgObj.useCombinedPlot:
-            orgObj.makeCombinedLine()
+            orgObj.makeCombinedLine(plotter)
 
         # Treatment of extra lines
         if self._labelName == "mainFields":
