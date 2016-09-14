@@ -362,7 +362,8 @@ int CelmaCurMom::convective(BoutReal t)
     // Set BC on n and uIPar
     n    .applyBoundary();
     uIPar.applyBoundary();
-    // Use the sheath boundary condition with constant Te for jPar at SE
+    // Use the sheath boundary condition with constant Te for jPar and
+    // uEPar at SE. Note that we have parallel uEPar derivatives
     // Here we have phiRef = Lambda
     ownBC.jParSheath (jPar, uEPar, uIPar, phi, n, Lambda, Lambda);
     ownBC.uEParSheath(uEPar, phi, Lambda, Lambda);
@@ -558,7 +559,7 @@ int CelmaCurMom::diffusive(BoutReal t, bool linear)
     n    .applyBoundary();
     uIPar.applyBoundary();
     // Use the sheath boundary condition with constant Te for jPar and
-    // uEPar at SE
+    // uEPar at SE. Note that we have parallel uEPar derivatives
     // Here we have phiRef = Lambda
     ownBC.jParSheath (jPar, uEPar, uIPar, phi, n, Lambda, Lambda);
     ownBC.uEParSheath(uEPar, phi, Lambda, Lambda);
