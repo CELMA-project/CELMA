@@ -118,7 +118,7 @@ class PostProcessorDriver(object):
         self._timeFolder = self._getTime()
 
         # Create the savepath
-        saveDirs = [os.path.split(self._path)[0],\
+        saveDirs = [os.path.normpath(self._path).split(os.sep)[0],\
                     'visualization',\
                     saveFolder,\
                     self._timeFolder]

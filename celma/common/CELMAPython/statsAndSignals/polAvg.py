@@ -11,13 +11,17 @@ def polAvg(f):
     """
     Returns the poloidal average of a field.
 
-    Input
-    f   - The field to find the poloidal average of.
-          The field must be a 4D field, and should not include the last
-          poloidal slice (i.e. the domain should go from [0,2pi[)
+    Parameters
+    ----------
+    f : array
+        The field to find the poloidal average of.
+        The field must be a 4D field, and should not include the last
+        poloidal slice (i.e. the domain should go from [0,2pi[)
 
-    Output
-    out   - The poloidal average of the field
+    Returns
+    -------
+    out : array
+        The poloidal average of the field
     """
 
     tLen, xLen, yLen, zLen = f.shape

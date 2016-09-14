@@ -34,22 +34,25 @@ class Line(object):
         """
         The constructor sets the member data
 
-        Input:
-
-        name    - Name which is going to be collected
-        label   - Label which is going to be used in the plot
-                  NOTE: '$' will be added around this string
-                  NOTE: Remember to use raw strings
-        plotPos - If there is a preferred position of the plot.
-                  Given as an index number.
-                  NOTE: The user have to take care so that two plots
-                  does not share the same number.
+        Parameters
+        ----------
+        name : str
+            Name which is going to be collected
+        label : str
+            Label which is going to be used in the plot
+            NOTE: "$" will be added around this string
+            NOTE: Remember to use raw strings
+        plotPos : int
+            If there is a preferred position of the plot.
+            Given as an index number.
+            NOTE: The user have to take care so that two plots
+            does not share the same number.
         """
         #}}}
 
         # Set member data from input
         self.name    = name
-        self.label   = r'$' + label + r'$'
+        self.label   = r"$" + label + r"$"
         self.plotPos = plotPos
 
         # Initialize non-input members
