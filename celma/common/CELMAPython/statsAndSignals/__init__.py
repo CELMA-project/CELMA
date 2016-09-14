@@ -11,3 +11,7 @@ from .probes import PerpPlaneProbes, Probes
 from .derivatives import DDZ,\
                          DDX,\
                          findLargestRadialGrad
+
+import matplotlib.cm as cm
+
+colorfunc = cm.viridis
