@@ -18,15 +18,15 @@ class Drivers2D(PostProcessorDriver):
     """
 
     #{{{Constructor
-    def __init__(self             ,\
-                 *args            ,\
-                 varName    = None,\
-                 var        = None,\
-                 pltName    = None,\
-                 varMax     = None,\
-                 varMin     = None,\
-                 varyMaxMin = None,\
-                 yEqual     = True ,\
+    def __init__(self                    ,\
+                 *args                   ,\
+                 varName           = None,\
+                 var               = None,\
+                 pltName           = None,\
+                 varMax            = None,\
+                 varMin            = None,\
+                 varyMaxMin        = None,\
+                 axisEqualParallel = True,\
                  **kwargs):
         #{{{docstring
         """
@@ -61,13 +61,13 @@ class Drivers2D(PostProcessorDriver):
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
-        self._varName    = varName
-        self._var        = var
-        self._pltName    = pltName
-        self._varMax     = varMax
-        self._varMin     = varMin
-        self._varyMaxMin = varyMaxMin
-        self._yEqual     = yEqual
+        self._varName           = varName
+        self._var               = var
+        self._pltName           = pltName
+        self._varMax            = varMax
+        self._varMin            = varMin
+        self._varyMaxMin        = varyMaxMin
+        self._axisEqualParallel = axisEqualParallel
     #}}}
 
     #{{{allMainFields2DDriver
@@ -122,7 +122,7 @@ class Drivers2D(PostProcessorDriver):
                              varMax            = self._varMax           ,\
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
-                             yEqual            = self._yEqual           ,\
+                             axisEqualParallel = self._axisEqualParallel,\
                             )
         except (KeyError, ValueError) as collectError:
 
@@ -196,7 +196,7 @@ class Drivers2D(PostProcessorDriver):
                              varMax            = self._varMax           ,\
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
-                             yEqual            = self._yEqual           ,\
+                             axisEqualParallel = self._axisEqualParallel,\
                             )
 
         plotter.plotDriver(self._pltName, savePath = self._savePath)
