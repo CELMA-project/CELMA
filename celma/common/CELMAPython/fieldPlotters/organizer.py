@@ -128,7 +128,7 @@ class Organizer(object):
 
         # Set the colors
         colorSpace = np.arange(len(self.lines))
-        colors = cm.rainbow(np.linspace(0, 1, len(colorSpace)))
+        colors = cm.viridis(np.linspace(0, 1, len(colorSpace)))
 
         for lineNr, line in enumerate(self.lines):
             line.color = colors[lineNr]

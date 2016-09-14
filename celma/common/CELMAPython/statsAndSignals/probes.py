@@ -503,7 +503,11 @@ class Probes(object):
                         axis=-1))
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
-                    self.results[key]["zFFT"] = varFFT
+                    # Save the results and reshape the data
+                    import pdb; pdb.set_trace()
+                    # FIXME: CHECK THAT FORMAT IS CORRECT (i.e. 0,0
+                    # makes sense)
+                    self.results[key]["zFFT"] = varFFT[:,0,0,:]
     #}}}
 #}}}
 
