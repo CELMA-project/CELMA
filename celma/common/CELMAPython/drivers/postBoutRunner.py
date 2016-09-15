@@ -5,9 +5,10 @@ Contains a factory like function which calls the post processing
 function.
 """
 
-from .drivers1D   import Drivers1D
-from .drivers2D   import Drivers2D
-from .drivers1D2D import Drivers1D2D
+from .drivers1D     import Drivers1D
+from .drivers2D     import Drivers2D
+from .drivers1D2D   import Drivers1D2D
+from .driversProbes import DriversProbes
 
 #{{{postBoutRunner
 def postBoutRunner(path, driverName = None, **kwargs):
@@ -76,6 +77,14 @@ def postBoutRunner(path, driverName = None, **kwargs):
         elif driverName == "single1DDriver":
             driver.single1DDriver()
     #}}}
+    #{{{DriversProbes
+    elif driverName == "plotProbes":
+        # Make the driver object
+        driver = DriversProbes(path, **kwargs)
+        # Call the driver
+        driver.plotProbes()
+    #}}}
     else:
-        raise NotImplementedError("The driver {} is not implemented")
+        message = "The driverName {} is not implemented".format(driverName)
+        raise NotImplementedError(message)
 #}}}
