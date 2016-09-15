@@ -4,7 +4,11 @@
 Contains classes for plotting the fields
 """
 
-from ..plotHelpers import titleSize, plotNumberFormatter, physicalUnitsConverter
+from ..plotHelpers import (titleSize,\
+                           plotNumberFormatter,\
+                           physicalUnitsConverter,\
+                           seqCMap,\
+                           divCMap)
 from ..statsAndSignals import polAvg
 from .cylinderMesh import CylinderMesh
 from matplotlib import get_backend
@@ -301,9 +305,9 @@ class Plot(object):
 
         # Set colormap
         if self._subPolAvg:
-            self._cmap = plt.get_cmap('BrBG')
+            self._cmap = divCMap
         else:
-            self._cmap = plt.get_cmap('viridis')
+            self._cmap = seqCMap
     #}}}
 
     #{{{ _getIndices
@@ -920,7 +924,7 @@ class Plot2D(Plot):
         # Diverging colormap for fluctuations
         if self._subPolAvg:
             self._varMax = np.max([np.abs(self._varMax), np.abs(self._varMin)])
-            self._varMix = - self._varMax
+            self._varMin = - self._varMax
 
         # We need to manually sepcify the levels in order to have a
         # fixed color bar
@@ -1012,7 +1016,7 @@ class Plot2D(Plot):
         Z_RZ_P_PI = self._Z_RZ_P_PI[tInd, :, :]
 
         # If we want the max and min to vary
-        if self._varyMaxMin:
+        if self._varyMaxMin and tInd:
             # Update the max and min
             self._varMax =\
                 np.max([np.max(Z_RT),np.max(Z_RZ),np.max(Z_RZ_P_PI)])
@@ -1023,14 +1027,17 @@ class Plot2D(Plot):
             if self._subPolAvg:
                 self._varMax =\
                         np.max([np.abs(self._varMax), np.abs(self._varMin)])
-                self._varMix = - self._varMax
+                self._varMin = - self._varMax
 
             # Update the levels
-            self._levels = np.linspace(self._varMin   ,\
-                                       self._varMax   ,\
-                                       self._nCont    ,\
-                                       endpoint = True,\
-                                       )
+            levels = np.linspace(self._varMin   ,\
+                                 self._varMax   ,\
+                                 self._nCont    ,\
+                                 endpoint = True,\
+                                 )
+            # Update the levels just if there is any difference
+            if np.amin(np.diff(levels)) <= 0.0:
+                self._levels = levels
 
         # Plot the perpendicular plane
         perpPlane  = self._ax1.contourf(self._cyl.X_RT       ,\

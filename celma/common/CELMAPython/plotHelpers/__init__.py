@@ -3,6 +3,7 @@
 """ Init for the plotHelpers package """
 
 from .plotHelpers import plotNumberFormatter, physicalUnitsConverter
+from .collectiveCollect import collectiveCollect
 import matplotlib.pyplot as plt
 
 # Set the plot style for all plots
@@ -21,3 +22,8 @@ except RuntimeError:
     plt.switch_backend("Agg")
     plt.figure(0)
 plt.close(0)
+
+# Set the colorfunc
+seqCMap  = plt.get_cmap("viridis")
+seqCMap2 = plt.get_cmap("plasma")
+divCMap  = plt.get_cmap("BrBG")
