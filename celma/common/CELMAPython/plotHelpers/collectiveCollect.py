@@ -8,9 +8,13 @@ import numpy as np
 from boutdata import collect
 
 #{{{collectiveCollect
-def collectiveCollect(paths, varStrings,\
+def collectiveCollect(paths,\
+                      varStrings,\
                       collectGhost=False,\
-                      tInd=None, yInd=None, xInd=None, zInd=None):
+                      tInd=None,\
+                      yInd=None,\
+                      xInd=None,\
+                      zInd=None):
     """
     Collects variables from several paths
 

@@ -14,27 +14,22 @@ class PostProcessorDriver(object):
     """
     The parent driver of all BOUT++ post processing functions
 
-    Sets the memberdata
+    * Sets the memberdata.
+    * Sets the save path.
     """
 
     #{{{Constructor
-    def __init__(self                             ,\
-                 path                             ,\
-                 xguards           = False        ,\
-                 yguards           = False        ,\
-                 xSlice            = slice(0,None),\
-                 ySlice            = slice(0,None),\
-                 zSlice            = slice(0,None),\
-                 tSlice            = None         ,\
-                 convertToPhysical = False        ,\
-                 subPolAvg         = False        ,\
-                 showPlot          = False        ,\
-                 savePlot          = True         ,\
-                 saveFolder        = None         ,\
-                 saveFolderFunc    = None         ,\
-                 useSubProcess     = True         ,\
-                 **kwargs
-                ):
+    def __init__(self                     ,\
+                 path                     ,\
+                 convertToPhysical = False,\
+                 subPolAvg         = False,\
+                 showPlot          = False,\
+                 savePlot          = True ,\
+                 saveFolder        = None ,\
+                 saveFolderFunc    = None ,\
+                 useSubProcess     = True ,\
+                 extension         = "png",\
+                 **kwargs):
         #{{{docstring
         """
         This constructor sets the memberdata, and sets the savePath.
@@ -43,18 +38,6 @@ class PostProcessorDriver(object):
         ----------
         path : str
             The path to collect from.
-        xguards : bool
-            If xguards should be included when collecting.
-        yguards : bool
-            If yguards should be included when collecting.
-        xSlice : slice
-            How the data will be sliced in x.
-        ySlice : slice
-            How the data will be sliced in y.
-        zSlice : slice
-            How the data will be sliced in z.
-        tSlice : slice
-            How the data will be sliced in t.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
         subPolAvg : bool
@@ -71,6 +54,8 @@ class PostProcessorDriver(object):
         useSubProcess : bool
             Whether each plot will be made by a new sub process, or the
             plots should be made in series.
+        extension : str
+            The extension to use when saving non-animated plots
         **kwargs : keyword arguments
             Additional keyword arguments given as input to saveFolderFunc.
         """
@@ -78,33 +63,22 @@ class PostProcessorDriver(object):
 
         # Set the member data
         self._path              = path
-        self._xguards           = xguards
-        self._yguards           = yguards
-        self._xSlice            = xSlice
-        self._ySlice            = ySlice
-        self._zSlice            = zSlice
-        self._tSlice            = tSlice
         self._convertToPhysical = convertToPhysical
         self._subPolAvg         = subPolAvg
         self._showPlot          = showPlot
         self._savePlot          = savePlot
         self._saveFolder        = saveFolder
         self._useSubProcess     = useSubProcess
+        self._extension         = extension
 
         #{{{Set the saveFolder
         if saveFolderFunc is not None:
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
             if saveFolderFunc == 'scanWTagSaveFunc':
-                saveFolder = scanWTagSaveFunc(path                   ,\
-                                              xguards    = xguards   ,\
-                                              yguards    = yguards   ,\
-                                              xSlice     = xSlice    ,\
-                                              ySlice     = ySlice    ,\
-                                              zSlice     = zSlice    ,\
-                                              tSlice     = tSlice    ,\
-                                              saveFolder = saveFolder,\
-                                              **kwargs)
+                saveFolder = scanWTagSaveFunc(path                       ,\
+                                    convertToPhysical = convertToPhysical,\
+                                    **kwargs)
             else:
                 message  = "{0}Warning: saveFolderFunc '{1}' not found, "
                 message += "falling back to standard implementation{0}"
@@ -117,8 +91,8 @@ class PostProcessorDriver(object):
         # Get the timefolder
         self._timeFolder = self._getTime()
 
-        # Create the savepath
-        saveDirs = [os.path.normpath(self._path).split(os.sep)[0],\
+        # Create the savepath (based on the first path string)
+        saveDirs = [os.path.normpath(self._path[0]).split(os.sep)[0],\
                     'visualization',\
                     saveFolder,\
                     self._timeFolder]
