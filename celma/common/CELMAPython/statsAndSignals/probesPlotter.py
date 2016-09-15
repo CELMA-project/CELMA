@@ -2,10 +2,8 @@
 
 """ Collection of plotting results for the probes """
 
-from ..plotHelpers import plotNumberFormatter
-from . import colorfunc
+from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap2
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
 import numpy as np
@@ -22,12 +20,13 @@ class PlotProbes(object):
     """
 
     #{{{__init___
-    def __init__(self,
-                 probes,\
-                 show = False,\
-                 save = False,\
+    def __init__(self             ,\
+                 probes           ,\
+                 showPlot  = False,\
+                 savePlot  = False,\
                  extension = "png",\
-                 savePath  = ".",\
+                 savePath  = "."  ,\
+                 pltSize   = None ,\
                  ):
         #{{{docstring
         """
@@ -41,106 +40,42 @@ class PlotProbes(object):
         ----------
         probes : Probes object
             Contains the data to plot.
-        show : bool
+        showPlot : bool
             If the plots should be displayed.
-        save : bool
+        savePlot : bool
             If the plots should be saved.
         extension : str
             Extension to use on the plots
         savePath : str
             Path to save destination. Must exist.
+        pltSize : tuple
+            Size of the plots given as (x, y)
         """
         #}}}
 
         # Set the member data
         self._probes    = probes
-        self._show      = show
-        self._save      = save
+        self._showPlot  = showPlot
+        self._savePlot  = savePlot
         self._extension = extension
         self._savePath  = savePath
 
-        # Organize the keys
-        probesKeys = list(self._probes.results.keys())
-
-        # Sort the probesKeys list (this cannot be done alphabethically
-        # Instead we cast the key into a number, and sort it from that
-        probesKeysForSorting = [int(el.replace(",","")) for el in probesKeys]
-        self._probesKey =\
-            [list(el) for el in zip(*sorted(\
-                zip(probesKeysForSorting, probesKeys), key=lambda pair:
-                pair[0]))][1]
-
         # Get the colors
-        self._colors = colorfunc(np.linspace(0, 1, len(self._probesKey)))
+        self._colors = seqCMap(np.linspace(0, 1, len(self._probes.probesKeys)))
 
         # Get the default title
         # NOTE: Theta should be the same for all probes
         #       (assume only rho changing)
-        theta = self._probes.theta[self._probesKey[0]]*(180/np.pi)
+        theta = self._probes.theta[self._probes.probesKeys[0]]*(180/np.pi)
         # Make from radians to degrees
         theta = plotNumberFormatter(theta, None)
         # NOTE: z should be the same for all probes (assume only rho changing)
-        z     = plotNumberFormatter(self._probes.z[self._probesKey[0]], None)
+        z     = plotNumberFormatter(self._probes.z[self._probes.probesKeys[0]], None)
         self._defaultTitle =\
             r"$\theta=${}$^{{\circ}},$ $z=${}".format(theta, z)
 
         # Set the plot size
-        self._pltSize = (10, 7)
-    #}}}
-
-    #{{{plotZFFT
-    def plotZFFT(self, positionKey, maxMode):
-        """
-        Plots the fourier transform at the given position.
-
-        Parameters
-        ----------
-        positionKey : str
-            The key to the self._probes.results which we would like to plot for.
-            The key is on the form "dataXInd,dataYInd,dataZInd", where the
-            indices refer to the keys in the simulated data.
-        maxMode : int
-            Number of modes to plot.
-        """
-
-        # Create figure and colors
-        # NOTE: We use a different colormap here to distinguish from the
-        #       positions
-        fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
-        colors = cm.plasma(np.linspace(0, 1, maxMode))
-
-        # Skip the offset mode
-        for modeNr in range(1, maxMode+1):
-            ax.plot(self._probes.time,\
-                    self._probes.results[positionKey]["zFFT"][:, modeNr],\
-                    color=colors[modeNr-1],\
-                    label=r"$k_\theta={}$".format(modeNr))
-
-        # Set logscale
-        ax.set_yscale("log")
-
-        # Set axis label
-        ax.set_xlabel("Time []")
-        ax.set_ylabel("Amplitude")
-
-        rho = plotNumberFormatter(self._probes.rho[positionKey], None)
-        z   = plotNumberFormatter(self._probes.z[positionKey], None)
-        title  = r"$\rho=${}$,$ $z=${}".format(rho, z)
-
-        fig.suptitle(title)
-
-        # Make the plot look nice
-        self._makePlotPretty(ax)
-        fig.tight_layout()
-
-        if self._show:
-            plt.show()
-
-        if self._save:
-            self._savePlot(fig, "zFFT_at_{}".format(positionKey))
-
-        plt.close(fig)
+        self._pltSize = pltSize
     #}}}
 
     #{{{plotTimeTrace
@@ -151,11 +86,11 @@ class PlotProbes(object):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        for nr, key in enumerate(self._probesKey):
+        for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key])
-            mean = plotNumberFormatter(self._probes.results[key]["mean"])
-            var = plotNumberFormatter(self._probes.results[key]["var"])
+            rho  = plotNumberFormatter(self._probes.rho[key], None)
+            mean = plotNumberFormatter(self._probes.results[key]["mean"], None)
+            var  = plotNumberFormatter(self._probes.results[key]["var"], None)
             label = r"$\rho=${:8} $\mu_n$={:8} $\sigma^2_n$={}".\
                     format(rho, mean, var)
 
@@ -174,11 +109,11 @@ class PlotProbes(object):
         self._makePlotPretty(ax)
         fig.tight_layout()
 
-        if self._show:
+        if self._showPlot:
             plt.show()
 
-        if self._save:
-            self._savePlot(fig, "timeTraces")
+        if self._savePlot:
+            self._saveThePlot(fig, "timeTraces")
 
         plt.close(fig)
     #}}}
@@ -193,11 +128,11 @@ class PlotProbes(object):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        for nr, key in enumerate(self._probesKey):
+        for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key])
-            skew = plotNumberFormatter(self._probes.results[key]["skew"])
-            kurt = plotNumberFormatter(self._probes.results[key]["kurtosis"])
+            rho  = plotNumberFormatter(self._probes.rho[key], None)
+            skew = plotNumberFormatter(self._probes.results[key]["skew"], None)
+            kurt = plotNumberFormatter(self._probes.results[key]["kurtosis"], None)
             label = r"$\rho=${:8} $S_n$={:8} $K_n$={}".\
                     format(rho, skew, kurt)
 
@@ -219,11 +154,11 @@ class PlotProbes(object):
         self._makePlotPretty(ax)
         fig.tight_layout()
 
-        if self._show:
+        if self._showPlot:
             plt.show()
 
-        if self._save:
-            self._savePlot(fig, "PDFs")
+        if self._savePlot:
+            self._saveThePlot(fig, "PDFs")
 
         plt.close(fig)
     #}}}
@@ -249,11 +184,10 @@ class PlotProbes(object):
         avgAx   = fig.add_subplot(gs[1], sharex=totalAx)
         fluctAx = fig.add_subplot(gs[2], sharex=totalAx)
 
-        for nr, key in enumerate(self._probesKeys):
+        for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key])
-            label = r"$\rho=${:8}".\
-                    format(rho)
+            rho  = plotNumberFormatter(self._probes.rho[key], None)
+            label = r"$\rho=${:8}".format(rho)
 
             totalAx.plot(self._probes.time,\
                          self._probes.results[key]["varAvgFlux" +\
@@ -265,13 +199,13 @@ class PlotProbes(object):
                          self._probes.results[key]["varAvgFluxAvg" +\
                                                    uName.capitalize()],\
                          color=self._colors[nr],\
-                         )
+                         label=label)
 
             fluctAx.plot(self._probes.time,\
                          self._probes.results[key]["varAvgFluxFluct" +\
                                                    uName.capitalize()],\
                          color=self._colors[nr],\
-                         )
+                         label=label)
 
         # Set axis label
         totalAx.set_ylabel(r"$n{}$".format(labelName))
@@ -300,11 +234,66 @@ class PlotProbes(object):
         # Adjust the subplots
         fig.subplots_adjust(hspace=0)
 
-        if self._show:
+        if self._showPlot:
             plt.show()
 
-        if self._save:
-            self._savePlot(fig, "PDFs")
+        if self._savePlot:
+            self._saveThePlot(fig, "flux{}".format(uName))
+
+        plt.close(fig)
+    #}}}
+
+    #{{{plotZFFT
+    def plotZFFT(self, positionKey, maxMode):
+        """
+        Plots the fourier transform at the given position.
+
+        Parameters
+        ----------
+        positionKey : str
+            The key to the self._probes.results which we would like to plot for.
+            The key is on the form "dataXInd,dataYInd,dataZInd", where the
+            indices refer to the keys in the simulated data.
+        maxMode : int
+            Number of modes to plot.
+        """
+
+        # Create figure and colors
+        # NOTE: We use a different colormap here to distinguish from the
+        #       positions
+        fig = plt.figure(figsize = self._pltSize)
+        ax  = fig.add_subplot(111)
+        colors = seqCMap2(np.linspace(0, 1, maxMode))
+
+        # Skip the offset mode
+        for modeNr in range(1, maxMode+1):
+            ax.plot(self._probes.time,\
+                    self._probes.results[positionKey]["zFFT"][:, modeNr],\
+                    color=colors[modeNr-1],\
+                    label=r"$k_\theta={}$".format(modeNr))
+
+        # Set logscale
+        ax.set_yscale("log")
+
+        # Set axis label
+        ax.set_xlabel("Time []")
+        ax.set_ylabel("Amplitude")
+
+        rho = plotNumberFormatter(self._probes.rho[positionKey], None)
+        z   = plotNumberFormatter(self._probes.z[positionKey], None)
+        title  = r"$\rho=${}$,$ $z=${}".format(rho, z)
+
+        fig.suptitle(title)
+
+        # Make the plot look nice
+        self._makePlotPretty(ax)
+        fig.tight_layout()
+
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            self._saveThePlot(fig, "zFFT_at_{}".format(positionKey))
 
         plt.close(fig)
     #}}}
@@ -324,8 +313,11 @@ class PlotProbes(object):
             Rotation of the x axis.
         """
 
-        # Avoid silly top value
-        ax.get_yaxis().get_major_formatter().set_useOffset(False)
+        # Avoid silly top value (only for non-log axes)
+        try:
+            ax.get_yaxis().get_major_formatter().set_useOffset(False)
+        except:
+            pass
         # Format the tick labels
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
@@ -339,8 +331,8 @@ class PlotProbes(object):
         ax.xaxis.set_major_locator(MaxNLocator(prune=prune))
     #}}}
 
-    #{{{_savePlot
-    def _savePlot(self, fig, name):
+    #{{{_saveThePlot
+    def _saveThePlot(self, fig, name):
         """
         Saves the figure
 
@@ -351,8 +343,6 @@ class PlotProbes(object):
         name : str
             The name of the plot.
         """
-
-        # TODO: PostProcessorDriver sets the save name
 
         fileName = "{}.{}".\
             format(os.path.join(self._savePath, name), self._extension)
