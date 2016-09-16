@@ -21,12 +21,12 @@ def plotNumberFormatter(val, pos):
 
     tickString = "${:.3g}".format(val)
     if "e+" in tickString:
-        tickString = tickString.replace("e+" , r"\cdot 10^{")
         tickString = tickString.replace("e+0", r"\cdot 10^{")
+        tickString = tickString.replace("e+" , r"\cdot 10^{")
         tickString += "}$"
     elif "e-" in tickString:
-        tickString = tickString.replace("e-" , r"\cdot 10^{-")
         tickString = tickString.replace("e-0", r"\cdot 10^{-")
+        tickString = tickString.replace("e-" , r"\cdot 10^{-")
         tickString += "}$"
     else:
         tickString += "$"

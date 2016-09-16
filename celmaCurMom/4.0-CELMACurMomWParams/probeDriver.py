@@ -28,6 +28,11 @@ from CELMAPython.statsAndSignals import PerpPlaneProbes
 #         ]
 
 # Get all the paths
+# paths = [\
+#  "newKiwiFlat/nout_500_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_a1-KiwiFlat-2-linearPhase1_0/",\
+#  "newKiwiFlat/nout_5000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_a1-KiwiFlat-3-turbulentPhase1_0/",\
+#         ]
+
 paths = [\
  "newKiwiFlat/nout_500_timestep_1/switch_forceAddNoise_True_switch_includeNoise_True_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_a1-KiwiFlat-2-linearPhase1_0/",\
  "newKiwiFlat/nout_5000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_a1-KiwiFlat-3-turbulentPhase1_0/",\

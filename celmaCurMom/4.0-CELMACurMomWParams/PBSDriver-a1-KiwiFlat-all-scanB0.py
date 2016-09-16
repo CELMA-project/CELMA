@@ -12,7 +12,6 @@ commonDir = os.path.abspath('./../common')
 sys.path.append(commonDir)
 
 from CELMAPython.drivers import postBoutRunner
-from CELMAPython.drivers import postBoutRunner
 
 # If you just want to post-process
 justPostProcess = False
@@ -101,7 +100,7 @@ savePlot   = True
 # Constructor options
 # *****************************************************************************
 remove_old = False
-directory  = "newKiwiFlat"
+directory  = "a1-KiwiFlat"
 make       = False
 # *****************************************************************************
 
@@ -191,7 +190,7 @@ dmp_folders, PBS_ids = initRunner.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -204,13 +203,12 @@ dmp_folders, PBS_ids = initRunner.execute_runs(\
                         )
 # =============================================================================
 
-if justPostProcess:
-    restart = None
-
 # Expand, Linear and turb options
 # =============================================================================
-# Set the temporal domain
-restart    = "overwrite"
+if justPostProcess:
+    restart = None
+else:
+    restart = "overwrite"
 # =============================================================================
 
 
@@ -278,7 +276,7 @@ dmp_folders, PBS_ids = expandRunner.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -302,7 +300,7 @@ tSlice              = slice(-200, None, 10)
 saveTerms           = False
 useHyperViscAzVortD = [True]
 timestep            = [1]
-BOUT_walltime       = '48:00:00'
+BOUT_walltime       = '72:00:00'
 # =============================================================================
 
 
@@ -370,7 +368,7 @@ dmp_folders, PBS_ids = linearRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -450,7 +448,7 @@ _, _ = turboRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\

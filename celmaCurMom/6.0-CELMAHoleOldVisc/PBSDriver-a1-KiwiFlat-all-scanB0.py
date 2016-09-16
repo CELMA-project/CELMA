@@ -12,7 +12,6 @@ commonDir = os.path.abspath('./../common')
 sys.path.append(commonDir)
 
 from CELMAPython.drivers import postBoutRunner
-from CELMAPython.drivers import postBoutRunner
 
 # If you just want to post-process
 justPostProcess = False

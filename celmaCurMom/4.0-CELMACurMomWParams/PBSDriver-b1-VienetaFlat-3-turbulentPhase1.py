@@ -22,7 +22,7 @@ useHyperViscAzVortD = [True]
 remove_old = False
 restart    = "overwrite"
 # Uncomment this if you just want to plot
-# restart      = None;
+restart      = None;
 restart_from = "b1-VienetaFlat/nout_1000_timestep_1/switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_b1-VienetaFlat-2-linearPhase3_0/"
 # Set the temporal domain
 nout       = [5000]
@@ -40,7 +40,7 @@ yguards    = False
 xSlice     = 0
 ySlice     = 8*2
 zSlice     = 0
-tSlice     = slice(-5, None)
+tSlice     = slice(-200, None, 10)
 showPlot   = False
 savePlot   = True
 theRunName = "b1-VienetaFlat-3-turbulentPhase1"
@@ -58,8 +58,8 @@ BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
-post_process_walltime = '00:29:00'
-post_process_queue    = 'xpresq'
+post_process_walltime = '03:00:00'
+post_process_queue    = 'workq'
 post_process_run_name = 'post' + theRunName.capitalize()
 # =============================================================================
 
@@ -108,7 +108,7 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                     driverName     = "single2DDriver",\
                      xguards        = xguards           ,\
                      yguards        = yguards           ,\
                      xSlice         = xSlice            ,\
@@ -118,5 +118,8 @@ myRuns.execute_runs(\
                      savePlot       = savePlot          ,\
                      saveFolderFunc = "scanWTagSaveFunc",\
                      theRunName     = theRunName        ,\
+                     varName        = "n",\
+                     pltName        = "n",\
+                     yEqual         = False,\
                     )
 # =============================================================================
