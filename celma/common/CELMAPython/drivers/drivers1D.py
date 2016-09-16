@@ -7,12 +7,12 @@ Contains drivers for plotting 1D plots
 from ..plotHelpers import physicalUnitsConverter
 from ..modelSpecific import getOrgObjFromModel, labelNames
 from ..fieldPlotters import Plot1D
-from .postProcessorDriver import PostProcessorDriver
+from .fieldPlottersDriver import FieldPlottersDriver
 import numpy as np
 from multiprocessing import Process
 
 #{{{Drivers1D
-class Drivers1D(PostProcessorDriver):
+class Drivers1D(FieldPlottersDriver):
     """
     Class which handles the 1D plots of the fields.
     """
@@ -35,7 +35,7 @@ class Drivers1D(PostProcessorDriver):
         Parameters
         ----------
         *args : positional arguments
-            See the constructor of PostProcessorDriver for details.
+            See the constructor of FieldPlottersDriver for details.
         skipPlots : list
             List of plots to skip when plotting for several.
         marker : str
@@ -43,7 +43,7 @@ class Drivers1D(PostProcessorDriver):
         labelName : str
            Name of plot to make.
         **kwargs : keyword arguments
-            See the constructor of PostProcessorDriver for details.
+            See the constructor of FieldPlottersDriver for details.
         """
         #}}}
 
@@ -176,19 +176,20 @@ class Drivers1D(PostProcessorDriver):
         """
 
         # Make the plotter object
-        plotter = Plot1D(self._path                                  ,\
-                         xguards           = self._xguards           ,\
-                         yguards           = self._yguards           ,\
-                         marker            = self._marker            ,\
-                         xSlice            = self._xSlice            ,\
-                         ySlice            = self._ySlice            ,\
-                         zSlice            = self._zSlice            ,\
-                         tSlice            = self._tSlice            ,\
-                         convertToPhysical = self._convertToPhysical ,\
-                         subPolAvg         = self._subPolAvg         ,\
-                         showPlot          = self._showPlot          ,\
-                         savePlot          = self._savePlot          ,\
-                         saveFolder        = self._saveFolder        ,\
+        plotter = Plot1D(self._path                                 ,\
+                         xguards           = self._xguards          ,\
+                         yguards           = self._yguards          ,\
+                         marker            = self._marker           ,\
+                         xSlice            = self._xSlice           ,\
+                         ySlice            = self._ySlice           ,\
+                         zSlice            = self._zSlice           ,\
+                         tSlice            = self._tSlice           ,\
+                         convertToPhysical = self._convertToPhysical,\
+                         subPolAvg         = self._subPolAvg        ,\
+                         showPlot          = self._showPlot         ,\
+                         savePlot          = self._savePlot         ,\
+                         saveFolder        = self._saveFolder       ,\
+                         extension         = self._extension        ,\
                         )
 
         # Get the organization object (will depend on the model used (i.e.

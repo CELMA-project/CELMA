@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from .line import Line
+from ..plotHelpers import seqCMap
 import numpy as np
 from matplotlib.gridspec import GridSpec
 import matplotlib.cm as cm
@@ -128,7 +129,7 @@ class Organizer(object):
 
         # Set the colors
         colorSpace = np.arange(len(self.lines))
-        colors = cm.rainbow(np.linspace(0, 1, len(colorSpace)))
+        colors = seqCMap(np.linspace(0, 1, len(colorSpace)))
 
         for lineNr, line in enumerate(self.lines):
             line.color = colors[lineNr]

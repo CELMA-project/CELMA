@@ -6,13 +6,13 @@ Contains drivers for plotting 2D plots
 
 from ..modelSpecific import varAndPlotNames
 from ..fieldPlotters import Plot2D
-from .postProcessorDriver import PostProcessorDriver
+from .fieldPlottersDriver import FieldPlottersDriver
 import numpy as np
 from multiprocessing import Process
 from boutdata import collect
 
 #{{{Drivers2D
-class Drivers2D(PostProcessorDriver):
+class Drivers2D(FieldPlottersDriver):
     """
     Class which handles the 2D plots of the fields.
     """
@@ -38,7 +38,7 @@ class Drivers2D(PostProcessorDriver):
         Parameters
         ----------
         *args : positional arguments
-            See the constructor of PostProcessorDriver for details.
+            See the constructor of FieldPlottersDriver for details.
         varName : str
             Name of the field which is going to be collected (if var is
             not given).
@@ -54,7 +54,7 @@ class Drivers2D(PostProcessorDriver):
             Whether or not the limits of the z-axis should be set
             to the max/min of the current timestep or not.
         **kwargs : keyword arguments
-            See the constructor of PostProcessorDriver for details.
+            See the constructor of FieldPlottersDriver for details.
         """
         #}}}
 
@@ -123,6 +123,7 @@ class Drivers2D(PostProcessorDriver):
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
                              axisEqualParallel = self._axisEqualParallel,\
+                             extension         = self._extension        ,\
                             )
         except (KeyError, ValueError) as collectError:
 
