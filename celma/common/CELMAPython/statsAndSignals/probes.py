@@ -4,13 +4,13 @@
 Contains classes which probes the data
 """
 
+from .polAvg import polAvg
+from .derivatives import DDZ, findLargestRadialGrad
+from ..plotHelpers import physicalUnitsConverter, collectiveCollect
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
 from boutdata import collect
-from .polAvg import polAvg
-from .collectiveCollect import collectiveCollect
-from .derivatives import DDZ, findLargestRadialGrad
 
 #{{{class Probes
 class Probes(object):
@@ -24,9 +24,16 @@ class Probes(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self, var, varName, time, tIndSaturatedTurb=None,\
-                 steadyStatePath=None, radialProbeIndices=None,\
-                 collectPath=None):
+    def __init__(self                      ,\
+                 var                       ,\
+                 varName                   ,\
+                 time                      ,\
+                 tIndSaturatedTurb   =None ,\
+                 steadyStatePath     =None ,\
+                 radialProbesIndices =None ,\
+                 collectPath         =None ,\
+                 convertToPhysical   =False,\
+                 ):
         #{{{docstring
         """
         Constructor for the Probes class
@@ -44,22 +51,24 @@ class Probes(object):
             from CELMAPython.plotting self.results[index]["zFFT"] after
             calculation
         steadyStatePath : str
-            What path to use when collecting J. If radialProbeIndices is
+            What path to use when collecting J. If radialProbesIndices is
             None, this will also be the path for finding the largest
             gradient. Default is None.
-        radialProbeIndices : [None|array]
+        radialProbesIndices : [None|array]
             What radial indices to probe. If set to None, it will be
             selected from the largest gradient in the steady state
             variable.
         collectPath : str
-            Path to collect J and the coordinates from. Not effective
-            if steadyStatePath is set.
+            Path to collect J, coordinates and the normalization constants
+            from. Not effective if steadyStatePath is set.
+        convertToPhysical : str
+            Whether normalized or physical units should be used.
         """
         #}}}
 
         # Guard
-        if steadyStatePath is None and radialProbeIndices is None:
-            message = ("steadyStatePath and radialProbeIndices cannot "
+        if steadyStatePath is None and radialProbesIndices is None:
+            message = ("steadyStatePath and radialProbesIndices cannot "
                        "be None simultaneously")
             raise ValueError(message)
         if steadyStatePath is None and collectPath is None:
@@ -67,8 +76,42 @@ class Probes(object):
                        "be None simultaneously")
             raise ValueError(message)
 
-        self._var      = var
-        self.time      = time
+        # Set the collect path
+        if collectPath is None:
+            collectPath = steadyStatePath
+
+        # Convert to physical, and get units
+        # Collect the normalization constants
+        self._convDict = {}
+        if convertToPhysical:
+            try:
+                self._convDict['omCI']=collect("omCI", path = collectPath[-1])
+                self._convDict['rhoS']=collect("rhoS", path = collectPath[-1])
+                self._convDict['n0']  =collect("n0" ,  path = collectPath[-1])
+                self._convDict['Te0'] =collect("Te0",  path = collectPath[-1])
+                self._convertToPhysical = True
+            except ValueError:
+                # An OSError is thrown if the file is not found
+                message = ("{0}{1}WARNING: Normalized quantities not found. "
+                           "Will use normalized units{1}{0}".\
+                            format("\n"*3,"!"*3))
+                print(message)
+                self._convertToPhysical = False
+        else:
+            self._convertToPhysical = False
+
+        # Get the units (eventually convert to physical units)
+        self._var, self.varNormalization, self.varUnits =\
+            physicalUnitsConverter(var,\
+                                   varName,\
+                                   convertToPhysical,\
+                                   self._convDict)
+        self.time, self.timeNormalization, self.timeUnits =\
+            physicalUnitsConverter(time,\
+                                   "t",\
+                                   convertToPhysical,\
+                                   self._convDict)
+
         self.fluctTime = time[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
@@ -80,9 +123,6 @@ class Probes(object):
 
         if varName == "n":
             collectVarName = "lnN"
-
-        if collectPath is None:
-            collectPath = steadyStatePath
 
         # Set the Jacobian
         # Contains the ghost points as we are using this in DDZ
@@ -137,7 +177,7 @@ class Probes(object):
         self.theta = dz * np.array(np.arange(0.0, innerPoints))
         #}}}
 
-        if radialProbeIndices == None:
+        if radialProbesIndices == None:
             # Note that the ghost cells are collected, as we are taking
             # derivatives of the field
             self._varSteadyState =\
@@ -224,7 +264,8 @@ class Probes(object):
                                 self._varFluct[:, xInd, yInd, zInd]
 
                     # Initialize the result as a dictionary
-                    self.results["{},{},{}".format(xInd, actualYInd, zInd)] = {}
+                    self.results["{},{},{}".format(xInd, actualYInd, zInd)] =\
+                        {}
 
                     # Set the coordinates
                     self.rho["{},{},{}".format(xInd, actualYInd, zInd)] =\
@@ -233,6 +274,17 @@ class Probes(object):
                         theta[zInd]
                     self.z["{},{},{}".format(xInd, actualYInd, zInd)] =\
                         z[actualYInd]
+
+        # Organize the keys
+        probesKeys = list(self.results.keys())
+
+        # Sort the probesKeys list (this cannot be done alphabethically
+        # Instead we cast the key into a number, and sort it from that
+        probesKeysForSorting = [int(el.replace(",","")) for el in probesKeys]
+        self.probesKeys =\
+            [list(el) for el in zip(*sorted(\
+                zip(probesKeysForSorting, probesKeys), key=lambda pair:
+                pair[0]))][1]
     #}}}
 
     #{{{calcStatsMoments
@@ -283,7 +335,8 @@ class Probes(object):
 
         Probability distribution function
         ---------------------------------
-        Probability that the measurement falls within an infinite small interval.
+        Probability that the measurement falls within an infinite small
+        interval.
 
         Output
         ------
@@ -315,17 +368,25 @@ class Probes(object):
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
 
-                    self.results[key]["pdfY"], bins =\
-                              np.histogram(self.timeTraceOfVarFluct[key],\
-                                           bins="auto",\
-                                           density=True)
-                    # Initialize y
-                    self.results[key]["pdfX"] =\
-                            np.zeros(self.results[key]["pdfY"].size)
+                    try:
+                        self.results[key]["pdfY"], bins =\
+                                  np.histogram(self.timeTraceOfVarFluct[key],\
+                                               bins="auto",\
+                                               density=True)
+                        # Initialize y
+                        self.results[key]["pdfX"] =\
+                                np.zeros(self.results[key]["pdfY"].size)
 
-                    for k in range(self.results[key]["pdfY"].size):
-                        # Only the bin edges are saved. Interpolate to the center of the bin
-                        self.results[key]["pdfX"][k] = 0.5*(bins[k]+bins[k+1])
+                        for k in range(self.results[key]["pdfY"].size):
+                            # Only the bin edges are saved. Interpolate to the
+                            # center of the bin
+                            self.results[key]["pdfX"][k] = 0.5*(bins[k]+bins[k+1])
+                    except MemoryError:
+                        message = ("{0}{1}WARNING: MemoryError in histogram. "
+                                   "Setting manually to 1{1}{0}".format("\n"*2, "!"*3))
+                        self.results[key]["pdfX"] = self.results[key]["pdfY"] = [0.99,1]
+                        print(message)
+
     #}}}
 
     #{{{calcPSDs
@@ -399,7 +460,7 @@ class Probes(object):
         -----------------------------
         <ab> = < (<a> + a_fluct)(<b> + b_fluct) >
              = < <a> <b>+ a_fluct<b> + <a> b_fluct + a_fluct b_fluct>
-             = < <a> <b> > + < a_fluct<b> > + < <a> b_fluct> + <a_fluct b_fluct>
+             = < <a> <b> > + < a_fluct<b> > + < <a> b_fluct> +<a_fluct b_fluct>
              = < <a> <b> > + <b>< a_fluct > + <a>< b_fluct> + <a_fluct b_fluct>
              = < <a> <b> > + <b>0 + <a>0 + <a_fluct b_fluct>
              = < <a> <b> > + <a_fluct b_fluct>
@@ -407,8 +468,8 @@ class Probes(object):
         Parameters
         ----------
         u : array
-            The velocity of the flux in the direction of the flux (xInd and yInd must
-            be specified)
+            The velocity of the flux in the direction of the flux
+            (xInd and yInd must be specified)
         uName : str
             Name of the velocity
 
@@ -440,6 +501,13 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
+        # Convert to physical, and get units
+        u, self._uNormalization, self._uUnits =\
+            physicalUnitsConverter(u,\
+                                   "u",\
+                                   self._convertToPhysical,\
+                                   self._convDict)
+
         # Find the fluctuating velocity
         uAvg         = polAvg(u)
         uFluct       = u - uAvg
@@ -465,7 +533,7 @@ class Probes(object):
                     self.results[key]["varAvgFluxAvg" + uName.capitalize()] =\
                         avgFluxAvg[:, 0, 0, zInd]
 
-                    self.results[key]["varAvgFluxFluct" + uName.capitalize()] =\
+                    self.results[key]["varAvgFluxFluct"+ uName.capitalize()] =\
                         avgFluxFluct[:, 0, 0, zInd]
     #}}}
 
@@ -483,9 +551,9 @@ class Probes(object):
         the index under consideration.
 
         zFFT : array
-            The fourier transformed of the z-direction for each time. Notice that the
-            result will be the same for every z-index for a fixed x- and
-            y-index.
+            The fourier transformed of the z-direction for each time. Notice
+            that the result will be the same for every z-index for a fixed x-
+            and y-index.
         """
         #}}}
 
@@ -503,7 +571,8 @@ class Probes(object):
                         axis=-1))
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
-                    self.results[key]["zFFT"] = varFFT
+                    # Save the results and reshape the data
+                    self.results[key]["zFFT"] = varFFT[:,0,0,:]
     #}}}
 #}}}
 
@@ -521,9 +590,16 @@ class PerpPlaneProbes(Probes):
     #}}}
 
     #{{{Constructor
-    def __init__(self, varName, paths, yInd,\
-                 nProbes=5, physicalUnits=False, tIndSaturatedTurb=None,\
-                 steadyStatePath=None, radialProbeIndices=None):
+    def __init__(self                       ,\
+                 varName                    ,\
+                 paths                      ,\
+                 yInd                       ,\
+                 nProbes             = 5    ,\
+                 convertToPhysical   = False,\
+                 tIndSaturatedTurb   = None ,\
+                 steadyStatePath     = None ,\
+                 radialProbesIndices = None ,\
+                 ):
         #{{{docstring
         """
         Constructor for the PerpPlaneProbes class
@@ -543,8 +619,8 @@ class PerpPlaneProbes(Probes):
             yInd to collect from
         nProbes : int
             Number of probes. Default is 5. Will be overridden by
-            radialProbeIndices if set.
-        physicalUnits : bool
+            radialProbesIndices if set.
+        convertToPhysical : bool
             Will normalize the time array and collect the normalization
             constants if True. Note that normalization of the other
             variables must be recalculated manually in order to obtain
@@ -554,10 +630,10 @@ class PerpPlaneProbes(Probes):
             from CELMAPython.plotting self.results[index]["zFFT"] after
             calculation
         steadyStatePath : string
-            What path to use when collecting J. If radialProbeIndices is
+            What path to use when collecting J. If radialProbesIndices is
             None, this will also be the path for finding the largest
             gradient. Default is None.
-        radialProbeIndices : [None|array]
+        radialProbesIndices : [None|array]
             What radial indices to probe. If set to None, it will be
             selected from the largest gradient in the steady state
             variable.
@@ -565,8 +641,8 @@ class PerpPlaneProbes(Probes):
         #}}}
 
         # Guard
-        if steadyStatePath is None and radialProbeIndices is None:
-            message = ("steadyStatePath and radialProbeIndices cannot "
+        if steadyStatePath is None and radialProbesIndices is None:
+            message = ("steadyStatePath and radialProbesIndices cannot "
                        "be None simultaneously")
             raise ValueError(message)
 
@@ -585,34 +661,17 @@ class PerpPlaneProbes(Probes):
         if varName == "n":
             var = np.exp(var)
 
-        # Collect and recalculate the time
-        if physicalUnits:
-            try:
-                self.n0   = collect("n0" ,  path = paths[-1])
-                self.Te0  = collect("Te0",  path = paths[-1])
-                self.Ti0  = collect("Ti0",  path = paths[-1])
-                self.B0   = collect("B0" ,  path = paths[-1])
-                self.omCI = collect("omCI", path = paths[-1])
-                self.rhoS = collect("rhoS", path = paths[-1])
-
-                time /= self.omCI
-            except ValueError:
-                # An OSError is thrown if the file is not found
-                message = ("{0}{1}WARNING: Normalized quantities not found. "
-                           "The time remains normalized".format("\n"*3,"!"*3))
-                print(message)
-
         # Call the parent class
         super().__init__(var,\
                          varName,\
                          time,\
                          tIndSaturatedTurb,\
                          steadyStatePath,\
-                         radialProbeIndices)
+                         radialProbesIndices)
 
         self.yInd = yInd
 
-        if radialProbeIndices is None:
+        if radialProbesIndices is None:
             # Find the max gradient of the variable
             _, maxGradInd =\
                 findLargestRadialGrad(\
@@ -622,9 +681,11 @@ class PerpPlaneProbes(Probes):
             self.radialProbesIndices =\
                 self.getRadialProbeIndices(maxGradInd, nProbes)
         else:
-            self.radialProbesIndices = radialProbeIndices
+            self.radialProbesIndices = radialProbesIndices
 
         # Get the radial ExB drift for this plane
+        # NOTE: We do not convert this to physical units but the ExB
+        #       drift
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
                                 yInd = [self.yInd, self.yInd],\
