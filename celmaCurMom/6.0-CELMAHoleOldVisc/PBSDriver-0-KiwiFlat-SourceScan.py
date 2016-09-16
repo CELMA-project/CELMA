@@ -17,15 +17,16 @@ from CELMAPython.drivers import postBoutRunner
 # =============================================================================
 # *****************************************************************************
 ownFilterType = "none"
+Sn = [2.25e22, 2e22, 1.5e22, 1.125e22, 2.25e21, 2.225e20]
 # *****************************************************************************
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
 restart    = None
 remove_old = False
-timestep   = [2e2]
-nout       = [20]
-directory  = "a1-KiwiFlat"
+timestep   = [2e3]
+nout       = [2]
+directory  = "a1-KiwiFlatSourceScan"
 # Shall we make?
 make       = False
 # =============================================================================
@@ -36,12 +37,13 @@ make       = False
 xguards    = False
 yguards    = False
 xSlice     = 0
-ySlice     = 8*2
+ySlice     = 65
 zSlice     = 0
-tSlice     = slice(-5, None)
+tSlice     = slice(0, None)
 showPlot   = False
 savePlot   = True
-theRunName = "a1-KiwiFlat-0-initialize"
+axisEqualParallel = False
+theRunName = "0-KiwiFlat-SourceScan"
 # =============================================================================
 
 
@@ -51,7 +53,7 @@ theRunName = "a1-KiwiFlat-0-initialize"
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
-BOUT_walltime         = '03:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_nproc    = 1
 post_process_nodes    = 1
@@ -78,7 +80,8 @@ myRuns = PBS_runner(\
             restart    = restart,\
             additional = [
                           ('tag',theRunName,0),\
-                          ('ownFilters'  , 'type', ownFilterType),\
+                          ('ownFilters', 'type', ownFilterType),\
+                          ('input'     , 'Sn',   Sn),\
                          ],\
             # PBS options
             BOUT_nodes            = BOUT_nodes           ,\
@@ -106,15 +109,16 @@ myRuns.execute_runs(\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
                      # Switches
-                     driverName     = "plot1D2DAndFluctDriver",\
-                     xguards        = xguards           ,\
-                     yguards        = yguards           ,\
-                     xSlice         = xSlice            ,\
-                     ySlice         = ySlice            ,\
-                     zSlice         = zSlice            ,\
-                     tSlice         = tSlice            ,\
-                     savePlot       = savePlot          ,\
-                     saveFolderFunc = "scanWTagSaveFunc",\
-                     theRunName     = theRunName        ,\
+                     driverName        = "plot1DAnd2DDriver",\
+                     xguards           = xguards           ,\
+                     yguards           = yguards           ,\
+                     xSlice            = xSlice            ,\
+                     ySlice            = ySlice            ,\
+                     zSlice            = zSlice            ,\
+                     tSlice            = tSlice            ,\
+                     axisEqualParallel = axisEqualParallel ,\
+                     savePlot          = savePlot          ,\
+                     saveFolderFunc    = "scanWTagSaveFunc",\
+                     theRunName        = theRunName        ,\
                     )
 # =============================================================================
