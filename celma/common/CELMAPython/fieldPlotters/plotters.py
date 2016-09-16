@@ -4,7 +4,11 @@
 Contains classes for plotting the fields
 """
 
-from ..plotHelpers import titleSize, plotNumberFormatter, physicalUnitsConverter
+from ..plotHelpers import (titleSize,\
+                           plotNumberFormatter,\
+                           physicalUnitsConverter,\
+                           seqCMap,\
+                           divCMap)
 from ..statsAndSignals import polAvg
 from .cylinderMesh import CylinderMesh
 from matplotlib import get_backend
@@ -12,7 +16,6 @@ from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import matplotlib.cm as cm
 from boutdata import collect
 from boututils.options import BOUTOptions
 import numpy as np
@@ -299,6 +302,12 @@ class Plot(object):
             self._constZTxt   = r"{0[zTxt]} $=$ {0[value]}"
             self._tTxt        =\
                 r"$t{0[normalization]}$ $=$ {0[value]}"
+
+        # Set colormap
+        if self._subPolAvg:
+            self._cmap = divCMap
+        else:
+            self._cmap = seqCMap
     #}}}
 
     #{{{ _getIndices
@@ -912,6 +921,10 @@ class Plot2D(Plot):
             self._varMax = np.max(self._variable)
         if self._varMin == None:
             self._varMin = np.min(self._variable)
+        # Diverging colormap for fluctuations
+        if self._subPolAvg:
+            self._varMax = np.max([np.abs(self._varMax), np.abs(self._varMin)])
+            self._varMin = - self._varMax
 
         # We need to manually sepcify the levels in order to have a
         # fixed color bar
@@ -1003,24 +1016,34 @@ class Plot2D(Plot):
         Z_RZ_P_PI = self._Z_RZ_P_PI[tInd, :, :]
 
         # If we want the max and min to vary
-        if self._varyMaxMin:
+        if self._varyMaxMin and tInd:
             # Update the max and min
             self._varMax =\
                 np.max([np.max(Z_RT),np.max(Z_RZ),np.max(Z_RZ_P_PI)])
             self._varMin =\
                 np.max([np.min(Z_RT),np.min(Z_RZ),np.min(Z_RZ_P_PI)])
+
+            # Diverging colormap for fluctuations
+            if self._subPolAvg:
+                self._varMax =\
+                        np.max([np.abs(self._varMax), np.abs(self._varMin)])
+                self._varMin = - self._varMax
+
             # Update the levels
-            self._levels = np.linspace(self._varMin   ,\
-                                       self._varMax   ,\
-                                       self._nCont    ,\
-                                       endpoint = True,\
-                                       )
+            levels = np.linspace(self._varMin   ,\
+                                 self._varMax   ,\
+                                 self._nCont    ,\
+                                 endpoint = True,\
+                                 )
+            # Update the levels just if there is any difference
+            if np.amin(np.diff(levels)) <= 0.0:
+                self._levels = levels
 
         # Plot the perpendicular plane
         perpPlane  = self._ax1.contourf(self._cyl.X_RT       ,\
                                         self._cyl.Y_RT       ,\
                                         Z_RT                 ,\
-                                        cmap   = cm.RdYlBu_r ,\
+                                        cmap   = self._cmap  ,\
                                         vmax   = self._varMax,\
                                         vmin   = self._varMin,\
                                         levels = self._levels,\
@@ -1030,7 +1053,7 @@ class Plot2D(Plot):
         parPlane  = self._ax2.contourf(self._cyl.X_RZ       ,\
                                        self._cyl.Y_RZ       ,\
                                        Z_RZ                 ,\
-                                       cmap   = cm.RdYlBu_r ,\
+                                       cmap   = self._cmap  ,\
                                        vmax   = self._varMax,\
                                        vmin   = self._varMin,\
                                        levels = self._levels,\
@@ -1038,7 +1061,7 @@ class Plot2D(Plot):
         parPlaneNeg  = self._ax2.contourf(self._cyl.X_RZ_NEG   ,\
                                           self._cyl.Y_RZ       ,\
                                           Z_RZ_P_PI            ,\
-                                          cmap   = cm.RdYlBu_r ,\
+                                          cmap   = self._cmap  ,\
                                           vmax   = self._varMax,\
                                           vmin   = self._varMin,\
                                           levels = self._levels,\

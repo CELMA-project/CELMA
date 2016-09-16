@@ -98,6 +98,9 @@ def physicalUnitsConverter(var, varName, convertToPhysical, convDict):
         elif varName == "uEPar":
             var *= convDict["rhoS"]*convDict["omCI"]
             units = r"\mathrm{m}\mathrm{s}^{-1}"
+            # Generic for velocities
+        elif varName == "u":
+            var *= convDict["rhoS"]*convDict["omCI"]
         elif varName == "S":
             var *= convDict["omCI"]*convDict["n0"]
             units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
