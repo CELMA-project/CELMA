@@ -117,7 +117,8 @@ def findLargestRadialGrad(var, dx, MXG = None):
 
     maxGrad = ddxVar[maxGradInds]
 
-    maxGradInd = int(maxGradInds[1])
+    # Take the firs occurence of the x axis
+    maxGradInd = int(maxGradInds[1][0])
     if MXG is not None:
         # Subtract MXG as xguards are collected
         maxGradInd -= MXG

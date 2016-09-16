@@ -5,9 +5,7 @@ Init-file for statistics
 """
 
 from .polAvg import polAvg
-from .collectiveCollect import collectiveCollect
 from .energy import collectEnergy, plotEnergies
 from .probes import PerpPlaneProbes, Probes
-from .derivatives import DDZ,\
-                         DDX,\
-                         findLargestRadialGrad
+from .probesPlotter import PlotProbes
+from .derivatives import DDZ, DDX, findLargestRadialGrad

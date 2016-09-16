@@ -5,7 +5,7 @@ Contains function which deals with the post-processing of energies
 """
 
 import matplotlib.pyplot as plt
-from .collectiveCollect import collectiveCollect
+from ..plotHelpers import collectiveCollect
 
 #{{{collectEnergy
 def collectEnergy(paths):
