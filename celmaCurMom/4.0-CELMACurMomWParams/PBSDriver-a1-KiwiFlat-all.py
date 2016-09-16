@@ -12,7 +12,6 @@ commonDir = os.path.abspath('./../common')
 sys.path.append(commonDir)
 
 from CELMAPython.drivers import postBoutRunner
-from CELMAPython.drivers import postBoutRunner
 
 # If you just want to post-process
 justPostProcess = False
@@ -33,7 +32,7 @@ savePlot   = True
 # Constructor options
 # *****************************************************************************
 remove_old = False
-directory  = "newKiwiFlat"
+directory  = "a1-KiwiFlat"
 make       = False
 # *****************************************************************************
 
@@ -79,7 +78,6 @@ BOUT_walltime         = '03:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 # *****************************************************************************
-
 initRunner = PBS_runner(\
                 directory  = directory ,\
                 nproc      = nproc ,\
@@ -118,7 +116,7 @@ dmp_folders, PBS_ids = initRunner.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -158,7 +156,6 @@ BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 # *****************************************************************************
-
 expandRunner = PBS_runner(\
                 directory  = directory ,\
                 nproc      = nproc ,\
@@ -200,7 +197,7 @@ dmp_folders, PBS_ids = expandRunner.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -240,7 +237,6 @@ theRunName = "a1-KiwiFlat-2-linearPhase1"
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 # *****************************************************************************
-
 linearRun = PBS_runner(\
             directory  = directory ,\
             nproc      = nproc ,\
@@ -283,7 +279,7 @@ dmp_folders, PBS_ids = linearRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\
@@ -297,7 +293,10 @@ dmp_folders, PBS_ids = linearRun.execute_runs(\
 # =============================================================================
 
 
-
+# Turb options
+# =============================================================================
+BOUT_walltime = '72:00:00'
+# =============================================================================
 
 
 # Create the runner
@@ -313,7 +312,6 @@ theRunName = "a1-KiwiFlat-3-turbulentPhase1"
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 # *****************************************************************************
-
 turboRun = PBS_runner(\
                 directory  = directory ,\
                 nproc      = nproc ,\
@@ -354,7 +352,7 @@ _, _ = turboRun.execute_runs(\
                          # Below are the kwargs arguments being passed to
                          # the post processing function
                          # Switches
-                     driverName        = "plot1D2DAndFluctDriver",\
+                         driverName     = "plot1D2DAndFluctDriver",\
                          xguards        = xguards           ,\
                          yguards        = yguards           ,\
                          xSlice         = xSlice            ,\

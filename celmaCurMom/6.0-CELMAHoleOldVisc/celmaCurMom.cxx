@@ -736,7 +736,7 @@ void CelmaCurMom::timestepInitialization()
                              Lambda,
                              Lambda,
                              holeProfile);
-    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda);
+    ownBC.uEParSheath(uEPar, phi, Lambda, Lambda, holeProfile);
     // Set the BC for momDensPar
     ownBC.parDensMomSheathProfiled(momDensPar, uIPar, n, holeProfile);
     // ************************************************************************
