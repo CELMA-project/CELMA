@@ -177,7 +177,6 @@ class PlotProbes(object):
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
 
         gs      = GridSpec(nrows=3, ncols=1)
         totalAx = fig.add_subplot(gs[0])
@@ -319,6 +318,7 @@ class PlotProbes(object):
         except:
             pass
         # Format the tick labels
+        import pdb; pdb.set_trace()
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
