@@ -27,6 +27,7 @@ class PlotProbes(object):
                  extension = "png",\
                  savePath  = "."  ,\
                  pltSize   = None ,\
+                 convertToPhysical   =False,\
                  ):
         #{{{docstring
         """
@@ -50,6 +51,8 @@ class PlotProbes(object):
             Path to save destination. Must exist.
         pltSize : tuple
             Size of the plots given as (x, y)
+        convertToPhysical : str
+            Whether normalized or physical units should be used.
         """
         #}}}
 
@@ -74,6 +77,39 @@ class PlotProbes(object):
         self._defaultTitle =\
             r"$\theta=${}$^{{\circ}},$ $z=${}".format(theta, z)
 
+        # Get labels
+        # String formatting
+        self._tTxtDict   = {"normalization":tNormalization  , "units":tUnits}
+        self._rhoTxtDict = {"normalization":rhoNormalization, "units":rhoUnits}
+        self._zTxtDict   = {"normalization":zNormalization  , "units":zUnits}
+
+        self._rhoTxt   = r"$\rho{0[normalization]}$".format(self._rhoTxtDict)
+        self._thetaTxt = r"$\theta={:d}^{{\circ}}$"
+        self._zTxt     = r"$z{0[normalization]}$".format(self._zTxtDict)
+
+        # Expand the dictionaries
+        self._rhoTxtDict['rhoTxt'] = self._rhoTxt
+        self._zTxtDict['zTxt']     = self._zTxt
+
+        if self.convertToPhysical:
+            self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".\
+                    format(self._rhoTxtDict)
+            self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$".\
+                    format(self._zTxtDict)
+
+            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
+            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
+            self._tTxt        =\
+                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
+        else:
+            self._rhoTxtLabel = "{0[rhoTxt]}".format(self._rhoTxtDict)
+            self._zTxtLabel   = "{0[zTxt]}"  .format(self._zTxtDict)
+
+            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]}"
+            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]}"
+            self._tTxt        =\
+                r"$t{0[normalization]}$ $=$ {0[value]}"
+
         # Set the plot size
         self._pltSize = pltSize
     #}}}
@@ -82,32 +118,51 @@ class PlotProbes(object):
     def plotTimeTrace(self):
         """ Plots the time traces of the fluctuations."""
 
+        # Manual tweeking as we want legends outside the plot
+        pltSize = (self._pltSize[0] + 10, self._pltSize[1])
         # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
+        fig = plt.figure(figsize = pltSize)
         ax  = fig.add_subplot(111)
 
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
             rho  = plotNumberFormatter(self._probes.rho[key], None)
-            mean = plotNumberFormatter(self._probes.results[key]["mean"], None)
-            var  = plotNumberFormatter(self._probes.results[key]["var"], None)
+            mean = plotNumberFormatter(self._probes.results[key]["mean"],\
+                                       None,\
+                                       precision=3)
+            var  = plotNumberFormatter(self._probes.results[key]["var"],\
+                                       None,\
+                                       precision=3)
             label = r"$\rho=${:8} $\mu_n$={:8} $\sigma^2_n$={}".\
                     format(rho, mean, var)
 
-            ax.plot(self._probes.time,\
+            ax.plot(self._probes.fluctTime,\
                     self._probes.timeTraceOfVarFluct[key],\
                     color=self._colors[nr],\
                     label=label)
 
         # Set axis label
+        # FIXME: Units in the old fashioned way
         ax.set_xlabel(r"$t\omega_{ci}$")
         ax.set_ylabel(r"$\tilde{n}$")
 
-        fig.suptitle(self._defaultTitle)
+        ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._makePlotPretty(ax)
-        fig.tight_layout()
+        self._makePlotPretty(ax, rotation = 45)
+
+        # Manual tweeking as we want legends outside the plot
+        # Shrink current axis by 20%
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        self._leg = ax.legend(loc="center left",\
+                              fancybox = True,\
+                              numpoints=1,\
+                              bbox_to_anchor=(1, 0.5),\
+                              )
+        self._leg.get_frame().set_alpha(0.5)
+        # Manual tweeking as we want legends outside the plot
+        fig.tight_layout(rect=[0,0,0.7,1])
 
         if self._showPlot:
             plt.show()
@@ -122,6 +177,8 @@ class PlotProbes(object):
     def plotPDFs(self):
         """
         Plots the PDFs at all positions in the Probes object.
+
+        NOTE: The PDF is a probability, and thus has no units.
         """
 
         # Create the plot
@@ -145,10 +202,12 @@ class PlotProbes(object):
         ax.set_yscale("log")
 
         # Set axis label
+        # FIXME: Units of the variables here
         ax.set_xlabel(r"$\tilde{n}$")
+        # FIXME: Units in the old fashioned way
         ax.set_ylabel(r"$\mathrm{PDF}(\tilde{n})$")
 
-        fig.suptitle(self._defaultTitle)
+        ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
         self._makePlotPretty(ax)
@@ -163,8 +222,63 @@ class PlotProbes(object):
         plt.close(fig)
     #}}}
 
+    #{{{plotPSDs
+    def plotPSDs(self):
+        """
+        Plots the PSDs at all positions in the Probes object.
+
+        NOTE: The units will be in variableUnits**2/Hz for
+              non-normalized variables.
+              The normalization would be
+              variableNormalization**2/(tOmegaCI)
+        """
+
+        # Create the plot
+        fig = plt.figure(figsize = self._pltSize)
+        ax  = fig.add_subplot(111)
+
+        for nr, key in enumerate(self._probes.probesKeys):
+            # Make the labels
+            rho  = plotNumberFormatter(self._probes.rho[key], None)
+            label = r"$\rho=${}".format(rho)
+
+            ax.plot(self._probes.results[key]["psdX"],\
+                    self._probes.results[key]["psdY"],\
+                    color=self._colors[nr],\
+                    label=label)
+
+        # Set logscale
+        ax.set_yscale("log")
+
+        # Set axis label
+        # FIXME: Herz or so
+        ax.set_xlabel(r"${}$")
+        # FIXME: Units as described above
+        ax.set_ylabel(r"${}^2/{}$")
+
+        ax.set_title(self._defaultTitle)
+
+        # Make the plot look nice
+        self._makePlotPretty(ax)
+        fig.tight_layout()
+
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            self._saveThePlot(fig, "PSDs")
+
+        plt.close(fig)
+    #}}}
+
     #{{{plotAvgFluxThrougVolumeElement
-    def plotAvgFluxThrougVolumeElement(self, uName, labelName):
+    def plotAvgFluxThrougVolumeElement(self,\
+                                       uName,\
+                                       labelName,\
+                                       pltFluct = True,\
+                                       pltTotal = False,\
+                                       pltAvg   = False,\
+                                       ):
         """
         Plots the average flux through a volume element
 
@@ -173,65 +287,115 @@ class PlotProbes(object):
         labelName : str
             Name of the velocity in a LaTeX plottable format (not
             including $)
+        pltFluct : bool
+            If the average flux fluctuation is to be plotted.
+        pltTotal : bool
+            If the total average flux is to be plotted.
+        pltAvg : bool
+            If the average flux average is to be plotted.
         """
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
 
-        gs      = GridSpec(nrows=3, ncols=1)
-        totalAx = fig.add_subplot(gs[0])
-        avgAx   = fig.add_subplot(gs[1], sharex=totalAx)
-        fluctAx = fig.add_subplot(gs[2], sharex=totalAx)
+        totalPlots = 0
+        if pltFluct:
+            totalPlots += 1
+        if pltTotal:
+            totalPlots += 1
+        if pltAvg:
+            totalPlots += 1
 
+        gs = GridSpec(nrows=totalPlots, ncols=1)
+
+        axes = {}
+        pltAxes = []
+        curPlot = 0
+        if pltFluct:
+            axes["fluctAx"] = fig.add_subplot(gs[curPlot])
+            curPlot += 1
+            pltAxes.append(axes["fluctAx"])
+        if pltTotal:
+            if pltFluct:
+                axes["totalAx"] =\
+                        fig.add_subplot(gs[curPlot], sharex=axes["fluctAx"])
+            else:
+                axes["totalAx"] = fig.add_subplot(gs[curPlot])
+            curPlot += 1
+            pltTotal.append(axes["totalAx"])
+        if pltAvg:
+            if pltFluct:
+                axes["avgAx"] =\
+                        fig.add_subplot(gs[curPlot], sharex=axes["fluctAx"])
+            elif pltTotal:
+                axes["avgAx"] =\
+                        fig.add_subplot(gs[curPlot], sharex=axes["totalAx"])
+            else:
+                axes["avgAx"] = fig.add_subplot(gs[curPlot])
+
+            pltTotal.append(axes["avgAx"])
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
             rho  = plotNumberFormatter(self._probes.rho[key], None)
             label = r"$\rho=${:8}".format(rho)
 
-            totalAx.plot(self._probes.time,\
-                         self._probes.results[key]["varAvgFlux" +\
-                                                   uName.capitalize()],\
-                         color=self._colors[nr],\
-                         label=label)
+            if pltFluct:
+                axes["fluctAx"].plot(self._probes.fluctTime,\
+                                     self._probes.\
+                                        results[key]["varAvgFluxFluct" +\
+                                                    uName.capitalize()],\
+                                     color=self._colors[nr],\
+                                     label=label)
+            if pltTotal:
+                axes["totalAx"].plot(self._probes.time,\
+                                     self._probes.\
+                                        results[key]["varAvgFlux" +\
+                                                    uName.capitalize()],\
+                                     color=self._colors[nr],\
+                                     label=label)
+            if pltAvg:
+                axes["avgAx"].plot(self._probes.fluctTime,\
+                                   self._probes.\
+                                    results[key]["varAvgFluxAvg" +\
+                                                 uName.capitalize()],\
+                                   color=self._colors[nr],\
+                                   label=label)
 
-            avgAx.  plot(self._probes.time,\
-                         self._probes.results[key]["varAvgFluxAvg" +\
-                                                   uName.capitalize()],\
-                         color=self._colors[nr],\
-                         label=label)
-
-            fluctAx.plot(self._probes.time,\
-                         self._probes.results[key]["varAvgFluxFluct" +\
-                                                   uName.capitalize()],\
-                         color=self._colors[nr],\
-                         label=label)
 
         # Set axis label
-        totalAx.set_ylabel(r"$n{}$".format(labelName))
-        totalAx.tick_params(labelbottom="off")
-        avgAx  .set_ylabel(r"$\bar{{n}}\bar{}$".format(labelName))
-        avgAx  .tick_params(labelbottom="off")
-        fluctAx.set_xlabel(r"$t\omega_{ci}$")
-        fluctAx.set_ylabel(\
-            r"$\langle\tilde{{n}}\tilde{}\rangle$".format(labelName))
+        # FIXME: Units (need to multiply with m\s or cs)
+        if pltFluct:
+            axes["fluctAx"].set_ylabel(\
+                r"$\langle\tilde{{n}}\tilde{}\rangle$".format(labelName))
+        if pltTotal:
+            axes["totalAx"].set_ylabel(r"$n{}$".format(labelName))
+        if pltAvg:
+            axes["avgAx"].set_ylabel(r"$\bar{{n}}\bar{}$".format(labelName))
 
-        fig.suptitle(self._defaultTitle)
+        pltAxes[0].set_title(self._defaultTitle)
 
         # Make the plot look nice
         # Plot the legend
-        leg = totalAx.legend(loc="best", fancybox = True, numpoints=1)
+        leg = pltAxes[0].legend(loc="best", fancybox = True, numpoints=1)
         leg.get_frame().set_alpha(0.5)
 
-        axes = [totalAx, avgAx, fluctAx]
-
-        for ax in axes:
+        for ax in pltAxes:
             self._makePlotPretty(ax, prune = "both", rotation = 45)
 
+        for ax in pltAxes[0:-1]:
+            avgAx.tick_params(labelbottom="off")
+
         # Make sure no collision between the ticks
-        fluctAx.xaxis.set_major_locator(MaxNLocator(prune="lower"))
+        pltAxes[-1].xaxis.set_major_locator(MaxNLocator(prune="lower"))
+        # FIXME: Units and stuff
+        pltAxes[-1].set_xlabel(r"$t\omega_{ci}$")
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0)
+
+        # Manual tweeking as we want legends outside the plot
+        fig.tight_layout(rect=[0,0,0.9,0.95])
+
 
         if self._showPlot:
             plt.show()
@@ -246,6 +410,12 @@ class PlotProbes(object):
     def plotZFFT(self, positionKey, maxMode):
         """
         Plots the fourier transform at the given position.
+
+        NOTE: As we are taking the fourier transform in the
+              dimensionless theta direction, that means that the units
+              will remain the same as
+
+              \hat{f}(x) = \int_\infty^\infty f(x) \exp(-i2\pi x\xi) d\xi
 
         Parameters
         ----------
@@ -275,17 +445,19 @@ class PlotProbes(object):
         ax.set_yscale("log")
 
         # Set axis label
-        ax.set_xlabel("Time []")
-        ax.set_ylabel("Amplitude")
+        # FIXME: Units and stuff here
+        ax.set_xlabel("$t\omega_{ci}$")
+        # FIXME: Units and stuff here
+        ax.set_ylabel("$\mathrm{Amplitude}$")
 
         rho = plotNumberFormatter(self._probes.rho[positionKey], None)
         z   = plotNumberFormatter(self._probes.z[positionKey], None)
         title  = r"$\rho=${}$,$ $z=${}".format(rho, z)
 
-        fig.suptitle(title)
+        ax.set_title(title)
 
         # Make the plot look nice
-        self._makePlotPretty(ax)
+        self._makePlotPretty(ax, rotation = 45)
         fig.tight_layout()
 
         if self._showPlot:
@@ -318,13 +490,15 @@ class PlotProbes(object):
         except:
             pass
         # Format the tick labels
-        import pdb; pdb.set_trace()
+        ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
-        ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
         # Plot the legend
-        leg = ax.legend(loc="best", fancybox = True, numpoints=1)
-        leg.get_frame().set_alpha(0.5)
+        self._leg = ax.legend(loc="best",\
+                              fancybox = True,\
+                              numpoints=1,\
+                              )
+        self._leg.get_frame().set_alpha(0.5)
         # Plot the grid
         ax.grid()
         # Make sure no collision between the ticks
@@ -348,9 +522,10 @@ class PlotProbes(object):
             format(os.path.join(self._savePath, name), self._extension)
 
         fig.savefig(fileName,\
-                    transparent = True    ,\
-                    bbox_inches = "tight" ,\
-                    pad_inches  = 0       ,\
+                    transparent = True             ,\
+                    bbox_inches = "tight"          ,\
+                    bbox_extra_artists=(self._leg,),\
+                    pad_inches  = 0                ,\
                     )
 
         print("Saved to {}".format(fileName))
