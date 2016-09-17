@@ -111,15 +111,13 @@ class Probes(object):
                                    "t",\
                                    convertToPhysical,\
                                    self._convDict)
+        # FIXME: Normalize z...that is in the direction of B
 
         self.fluctTime = time[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
-        self._varAvg   = polAvg(var)
-        self._varFluct = var - self._varAvg
-
-        # Clip the fluctuation part
-        self._varFluct = self._varFluct[tIndSaturatedTurb:,:,:,:]
+        self._varAvg   = polAvg(var[tIndSaturatedTurb:, :, :, :])
+        self._varFluct = var[tIndSaturatedTurb:, :, :, :] - self._varAvg
 
         if varName == "n":
             collectVarName = "lnN"
@@ -130,6 +128,7 @@ class Probes(object):
                           xguards=True, yguards=True, info=False)
 
         # Sets the normalized coordinates
+        # FIXME: This is common
         # Get the coordinates
         #{{{rho
         self._dx = collect("dx", path = collectPath,\
@@ -432,7 +431,7 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
-        fs = self.time[1] - self.time[0]
+        fs = self.fluctTime[1] - self.fluctTime[0]
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
