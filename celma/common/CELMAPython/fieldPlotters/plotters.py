@@ -107,7 +107,10 @@ class Plot(object):
         # Public as used in the driver
         self.convertToPhysical = convertToPhysical
 
-        # Get the coordinates
+        # FIXME: getCoordinates
+        # Get the coordinates (coordinates used as self._
+        # FIXME: Still need to collect self._dz
+        # NOTE: t on its own as collected with tind
         #{{{rho
         dx = collect("dx"             ,\
                      path    = path   ,\
@@ -242,6 +245,7 @@ class Plot(object):
         # Set frames
         self._frames = len(self._t)
 
+        # FIXME: This is also common, self.convDict
         # Convert to physical units
         self.convDict = {}
         if self.convertToPhysical:
@@ -260,6 +264,7 @@ class Plot(object):
                 # Reset convertToPhysical
                 self.convertToPhysical = False
 
+        # FIXME: This is common as well
         # Process values, and get normalization and units
         self._t, tNormalization, tUnits =\
                 physicalUnitsConverter(self._t, "t",\
