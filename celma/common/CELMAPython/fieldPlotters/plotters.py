@@ -1269,7 +1269,7 @@ class Plot2D(Plot):
                              "bbox_extra_artists" :(cbar,\
                                                    self._ax1txt,\
                                                    self._ax2txt),\
-                             "bbox_inches"        :"tight"},\
+                            },\
                           )
                 print("Saved to {}.gif".format(fileName))
         else:
