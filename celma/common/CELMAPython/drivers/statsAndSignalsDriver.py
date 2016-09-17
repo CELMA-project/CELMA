@@ -40,6 +40,6 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
 
         # Set member data
         self._paths = paths
-        self._pltSize = (10, 7)
+        self._pltSize = (12, 9)
     #}}}
 #}}}
