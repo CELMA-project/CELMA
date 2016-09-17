@@ -91,8 +91,13 @@ class PostProcessorDriver(object):
         # Get the timefolder
         self._timeFolder = self._getTime()
 
+
+        # Differentiate whether or not there are several folders
+        if hasattr(path, "__iter__") and type(path) != str:
+            path = path[0]
+
         # Create the savepath (based on the first path string)
-        saveDirs = [os.path.normpath(self._path[0]).split(os.sep)[0],\
+        saveDirs = [os.path.normpath(path).split(os.sep)[0],\
                     'visualization',\
                     saveFolder,\
                     self._timeFolder]
