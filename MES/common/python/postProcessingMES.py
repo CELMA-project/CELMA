@@ -6,7 +6,6 @@ from boutdata import collect
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import matplotlib.cm as cm
-from pylab import plot
 import numpy as np
 import os
 
