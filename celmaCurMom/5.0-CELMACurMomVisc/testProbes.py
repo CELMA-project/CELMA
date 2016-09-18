@@ -116,13 +116,14 @@ postBoutRunner(dmp_folder,\
                # postBoutRunner input
                driverName = "plotProbes",\
                # PostProcessDriver input
-               convertToPhysical = False             ,\
+               convertToPhysical = True             ,\
                # subPolAvg         = False             ,\
-               showPlot          = False             ,\
+               # showPlot          = True             ,\
                savePlot          = True              ,\
                # saveFolder        = None              ,\
                saveFolderFunc    = "scanWTagSaveFunc",\
-               # useSubProcess     = True              ,\
+               # Uses the Qt backend
+               useSubProcess     = False              ,\
                theRunName        = "probeTest"       ,\
                # StatsAndSignalsDrivers input
                paths             = collectionFolders,\
