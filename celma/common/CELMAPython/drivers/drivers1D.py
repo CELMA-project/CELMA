@@ -4,7 +4,6 @@
 Contains drivers for plotting 1D plots
 """
 
-from ..plotHelpers import physicalUnitsConverter
 from ..modelSpecific import getOrgObjFromModel, labelNames
 from ..fieldPlotters import Plot1D
 from .fieldPlottersDriver import FieldPlottersDriver
@@ -244,13 +243,10 @@ class Drivers1D(FieldPlottersDriver):
         # Get the correct units and numbers
         for line in orgObj.lines:
             line.field, _, units =\
-                    physicalUnitsConverter(line.field,\
-                                           line.name,\
-                                           self._convertToPhysical,\
-                                           plotter.convDict)
+                    plotter.helper.physicalUnitsConverter(line.field,\
+                                                          line.name)
 
-
-            if plotter.convertToPhysical:
+            if plotter.helper.convertToPhysical:
                 if line.name == "momDensPar":
                     line.label = "$m_i$" + line.label
                 if self._labelName == "mainFields":
