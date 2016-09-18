@@ -265,11 +265,10 @@ class PlotHelper(object):
         # Set generic string templates
         self.rhoTxtDict["rhoTxt"] =\
                 r"$\rho{0[normalization]}$".format(self.rhoTxtDict)
-        self.thetaTxtDict["thetaTxt"] =\
-                r"$\theta={:d}^{{\circ}}$"
         self.zTxtDict["zTxt"] =\
                 r"$z{0[normalization]}$".format(self.zTxtDict)
-
+        self.thetaTxtDict["constThetaTxt"] =\
+                r"$\theta={:d}^{{\circ}}$"
         # Set label and title templates
         if self.convertToPhysical:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]} $[{0[units]}]$".\
@@ -282,6 +281,8 @@ class PlotHelper(object):
                     r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
             self.tTxtDict["tTxt"] =\
                 r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
+            self.tTxtDict["tTxtLabel"] =\
+                r"$\mathrm{{t}}{0[normalization]}$ $[{0[units]}]$"
         else:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]}".\
                                              format(self.rhoTxtDict)
@@ -289,7 +290,9 @@ class PlotHelper(object):
             self.zTxtDict  ["zTxtLabel"] = "{0[zTxt]}".\
                                            format(self.zTxtDict)
             self.zTxtDict  ["constZTxt"] = r"{0[zTxt]} $=$ {0[value]}"
-            self.tTxtDict  ["tTxt"] = r"$t{0[normalization]}$ $=$ {0[value]}"
+            self.tTxtDict["tTxt"] =\
+                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]}"
+            self.tTxtDict  ["tTxtLabel"] = r"$t{0[normalization]}$"
     #}}}
 
     #{{{physicalUnitsConverter
@@ -352,15 +355,16 @@ class PlotHelper(object):
             elif varName == "uIPar":
                 var *= self._convDict["rhoS"]*\
                        self._convDict["omCI"]
-                units = r"\mathrm{m}\mathrm{s}^{-1}"
+                units = r"\mathrm{ms}^{-1}"
             elif varName == "uEPar":
                 var *= self._convDict["rhoS"]*\
                        self._convDict["omCI"]
-                units = r"\mathrm{m}\mathrm{s}^{-1}"
+                units = r"\mathrm{ms}^{-1}"
                 # Generic for velocities
             elif varName == "u":
                 var *= self._convDict["rhoS"]*\
                        self._convDict["omCI"]
+                units = r"\mathrm{ms}^{-1}"
             elif varName == "S":
                 var *= self._convDict["omCI"]*\
                        self._convDict["n0"]
