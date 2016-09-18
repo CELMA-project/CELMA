@@ -2,7 +2,8 @@
 
 """ Init for the plotHelpers package """
 
-from .plotHelpers import plotNumberFormatter, physicalUnitsConverter
+from .plotHelper import PlotHelper
+from .plotNumberFormatter import plotNumberFormatter
 from .collectiveCollect import collectiveCollect
 import matplotlib.pyplot as plt
 
