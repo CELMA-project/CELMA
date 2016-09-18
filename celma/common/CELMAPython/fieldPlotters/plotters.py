@@ -312,7 +312,7 @@ class Plot1D(Plot):
             self.helper.zTxtDict['value'] =\
                 plotNumberFormatter(self.helper.z[kwargs["ySlice"]], None)
             # Set values
-            thetaTxt = self.helper.thetaTxtDict["thetaTxt"].\
+            thetaTxt = self.helper.thetaTxtDict["constThetaTxt"].\
                        format(int(self.helper.theta[kwargs["zSlice"]]))
             zTxt     = self.helper.zTxtDict["constZTxt"].\
                        format(self.helper.zTxtDict)
@@ -331,7 +331,7 @@ class Plot1D(Plot):
             self.helper.rhoTxtDict['value'] =\
                 plotNumberFormatter(self.helper.rho[kwargs["xSlice"]], None)
             # Set values
-            thetaTxt = self.helper.thetaTxtDict["thetaTxt"].\
+            thetaTxt = self.helper.thetaTxtDict["constThetaTxt"].\
                             format(int(self.helper.theta[kwargs["zSlice"]]))
             rhoTxt   = self.helper.rhoTxtDict["constRhoTxt"].\
                             format(self.helper.rhoTxtDict)
@@ -952,7 +952,7 @@ class Plot2D(Plot):
         ax1Title =\
             self.helper.zTxtDict["constZTxt"].format(self.helper.zTxtDict)
         ax2Title =\
-            self.helper.thetaTxtDict["thetaTxt"] .format(int(self._thetaDeg))
+            self.helper.thetaTxtDict["constThetaTxt"] .format(int(self._thetaDeg))
         timeTitle = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
 
         # Title axis 1

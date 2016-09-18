@@ -107,16 +107,18 @@ class DriversProbes(StatsAndSignalsDrivers):
             self.calcProbes()
 
         # Create the probesPlotter
-        probesPlotter = PlotProbes(self._probes   ,\
-                                   self._showPlot ,\
-                                   self._savePlot ,\
-                                   self._extension,\
-                                   self._savePath ,\
-                                   self._pltSize  ,\
+        probesPlotter = PlotProbes(\
+                self._probes,\
+                showPlot  = self._showPlot         ,\
+                savePlot  = self._savePlot         ,\
+                extension = self._extension        ,\
+                savePath  = self._savePath         ,\
+                pltSize   = self._pltSize          ,\
                                   )
 
         probesPlotter.plotTimeTrace()
         probesPlotter.plotPDFs()
+        probesPlotter.plotPSDs()
         probesPlotter.plotAvgFluxThrougVolumeElement(\
                                             uName     = self._uName,\
                                             labelName = self._labelName)

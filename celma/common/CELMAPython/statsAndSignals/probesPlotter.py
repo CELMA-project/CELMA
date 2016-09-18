@@ -9,8 +9,6 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
 
-# TODO: Add physical parameters calculation
-
 #{{{PlotProbes
 class PlotProbes(object):
     """
@@ -20,14 +18,13 @@ class PlotProbes(object):
     """
 
     #{{{__init___
-    def __init__(self             ,\
-                 probes           ,\
-                 showPlot  = False,\
-                 savePlot  = False,\
-                 extension = "png",\
-                 savePath  = "."  ,\
-                 pltSize   = None ,\
-                 convertToPhysical   =False,\
+    def __init__(self                     ,\
+                 probes                   ,\
+                 showPlot          = False,\
+                 savePlot          = False,\
+                 extension         = "png",\
+                 savePath          = "."  ,\
+                 pltSize           = None ,\
                  ):
         #{{{docstring
         """
@@ -64,51 +61,34 @@ class PlotProbes(object):
         self._savePath  = savePath
 
         # Get the colors
-        self._colors = seqCMap(np.linspace(0, 1, len(self._probes.probesKeys)))
+        self._colors = seqCMap(np.linspace(0, 1, len(probes.probesKeys)))
 
-        # Get the default title
+        # Make the default title
         # NOTE: Theta should be the same for all probes
         #       (assume only rho changing)
-        theta = self._probes.theta[self._probes.probesKeys[0]]*(180/np.pi)
-        # Make from radians to degrees
-        theta = plotNumberFormatter(theta, None)
+        theta = int(probes.theta[probes.probesKeys[0]])
         # NOTE: z should be the same for all probes (assume only rho changing)
-        z     = plotNumberFormatter(self._probes.z[self._probes.probesKeys[0]], None)
-        self._defaultTitle =\
-            r"$\theta=${}$^{{\circ}},$ $z=${}".format(theta, z)
+        probes.helper.zTxtDict["value"] =\
+                plotNumberFormatter(probes.z[probes.probesKeys[0]], None)
+        self._defaultTitle = r"{}$,$ {}".\
+             format(probes.helper.thetaTxtDict["constThetaTxt"].format(theta),\
+                    probes.helper.zTxtDict["constZTxt"].format(probes.helper.zTxtDict))
 
-        # Get labels
-        # String formatting
-        self._tTxtDict   = {"normalization":tNormalization  , "units":tUnits}
-        self._rhoTxtDict = {"normalization":rhoNormalization, "units":rhoUnits}
-        self._zTxtDict   = {"normalization":zNormalization  , "units":zUnits}
+        # Set default time label
+        self._timeLabel = probes.helper.tTxtDict["tTxtLabel"].\
+                          format(probes.helper.tTxtDict)
 
-        self._rhoTxt   = r"$\rho{0[normalization]}$".format(self._rhoTxtDict)
-        self._thetaTxt = r"$\theta={:d}^{{\circ}}$"
-        self._zTxt     = r"$z{0[normalization]}$".format(self._zTxtDict)
-
-        # Expand the dictionaries
-        self._rhoTxtDict['rhoTxt'] = self._rhoTxt
-        self._zTxtDict['zTxt']     = self._zTxt
-
-        if self.convertToPhysical:
-            self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".\
-                    format(self._rhoTxtDict)
-            self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$".\
-                    format(self._zTxtDict)
-
-            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
-            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
-            self._tTxt        =\
-                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
+        # Set the variable label
+        if probes.helper.convertToPhysical:
+            self._varLabel = r"${}$ $[{}]$".\
+                                  format(probes.varName, probes.varUnits)
+            self._varLabelFLuct = r"$\tilde{{{}}}$ $[{}]$".\
+                                  format(probes.varName, probes.varUnits)
         else:
-            self._rhoTxtLabel = "{0[rhoTxt]}".format(self._rhoTxtDict)
-            self._zTxtLabel   = "{0[zTxt]}"  .format(self._zTxtDict)
-
-            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]}"
-            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]}"
-            self._tTxt        =\
-                r"$t{0[normalization]}$ $=$ {0[value]}"
+            self._varLabel = r"${}{}$".\
+                                  format(probes.varName, probes.varNormalization)
+            self._varLabelFLuct = r"$\tilde{{{}}}{}$".\
+                                  format(probes.varName, probes.varNormalization)
 
         # Set the plot size
         self._pltSize = pltSize
@@ -126,14 +106,17 @@ class PlotProbes(object):
 
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key], None)
+            self._probes.helper.rhoTxtDict["value"] =\
+                    plotNumberFormatter(self._probes.rho[key], None)
             mean = plotNumberFormatter(self._probes.results[key]["mean"],\
                                        None,\
                                        precision=3)
             var  = plotNumberFormatter(self._probes.results[key]["var"],\
                                        None,\
                                        precision=3)
-            label = r"$\rho=${:8} $\mu_n$={:8} $\sigma^2_n$={}".\
+            rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                    format(self._probes.helper.rhoTxtDict)
+            label = r"{}  $\mu_n$={:8} $\sigma^2_n$={}".\
                     format(rho, mean, var)
 
             ax.plot(self._probes.fluctTime,\
@@ -141,10 +124,9 @@ class PlotProbes(object):
                     color=self._colors[nr],\
                     label=label)
 
-        # Set axis label
-        # FIXME: Units in the old fashioned way
-        ax.set_xlabel(r"$t\omega_{ci}$")
-        ax.set_ylabel(r"$\tilde{n}$")
+        # Set axis labels
+        ax.set_xlabel(self._timeLabel)
+        ax.set_ylabel(self._varLabelFLuct)
 
         ax.set_title(self._defaultTitle)
 
@@ -187,10 +169,16 @@ class PlotProbes(object):
 
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key], None)
-            skew = plotNumberFormatter(self._probes.results[key]["skew"], None)
-            kurt = plotNumberFormatter(self._probes.results[key]["kurtosis"], None)
-            label = r"$\rho=${:8} $S_n$={:8} $K_n$={}".\
+            self._probes.helper.rhoTxtDict["value"] =\
+                    plotNumberFormatter(self._probes.rho[key], None)
+            skew =\
+                plotNumberFormatter(self._probes.results[key]["skew"], None)
+            kurt =\
+                plotNumberFormatter(self._probes.results[key]["kurtosis"], None)
+
+            rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                    format(self._probes.helper.rhoTxtDict)
+            label = r"{}   $S_n$={:8} $K_n$={}".\
                     format(rho, skew, kurt)
 
             ax.plot(self._probes.results[key]["pdfX"],\
@@ -202,10 +190,9 @@ class PlotProbes(object):
         ax.set_yscale("log")
 
         # Set axis label
-        # FIXME: Units of the variables here
-        ax.set_xlabel(r"$\tilde{n}$")
-        # FIXME: Units in the old fashioned way
-        ax.set_ylabel(r"$\mathrm{PDF}(\tilde{n})$")
+        ax.set_xlabel(self._varLabelFLuct)
+        ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
+                format(self._probes.varName))
 
         ax.set_title(self._defaultTitle)
 
@@ -239,8 +226,10 @@ class PlotProbes(object):
 
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key], None)
-            label = r"$\rho=${}".format(rho)
+            self._probes.helper.rhoTxtDict["value"] =\
+                    plotNumberFormatter(self._probes.rho[key], None)
+            label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                        format(self._probes.helper.rhoTxtDict)
 
             ax.plot(self._probes.results[key]["psdX"],\
                     self._probes.results[key]["psdY"],\
@@ -251,15 +240,19 @@ class PlotProbes(object):
         ax.set_yscale("log")
 
         # Set axis label
-        # FIXME: Herz or so
-        ax.set_xlabel(r"${}$")
-        # FIXME: Units as described above
-        ax.set_ylabel(r"${}^2/{}$")
+        if self._probes.helper.convertToPhysical:
+            inverse = "$/Hz$"
+            xlabel = "$\mathrm{f}$ $\mathrm{[Hz]}$"
+        else:
+            inverse = "$/${}".format(self._timeLabel)
+            xlabel = "$(1/${}$)$".format(self._timeLabel)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(r"${}^2${}".format(self._probes.varName, inverse))
 
         ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._makePlotPretty(ax)
+        self._makePlotPretty(ax, rotation = 45)
         fig.tight_layout()
 
         if self._showPlot:
@@ -336,8 +329,10 @@ class PlotProbes(object):
             pltTotal.append(axes["avgAx"])
         for nr, key in enumerate(self._probes.probesKeys):
             # Make the labels
-            rho  = plotNumberFormatter(self._probes.rho[key], None)
-            label = r"$\rho=${:8}".format(rho)
+            self._probes.helper.rhoTxtDict["value"] =\
+                    plotNumberFormatter(self._probes.rho[key], None)
+            label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                        format(self._probes.helper.rhoTxtDict)
 
             if pltFluct:
                 axes["fluctAx"].plot(self._probes.fluctTime,\
@@ -363,14 +358,21 @@ class PlotProbes(object):
 
 
         # Set axis label
-        # FIXME: Units (need to multiply with m\s or cs)
+        if self._probes.helper.convertToPhysical:
+            labelEnd = "[{}\mathrm{{ms}}^{{-1}}]".format(self._probes.varUnits)
+        else:
+            labelEnd = "{}c_s".format(self._probes.varNormalization)
+
         if pltFluct:
             axes["fluctAx"].set_ylabel(\
-                r"$\langle\tilde{{n}}\tilde{}\rangle$".format(labelName))
+                r"$\langle\tilde{{{}}}\tilde{{{}}}\rangle{}$".\
+                    format(self._probes.varName, labelName, labelEnd))
         if pltTotal:
-            axes["totalAx"].set_ylabel(r"$n{}$".format(labelName))
+            axes["totalAx"].set_ylabel(r"${}{}{}$".\
+                    format(self._probes.varName, labelName, labelEnd))
         if pltAvg:
-            axes["avgAx"].set_ylabel(r"$\bar{{n}}\bar{}$".format(labelName))
+            axes["avgAx"].set_ylabel(r"$\bar{{{}}}\bar{}{}$".\
+                    format(self._probes.varName, labelName, labelEnd))
 
         pltAxes[0].set_title(self._defaultTitle)
 
@@ -387,8 +389,7 @@ class PlotProbes(object):
 
         # Make sure no collision between the ticks
         pltAxes[-1].xaxis.set_major_locator(MaxNLocator(prune="lower"))
-        # FIXME: Units and stuff
-        pltAxes[-1].set_xlabel(r"$t\omega_{ci}$")
+        pltAxes[-1].set_xlabel(self._timeLabel)
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0)
@@ -408,7 +409,7 @@ class PlotProbes(object):
 
     #{{{plotZFFT
     def plotZFFT(self, positionKey, maxMode):
-        """
+        r"""
         Plots the fourier transform at the given position.
 
         NOTE: As we are taking the fourier transform in the
@@ -445,14 +446,18 @@ class PlotProbes(object):
         ax.set_yscale("log")
 
         # Set axis label
-        # FIXME: Units and stuff here
-        ax.set_xlabel("$t\omega_{ci}$")
-        # FIXME: Units and stuff here
-        ax.set_ylabel("$\mathrm{Amplitude}$")
+        ax.set_xlabel(self._timeLabel)
+        ax.set_ylabel(self._varLabel)
 
-        rho = plotNumberFormatter(self._probes.rho[positionKey], None)
-        z   = plotNumberFormatter(self._probes.z[positionKey], None)
-        title  = r"$\rho=${}$,$ $z=${}".format(rho, z)
+        self._probes.helper.rhoTxtDict["value"] =\
+                plotNumberFormatter(self._probes.rho[positionKey], None)
+        rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                    format(self._probes.helper.rhoTxtDict)
+        self._probes.helper.zTxtDict  ["value"] =\
+                plotNumberFormatter(self._probes.z[positionKey], None)
+        z   = self._probes.helper.zTxtDict["constZTxt"].\
+                    format(self._probes.helper.zTxtDict)
+        title  = r"{}$,$ {}".format(rho, z)
 
         ax.set_title(title)
 

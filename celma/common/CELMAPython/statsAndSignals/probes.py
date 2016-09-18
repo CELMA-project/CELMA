@@ -6,7 +6,7 @@ Contains classes which probes the data
 
 from .polAvg import polAvg
 from .derivatives import DDZ, findLargestRadialGrad
-from ..plotHelpers import physicalUnitsConverter, collectiveCollect
+from ..plotHelpers import PlotHelper, collectiveCollect
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
@@ -24,15 +24,15 @@ class Probes(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self                      ,\
-                 var                       ,\
-                 varName                   ,\
-                 time                      ,\
-                 tIndSaturatedTurb   =None ,\
-                 steadyStatePath     =None ,\
-                 radialProbesIndices =None ,\
-                 collectPath         =None ,\
-                 convertToPhysical   =False,\
+    def __init__(self                       ,\
+                 var                        ,\
+                 varName                    ,\
+                 time                       ,\
+                 tIndSaturatedTurb   = None ,\
+                 steadyStatePath     = None ,\
+                 radialProbesIndices = None ,\
+                 collectPath         = None ,\
+                 convertToPhysical   = False,\
                  ):
         #{{{docstring
         """
@@ -80,39 +80,20 @@ class Probes(object):
         if collectPath is None:
             collectPath = steadyStatePath
 
-        # Convert to physical, and get units
-        # Collect the normalization constants
-        self._convDict = {}
-        if convertToPhysical:
-            try:
-                self._convDict['omCI']=collect("omCI", path = collectPath[-1])
-                self._convDict['rhoS']=collect("rhoS", path = collectPath[-1])
-                self._convDict['n0']  =collect("n0" ,  path = collectPath[-1])
-                self._convDict['Te0'] =collect("Te0",  path = collectPath[-1])
-                self._convertToPhysical = True
-            except ValueError:
-                # An OSError is thrown if the file is not found
-                message = ("{0}{1}WARNING: Normalized quantities not found. "
-                           "Will use normalized units{1}{0}".\
-                            format("\n"*3,"!"*3))
-                print(message)
-                self._convertToPhysical = False
-        else:
-            self._convertToPhysical = False
+        # Make the PlotHelper object
+        # Public as used in the driver
+        self.helper = PlotHelper(collectPath                          ,\
+                                  time                                 ,\
+                                  xguards           = False            ,\
+                                  yguards           = False            ,\
+                                  convertToPhysical = convertToPhysical,\
+                                 )
 
         # Get the units (eventually convert to physical units)
         self._var, self.varNormalization, self.varUnits =\
-            physicalUnitsConverter(var,\
-                                   varName,\
-                                   convertToPhysical,\
-                                   self._convDict)
-        self.time, self.timeNormalization, self.timeUnits =\
-            physicalUnitsConverter(time,\
-                                   "t",\
-                                   convertToPhysical,\
-                                   self._convDict)
-        # FIXME: Normalize z...that is in the direction of B
+            self.helper.physicalUnitsConverter(var, varName)
 
+        self.time      = time
         self.fluctTime = time[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
@@ -126,55 +107,6 @@ class Probes(object):
         # Contains the ghost points as we are using this in DDZ
         self._J = collect("J", path=collectPath,\
                           xguards=True, yguards=True, info=False)
-
-        # Sets the normalized coordinates
-        # FIXME: This is common
-        # Get the coordinates
-        #{{{rho
-        self._dx = collect("dx", path = collectPath,\
-                           xguards = True, yguards = True, info = False)
-        self._MXG = collect("MXG", path = collectPath,\
-                            xguards = True, yguards = True, info = False)
-
-        nPoints  = self._dx.shape[0]
-        dx       = self._dx[0,0]
-
-        innerPoints = nPoints - 2*self._MXG
-        self.rho    = dx * np.array(np.arange(0.5, innerPoints))
-
-        # Insert the first and last grid point due to the guards
-        self.rho = np.insert(self.rho, 0, - 0.5*dx)
-        self.rho = np.append(self.rho, self.rho[-1] + dx)
-        #}}}
-
-        #{{{z
-        dy = collect("dy", path = collectPath,\
-                     xguards = True, yguards = True, info = False)
-        MYG = collect("MYG", path = collectPath,\
-                      xguards = True, yguards = True, info = False)
-
-        nPoints  = dy.shape[1]
-        self._dy = dy[0,0]
-
-        innerPoints = nPoints - 2*MYG
-        self.z = self._dy * np.array(np.arange(0.5, innerPoints))
-
-        # Insert the first and last grid point
-        self.z = np.insert(self.z, 0, - 0.5*self._dy)
-        self.z = np.append(self.z, self.z[-1] + self._dy)
-        #}}}
-
-        #{{{theta
-        dz = collect("dz", path = collectPath,\
-                     xguards = True, yguards = True, info = False)
-        MZ = collect("MZ", path = collectPath,\
-                     xguards = True, yguards = True, info = False)
-
-        # Subtract the unused plane
-        innerPoints = MZ - 1
-
-        self.theta = dz * np.array(np.arange(0.0, innerPoints))
-        #}}}
 
         if radialProbesIndices == None:
             # Note that the ghost cells are collected, as we are taking
@@ -238,9 +170,9 @@ class Probes(object):
 
         # Copy the coordinates so that they will have the same
         # dimensions as timetraces
-        rho   = self.rho  .copy()
-        theta = self.theta.copy()
-        z     = self.z    .copy()
+        rho   = self.helper.rho  .copy()
+        theta = self.helper.theta.copy()
+        z     = self.helper.z    .copy()
 
         self.rho   = {}
         self.theta = {}
@@ -502,10 +434,7 @@ class Probes(object):
 
         # Convert to physical, and get units
         u, self._uNormalization, self._uUnits =\
-            physicalUnitsConverter(u,\
-                                   "u",\
-                                   self._convertToPhysical,\
-                                   self._convDict)
+            self.helper.physicalUnitsConverter(u, "u")
 
         # Find the fluctuating velocity
         uAvg         = polAvg(u)
@@ -661,21 +590,26 @@ class PerpPlaneProbes(Probes):
             var = np.exp(var)
 
         # Call the parent class
-        super().__init__(var,\
-                         varName,\
-                         time,\
-                         tIndSaturatedTurb,\
-                         steadyStatePath,\
-                         radialProbesIndices)
+        super().__init__(var                                      ,\
+                         varName                                  ,\
+                         time                                     ,\
+                         tIndSaturatedTurb   = tIndSaturatedTurb  ,\
+                         steadyStatePath     = steadyStatePath    ,\
+                         radialProbesIndices = radialProbesIndices,\
+                         convertToPhysical   = convertToPhysical  ,\
+                         )
 
         self.yInd = yInd
 
         if radialProbesIndices is None:
+            # Collect dx and MXG
+            dx        = collect("dx",  path=paths[0], info=False)
+            self._MXG = collect("MXG", path=paths[0], info=False)
             # Find the max gradient of the variable
             _, maxGradInd =\
                 findLargestRadialGrad(\
                   self._varSteadyState[0:1, :, self.yInd:self.yInd+1, 0:1],\
-                  self._dx,\
+                  dx,\
                   self._MXG)
             self.radialProbesIndices =\
                 self.getRadialProbeIndices(maxGradInd, nProbes)
