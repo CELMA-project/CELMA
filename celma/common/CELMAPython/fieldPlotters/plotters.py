@@ -4,9 +4,9 @@
 Contains classes for plotting the fields
 """
 
-from ..plotHelpers import (titleSize,\
+from ..plotHelpers import (PlotHelper,\
+                           titleSize,\
                            plotNumberFormatter,\
-                           physicalUnitsConverter,\
                            seqCMap,\
                            divCMap)
 from ..statsAndSignals import polAvg
@@ -17,7 +17,6 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from boutdata import collect
-from boututils.options import BOUTOptions
 import numpy as np
 import os
 import warnings
@@ -104,102 +103,6 @@ class Plot(object):
         self._saveFolder = saveFolder
         self._subPolAvg  = subPolAvg
         self._extension  = extension
-        # Public as used in the driver
-        self.convertToPhysical = convertToPhysical
-
-        # FIXME: getCoordinates
-        # Get the coordinates (coordinates used as self._
-        # FIXME: Still need to collect self._dz
-        # NOTE: t on its own as collected with tind
-        #{{{rho
-        dx = collect("dx"             ,\
-                     path    = path   ,\
-                     xguards = xguards,\
-                     yguards = yguards,\
-                     info    = False)
-        MXG = collect("MXG"            ,\
-                      path    = path   ,\
-                      xguards = xguards,\
-                      yguards = yguards,\
-                      info    = False)
-
-        nPoints = dx.shape[0]
-        dx      = dx[0,0]
-
-        if xguards:
-            innerPoints = nPoints - 2*MXG
-        else:
-            innerPoints = nPoints
-
-        # By default there is no offset in the cylinder
-        # For comparision with other codes, an offset option is set
-        # Read the input file
-        myOpts = BOUTOptions(path)
-        # Read in geom offset
-        try:
-            offset = eval(myOpts.geom["offset"])
-            spacing = "\n"*3
-            print("{0}!!!WARNING: 'offset' found in BOUT.inp, "
-                  "running as annulus!!!{0}".format(spacing))
-            self._rho = offset + dx * np.array(np.arange(0.5, innerPoints))
-        except KeyError:
-            # This is the default
-            self._rho = dx * np.array(np.arange(0.5, innerPoints))
-
-        if xguards:
-            # Insert the first and last grid point
-            self._rho = np.insert(self._rho, 0, - 0.5*dx)
-            self._rho = np.append(self._rho, self._rho[-1] + dx)
-        #}}}
-
-        #{{{z
-        dy  = collect("dy"             ,\
-                      path    = path   ,\
-                      xguards = xguards,\
-                      yguards = yguards,\
-                      info    = False)
-        MYG = collect("MYG"            ,\
-                      path    = path   ,\
-                      xguards = xguards,\
-                      yguards = yguards,\
-                      info    = False)
-
-        nPoints  = dy.shape[1]
-        self._dy = dy[0,0]
-
-        if yguards:
-            innerPoints = nPoints - 2*MYG
-        else:
-            innerPoints = nPoints
-
-        self._z = self._dy * np.array(np.arange(0.5, innerPoints))
-
-        if yguards:
-            # Insert the first and last grid point
-            self._z = np.insert(self._z, 0, - 0.5*self._dy)
-            self._z = np.append(self._z, self._z[-1] + self._dy)
-        #}}}
-
-        #{{{theta
-        self._dz = collect("dz"             ,\
-                           path    = path   ,\
-                           xguards = xguards,\
-                           yguards = yguards,\
-                           info    = False)
-        MZ       = collect("MZ"             ,\
-                           path    = path   ,\
-                           xguards = xguards,\
-                           yguards = yguards,\
-                           info    = False)
-
-        # Subtract the unused plane
-        innerPoints = MZ - 1
-
-        self._theta = self._dz * np.array(np.arange(0.0, innerPoints))
-
-        # Convert to degrees
-        self._theta * (180/np.pi)
-        #}}}
 
         # Get proper indices
         self._xind = self._getIndices(xSlice, "x")
@@ -234,79 +137,24 @@ class Plot(object):
         self._tSlice = tSlice
 
         # Get the time
-        self._t =\
-            collect("t_array", path=self._path, tind=self._tind, info=False)
+        t = collect("t_array", path=self._path, tind=self._tind, info=False)
 
         # Slice in t
         if self._tSlice is not None:
             if self._tSlice.step is not None:
-                self._t = self._t[::self._tSlice.step]
+                t = t[::self._tSlice.step]
 
         # Set frames
-        self._frames = len(self._t)
+        self._frames = len(t)
 
-        # FIXME: This is also common, self.convDict
-        # Convert to physical units
-        self.convDict = {}
-        if self.convertToPhysical:
-            try:
-                normalizers = ["omCI", "rhoS", "n0", "Te0"]
-                for normalizer in normalizers:
-                    self.convDict[normalizer] =\
-                            collect(normalizer, path=self._path, info=False)
-
-            except ValueError:
-                # An OSError is thrown if the file is not found
-                message = ("{0}{1}WARNING: Normalized quantities not found. "
-                           "The time remains normalized".format("\n"*3,"!"*3))
-                print(message)
-
-                # Reset convertToPhysical
-                self.convertToPhysical = False
-
-        # FIXME: This is common as well
-        # Process values, and get normalization and units
-        self._t, tNormalization, tUnits =\
-                physicalUnitsConverter(self._t, "t",\
-                                       self.convertToPhysical, self.convDict)
-        self._rho, rhoNormalization, rhoUnits =\
-                physicalUnitsConverter(self._rho, "rho",\
-                                       self.convertToPhysical, self.convDict)
-        self._z, zNormalization, zUnits =\
-                physicalUnitsConverter(self._z, "z",\
-                                       self.convertToPhysical, self.convDict)
-
-        # String formatting
-        self._tTxtDict   = {"normalization":tNormalization  , "units":tUnits}
-        self._rhoTxtDict = {"normalization":rhoNormalization, "units":rhoUnits}
-        self._zTxtDict   = {"normalization":zNormalization  , "units":zUnits}
-
-        self._rhoTxt   = r"$\rho{0[normalization]}$".format(self._rhoTxtDict)
-        self._thetaTxt = r"$\theta={:d}^{{\circ}}$"
-        self._zTxt     = r"$z{0[normalization]}$".format(self._zTxtDict)
-
-        # Expand the dictionaries
-        self._rhoTxtDict['rhoTxt'] = self._rhoTxt
-        self._zTxtDict['zTxt']     = self._zTxt
-
-        if self.convertToPhysical:
-            self._rhoTxtLabel = "{0[rhoTxt]} $[{0[units]}]$".\
-                    format(self._rhoTxtDict)
-            self._zTxtLabel   = "{0[zTxt]} $[{0[units]}]$".\
-                    format(self._zTxtDict)
-
-            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]} ${0[units]}$"
-            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
-            self._tTxt        =\
-                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
-        else:
-            self._rhoTxtLabel = "{0[rhoTxt]}".format(self._rhoTxtDict)
-            self._zTxtLabel   = "{0[zTxt]}"  .format(self._zTxtDict)
-
-            self._constRhoTxt = r"{0[rhoTxt]} $=$ {0[value]}"
-            self._constZTxt   = r"{0[zTxt]} $=$ {0[value]}"
-            self._tTxt        =\
-                r"$t{0[normalization]}$ $=$ {0[value]}"
+        # Make the PlotHelper object
+        # Public as used in the driver
+        self.helper = PlotHelper(path                                 ,\
+                                 t                                    ,\
+                                 xguards           = xguards          ,\
+                                 yguards           = yguards          ,\
+                                 convertToPhysical = convertToPhysical,\
+                                 )
 
         # Set colormap
         if self._subPolAvg:
@@ -461,14 +309,16 @@ class Plot1D(Plot):
         #{{{x-direction
         if type(kwargs["xSlice"]) == slice:
             # Update dict
-            self._zTxtDict['value'] =\
-                plotNumberFormatter(self._z[kwargs["ySlice"]], None)
+            self.helper.zTxtDict['value'] =\
+                plotNumberFormatter(self.helper.z[kwargs["ySlice"]], None)
             # Set values
-            thetaTxt = self._thetaTxt .format(int(self._theta[kwargs["zSlice"]]))
-            zTxt     = self._constZTxt.format(self._zTxtDict)
+            thetaTxt = self.helper.thetaTxtDict["thetaTxt"].\
+                       format(int(self.helper.theta[kwargs["zSlice"]]))
+            zTxt     = self.helper.zTxtDict["constZTxt"].\
+                       format(self.helper.zTxtDict)
             # Set the label and the title
-            self._xAx    = self._rho
-            self._xlabel = self._rhoTxtLabel
+            self._xAx    = self.helper.rho
+            self._xlabel = self.helper.rhoTxtDict["rhoTxtLabel"]
             self._title  = "{}   {}  ".format(thetaTxt, zTxt)
 
             # Set direction (used in save)
@@ -478,14 +328,16 @@ class Plot1D(Plot):
         #{{{y-direction
         if type(kwargs["ySlice"]) == slice:
             # Update dict
-            self._rhoTxtDict['value'] =\
-                plotNumberFormatter(self._rho[kwargs["xSlice"]], None)
+            self.helper.rhoTxtDict['value'] =\
+                plotNumberFormatter(self.helper.rho[kwargs["xSlice"]], None)
             # Set values
-            thetaTxt = self._thetaTxt.format(int(self._theta[kwargs["zSlice"]]))
-            rhoTxt   = self._constRhoTxt.format(self._rhoTxtDict)
+            thetaTxt = self.helper.thetaTxtDict["thetaTxt"].\
+                            format(int(self.helper.theta[kwargs["zSlice"]]))
+            rhoTxt   = self.helper.rhoTxtDict["constRhoTxt"].\
+                            format(self.helper.rhoTxtDict)
             # Set the label and the title
-            self._xAx    = self._z
-            self._xlabel = self._zTxtLabel
+            self._xAx    = self.helper.z
+            self._xlabel = self.helper.zTxtDict["zTxtLabel"]
             self._title  = "{}   {}  ".format(rhoTxt, thetaTxt)
 
             # Set direction (used in save)
@@ -496,16 +348,18 @@ class Plot1D(Plot):
         if type(kwargs["zSlice"]) == slice:
 
             # Update dicts
-            self._rhoTxtDict['value'] =\
-                plotNumberFormatter(self._rho[kwargs["xSlice"]], None)
-            self._zTxtDict['value'] =\
-                plotNumberFormatter(self._z [kwargs["ySlice"]], None)
+            self.helper.rhoTxtDict['value'] =\
+                plotNumberFormatter(self.helper.rho[kwargs["xSlice"]], None)
+            self.helper.zTxtDict['value'] =\
+                plotNumberFormatter(self.helper.z [kwargs["ySlice"]], None)
             # Set values
-            rhoTxt = self._constRhoTxt.format(self._rhoTxtDict)
-            zTxt   = self._constZTxt  .format(self._zTxtDict)
+            rhoTxt = self.helper.rhoTxtDict["constRhoTxt"].\
+                            format(self.helper.rhoTxtDict)
+            zTxt   = self.helper.zTxtDict["constZTxt"].\
+                            format(self.helper.zTxtDict)
             # Set the label and the title
             self._xAx    = r"$\theta$"
-            self._xlabel = self._zTxtLabel
+            self._xlabel = self.helper.zTxtDict["zTxtLabel"]
             self._title  = "{}   {}   ".format(rhoTxt, zTxt)
 
             # Set direction (used in save)
@@ -554,8 +408,9 @@ class Plot1D(Plot):
 
         # Set the title
         # Update the dictionary
-        self._tTxtDict['value'] = plotNumberFormatter(self._t[tInd], None)
-        curTimeTxt = self._tTxt.format(self._tTxtDict)
+        self.helper.tTxtDict['value'] =\
+            plotNumberFormatter(self.helper.t[tInd], None)
+        curTimeTxt = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
         fig.suptitle("{}{}".format(self._title, curTimeTxt))
     #}}}
 
@@ -641,8 +496,9 @@ class Plot1D(Plot):
             orgObj.combLine.ax.set_ylim(allMin, allMax)
 
         # Set the title
-        self._tTxtDict['value'] = plotNumberFormatter(self._t[0], None)
-        curTimeTxt = self._tTxt.format(self._tTxtDict)
+        self.helper.tTxtDict['value'] =\
+            plotNumberFormatter(self.helper.t[0], None)
+        curTimeTxt = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
         fig.suptitle("{}{}".format(self._title, curTimeTxt))
 
         # Adjust the subplots
@@ -681,7 +537,7 @@ class Plot1D(Plot):
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
                 # Make it a 4d variable
-                field      = np.zeros(( len(self._t), *line.field.shape))
+                field      = np.zeros(( len(self.helper.t), *line.field.shape))
                 # Copy the field in to each time
                 field[:]   = line.field
                 line.field = field
@@ -711,7 +567,7 @@ class Plot1D(Plot):
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
                 # Make it a 4d variable
-                field      = np.zeros(( len(self._t), *line.field.shape))
+                field      = np.zeros(( len(self.helper.t), *line.field.shape))
                 # Copy the field in to each time
                 field[:]   = line.field
                 line.field = field
@@ -868,7 +724,7 @@ class Plot2D(Plot):
             message = "3 slices were given, although only 2 is possible"
             raise ValueError(message)
 
-        # Make it possible to filter warnings (f.ex if no variation in the data)
+        # Make it possible to filter warnings (Ex: no variation in the data)
         warnings.filterwarnings("error")
 
         # Set member data from the index
@@ -883,7 +739,10 @@ class Plot2D(Plot):
         self._pltName   = None
 
         # Create a CylinderMesh object
-        self._cyl = CylinderMesh(self._rho, self._theta, self._z, xguards)
+        self._cyl = CylinderMesh(self.helper.rho,\
+                                 self.helper.theta,\
+                                 self.helper.z,\
+                                 xguards)
 
         # Collect the full variable
         # Stored as an ndarray with the indices [t,x,y,z] (=[t,rho,z,theta])
@@ -908,14 +767,10 @@ class Plot2D(Plot):
 
         # Add the last theta slice
         self._variable =\
-                self._cyl.addLastThetaSlice(self._variable, len(self._t))
+                self._cyl.addLastThetaSlice(self._variable, len(self.helper.t))
 
-        self._variable, _, self._units =\
-                physicalUnitsConverter(self._variable,\
-                                       varName,\
-                                       self.convertToPhysical,\
-                                       self.convDict,\
-                                       )
+        self._variable, self._normalization, self._units =\
+                self.helper.physicalUnitsConverter(self._variable, varName)
 
         if xguards:
             # Remove the inner ghost points from the variable
@@ -975,13 +830,14 @@ class Plot2D(Plot):
         """ Set the lines which shows where the data is sliced"""
 
         # The slice lines we are plotting
-        rhoStart = self._rho[0]
-        rhoEnd   = self._rho[-1]
+        rhoStart = self.helper.rho[0]
+        rhoEnd   = self.helper.rho[-1]
 
         # Calculate the numerical value of the theta angle and the z value
-        thetaRad         = self._dz*self._zind[-1]
+        thetaRad         = (self.helper.theta[1] - self.helper.theta[0])*\
+                            self._zind[-1]
         thetaPPi         = thetaRad + np.pi
-        self._zVal       = self._z[self._ySlice]
+        self._zVal       = self.helper.z[self._ySlice]
         self._thetaDeg   = thetaRad*(180/np.pi)
 
         # Set coordinates for the lines which indicate how the data is
@@ -1077,21 +933,27 @@ class Plot2D(Plot):
         self._ax2.grid(b=True)
 
         # x and y labels
-        self._ax1.set_xlabel(self._rhoTxtLabel, fontsize = self._latexSize)
-        self._ax1.set_ylabel(self._rhoTxtLabel, fontsize = self._latexSize)
-        self._ax2.set_xlabel(self._rhoTxtLabel, fontsize = self._latexSize)
-        self._ax2.set_ylabel(self._zTxtLabel  , fontsize = self._latexSize)
+        self._ax1.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                             fontsize = self._latexSize)
+        self._ax1.set_ylabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                             fontsize = self._latexSize)
+        self._ax2.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                             fontsize = self._latexSize)
+        self._ax2.set_ylabel(self.helper.zTxtDict["zTxtLabel"],\
+                            fontsize = self._latexSize)
 
         # Title preparation
-        self._zTxtDict["value"] =\
-                plotNumberFormatter(self._z[self._ySlice], None)
-        self._tTxtDict["value"] =\
-                plotNumberFormatter(self._t[tInd], None)
+        self.helper.zTxtDict["value"] =\
+                plotNumberFormatter(self.helper.z[self._ySlice], None)
+        self.helper.tTxtDict["value"] =\
+                plotNumberFormatter(self.helper.t[tInd], None)
 
         # Titles
-        ax1Title  = self._constZTxt.format(self._zTxtDict)
-        ax2Title  = self._thetaTxt .format(int(self._thetaDeg))
-        timeTitle = self._tTxt.format(self._tTxtDict)
+        ax1Title =\
+            self.helper.zTxtDict["constZTxt"].format(self.helper.zTxtDict)
+        ax2Title =\
+            self.helper.thetaTxtDict["thetaTxt"] .format(int(self._thetaDeg))
+        timeTitle = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
 
         # Title axis 1
         self._ax1txt = self._ax1.text(0.5, 1.05,\
@@ -1161,7 +1023,7 @@ class Plot2D(Plot):
 #                if self.convertToPhysical:
 #                    cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
 #                else:
-#                    cbarName = r"${}{}$".format(self._pltName, self._units)
+#                    cbarName = r"${}{}$".format(self._pltName, self._normalization)
 #
 #                cbar.set_label(label = cbarName, size = titleSize + 5)
 #
@@ -1199,10 +1061,10 @@ class Plot2D(Plot):
                                       format = FuncFormatter(     \
                                               plotNumberFormatter),\
                                       )
-            if self.convertToPhysical:
+            if self.helper.convertToPhysical:
                 cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
             else:
-                cbarName = r"${}{}$".format(self._pltName, self._units)
+                cbarName = r"${}{}$".format(self._pltName, self._normalization)
 
             cbar.set_label(label = cbarName, size = titleSize + 5)
 
