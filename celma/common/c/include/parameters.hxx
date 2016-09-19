@@ -62,7 +62,7 @@ class Parameters
         // Additional parameters
         BoutReal beta;   //<! Plasma beta
         BoutReal mu;     //<! Mass ratio
-        BoutReal Lambda; //<! \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\rigth)\f$
+        BoutReal Lambda; //<! \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\right)\f$
 
         // Parallel viscosities
         BoutReal eta0I; //<! Viscosity parameter ion eta 0
