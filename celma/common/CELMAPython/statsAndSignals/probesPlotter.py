@@ -4,7 +4,7 @@
 
 from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap2
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator, FuncFormatter
+from matplotlib.ticker import MaxNLocator
 from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
@@ -48,8 +48,6 @@ class PlotProbes(object):
             Path to save destination. Must exist.
         pltSize : tuple
             Size of the plots given as (x, y)
-        convertToPhysical : str
-            Whether normalized or physical units should be used.
         """
         #}}}
 
@@ -131,7 +129,7 @@ class PlotProbes(object):
         ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._makePlotPretty(ax, rotation = 45)
+        self._probes.helper.makePlotPretty(ax, rotation = 45)
 
         # Manual tweeking as we want legends outside the plot
         # Shrink current axis by 20%
@@ -150,7 +148,10 @@ class PlotProbes(object):
             plt.show()
 
         if self._savePlot:
-            self._saveThePlot(fig, "timeTraces")
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "timeTraces"),\
+                       self._extension)
+            self._probes.helper.savePlot(fig, fileName, (self._leg,))
 
         plt.close(fig)
     #}}}
@@ -197,14 +198,17 @@ class PlotProbes(object):
         ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._makePlotPretty(ax)
+        self._probes.helper.makePlotPretty(ax)
         fig.tight_layout()
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            self._saveThePlot(fig, "PDFs")
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "PDFs"),\
+                       self._extension)
+            self._probes.helper.savePlot(fig, fileName)
 
         plt.close(fig)
     #}}}
@@ -252,14 +256,17 @@ class PlotProbes(object):
         ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._makePlotPretty(ax, rotation = 45)
+        self._probes.helper.makePlotPretty(ax, rotation = 45)
         fig.tight_layout()
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            self._saveThePlot(fig, "PSDs")
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "PSDs"),\
+                       self._extension)
+            self._probes.helper.savePlot(fig, fileName)
 
         plt.close(fig)
     #}}}
@@ -382,7 +389,7 @@ class PlotProbes(object):
         leg.get_frame().set_alpha(0.5)
 
         for ax in pltAxes:
-            self._makePlotPretty(ax, prune = "both", rotation = 45)
+            self._probes.helper.makePlotPretty(ax, yprune = "both", rotation = 45)
 
         for ax in pltAxes[0:-1]:
             avgAx.tick_params(labelbottom="off")
@@ -402,7 +409,10 @@ class PlotProbes(object):
             plt.show()
 
         if self._savePlot:
-            self._saveThePlot(fig, "flux{}".format(uName))
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "flux{}".format(uName)),\
+                       self._extension)
+            self._probes.helper.savePlot(fig, fileName)
 
         plt.close(fig)
     #}}}
@@ -462,77 +472,19 @@ class PlotProbes(object):
         ax.set_title(title)
 
         # Make the plot look nice
-        self._makePlotPretty(ax, rotation = 45)
+        self._probes.helper.makePlotPretty(ax, rotation = 45)
         fig.tight_layout()
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            self._saveThePlot(fig, "zFFT_at_{}".format(positionKey))
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath,\
+                       "zFFT_at_{}".format(positionKey)),\
+                       self._extension)
+            self._probes.helper.savePlot(fig, fileName)
 
         plt.close(fig)
-    #}}}
-
-    #{{{_makePlotPretty
-    def _makePlotPretty(self, ax, prune = "lower", rotation = "horizontal"):
-        """
-        Routine that fixes some beauty-mistakes in matplotlib
-
-        Parameters
-        ----------
-        ax : axis
-            The axis to fix.
-        prune : str
-            What ticks should be pruned.
-        rotation : [str | int]
-            Rotation of the x axis.
-        """
-
-        # Avoid silly top value (only for non-log axes)
-        try:
-            ax.get_yaxis().get_major_formatter().set_useOffset(False)
-        except:
-            pass
-        # Format the tick labels
-        ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
-        ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
-        ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
-        # Plot the legend
-        self._leg = ax.legend(loc="best",\
-                              fancybox = True,\
-                              numpoints=1,\
-                              )
-        self._leg.get_frame().set_alpha(0.5)
-        # Plot the grid
-        ax.grid()
-        # Make sure no collision between the ticks
-        ax.xaxis.set_major_locator(MaxNLocator(prune=prune))
-    #}}}
-
-    #{{{_saveThePlot
-    def _saveThePlot(self, fig, name):
-        """
-        Saves the figure
-
-        Parameters
-        ----------
-        fig: figure
-            The figure.
-        name : str
-            The name of the plot.
-        """
-
-        fileName = "{}.{}".\
-            format(os.path.join(self._savePath, name), self._extension)
-
-        fig.savefig(fileName,\
-                    transparent = True             ,\
-                    bbox_inches = "tight"          ,\
-                    bbox_extra_artists=(self._leg,),\
-                    pad_inches  = 0                ,\
-                    )
-
-        print("Saved to {}".format(fileName))
     #}}}
 #}}}
