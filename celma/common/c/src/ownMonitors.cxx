@@ -25,25 +25,29 @@
  * \f{eqnarray}{
  * E_{kin,\alpha} =& \frac{1}{2}m_{\alpha}\int
  *                      n\mathbf{u}_E^2
- *                      + n\mathbf{u}_{\alpha}^2 dV\\
+ *                      + n\mathbf{u}_{\alpha,\parallel}^2 dV\\
  *                =& \frac{1}{2}m_{\alpha}\int
- *                      n\left(\frac{-\nabla_\perp\times\mathbf{b}}{B}\right)^2
- *                      + n\mathbf{u}_{\alpha}^2 dV\\
+ *                      n\left(\frac{-\nabla_\perp\phi
+ *                             \times\mathbf{b}}{B}\right)^2
+ *                      + n\mathbf{u}_{\alpha,\parallel}^2 dV\\
  *                =& \frac{1}{2}m_{\alpha}\int
- *                      n\left(\left[\frac{-\nabla_\perp}{B}\right]^2
- *                      + [\mathbf{u}_{\alpha}]^2\right) dV
+ *                      n\left(\left[\frac{-\nabla_\perp\phi}{B}\right]^2
+ *                      + [\mathbf{u}_{\alpha,\parallel}]^2\right) dV\\
+ *                =& \frac{1}{2}m_{\alpha}\int\int\int
+ *                      n\left(\left[\frac{-\nabla_\perp\phi}{B}\right]^2
+ *                      + [\mathbf{u}_{\alpha,\parallel}]^2\right)
+ *                      J d\rho d\theta dz\\
+ *                =& \frac{1}{2}m_i\frac{m_{\alpha}}{m_i}
+ *                      n_0c_s^2\rho_s^3
+ *                      \int\int\int
+ *                      \tilde{n}\tilde{u}_\alpha^2
+ *                      \tilde{J} \widetilde{d\rho} d\theta \widetilde{dz}\\
+ *                =& m_in_0c_s^2\rho_s^3 \tilde{E}_{kin,\alpha}
  * \f}
  *
  * where we have used (V.4) in D'Haeseleer, and where \f$\alpha\f$ is the
- * particle species. Normalizing using
- * \f$\tilde{E}_{kin,\alpha} = \frac{E_{kin,\alpha}}{m_ic_s}\f$ and Bohm
- * normalization yields (dropping tilde)
- *
- * \f{eqnarray}{
- * E_{kin,\alpha} =& \frac{1}{2}\frac{m_{\alpha}}{m_i}\int
- *                  n\left(\left[\nabla_\perp\right]^2
- *                  + [\mathbf{u}_{\alpha}]^2\right) dV
- * \f}
+ * particle species. This function calculates
+ * \f$\frac{m_i}{m_{\alpha}}\tilde{E}_{kin,\alpha}\f$
  *
  * \warning This function does not multiply with \f$\frac{m_{\alpha}}{m_i}\f$.
  *

@@ -369,7 +369,7 @@ BoutReal Parameters::getMu() const
 /*!
  * Returns the Lambda
  *
- * \param[out] Lambda \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\rigth)\f$
+ * \param[out] Lambda \f$\ln\left(\sqrt{\frac{\mu}{2\pi}}\right)\f$
  */
 BoutReal Parameters::getLambda() const
 {
