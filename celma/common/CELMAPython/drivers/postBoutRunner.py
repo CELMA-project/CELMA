@@ -9,6 +9,7 @@ from .drivers1D     import Drivers1D
 from .drivers2D     import Drivers2D
 from .drivers1D2D   import Drivers1D2D
 from .driversProbes import DriversProbes
+from .driversEnergy import DriversEnergy
 
 #{{{postBoutRunner
 def postBoutRunner(path, driverName = None, **kwargs):
@@ -83,6 +84,13 @@ def postBoutRunner(path, driverName = None, **kwargs):
         driver = DriversProbes(path, **kwargs)
         # Call the driver
         driver.plotProbes()
+    #}}}
+    #{{{DriversEnergy
+    elif driverName == "plotEnergy":
+        # Make the driver object
+        driver = DriversEnergy(path, **kwargs)
+        # Call the driver
+        driver.plotEnergy()
     #}}}
     else:
         message = "The driverName {} is not implemented".format(driverName)

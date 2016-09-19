@@ -82,7 +82,7 @@ class Probes(object):
 
         # Make the PlotHelper object
         # Public as used in the driver
-        self.helper = PlotHelper(collectPath                          ,\
+        self.helper = PlotHelper(collectPath                           ,\
                                   time                                 ,\
                                   xguards           = False            ,\
                                   yguards           = False            ,\

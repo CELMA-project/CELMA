@@ -2,9 +2,11 @@
 
 """ Contains the PlotHelper class """
 
-import scipy.constants as cst
-from boututils.options import BOUTOptions
+from .plotNumberFormatter import plotNumberFormatter
 from boutdata import collect
+from boututils.options import BOUTOptions
+from matplotlib.ticker import MaxNLocator, FuncFormatter
+import scipy.constants as cst
 import numpy as np
 
 #{{{PlotHelper
@@ -295,6 +297,79 @@ class PlotHelper(object):
             self.tTxtDict  ["tTxtLabel"] = r"$t{0[normalization]}$"
     #}}}
 
+    #{{{makePlotPretty
+    def makePlotPretty(self                   ,\
+                       ax                     ,\
+                       xprune   = "lower"     ,\
+                       yprune   = None        ,\
+                       rotation = "horizontal",\
+                       loc      = "best"      ,\
+                       ):
+        """
+        Routine that fixes some beauty-mistakes in matplotlib
+
+        Parameters
+        ----------
+        ax : axis
+            The axis to fix.
+        xprune : str
+            What ticks should be pruned on the x axis.
+        yprune : str
+            What ticks should be pruned on the y axis.
+        rotation : [str | int]
+            Rotation of the x axis.
+        loc : str
+            Location of the legend
+        """
+
+        # Avoid silly top value (only for non-log axes)
+        try:
+            ax.get_yaxis().get_major_formatter().set_useOffset(False)
+        except:
+            pass
+        # Format the tick labels
+        ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
+        ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
+        ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
+        # Plot the legend
+        leg = ax.legend(loc       = loc ,\
+                        fancybox  = True,\
+                        numpoints = 1   ,\
+                        )
+        leg.get_frame().set_alpha(0.5)
+        # Plot the grid
+        ax.grid()
+        # Make sure no collision between the ticks
+        ax.xaxis.set_major_locator(MaxNLocator(prune=xprune))
+        ax.yaxis.set_major_locator(MaxNLocator(prune=yprune))
+    #}}}
+
+    #{{{savePlot
+    def savePlot(self, fig, fileName, extraArtists=None):
+        """
+        Saves the figure
+
+        Parameters
+        ----------
+        fig: figure
+            The figure.
+        fileName : str
+            Full path of the plot.
+        extraArtist : tuple
+            Tuple of bbox_extra_artists to be saved
+        """
+
+        fig.savefig(fileName,\
+                    transparent = True             ,\
+                    bbox_inches = "tight"          ,\
+                    bbox_extra_artists=extraArtists,\
+                    pad_inches  = 0                ,\
+                    )
+
+        print("Saved to {}".format(fileName))
+    #}}}
+
+
     #{{{physicalUnitsConverter
     def physicalUnitsConverter(self, var, varName):
         #{{{docstring
@@ -378,6 +453,20 @@ class PlotHelper(object):
             elif varName == "z":
                 var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
+            elif "EE" in varName:
+                # NOTE: The masses are not included in the integral
+                var *= cst.m_e*\
+                       self._convDict["n0"]*\
+                       (self._convDict["rhoS"]*self._convDict["omCI"])**2*\
+                       (self._convDict["rhoS"])**3
+                units = r"\mathrm{kgm}^2\mathrm{s}^{-2}"
+            elif "EI" in varName:
+                # NOTE: The masses are not included in the integral
+                var *= cst.m_p*\
+                       self._convDict["n0"]*\
+                       (self._convDict["rhoS"]*self._convDict["omCI"])**2*\
+                       (self._convDict["rhoS"])**3
+                units = r"\mathrm{kgm}^2\mathrm{s}^{-2}"
             else:
                 units = " "
         else:
@@ -407,6 +496,13 @@ class PlotHelper(object):
                 normalization = r"/\rho_s"
             elif varName == "z":
                 normalization = r"/\rho_s"
+            elif "EE" in varName:
+                # NOTE: The masses are not included in the integral
+                var *= cst.m_e/cst.m_p
+                normalization = r"/m_in_0c_s^2\rho_s^3"
+            elif "EI" in varName:
+                # NOTE: The masses are not included in the integral
+                normalization = r"/m_in_0c_s^2\rho_s^3"
             else:
                 normalization = " "
 
