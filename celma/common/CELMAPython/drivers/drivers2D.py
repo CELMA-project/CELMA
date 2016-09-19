@@ -18,15 +18,16 @@ class Drivers2D(FieldPlottersDriver):
     """
 
     #{{{Constructor
-    def __init__(self                    ,\
-                 *args                   ,\
-                 varName           = None,\
-                 var               = None,\
-                 pltName           = None,\
-                 varMax            = None,\
-                 varMin            = None,\
-                 varyMaxMin        = None,\
-                 axisEqualParallel = True,\
+    def __init__(self                            ,\
+                 *args                           ,\
+                 varName           = None        ,\
+                 var               = None        ,\
+                 pltName           = None        ,\
+                 varMax            = None        ,\
+                 varMin            = None        ,\
+                 varyMaxMin        = None        ,\
+                 axisEqualParallel = True        ,\
+                 mode              = "perpAndPar",\
                  **kwargs):
         #{{{docstring
         """
@@ -53,6 +54,8 @@ class Drivers2D(FieldPlottersDriver):
         varyMaxMin : bool
             Whether or not the limits of the z-axis should be set
             to the max/min of the current timestep or not.
+        mode : ["perpAndPar" | "perp" | "par" | "pol"]
+            The mode to plot.
         **kwargs : keyword arguments
             See the constructor of FieldPlottersDriver for details.
         """
@@ -68,6 +71,7 @@ class Drivers2D(FieldPlottersDriver):
         self._varMin            = varMin
         self._varyMaxMin        = varyMaxMin
         self._axisEqualParallel = axisEqualParallel
+        self._mode              = mode
     #}}}
 
     #{{{allMainFields2DDriver
@@ -123,6 +127,7 @@ class Drivers2D(FieldPlottersDriver):
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
                              axisEqualParallel = self._axisEqualParallel,\
+                             mode              = self._mode             ,\
                              extension         = self._extension        ,\
                             )
         except (KeyError, ValueError) as collectError:
@@ -213,6 +218,7 @@ class Drivers2D(FieldPlottersDriver):
                              varMin            = self._varMin           ,\
                              varyMaxMin        = self._varyMaxMin       ,\
                              axisEqualParallel = self._axisEqualParallel,\
+                             mode              = self._mode             ,\
                              extension         = self._extension        ,\
                             )
 
