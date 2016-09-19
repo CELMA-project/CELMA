@@ -35,10 +35,16 @@ class CylinderMesh(object):
         # Add the last slice to theta
         theta = np.append(theta, 2.0*np.pi)
 
+        # For the theta, z plane
+        Z_ZT, THETA_ZT = np.meshgrid(theta, z)
         # For the rho, theta plane
         THETA_RT, RHO_RT = np.meshgrid(theta, rho)
         # For the rho, z plane
         Z_RZ, RHO_RZ = np.meshgrid(z, rho)
+
+        # Set Z and THETA to X_ZT and Y_ZT
+        self.X_ZT = THETA_ZT
+        self.Y_ZT = Z_ZT
 
         # Convert RHO and THETA to X_RT and Y_RT
         self.X_RT = RHO_RT*np.cos(THETA_RT)
