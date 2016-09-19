@@ -664,16 +664,17 @@ class Plot2D(Plot):
     """
 
     #{{{Constructor
-    def __init__(self                     ,\
-                 path                     ,\
-                 varName                  ,\
-                 var               = None ,\
-                 xguards           = False,\
-                 yguards           = False,\
-                 varMax            = None ,\
-                 varMin            = None ,\
-                 varyMaxMin        = False,\
-                 axisEqualParallel = True ,\
+    def __init__(self                            ,\
+                 path                            ,\
+                 varName                         ,\
+                 var               = None        ,\
+                 xguards           = False       ,\
+                 yguards           = False       ,\
+                 varMax            = None        ,\
+                 varMin            = None        ,\
+                 varyMaxMin        = False       ,\
+                 axisEqualParallel = True        ,\
+                 mode              = "perpAndPar",\
                  **kwargs):
         #{{{docstring
         """
@@ -706,10 +707,25 @@ class Plot2D(Plot):
         axisEqualParallel : bool
             Whether or not the parallel plot should be plotted with axis
             equal or not.
+        mode : ["perpAndPar" | "perp" | "par" | "pol"]
+            The mode to plot.
         **kwargs : keyword arguments
             See the constructor of Plot for details.
         """
         #}}}
+
+        # Check that mode is set correctly:
+        implementedModes = ["perpAndPar", "perp", "par", "pol"]
+        found = False
+        for checkMode in implementedModes:
+            if mode == checkMode:
+                self._mode = mode.lower()
+                found = True
+                break
+
+        if not found:
+            message = "mode '{}' not implemented".format(mode)
+            raise NotImplementedError(message)
 
         # Call the constructor of the parent class
         super(Plot2D, self).__init__(path   ,\
@@ -796,36 +812,67 @@ class Plot2D(Plot):
         # Then theta index corresponding to pi
         piInd = round(self._variable.shape[3]/2)
 
+        # Calculate the theta in degrees
+        dz             = self.helper.theta[1] - self.helper.theta[0]
+        self._thetaRad = dz*self._zind[-1]
+        self._thetaDeg = self._thetaRad*(180/np.pi)
+
         # Get the Z values of the X, Y, Z plots
         # We subscript the last index of self._@ind, as this is given as
         # a range in the Plot constructor
-        self._Z_RT = self._variable[:, :, self._yind[-1], :             ]
-        self._Z_RZ = self._variable[:, :, :             , self._zind[-1]]
-        # Get the Z value in the RZ plane which is pi from the current index
-        if self._zind[-1] > piInd:
-            self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] - piInd]
-        else:
-            self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
+        if "pol" in self._mode:
+            self._Z_ZT = self._variable[:, self._yind[-1],: , :]
+        if "perp" in self._mode:
+            self._Z_RT = self._variable[:, :, self._yind[-1], :]
+        if "par" in self._mode:
+            self._Z_RZ = self._variable[:, :, :, self._zind[-1]]
+            # Get the Z value in the RZ plane which is pi from the current index
+            if self._zind[-1] > piInd:
+                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] - piInd]
+            else:
+                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
 
-        self._setLines()
+        if self._mode == "perpAndPar".lower():
+            self._setLines()
 
         # Create the figure and axis
-        pltSize      = (30,15)
-        gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+        if self._mode == "perpAndPar".lower():
+            pltSize = (30,15)
+        else:
+            pltSize = (20,15)
         self._fig    = plt.figure(figsize = pltSize)
-        self._ax1    = self._fig.add_subplot(gs[0])
-        self._ax2    = self._fig.add_subplot(gs[1])
-        self._cBarAx = self._fig.add_subplot(gs[2])
-        self._fig.subplots_adjust(wspace=0.25)
-        self._ax1.grid(True)
-        self._ax2.grid(True)
+        #{{{if self._mode == "perpAndPar".lower()
+        if self._mode == "perpAndPar".lower():
+            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            self._perpAx = self._fig.add_subplot(gs[0])
+            self._parAx  = self._fig.add_subplot(gs[1])
+            self._cBarAx = self._fig.add_subplot(gs[2])
+            self._fig.subplots_adjust(wspace=0.25)
+            self._parAx.grid(True)
+            self._perpAx.grid(True)
+        #}}}
+        #{{{elif self._mode == "perp"
+        elif self._mode == "perp":
+            self._perpAx = self._fig.add_subplot(111)
+            self._perpAx.grid(True)
+        #}}}
+        #{{{elif self._mode == "par"
+        elif self._mode == "par":
+            self._parAx = self._fig.add_subplot(111)
+            self._parAx.grid(True)
+        #}}}
+        #{{{elif self._mode == "pol"
+        elif self._mode == "pol":
+            self._polAx = self._fig.add_subplot(111)
+            self._polAx.grid(True)
+        #}}}
 
         # Create placeholder for colorbar and images
         self._cbarPlane = None
         self._images = []
         #}}}
 
-    #{{{setLines
+    #{{{_setLines
     def _setLines(self):
         """ Set the lines which shows where the data is sliced"""
 
@@ -834,11 +881,8 @@ class Plot2D(Plot):
         rhoEnd   = self.helper.rho[-1]
 
         # Calculate the numerical value of the theta angle and the z value
-        thetaRad         = (self.helper.theta[1] - self.helper.theta[0])*\
-                            self._zind[-1]
-        thetaPPi         = thetaRad + np.pi
+        thetaPPi         = self._thetaRad + np.pi
         self._zVal       = self.helper.z[self._ySlice]
-        self._thetaDeg   = thetaRad*(180/np.pi)
 
         # Set coordinates for the lines which indicate how the data is
         # sliced
@@ -872,17 +916,40 @@ class Plot2D(Plot):
             if len(self._levels) > 1 and np.amin(np.diff(self._levels)) <= 0.0:
                 self._levels = None
 
-        Z_RT      = self._Z_RT     [tInd, :, :]
-        Z_RZ      = self._Z_RZ     [tInd, :, :]
-        Z_RZ_P_PI = self._Z_RZ_P_PI[tInd, :, :]
+        if self._varyMaxMin:
+            # Allocate the max and min lists
+            maxList = []
+            minList = []
+        #{{{if "pol" in self._mode
+        if "pol" in self._mode:
+            Z_ZT = self._Z_ZT[tInd, :, :]
+            if self._varyMaxMin:
+                maxList.append(np.max(Z_ZT))
+                minList.append(np.min(Z_ZT))
+        #}}}
+        #{{{if "perp" in self._mode
+        if "perp" in self._mode:
+            Z_RT = self._Z_RT[tInd, :, :]
+            if self._varyMaxMin:
+                maxList.append(np.max(Z_RT))
+                minList.append(np.min(Z_RT))
+        #}}}
+        #{{{if "par" in self._mode
+        if "par" in self._mode:
+            Z_RZ      = self._Z_RZ     [tInd, :, :]
+            Z_RZ_P_PI = self._Z_RZ_P_PI[tInd, :, :]
+            if self._varyMaxMin:
+                maxList.append(np.max(Z_RZ))
+                maxList.append(np.max(Z_RZ_P_PI))
+                minList.append(np.min(Z_RZ_P_PI))
+                minList.append(np.min(Z_RZ_P_PI))
+        #}}}
 
         # If we want the max and min to vary
         if self._varyMaxMin and tInd:
             # Update the max and min
-            self._varMax =\
-                np.max([np.max(Z_RT),np.max(Z_RZ),np.max(Z_RZ_P_PI)])
-            self._varMin =\
-                np.max([np.min(Z_RT),np.min(Z_RZ),np.min(Z_RZ_P_PI)])
+            self._varMax = np.max(maxList)
+            self._varMin = np.max(minList)
 
             # Diverging colormap for fluctuations
             if self._subPolAvg:
@@ -900,115 +967,201 @@ class Plot2D(Plot):
             if np.amin(np.diff(levels)) <= 0.0:
                 self._levels = levels
 
-        # Plot the perpendicular plane
-        perpPlane  = self._ax1.contourf(self._cyl.X_RT       ,\
-                                        self._cyl.Y_RT       ,\
-                                        Z_RT                 ,\
-                                        cmap   = self._cmap  ,\
-                                        vmax   = self._varMax,\
-                                        vmin   = self._varMin,\
-                                        levels = self._levels,\
-                                        )
+        # Specify repeated kwargs of contourf
+        # NOTE: It doens't make sense to use functools.partial here as
+        #       contourf is a memberfunction of ax
+        # NOTE: zorder sets the rasterization
+        #       http://stackoverflow.com/questions/37020842/reducing-size-of-vectorized-contourplot
+        cfKwargs = {"cmap"   : self._cmap  ,\
+                    "vmax"   : self._varMax,\
+                    "vmin"   : self._varMin,\
+                    "levels" : self._levels,\
+                    "zorder" : -20         ,\
+                   }
 
-        # Plot the parallel plane
-        parPlane  = self._ax2.contourf(self._cyl.X_RZ       ,\
-                                       self._cyl.Y_RZ       ,\
-                                       Z_RZ                 ,\
-                                       cmap   = self._cmap  ,\
-                                       vmax   = self._varMax,\
-                                       vmin   = self._varMin,\
-                                       levels = self._levels,\
-                                       )
-        parPlaneNeg  = self._ax2.contourf(self._cyl.X_RZ_NEG   ,\
-                                          self._cyl.Y_RZ       ,\
-                                          Z_RZ_P_PI            ,\
-                                          cmap   = self._cmap  ,\
-                                          vmax   = self._varMax,\
-                                          vmin   = self._varMin,\
-                                          levels = self._levels,\
-                                          )
-
-        # Draw the grids
-        self._ax1.grid(b=True)
-        self._ax2.grid(b=True)
-
-        # x and y labels
-        self._ax1.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
-                             fontsize = self._latexSize)
-        self._ax1.set_ylabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
-                             fontsize = self._latexSize)
-        self._ax2.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
-                             fontsize = self._latexSize)
-        self._ax2.set_ylabel(self.helper.zTxtDict["zTxtLabel"],\
-                            fontsize = self._latexSize)
+        # Plot, set labels and draw grids
+        #{{{if "pol" in self._mode
+        if "pol" in self._mode:
+            # Plot the poloidal plane
+            polPlane = self._polAx.\
+                    contourf(self._cyl.X_ZT, self._cyl.Y_ZT, Z_ZT, **cfKwargs)
+            # Set rasterization order
+            self._polAx.set_rasterization_zorder(-10)
+            # Draw the grids
+            self._polAx.grid(b=True)
+            # Set x and y labels
+            self._polAx.set_xlabel(r"$\theta$", fontsize = self._latexSize)
+            self._polAx.set_ylabel(self.helper.zTxtDict["zTxtLabel"],\
+                                   fontsize = self._latexSize)
+        #}}}
+        #{{{if "perp" in self._mode
+        if "perp" in self._mode:
+            # Plot the perpendicular plane
+            perpPlane = self._perpAx.\
+                    contourf(self._cyl.X_RT, self._cyl.Y_RT, Z_RT, **cfKwargs)
+            # Set rasterization order
+            self._perpAx.set_rasterization_zorder(-10)
+            # Draw the grids
+            self._perpAx.grid(b=True)
+            # Set x and y labels
+            self._perpAx.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                                 fontsize = self._latexSize)
+            self._perpAx.set_ylabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                                 fontsize = self._latexSize)
+        #}}}
+        #{{{if "par" in self._mode
+        if "par" in self._mode:
+            # Plot the parallel plane
+            parPlane  = self._parAx.\
+                    contourf(self._cyl.X_RZ, self._cyl.Y_RZ, Z_RZ, **cfKwargs)
+            parPlaneNeg  = self._parAx.\
+            contourf(self._cyl.X_RZ_NEG, self._cyl.Y_RZ, Z_RZ_P_PI, **cfKwargs)
+            # Set rasterization order
+            self._parAx.set_rasterization_zorder(-10)
+            # Draw the grids
+            self._parAx.grid(b=True)
+            # Set x and y labels
+            self._parAx.set_xlabel(self.helper.rhoTxtDict["rhoTxtLabel"],\
+                                 fontsize = self._latexSize)
+            self._parAx.set_ylabel(self.helper.zTxtDict["zTxtLabel"],\
+                                fontsize = self._latexSize)
+        #}}}
 
         # Title preparation
+        self.helper.rhoTxtDict["value"] =\
+                plotNumberFormatter(self.helper.rho[self._xSlice], None)
         self.helper.zTxtDict["value"] =\
                 plotNumberFormatter(self.helper.z[self._ySlice], None)
         self.helper.tTxtDict["value"] =\
-                plotNumberFormatter(self.helper.t[tInd], None)
+                plotNumberFormatter(self.helper.t[tInd], None, precision=4)
 
         # Titles
-        ax1Title =\
+        polTitle =\
+            self.helper.rhoTxtDict["constRhoTxt"].format(self.helper.rhoTxtDict)
+        perpTitle =\
             self.helper.zTxtDict["constZTxt"].format(self.helper.zTxtDict)
-        ax2Title =\
-            self.helper.thetaTxtDict["constThetaTxt"] .format(int(self._thetaDeg))
+        parTitle =\
+        self.helper.thetaTxtDict["constThetaTxt"].format(int(self._thetaDeg))
         timeTitle = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
 
-        # Title axis 1
-        self._ax1txt = self._ax1.text(0.5, 1.05,\
-                                      ax1Title,\
-                                      horizontalalignment = "center",\
-                                      verticalalignment = "center",\
-                                      fontsize = self._latexSize,\
-                                      transform = self._ax1.transAxes)
+        # Specify repeated kwargs of txt
+        txtKwargs = { "horizontalalignment" : "center"       ,\
+                      "verticalalignment"   : "center"       ,\
+                      "fontsize"            : self._latexSize,\
+                    }
+        # Set the titles
+        #{{{if self._mode == "perpAndPar".lower()
+        if self._mode == "perpAndPar".lower():
+            # Title axis 1
+            self._perpTxt = self._perpAx.text(0.5, 1.05, perpTitle,\
+                                         transform = self._perpAx.transAxes,\
+                                         **txtKwargs)
 
-        # Title axis 2
-        self._ax2txt = self._ax2.text(0.5, 1.05,\
-                            ax2Title,\
-                            horizontalalignment = "center",\
-                            verticalalignment = "center",\
-                            fontsize = self._latexSize,\
-                            transform = self._ax2.transAxes)
+            # Title axis 2
+            self._parTxt = self._parAx.text(0.5, 1.05, parTitle,\
+                                        transform = self._parAx.transAxes,\
+                                        **txtKwargs)
 
-        # Title mid
-        # Text for the figure. Could append this to the figure itself,
-        # but it seems to be easier to just add it to an axis due to
-        # animation
-        self._figTxt = self._ax1.text(1.10, 1.05,\
-                                      timeTitle,\
-                                      horizontalalignment = "center",\
-                                      verticalalignment = "center",\
-                                      fontsize = self._latexSize,\
-                                      transform = self._ax1.transAxes)
+            # Title mid
+            # Text for the figure. Could append this to the figure itself,
+            # but it seems to be easier to just add it to an axis due to
+            # animation
+            self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
+                                          transform = self._perpAx.transAxes,\
+                                          **txtKwargs)
+        #}}}
+        #{{{elif self._mode == "pol"
+        elif self._mode == "pol":
+            self._polTxt = self._polAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(polTitle, timeTitle),\
+                                         transform = self._polAx.transAxes,\
+                                         **txtKwargs)
+        #}}}
+        #{{{elif self._mode == "perp"
+        elif self._mode == "perp":
+            self._perpTxt = self._perpAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(perpTitle, timeTitle),\
+                                         transform = self._perpAx.transAxes,\
+                                         **txtKwargs)
+        #}}}
+        #{{{elif self._mode == "par"
+        elif self._mode == "par":
+            self._parTxt = self._parAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(parTitle, timeTitle),\
+                                         transform = self._parAx.transAxes,\
+                                         **txtKwargs)
+        #}}}
 
-        self._ax1.get_xaxis().set_major_formatter(\
-            FuncFormatter(plotNumberFormatter))
-        self._ax1.get_yaxis().set_major_formatter(\
-            FuncFormatter(plotNumberFormatter))
-        self._ax2.get_xaxis().set_major_formatter(\
-            FuncFormatter(plotNumberFormatter))
-        self._ax2.get_yaxis().set_major_formatter(\
-            FuncFormatter(plotNumberFormatter))
+        # Format axes and set equal
+        #{{{if "pol" in self._mode:
+        if "pol" in self._mode:
+            self._polAx.set_xticks([0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi])
+            self._polAx.set_xticklabels(\
+                    [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"])
+            self._polAx.get_yaxis().set_major_formatter(\
+                FuncFormatter(plotNumberFormatter))
+        #}}}
+        #{{{if "perp" in self._mode:
+        if "perp" in self._mode:
+            self._perpAx.get_xaxis().set_major_formatter(\
+                FuncFormatter(plotNumberFormatter))
+            self._perpAx.get_yaxis().set_major_formatter(\
+                FuncFormatter(plotNumberFormatter))
+            self._perpAx.axis("equal")
+        #}}}
+        #{{{if "par" in self._mode:
+        if "par" in self._mode:
+            self._parAx.get_xaxis().set_major_formatter(\
+                FuncFormatter(plotNumberFormatter))
+            self._parAx.get_yaxis().set_major_formatter(\
+                FuncFormatter(plotNumberFormatter))
+            if self._axisEqualParallel:
+                self._parAx.axis("equal")
+        #}}}
 
-        # Make the axis equal
-        self._ax1.axis("equal")
-        if self._axisEqualParallel:
-            self._ax2.axis("equal")
+        # API consistency fix, make image list and set self._cbarPlane
+        # (https://github.com/matplotlib/matplotlib/issues/6139)
+        #{{{if self._mode == "perpAndPar".lower():
+        if self._mode == "perpAndPar".lower():
+            addArtPerpPlane   = perpPlane.collections
+            addArtParPlane    = parPlane.collections
+            addArtParPlaneNeg = parPlaneNeg.collections
+            imList = addArtPerpPlane + [self._perpTxt] +\
+                     addArtParPlane + addArtParPlaneNeg +\
+                     [self._parTxt] + [self._figTxt]
 
-        # Current API inconsistency fix
-        # (https://github.com/matplotlib/matplotlib/issues/6139):
-        addArtPerpPlane   = perpPlane.collections
-        addArtParPlane    = parPlane.collections
-        addArtParPlaneNeg = parPlaneNeg.collections
+            if self._cbarPlane is None:
+                self._cbarPlane = parPlane
+        #}}}
+        #{{{elif self._mode == "pol":
+        elif self._mode == "pol":
+            addArtPolPlane = polPlane.collections
+            imList = addArtPolPlane + [self._polTxt]
+
+            if self._cbarPlane is None:
+                self._cbarPlane = polPlane
+        #}}}
+        #{{{elif self._mode == "perp":
+        elif self._mode == "perp":
+            addArtPerpPlane = perpPlane.collections
+            imList = addArtPerpPlane + [self._perpTxt]
+
+            if self._cbarPlane is None:
+                self._cbarPlane = perpPlane
+        #}}}
+        #{{{elif self._mode == "par":
+        elif self._mode == "par":
+            addArtParPlane    = parPlane.collections
+            addArtParPlaneNeg = parPlaneNeg.collections
+            imList = addArtParPlane + addArtParPlaneNeg + [self._parTxt]
+
+            if self._cbarPlane is None:
+                self._cbarPlane = parPlane
+        #}}}
 
         # Put images together
-        self._images.append(addArtPerpPlane + [self._ax1txt] +\
-                            addArtParPlane + addArtParPlaneNeg +\
-                            [self._ax2txt] + [self._figTxt])
+        self._images.append(imList)
 
-        if self._cbarPlane is None:
-            self._cbarPlane = parPlane
 #        # FIXME: You are here
 #        if self._cbarPlane is None and self._varyMaxMin == False:
 #            self._cbarPlane = parPlane
@@ -1056,11 +1209,17 @@ class Plot2D(Plot):
         # Make the colorbar
         # format = "%.g" gave undesired results
         try:
-            cbar = self._fig.colorbar(self._cbarPlane            ,\
-                                      cax    = self._cBarAx      ,\
-                                      format = FuncFormatter(     \
-                                              plotNumberFormatter),\
-                                      )
+            if self._mode == "perpAndPar":
+                cbar = self._fig.colorbar(self._cbarPlane            ,\
+                                          cax    = self._cBarAx      ,\
+                                          format = FuncFormatter(     \
+                                                  plotNumberFormatter),\
+                                          )
+            else:
+                cbar = self._fig.colorbar(self._cbarPlane            ,\
+                                          format = FuncFormatter(     \
+                                                  plotNumberFormatter),\
+                                          )
             if self.helper.convertToPhysical:
                 cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
             else:
@@ -1073,34 +1232,37 @@ class Plot2D(Plot):
             message += ". No cbar will be set!"
             print(message)
 
-        # Lines needs only to be plotted once
-        # Par line 1
-        self._ax2.plot(self._RZLine1XVals,\
-                       self._RZLine1YVals,\
-                       "--k"             ,\
-                       linewidth = 1     ,\
-                       )
-        # Par line 2
-        self._ax2.plot(self._RZLine2XVals,\
-                       self._RZLine2YVals,\
-                       "--k"             ,\
-                       linewidth = 1     ,\
-                       )
-        # Perp line 1
-        self._ax1.plot(self._RTLine1XVals,\
-                       self._RTLine1YVals,\
-                       "--k"             ,\
-                       linewidth = 1     ,\
-                       )
-        # Perp line 2
-        self._ax1.plot(self._RTLine2XVals,\
-                       self._RTLine2YVals,\
-                       "--k"             ,\
-                       linewidth = 1     ,\
-                       )
+        #{{{if self._mode == "perpAndPar"
+        if self._mode == "perpAndPar".lower():
+            # Lines needs only to be plotted once
+            # Par line 1
+            self._parAx.plot(self._RZLine1XVals,\
+                           self._RZLine1YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Par line 2
+            self._parAx.plot(self._RZLine2XVals,\
+                           self._RZLine2YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Perp line 1
+            self._perpAx.plot(self._RTLine1XVals,\
+                           self._RTLine1YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Perp line 2
+            self._perpAx.plot(self._RTLine2XVals,\
+                           self._RTLine2YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
 
-        # Need to specify rect in order to have top text
-        self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
+            # Need to specify rect in order to have top text
+            self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
+        #}}}
 
         if self._savePlot:
             # Make dir if not exists
@@ -1112,7 +1274,7 @@ class Plot2D(Plot):
             saveName = saveName.replace("{", "")
             saveName = saveName.replace("}", "")
             saveName = saveName.replace("^", "")
-            fileName = saveName + "-2D"
+            fileName = "{}-{}-{}".format(saveName, self._mode, "2D")
             fileName = os.path.join(savePath, fileName)
 
         # Animate if we have more than one frame
@@ -1128,14 +1290,20 @@ class Plot2D(Plot):
                                              )
 
             if self._savePlot:
+                if self._mode == "perpAndPar":
+                    bboxExtra = (cbar, self._perpTxt, self._parTxt)
+                elif self._mode == "pol":
+                    bboxExtra = (cbar, self._polTxt)
+                elif self._mode == "perp":
+                    bboxExtra = (cbar, self._perpTxt)
+                elif self._mode == "par":
+                    bboxExtra = (cbar, self._parTxt)
                 # Save the animation
                 anim.save(fileName + ".gif"              ,\
-                          writer         = "imagemagick"   ,\
+                          writer         = "imagemagick" ,\
                           savefig_kwargs =\
-                            {"pad_inches"         :0       ,\
-                             "bbox_extra_artists" :(cbar,\
-                                                   self._ax1txt,\
-                                                   self._ax2txt),\
+                            {"pad_inches"         :0        ,\
+                             "bbox_extra_artists" :bboxExtra,\
                             },\
                           )
                 print("Saved to {}.gif".format(fileName))

@@ -116,7 +116,7 @@ postBoutRunner(dmp_folder,\
                # postBoutRunner input
                driverName = "plotProbes",\
                # PostProcessDriver input
-               convertToPhysical = True             ,\
+               convertToPhysical = False             ,\
                # subPolAvg         = False             ,\
                # showPlot          = True             ,\
                savePlot          = True              ,\
@@ -135,3 +135,21 @@ postBoutRunner(dmp_folder,\
                steadyStatePath   = collectionFolders[1] ,\
                maxMode           = 7                 ,\
               )
+
+# # Plot the probe data
+# postBoutRunner(dmp_folder,\
+#                # postBoutRunner input
+#                driverName = "plotEnergy",\
+#                # PostProcessDriver input
+#                convertToPhysical = False             ,\
+#                # subPolAvg         = False             ,\
+#                # showPlot          = True             ,\
+#                savePlot          = True              ,\
+#                # saveFolder        = None              ,\
+#                saveFolderFunc    = "scanWTagSaveFunc",\
+#                # Uses the Qt backend
+#                useSubProcess     = False              ,\
+#                theRunName        = "energyTest"       ,\
+#                # StatsAndSignalsDrivers input
+#                paths             = collectionFolders,\
+#               )
