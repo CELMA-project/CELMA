@@ -645,7 +645,7 @@ class Plot1D(Plot):
                 print("Saved to {}.{}".format(fileName, self._extension))
 
         if self._showPlot:
-            self._fig.show()
+            fig.show()
 
         plt.close(fig)
     #}}}
