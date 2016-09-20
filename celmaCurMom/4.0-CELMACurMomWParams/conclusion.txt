@@ -11,10 +11,56 @@ Results:
 
 a1-KiwiFlat
 -----------
-a1-KiwiFlat-0-initialize      - 4000 omci^-1 - 01h 46 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
-a1-KiwiFlat-1-expand          - 4100 omci^-1 - 03h 44 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-4
-a1-KiwiFlat-2-linearPhase1    - 4700 omci^-1 - 14h 03 m - Turbulence level around 3e-1, radial gridsize oscillations in Om and OmD
-a1-KiwiFlat-3-turbulentPhase1 - 9700 omci^-1 - 34h 40 m - Turbulence level around 3.5e-1, radial gridsize oscillations in Om and OmD
+Checklist:
+[ ] - Fields steady state
+[ ] - All OK on expand
+[ ] - Linear modes: Radial and poloidal
+[ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
+[ ] - Profiles during linear - still grid size oscillation?
+[ ] - Profiles during turbulence - still grid size oscillation?
+[ ] - Time of energy overshoot
+[ ] - Probe data
+
+B0 = 0.1
+a1-KiwiFlat-0-initialize      - 1h59m
+a1-KiwiFlat-1-expand          - 4h42m  : 1. Grid-size oscillation in parallel jPar
+                                           NOTE: Magnitudes are small
+                                                 Could be loss of precision multiplied with mu
+                                           * nu*n*dz(Te*lnN-phi)
+                                           * par visc
+                                        2. Boundary layers in ue, jPar and vort (seems to be necessary for empty the edges of domain
+a1-KiwiFlat-2-linearPhase1    - 25h15m : FIXME
+a1-KiwiFlat-3-turbulentPhase1 - 37h13m : Breaks and builds up, blob-like, sheared off, almost no gradients parallely - only when bursts (seen from 2D plots)
+
+B0 = 0.09
+a1-KiwiFlat-0-initialize      - 2h08m
+a1-KiwiFlat-1-expand          - 4h29m  : See B0=0.1, about twice magnitude nu*n*dz(Te*lnN-phi)
+a1-KiwiFlat-2-linearPhase1    - 11h38m : FIXME
+a1-KiwiFlat-3-turbulentPhase1 - 34h31m : Breaks and builds up, blob-like, sheared off, almost no gradients parallely - only when bursts (seen from 2D plots)
+
+B0 = 0.08
+a1-KiwiFlat-0-initialize      - 2h10m
+a1-KiwiFlat-1-expand          - 4h47m  : See B0=0.1, about twice magnitude nu*n*dz(Te*lnN-phi) with B0=0.08
+a1-KiwiFlat-2-linearPhase1    - 10h37m : FIXME
+a1-KiwiFlat-3-turbulentPhase1 - 45h00m : Bursts as well, seems less coherent, seems more structures parallely
+
+B0 = 0.07
+a1-KiwiFlat-0-initialize      - 1h58m
+a1-KiwiFlat-1-expand          - 3h54m  : See B0=0.1, about twice magnitude nu*n*dz(Te*lnN-phi) with B0=0.08
+a1-KiwiFlat-2-linearPhase1    - 11h17m : FIXME
+a1-KiwiFlat-3-turbulentPhase1 - 57h15m : Less big burst, not many structures parallely
+
+B0 = 0.06
+a1-KiwiFlat-0-initialize      - 2h44m
+a1-KiwiFlat-1-expand          - Running
+a1-KiwiFlat-2-linearPhase1    - FIXME
+a1-KiwiFlat-3-turbulentPhase1 - FIXME
+
+B0 = 0.05
+a1-KiwiFlat-0-initialize      - 2h44m
+a1-KiwiFlat-1-expand          - 4h23m
+a1-KiwiFlat-2-linearPhase1    - Sundials failed 172 of 500 steps
+a1-KiwiFlat-3-turbulentPhase1 - NA
 
 
 
