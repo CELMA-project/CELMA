@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Driver which checks the plots."""
+"""Driver which tests the energy and probes plots."""
 
 from bout_runners import basic_runner
 import numpy as np
@@ -108,48 +108,30 @@ myRuns = basic_runner(\
 
 dmp_folder, _ = myRuns.execute_runs(remove_old = remove_old)
 collectionFolders.append(dmp_folder[0])
+
+# Run this driver after all, as we need the collectionFolders
+_, _ = myRuns.execute_runs(\
+                    remove_old               = False        ,\
+                    post_processing_function = postBoutRunner,\
+                    driverName = "plotEnergyAndProbes"    ,\
+                    # PostProcessDriver input
+                    convertToPhysical = False             ,\
+                    # subPolAvg         = False           ,\
+                    # showPlot          = True            ,\
+                    savePlot          = True              ,\
+                    # saveFolder        = None            ,\
+                    saveFolderFunc    = "scanWTagSaveFunc",\
+                    # Uses the Qt backend
+                    useSubProcess     = False              ,\
+                    theRunName        = "energyProbesTest" ,\
+                    # StatsAndSignalsDrivers input
+                    paths             = collectionFolders,\
+                    # DriversProbes input
+                    var               = 'n'               ,\
+                    yInd              = 2*8               ,\
+                    nProbes           = 5                 ,\
+                    # Choose this in order to have some gradients
+                    steadyStatePath   = collectionFolders[1] ,\
+                    maxMode           = 7                 ,\
+                    )
 # =============================================================================
-
-
-# Plot the probe data
-postBoutRunner(dmp_folder,\
-               # postBoutRunner input
-               driverName = "plotProbes",\
-               # PostProcessDriver input
-               convertToPhysical = False             ,\
-               # subPolAvg         = False             ,\
-               # showPlot          = True             ,\
-               savePlot          = True              ,\
-               # saveFolder        = None              ,\
-               saveFolderFunc    = "scanWTagSaveFunc",\
-               # Uses the Qt backend
-               useSubProcess     = False              ,\
-               theRunName        = "probeTest"       ,\
-               # StatsAndSignalsDrivers input
-               paths             = collectionFolders,\
-               # DriversProbes input
-               var               = 'n'               ,\
-               yInd              = 2*8               ,\
-               nProbes           = 5                 ,\
-               # Choose this in order to have some gradients
-               steadyStatePath   = collectionFolders[1] ,\
-               maxMode           = 7                 ,\
-              )
-
-# # Plot the probe data
-# postBoutRunner(dmp_folder,\
-#                # postBoutRunner input
-#                driverName = "plotEnergy",\
-#                # PostProcessDriver input
-#                convertToPhysical = False             ,\
-#                # subPolAvg         = False             ,\
-#                # showPlot          = True             ,\
-#                savePlot          = True              ,\
-#                # saveFolder        = None              ,\
-#                saveFolderFunc    = "scanWTagSaveFunc",\
-#                # Uses the Qt backend
-#                useSubProcess     = False              ,\
-#                theRunName        = "energyTest"       ,\
-#                # StatsAndSignalsDrivers input
-#                paths             = collectionFolders,\
-#               )

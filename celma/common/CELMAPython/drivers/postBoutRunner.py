@@ -5,11 +5,12 @@ Contains a factory like function which calls the post processing
 function.
 """
 
-from .drivers1D     import Drivers1D
-from .drivers2D     import Drivers2D
-from .drivers1D2D   import Drivers1D2D
-from .driversProbes import DriversProbes
-from .driversEnergy import DriversEnergy
+from .drivers1D           import Drivers1D
+from .drivers2D           import Drivers2D
+from .drivers1D2D         import Drivers1D2D
+from .driversProbes       import DriversProbes
+from .driversEnergy       import DriversEnergy
+from .driversEnergyProbes import DriversEnergyProbes
 
 #{{{postBoutRunner
 def postBoutRunner(path, driverName = None, **kwargs):
@@ -78,12 +79,12 @@ def postBoutRunner(path, driverName = None, **kwargs):
         elif driverName == "single1DDriver":
             driver.single1DDriver()
     #}}}
-    #{{{DriversProbes
-    elif driverName == "plotProbes":
+    #{{{DriversEnergyProbes
+    elif driverName == "plotEnergyAndProbes":
         # Make the driver object
-        driver = DriversProbes(path, **kwargs)
+        driver = DriversEnergyProbes(path, **kwargs)
         # Call the driver
-        driver.plotProbes()
+        driver.plotEnergyAndProbes()
     #}}}
     #{{{DriversEnergy
     elif driverName == "plotEnergy":
@@ -91,6 +92,13 @@ def postBoutRunner(path, driverName = None, **kwargs):
         driver = DriversEnergy(path, **kwargs)
         # Call the driver
         driver.plotEnergy()
+    #}}}
+    #{{{DriversProbes
+    elif driverName == "plotProbes":
+        # Make the driver object
+        driver = DriversProbes(path, **kwargs)
+        # Call the driver
+        driver.plotProbes()
     #}}}
     else:
         message = "The driverName {} is not implemented".format(driverName)

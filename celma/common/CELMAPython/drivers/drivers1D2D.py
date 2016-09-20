@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for plotting 2D plots
+Contains drivers for plotting 1D and 2D plots
 """
 
 from .drivers1D import Drivers1D
@@ -27,9 +27,9 @@ class Drivers1D2D(Drivers1D, Drivers2D):
         Parameters
         ----------
         *args : positional arguments
-            See the constructor of Driver1D and Driver2D for details.
+            See the constructor of Drivers1D and Drivers2D for details.
         **kwargs : keyword arguments
-            See the constructor of Driver1D and Driver2D for details.
+            See the constructor of Drivers1D and Drivers2D for details.
         """
         #}}}
 
