@@ -7,6 +7,7 @@ Contains classes which probes the data
 from .polAvg import polAvg
 from .derivatives import DDZ, findLargestRadialGrad
 from ..plotHelpers import PlotHelper, collectiveCollect
+import re
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
@@ -24,16 +25,17 @@ class Probes(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self                       ,\
-                 var                        ,\
-                 varName                    ,\
-                 time                       ,\
-                 tIndSaturatedTurb   = None ,\
-                 steadyStatePath     = None ,\
-                 radialProbesIndices = None ,\
-                 collectPath         = None ,\
-                 convertToPhysical   = False,\
-                 ):
+    def __init__(self                          ,\
+                 var                           ,\
+                 varName                       ,\
+                 time                          ,\
+                 tIndSaturatedTurb      = None ,\
+                 steadyStatePath        = None ,\
+                 useSteadyStatePathFunc = False,\
+                 radialProbesIndices    = None ,\
+                 collectPath            = None ,\
+                 convertToPhysical      = False,\
+                 **steadyStatePathFuncKwargs):
         #{{{docstring
         """
         Constructor for the Probes class
@@ -53,32 +55,47 @@ class Probes(object):
         steadyStatePath : str
             What path to use when collecting J. If radialProbesIndices is
             None, this will also be the path for finding the largest
-            gradient. Default is None.
+            gradient. Will be ignored if useSteadyStatePathFunc is True
+            Default is None.
+        useSteadyStatePathFunc : bool
+            If steadyStatePathFunc should be used.
         radialProbesIndices : [None|array]
             What radial indices to probe. If set to None, it will be
             selected from the largest gradient in the steady state
             variable.
         collectPath : str
             Path to collect J, coordinates and the normalization constants
-            from. Not effective if steadyStatePath is set.
+            from. Not effective if steadyStatePath or useSteadyStatePathFunc
+            is set.
         convertToPhysical : str
             Whether normalized or physical units should be used.
+        **steadyStatePathFuncKwargs : keyword arguments
+            Used in steadyStatePath if used. See steadyStatePathFunc for
+            details
         """
         #}}}
 
         # Guard
-        if steadyStatePath is None and radialProbesIndices is None:
-            message = ("steadyStatePath and radialProbesIndices cannot "
-                       "be None simultaneously")
+        if steadyStatePath is None\
+          and useSteadyStatePathFunc is None\
+          and radialProbesIndices is None:
+            message = ("steadyStatePath, useSteadyStatePathFunc and "
+                       "radialProbesIndices cannot be None simultaneously")
             raise ValueError(message)
-        if steadyStatePath is None and collectPath is None:
-            message = ("steadyStatePath and collectPath cannot "
-                       "be None simultaneously")
+        if steadyStatePath is None\
+          and useSteadyStatePathFunc is None\
+          and collectPath is None:
+            message = ("steadyStatePath, useSteadyStatePathFunc and "
+                       "collectPath cannot be None simultaneously")
             raise ValueError(message)
 
         # Set the collect path
         if collectPath is None:
-            collectPath = steadyStatePath
+            if steadyStatePath is not None:
+                collectPath = steadyStatePath
+            else:
+                collectPath =\
+                        self._steadyStatePathFunc(**steadyStatePathFuncKwargs)
 
         # Make the PlotHelper object
         # Public as used in the driver
@@ -502,6 +519,67 @@ class Probes(object):
                     # Save the results and reshape the data
                     self.results[key]["zFFT"] = varFFT[:,0,0,:]
     #}}}
+
+    #{{{_steadyStatePathFunc
+    def _steadyStatePathFunc(self,\
+                             dmp_folder                       = None,\
+                             one_of_the_restart_paths_in_scan = None,\
+                             scan_parameters                  = None):
+        """
+        Function which returns the steadyStatePath from dmp_folder and
+        one_of_the_restart_paths_in_scan
+
+        Parameters
+        ----------
+        dmp_folder : str
+            Given by the bout_runners. Used to find the current scan
+            values.
+        one_of_the_restart_paths_in_scan : str
+            One of the restart paths from a previously run scan. This
+            paramemter will be given as a kwargs
+        scan_parameters : list
+            List of strings of the names of the scan paramemters.
+        """
+
+        # Make a template string of one_of_the_restart_paths_in_scan
+        steadyStateTemplate = one_of_the_restart_paths_in_scan
+        for scan_parameter in scan_parameters:
+            hits = [m.start() for m in \
+                    re.finditer(scan_parameter, steadyStateTemplate)]
+            while(len(hits) > 0):
+                # Replace the values with {}
+                # The value is separated from the value by 1 character
+                value_start = hits[0] + len(scan_parameter) + 1
+                # Here we assume that the value is not separated by an
+                # underscore
+                value_len = len(steadyStateTemplate[value_start:].split("_")[0])
+                value_end = value_start + value_len
+                # Replace the values with {}
+                steadyStateTemplate =\
+                    "{}{{0[{}]}}{}".format(\
+                        steadyStateTemplate[:value_start],\
+                        scan_parameter,\
+                        steadyStateTemplate[value_end:])
+                # Update hits
+                hits.remove(hits[0])
+
+        # Get the values from the current dmp_folder
+        values = {}
+        for scan_parameter in scan_parameters:
+            hits = [m.start() for m in \
+                    re.finditer(scan_parameter, dmp_folder)]
+            # Choose the first hit to get the value from (again we assume
+            # that the value does not contain a _)
+            value_start = hits[0] + len(scan_parameter) + 1
+            # Here we assume that the value is not separated by an
+            # underscore
+            values[scan_parameter] = dmp_folder[value_start:].split("_")[0]
+
+        # Insert the values
+        steadyStatePath = steadyStateTemplate.format(values)
+
+        return steadyStatePath
+    #}}}
 #}}}
 
 #{{{class PerpPlaneProbes
@@ -518,16 +596,13 @@ class PerpPlaneProbes(Probes):
     #}}}
 
     #{{{Constructor
-    def __init__(self                       ,\
-                 varName                    ,\
-                 paths                      ,\
-                 yInd                       ,\
-                 nProbes             = 5    ,\
-                 convertToPhysical   = False,\
-                 tIndSaturatedTurb   = None ,\
-                 steadyStatePath     = None ,\
-                 radialProbesIndices = None ,\
-                 ):
+    def __init__(self                          ,\
+                 varName                       ,\
+                 paths                         ,\
+                 yInd                          ,\
+                 nProbes                = 5    ,\
+                 radialProbesIndices    = None ,\
+                 **kwargs):
         #{{{docstring
         """
         Constructor for the PerpPlaneProbes class
@@ -548,31 +623,15 @@ class PerpPlaneProbes(Probes):
         nProbes : int
             Number of probes. Default is 5. Will be overridden by
             radialProbesIndices if set.
-        convertToPhysical : bool
-            Will normalize the time array and collect the normalization
-            constants if True. Note that normalization of the other
-            variables must be recalculated manually in order to obtain
-            the quantities in physical units. Default is False.
-        tIndSaturatedTurb : [int|None]
-            Index at where the turbulence saturates. This can be found
-            from CELMAPython.plotting self.results[index]["zFFT"] after
-            calculation
-        steadyStatePath : string
-            What path to use when collecting J. If radialProbesIndices is
-            None, this will also be the path for finding the largest
-            gradient. Default is None.
         radialProbesIndices : [None|array]
             What radial indices to probe. If set to None, it will be
             selected from the largest gradient in the steady state
             variable.
+        **kwargs : keyword arguments
+            Keyword arguments used in the parent constructor. See the
+            Probes constructor for details.
         """
         #}}}
-
-        # Guard
-        if steadyStatePath is None and radialProbesIndices is None:
-            message = ("steadyStatePath and radialProbesIndices cannot "
-                       "be None simultaneously")
-            raise ValueError(message)
 
         if varName == "n":
             collectVarName = "lnN"
@@ -593,11 +652,8 @@ class PerpPlaneProbes(Probes):
         super().__init__(var                                      ,\
                          varName                                  ,\
                          time                                     ,\
-                         tIndSaturatedTurb   = tIndSaturatedTurb  ,\
-                         steadyStatePath     = steadyStatePath    ,\
                          radialProbesIndices = radialProbesIndices,\
-                         convertToPhysical   = convertToPhysical  ,\
-                         )
+                         **kwargs)
 
         self.yInd = yInd
 
