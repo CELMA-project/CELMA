@@ -36,7 +36,7 @@ class CylinderMesh(object):
         theta = np.append(theta, 2.0*np.pi)
 
         # For the theta, z plane
-        Z_ZT, THETA_ZT = np.meshgrid(theta, z)
+        Z_ZT, THETA_ZT = np.meshgrid(z, theta)
         # For the rho, theta plane
         THETA_RT, RHO_RT = np.meshgrid(theta, rho)
         # For the rho, z plane

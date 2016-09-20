@@ -964,7 +964,7 @@ class Plot2D(Plot):
                                  endpoint = True,\
                                  )
             # Update the levels just if there is any difference
-            if np.amin(np.diff(levels)) <= 0.0:
+            if np.amin(np.diff(levels)) > 0.0:
                 self._levels = levels
 
         # Specify repeated kwargs of contourf
@@ -984,7 +984,8 @@ class Plot2D(Plot):
         if "pol" in self._mode:
             # Plot the poloidal plane
             polPlane = self._polAx.\
-                    contourf(self._cyl.X_ZT, self._cyl.Y_ZT, Z_ZT, **cfKwargs)
+                contourf(\
+                self._cyl.X_ZT, self._cyl.Y_ZT, Z_ZT.transpose(), **cfKwargs)
             # Set rasterization order
             self._polAx.set_rasterization_zorder(-10)
             # Draw the grids
