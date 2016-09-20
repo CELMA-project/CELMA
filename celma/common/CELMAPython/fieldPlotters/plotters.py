@@ -888,8 +888,9 @@ class Plot2D(Plot):
         rhoEnd   = self.helper.rho[-1]
 
         # Calculate the numerical value of the theta angle and the z value
-        thetaPPi         = self._thetaRad + np.pi
-        self._zVal       = self.helper.z[self._ySlice]
+        thetaRad   = self._thetaRad
+        thetaPPi   = thetaRad + np.pi
+        self._zVal = self.helper.z[self._ySlice]
 
         # Set coordinates for the lines which indicate how the data is
         # sliced
