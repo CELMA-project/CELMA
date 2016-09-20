@@ -16,6 +16,7 @@ from matplotlib.ticker import MaxNLocator, FuncFormatter
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from boutdata import collect
 import numpy as np
 import os
@@ -854,22 +855,28 @@ class Plot2D(Plot):
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
             self._perpAx = self._fig.add_subplot(111)
+            self._cBarAx = make_axes_locatable(self._perpAx).\
+                           append_axes('right', '5%', '5%')
             self._perpAx.grid(True)
         #}}}
         #{{{elif self._mode == "par"
         elif self._mode == "par":
             self._parAx = self._fig.add_subplot(111)
+            self._cBarAx = make_axes_locatable(self._parAx).\
+                           append_axes('right', '5%', '5%')
             self._parAx.grid(True)
         #}}}
         #{{{elif self._mode == "pol"
         elif self._mode == "pol":
             self._polAx = self._fig.add_subplot(111)
+            self._cBarAx = make_axes_locatable(self._polAx).\
+                           append_axes('right', '5%', '5%')
             self._polAx.grid(True)
         #}}}
 
-        # Create placeholder for colorbar and images
+        # Set memberdatas altered in _plot2D
         self._cbarPlane = None
-        self._images = []
+        self._txtSet    = False
         #}}}
 
     #{{{_setLines
@@ -979,7 +986,7 @@ class Plot2D(Plot):
                     "zorder" : -20         ,\
                    }
 
-        # Plot, set labels and draw grids
+        #{{{ Plot, set labels and draw grids
         #{{{if "pol" in self._mode
         if "pol" in self._mode:
             # Plot the poloidal plane
@@ -1027,6 +1034,7 @@ class Plot2D(Plot):
             self._parAx.set_ylabel(self.helper.zTxtDict["zTxtLabel"],\
                                 fontsize = self._latexSize)
         #}}}
+        #}}}
 
         # Title preparation
         self.helper.rhoTxtDict["value"] =\
@@ -1050,50 +1058,67 @@ class Plot2D(Plot):
                       "verticalalignment"   : "center"       ,\
                       "fontsize"            : self._latexSize,\
                     }
-        # Set the titles
+        #{{{ Set the titles
         #{{{if self._mode == "perpAndPar".lower()
         if self._mode == "perpAndPar".lower():
-            # Title axis 1
-            self._perpTxt = self._perpAx.text(0.5, 1.05, perpTitle,\
-                                         transform = self._perpAx.transAxes,\
-                                         **txtKwargs)
+            if self._txtSet == False:
+                # Title axis 1
+                self._perpTxt = self._perpAx.text(0.5, 1.05, perpTitle,\
+                                             transform = self._perpAx.transAxes,\
+                                             **txtKwargs)
 
-            # Title axis 2
-            self._parTxt = self._parAx.text(0.5, 1.05, parTitle,\
-                                        transform = self._parAx.transAxes,\
-                                        **txtKwargs)
+                # Title axis 2
+                self._parTxt = self._parAx.text(0.5, 1.05, parTitle,\
+                                            transform = self._parAx.transAxes,\
+                                            **txtKwargs)
 
-            # Title mid
-            # Text for the figure. Could append this to the figure itself,
-            # but it seems to be easier to just add it to an axis due to
-            # animation
-            self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
-                                          transform = self._perpAx.transAxes,\
-                                          **txtKwargs)
+                # Title mid
+                # Text for the figure. Could append this to the figure itself,
+                # but it seems to be easier to just add it to an axis due to
+                # animation
+                self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
+                                              transform = self._perpAx.transAxes,\
+                                              **txtKwargs)
+                self._txtSet = True
+            else:
+                self._figTxt.set_text(timeTitle)
         #}}}
         #{{{elif self._mode == "pol"
         elif self._mode == "pol":
-            self._polTxt = self._polAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(polTitle, timeTitle),\
-                                         transform = self._polAx.transAxes,\
-                                         **txtKwargs)
+            if self._txtSet == False:
+                self._polTxt = self._polAx.text(0.5, 1.05,\
+                                             "{}$,$ {}".format(polTitle, timeTitle),\
+                                             transform = self._polAx.transAxes,\
+                                             **txtKwargs)
+                self._txtSet = True
+            else:
+                self._polTxt.set_text("{}$,$ {}".format(polTitle, timeTitle))
         #}}}
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
-            self._perpTxt = self._perpAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(perpTitle, timeTitle),\
-                                         transform = self._perpAx.transAxes,\
-                                         **txtKwargs)
+            if self._txtSet == False:
+                self._perpTxt = self._perpAx.text(0.5, 1.05,\
+                                             "{}$,$ {}".format(perpTitle, timeTitle),\
+                                             transform = self._perpAx.transAxes,\
+                                             **txtKwargs)
+                self._txtSet = True
+            else:
+                self._perpTxt.set_text("{}$,$ {}".format(perpTitle, timeTitle))
         #}}}
         #{{{elif self._mode == "par"
         elif self._mode == "par":
-            self._parTxt = self._parAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(parTitle, timeTitle),\
-                                         transform = self._parAx.transAxes,\
-                                         **txtKwargs)
+            if self._txtSet == False:
+                self._parTxt = self._parAx.text(0.5, 1.05,\
+                                             "{}$,$ {}".format(parTitle, timeTitle),\
+                                             transform = self._parAx.transAxes,\
+                                             **txtKwargs)
+                self._txtSet = True
+            else:
+                self._parTxt.set_text("{}$,$ {}".format(parTitle, timeTitle))
+        #}}}
         #}}}
 
-        # Format axes and set equal
+        #{{{ Format axes and set equal
         #{{{if "pol" in self._mode:
         if "pol" in self._mode:
             self._polAx.set_xticks([0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi])
@@ -1119,73 +1144,25 @@ class Plot2D(Plot):
             if self._axisEqualParallel:
                 self._parAx.axis("equal")
         #}}}
+        #}}}
 
-        # API consistency fix, make image list and set self._cbarPlane
-        # (https://github.com/matplotlib/matplotlib/issues/6139)
-        #{{{if self._mode == "perpAndPar".lower():
+        #{{{ Set self._cbarPlane
         if self._mode == "perpAndPar".lower():
-            addArtPerpPlane   = perpPlane.collections
-            addArtParPlane    = parPlane.collections
-            addArtParPlaneNeg = parPlaneNeg.collections
-            imList = addArtPerpPlane + [self._perpTxt] +\
-                     addArtParPlane + addArtParPlaneNeg +\
-                     [self._parTxt] + [self._figTxt]
-
-            if self._cbarPlane is None:
-                self._cbarPlane = parPlane
-        #}}}
-        #{{{elif self._mode == "pol":
+            self._cbarPlane = parPlane
         elif self._mode == "pol":
-            addArtPolPlane = polPlane.collections
-            imList = addArtPolPlane + [self._polTxt]
-
-            if self._cbarPlane is None:
-                self._cbarPlane = polPlane
-        #}}}
-        #{{{elif self._mode == "perp":
+            self._cbarPlane = polPlane
         elif self._mode == "perp":
-            addArtPerpPlane = perpPlane.collections
-            imList = addArtPerpPlane + [self._perpTxt]
-
-            if self._cbarPlane is None:
-                self._cbarPlane = perpPlane
-        #}}}
-        #{{{elif self._mode == "par":
+            self._cbarPlane = perpPlane
         elif self._mode == "par":
-            addArtParPlane    = parPlane.collections
-            addArtParPlaneNeg = parPlaneNeg.collections
-            imList = addArtParPlane + addArtParPlaneNeg + [self._parTxt]
-
-            if self._cbarPlane is None:
-                self._cbarPlane = parPlane
+            self._cbarPlane = parPlane
         #}}}
 
-        # Put images together
-        self._images.append(imList)
-
-#        # FIXME: You are here
-#        if self._cbarPlane is None and self._varyMaxMin == False:
-#            self._cbarPlane = parPlane
-#
-#        elif self._varyMaxMin == True:
-#            try:
-#                cbar = self._fig.colorbar(self._cbarPlane            ,\
-#                                          cax    = self._cBarAx      ,\
-#                                          format = FuncFormatter(     \
-#                                                  plotNumberFormatter),\
-#                                          )
-#                if self.convertToPhysical:
-#                    cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
-#                else:
-#                    cbarName = r"${}{}$".format(self._pltName, self._normalization)
-#
-#                cbar.set_label(label = cbarName, size = titleSize + 5)
-#
-#                self._images.append([cbar.collections])
-#            except RuntimeWarning:
-#                # Warning will have been printed in the init
-#                pass
-
+        # Set the colorbar
+        # Clear the axis
+        # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
+        self._cBarAx.cla()
+        self._fig.colorbar(self._cbarPlane, cax = self._cBarAx,\
+                           format = FuncFormatter(plotNumberFormatter))
     #}}}
 
     #{{{plotDriver
@@ -1205,33 +1182,6 @@ class Plot2D(Plot):
 
         # Initial plot
         self._plot2D(0)
-
-        # The colorbar needs only to be plotted once
-        # Make the colorbar
-        # format = "%.g" gave undesired results
-        try:
-            if self._mode == "perpAndPar":
-                cbar = self._fig.colorbar(self._cbarPlane            ,\
-                                          cax    = self._cBarAx      ,\
-                                          format = FuncFormatter(     \
-                                                  plotNumberFormatter),\
-                                          )
-            else:
-                cbar = self._fig.colorbar(self._cbarPlane            ,\
-                                          format = FuncFormatter(     \
-                                                  plotNumberFormatter),\
-                                          )
-            if self.helper.convertToPhysical:
-                cbarName = r"${}$ $[{}]$".format(self._pltName, self._units)
-            else:
-                cbarName = r"${}{}$".format(self._pltName, self._normalization)
-
-            cbar.set_label(label = cbarName, size = titleSize + 5)
-
-        except RuntimeWarning:
-            message  = "RuntimeError caught in cbar in " + self._pltName
-            message += ". No cbar will be set!"
-            print(message)
 
         #{{{if self._mode == "perpAndPar"
         if self._mode == "perpAndPar".lower():
@@ -1280,32 +1230,18 @@ class Plot2D(Plot):
 
         # Animate if we have more than one frame
         if self._frames > 1:
-            # Create the plots
-            for tInd in range(1, self._frames):
-                self._plot2D(tInd)
 
             # Animate
-            anim = animation.ArtistAnimation(self._fig            ,\
-                                             self._images         ,\
-                                             blit   = False       ,\
-                                             )
+            anim = animation.FuncAnimation(self._fig            ,\
+                                           self._plot2D         ,\
+                                           frames = self._frames,\
+                                           blit   = False       ,\
+                                           )
 
             if self._savePlot:
-                if self._mode == "perpAndPar":
-                    bboxExtra = (cbar, self._perpTxt, self._parTxt)
-                elif self._mode == "pol":
-                    bboxExtra = (cbar, self._polTxt)
-                elif self._mode == "perp":
-                    bboxExtra = (cbar, self._perpTxt)
-                elif self._mode == "par":
-                    bboxExtra = (cbar, self._parTxt)
                 # Save the animation
                 anim.save(fileName + ".gif"              ,\
                           writer         = "imagemagick" ,\
-                          savefig_kwargs =\
-                            {"pad_inches"         :0        ,\
-                             "bbox_extra_artists" :bboxExtra,\
-                            },\
                           )
                 print("Saved to {}.gif".format(fileName))
         else:
