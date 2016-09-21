@@ -5,7 +5,6 @@ Contains classes for plotting the fields
 """
 
 from ..plotHelpers import (PlotHelper,\
-                           titleSize,\
                            plotNumberFormatter,\
                            seqCMap,\
                            divCMap)
@@ -1022,8 +1021,9 @@ class Plot2D(Plot):
         if "par" in self._mode:
             # Plot the parallel plane
             parPlane  = self._parAx.\
-                    contourf(self._cyl.X_RZ, self._cyl.Y_RZ, Z_RZ, **cfKwargs)
-            parPlaneNeg  = self._parAx.\
+            contourf(self._cyl.X_RZ, self._cyl.Y_RZ, Z_RZ, **cfKwargs)
+            # parPlaneNeg, not used
+            self._parAx.\
             contourf(self._cyl.X_RZ_NEG, self._cyl.Y_RZ, Z_RZ_P_PI, **cfKwargs)
             # Set rasterization order
             self._parAx.set_rasterization_zorder(-10)

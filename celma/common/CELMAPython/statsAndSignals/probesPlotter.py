@@ -389,10 +389,11 @@ class PlotProbes(object):
         leg.get_frame().set_alpha(0.5)
 
         for ax in pltAxes:
-            self._probes.helper.makePlotPretty(ax, yprune = "both", rotation = 45)
+            self._probes.helper.makePlotPretty(ax, yprune = "both",\
+                                               rotation = 45)
 
         for ax in pltAxes[0:-1]:
-            avgAx.tick_params(labelbottom="off")
+            ax.tick_params(labelbottom="off")
 
         # Make sure no collision between the ticks
         pltAxes[-1].xaxis.set_major_locator(MaxNLocator(prune="lower"))

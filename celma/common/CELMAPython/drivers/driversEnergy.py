@@ -6,7 +6,6 @@ Contains drivers for the probes
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import collectEnergy, PlotEnergy
-import numpy as np
 
 #{{{DriversEnergy
 class DriversEnergy(StatsAndSignalsDrivers):
