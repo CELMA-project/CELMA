@@ -21,10 +21,7 @@ class DriversProbes(StatsAndSignalsDrivers):
                  yInd                   = None ,\
                  nProbes                = None ,\
                  steadyStatePath        = None ,\
-                 useSteadyStatePathFunc = False,\
                  maxMode                = 7    ,\
-                 scan_parameters        = None ,\
-                 one_of_the_restart_paths_in_scan = None,\
                  **kwargs):
         #{{{docstring
         """
@@ -47,10 +44,6 @@ class DriversProbes(StatsAndSignalsDrivers):
             Path to the steady state
         maxMode : int
             Maximum modes to be plotted in FFT
-        one_of_the_restart_paths_in_scan : str
-            One of the restart paths from a previously run scan.
-        scan_parameters : list
-            List of strings of the scan paramemters
         **kwargs : keyword arguments
             See the constructor of StatsAndSignalsDrivers and
             PlotProbes for details.
@@ -64,12 +57,12 @@ class DriversProbes(StatsAndSignalsDrivers):
         self._var                    = var
         self._yInd                   = yInd
         self._nProbes                = nProbes
-        self._steadyStatePath        = steadyStatePath
         self._maxMode                = maxMode
-        self._useSteadyStatePathFunc = useSteadyStatePathFunc
-        self._scan_parameters        = scan_parameters
-        self._one_of_the_restart_paths_in_scan =\
-            one_of_the_restart_paths_in_scan
+
+        if self._scanParameters:
+            self._steadyStatePath = self._convertToPhysical(steadyStatePath)
+        else:
+            self._steadyStatePath = steadyStatePath
 
         # Avgerage flux input
         self._uName     = "ExB"
@@ -90,12 +83,7 @@ class DriversProbes(StatsAndSignalsDrivers):
                       nProbes                = self._nProbes               ,\
                       convertToPhysical      = self._convertToPhysical     ,\
                       steadyStatePath        = self._steadyStatePath       ,\
-                      useSteadyStatePathFunc = self._useSteadyStatePathFunc,\
                       radialProbesIndices    = None                        ,\
-                      dmp_folder             = self._path                  ,\
-                      scan_parameters        = self._scan_parameters       ,\
-                      one_of_the_restart_paths_in_scan =\
-                      self._one_of_the_restart_paths_in_scan               ,\
                      )
 
         # Create the probe
@@ -111,7 +99,7 @@ class DriversProbes(StatsAndSignalsDrivers):
 
         # Set the position of the FFT plot to be the middle of the probes
         keyPos = int(np.ceil(len(self._probes.probesKeys)/2))
-        self._positionKey = self._probes.probesKeys[3]
+        self._positionKey = self._probes.probesKeys[keyPos]
     #}}}
 
     #{{{plotProbes
