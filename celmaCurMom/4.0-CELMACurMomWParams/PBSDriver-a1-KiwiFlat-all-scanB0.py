@@ -2,120 +2,139 @@
 
 """Driver which runs using PBS."""
 
-from bout_runners import PBS_runner
-import numpy as np
-
 import os, sys
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath('./../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
+import re
+from bout_runners import PBS_runner
 from CELMAPython.drivers import postBoutRunner
 
-# If you just want to post-process
-justPostProcess = True
-# Normal post-processors
-postProcessInit = False
-postProcessExp  = True
-postProcessLin  = False
-postProcessTrub = False
-# Extra post-processors
-postProcessLinProfiles     = True
-postProcessTurbProfiles    = True
-postProcessProbesAndEnergy = False
-
-#{{{restart_from_func
-def restart_from_func(dmp_folder, **kwargs):
+#{{{restartFromFunc
+def restartFromFunc(dmp_folder     = None,\
+                    aScanPath      = None,\
+                    scanParameters = None,\
+                    **kwargs):
     """
-    Function which returns the restart from folder
+    Function which converts a path belonging to one paths in a scan
+    to the path belonging to the current scan.
+
+    The function obtains the current scan parameters from dmp_folder
+    (the dmp_folder given from bout_runners), and inserts the
+    current scan parameters into aScanPath (the function input which is
+    one of the paths belonging to the scan).
+
+    NOTE: This will not work if the values of one of the scan parameters
+          contains an underscore.
 
     Parameters
     ----------
     dmp_folder : str
-        Given by the bout_runners
-    one_of_the_restart_paths_in_scan : str
-        One of the restart paths from a previously run scan. This
-        paramemter will be given as a kwargs
-    kwargs : dict
+        Given by the bout_runners. Used to find the current scan
+        values.
+    aScanPath : str
+        One of the restart paths from a previously run simulation.
+    scanParameters : list
+        List of strings of the names of the scan paramemters.
+    **kwargs : keyword dictionary
         Dictionary with additional keyword arguments, given by
         bout_runners.
-        One of the arguments (given as kwargs to execute_runs) is
-        one_of_the_restart_paths_in_scan.
+
+    Returns
+    -------
+    scanPath : str
+        aScanPath converted to the scan parameters of the current run.
     """
 
-    # Ensure that the variable is set
-    one_of_the_restart_paths_in_scan =\
-            kwargs["one_of_the_restart_paths_in_scan"]
+    # Make a template string of aScanPath
+    scanPathTemplate = aScanPath
+    for scanParameter in scanParameters:
+        hits = [m.start() for m in \
+                re.finditer(scanParameter, scanPathTemplate)]
+        while(len(hits) > 0):
+            # Replace the values with {}
+            # The value is separated from the value by 1 character
+            value_start = hits[0] + len(scanParameter) + 1
+            # Here we assume that the value is not separated by an
+            # underscore
+            value_len = len(scanPathTemplate[value_start:].split("_")[0])
+            value_end = value_start + value_len
+            # Replace the values with {}
+            scanPathTemplate =\
+                "{}{{0[{}]}}{}".format(\
+                    scanPathTemplate[:value_start],\
+                    scanParameter,\
+                    scanPathTemplate[value_end:])
+            # Update hits
+            hits.remove(hits[0])
 
-    # Values in the current scan
-    valNames = ["Lx", "Ly", "B0"]
-
-    # Make a template of the restart paths
-    # Split the dmp_folder at _ (separator between the variable and its
-    # value)
-    restart_template = one_of_the_restart_paths_in_scan.split("_")
-
-    # Remove the values from one_of_the_restart_paths_in_scan in order
-    # to make it possible to enter values using the str.format()
-    # function
-    for valName in valNames:
-        indices = [ind for ind, el in enumerate(restart_template)\
-                   if el == valName]
-
-        for ind in indices:
-            # The value is found to the right of the variable
-            restart_template[ind + 1] = "{{0[{}]}}".format(valName)
-
-    # Join the restart_template to one string
-    restart_template = "_".join(restart_template)
-
-    # Find the values to put into the template
-    splitted = dmp_folder.split("_")
+    # Get the values from the current dmp_folder
     values = {}
-    for valName in valNames:
-        # Find the first index of val
-        ind = splitted.index(valName)
-        # The value is found to the right of the variable
-        values[valName] = splitted[ind+1]
+    for scanParameter in scanParameters:
+        hits = [m.start() for m in \
+                re.finditer(scanParameter, dmp_folder)]
+        # Choose the first hit to get the value from (again we assume
+        # that the value does not contain a _)
+        value_start = hits[0] + len(scanParameter) + 1
+        # Here we assume that the value is not separated by an
+        # underscore
+        values[scanParameter] = dmp_folder[value_start:].split("_")[0]
 
-    # Insert the values into the restart_template string using the
-    # values dictionary
-    restart_from = restart_template.format(values)
+    # Insert the values
+    restartFrom = scanPathTemplate.format(values)
 
-    return restart_from
+    return restartFrom
 #}}}
 
-# Common options
-# =============================================================================
-# The scan
-# *****************************************************************************
+# If you just want to post-process
+justPostProcess = False
+# Normal post-processors
+postProcessInit = False
+postProcessExp  = False
+postProcessLin  = False
+postProcessTrub = False
+# Extra post-processors
+postProcessLinProfiles     = False
+postProcessTurbProfiles    = False
+postProcessProbesAndEnergy = True
+
+#{{{Main options
+#{{{The scan
 B0 = [1.0e-1  , 9.0e-2  , 8.0e-2   , 7.0e-2 , 6.0e-2  , 5.0e-2  ]
 Lx = [4.8296  , 4.3466  , 3.8637   , 3.3807 , 2.8978  , 2.4148  ]
 Ly = [270.4579, 243.4121, 216.3663, 189.3205, 162.2747, 135.2289]
-# *****************************************************************************
-
-# The options for the post processing function
-# *****************************************************************************
-xguards    = False
-yguards    = False
-xSlice     = 0
-ySlice     = 8*2
-zSlice     = 0
-showPlot   = False
-savePlot   = True
-# *****************************************************************************
-
-# Constructor options
-# *****************************************************************************
+scanParameters  = ["B0", "Lx", "Ly"]
+#}}}
+#{{{The options for the post processing function
+saveFolderFunc         = "scanWTagSaveFunc"
+convertToPhysical      = False
+showPlot               = False
+savePlot               = True
+xguards                = False
+yguards                = False
+xSlice                 = 0
+ySlice                 = 8*2
+zSlice                 = 0
+axisEqualParallel      = False
+varName                = "n"
+pltName                = "n"
+nProbes                = 5
+maxMode                = 10
+yInd                   = ySlice
+var                    = "n"
+useSteadyStatePathFunc = True
+extension              = "png"
+use_subprocess         = True
+#}}}
+#{{{Constructor options
 remove_old = False
 directory  = "a1-KiwiFlat"
 make       = False
-# *****************************************************************************
-
-# The PBS options
-# *****************************************************************************
-# Specify the numbers used for the BOUT runs
+cpy_source = True
+#}}}
+#{{{The PBS options
 nproc                 = 48
 BOUT_nodes            = 3
 BOUT_ppn              = 16
@@ -124,29 +143,71 @@ post_process_nodes    = 1
 post_process_ppn      = 20
 post_process_walltime = '0:29:00'
 post_process_queue    = 'xpresq'
-# *****************************************************************************
-# =============================================================================
+#}}}
+#}}}
 
+#{{{Abbrevations
+#{{{Dictionaries with common runner options
+commonRunnerKwargs =\
+        {\
+         "directory"          : directory         ,\
+         "make"               : make              ,\
+         "nproc"              : nproc             ,\
+         "cpy_source"         : cpy_source        ,\
+         "BOUT_nodes"         : BOUT_nodes        ,\
+         "BOUT_ppn"           : BOUT_ppn          ,\
+         "post_process_nproc" : post_process_nproc,\
+         "post_process_nodes" : post_process_nodes,\
+         "post_process_ppn"   : post_process_ppn  ,\
+        }
+#}}}
 
-# Init and expand options
-# =============================================================================
+#{{{Dictionaries with common post-processing options
+commonPlotterKwargs =\
+        {\
+         "saveFolderFunc"   : saveFolderFunc   ,\
+         "convertToPhysical": convertToPhysical,\
+         "showPlot"         : showPlot         ,\
+         "savePlot"         : savePlot         ,\
+         "extension"        : extension        ,\
+         "use_subprocess"   : use_subprocess   ,\
+        }
+fieldPlotterKwargs =\
+        {\
+         "xguards"          : xguards          ,\
+         "yguards"          : yguards          ,\
+         "xSlice"           : xSlice           ,\
+         "ySlice"           : ySlice           ,\
+         "zSlice"           : zSlice           ,\
+         "axisEqualParallel": axisEqualParallel,\
+         **commonPlotterKwargs                 ,\
+        }
+#}}}
+
+#{{{Set the scan
+series_add = [\
+              ('input', 'B0', B0),\
+              ('geom' , 'Lx', Lx),\
+              ('geom' , 'Ly', Ly),\
+             ]
+#}}}
+#}}}
+
+#{{{Init and expand options
 # Filter
 ownFilterType = "none"
 # Spatial domain
 nout       = [2]
 # Post processing option
 tSlice     = slice(-2, None)
-# =============================================================================
+#}}}
 
-
-# Init runner
-# =============================================================================
+#{{{Init runner
 if postProcessInit:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
-# Init options
-# *****************************************************************************
+#{{{Init options
 # Name
 theRunName = "a1-KiwiFlat-0-initialize"
 # Set the spatial domain
@@ -158,40 +219,30 @@ timestep   = [2e3]
 BOUT_walltime         = '05:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
-# *****************************************************************************
-
+#}}}
+#{{{Run and post processing
 initRunner = PBS_runner(\
-                directory  = directory ,\
-                nproc      = nproc ,\
                 # Set spatial domain
-                nz         = nz,\
+                nz         = nz      ,\
                 # Set temporal domain
-                nout       = nout  ,\
+                nout       = nout    ,\
                 timestep   = timestep,\
-                # Copy the source file
-                cpy_source = True  ,\
-                make       = make  ,\
-                restart    = restart,\
+                # Set the restart option
+                restart    = restart ,\
+                # Set additional option
                 additional = [
                               ('tag',theRunName,0),\
                               ('ownFilters'  , 'type', ownFilterType),\
                              ],\
-                series_add = [
-                              ('input', 'B0', B0),\
-                              ('geom', 'Lx', Lx),\
-                              ('geom', 'Ly', Ly),\
-                             ],\
+                series_add = series_add                      ,\
                 # PBS options
-                BOUT_nodes            = BOUT_nodes           ,\
-                BOUT_ppn              = BOUT_ppn             ,\
                 BOUT_walltime         = BOUT_walltime        ,\
                 BOUT_run_name         = BOUT_run_name        ,\
-                post_process_nproc    = post_process_nproc   ,\
-                post_process_nodes    = post_process_nodes   ,\
-                post_process_ppn      = post_process_ppn     ,\
                 post_process_walltime = post_process_walltime,\
                 post_process_queue    = post_process_queue   ,\
                 post_process_run_name = post_process_run_name,\
+                # Common options
+                **commonRunnerKwargs                         ,\
                 )
 
 init_dmp_folders, PBS_ids = initRunner.execute_runs(\
@@ -202,43 +253,34 @@ init_dmp_folders, PBS_ids = initRunner.execute_runs(\
                              post_process_after_every_run = True,\
                              # Below are the kwargs arguments being passed to
                              # the post processing function
-                             # Switches
-                             driverName     = "plot1D2DAndFluctDriver",\
-                             xguards        = xguards           ,\
-                             yguards        = yguards           ,\
-                             xSlice         = xSlice            ,\
-                             ySlice         = ySlice            ,\
-                             zSlice         = zSlice            ,\
-                             tSlice         = tSlice            ,\
-                             savePlot       = savePlot          ,\
-                             saveFolderFunc = "scanWTagSaveFunc",\
-                             theRunName     = theRunName        ,\
+                             driverName        = "plot1D2DAndFluctDriver",\
+                             tSlice            = tSlice                  ,\
+                             theRunName        = theRunName              ,\
+                             # Common kwargs
+                             **fieldPlotterKwargs                        ,\
                             )
-# =============================================================================
+#}}}
+#}}}
 
-# Expand, Linear and turb options
-# =============================================================================
+#{{{Expand, Linear and turb options
 if justPostProcess:
     restart = None
 else:
     restart = "overwrite"
-# =============================================================================
+#}}}
 
-
-# The expand runner
-# =============================================================================
+#{{{The expand runner
 if postProcessExp:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
-# Expand runner options
-# *****************************************************************************
+#{{{Expand runner options
 # Set the spatial domain
 nz = 256
 # Set the temporal domain
 timestep   = [50]
 # From previous outputs
-one_of_the_restart_paths_in_scan = init_dmp_folders[0]
+aScanPath = init_dmp_folders[0]
 # Name
 theRunName = "a1-KiwiFlat-1-expand"
 # PBS options
@@ -247,41 +289,31 @@ BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 # Post processing option
 tSlice     = slice(-2, None)
-# *****************************************************************************
-
+#}}}
+#{{{Run and post processing
 expandRunner = PBS_runner(\
-                directory  = directory ,\
-                nproc      = nproc ,\
                 # Set spatial domain
-                nz         = nz,\
+                nz           = nz               ,\
                 # Set temporal domain
-                nout       = nout  ,\
-                timestep   = timestep,\
-                # Copy the source file
-                cpy_source = True  ,\
-                make       = make  ,\
-                restart    = restart,\
-                restart_from = restart_from_func,\
+                nout         = nout             ,\
+                timestep     = timestep         ,\
+                # Set restart options
+                restart      = restart          ,\
+                restart_from = restartFromFunc  ,\
+                # Set additional options
                 additional = [
                               ('tag',theRunName,0),\
                               ('ownFilters'  , 'type', ownFilterType),\
                              ],\
-                series_add = [
-                              ('input', 'B0', B0),\
-                              ('geom', 'Lx', Lx),\
-                              ('geom', 'Ly', Ly),\
-                             ],\
+                series_add = series_add                      ,\
                 # PBS options
-                BOUT_nodes            = BOUT_nodes           ,\
-                BOUT_ppn              = BOUT_ppn             ,\
                 BOUT_walltime         = BOUT_walltime        ,\
                 BOUT_run_name         = BOUT_run_name        ,\
-                post_process_nproc    = post_process_nproc   ,\
-                post_process_nodes    = post_process_nodes   ,\
-                post_process_ppn      = post_process_ppn     ,\
                 post_process_walltime = post_process_walltime,\
                 post_process_queue    = post_process_queue   ,\
                 post_process_run_name = post_process_run_name,\
+                # Common options
+                **commonRunnerKwargs                         ,\
                 )
 
 expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
@@ -294,50 +326,39 @@ expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
                                post_process_after_every_run = True,\
                                # Below are the kwargs arguments being passed to
                                # the post processing function
-                               # Switches
-                               driverName     = "plot1D2DAndFluctDriver",\
-                               xguards        = xguards           ,\
-                               yguards        = yguards           ,\
-                               xSlice         = xSlice            ,\
-                               ySlice         = ySlice            ,\
-                               zSlice         = zSlice            ,\
-                               tSlice         = tSlice            ,\
-                               savePlot       = savePlot          ,\
-                               saveFolderFunc = "scanWTagSaveFunc",\
-                               theRunName     = theRunName        ,\
-                               extension      = "png"             ,\
+                               driverName        = "plot1D2DAndFluctDriver",\
+                               tSlice            = tSlice                  ,\
+                               theRunName        = theRunName              ,\
                                # Below are the kwargs given to the
-                               # restart_from_func
-                               one_of_the_restart_paths_in_scan =\
-                               one_of_the_restart_paths_in_scan,\
+                               # restartFromFunc
+                               aScanPath      = aScanPath     ,\
+                               scanParameters = scanParameters,\
+                               # Common kwargs
+                               **fieldPlotterKwargs           ,\
                               )
-# =============================================================================
+#}}}
+#}}}
 
-
-# Linear and turb options
-# =============================================================================
+#{{{Linear and turb options
 saveTerms           = False
 useHyperViscAzVortD = [True]
 timestep            = [1]
-BOUT_walltime       = '72:00:00'
+BOUT_walltime       = '100:00:00'
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
-# =============================================================================
+#}}}
 
-
-# The linear runner
-# =============================================================================
+#{{{The linear runner
 if postProcessLin:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
-# Linear options
-# *****************************************************************************
+#{{{ Linear options
 tSlice        = slice(-300, -300, None)
 includeNoise  = True
 forceAddNoise = True
 # From previous outputs
-one_of_the_restart_paths_in_scan = expand_dmp_folders[0]
+aScanPath = expand_dmp_folders[0]
 # Set the temporal domain
 nout = [500]
 # Name
@@ -345,19 +366,16 @@ theRunName = "a1-KiwiFlat-2-linearPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
-# *****************************************************************************
-
+#}}}
+#{{{Run and post processing
 linearRun = PBS_runner(\
-            directory  = directory ,\
-            nproc      = nproc ,\
             # Set temporal domain
-            nout       = nout  ,\
-            timestep   = timestep,\
-            # Copy the source file
-            cpy_source = True  ,\
-            make       = make  ,\
-            restart    = restart,\
-            restart_from = restart_from_func,\
+            nout         = nout           ,\
+            timestep     = timestep       ,\
+            # Set restart options
+            restart      = restart        ,\
+            restart_from = restartFromFunc,\
+            # Set additional options
             additional = [
                           ('tag',theRunName,0),\
                           ('switch'      , 'includeNoise'       , includeNoise ),\
@@ -365,22 +383,15 @@ linearRun = PBS_runner(\
                           ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                           ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
-            series_add = [
-                          ('input', 'B0', B0),\
-                          ('geom', 'Lx', Lx),\
-                          ('geom', 'Ly', Ly),\
-                         ],\
+            series_add = series_add                      ,\
             # PBS options
-            BOUT_nodes            = BOUT_nodes           ,\
-            BOUT_ppn              = BOUT_ppn             ,\
             BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_nproc    = post_process_nproc   ,\
-            post_process_nodes    = post_process_nodes   ,\
-            post_process_ppn      = post_process_ppn     ,\
             post_process_walltime = post_process_walltime,\
             post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
+            # Common options
+            **commonRunnerKwargs                         ,\
             )
 
 linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
@@ -394,77 +405,59 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  # Below are the kwargs arguments being passed to
                                  # the post processing function
                                  # Switches
-                                 driverName     = "single2DDriver"  ,\
-                                 xguards        = xguards           ,\
-                                 yguards        = yguards           ,\
-                                 xSlice         = xSlice            ,\
-                                 ySlice         = ySlice            ,\
-                                 zSlice         = zSlice            ,\
-                                 tSlice         = tSlice            ,\
-                                 savePlot       = savePlot          ,\
-                                 saveFolderFunc = "scanWTagSaveFunc",\
-                                 theRunName     = theRunName        ,\
-                                 subPolAvg      = True              ,\
-                                 varName        = "n"               ,\
-                                 pltName        = "n"               ,\
-                                 extension      = "png"             ,\
+                                 driverName        = "single2DDriver" ,\
+                                 theRunName        = theRunName       ,\
+                                 tSlice            = tSlice           ,\
+                                 subPolAvg         = True             ,\
+                                 varName           = varName          ,\
+                                 pltName           = pltName          ,\
                                  # Below are the kwargs given to the
-                                 # restart_from_func
-                                 one_of_the_restart_paths_in_scan =\
-                                 one_of_the_restart_paths_in_scan,\
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
                                 )
 
-# If linear profiles are to be plotted
-# -----------------------------------------------------------------------------
+#{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
-else:
-    curPostProcessor = None
-tSlice = slice(-30, None, 10)
-_, _ = linearRun.execute_runs(\
-                             remove_old               = remove_old,\
-                             post_processing_function = curPostProcessor,\
-                             # Declare dependencies
-                             job_dependencies = PBS_ids,\
-                             # This function will be called every time after
-                             # performing a run
-                             post_process_after_every_run = True,\
-                             # Below are the kwargs arguments being passed to
-                             # the post processing function
-                             # Switches
-                             driverName     = "parDriver"       ,\
-                             xguards        = xguards           ,\
-                             yguards        = yguards           ,\
-                             xSlice         = xSlice            ,\
-                             ySlice         = ySlice            ,\
-                             zSlice         = zSlice            ,\
-                             tSlice         = tSlice            ,\
-                             savePlot       = savePlot          ,\
-                             saveFolderFunc = "scanWTagSaveFunc",\
-                             theRunName     = theRunName        ,\
-                             subPolAvg      = True              ,\
-                             # Below are the kwargs given to the
-                             # restart_from_func
-                             one_of_the_restart_paths_in_scan =\
-                             one_of_the_restart_paths_in_scan,\
-                            )
-# -----------------------------------------------------------------------------
-# =============================================================================
+    theRunName = "a1-KiwiFlat-2-linearPhaseParProfiles"
+    tSlice = slice(-30, None, 10)
 
+    _, _ = linearRun.execute_runs(\
+                                 remove_old               = remove_old,\
+                                 post_processing_function = curPostProcessor,\
+                                 # Declare dependencies
+                                 job_dependencies = PBS_ids,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = True,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName     = "parDriver"   ,\
+                                 tSlice         = tSlice        ,\
+                                 theRunName     = theRunName    ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
+                                )
+#}}}
+#}}}
+#}}}
 
-
-
-
-# Create the runner
-# =============================================================================
+#{{{Turbulence runner
 if postProcessTrub:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
-# The options for the run
-# *****************************************************************************
+#{{{Turbulence options
 tSlice = slice(-5000, None, 10)
-one_of_the_restart_paths_in_scan = linear_dmp_folders[0]
+aScanPath = linear_dmp_folders[0]
 # Set the temporal domain
 nout       = [5000]
 # Name
@@ -472,40 +465,29 @@ theRunName = "a1-KiwiFlat-3-turbulentPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
-# *****************************************************************************
-
+#}}}
+#{{{Run and post processing
 turboRun = PBS_runner(\
-                directory  = directory ,\
-                nproc      = nproc ,\
                 # Set temporal domain
-                nout       = nout  ,\
-                timestep   = timestep,\
-                # Copy the source file
-                cpy_source = True  ,\
-                make       = make  ,\
-                restart    = restart,\
-                restart_from = restart_from_func,\
+                nout       = nout               ,\
+                timestep   = timestep           ,\
+                # Set restart options
+                restart      = restart          ,\
+                restart_from = restartFromFunc,\
                 additional = [
                               ('tag',theRunName,0),\
                               ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                               ('switch'      , 'saveTerms'          ,saveTerms),\
                              ],\
-                series_add = [
-                              ('input', 'B0', B0),\
-                              ('geom', 'Lx', Lx),\
-                              ('geom', 'Ly', Ly),\
-                             ],\
+                series_add = series_add                      ,\
                 # PBS options
-                BOUT_nodes            = BOUT_nodes           ,\
-                BOUT_ppn              = BOUT_ppn             ,\
                 BOUT_walltime         = BOUT_walltime        ,\
                 BOUT_run_name         = BOUT_run_name        ,\
-                post_process_nproc    = post_process_nproc   ,\
-                post_process_nodes    = post_process_nodes   ,\
-                post_process_ppn      = post_process_ppn     ,\
                 post_process_walltime = post_process_walltime,\
                 post_process_queue    = post_process_queue   ,\
                 post_process_run_name = post_process_run_name,\
+                # Common options
+                **commonRunnerKwargs                         ,\
                 )
 
 turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
@@ -519,85 +501,83 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
                                  # Below are the kwargs arguments being passed to
                                  # the post processing function
                                  # Switches
-                                 driverName     = "single2DDriver"  ,\
-                                 xguards        = xguards           ,\
-                                 yguards        = yguards           ,\
-                                 xSlice         = xSlice            ,\
-                                 ySlice         = ySlice            ,\
-                                 zSlice         = zSlice            ,\
-                                 tSlice         = tSlice            ,\
-                                 savePlot       = savePlot          ,\
-                                 saveFolderFunc = "scanWTagSaveFunc",\
-                                 theRunName     = theRunName        ,\
-                                 varName        = "n"               ,\
-                                 pltName        = "n"               ,\
-                                 axisEqualParallel = False          ,\
+                                 driverName     = "single2DDriver",\
+                                 tSlice         = tSlice          ,\
+                                 theRunName     = theRunName      ,\
+                                 varName        = varName         ,\
+                                 pltName        = pltName         ,\
                                  # Below are the kwargs given to the
-                                 # restart_from_func
-                                 one_of_the_restart_paths_in_scan =\
-                                 one_of_the_restart_paths_in_scan,\
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
                                 )
-
-# If linear profiles are to be plotted
-# -----------------------------------------------------------------------------
+#{{{ If linear profiles are to be plotted
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
-else:
-    curPostProcessor = None
-tSlice = slice(-30, None, 10)
-_, _ = turboRun.execute_runs(\
-                             remove_old               = remove_old,\
-                             post_processing_function = curPostProcessor,\
-                             # Declare dependencies
-                             job_dependencies = PBS_ids,\
-                             # This function will be called every time after
-                             # performing a run
-                             post_process_after_every_run = True,\
-                             # Below are the kwargs arguments being passed to
-                             # the post processing function
-                             # Switches
-                             driverName     = "parDriver"       ,\
-                             xguards        = xguards           ,\
-                             yguards        = yguards           ,\
-                             xSlice         = xSlice            ,\
-                             ySlice         = ySlice            ,\
-                             zSlice         = zSlice            ,\
-                             tSlice         = tSlice            ,\
-                             savePlot       = savePlot          ,\
-                             saveFolderFunc = "scanWTagSaveFunc",\
-                             theRunName     = theRunName        ,\
-                             subPolAvg      = True              ,\
-                             # Below are the kwargs given to the
-                             # restart_from_func
-                             one_of_the_restart_paths_in_scan =\
-                             one_of_the_restart_paths_in_scan,\
-                            )
-# -----------------------------------------------------------------------------
-# =============================================================================
+    theRunName = "a1-KiwiFlat-3-turbulentPhase1ParProfiles"
+    tSlice = slice(-30, None, 10)
 
-collectionFolders = [linear_dmp_folders[0],\
-                     turbo_dmp_folders[0]]
+    _, _ = turboRun.execute_runs(\
+                                 remove_old               = remove_old      ,\
+                                 post_processing_function = curPostProcessor,\
+                                 # Declare dependencies
+                                 job_dependencies = PBS_ids         ,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = True,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName     = "parDriver"   ,\
+                                 tSlice         = tSlice        ,\
+                                 theRunName     = theRunName    ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
+                                )
+#}}}
+#}}}
+#}}}
 
-# # Plot the probe data
-# postBoutRunner(# postBoutRunner input
-#                turbo_dmp_folders,\
-#                driverName = "plotProbes",\
-#                # PostProcessDriver input
-#                convertToPhysical = False             ,\
-#                # subPolAvg         = False             ,\
-#                showPlot          = False             ,\
-#                savePlot          = True              ,\
-#                # saveFolder        = None              ,\
-#                saveFolderFunc    = "scanWTagSaveFunc",\
-#                # useSubProcess     = True              ,\
-#                theRunName        = "probeTest"       ,\
-#                # StatsAndSignalsDrivers input
-#                paths             = collectionFolders,\
-#                # DriversProbes input
-#                var               = 'n'               ,\
-#                yInd              = 2*8               ,\
-#                nProbes           = 5                 ,\
-#                # Choose this in order to have some gradients
-#                steadyStatePath   = expand_dmp_folders[0] ,\
-#                maxMode           = 7                 ,\
-#               )
+#{{{ Probes and energy (run this driver after all, as we need the collectionFolders)
+if postProcessProbesAndEnergy:
+    # FIXME: CollectionFolders: One for each scan....
+    collectionFolders = [linear_dmp_folders[0],\
+                         turbo_dmp_folders[0]]
+    theRunName = "a1-KiwiFlat-all-energyProbesPlot"
+    curPostProcessor = postBoutRunner
+
+    _, _ = turboRun.execute_runs(\
+                                 remove_old               = remove_old,\
+                                 post_processing_function = curPostProcessor,\
+                                 # Declare dependencies
+                                 job_dependencies = PBS_ids,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = True,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # postBoutRunner option
+                                 driverName = "plotEnergyAndProbes"    ,\
+                                 # PostProcessDriver input
+                                 **commonPlotterKwargs                 ,\
+                                 theRunName        = theRunName        ,\
+                                 # StatsAndSignalsDrivers input
+                                 paths             = collectionFolders,\
+                                 # DriversProbes input
+                                 var                    = var                   ,\
+                                 yInd                   = yInd                  ,\
+                                 nProbes                = nProbes               ,\
+                                 useSteadyStatePathFunc = useSteadyStatePathFunc,\
+                                 maxMode                = maxMode               ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc and convertToCurrentScanParameters
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                )
+#}}}

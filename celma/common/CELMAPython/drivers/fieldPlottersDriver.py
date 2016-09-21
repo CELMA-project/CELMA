@@ -5,9 +5,6 @@ Contains the post processing driver class for plotting the fields
 """
 
 from .postProcessorDriver import PostProcessorDriver
-from matplotlib.pylab import plt
-import datetime
-import os
 
 #{{{FieldPlottersDriver
 class FieldPlottersDriver(PostProcessorDriver):
