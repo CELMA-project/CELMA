@@ -4,7 +4,6 @@ from .line import Line
 from ..plotHelpers import seqCMap
 import numpy as np
 from matplotlib.gridspec import GridSpec
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from boututils.datafile import DataFile
 import os

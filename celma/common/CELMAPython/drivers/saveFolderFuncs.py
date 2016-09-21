@@ -11,7 +11,8 @@ def scanWTagSaveFunc(path, theRunName = None, *args, **kwargs):
     if hasattr(path, "__iter__") and type(path) != str:
         path = path[0]
 
-    saveFolder = theRunName + "-" + path.split('/')[-1].replace('_tag_'+theRunName+'_0','')
+    saveFolder =\
+    theRunName + "-" + path.split('/')[-1].replace('_tag_'+theRunName+'_0','')
 
     return saveFolder
 #}}}
