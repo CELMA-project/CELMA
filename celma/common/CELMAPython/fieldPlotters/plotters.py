@@ -46,6 +46,7 @@ class Plot(object):
                  ySlice            = slice(0,None),\
                  zSlice            = slice(0,None),\
                  tSlice            = None         ,\
+                 maxGradRhoFolder  = None         ,\
                  convertToPhysical = False        ,\
                  subPolAvg         = False        ,\
                  showPlot          = False        ,\
@@ -78,6 +79,9 @@ class Plot(object):
             How the data will be sliced in z.
         tSlice : slice
             How the data will be sliced in t.
+        maxGradRhoFolder : [None | str]
+            If this is set, the xSlice will be replaced by the index of
+            the largest gradient in rho direction.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
         subPolAvg : vool
@@ -95,14 +99,15 @@ class Plot(object):
         #}}}
 
         # Set member data from input
-        self._path       = path
-        self._xguards    = xguards
-        self._yguards    = yguards
-        self._showPlot   = showPlot
-        self._savePlot   = savePlot
-        self._saveFolder = saveFolder
-        self._subPolAvg  = subPolAvg
-        self._extension  = extension
+        self._path             = path
+        self._xguards          = xguards
+        self._yguards          = yguards
+        self._showPlot         = showPlot
+        self._savePlot         = savePlot
+        self._saveFolder       = saveFolder
+        self._subPolAvg        = subPolAvg
+        self._extension        = extension
+        self._maxGradRhoFolder = maxGradRhoFolder
 
         # Get proper indices
         self._xind = self._getIndices(xSlice, "x")
@@ -128,6 +133,39 @@ class Plot(object):
                            "Setting to None{1}{0}".format("\n"*3, "!"*3))
                 print(message)
                 zSlice.step = None
+
+        #{{{Reset xSlice through maxGradRhoFolder
+        if maxGradRhoFolder:
+            # Collect the profile of the variable
+            if varName == "n"
+                curVarName == "lnN"
+            else:
+                curVarName == varName
+            # Need the x-guards as derivatives will be taken (subtracted
+            # in findLargestRadialGrad
+            var = collect(varname = curVarName      ,\
+                          path    = maxGradRhoFolder,\
+                          xguards = True            ,\
+                          yguards = False           ,\
+                          info    = False           ,\
+                          yind    = [ySlice, ySlice],\
+                          zind    = [zSlice, zSlice],\
+                          )
+            if varname == "n"
+                var = np.exp(var)
+            # Collect variables needed for findLargestRadialGrad
+            dx  = collect(varname = "dx"            ,\
+                          path    = path            ,\
+                          xguards = True            ,\
+                          yguards = False           ,\
+                          info    = False           ,\
+                          yind    = [ySlice, ySlice],\
+                          )
+            MXG = collect(varname = "MXG", path = path, info=False)
+            n = np.exp(lnN)
+            # Find the max gradient of the variable (subtracts the guard cells)
+            _, xSlice = findLargestRadialGrad(var, dx, MXG)
+        #}}}
 
         # Used if we are taking poloidal averages
         self._xSlice = xSlice
@@ -734,9 +772,9 @@ class Plot2D(Plot):
                                      **kwargs)
 
         # Check that the indices are properly set
-        if (kwargs["xSlice"] == slice(0,None)) and\
-           (kwargs["ySlice"] == slice(0,None)) and\
-           (kwargs["zSlice"] == slice(0,None)):
+        if (self._xSlice == slice(0,None)) and\
+           (self._ySlice == slice(0,None)) and\
+           (self._zSlice == slice(0,None)):
             message = "3 slices were given, although only 2 is possible"
             raise ValueError(message)
 
