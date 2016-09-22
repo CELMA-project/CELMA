@@ -21,7 +21,7 @@ class PostProcessorDriver(object):
 
     #{{{Constructor
     def __init__(self                     ,\
-                 path                     ,\
+                 dmp_folder               ,\
                  convertToPhysical = False,\
                  subPolAvg         = False,\
                  showPlot          = False,\
@@ -38,8 +38,9 @@ class PostProcessorDriver(object):
 
         Parameters
         ----------
-        path : str
-            The path to collect from.
+        dmp_folder : [str|list]
+            The path to collect from. This is the output dmp_folder from
+            bout_runners.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
         subPolAvg : bool
@@ -68,7 +69,7 @@ class PostProcessorDriver(object):
         #}}}
 
         # Set the member data
-        self._path              = path
+        self._dmp_folder        = dmp_folder
         self._convertToPhysical = convertToPhysical
         self._subPolAvg         = subPolAvg
         self._showPlot          = showPlot
@@ -83,28 +84,28 @@ class PostProcessorDriver(object):
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
             if saveFolderFunc == 'scanWTagSaveFunc':
-                saveFolder = scanWTagSaveFunc(path                       ,\
+                saveFolder = scanWTagSaveFunc(dmp_folder                       ,\
                                     convertToPhysical = convertToPhysical,\
                                     **kwargs)
             else:
                 message  = "{0}Warning: saveFolderFunc '{1}' not found, "
                 message += "falling back to standard implementation{0}"
                 print(message.format("\n"*3, saveFolderFunc))
-                saveFolder = "-".join(path.split('/')[::-1])
+                saveFolder = "-".join(dmp_folder.split('/')[::-1])
         else:
             if saveFolder is None:
-                saveFolder = "-".join(path.split('/')[::-1])
+                saveFolder = "-".join(dmp_folder.split('/')[::-1])
 
         # Get the timefolder
         self._timeFolder = self._getTime()
 
 
         # Differentiate whether or not there are several folders
-        if hasattr(path, "__iter__") and type(path) != str:
-            path = path[0]
+        if hasattr(dmp_folder, "__iter__") and type(dmp_folder) != str:
+            dmp_folder = dmp_folder[0]
 
-        # Create the savepath (based on the first path string)
-        saveDirs = [os.path.normpath(path).split(os.sep)[0],\
+        # Create the savepath (based on the first dmp_folder string)
+        saveDirs = [os.path.normpath(dmp_folder).split(os.sep)[0],\
                     'visualization',\
                     saveFolder,\
                     self._timeFolder]
@@ -192,10 +193,10 @@ class PostProcessorDriver(object):
         Function which converts a path belonging to one paths in a scan
         to the path belonging to the current scan.
 
-        The function obtains the current scan parameters from self._path
-        (the dmp_folder given from bout_runners), and inserts the
-        current scan parameters into aScanPath (the function input which is
-        one of the paths belonging to the scan).
+        The function obtains the current scan parameters from
+        self._dmp_folder, and inserts the current scan parameters into
+        aScanPath (the function input which is one of the paths
+        belonging to the scan).
 
         Parameters
         ----------
@@ -230,17 +231,17 @@ class PostProcessorDriver(object):
                 # Update hits
                 hits.remove(hits[0])
 
-        # Get the values from the current self._path
+        # Get the values from the current self._dmp_folder
         values = {}
         for scanParameter in self._scanParameters:
             hits = [m.start() for m in \
-                    re.finditer(scanParameter, self._path)]
+                    re.finditer(scanParameter, self._dmp_folder)]
             # Choose the first hit to get the value from (again we assume
             # that the value does not contain a _)
             value_start = hits[0] + len(scanParameter) + 1
             # Here we assume that the value is not separated by an
             # underscore
-            values[scanParameter] = self._path[value_start:].split("_")[0]
+            values[scanParameter] = self._dmp_folder[value_start:].split("_")[0]
 
         # Insert the values
         scanPath = scanPathTemplate.format(values)
