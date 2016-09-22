@@ -154,11 +154,11 @@ class PlotHelper(object):
         #}}}
 
         #{{{theta
-        dz = collect("dz"                   ,\
-                     path    = self._path   ,\
-                     xguards = self._xguards,\
-                     yguards = self._yguards,\
-                     info    = False)
+        self.dz = collect("dz"                   ,\
+                          path    = self._path   ,\
+                          xguards = self._xguards,\
+                          yguards = self._yguards,\
+                          info    = False)
         MZ       = collect("MZ"                   ,\
                            path    = self._path   ,\
                            xguards = self._xguards,\
@@ -168,7 +168,7 @@ class PlotHelper(object):
         # Subtract the unused plane
         innerPoints = MZ - 1
 
-        theta = dz * np.array(np.arange(0.0, innerPoints))
+        theta = self.dz * np.array(np.arange(0.0, innerPoints))
 
         # Convert to degrees
         theta * (180/np.pi)

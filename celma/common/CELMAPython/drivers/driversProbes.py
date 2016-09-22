@@ -6,6 +6,7 @@ Contains drivers for the probes
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import PerpPlaneProbes, PlotProbes
+from multiprocessing import Process
 import numpy as np
 
 #{{{DriversProbes
@@ -61,7 +62,7 @@ class DriversProbes(StatsAndSignalsDrivers):
 
         if self._scanParameters:
             self._steadyStatePath =\
-                    self._convertToCurrentScanParameters(self._steadyStatePath)
+                    self._convertToCurrentScanParameters(steadyStatePath)
         else:
             self._steadyStatePath = steadyStatePath
 
@@ -91,6 +92,10 @@ class DriversProbes(StatsAndSignalsDrivers):
         self._probes.initializeInputOutput(self._probes.radialProbesIndices,\
                                      [self._probes.yInd],\
                                      [0])
+
+        # FIXME: Use subprocesses to calculate
+        #        May have to define a calling classe, see
+        #        http://stackoverflow.com/questions/35717109/python-class-object-sharing-between-processes-created-using-multiprocessing-modu
         self._probes.calcStatsMoments()
         self._probes.calcPDFs()
         self._probes.calcPSDs()
@@ -120,14 +125,57 @@ class DriversProbes(StatsAndSignalsDrivers):
                 savePath  = self._savePath         ,\
                 pltSize   = self._pltSize          ,\
                                   )
+        if self._useSubProcess:
+            #{{{ Function call through subprocess
+            proc = {}
+            # Create process
+            proc["plotTimeTrace"] =\
+                    Process(\
+                            target = probesPlotter.plotTimeTrace,\
+                            args   = ()                         ,\
+                            kwargs = {}
+                           )
+            proc["plotPDFs"] =\
+                    Process(\
+                            target = probesPlotter.plotPDFs,\
+                            args   = ()                    ,\
+                            kwargs = {}
+                           )
+            proc["plotPSDs"] =\
+                    Process(\
+                            target = probesPlotter.plotPSDs,\
+                            args   = ()                    ,\
+                            kwargs = {}
+                           )
+            proc["plotAvgFluxThroughVolumeElement"] =\
+                    Process(\
+                target =  probesPlotter.plotAvgFluxThroughVolumeElement,\
+                args   = (self._uName, self._labelName)                ,\
+                kwargs = {}
+                           )
+            proc["plotZFFT"] =\
+                    Process(\
+                            target = probesPlotter.plotZFFT            ,\
+                            args   = (self._positionKey, self._maxMode),\
+                            kwargs = {}
+                           )
 
-        probesPlotter.plotTimeTrace()
-        probesPlotter.plotPDFs()
-        probesPlotter.plotPSDs()
-        probesPlotter.plotAvgFluxThrougVolumeElement(\
-                                            uName     = self._uName,\
-                                            labelName = self._labelName)
-
-        probesPlotter.plotZFFT(self._positionKey, self._maxMode)
+            # Start processes
+            for key in proc.keys():
+                proc[key].start()
+            # Wait for process to finish
+            for key in proc.keys():
+                proc[key].join()
+            #}}}
+        else:
+            #{{{Normal function call
+                probesPlotter.plotTimeTrace()
+                probesPlotter.plotPDFs()
+                probesPlotter.plotPSDs()
+                probesPlotter.plotAvgFluxThroughVolumeElement(\
+                                                    uName     = self._uName,\
+                                                    labelName = self._labelName)
+                probesPlotter.plotZFFT(self._positionKey, self._maxMode)
+            #}}}
     #}}}
 #}}}
