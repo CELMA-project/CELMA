@@ -23,6 +23,8 @@ class FieldPlottersDriver(PostProcessorDriver):
                  ySlice            = slice(0,None),\
                  zSlice            = slice(0,None),\
                  tSlice            = None         ,\
+                 maxGradRhoFolder  = None         ,\
+                 writer            = "ffmpeg"     ,\
                  **kwargs
                 ):
         #{{{docstring
@@ -48,6 +50,8 @@ class FieldPlottersDriver(PostProcessorDriver):
         maxGradRhoFolder : [None | str]
             If this is set, the xSlice will be replaced by the index of
             the largest gradient in rho direction.
+        writer : str
+            Writer to use if the plots are animated.
         **kwargs : keyword arguments
             Additional keyword arguments given as input to
             PostProcessorDriver.
@@ -64,6 +68,7 @@ class FieldPlottersDriver(PostProcessorDriver):
         self._ySlice  = ySlice
         self._zSlice  = zSlice
         self._tSlice  = tSlice
+        self._writer  = writer
 
         # Get the current scan
         if maxGradRhoFolder:

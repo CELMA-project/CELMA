@@ -99,6 +99,7 @@ class Organizer(object):
                 notFound.append(line)
         for missing in notFound:
             self.lines.remove(missing)
+            self.useCombinedPlot = False
 
         # Append lines with eventual extra lines
         # The extra lines are treated specially since they are not
@@ -112,19 +113,32 @@ class Organizer(object):
         # Organize the lines
         newLines = [None]*len(self.lines)
         # Make a copy as we are going to pop the list
+        self.allFieldsPresent = True
         for line in self.lines:
             if line.plotPos:
                 # Get index in self line
                 index = self.lines.index(line)
-                newLines[line.plotPos] = line
-        if len(self.lines) > 0:
+                try:
+                    newLines[line.plotPos] = line
+                except IndexError:
+                    # If not all the fields are saved
+                    print(("WARNING: Could not properly position\n\n"))
+                    self.allFieldsPresent = False
+                    break
+        if len(self.lines) > 0 and self.allFieldsPresent:
             # Get the free indices in newLines
             indices = [i for i, el in enumerate(newLines) if el is None]
             for index, line in zip(indices, self.lines):
                 newLines[index] = line
 
-        # Reassign
-        self.lines = newLines
+        if self.allFieldsPresent:
+            # Reassign
+            self.lines = newLines
+        else:
+            print(("Removing extra lines as positioning failed"))
+            for key in self.extraLines.keys():
+                # Insert the extraLines into self.lines
+                self.lines.remove(self.extraLines[key])
 
         # Set the colors
         colorSpace = np.arange(len(self.lines))
@@ -160,14 +174,22 @@ class Organizer(object):
                 line.ax = fig.add_subplot(gs[lineNr], sharex=firstAx)
 
         for col in range(1, self._cols+1):
-            self.lines[-col].bottomAx = True
+            try:
+                self.lines[-col].bottomAx = True
+            except IndexError:
+                # Only one column
+                if self.useCombinedPlot:
+                    print("WARNING: Only combLine found. Will not plot!!!\n\n\n")
+                    plt.close(fig)
+                    return None
+                break
 
         # Pop the combined line in order not to collect it
         if self.useCombinedPlot:
             self.combLine = self.lines.pop()
 
         # Pop the extra lines in order not to collect them
-        if nExtraLines > 0:
+        if nExtraLines > 0 and self.allFieldsPresent:
             for key in self.extraLines.keys():
                 # Update the extraLines, and remove them from
                 # self.lines, in order not to collect them

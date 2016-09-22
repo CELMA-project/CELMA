@@ -40,7 +40,6 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
 
         # Set member data
         self._paths          = paths
-        self._scanParameters = scanParameters
         self._pltSize        = (12, 9)
 
         # Convert the paths

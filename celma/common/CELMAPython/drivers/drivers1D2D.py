@@ -41,19 +41,29 @@ class Drivers1D2D(Drivers1D, Drivers2D):
     def plot1DAnd2DDriver(self):
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             # Plot the 2D plots
-            Process(\
-                    target = self.allMainFields2DDriver,\
-                    args   = ()                        ,\
-                    kwargs = {}
-                   ).start()
+            proc["allMainFields2DDriver"] =\
+                Process(\
+                        target = self.allMainFields2DDriver,\
+                        args   = ()                        ,\
+                        kwargs = {}
+                       )
 
             # Plot the 1D plots
-            Process(\
-                    target = self.parPerpDriver,\
-                    args   = ()                ,\
-                    kwargs = {}
-                   ).start()
+            proc["parPerpDriver"] =\
+                Process(\
+                        target = self.parPerpDriver,\
+                        args   = ()                ,\
+                        kwargs = {}
+                       )
+
+            # Start the processes
+            for key in proc.keys():
+                proc[key].start()
+            # Wait for process to finish
+            for key in proc.keys():
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -76,7 +86,7 @@ class Drivers1D2D(Drivers1D, Drivers2D):
                     target = self.plot1DAnd2DDriver,\
                     args   = ()                    ,\
                     kwargs = {}
-                   ).start()
+                   )
 
             # Plot fluctuation fields
             self._setSubPolAvg(True)
@@ -84,7 +94,7 @@ class Drivers1D2D(Drivers1D, Drivers2D):
                     target = self.plot1DAnd2DDriver,\
                     args   = ()                    ,\
                     kwargs = {}
-                   ).start()
+                   )
             #}}}
         else:
             #{{{ Normal function call
