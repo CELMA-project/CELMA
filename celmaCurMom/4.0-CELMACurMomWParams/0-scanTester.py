@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Driver which runs using PBS."""
+"""Tests that all drivers are working."""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 import re
 import numpy as np
 from boutdata import collect
-from bout_runners import PBS_runner
+from bout_runners import basic_runner
 from CELMAPython.drivers import postBoutRunner
 from CELMAPython.plotHelpers import findLargestRadialGrad
 
@@ -96,11 +96,11 @@ justPostProcess = True
 # Normal post-processors
 postProcessInit = False
 postProcessExp  = False
-postProcessLin  = True
+postProcessLin  = False
 postProcessTrub = False
 # Extra post-processors
-postProcessLinProfiles     = False
-postProcessTurbProfiles    = False
+postProcessLinProfiles     = True
+postProcessTurbProfiles    = True
 postProcessProbesAndEnergy = False
 
 #{{{Main options
@@ -133,20 +133,11 @@ useSubProcess          = True
 #}}}
 #{{{Constructor options
 remove_old = False
-directory  = "a1-KiwiFlat"
+directory  = "0-scanTest"
 make       = False
 cpy_source = True
 #}}}
-#{{{The PBS options
-nproc                 = 48
-BOUT_nodes            = 3
-BOUT_ppn              = 16
-post_process_nproc    = 1
-post_process_nodes    = 1
-post_process_ppn      = 20
-post_process_walltime = '0:29:00'
-post_process_queue    = 'xpresq'
-#}}}
+nproc = 4
 #}}}
 
 #{{{Abbrevations
@@ -157,11 +148,6 @@ commonRunnerKwargs =\
          "make"               : make              ,\
          "nproc"              : nproc             ,\
          "cpy_source"         : cpy_source        ,\
-         "BOUT_nodes"         : BOUT_nodes        ,\
-         "BOUT_ppn"           : BOUT_ppn          ,\
-         "post_process_nproc" : post_process_nproc,\
-         "post_process_nodes" : post_process_nodes,\
-         "post_process_ppn"   : post_process_ppn  ,\
         }
 #}}}
 #{{{Dictionaries with common post-processing options
@@ -201,24 +187,20 @@ else:
     curPostProcessor = None
 #{{{Init options
 # Name
-theRunName = "a1-KiwiFlat-0-initialize"
+theRunName = "0-TestScan-0-initialize"
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
 restart    = None
-timestep   = [2e3]
+timestep   = [1e-10]
 nout       = [2]
 # Filter
 ownFilterType = "none"
-# Specify the numbers used for the BOUT runs
-BOUT_walltime         = '05:00:00'
-BOUT_run_name         = theRunName
-post_process_run_name = 'post' + theRunName.capitalize()
 # Post processing option
 tSlice     = slice(-2, None)
 #}}}
 #{{{Run and post processing
-initRunner = PBS_runner(\
+initRunner = basic_runner(\
                 # Set spatial domain
                 nz         = nz      ,\
                 # Set temporal domain
@@ -232,17 +214,11 @@ initRunner = PBS_runner(\
                               ('ownFilters'  , 'type', ownFilterType),\
                              ],\
                 series_add = series_add                      ,\
-                # PBS options
-                BOUT_walltime         = BOUT_walltime        ,\
-                BOUT_run_name         = BOUT_run_name        ,\
-                post_process_walltime = post_process_walltime,\
-                post_process_queue    = post_process_queue   ,\
-                post_process_run_name = post_process_run_name,\
                 # Common options
                 **commonRunnerKwargs                         ,\
                 )
 
-init_dmp_folders, PBS_ids = initRunner.execute_runs(\
+init_dmp_folders, _ = initRunner.execute_runs(\
                              remove_old               = remove_old,\
                              post_processing_function = curPostProcessor,\
                              # This function will be called every time after
@@ -273,23 +249,19 @@ else:
 # Set the spatial domain
 nz = 256
 # Set the temporal domain
-timestep   = [50]
+timestep   = [1e-10]
 nout       = [2]
 # Filter
 ownFilterType = "none"
 # From previous outputs
 aScanPath = init_dmp_folders[0]
 # Name
-theRunName = "a1-KiwiFlat-1-expand"
-# PBS options
-BOUT_walltime         = '06:00:00'
-BOUT_run_name         = theRunName
-post_process_run_name = 'post' + theRunName.capitalize()
+theRunName = "0-TestScan-1-expand"
 # Post processing option
 tSlice     = slice(-2, None)
 #}}}
 #{{{Run and post processing
-expandRunner = PBS_runner(\
+expandRunner = basic_runner(\
                 # Set spatial domain
                 nz           = nz               ,\
                 # Set temporal domain
@@ -304,21 +276,13 @@ expandRunner = PBS_runner(\
                               ('ownFilters'  , 'type', ownFilterType),\
                              ],\
                 series_add = series_add                      ,\
-                # PBS options
-                BOUT_walltime         = BOUT_walltime        ,\
-                BOUT_run_name         = BOUT_run_name        ,\
-                post_process_walltime = post_process_walltime,\
-                post_process_queue    = post_process_queue   ,\
-                post_process_run_name = post_process_run_name,\
                 # Common options
                 **commonRunnerKwargs                         ,\
                 )
 
-expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
+expand_dmp_folders, _ = expandRunner.execute_runs(\
                                remove_old               = remove_old  ,\
                                post_processing_function = curPostProcessor,\
-                               # Declare dependencies
-                               job_dependencies = PBS_ids,\
                                # This function will be called every time after
                                # performing a run
                                post_process_after_every_run = True,\
@@ -337,6 +301,33 @@ expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
 #}}}
 #}}}
 
+#{{{ If profiles are to be plotted
+if postProcessLinProfiles or postProcessTurbProfiles:
+    noutProfile                 = 0
+    timestepProfile             = 1e-10
+    useHyperViscAzVortDProfile  = True
+    saveTermsProfile            = True
+
+    # Create a new runner as we would like to save all the fields
+    profileRun = basic_runner(\
+                  # Set temporal domain
+                  nout         = noutProfile    ,\
+                  timestep     = timestepProfile,\
+                  # Set restart options
+                  restart      = restart        ,\
+                  restart_from = restartFromFunc,\
+                  # Set additional options
+                  additional = [
+                                ('tag',theRunName,0),\
+                                ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortDProfile),\
+                                ('switch'      , 'saveTerms'          ,saveTermsProfile),\
+                               ],\
+                  series_add = series_add                      ,\
+                  # Common options
+                  **commonRunnerKwargs                         ,\
+                  )
+#}}}
+
 #{{{The linear runner
 if postProcessLin:
     curPostProcessor = postBoutRunner
@@ -353,24 +344,18 @@ maxGradRhoFolder = expand_dmp_folders[0]
 # From previous outputs
 aScanPath = expand_dmp_folders[0]
 # Set the temporal domain
-timestep  = [1]
-nout     = [500]
+timestep  = [1e-10]
+nout     = [2]
 # Name
-theRunName = "a1-KiwiFlat-2-linearPhase1"
-# PBS options
-BOUT_run_name         = theRunName
-BOUT_walltime         = '100:00:00'
-post_process_run_name = 'post' + theRunName.capitalize()
-post_process_walltime = '03:00:00'
-post_process_queue    = 'workq'
+theRunName = "0-TestScan-2-linearPhase1"
 # Post processing options
-tSlice           = slice(-500, 0, None)
+tSlice           = slice(-2, None)
 varyMaxMin       = True
 subPolAvg        = True
 mode             = "perpAndPol"
 #}}}
 #{{{Run and post processing
-linearRun = PBS_runner(\
+linearRun = basic_runner(\
             # Set temporal domain
             nout         = nout           ,\
             timestep     = timestep       ,\
@@ -386,21 +371,13 @@ linearRun = PBS_runner(\
                           ('switch'      , 'saveTerms'          ,saveTerms),\
                          ],\
             series_add = series_add                      ,\
-            # PBS options
-            BOUT_walltime         = BOUT_walltime        ,\
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
-            post_process_run_name = post_process_run_name,\
             # Common options
             **commonRunnerKwargs                         ,\
             )
 
-linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
+linear_dmp_folders, _ = linearRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
-                                 # Declare dependencies
-                                 job_dependencies = PBS_ids,\
                                  # This function will be called every time after
                                  # performing a run
                                  post_process_after_every_run = True,\
@@ -424,34 +401,31 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  **fieldPlotterKwargs           ,\
                                 )
 
+#}}}
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a1-KiwiFlat-2-linearPhaseParProfiles"
-    tSlice = slice(-30, None, 10)
+    theRunName = "0-TestScan-linearPhaseParProfiles"
+    aScanPathProfiles = linear_dmp_folders[0]
 
-    _, _ = linearRun.execute_runs(\
-                                 remove_old               = remove_old,\
-                                 post_processing_function = curPostProcessor,\
-                                 # Declare dependencies
-                                 job_dependencies = PBS_ids,\
-                                 # This function will be called every time after
-                                 # performing a run
-                                 post_process_after_every_run = True,\
-                                 # Below are the kwargs arguments being passed to
-                                 # the post processing function
-                                 # Switches
-                                 driverName     = "parDriver"   ,\
-                                 tSlice         = tSlice        ,\
-                                 theRunName     = theRunName    ,\
-                                 # Below are the kwargs given to the
-                                 # restartFromFunc
-                                 aScanPath      = aScanPath     ,\
-                                 scanParameters = scanParameters,\
-                                 # Common kwargs
-                                 **fieldPlotterKwargs           ,\
-                                )
-#}}}
+    _, _ = profileRun.execute_runs(\
+                                   remove_old               = remove_old,\
+                                   post_processing_function = curPostProcessor,\
+                                   # This function will be called every time after
+                                   # performing a run
+                                   post_process_after_every_run = True,\
+                                   # Below are the kwargs arguments being passed to
+                                   # the post processing function
+                                   # Switches
+                                   driverName     = "parDriver"   ,\
+                                   theRunName     = theRunName    ,\
+                                   # Below are the kwargs given to the
+                                   # restartFromFunc
+                                   aScanPath      = aScanPathProfiles,\
+                                   scanParameters = scanParameters,\
+                                   # Common kwargs
+                                   **fieldPlotterKwargs           ,\
+                                  )
 #}}}
 #}}}
 
@@ -465,22 +439,16 @@ else:
 saveTerms           = False
 useHyperViscAzVortD = [True]
 # Set the temporal domain
-nout     = [5000]
-timestep = [1]
+nout     = [2]
+timestep = [1e-10]
 # Name
-theRunName = "a1-KiwiFlat-3-turbulentPhase1"
-# PBS options
-BOUT_run_name         = theRunName
-BOUT_walltime         = '100:00:00'
-post_process_run_name = 'post' + theRunName.capitalize()
-post_process_walltime = '03:00:00'
-post_process_queue    = 'workq'
+theRunName = "0-TestScan-3-turbulentPhase1"
 # Post processing options
-tSlice    = slice(-5000, None, 10)
+tSlice    = slice(-2, None)
 aScanPath = linear_dmp_folders[0]
 #}}}
 #{{{Run and post processing
-turboRun = PBS_runner(\
+turboRun = basic_runner(\
                 # Set temporal domain
                 nout       = nout               ,\
                 timestep   = timestep           ,\
@@ -493,21 +461,13 @@ turboRun = PBS_runner(\
                               ('switch'      , 'saveTerms'          ,saveTerms),\
                              ],\
                 series_add = series_add                      ,\
-                # PBS options
-                BOUT_walltime         = BOUT_walltime        ,\
-                BOUT_run_name         = BOUT_run_name        ,\
-                post_process_walltime = post_process_walltime,\
-                post_process_queue    = post_process_queue   ,\
-                post_process_run_name = post_process_run_name,\
                 # Common options
                 **commonRunnerKwargs                         ,\
                 )
 
-turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
+turbo_dmp_folders, _ = turboRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
-                                 # Declare dependencies
-                                 job_dependencies = PBS_ids,\
                                  # This function will be called every time after
                                  # performing a run
                                  post_process_after_every_run = True,\
@@ -526,34 +486,31 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
                                  # Common kwargs
                                  **fieldPlotterKwargs           ,\
                                 )
+#}}}
 #{{{ If linear profiles are to be plotted
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a1-KiwiFlat-3-turbulentPhase1ParProfiles"
-    tSlice = slice(-30, None, 10)
+    theRunName = "0-TestScan-turboPhaseParProfiles"
+    aScanPathProfiles = turbo_dmp_folders[0]
 
-    _, _ = turboRun.execute_runs(\
-                                 remove_old               = remove_old      ,\
-                                 post_processing_function = curPostProcessor,\
-                                 # Declare dependencies
-                                 job_dependencies = PBS_ids         ,\
-                                 # This function will be called every time after
-                                 # performing a run
-                                 post_process_after_every_run = True,\
-                                 # Below are the kwargs arguments being passed to
-                                 # the post processing function
-                                 # Switches
-                                 driverName     = "parDriver"   ,\
-                                 tSlice         = tSlice        ,\
-                                 theRunName     = theRunName    ,\
-                                 # Below are the kwargs given to the
-                                 # restartFromFunc
-                                 aScanPath      = aScanPath     ,\
-                                 scanParameters = scanParameters,\
-                                 # Common kwargs
-                                 **fieldPlotterKwargs           ,\
-                                )
-#}}}
+    _, _ = profileRun.execute_runs(\
+                                   remove_old               = remove_old,\
+                                   post_processing_function = curPostProcessor,\
+                                   # This function will be called every time after
+                                   # performing a run
+                                   post_process_after_every_run = True,\
+                                   # Below are the kwargs arguments being passed to
+                                   # the post processing function
+                                   # Switches
+                                   driverName     = "parDriver"   ,\
+                                   theRunName     = theRunName    ,\
+                                   # Below are the kwargs given to the
+                                   # restartFromFunc
+                                   aScanPath      = aScanPathProfiles,\
+                                   scanParameters = scanParameters,\
+                                   # Common kwargs
+                                   **fieldPlotterKwargs           ,\
+                                  )
 #}}}
 #}}}
 
@@ -561,14 +518,12 @@ if postProcessTurbProfiles:
 if postProcessProbesAndEnergy:
     collectionFolders = [linear_dmp_folders[0],\
                          turbo_dmp_folders[0]]
-    theRunName = "a1-KiwiFlat-all-energyProbesPlot"
+    theRunName = "0-TestScan-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
 
     _, _ = turboRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
-                                 # Declare dependencies
-                                 job_dependencies = PBS_ids,\
                                  # This function will be called every time after
                                  # performing a run
                                  post_process_after_every_run = True,\

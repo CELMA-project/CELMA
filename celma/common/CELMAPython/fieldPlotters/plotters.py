@@ -7,7 +7,8 @@ Contains classes for plotting the fields
 from ..plotHelpers import (PlotHelper,\
                            plotNumberFormatter,\
                            seqCMap,\
-                           divCMap)
+                           divCMap,\
+                           findLargestRadialGrad)
 from ..statsAndSignals import polAvg
 from .cylinderMesh import CylinderMesh
 from matplotlib import get_backend
@@ -46,13 +47,13 @@ class Plot(object):
                  ySlice            = slice(0,None),\
                  zSlice            = slice(0,None),\
                  tSlice            = None         ,\
-                 maxGradRhoFolder  = None         ,\
                  convertToPhysical = False        ,\
                  subPolAvg         = False        ,\
                  showPlot          = False        ,\
                  savePlot          = True         ,\
                  saveFolder        = None         ,\
                  extension         = "png"        ,\
+                 writer            = "ffmpeg"     ,\
                 ):
         #{{{docstring
         """
@@ -94,20 +95,30 @@ class Plot(object):
         saveFolder : str
             Name of the folder to save plots in.
         extension : str
-            Extension of the plot (if the animation is not used)
+            Extension of the plot (if the animation is not used).
+        writer : str
+            Writer to use if the plots are animated.
         """
         #}}}
 
         # Set member data from input
-        self._path             = path
-        self._xguards          = xguards
-        self._yguards          = yguards
-        self._showPlot         = showPlot
-        self._savePlot         = savePlot
-        self._saveFolder       = saveFolder
-        self._subPolAvg        = subPolAvg
-        self._extension        = extension
-        self._maxGradRhoFolder = maxGradRhoFolder
+        self._path       = path
+        self._xguards    = xguards
+        self._yguards    = yguards
+        self._showPlot   = showPlot
+        self._savePlot   = savePlot
+        self._saveFolder = saveFolder
+        self._subPolAvg  = subPolAvg
+        self._extension  = extension
+        self._writer     = writer
+
+        if writer == "imagemagick":
+            self._animExtension = ".gif"
+        elif writer == "ffmpeg":
+            self._animExtension = ".mp4"
+        else:
+            message = "Writer {} not implemented".format(writer)
+            raise NotImplementedError(message)
 
         # Get proper indices
         self._xind = self._getIndices(xSlice, "x")
@@ -133,39 +144,6 @@ class Plot(object):
                            "Setting to None{1}{0}".format("\n"*3, "!"*3))
                 print(message)
                 zSlice.step = None
-
-        #{{{Reset xSlice through maxGradRhoFolder
-        if maxGradRhoFolder:
-            # Collect the profile of the variable
-            if varName == "n"
-                curVarName == "lnN"
-            else:
-                curVarName == varName
-            # Need the x-guards as derivatives will be taken (subtracted
-            # in findLargestRadialGrad
-            var = collect(varname = curVarName      ,\
-                          path    = maxGradRhoFolder,\
-                          xguards = True            ,\
-                          yguards = False           ,\
-                          info    = False           ,\
-                          yind    = [ySlice, ySlice],\
-                          zind    = [zSlice, zSlice],\
-                          )
-            if varname == "n"
-                var = np.exp(var)
-            # Collect variables needed for findLargestRadialGrad
-            dx  = collect(varname = "dx"            ,\
-                          path    = path            ,\
-                          xguards = True            ,\
-                          yguards = False           ,\
-                          info    = False           ,\
-                          yind    = [ySlice, ySlice],\
-                          )
-            MXG = collect(varname = "MXG", path = path, info=False)
-            n = np.exp(lnN)
-            # Find the max gradient of the variable (subtracts the guard cells)
-            _, xSlice = findLargestRadialGrad(var, dx, MXG)
-        #}}}
 
         # Used if we are taking poloidal averages
         self._xSlice = xSlice
@@ -666,11 +644,11 @@ class Plot1D(Plot):
 
             if self._savePlot:
                 # Save the animation
-                anim.save(fileName + ".gif"              ,\
-                          writer         = "imagemagick"   ,\
+                anim.save(fileName + self._animExtension   ,\
+                          writer = self._writer            ,\
                           savefig_kwargs = {"pad_inches":0},\
                           )
-                print("Saved to {}.gif".format(fileName))
+                print("Saved to {}{}".format(fileName, self._animExtension))
         else:
             if self._savePlot:
                 # Save the figure
@@ -706,6 +684,7 @@ class Plot2D(Plot):
                  path                            ,\
                  varName                         ,\
                  var               = None        ,\
+                 maxGradRhoFolder  = None        ,\
                  xguards           = False       ,\
                  yguards           = False       ,\
                  varMax            = None        ,\
@@ -735,6 +714,9 @@ class Plot2D(Plot):
             not given).
         var : [None | array]
             The variable to plot.
+        maxGradRhoFolder : [None | str]
+            If this is set, the xSlice will be replaced by the index of
+            the largest gradient in rho direction.
         varMax : [None | float]
             Setting a hard upper limit z-axis in the plot.
         varMin : [None | float]
@@ -777,6 +759,40 @@ class Plot2D(Plot):
            (self._zSlice == slice(0,None)):
             message = "3 slices were given, although only 2 is possible"
             raise ValueError(message)
+
+        #{{{Reset xSlice through maxGradRhoFolder
+        if maxGradRhoFolder:
+            # Collect the profile of the variable
+            if varName == "n":
+                curVarName = "lnN"
+            else:
+                curVarName = varName
+            # Need the x-guards as derivatives will be taken (subtracted
+            # in findLargestRadialGrad
+            tmpVar = collect(varname = curVarName                  ,\
+                             path    = maxGradRhoFolder            ,\
+                             xguards = True                        ,\
+                             yguards = False                       ,\
+                             info    = False                       ,\
+                             yind    = [self._ySlice, self._ySlice],\
+                             zind    = [self._zSlice, self._zSlice],\
+                             )
+            if varName == "n":
+                tmpVar = np.exp(tmpVar)
+            # Collect variables needed for findLargestRadialGrad
+            dx  = collect(varname = "dx"                        ,\
+                          path    = path                        ,\
+                          xguards = True                        ,\
+                          yguards = False                       ,\
+                          info    = False                       ,\
+                          yind    = [self._ySlice, self._ySlice],\
+                          )
+            MXG = collect(varname = "MXG", path = path, info=False)
+            # Find the max gradient of the variable (subtracts the guard cells)
+            _, self._xSlice = findLargestRadialGrad(tmpVar, dx, MXG)
+            # Update _xind
+            self._xind = self._getIndices(self._xSlice, "x")
+        #}}}
 
         # Make it possible to filter warnings (Ex: no variation in the data)
         warnings.filterwarnings("error")
@@ -851,15 +867,14 @@ class Plot2D(Plot):
         piInd = round(self._variable.shape[3]/2)
 
         # Calculate the theta in degrees
-        dz             = self.helper.theta[1] - self.helper.theta[0]
-        self._thetaRad = dz*self._zind[-1]
+        self._thetaRad = self.helper.dz*self._zind[-1]
         self._thetaDeg = self._thetaRad*(180/np.pi)
 
         # Get the Z values of the X, Y, Z plots
         # We subscript the last index of self._@ind, as this is given as
         # a range in the Plot constructor
         if "pol" in self._mode:
-            self._Z_ZT = self._variable[:, self._yind[-1],: , :]
+            self._Z_ZT = self._variable[:, self._xind[-1],: , :]
         if "perp" in self._mode:
             self._Z_RT = self._variable[:, :, self._yind[-1], :]
         if "par" in self._mode:
@@ -1358,10 +1373,10 @@ class Plot2D(Plot):
 
             if self._savePlot:
                 # Save the animation
-                anim.save(fileName + ".gif"              ,\
-                          writer         = "imagemagick" ,\
+                anim.save(fileName + self._animExtension,\
+                          writer = self._writer         ,\
                           )
-                print("Saved to {}.gif".format(fileName))
+                print("Saved to {}{}".format(fileName, self._animExtension))
         else:
             if self._savePlot:
                 # Save the figure

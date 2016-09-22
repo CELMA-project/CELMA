@@ -272,13 +272,13 @@ class PlotProbes(object):
         plt.close(fig)
     #}}}
 
-    #{{{plotAvgFluxThrougVolumeElement
-    def plotAvgFluxThrougVolumeElement(self,\
-                                       uName,\
-                                       labelName,\
-                                       pltFluct = True,\
-                                       pltTotal = False,\
-                                       pltAvg   = False,\
+    #{{{plotAvgFluxThroughVolumeElement
+    def plotAvgFluxThroughVolumeElement(self,\
+                                        uName,\
+                                        labelName,\
+                                        pltFluct = True,\
+                                        pltTotal = False,\
+                                        pltAvg   = False,\
                                        ):
         """
         Plots the average flux through a volume element

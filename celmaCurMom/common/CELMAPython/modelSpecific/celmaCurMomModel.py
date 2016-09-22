@@ -33,20 +33,17 @@ def getMainFields(path):
     # Making the orgObj instance
     mainFields = Organizer("mainFields", path = path)
     # Making lines in the pattern name, lable, plotPos
-    # Evolved fields
     mainFields.lines.append(Line("lnN"       , r"\ln(n)"          , plotPos=0))
+    mainFields.lines.append(Line("vort"      , r"\Omega"          , plotPos=5))
     mainFields.lines.append(Line("jPar"      , r"j_{\parallel}"   , plotPos=8))
-    mainFields.lines.append(Line("momDensPar", r"nu_{i,\parallel}", plotPos=1))
     mainFields.lines.append(Line("vortD"     , r"\Omega^D"        , plotPos=3))
-    # Helping field
-    mainFields.lines.append(Line("uIPar", r"u_{i,\parallel}", plotPos=6))
-    mainFields.lines.append(Line("uEPar", r"u_{e,\parallel}", plotPos=4))
-    mainFields.lines.append(Line("phi"  , r"\phi"           , plotPos=7))
-    mainFields.lines.append(Line("S"    , r"S"              , plotPos=9))
-    mainFields.lines.append(Line("vort" , r"\Omega"         , plotPos=5))
-    # Extra lines
+    mainFields.lines.append(Line("momDensPar", r"nu_{i,\parallel}", plotPos=1))
+    mainFields.lines.append(Line("phi"       , r"\phi"            , plotPos=7))
+    mainFields.lines.append(Line("uIPar"     , r"u_{i,\parallel}" , plotPos=6))
+    mainFields.lines.append(Line("uEPar"     , r"u_{e,\parallel}" , plotPos=4))
+    mainFields.lines.append(Line("S"         , r"S"               , plotPos=9))
     # FIXME: This API is not so intuitive, consider change
-    mainFields.extraLines["n"] = Line("n"   , r"n"          , plotPos=2)
+    mainFields.extraLines["n"] = Line("n"   , r"n"                , plotPos=2)
 
     return mainFields
 #}}}

@@ -73,13 +73,20 @@ class Drivers1D(FieldPlottersDriver):
 
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             for labelName in labelNames:
                 self._labelName = labelName
-                Process(\
-                        target = self.single1DDriver,\
-                        args   = ()                 ,\
-                        kwargs = {}
-                       ).start()
+                # Create process
+                proc[labelName] = Process(\
+                                    target = self.single1DDriver,\
+                                    args   = ()                 ,\
+                                    kwargs = {}
+                                   )
+                # Start process
+                proc[labelName].start()
+            for key in proc.keys():
+                # Wait for process to finish
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -96,13 +103,20 @@ class Drivers1D(FieldPlottersDriver):
 
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             for labelName in labelNames:
                 self._labelName = labelName
-                Process(\
-                        target = self.single1DDriver,\
-                        args   = ()                 ,\
-                        kwargs = {}
-                       ).start()
+                # Create process
+                proc[labelName] = Process(\
+                                    target = self.single1DDriver,\
+                                    args   = ()                 ,\
+                                    kwargs = {}
+                                   )
+                # Start process
+                proc[labelName].start()
+            for key in proc.keys():
+                # Wait for process to finish
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -124,13 +138,20 @@ class Drivers1D(FieldPlottersDriver):
 
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             for labelName in labelNames:
                 self._labelName = labelName
-                Process(\
-                        target = self.single1DDriver,\
-                        args   = ()                 ,\
-                        kwargs = {}
-                       ).start()
+                # Create process
+                proc[labelName] = Process(\
+                                    target = self.single1DDriver,\
+                                    args   = ()                 ,\
+                                    kwargs = {}
+                                   )
+                # Start process
+                proc[labelName].start()
+            for key in proc.keys():
+                # Wait for process to finish
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -152,13 +173,20 @@ class Drivers1D(FieldPlottersDriver):
 
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             for labelName in labelNames:
                 self._labelName = labelName
-                Process(\
-                        target = self.single1DDriver,\
-                        args   = ()                 ,\
-                        kwargs = {}
-                       ).start()
+                # Create process
+                proc[labelName] = Process(\
+                                    target = self.single1DDriver,\
+                                    args   = ()                 ,\
+                                    kwargs = {}
+                                   )
+                # Start process
+                proc[labelName].start()
+            for key in proc.keys():
+                # Wait for process to finish
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -189,6 +217,7 @@ class Drivers1D(FieldPlottersDriver):
                          savePlot          = self._savePlot         ,\
                          saveFolder        = self._saveFolder       ,\
                          extension         = self._extension        ,\
+                         writer            = self._writer           ,\
                         )
 
         # Get the organization object (will depend on the model used (i.e.
@@ -197,6 +226,10 @@ class Drivers1D(FieldPlottersDriver):
 
         # Prepare the lines for plotting
         fig = orgObj.pltPrepare()
+
+        if fig is None or len(orgObj.lines) == 0:
+            # Exit as no plots will take place
+            return None
 
         # Collect with the plotter object
         for line in orgObj.lines:
@@ -207,7 +240,8 @@ class Drivers1D(FieldPlottersDriver):
 
         # Treatment of extra lines
         if self._labelName == "mainFields":
-            if "jParFields" not in labelNames:
+            if "jParFields" not in labelNames\
+            and orgObj.allFieldsPresent:
                 # Find lnN, uEPar and uIPar
                 for line in orgObj.lines:
                     if line.name == "lnN":
@@ -226,7 +260,8 @@ class Drivers1D(FieldPlottersDriver):
                 else:
                     orgObj.lines.append(orgObj.extraLines["jPar"])
 
-            if "n" not in labelNames:
+            if "n" not in labelNames\
+            and orgObj.allFieldsPresent:
                 # Find lnN, uEPar and uIPar
                 for line in orgObj.lines:
                     if line.name == "lnN":

@@ -82,14 +82,21 @@ class Drivers2D(FieldPlottersDriver):
 
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            proc = {}
             for varName, plotName in varAndPlotNames:
                 self._varName = varName
                 self._pltName = plotName
-                Process(\
-                        target = self.single2DDriver,\
-                        args   = ()  ,\
-                        kwargs = {}
-                       ).start()
+                # Create process
+                proc[varName] = Process(\
+                                 target = self.single2DDriver,\
+                                 args   = ()  ,\
+                                 kwargs = {}
+                                )
+                # Start process
+                proc[varName].start()
+            for key in proc.keys():
+                # Wait for process to finish
+                proc[key].join()
             #}}}
         else:
             #{{{ Normal function call
@@ -126,6 +133,7 @@ class Drivers2D(FieldPlottersDriver):
                          "axisEqualParallel" : self._axisEqualParallel,\
                          "mode"              : self._mode             ,\
                          "extension"         : self._extension        ,\
+                         "writer"            : self._writer           ,\
                         }
         try:
             # Make the plotter object
