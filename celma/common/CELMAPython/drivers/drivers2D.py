@@ -107,28 +107,32 @@ class Drivers2D(FieldPlottersDriver):
         Driver for a single 2D plot.
         """
 
+        plotterKwargs = {\
+                         "xguards"           : self._xguards          ,\
+                         "yguards"           : self._yguards          ,\
+                         "xSlice"            : self._xSlice           ,\
+                         "ySlice"            : self._ySlice           ,\
+                         "zSlice"            : self._zSlice           ,\
+                         "tSlice"            : self._tSlice           ,\
+                         "maxGradRhoFolder"  : self._maxGradRhoFolder ,\
+                         "subPolAvg"         : self._subPolAvg        ,\
+                         "convertToPhysical" : self._convertToPhysical,\
+                         "showPlot"          : self._showPlot         ,\
+                         "savePlot"          : self._savePlot         ,\
+                         "saveFolder"        : self._saveFolder       ,\
+                         "varMax"            : self._varMax           ,\
+                         "varMin"            : self._varMin           ,\
+                         "varyMaxMin"        : self._varyMaxMin       ,\
+                         "axisEqualParallel" : self._axisEqualParallel,\
+                         "mode"              : self._mode             ,\
+                         "extension"         : self._extension        ,\
+                        }
         try:
             # Make the plotter object
-            plotter = Plot2D(self._path                                 ,\
-                             self._varName                              ,\
-                             var               = self._var              ,\
-                             xguards           = self._xguards          ,\
-                             yguards           = self._yguards          ,\
-                             xSlice            = self._xSlice           ,\
-                             ySlice            = self._ySlice           ,\
-                             zSlice            = self._zSlice           ,\
-                             tSlice            = self._tSlice           ,\
-                             subPolAvg         = self._subPolAvg        ,\
-                             convertToPhysical = self._convertToPhysical,\
-                             showPlot          = self._showPlot         ,\
-                             savePlot          = self._savePlot         ,\
-                             saveFolder        = self._saveFolder       ,\
-                             varMax            = self._varMax           ,\
-                             varMin            = self._varMin           ,\
-                             varyMaxMin        = self._varyMaxMin       ,\
-                             axisEqualParallel = self._axisEqualParallel,\
-                             mode              = self._mode             ,\
-                             extension         = self._extension        ,\
+            plotter = Plot2D(self._path                 ,\
+                             self._varName              ,\
+                             var             = self._var,\
+                             **plotterKwargs            ,\
                             )
         except (KeyError, ValueError) as collectError:
 
@@ -200,26 +204,10 @@ class Drivers2D(FieldPlottersDriver):
                 #}}}
 
             # Make the plotter object
-            plotter = Plot2D(self._path                                 ,\
-                             self._varName                              ,\
-                             var               = self._var              ,\
-                             xguards           = self._xguards          ,\
-                             yguards           = self._yguards          ,\
-                             xSlice            = self._xSlice           ,\
-                             ySlice            = self._ySlice           ,\
-                             zSlice            = self._zSlice           ,\
-                             tSlice            = self._tSlice           ,\
-                             subPolAvg         = self._subPolAvg        ,\
-                             convertToPhysical = self._convertToPhysical,\
-                             showPlot          = self._showPlot         ,\
-                             savePlot          = self._savePlot         ,\
-                             saveFolder        = self._saveFolder       ,\
-                             varMax            = self._varMax           ,\
-                             varMin            = self._varMin           ,\
-                             varyMaxMin        = self._varyMaxMin       ,\
-                             axisEqualParallel = self._axisEqualParallel,\
-                             mode              = self._mode             ,\
-                             extension         = self._extension        ,\
+            plotter = Plot2D(self._path                 ,\
+                             self._varName              ,\
+                             var             = self._var,\
+                             **plotterKwargs            ,\
                             )
 
         plotter.plotDriver(self._pltName, savePath = self._savePath)
