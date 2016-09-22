@@ -584,9 +584,10 @@ class PerpPlaneProbes(Probes):
 
         if radialProbesIndices is None:
             # Collect dx and MXG
-            dx        = collect("dx",  path=paths[0], info=False)
+            # xguards will be collected as derivatives will be taken
+            dx        = collect("dx",  path=paths[0], xguards=True, info=False)
             self._MXG = collect("MXG", path=paths[0], info=False)
-            # Find the max gradient of the variable
+            # Find the max gradient of the variable (subtracts the guard cells)
             _, maxGradInd =\
                 findLargestRadialGrad(\
                   self._varSteadyState[0:1, :, self.yInd:self.yInd+1, 0:1],\

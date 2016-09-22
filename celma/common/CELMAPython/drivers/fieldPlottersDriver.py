@@ -45,6 +45,9 @@ class FieldPlottersDriver(PostProcessorDriver):
             How the data will be sliced in z.
         tSlice : slice
             How the data will be sliced in t.
+        maxGradRhoFolder : [None | str]
+            If this is set, the xSlice will be replaced by the index of
+            the largest gradient in rho direction.
         **kwargs : keyword arguments
             Additional keyword arguments given as input to
             PostProcessorDriver.
@@ -61,4 +64,14 @@ class FieldPlottersDriver(PostProcessorDriver):
         self._ySlice  = ySlice
         self._zSlice  = zSlice
         self._tSlice  = tSlice
+
+        # Get the current scan
+        if maxGradRhoFolder:
+            if self._scanParameters:
+                self._maxGradRhoFolder = maxGradRhoFolder
+            else:
+                self._maxGradRhoFolder =\
+                    self._convertToCurrentScanParameters(maxGradRhoFolder)
+        else:
+            self._maxGradRhoFolder = None
 #}}}
