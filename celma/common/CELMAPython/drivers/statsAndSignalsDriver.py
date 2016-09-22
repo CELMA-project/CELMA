@@ -14,10 +14,10 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
     """
 
     #{{{Constructor
-    def __init__(self                   ,\
-                 *args                  ,\
-                 paths           = None ,\
-                 scanParameters  = False,\
+    def __init__(self                  ,\
+                 *args                 ,\
+                 paths           = None,\
+                 scanParameters  = None,\
                  **kwargs):
         #{{{docstring
         """
@@ -50,7 +50,7 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
         self._pltSize        = (12, 9)
 
         # Convert the paths
-        if self._scanParameters is not None:
+        if self._scanParameters:
             self._paths = [self._convertToCurrentScanParameters(path)
                            for path in paths]
     #}}}

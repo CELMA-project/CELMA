@@ -341,7 +341,10 @@ class PlotHelper(object):
         ax.grid()
         # Make sure no collision between the ticks
         ax.xaxis.set_major_locator(MaxNLocator(prune=xprune))
-        ax.yaxis.set_major_locator(MaxNLocator(prune=yprune))
+
+        if ax.get_yscale() != "log":
+            # This destroys the ticks on log plots
+            ax.yaxis.set_major_locator(MaxNLocator(prune=yprune))
     #}}}
 
     #{{{savePlot

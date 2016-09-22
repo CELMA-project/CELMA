@@ -5,6 +5,7 @@
 from .plotHelper import PlotHelper
 from .plotNumberFormatter import plotNumberFormatter
 from .collectiveCollect import collectiveCollect
+from .derivatives import DDZ, DDX, findLargestRadialGrad
 import matplotlib.pyplot as plt
 
 # Set the plot style for all plots
