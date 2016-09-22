@@ -52,9 +52,9 @@ a1-KiwiFlat-3-turbulentPhase1 - 57h15m : Less big burst, not many structures par
 
 B0 = 0.06
 a1-KiwiFlat-0-initialize      - 2h44m
-a1-KiwiFlat-1-expand          - Running
-a1-KiwiFlat-2-linearPhase1    - FIXME
-a1-KiwiFlat-3-turbulentPhase1 - FIXME
+a1-KiwiFlat-1-expand          - 3h34m
+a1-KiwiFlat-2-linearPhase1    - 12h46m
+a1-KiwiFlat-3-turbulentPhase1 - Running
 
 B0 = 0.05
 a1-KiwiFlat-0-initialize      - 2h44m
