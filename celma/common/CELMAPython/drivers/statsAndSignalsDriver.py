@@ -76,6 +76,7 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
         scanPath : str
             aScanPath converted to the scan parameters of the current run.
         """
+
         # Make a template string of aScanPath
         scanPathTemplate = aScanPath
         for scanParameter in self._scanParameters:

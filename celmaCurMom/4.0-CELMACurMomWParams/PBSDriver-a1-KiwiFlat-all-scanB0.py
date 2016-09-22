@@ -89,16 +89,16 @@ def restartFromFunc(dmp_folder     = None,\
 #}}}
 
 # If you just want to post-process
-justPostProcess = False
+justPostProcess = True
 # Normal post-processors
 postProcessInit = False
 postProcessExp  = False
-postProcessLin  = False
+postProcessLin  = True
 postProcessTrub = False
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = True
+postProcessProbesAndEnergy = False
 
 #{{{Main options
 #{{{The scan
@@ -354,7 +354,10 @@ if postProcessLin:
 else:
     curPostProcessor = None
 #{{{ Linear options
-tSlice        = slice(-300, -300, None)
+tSlice        = slice(-500, 0, None)
+varyMaxMin    = True
+subPolAvg     = True
+mode          = "perpAndPol"
 includeNoise  = True
 forceAddNoise = True
 # From previous outputs
@@ -405,12 +408,14 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  # Below are the kwargs arguments being passed to
                                  # the post processing function
                                  # Switches
-                                 driverName        = "single2DDriver" ,\
-                                 theRunName        = theRunName       ,\
-                                 tSlice            = tSlice           ,\
-                                 subPolAvg         = True             ,\
-                                 varName           = varName          ,\
-                                 pltName           = pltName          ,\
+                                 driverName = "single2DDriver",\
+                                 theRunName = theRunName      ,\
+                                 tSlice     = tSlice          ,\
+                                 subPolAvg  = subPolAvg       ,\
+                                 varName    = varName         ,\
+                                 pltName    = pltName         ,\
+                                 varyMaxMin = varyMaxMin      ,\
+                                 mode       = mode            ,\
                                  # Below are the kwargs given to the
                                  # restartFromFunc
                                  aScanPath      = aScanPath     ,\
