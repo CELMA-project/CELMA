@@ -707,7 +707,7 @@ class Plot2D(Plot):
         axisEqualParallel : bool
             Whether or not the parallel plot should be plotted with axis
             equal or not.
-        mode : ["perpAndPar" | "perp" | "par" | "pol"]
+        mode : ["perpAndPar" | "perpAndPol" | "perp" | "par" | "pol"]
             The mode to plot.
         **kwargs : keyword arguments
             See the constructor of Plot for details.
@@ -715,7 +715,7 @@ class Plot2D(Plot):
         #}}}
 
         # Check that mode is set correctly:
-        implementedModes = ["perpAndPar", "perp", "par", "pol"]
+        implementedModes = ["perpAndPar",  "perpAndPol", "perp", "par", "pol"]
         found = False
         for checkMode in implementedModes:
             if mode == checkMode:
@@ -832,11 +832,12 @@ class Plot2D(Plot):
             else:
                 self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
 
-        if self._mode == "perpAndPar".lower():
-            self._setLines()
+        if self._mode == "perpAndPar".lower()\
+           or self._mode == "perpAndPol".lower():
+            self._createLines()
 
         # Create the figure and axis
-        if self._mode == "perpAndPar".lower():
+        if self._mode == "perpAndPar".lower() or self._mode == "perpAndPol".lower():
             pltSize = (30,15)
         else:
             pltSize = (20,15)
@@ -850,6 +851,16 @@ class Plot2D(Plot):
             self._fig.subplots_adjust(wspace=0.25)
             self._parAx.grid(True)
             self._perpAx.grid(True)
+        #}}}
+        #{{{elif self._mode == "perpAndPol".lower()
+        elif self._mode == "perpAndPol".lower():
+            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            self._perpAx = self._fig.add_subplot(gs[0])
+            self._polAx  = self._fig.add_subplot(gs[1])
+            self._cBarAx = self._fig.add_subplot(gs[2])
+            self._fig.subplots_adjust(wspace=0.25)
+            self._perpAx.grid(True)
+            self._polAx.grid(True)
         #}}}
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
@@ -878,31 +889,62 @@ class Plot2D(Plot):
         self._txtSet    = False
         #}}}
 
-    #{{{_setLines
-    def _setLines(self):
+    #{{{_createLines
+    def _createLines(self):
         """ Set the lines which shows where the data is sliced"""
 
-        # The slice lines we are plotting
-        rhoStart = self.helper.rho[0]
-        rhoEnd   = self.helper.rho[-1]
+        if self._mode == "perpAndPar".lower():
+            # The slice lines we are plotting
+            rhoStart = self.helper.rho[0]
+            rhoEnd   = self.helper.rho[-1]
 
-        # Calculate the numerical value of the theta angle and the z value
-        thetaRad   = self._thetaRad
-        thetaPPi   = thetaRad + np.pi
-        self._zVal = self.helper.z[self._ySlice]
+            # Calculate the numerical value of the theta angle and the z value
+            thetaRad = self._thetaRad
+            thetaPPi = thetaRad + np.pi
+            zVal     = self.helper.z[self._ySlice]
 
-        # Set coordinates for the lines which indicate how the data is
-        # sliced
-        # Organized in start and stop pairs
-        # We need two lines due to the center of the cylinder
-        self._RTLine1XVals=(rhoStart*np.cos(thetaRad), rhoEnd*np.cos(thetaRad))
-        self._RTLine1YVals=(rhoStart*np.sin(thetaRad), rhoEnd*np.sin(thetaRad))
-        self._RTLine2XVals=(rhoStart*np.cos(thetaPPi), rhoEnd*np.cos(thetaPPi))
-        self._RTLine2YVals=(rhoStart*np.sin(thetaPPi), rhoEnd*np.sin(thetaPPi))
-        self._RZLine1XVals=(-rhoEnd                  , -rhoStart              )
-        self._RZLine1YVals=(self._zVal               , self._zVal             )
-        self._RZLine2XVals=(rhoStart                 , rhoEnd                 )
-        self._RZLine2YVals=(self._zVal               , self._zVal             )
+            # Set coordinates for the lines which indicate how the data is
+            # sliced
+            # Organized in start and stop pairs
+            # We need two lines due to the center of the cylinder
+            self._RTLine1XVals =\
+                    (rhoStart*np.cos(thetaRad), rhoEnd*np.cos(thetaRad))
+            self._RTLine1YVals =\
+                    (rhoStart*np.sin(thetaRad), rhoEnd*np.sin(thetaRad))
+            self._RTLine2XVals =\
+                    (rhoStart*np.cos(thetaPPi), rhoEnd*np.cos(thetaPPi))
+            self._RTLine2YVals =\
+                    (rhoStart*np.sin(thetaPPi), rhoEnd*np.sin(thetaPPi))
+            self._RZLine1XVals =\
+                    (-rhoEnd                  , -rhoStart              )
+            self._RZLine1YVals =\
+                    (zVal                     , zVal                   )
+            self._RZLine2XVals =\
+                    (rhoStart                 , rhoEnd                 )
+            self._RZLine2YVals =\
+                    (zVal                     , zVal                   )
+        elif self._mode == "perpAndPol".lower():
+            # Get the radius of the circle
+            rhoVal = self.helper.rho[self._xSlice]
+
+            # Create the circle
+            self._circle = plt.Circle((0, 0)         ,\
+                                      rhoVal         ,\
+                                      fill = False   ,\
+                                      linewidth = 1.0,\
+                                      linestyle= '--',\
+                                      color='k')
+
+            # Get the z value
+            zVal = self.helper.z[self._ySlice]
+
+            # Set coordinates for the lines which indicate how the data is
+            # sliced
+            # Organized in start and stop pairs
+            # We only need one line to indicate the z value on the
+            # poloidal plot
+            self._ZTLineXVals=(0   , 2.0*np.pi)
+            self._ZTLineYVals=(zVal, zVal     )
     #}}}
 
     #{{{_plot2D
@@ -917,7 +959,6 @@ class Plot2D(Plot):
             The index to plot for.
         """
         #}}}
-
         # Check that levels are rising
         if not(self._levels is None):
             if len(self._levels) > 1 and np.amin(np.diff(self._levels)) <= 0.0:
@@ -1063,15 +1104,39 @@ class Plot2D(Plot):
         #{{{if self._mode == "perpAndPar".lower()
         if self._mode == "perpAndPar".lower():
             if self._txtSet == False:
-                # Title axis 1
-                self._perpTxt = self._perpAx.text(0.5, 1.05, perpTitle,\
-                                             transform = self._perpAx.transAxes,\
-                                             **txtKwargs)
+                # Perp text
+                self._perpAx.text(0.5, 1.05, perpTitle,\
+                             transform = self._perpAx.transAxes,\
+                             **txtKwargs)
 
-                # Title axis 2
-                self._parTxt = self._parAx.text(0.5, 1.05, parTitle,\
-                                            transform = self._parAx.transAxes,\
-                                            **txtKwargs)
+                # Par text
+                self._parAx.text(0.5, 1.05, parTitle,\
+                             transform = self._parAx.transAxes,\
+                             **txtKwargs)
+
+                # Title mid
+                # Text for the figure. Could append this to the figure itself,
+                # but it seems to be easier to just add it to an axis due to
+                # animation
+                self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
+                                              transform = self._perpAx.transAxes,\
+                                              **txtKwargs)
+                self._txtSet = True
+            else:
+                self._figTxt.set_text(timeTitle)
+        #}}}
+        #{{{elif self._mode == "perpAndPol".lower()
+        elif self._mode == "perpAndPol".lower():
+            if self._txtSet == False:
+                # Perp text
+                self._perpAx.text(0.5, 1.05, perpTitle,\
+                             transform = self._perpAx.transAxes,\
+                             **txtKwargs)
+
+                # Pol text
+                self._polAx.text(0.5, 1.05, polTitle,\
+                             transform = self._polAx.transAxes,\
+                             **txtKwargs)
 
                 # Title mid
                 # Text for the figure. Could append this to the figure itself,
@@ -1148,14 +1213,12 @@ class Plot2D(Plot):
         #}}}
 
         #{{{ Set self._cbarPlane
-        if self._mode == "perpAndPar".lower():
-            self._cbarPlane = parPlane
-        elif self._mode == "pol":
-            self._cbarPlane = polPlane
-        elif self._mode == "perp":
+        if "perp" in self._mode:
             self._cbarPlane = perpPlane
-        elif self._mode == "par":
+        elif "par" in self._mode:
             self._cbarPlane = parPlane
+        elif "pol" in self._mode:
+            self._cbarPlane = polPlane
         #}}}
 
         # Set the colorbar
@@ -1211,6 +1274,22 @@ class Plot2D(Plot):
                            "--k"             ,\
                            linewidth = 1     ,\
                            )
+
+            # Need to specify rect in order to have top text
+            self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
+        #}}}
+        #{{{elif self._mode == "perpAndPol"
+        elif self._mode == "perpAndPol".lower():
+            # Lines needs only to be plotted once
+            # Circle
+            self._perpAx.add_artist(self._circle)
+
+            # Pol line
+            self._polAx.plot(self._ZTLineXVals,\
+                             self._ZTLineYVals,\
+                             "--k"            ,\
+                             linewidth = 1    ,\
+                             )
 
             # Need to specify rect in order to have top text
             self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
