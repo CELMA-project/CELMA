@@ -113,6 +113,7 @@ collectionFolders.append(dmp_folder[0])
 _, _ = myRuns.execute_runs(\
                     remove_old               = False        ,\
                     post_processing_function = postBoutRunner,\
+                    # postBoutRunner option
                     driverName = "plotEnergyAndProbes"    ,\
                     # PostProcessDriver input
                     convertToPhysical = False             ,\
