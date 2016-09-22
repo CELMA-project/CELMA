@@ -4,7 +4,7 @@
 
 from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap2
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
@@ -257,6 +257,7 @@ class PlotProbes(object):
 
         # Make the plot look nice
         self._probes.helper.makePlotPretty(ax, rotation = 45)
+
         fig.tight_layout()
 
         if self._showPlot:

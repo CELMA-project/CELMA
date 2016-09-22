@@ -5,8 +5,10 @@ Contains classes which probes the data
 """
 
 from .polAvg import polAvg
-from .derivatives import DDZ, findLargestRadialGrad
-from ..plotHelpers import PlotHelper, collectiveCollect
+from ..plotHelpers import (PlotHelper,\
+                           collectiveCollect,\
+                           DDZ,\
+                           findLargestRadialGrad)
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
