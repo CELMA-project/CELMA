@@ -60,7 +60,8 @@ class DriversProbes(StatsAndSignalsDrivers):
         self._maxMode                = maxMode
 
         if self._scanParameters:
-            self._steadyStatePath = self._convertToCurrentScanParameters(self._path)
+            self._steadyStatePath =\
+                    self._convertToCurrentScanParameters(self._steadyStatePath)
         else:
             self._steadyStatePath = steadyStatePath
 

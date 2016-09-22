@@ -175,7 +175,7 @@ class Drivers1D(FieldPlottersDriver):
         """
 
         # Make the plotter object
-        plotter = Plot1D(self._path                                 ,\
+        plotter = Plot1D(self._dmp_folder                           ,\
                          xguards           = self._xguards          ,\
                          yguards           = self._yguards          ,\
                          marker            = self._marker           ,\
@@ -193,7 +193,7 @@ class Drivers1D(FieldPlottersDriver):
 
         # Get the organization object (will depend on the model used (i.e.
         # the fields stored)
-        orgObj = getOrgObjFromModel(self._path, self._labelName)
+        orgObj = getOrgObjFromModel(self._dmp_folder, self._labelName)
 
         # Prepare the lines for plotting
         fig = orgObj.pltPrepare()
