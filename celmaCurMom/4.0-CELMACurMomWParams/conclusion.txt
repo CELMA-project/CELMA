@@ -21,6 +21,11 @@ Checklist:
 [ ] - Time of energy overshoot
 [ ] - Probe data
 
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
 B0 = 0.1
 a1-KiwiFlat-0-initialize      - 1h59m
 a1-KiwiFlat-1-expand          - 4h42m  : 1. Grid-size oscillation in parallel jPar
@@ -66,9 +71,16 @@ a1-KiwiFlat-3-turbulentPhase1 - NA
 
 b1-VienetaFlat
 --------------
-b1-VienetaFlat-0-initialize   - 10000 omci^-1 - 6h 50 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-6
-b1-VienetaFlat-1-expand       - 10010 omci^-1 - 2h 53 m - Small grid-size oscillations at mu n dz (Te lnN - phi), in the order 1e-6. NOTE: Longer expand took forever, exceeded walltime of 24 hours
-b1-VienetaFlat-2-linearPhase1 - 11010 omci^-1 - Running
+Init   : 10000 timesteps
+Expand : 10    timesteps - 100 timesteps took too long
+Linear : 1000  timesteps
+Turbul : 5000  timesteps
 
-
-b1-VienetaFlat-1-expand     - 10100 omci^-1 - 6h 49 m - Rerunning as kMaxCurrent at inner rho is equal or below to 0
+B0 = 0.1
+!kMaxCurrent at inner rho is equal or below to 0 => old mesh 34 x 66 x 257 -> 70 x 100 x 513
+b1-VienetaFlat-0-initialize      - 8h32m
+b1-VienetaFlat-1-expand          - 2h53m
+b1-VienetaFlat-2-linearPhase1    - 132 of 1000 48h
+b1-VienetaFlat-2-linearPhase2    - 234 of 1000 72h
+b1-VienetaFlat-2-linearPhase3    - 56h31m
+b1-VienetaFlat-3-turbulentPhase1 - 1473 of 5000 72h
