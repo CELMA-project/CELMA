@@ -19,6 +19,7 @@ class DriversProbes(StatsAndSignalsDrivers):
     def __init__(self                          ,\
                  *args                         ,\
                  var                    = None ,\
+                 tIndSaturatedTurb      = None ,\
                  yInd                   = None ,\
                  nProbes                = None ,\
                  steadyStatePath        = None ,\
@@ -55,10 +56,11 @@ class DriversProbes(StatsAndSignalsDrivers):
         super().__init__(*args, **kwargs)
 
         # Set member data
-        self._var                    = var
-        self._yInd                   = yInd
-        self._nProbes                = nProbes
-        self._maxMode                = maxMode
+        self._var               = var
+        self._tIndSaturatedTurb = tIndSaturatedTurb
+        self._yInd              = yInd
+        self._nProbes           = nProbes
+        self._maxMode           = maxMode
 
         if self._scanParameters:
             self._steadyStatePath =\
@@ -79,13 +81,14 @@ class DriversProbes(StatsAndSignalsDrivers):
         """ Calculates the statistics of the probes """
         # Create the probes
         self._probes = PerpPlaneProbes(\
-                      self._var                                            ,\
-                      paths                  = self._paths                 ,\
-                      yInd                   = self._yInd                  ,\
-                      nProbes                = self._nProbes               ,\
-                      convertToPhysical      = self._convertToPhysical     ,\
-                      steadyStatePath        = self._steadyStatePath       ,\
-                      radialProbesIndices    = None                        ,\
+                      self._var                                    ,\
+                      paths               = self._paths            ,\
+                      yInd                = self._yInd             ,\
+                      nProbes             = self._nProbes          ,\
+                      convertToPhysical   = self._convertToPhysical,\
+                      steadyStatePath     = self._steadyStatePath  ,\
+                      tIndSaturatedTurb   = self._tIndSaturatedTurb,\
+                      radialProbesIndices = None                   ,\
                      )
 
         # Create the probe

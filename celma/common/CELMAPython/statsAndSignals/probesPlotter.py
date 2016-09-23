@@ -57,6 +57,7 @@ class PlotProbes(object):
         self._savePlot  = savePlot
         self._extension = extension
         self._savePath  = savePath
+        self._alpha     = 0.7
 
         # Get the colors
         self._colors = seqCMap(np.linspace(0, 1, len(probes.probesKeys)))
@@ -106,25 +107,29 @@ class PlotProbes(object):
             # Make the labels
             self._probes.helper.rhoTxtDict["value"] =\
                     plotNumberFormatter(self._probes.rho[key], None)
-            mean = plotNumberFormatter(self._probes.results[key]["mean"],\
-                                       None,\
-                                       precision=3)
-            var  = plotNumberFormatter(self._probes.results[key]["var"],\
-                                       None,\
-                                       precision=3)
+            fluctMean =\
+                plotNumberFormatter(self._probes.results[key]["fluctMean"],\
+                                    None,\
+                                    precision=3)
+            fluctVar =\
+                plotNumberFormatter(self._probes.results[key]["fluctVar"],\
+                                    None,\
+                                    precision=3)
             rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                     format(self._probes.helper.rhoTxtDict)
-            label = r"{}  $\mu_n$={:8} $\sigma^2_n$={}".\
-                    format(rho, mean, var)
+            label = (r"{}  $\mu_{{\tilde{{n}}}}$={:8} "
+                     r"$\sigma^2_{{\tilde{{n}}}}$={}").\
+                             format(rho, fluctMean, fluctVar)
 
             ax.plot(self._probes.fluctTime,\
-                    self._probes.timeTraceOfVarFluct[key],\
+                    self._probes.\
+                        timeTraceOfVar[key][self._probes.tIndSaturatedTurb:],\
                     color=self._colors[nr],\
                     label=label)
 
         # Set axis labels
         ax.set_xlabel(self._timeLabel)
-        ax.set_ylabel(self._varLabelFLuct)
+        ax.set_ylabel(self._varLabel)
 
         ax.set_title(self._defaultTitle)
 
@@ -172,20 +177,21 @@ class PlotProbes(object):
             # Make the labels
             self._probes.helper.rhoTxtDict["value"] =\
                     plotNumberFormatter(self._probes.rho[key], None)
-            skew =\
-                plotNumberFormatter(self._probes.results[key]["skew"], None)
-            kurt =\
-                plotNumberFormatter(self._probes.results[key]["kurtosis"], None)
+            fluctSkew =\
+               plotNumberFormatter(self._probes.results[key]["fluctSkew"], None)
+            fluctKurt =\
+               plotNumberFormatter(self._probes.results[key]["fluctKurt"], None)
 
             rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                     format(self._probes.helper.rhoTxtDict)
-            label = r"{}   $S_n$={:8} $K_n$={}".\
-                    format(rho, skew, kurt)
+            label = r"{}   $S_{{\tilde{{n}}}}$={:8} $K_{{\tilde{{n}}}}$={}".\
+                    format(rho, fluctSkew, fluctKurt)
 
             ax.plot(self._probes.results[key]["pdfX"],\
                     self._probes.results[key]["pdfY"],\
                     color=self._colors[nr],\
-                    label=label)
+                    label=label,\
+                    alpha=self._alpha)
 
         # Set logscale
         ax.set_yscale("log")
@@ -234,11 +240,12 @@ class PlotProbes(object):
                     plotNumberFormatter(self._probes.rho[key], None)
             label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                         format(self._probes.helper.rhoTxtDict)
-
-            ax.plot(self._probes.results[key]["psdX"],\
-                    self._probes.results[key]["psdY"],\
+            # Clip the very first point as this is rediculously low
+            ax.plot(self._probes.results[key]["psdX"][1:],\
+                    self._probes.results[key]["psdY"][1:],\
                     color=self._colors[nr],\
-                    label=label)
+                    label=label,\
+                    alpha=self._alpha)
 
         # Set logscale
         ax.set_yscale("log")
@@ -276,9 +283,6 @@ class PlotProbes(object):
     def plotAvgFluxThroughVolumeElement(self,\
                                         uName,\
                                         labelName,\
-                                        pltFluct = True,\
-                                        pltTotal = False,\
-                                        pltAvg   = False,\
                                        ):
         """
         Plots the average flux through a volume element
@@ -288,124 +292,67 @@ class PlotProbes(object):
         labelName : str
             Name of the velocity in a LaTeX plottable format (not
             including $)
-        pltFluct : bool
-            If the average flux fluctuation is to be plotted.
-        pltTotal : bool
-            If the total average flux is to be plotted.
-        pltAvg : bool
-            If the average flux average is to be plotted.
         """
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
 
         totalPlots = 0
-        if pltFluct:
-            totalPlots += 1
-        if pltTotal:
-            totalPlots += 1
-        if pltAvg:
-            totalPlots += 1
 
-        gs = GridSpec(nrows=totalPlots, ncols=1)
+        gs = GridSpec(nrows=len(self._probes.probesKeys), ncols=1)
 
-        axes = {}
-        pltAxes = []
-        curPlot = 0
-        if pltFluct:
-            axes["fluctAx"] = fig.add_subplot(gs[curPlot])
-            curPlot += 1
-            pltAxes.append(axes["fluctAx"])
-        if pltTotal:
-            if pltFluct:
-                axes["totalAx"] =\
-                        fig.add_subplot(gs[curPlot], sharex=axes["fluctAx"])
-            else:
-                axes["totalAx"] = fig.add_subplot(gs[curPlot])
-            curPlot += 1
-            pltTotal.append(axes["totalAx"])
-        if pltAvg:
-            if pltFluct:
-                axes["avgAx"] =\
-                        fig.add_subplot(gs[curPlot], sharex=axes["fluctAx"])
-            elif pltTotal:
-                axes["avgAx"] =\
-                        fig.add_subplot(gs[curPlot], sharex=axes["totalAx"])
-            else:
-                axes["avgAx"] = fig.add_subplot(gs[curPlot])
-
-            pltTotal.append(axes["avgAx"])
+        axes = []
         for nr, key in enumerate(self._probes.probesKeys):
+            if nr == 0:
+                axes.append(fig.add_subplot(gs[nr]))
+            else:
+                axes.append(fig.add_subplot(gs[nr], sharex=axes[0]))
+
             # Make the labels
             self._probes.helper.rhoTxtDict["value"] =\
                     plotNumberFormatter(self._probes.rho[key], None)
             label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                         format(self._probes.helper.rhoTxtDict)
 
-            if pltFluct:
-                axes["fluctAx"].plot(self._probes.fluctTime,\
-                                     self._probes.\
-                                        results[key]["varAvgFluxFluct" +\
-                                                    uName.capitalize()],\
-                                     color=self._colors[nr],\
-                                     label=label)
-            if pltTotal:
-                axes["totalAx"].plot(self._probes.time,\
-                                     self._probes.\
-                                        results[key]["varAvgFlux" +\
-                                                    uName.capitalize()],\
-                                     color=self._colors[nr],\
-                                     label=label)
-            if pltAvg:
-                axes["avgAx"].plot(self._probes.fluctTime,\
-                                   self._probes.\
-                                    results[key]["varAvgFluxAvg" +\
-                                                 uName.capitalize()],\
-                                   color=self._colors[nr],\
-                                   label=label)
-
+            axes[nr].plot(self._probes.fluctTime,\
+                          self._probes.\
+                             results[key]["varAvgFluxFluct" +\
+                                         uName.capitalize()],\
+                          color=self._colors[nr],\
+                          label=label)
+            # Plot the legends
+            leg = axes[nr].legend(loc="upper right", fancybox = True, numpoints=1)
+            leg.get_frame().set_alpha(0.5)
 
         # Set axis label
         if self._probes.helper.convertToPhysical:
-            labelEnd = "[{}\mathrm{{ms}}^{{-1}}]".format(self._probes.varUnits)
+            labelEnd =\
+                "[{}\mathrm{{ms}}^{{-1}}]".format(self._probes.varUnits)
         else:
-            labelEnd = "{}c_s".format(self._probes.varNormalization)
+            labelEnd =\
+                "{}c_s".format(self._probes.varNormalization)
 
-        if pltFluct:
-            axes["fluctAx"].set_ylabel(\
-                r"$\langle\tilde{{{}}}\tilde{{{}}}\rangle{}$".\
-                    format(self._probes.varName, labelName, labelEnd))
-        if pltTotal:
-            axes["totalAx"].set_ylabel(r"${}{}{}$".\
-                    format(self._probes.varName, labelName, labelEnd))
-        if pltAvg:
-            axes["avgAx"].set_ylabel(r"$\bar{{{}}}\bar{}{}$".\
-                    format(self._probes.varName, labelName, labelEnd))
+        midAx = round(len(axes)/2)
+        axes[midAx].set_ylabel(\
+            r"$\langle\tilde{{{}}}\tilde{{{}}}\rangle{}$".\
+                format(self._probes.varName, labelName, labelEnd))
 
-        pltAxes[0].set_title(self._defaultTitle)
+        axes[0].set_title(self._defaultTitle)
 
         # Make the plot look nice
-        # Plot the legend
-        leg = pltAxes[0].legend(loc="best", fancybox = True, numpoints=1)
-        leg.get_frame().set_alpha(0.5)
-
-        for ax in pltAxes:
+        for ax in axes:
             self._probes.helper.makePlotPretty(ax, yprune = "both",\
                                                rotation = 45)
 
-        for ax in pltAxes[0:-1]:
+        for ax in axes[0:-1]:
             ax.tick_params(labelbottom="off")
 
         # Make sure no collision between the ticks
-        pltAxes[-1].xaxis.set_major_locator(MaxNLocator(prune="lower"))
-        pltAxes[-1].set_xlabel(self._timeLabel)
+        axes[-1].xaxis.set_major_locator(MaxNLocator(prune="lower"))
+        axes[-1].set_xlabel(self._timeLabel)
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0)
-
-        # Manual tweeking as we want legends outside the plot
-        fig.tight_layout(rect=[0,0,0.9,0.95])
-
 
         if self._showPlot:
             plt.show()
@@ -449,10 +396,13 @@ class PlotProbes(object):
 
         # Skip the offset mode
         for modeNr in range(1, maxMode+1):
-            ax.plot(self._probes.time,\
-                    self._probes.results[positionKey]["zFFT"][:, modeNr],\
+            # Clip where the modes has been added
+            clip = 3
+            ax.plot(self._probes.time[clip:],\
+                    self._probes.results[positionKey]["zFFT"][clip:, modeNr],\
                     color=colors[modeNr-1],\
-                    label=r"$k_\theta={}$".format(modeNr))
+                    label=r"$k_\theta={}$".format(modeNr),
+                    alpha=self._alpha)
 
         # Set logscale
         ax.set_yscale("log")

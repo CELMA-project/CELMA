@@ -96,12 +96,12 @@ justPostProcess = True
 # Normal post-processors
 postProcessInit = False
 postProcessExp  = False
-postProcessLin  = True
+postProcessLin  = False
 postProcessTrub = False
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = False
+postProcessProbesAndEnergy = True
 
 #{{{Main options
 #{{{The scan
@@ -393,7 +393,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
 # Post processing options
-tSlice           = slice(-500, 0, None)
+tSlice           = slice(-500, None, 2)
 varyMaxMin       = True
 subPolAvg        = True
 mode             = "perpAndPol"
@@ -595,6 +595,11 @@ if postProcessProbesAndEnergy:
     theRunName = "a1-KiwiFlat-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
 
+    # Found from the overshoot at the energy plot
+    # Overshoot happening around timestep 4400, timestep 4700 looks ok
+    # Init + expand = 4100 => 4700 - 4100 = 600
+    tIndSaturatedTurb = 600
+
     _, _ = turboRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
@@ -613,10 +618,11 @@ if postProcessProbesAndEnergy:
                                  # StatsAndSignalsDrivers input
                                  paths             = collectionFolders,\
                                  # DriversProbes input
-                                 var             = var                  ,\
-                                 yInd            = yInd                 ,\
-                                 nProbes         = nProbes              ,\
-                                 maxMode         = maxMode              ,\
+                                 var               = var              ,\
+                                 yInd              = yInd             ,\
+                                 nProbes           = nProbes          ,\
+                                 maxMode           = maxMode          ,\
+                                 tIndSaturatedTurb = tIndSaturatedTurb,\
                                  # The steady state path will be
                                  # converted using convertToCurrentScanParameters
                                  steadyStatePath = expand_dmp_folders[0],\
