@@ -26,15 +26,15 @@ class Probes(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self                          ,\
-                 var                           ,\
-                 varName                       ,\
-                 time                          ,\
-                 tIndSaturatedTurb      = None ,\
-                 steadyStatePath        = None ,\
-                 radialProbesIndices    = None ,\
-                 collectPath            = None ,\
-                 convertToPhysical      = False,\
+    def __init__(self                       ,\
+                 var                        ,\
+                 varName                    ,\
+                 time                       ,\
+                 tIndSaturatedTurb   = None ,\
+                 steadyStatePath     = None ,\
+                 radialProbesIndices = None ,\
+                 collectPath         = None ,\
+                 convertToPhysical   = False,\
                  ):
         #{{{docstring
         """
@@ -49,9 +49,8 @@ class Probes(object):
         time : array
             The time array
         tIndSaturatedTurb : [int|None]
-            Index at where the turbulence saturates. This can be found
-            from CELMAPython.plotting self.results[index]["zFFT"] after
-            calculation
+            Index at where the turbulence saturates. This should be set
+            to be after the overshoot in the energy.
         steadyStatePath : str
             What path to use when collecting J. If radialProbesIndices is
             None, this will also be the path for finding the largest
@@ -121,8 +120,8 @@ class Probes(object):
             if varName == "n":
                 self._varSteadyState = np.exp(self._varSteadyState)
 
-        self.varName            = varName
-        self._tIndSaturatedTurb = tIndSaturatedTurb
+        self.varName           = varName
+        self.tIndSaturatedTurb = tIndSaturatedTurb
 
         # Set uninitialized variables to None
         self.results             = None
@@ -233,14 +232,14 @@ class Probes(object):
         self._result[indexString], where indexString is the string of
         the index under consideration.
 
-        mean : array
+        fluctMean : array
             The mean of the fluctuations for each time (should be 0).
-        var : array
+        fluctVar : array
             The variance of the fluctuations for each time.
-        kurtosis : array
+        fluctKurt : array
             The kurtosis of the fluctuations for each time (is 3.0 for a
             normal distribution).
-        skew : array
+        fluctSkew : array
             The skewness of the the fluctuations for each time (is 0 for
             a normal distribution)
         """
@@ -250,13 +249,13 @@ class Probes(object):
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
-                    self.results[key]["mean"] =\
+                    self.results[key]["fluctMean"] =\
                         self.timeTraceOfVarFluct[key].mean()
-                    self.results[key]["var"] =\
+                    self.results[key]["fluctVar"] =\
                         self.timeTraceOfVarFluct[key].var()
-                    self.results[key]["kurtosis"] =\
+                    self.results[key]["fluctKurt"] =\
                         kurtosis(self.timeTraceOfVarFluct[key])
-                    self.results[key]["skew"] =\
+                    self.results[key]["fluctSkew"] =\
                         skew(self.timeTraceOfVarFluct[key])
     #}}}
 
@@ -450,10 +449,10 @@ class Probes(object):
                                 u             [:,xInd:xInd+1,yInd:yInd+1,:])
                 avgFluxAvg   = polAvg(\
                                 self._varAvg  [:,xInd:xInd+1,yInd:yInd+1,:]*\
-                                uAvg          [:,xInd:xInd+1,yInd:yInd+1,:])
+                    uAvg[self.tIndSaturatedTurb:,xInd:xInd+1,yInd:yInd+1,:])
                 avgFluxFluct = polAvg(\
                                 self._varFluct[:,xInd:xInd+1,yInd:yInd+1,:]*\
-                                uFluct        [:,xInd:xInd+1,yInd:yInd+1,:])
+                    uFluct[self.tIndSaturatedTurb:,xInd:xInd+1,yInd:yInd+1,:])
                 for zInd in self._zInds:
 
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
