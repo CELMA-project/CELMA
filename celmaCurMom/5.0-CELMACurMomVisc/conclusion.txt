@@ -15,32 +15,37 @@ Checklist:
 [ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
 [ ] - Probe data
 
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 750  timesteps
+Turbul : 5000 timesteps
+
 artPar = 4.0
 a1-KiwiFlat-0-initialize      - 5h28m
 a1-KiwiFlat-1-expand          - 0h49m
 a1-KiwiFlat-2-linearPhase1    - 76h17m
-a1-KiwiFlat-3-turbulentPhase1 - Running
+a1-KiwiFlat-3-turbulentPhase1 - FIXME: No restart!
 
 artPar = 2.0
 a1-KiwiFlat-0-initialize      - 4h26m
 a1-KiwiFlat-1-expand          - 0h19m
 a1-KiwiFlat-2-linearPhase1    - 662 of 750 100h
-a1-KiwiFlat-3-turbulentPhase1 - Running
+a1-KiwiFlat-3-turbulentPhase1 - FIXME: No restart!
 
 artPar = 1.0
 a1-KiwiFlat-0-initialize      - 4h42m
 a1-KiwiFlat-1-expand          - 0h26m
 a1-KiwiFlat-2-linearPhase1    - 533 of 750 100h
-a1-KiwiFlat-3-turbulentPhase1 - Running
+a1-KiwiFlat-3-turbulentPhase1 - FIXME: No restart!
 
 artPar = 0.5
 a1-KiwiFlat-0-initialize      - 5h29m
 a1-KiwiFlat-1-expand          - 0h33m
 a1-KiwiFlat-2-linearPhase1    - 370 of 100 ~72h <- mystery what happened
-a1-KiwiFlat-3-turbulentPhase1 - Running
+a1-KiwiFlat-3-turbulentPhase1 - FIXME: No restart!
 
 artPar = 0.1
 a1-KiwiFlat-0-initialize      - 4h11m
 a1-KiwiFlat-1-expand          - 0h27m
 a1-KiwiFlat-2-linearPhase1    - 274 SUNDIALS failed
-a1-KiwiFlat-3-turbulentPhase1 - Running
+a1-KiwiFlat-3-turbulentPhase1 - FIXME: No restart!

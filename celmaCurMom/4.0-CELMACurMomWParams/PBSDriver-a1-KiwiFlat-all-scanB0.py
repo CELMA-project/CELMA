@@ -131,7 +131,7 @@ useSteadyStatePathFunc = True
 extension              = "png"
 useSubProcess          = True
 #}}}
-#{{{Constructor options
+#{{{File handeling options
 remove_old = False
 directory  = "a1-KiwiFlat"
 make       = False
@@ -144,8 +144,6 @@ BOUT_ppn              = 16
 post_process_nproc    = 1
 post_process_nodes    = 1
 post_process_ppn      = 20
-post_process_walltime = '0:29:00'
-post_process_queue    = 'xpresq'
 #}}}
 #}}}
 
@@ -214,6 +212,8 @@ ownFilterType = "none"
 BOUT_walltime         = '05:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
+post_process_walltime = '0:29:00'
+post_process_queue    = 'xpresq'
 # Post processing option
 tSlice     = slice(-2, None)
 #}}}
@@ -285,6 +285,8 @@ theRunName = "a1-KiwiFlat-1-expand"
 BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
+post_process_walltime = '0:29:00'
+post_process_queue    = 'xpresq'
 # Post processing option
 tSlice     = slice(-2, None)
 #}}}
@@ -335,6 +337,33 @@ expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
                                **fieldPlotterKwargs           ,\
                               )
 #}}}
+#}}}
+
+#{{{ If profiles are to be plotted
+if postProcessLinProfiles or postProcessTurbProfiles:
+    noutProfile                 = 3
+    timestepProfile             = 10
+    useHyperViscAzVortDProfile  = True
+    saveTermsProfile            = True
+
+    # Create a new runner as we would like to save all the fields
+    profileRun = PBS_runner(\
+                  # Set temporal domain
+                  nout         = noutProfile    ,\
+                  timestep     = timestepProfile,\
+                  # Set restart options
+                  restart      = restart        ,\
+                  restart_from = restartFromFunc,\
+                  # Set additional options
+                  additional = [
+                                ('tag',theRunName,0),\
+                                ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortDProfile),\
+                                ('switch'      , 'saveTerms'          ,saveTermsProfile),\
+                               ],\
+                  series_add = series_add                      ,\
+                  # Common options
+                  **commonRunnerKwargs                         ,\
+                  )
 #}}}
 
 #{{{The linear runner
@@ -424,10 +453,12 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  **fieldPlotterKwargs           ,\
                                 )
 
+#}}}
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
     theRunName = "a1-KiwiFlat-2-linearPhaseParProfiles"
+    aScanPathProfiles = linear_dmp_folders[0]
     tSlice = slice(-30, None, 10)
 
     _, _ = linearRun.execute_runs(\
@@ -451,7 +482,6 @@ if postProcessLinProfiles:
                                  # Common kwargs
                                  **fieldPlotterKwargs           ,\
                                 )
-#}}}
 #}}}
 #}}}
 
@@ -526,11 +556,13 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
                                  # Common kwargs
                                  **fieldPlotterKwargs           ,\
                                 )
+#}}}
 #{{{ If linear profiles are to be plotted
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
     theRunName = "a1-KiwiFlat-3-turbulentPhase1ParProfiles"
     tSlice = slice(-30, None, 10)
+    aScanPathProfiles = turbo_dmp_folders[0]
 
     _, _ = turboRun.execute_runs(\
                                  remove_old               = remove_old      ,\
@@ -553,7 +585,6 @@ if postProcessTurbProfiles:
                                  # Common kwargs
                                  **fieldPlotterKwargs           ,\
                                 )
-#}}}
 #}}}
 #}}}
 
