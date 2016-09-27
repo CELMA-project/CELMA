@@ -96,11 +96,11 @@ justPostProcess = True
 # Normal post-processors
 postProcessInit = False
 postProcessExp  = False
-postProcessLin  = False
+postProcessLin  = True
 postProcessTrub = False
 # Extra post-processors
-postProcessLinProfiles     = True
-postProcessTurbProfiles    = True
+postProcessLinProfiles     = False
+postProcessTurbProfiles    = False
 postProcessProbesAndEnergy = False
 
 #{{{Main options
@@ -131,7 +131,7 @@ useSteadyStatePathFunc = True
 extension              = "png"
 useSubProcess          = True
 #}}}
-#{{{Constructor options
+#{{{File handeling options
 remove_old = False
 directory  = "0-scanTest"
 make       = False
