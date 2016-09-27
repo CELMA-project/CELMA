@@ -9,6 +9,9 @@ Copied from 3.0-CELMACurMomWMonitors
 Results:
 ========
 
+!!!!!!! MISTAKE: No artViscPerpVortD has been used !!!!
+!! MISTAKE: Hypervisc is on from the start <- this shouldn't be too much of a problem as ddz ~ 0
+
 a1-KiwiFlat
 -----------
 Checklist:

@@ -56,6 +56,7 @@ def restartFromFunc(dmp_folder     = None,\
     for scanParameter in scanParameters:
         hits = [m.start() for m in \
                 re.finditer(scanParameter, scanPathTemplate)]
+        # FIXME: If initial hit is in root folder this algorithm will fail
         while(len(hits) > 0):
             # Replace the values with {}
             # The value is separated from the value by 1 character
@@ -107,6 +108,9 @@ postProcessProbesAndEnergy = False
 #{{{The scan
 artPar = [4.0, 2.0, 1.0, 0.5, 0.1]
 scanParameters  = ["artPar"]
+series_add = [\
+              ('visc', 'artPar', artPar),\
+             ]
 #}}}
 #{{{The options for the post processing function
 saveFolderFunc         = "scanWTagSaveFunc"
@@ -180,11 +184,6 @@ fieldPlotterKwargs =\
          "axisEqualParallel": axisEqualParallel,\
          **commonPlotterKwargs                 ,\
         }
-#}}}
-#{{{Set the scan
-series_add = [\
-              ('visc', 'artPar', artPar),\
-             ]
 #}}}
 #}}}
 
