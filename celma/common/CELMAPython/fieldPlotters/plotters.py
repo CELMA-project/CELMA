@@ -939,7 +939,6 @@ class Plot2D(Plot):
 
         # Set memberdatas altered in _plot2D
         self._cbarPlane = None
-        self._txtSet    = False
         #}}}
 
     #{{{_createLines
@@ -1042,7 +1041,7 @@ class Plot2D(Plot):
             if self._varyMaxMin:
                 maxList.append(np.max(Z_RZ))
                 maxList.append(np.max(Z_RZ_P_PI))
-                minList.append(np.min(Z_RZ_P_PI))
+                minList.append(np.min(Z_RZ))
                 minList.append(np.min(Z_RZ_P_PI))
         #}}}
 
@@ -1050,7 +1049,7 @@ class Plot2D(Plot):
         if self._varyMaxMin and tInd:
             # Update the max and min
             self._varMax = np.max(maxList)
-            self._varMin = np.max(minList)
+            self._varMin = np.min(minList)
 
             # Diverging colormap for fluctuations
             if self._subPolAvg:
@@ -1083,6 +1082,8 @@ class Plot2D(Plot):
         #{{{ Plot, set labels and draw grids
         #{{{if "pol" in self._mode
         if "pol" in self._mode:
+            # Clear previous axis
+            self._polAx.cla()
             # Plot the poloidal plane
             polPlane = self._polAx.\
                 contourf(\
@@ -1098,6 +1099,8 @@ class Plot2D(Plot):
         #}}}
         #{{{if "perp" in self._mode
         if "perp" in self._mode:
+            # Clear previous axis
+            self._perpAx.cla()
             # Plot the perpendicular plane
             perpPlane = self._perpAx.\
                     contourf(self._cyl.X_RT, self._cyl.Y_RT, Z_RT, **cfKwargs)
@@ -1113,6 +1116,8 @@ class Plot2D(Plot):
         #}}}
         #{{{if "par" in self._mode
         if "par" in self._mode:
+            # Clear previous axis
+            self._parAx.cla()
             # Plot the parallel plane
             parPlane  = self._parAx.\
             contourf(self._cyl.X_RZ, self._cyl.Y_RZ, Z_RZ, **cfKwargs)
@@ -1130,6 +1135,52 @@ class Plot2D(Plot):
                                 fontsize = self._latexSize)
         #}}}
         #}}}
+
+        #{{{ Draw lines
+        #{{{if self._mode == "perpAndPar"
+        if self._mode == "perpAndPar".lower():
+            # Lines needs only to be plotted once
+            # Par line 1
+            self._parAx.plot(self._RZLine1XVals,\
+                           self._RZLine1YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Par line 2
+            self._parAx.plot(self._RZLine2XVals,\
+                           self._RZLine2YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Perp line 1
+            self._perpAx.plot(self._RTLine1XVals,\
+                           self._RTLine1YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+            # Perp line 2
+            self._perpAx.plot(self._RTLine2XVals,\
+                           self._RTLine2YVals,\
+                           "--k"             ,\
+                           linewidth = 1     ,\
+                           )
+
+        #}}}
+        #{{{elif self._mode == "perpAndPol"
+        elif self._mode == "perpAndPol".lower():
+            # Lines needs only to be plotted once
+            # Circle
+            self._perpAx.add_artist(self._circle)
+
+            # Pol line
+            self._polAx.plot(self._ZTLineXVals,\
+                             self._ZTLineYVals,\
+                             "--k"            ,\
+                             linewidth = 1    ,\
+                             )
+        #}}}
+        #}}}
+
 
         # Title preparation
         self.helper.rhoTxtDict["value"] =\
@@ -1156,84 +1207,66 @@ class Plot2D(Plot):
         #{{{ Set the titles
         #{{{if self._mode == "perpAndPar".lower()
         if self._mode == "perpAndPar".lower():
-            if self._txtSet == False:
-                # Perp text
-                self._perpAx.text(0.5, 1.05, perpTitle,\
-                             transform = self._perpAx.transAxes,\
-                             **txtKwargs)
+            # Perp text
+            self._perpAx.text(0.5, 1.05, perpTitle,\
+                         transform = self._perpAx.transAxes,\
+                         **txtKwargs)
 
-                # Par text
-                self._parAx.text(0.5, 1.05, parTitle,\
-                             transform = self._parAx.transAxes,\
-                             **txtKwargs)
+            # Par text
+            self._parAx.text(0.5, 1.05, parTitle,\
+                         transform = self._parAx.transAxes,\
+                         **txtKwargs)
 
-                # Title mid
-                # Text for the figure. Could append this to the figure itself,
-                # but it seems to be easier to just add it to an axis due to
-                # animation
-                self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
-                                              transform = self._perpAx.transAxes,\
-                                              **txtKwargs)
-                self._txtSet = True
-            else:
-                self._figTxt.set_text(timeTitle)
+            # Title mid
+            # Text for the figure. Could append this to the figure itself,
+            # but it seems to be easier to just add it to an axis due to
+            # animation
+            self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
+                                          transform = self._perpAx.transAxes,\
+                                          **txtKwargs)
         #}}}
         #{{{elif self._mode == "perpAndPol".lower()
         elif self._mode == "perpAndPol".lower():
-            if self._txtSet == False:
-                # Perp text
-                self._perpAx.text(0.5, 1.05, perpTitle,\
-                             transform = self._perpAx.transAxes,\
-                             **txtKwargs)
+            # Perp text
+            self._perpAx.text(0.5, 1.05, perpTitle,\
+                         transform = self._perpAx.transAxes,\
+                         **txtKwargs)
 
-                # Pol text
-                self._polAx.text(0.5, 1.05, polTitle,\
-                             transform = self._polAx.transAxes,\
-                             **txtKwargs)
+            # Pol text
+            self._polAx.text(0.5, 1.05, polTitle,\
+                         transform = self._polAx.transAxes,\
+                         **txtKwargs)
 
-                # Title mid
-                # Text for the figure. Could append this to the figure itself,
-                # but it seems to be easier to just add it to an axis due to
-                # animation
-                self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
-                                              transform = self._perpAx.transAxes,\
-                                              **txtKwargs)
-                self._txtSet = True
-            else:
-                self._figTxt.set_text(timeTitle)
+            # Title mid
+            # Text for the figure. Could append this to the figure itself,
+            # but it seems to be easier to just add it to an axis due to
+            # animation
+            self._figTxt = self._perpAx.text(1.10, 1.05, timeTitle,\
+                                          transform = self._perpAx.transAxes,\
+                                          **txtKwargs)
         #}}}
         #{{{elif self._mode == "pol"
         elif self._mode == "pol":
-            if self._txtSet == False:
-                self._polTxt = self._polAx.text(0.5, 1.05,\
-                                             "{}$,$ {}".format(polTitle, timeTitle),\
-                                             transform = self._polAx.transAxes,\
-                                             **txtKwargs)
-                self._txtSet = True
-            else:
-                self._polTxt.set_text("{}$,$ {}".format(polTitle, timeTitle))
+            self._polTxt = self._polAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(polTitle, timeTitle),\
+                                         transform = self._polAx.transAxes,\
+                                         **txtKwargs)
         #}}}
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
-            if self._txtSet == False:
-                self._perpTxt = self._perpAx.text(0.5, 1.05,\
-                                             "{}$,$ {}".format(perpTitle, timeTitle),\
-                                             transform = self._perpAx.transAxes,\
-                                             **txtKwargs)
-                self._txtSet = True
-            else:
-                self._perpTxt.set_text("{}$,$ {}".format(perpTitle, timeTitle))
+            self._perpTxt = self._perpAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(perpTitle, timeTitle),\
+                                         transform = self._perpAx.transAxes,\
+                                         **txtKwargs)
+            self._txtSet = True
         #}}}
         #{{{elif self._mode == "par"
         elif self._mode == "par":
-            if self._txtSet == False:
-                self._parTxt = self._parAx.text(0.5, 1.05,\
-                                             "{}$,$ {}".format(parTitle, timeTitle),\
-                                             transform = self._parAx.transAxes,\
-                                             **txtKwargs)
-                self._txtSet = True
-            else:
-                self._parTxt.set_text("{}$,$ {}".format(parTitle, timeTitle))
+            self._parTxt = self._parAx.text(0.5, 1.05,\
+                                         "{}$,$ {}".format(parTitle, timeTitle),\
+                                         transform = self._parAx.transAxes,\
+                                         **txtKwargs)
+            self._txtSet = True
         #}}}
         #}}}
 
@@ -1300,53 +1333,10 @@ class Plot2D(Plot):
         # Initial plot
         self._plot2D(0)
 
-        #{{{if self._mode == "perpAndPar"
-        if self._mode == "perpAndPar".lower():
-            # Lines needs only to be plotted once
-            # Par line 1
-            self._parAx.plot(self._RZLine1XVals,\
-                           self._RZLine1YVals,\
-                           "--k"             ,\
-                           linewidth = 1     ,\
-                           )
-            # Par line 2
-            self._parAx.plot(self._RZLine2XVals,\
-                           self._RZLine2YVals,\
-                           "--k"             ,\
-                           linewidth = 1     ,\
-                           )
-            # Perp line 1
-            self._perpAx.plot(self._RTLine1XVals,\
-                           self._RTLine1YVals,\
-                           "--k"             ,\
-                           linewidth = 1     ,\
-                           )
-            # Perp line 2
-            self._perpAx.plot(self._RTLine2XVals,\
-                           self._RTLine2YVals,\
-                           "--k"             ,\
-                           linewidth = 1     ,\
-                           )
-
+        if self._mode == "perpAndPar".lower() or\
+           self._mode == "perpAndPol".lower():
             # Need to specify rect in order to have top text
             self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
-        #}}}
-        #{{{elif self._mode == "perpAndPol"
-        elif self._mode == "perpAndPol".lower():
-            # Lines needs only to be plotted once
-            # Circle
-            self._perpAx.add_artist(self._circle)
-
-            # Pol line
-            self._polAx.plot(self._ZTLineXVals,\
-                             self._ZTLineYVals,\
-                             "--k"            ,\
-                             linewidth = 1    ,\
-                             )
-
-            # Need to specify rect in order to have top text
-            self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
-        #}}}
 
         if self._savePlot:
             # Make dir if not exists

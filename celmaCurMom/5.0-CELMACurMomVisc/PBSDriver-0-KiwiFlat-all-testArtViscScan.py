@@ -95,13 +95,13 @@ def restartFromFunc(dmp_folder     = None,\
 justPostProcess = True
 # Normal post-processors
 postProcessInit = False
-postProcessExp  = True
+postProcessExp  = False
 postProcessLin  = True
-postProcessTrub = True
+postProcessTrub = False
 # Extra post-processors
-postProcessLinProfiles     = True
-postProcessTurbProfiles    = True
-postProcessProbesAndEnergy = True
+postProcessLinProfiles     = False
+postProcessTurbProfiles    = False
+postProcessProbesAndEnergy = False
 
 #{{{Main options
 #{{{The scan
@@ -389,7 +389,7 @@ post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
 # Post processing options
-tSlice           = slice(-500, 0, None)
+tSlice           = None
 varyMaxMin       = True
 subPolAvg        = True
 mode             = "perpAndPol"
