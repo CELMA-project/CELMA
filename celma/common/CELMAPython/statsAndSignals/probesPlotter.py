@@ -117,7 +117,7 @@ class PlotProbes(object):
                                     precision=3)
             rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                     format(self._probes.helper.rhoTxtDict)
-            label = (r"{}  $\mu_{{\tilde{{n}}}}$={:8} "
+            label = (r"{}  $ \mu_{{\tilde{{n}}}}$={:8} "
                      r"$\sigma^2_{{\tilde{{n}}}}$={}").\
                              format(rho, fluctMean, fluctVar)
 
@@ -367,7 +367,7 @@ class PlotProbes(object):
     #}}}
 
     #{{{plotZFFT
-    def plotZFFT(self, positionKey, maxMode):
+    def plotZFFT(self, positionKey, maxMode, clip=True, plotLinear=True):
         r"""
         Plots the fourier transform at the given position.
 
@@ -385,58 +385,99 @@ class PlotProbes(object):
             indices refer to the keys in the simulated data.
         maxMode : int
             Number of modes to plot.
+        clip : bool
+            If True, the first three points (typically where the
+            perturbed noise decays) is removed from the plot.
+        plotLinear : bool
+            If True, the linear phase will be plotted as well
         """
 
-        # Create figure and colors
-        # NOTE: We use a different colormap here to distinguish from the
-        #       positions
-        fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
-        colors = seqCMap2(np.linspace(0, 1, maxMode))
+        #{{{plotFunc
+        def plotFunc(linear=False):
+            """
+            The function which plots and saves the FFT plot
 
-        # Skip the offset mode
-        for modeNr in range(1, maxMode+1):
-            # Clip where the modes has been added
-            clip = 3
-            ax.plot(self._probes.time[clip:],\
-                    self._probes.results[positionKey]["zFFT"][clip:, modeNr],\
-                    color=colors[modeNr-1],\
-                    label=r"$k_\theta={}$".format(modeNr),
-                    alpha=self._alpha)
+            Parameters
+            ----------
+            linear : bool
+                If True, "linear" will be appended to the plot name.
+            """
+            # Create figure and colors
+            # NOTE: We use a different colormap here to distinguish from the
+            #       positions
+            fig = plt.figure(figsize = self._pltSize)
+            ax  = fig.add_subplot(111)
+            colors = seqCMap2(np.linspace(0, 1, maxMode))
 
-        # Set logscale
-        ax.set_yscale("log")
+            # Skip the offset mode
+            for modeNr in range(1, maxMode+1):
+                # Clip where the modes has been added
+                clip = 3
+                if linear:
+                    linearClip = self._probes.results[positionKey]["zFFTLinearIndex"]
+                else:
+                    linearClip = None
 
-        # Set axis label
-        ax.set_xlabel(self._timeLabel)
-        ax.set_ylabel(self._varLabel)
+                ax.plot(self._probes.time[clip:linearClip],\
+                        self._probes.results[positionKey]["zFFT"]\
+                            [clip:linearClip, modeNr],\
+                        color=colors[modeNr-1],\
+                        label=r"$k_\theta={}$".format(modeNr),
+                        alpha=self._alpha)
 
-        self._probes.helper.rhoTxtDict["value"] =\
-                plotNumberFormatter(self._probes.rho[positionKey], None)
-        rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
-                    format(self._probes.helper.rhoTxtDict)
-        self._probes.helper.zTxtDict  ["value"] =\
-                plotNumberFormatter(self._probes.z[positionKey], None)
-        z   = self._probes.helper.zTxtDict["constZTxt"].\
-                    format(self._probes.helper.zTxtDict)
-        title  = r"{}$,$ {}".format(rho, z)
+            # Set logscale
+            try:
+                ax.set_yscale("log")
+            except ValueError as er:
+                if "no positive values" in er.args[0]:
+                    message = ("{0}{1}WARNING: Plot of FFT failed as no "
+                               "positive values{1}{0}".format("\n"*2, "!"*3))
+                    print(message)
+                    return
 
-        ax.set_title(title)
 
-        # Make the plot look nice
-        self._probes.helper.makePlotPretty(ax, rotation = 45)
-        fig.tight_layout()
+            # Set axis label
+            ax.set_xlabel(self._timeLabel)
+            ax.set_ylabel(self._varLabel)
 
-        if self._showPlot:
-            plt.show()
+            self._probes.helper.rhoTxtDict["value"] =\
+                    plotNumberFormatter(self._probes.rho[positionKey], None)
+            rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                        format(self._probes.helper.rhoTxtDict)
+            self._probes.helper.zTxtDict  ["value"] =\
+                    plotNumberFormatter(self._probes.z[positionKey], None)
+            z   = self._probes.helper.zTxtDict["constZTxt"].\
+                        format(self._probes.helper.zTxtDict)
+            title  = r"{}$,$ {}".format(rho, z)
 
-        if self._savePlot:
-            fileName = "{}.{}".\
-                format(os.path.join(self._savePath,\
-                       "zFFT_at_{}".format(positionKey)),\
-                       self._extension)
-            self._probes.helper.savePlot(fig, fileName)
+            ax.set_title(title)
 
-        plt.close(fig)
+            # Make the plot look nice
+            self._probes.helper.makePlotPretty(ax, rotation = 45)
+            fig.tight_layout()
+
+            if self._showPlot:
+                plt.show()
+
+            if self._savePlot:
+                if linear:
+                    linearOrNot = "Linear"
+                else:
+                    linearOrNot = ""
+                fileName = "{}{}.{}".\
+                    format(os.path.join(self._savePath,\
+                                "zFFT_at_{}".format(positionKey)),\
+                           linearOrNot,\
+                           self._extension)
+                self._probes.helper.savePlot(fig, fileName)
+
+            plt.close(fig)
+        #}}}
+
+        # Call the plot function
+        plotFunc(linear=False)
+
+        if plotLinear:
+            plotFunc(linear=True)
     #}}}
 #}}}
