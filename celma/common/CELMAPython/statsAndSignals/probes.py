@@ -484,6 +484,10 @@ class Probes(object):
             The fourier transformed of the z-direction for each time. Notice
             that the result will be the same for every z-index for a fixed x-
             and y-index.
+        zFFTLinearIndex : array
+            Index for the end of the linear phase. The end is here
+            defined as the first point where the max of all the modes is
+            90% of the max value.
         """
         #}}}
 
@@ -503,6 +507,20 @@ class Probes(object):
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
                     # Save the results and reshape the data
                     self.results[key]["zFFT"] = varFFT[:,0,0,:]
+
+        # Find the linear phase end for each key
+        for key in self.results.keys():
+            curMax = 0
+            # Skip the offset mode in range
+            for mode in range(1, self.results[key]["zFFT"].shape[-1]):
+                maxOfThisMode = np.max(self.results[key]["zFFT"][:,mode])
+                if maxOfThisMode > curMax:
+                    curMax      = maxOfThisMode
+                    modeWithMax = mode
+            # Find the first occurence where the mode is above or equatl 90%
+            self.results[key]["zFFTLinearIndex"] =\
+                int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
+                         self.results[key]["zFFT"][:,modeWithMax]*0.9)[0])
     #}}}
 #}}}
 
@@ -619,7 +637,9 @@ class PerpPlaneProbes(Probes):
         #{{{docstring
         """
         Get rho indices for nProbes located in an symmetric, equidistant way
-        around the input indexIn
+        around the input indexIn.
+
+        NOTE: Does not work if indexIn = 0.
 
         Parameters
         ----------

@@ -108,7 +108,8 @@ class DriversProbes(StatsAndSignalsDrivers):
 
         # Set the position of the FFT plot to be the middle of the probes
         keyPos = int(np.ceil(len(self._probes.probesKeys)/2))
-        self._positionKey = self._probes.probesKeys[keyPos]
+        # Counting from 0
+        self._positionKey = self._probes.probesKeys[keyPos-1]
     #}}}
 
     #{{{plotProbes
