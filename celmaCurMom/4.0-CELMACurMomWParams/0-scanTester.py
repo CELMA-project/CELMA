@@ -96,19 +96,24 @@ justPostProcess = True
 # Normal post-processors
 postProcessInit = False
 postProcessExp  = False
-postProcessLin  = True
+postProcessLin  = False
 postProcessTrub = False
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = False
+postProcessProbesAndEnergy = True
 
 #{{{Main options
 #{{{The scan
-B0 = [1.0e-1  , 9.0e-2  , 8.0e-2   , 7.0e-2 , 6.0e-2  , 5.0e-2  ]
-Lx = [4.8296  , 4.3466  , 3.8637   , 3.3807 , 2.8978  , 2.4148  ]
-Ly = [270.4579, 243.4121, 216.3663, 189.3205, 162.2747, 135.2289]
+B0 = [1.0e-1  , 9.0e-2  ]
+Lx = [4.8296  , 4.3466  ]
+Ly = [270.4579, 243.4121]
 scanParameters  = ["B0", "Lx", "Ly"]
+series_add = [\
+              ('input', 'B0', B0),\
+              ('geom' , 'Lx', Lx),\
+              ('geom' , 'Ly', Ly),\
+             ]
 #}}}
 #{{{The options for the post processing function
 saveFolderFunc         = "scanWTagSaveFunc"
@@ -129,7 +134,7 @@ yInd                   = ySlice
 var                    = "n"
 useSteadyStatePathFunc = True
 extension              = "png"
-useSubProcess          = True
+useSubProcess          = False
 #}}}
 #{{{File handeling options
 remove_old = False
@@ -170,13 +175,6 @@ fieldPlotterKwargs =\
          "axisEqualParallel": axisEqualParallel,\
          **commonPlotterKwargs                 ,\
         }
-#}}}
-#{{{Set the scan
-series_add = [\
-              ('input', 'B0', B0),\
-              ('geom' , 'Lx', Lx),\
-              ('geom' , 'Ly', Ly),\
-             ]
 #}}}
 #}}}
 
@@ -345,7 +343,7 @@ maxGradRhoFolder = expand_dmp_folders[0]
 aScanPath = expand_dmp_folders[0]
 # Set the temporal domain
 timestep  = [1e-10]
-nout     = [2]
+nout     = [10]
 # Name
 theRunName = "0-TestScan-2-linearPhase1"
 # Post processing options
@@ -408,24 +406,27 @@ if postProcessLinProfiles:
     theRunName = "0-TestScan-linearPhaseParProfiles"
     aScanPathProfiles = linear_dmp_folders[0]
 
-    _, _ = profileRun.execute_runs(\
-                                   remove_old               = remove_old,\
-                                   post_processing_function = curPostProcessor,\
-                                   # This function will be called every time after
-                                   # performing a run
-                                   post_process_after_every_run = True,\
-                                   # Below are the kwargs arguments being passed to
-                                   # the post processing function
-                                   # Switches
-                                   driverName     = "parDriver"   ,\
-                                   theRunName     = theRunName    ,\
-                                   # Below are the kwargs given to the
-                                   # restartFromFunc
-                                   aScanPath      = aScanPathProfiles,\
-                                   scanParameters = scanParameters,\
-                                   # Common kwargs
-                                   **fieldPlotterKwargs           ,\
-                                  )
+    _, _ = linearRun.execute_runs(\
+                                 remove_old               = remove_old,\
+                                 post_processing_function = curPostProcessor,\
+                                 # Declare dependencies
+                                 job_dependencies = PBS_ids,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = True,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName     = "parDriver"   ,\
+                                 tSlice         = tSlice        ,\
+                                 theRunName     = theRunName    ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
+                                )
 #}}}
 #}}}
 
@@ -493,24 +494,27 @@ if postProcessTurbProfiles:
     theRunName = "0-TestScan-turboPhaseParProfiles"
     aScanPathProfiles = turbo_dmp_folders[0]
 
-    _, _ = profileRun.execute_runs(\
-                                   remove_old               = remove_old,\
-                                   post_processing_function = curPostProcessor,\
-                                   # This function will be called every time after
-                                   # performing a run
-                                   post_process_after_every_run = True,\
-                                   # Below are the kwargs arguments being passed to
-                                   # the post processing function
-                                   # Switches
-                                   driverName     = "parDriver"   ,\
-                                   theRunName     = theRunName    ,\
-                                   # Below are the kwargs given to the
-                                   # restartFromFunc
-                                   aScanPath      = aScanPathProfiles,\
-                                   scanParameters = scanParameters,\
-                                   # Common kwargs
-                                   **fieldPlotterKwargs           ,\
-                                  )
+    _, _ = turboRun.execute_runs(\
+                                 remove_old               = remove_old      ,\
+                                 post_processing_function = curPostProcessor,\
+                                 # Declare dependencies
+                                 job_dependencies = PBS_ids         ,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = True,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName     = "parDriver"   ,\
+                                 tSlice         = tSlice        ,\
+                                 theRunName     = theRunName    ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                 # Common kwargs
+                                 **fieldPlotterKwargs           ,\
+                                )
 #}}}
 #}}}
 
@@ -520,6 +524,10 @@ if postProcessProbesAndEnergy:
                          turbo_dmp_folders[0]]
     theRunName = "0-TestScan-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
+
+    # Found from the overshoot at the energy plot
+    # Here just set to None
+    tIndSaturatedTurb = None
 
     _, _ = turboRun.execute_runs(\
                                  remove_old               = remove_old,\
