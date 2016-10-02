@@ -7,8 +7,8 @@ Copied from 4.0-CELMACurMomWParams
 Results:
 ========
 
-a1-KiwiFlat
------------
+a1-KiwiFlatMagField
+-------------------
 Checklist:
 [ ] - Fields steady state
 [ ] - All OK on expand
@@ -25,37 +25,99 @@ Linear : 500  timesteps
 Turbul : 5000 timesteps
 
 B0 = 0.1
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 1h52m
+a1-KiwiFlat-1-expand          - 4h2m
+a1-KiwiFlat-2-linearPhase1    - 13h21m
 a1-KiwiFlat-3-turbulentPhase1 -
 
 B0 = 0.09
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 1h51m
+a1-KiwiFlat-1-expand          - 3h20m
+a1-KiwiFlat-2-linearPhase1    - 8h31m
 a1-KiwiFlat-3-turbulentPhase1 -
 
 B0 = 0.08
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 1h50m
+a1-KiwiFlat-1-expand          - 2h50m
+a1-KiwiFlat-2-linearPhase1    - 11h4m
 a1-KiwiFlat-3-turbulentPhase1 -
 
 B0 = 0.07
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 1h40m
+a1-KiwiFlat-1-expand          - 3h12m
+a1-KiwiFlat-2-linearPhase1    - 10h58m
 a1-KiwiFlat-3-turbulentPhase1 -
 
 B0 = 0.06
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 1h33m
+a1-KiwiFlat-1-expand          - 3h9m
+a1-KiwiFlat-2-linearPhase1    - 12h53m
 a1-KiwiFlat-3-turbulentPhase1 -
 
 B0 = 0.05
-a1-KiwiFlat-0-initialize      -
-a1-KiwiFlat-1-expand          -
-a1-KiwiFlat-2-linearPhase1    -
+a1-KiwiFlat-0-initialize      - 2h2m
+a1-KiwiFlat-1-expand          - 1h49m
+a1-KiwiFlat-2-linearPhase1    - 10h17m
 a1-KiwiFlat-3-turbulentPhase1 -
+
+
+
+
+
+
+
+
+
+
+a1-KiwiFlatElTemp
+-----------------
+Checklist:
+[ ] - Fields steady state
+[ ] - All OK on expand
+[ ] - Linear modes: Radial and poloidal
+[ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
+[ ] - Profiles during linear - still grid size oscillation?
+[ ] - Profiles during turbulence - still grid size oscillation?
+[ ] - Time of energy overshoot
+[ ] - Probe data
+
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
+Te0 = 14.0
+a1-KiwiFlat-0-initialize      - 1h55m
+a1-KiwiFlat-1-expand          - 3h59m
+a1-KiwiFlat-2-linearPhase1    - 11h10m
+a1-KiwiFlat-3-turbulentPhase1 -
+
+Te0 = 12.0
+a1-KiwiFlat-0-initialize      - 1h41m
+a1-KiwiFlat-1-expand          - 3h39m
+a1-KiwiFlat-2-linearPhase1    - SUNDIALS 254 of 500 9h55m
+a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 2h3m
+
+Te0 = 10.0
+a1-KiwiFlat-0-initialize      - 1h34m
+a1-KiwiFlat-1-expand          - 4h9m
+a1-KiwiFlat-2-linearPhase1    - SUNDIALS 294 of 500 9h42m
+a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 0h37m
+
+Te0 = 8.0
+a1-KiwiFlat-0-initialize      - 1h39m
+a1-KiwiFlat-1-expand          - 4h19m
+a1-KiwiFlat-2-linearPhase1    - SUNDIALS 285 of 500 13h13m
+a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 3h46m
+
+Te0 = 6.0
+a1-KiwiFlat-0-initialize      - 1h47m
+a1-KiwiFlat-1-expand          - 4h32m
+a1-KiwiFlat-2-linearPhase1    - 11h15m
+a1-KiwiFlat-3-turbulentPhase1 -
+
+Te0 = 5.0
+a1-KiwiFlat-0-initialize      - 1h42m
+a1-KiwiFlat-1-expand          - 3h49m
+a1-KiwiFlat-2-linearPhase1    - SUNDIALS 285 of 500 11h29m
+a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 29m
