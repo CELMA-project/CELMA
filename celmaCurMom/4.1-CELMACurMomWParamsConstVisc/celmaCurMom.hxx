@@ -129,8 +129,8 @@ private:
     BoutReal n0;
     BoutReal Ti0,Te0;
     BoutReal B0;
-    BoutReal nuENUnormalized, nuINUnormalized;
     BoutReal Sn;    // Particle source amplitude
+    BoutReal nn;
     // *****************************************************************************
 
     // Output parameters

@@ -10,7 +10,7 @@ from bout_runners.bout_runners import basic_runner
 remove_old = True
 make       = False
 nproc      = 4
-B0 = [9e-2, 8e-2, 7e-2, 6e-2, 5e-2]
+nn         = [1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17]
 # =============================================================================
 
 
@@ -19,7 +19,7 @@ B0 = [9e-2, 8e-2, 7e-2, 6e-2, 5e-2]
 my_runs = basic_runner(\
             nproc      = nproc ,\
             # Copy the source file
-            additional = ('input', 'B0', B0),\
+            additional = ('input', 'nn', nn),\
             cpy_source = True  ,\
             make       = make  ,\
             )

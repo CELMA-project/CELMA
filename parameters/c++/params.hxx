@@ -33,8 +33,8 @@ private:
     BoutReal n0;
     BoutReal Ti0, Te0;
     BoutReal B0;
-    BoutReal nuENUnormalized, nuINUnormalized;
     BoutReal S;
+    BoutReal nn;
     // *****************************************************************************
 
     // Output parameters

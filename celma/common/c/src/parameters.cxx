@@ -24,24 +24,24 @@ Parameters::Parameters(BoutReal const &radius,
                        BoutReal const &Ti0,
                        BoutReal const &B0,
                        BoutReal const &S,
-                       BoutReal const &nuEN,
-                       BoutReal const &nuIN
+                       BoutReal const &nn
                        )
 : radius_(radius), len_(len),
   n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
-  nuEN_(nuEN), nuIN_(nuIN),
+  nn_(nn),
   separatorLen(57), separator(' '),
   nameWidth(23), numberWidth(15), unitsWidth(16),
   precision(4)
 {
     TRACE("Parameters::Parameters");
 
-    // Obtained from scipy.constants
+    // Obtained from scipy.constants (CODATA2014)
     BoutReal const eps0 = 8.854187817620389e-12;
     BoutReal const mu0  = 1.2566370614359173e-06;
     BoutReal const e    = 1.6021766208e-19;
     BoutReal const me   = 9.10938356e-31;
     BoutReal const mp   = 1.672621898e-27;
+    BoutReal const a0   = 5.2917721067e-11;
     int const N = 3; // Degrees of freedom
 
     BoutReal ne = n0_;
@@ -102,6 +102,13 @@ Parameters::Parameters(BoutReal const &radius,
      */
     nuII = (ni*pow(e, 4.0)*coloumbLog)/
            (12.0*pow(PI, 1.5)*pow(eps0, 2.0)*pow(mi, 0.5)*pow(Ti0J, 1.5));
+    /* Own calculations:
+     * See thesis
+     */
+    nuEN = (pow(2.0*PI, 0.5)*8.0*nn*pow(a0,2.0)*pow(Te0J, 0.5))/
+           (3.0*pow(me, 0.5));
+    nuIN = (8.0*nn*pow(PI, 0.5)*pow(a0,2.0)*pow(Ti0J, 0.5))/
+           (3.0*pow(mi, 0.5));
     /* Friedberg:
      * Plasma Physics and Fusion Energy - equation (9.52)
      * NOTE: These are probably not Maxwellian averaged!
@@ -131,8 +138,8 @@ Parameters::Parameters(BoutReal const &radius,
     // Normalized parameters
     nuEINorm  = nuEI/omCI;
     SNorm     = S/(n0_*omCI);
-    nuENNorm  = nuEN_/omCI;
-    nuINNorm  = nuIN_/omCI;
+    nuENNorm  = nuEN/omCI;
+    nuINNorm  = nuIN/omCI;
     /* Normalization can be found by looking at parallel momentum
      * equation
      */
@@ -180,10 +187,9 @@ void Parameters::printTable() const
     printVar("Ti0"   , Ti0_    , "eV"      );
     printVar("Te0"   , Te0_    , "eV"      );
     printVar("S"     , S_      , "m^-3s^-1");
-    printVar("nuEN"  , nuEN_   , "s^-1"    );
-    printVar("nuIN"  , nuIN_   , "s^-1"    );
     printVar("radius", radius_ , "m"       );
     printVar("len"   , len_    , "m"       );
+    printVar("nn"    , nn_     , "m^-3"    );
     output << std::string(separatorLen, '-') << std::endl;
     output << "CONVERTED UNITS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
@@ -240,8 +246,8 @@ void Parameters::printTable() const
     printVar("nuII"      , nuII      , "s^-1"       );
     printVar("nuIEApprox", nuIE      , "s^-1"       );
     printVar("nuEEApprox", nuEE      , "s^-1"       );
-    printVar("nuEN"      , nuEN_     , "s^-1"       );
-    printVar("nuIN"      , nuIN_     , "s^-1"       );
+    printVar("nuEN"      , nuEN      , "s^-1"       );
+    printVar("nuIN"      , nuIN      , "s^-1"       );
     printVar("eta0I"     , eta0I     , "kg m^-1s^-1");
     printVar("eta2I"     , eta2I     , "kg m^-1s^-1");
     printVar("eta4I"     , eta4I     , "kg m^-1s^-1");
