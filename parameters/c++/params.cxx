@@ -25,12 +25,10 @@ int Params::init(bool restarting) {
     input->get("Ti0"            , Ti0            , 0.0);
     input->get("B0"             , B0             , 0.0);
     input->get("S"              , S              , 0.0);
-    input->get("nuENUnormalized", nuENUnormalized, 0.0);
-    input->get("nuINUnormalized", nuINUnormalized, 0.0);
+    input->get("nn"             , nn             , 0.0);
     // ************************************************************************
 
-    Parameters params(radius, len, n0, Te0, Ti0, B0, S,
-                      nuENUnormalized, nuINUnormalized);
+    Parameters params(radius, len, n0, Te0, Ti0, B0, S, nn);
 
     // Get the variables
     // ************************************************************************

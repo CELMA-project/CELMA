@@ -84,6 +84,7 @@ MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 MES/integrals/volumeIntegral/VolIntCyl
 MES/integrals/surfaceEdgeIntegral/SurfEdgeIntCyl
 parameters/c++/params
+parameters/c++/data/input_*
 
 # Miscellaneous
 *delme*
