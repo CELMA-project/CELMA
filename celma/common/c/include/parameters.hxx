@@ -26,8 +26,7 @@ class Parameters
         BoutReal const Ti0_;    //<! Ion temperature [eV]
         BoutReal const B0_;     //<! Magnetic field [T]
         BoutReal const S_ ;     //<! Particle source [m^-3s^-1]
-        BoutReal const nuEN_;   //<! Electron neutral frequency
-        BoutReal const nuIN_;   //<! Ion neutral frequency
+        BoutReal const nn_;     //<! Neutral density [m^-3]
 
         // Converted
         BoutReal Ti0J;
@@ -58,6 +57,8 @@ class Parameters
         BoutReal nuIE;       //<! Ion electron frequency
         BoutReal nuEE;       //<! Electron electron frequency
         BoutReal nuII;       //<! Ion ion frequency
+        BoutReal nuEN;       //<! Electron neutral collision
+        BoutReal nuIN;       //<! Ion neutral collision
 
         // Additional parameters
         BoutReal beta;   //<! Plasma beta
@@ -74,8 +75,8 @@ class Parameters
 
         // Normalized parameters
         BoutReal nuEINorm;  //<! Normalized nuEI
-        BoutReal nuENNorm;  //<! Normalized nuEI
-        BoutReal nuINNorm;  //<! Normalized nuEI
+        BoutReal nuENNorm;  //<! Normalized nuEN
+        BoutReal nuINNorm;  //<! Normalized nuIN
         BoutReal SNorm;     //<! Normalized S
         BoutReal eta0INorm; //<! Normalized eta0I
         BoutReal eta2INorm; //<! Normalized eta2I
@@ -101,8 +102,7 @@ class Parameters
                    BoutReal const &Ti0,
                    BoutReal const &B0,
                    BoutReal const &S,
-                   BoutReal const &nuEN,
-                   BoutReal const &nuIN
+                   BoutReal const &nn
                    );
 
         //! Prints the table
