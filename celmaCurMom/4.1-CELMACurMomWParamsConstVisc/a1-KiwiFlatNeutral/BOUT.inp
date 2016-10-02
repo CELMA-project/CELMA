@@ -121,15 +121,14 @@ constViscHyper      = false
 # Input
 # =============================================================================
 [input]
-radius          = 0.025    # The length of x from boundary to boundary in [m]
-len             = 1.40     # The length of y from boundary to boundary in [m]
-n0              = 5.0e17   # m^-3
-Te0             = 14.0     # eV
-Ti0             = 7.0      # eV
-B0              = 1.0e-1   # T
-Sn              = 2.25e22  # m^-3s^-1
-nuENUnormalized = 0.0      # s^-1
-nuINUnormalized = 0.0      # s^-1
+radius = 0.025    # The length of x from boundary to boundary in [m]
+len    = 1.40     # The length of y from boundary to boundary in [m]
+n0     = 5.0e17   # m^-3
+Te0    = 14.0     # eV
+Ti0    = 7.0      # eV
+B0     = 1.0e-1   # T
+Sn     = 2.25e22  # m^-3s^-1
+nn     = 0.0      # m^-3
 # =============================================================================
 
 

@@ -3,6 +3,7 @@ Copied from 4.0-CELMACurMomWParams
 - Added const visc flag: Viscosities are being held constant in a scan. ALSO
   when changing B!
 - Better parameter display (as 5.0)
+- New implementation of neutral collision
 
 Results:
 ========
