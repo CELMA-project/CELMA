@@ -487,7 +487,7 @@ class Probes(object):
         zFFTLinearIndex : array
             Index for the end of the linear phase. The end is here
             defined as the first point where the max of all the modes is
-            90% of the max value.
+            15% of the max value.
         """
         #}}}
 
@@ -509,6 +509,7 @@ class Probes(object):
                     self.results[key]["zFFT"] = varFFT[:,0,0,:]
 
         # Find the linear phase end for each key
+        fracOfMax = 0.15
         for key in self.results.keys():
             curMax = 0
             # Skip the offset mode in range
@@ -517,10 +518,19 @@ class Probes(object):
                 if maxOfThisMode > curMax:
                     curMax      = maxOfThisMode
                     modeWithMax = mode
-            # Find the first occurence where the mode is above or equatl 90%
-            self.results[key]["zFFTLinearIndex"] =\
-                int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
-                         self.results[key]["zFFT"][:,modeWithMax]*0.9)[0])
+            # Find the first occurence where the mode is above or equal to 15%
+            try:
+                self.results[key]["zFFTLinearIndex"] =\
+                    int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
+                                 curMax*fracOfMax)[0])
+            except TypeError as er:
+                if "only length-1 arrays" in er.args[0]:
+                    # Need to subscript one more time
+                    self.results[key]["zFFTLinearIndex"] =\
+                        int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
+                                     curMax*fracOfMax)[0][0])
+                else:
+                    raise er
     #}}}
 #}}}
 
