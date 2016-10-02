@@ -106,10 +106,12 @@ postProcessProbesAndEnergy = False
 
 #{{{Main options
 #{{{The scan
-nn             = [1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17]
-scanParameters = ["nn"]
+len = [1       , 2       , 4       , 6       , 8       , 10       ]
+Ly  = [102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346]
+scanParameters  = ["len", "Ly"]
 series_add = [\
-              ('input', 'nn', nn),\
+              ('input', 'len', len),\
+              ('geom' , 'Ly' , Ly),\
              ]
 #}}}
 #{{{The options for the post processing function
@@ -135,7 +137,7 @@ useSubProcess          = True
 #}}}
 #{{{File handeling options
 remove_old = False
-directory  = "a1-KiwiFlatNeutral"
+directory  = "a1-KiwiFlatZ"
 make       = False
 cpy_source = True
 #}}}
@@ -194,7 +196,7 @@ else:
     curPostProcessor = None
 #{{{Init options
 # Name
-theRunName = "a1-KiwiFlatNeutral-0-initialize"
+theRunName = "a1-KiwiFlatZ-0-initialize"
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
@@ -280,7 +282,7 @@ useHyperViscAzVortD = [False]
 # From previous outputs
 aScanPath = init_dmp_folders[0]
 # Name
-theRunName = "a1-KiwiFlatNeutral-1-expand"
+theRunName = "a1-KiwiFlatZ-1-expand"
 # PBS options
 BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
@@ -386,7 +388,7 @@ aScanPath = expand_dmp_folders[0]
 timestep  = [1]
 nout     = [500]
 # Name
-theRunName = "a1-KiwiFlatNeutral-2-linearPhase1"
+theRunName = "a1-KiwiFlatZ-2-linearPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -458,7 +460,7 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a1-KiwiFlatNeutral-2-linearPhaseParProfiles"
+    theRunName = "a1-KiwiFlatZ-2-linearPhaseParProfiles"
     aScanPathProfiles = linear_dmp_folders[0]
     tSlice = slice(-30, None, 10)
 
@@ -499,7 +501,7 @@ useHyperViscAzVortD = [True]
 nout     = [5000]
 timestep = [1]
 # Name
-theRunName = "a1-KiwiFlatNeutral-3-turbulentPhase1"
+theRunName = "a1-KiwiFlatZ-3-turbulentPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -561,7 +563,7 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
 #{{{ If linear profiles are to be plotted
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a1-KiwiFlatNeutral-3-turbulentPhase1ParProfiles"
+    theRunName = "a1-KiwiFlatZ-3-turbulentPhase1ParProfiles"
     tSlice = slice(-30, None, 10)
     aScanPathProfiles = turbo_dmp_folders[0]
 
@@ -593,7 +595,7 @@ if postProcessTurbProfiles:
 if postProcessProbesAndEnergy:
     collectionFolders = [linear_dmp_folders[0],\
                          turbo_dmp_folders[0]]
-    theRunName = "a1-KiwiFlatNeutral-all-energyProbesPlot"
+    theRunName = "a1-KiwiFlatZ-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
 
     # Found from the overshoot at the energy plot
