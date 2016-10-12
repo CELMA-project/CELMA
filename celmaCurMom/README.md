@@ -15,7 +15,10 @@ and post-processing.
 * 2.3-CELMACurMomIMEXJParEdit3 - As 2.2, but removed the least stiff jPar terms
   to the diffusive part
 * 3.0-CELMACurMomWMonitors - As 1, but added monitors
-* 4.0-CELMACurMomWParams - As 2, but code input is now done consistently
+* 4.0-CELMACurMomWParams - As 2.0, but code input is now done consistently
   through radius, length, n0, B0, Te0, Ti0, and Sn
-* 5.0-CELMACurMomVisc - As 4, but added proper viscosity terms
+* 4.1-CELMACurMomWParamsConstVisc - As 4, but viscosity is kept constant
+* 5.0-CELMACurMomVisc - As 4.0, but added proper viscosity terms
+* 6.0-CELMAHoleOldVisc - As 4.0, but boundary conditions are so that there is a
+  "hole" in the sheath where the velocity is 0
 * common - python post processing and own implementations to BOUT++
