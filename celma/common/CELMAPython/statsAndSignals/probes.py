@@ -566,7 +566,7 @@ class PerpPlaneProbes(Probes):
         ----------
         varName : string
             Name of the variable.
-        paths : string
+        paths : iterable of strings
             What path to use when collecting the variable. Must be in
             ascending temporal order as the variable will be
             concatenated.
