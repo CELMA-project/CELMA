@@ -500,9 +500,9 @@ class Probes(object):
         for xInd in self._xInds:
             for yInd, actualYInd in zip(self._yInds, self._actualYInds):
                 varFFT =\
-                    np.abs(np.fft.fft(\
+                    np.fft.fft(\
                         self._var[:, xInd:xInd+1, yInd:yInd+1,:],\
-                        axis=-1))
+                        axis=-1)
                 for zInd in self._zInds:
                     key = "{},{},{}".format(xInd, actualYInd, zInd)
                     # Save the results and reshape the data
