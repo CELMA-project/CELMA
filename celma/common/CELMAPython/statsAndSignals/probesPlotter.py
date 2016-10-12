@@ -419,8 +419,8 @@ class PlotProbes(object):
                     linearClip = None
 
                 ax.plot(self._probes.time[clip:linearClip],\
-                        self._probes.results[positionKey]["zFFT"]\
-                            [clip:linearClip, modeNr],\
+                        np.abs(self._probes.results[positionKey]["zFFT"]\
+                            [clip:linearClip, modeNr]),\
                         color=colors[modeNr-1],\
                         label=r"$k_\theta={}$".format(modeNr),
                         alpha=self._alpha)
