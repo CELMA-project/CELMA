@@ -8,13 +8,14 @@ import numpy as np
 from boutdata import collect
 
 #{{{collectiveCollect
-def collectiveCollect(paths,\
-                      varStrings,\
-                      collectGhost=False,\
-                      tInd=None,\
-                      yInd=None,\
-                      xInd=None,\
-                      zInd=None):
+def collectiveCollect(paths               ,\
+                      varStrings          ,\
+                      collectGhost = False,\
+                      tInd         = None ,\
+                      yInd         = None ,\
+                      xInd         = None ,\
+                      zInd         = None):
+    #{{{docstring
     """
     Collects variables from several paths
 
@@ -45,6 +46,7 @@ def collectiveCollect(paths,\
     data : dict
         A dictionary of the concatenated variables
     """
+    #}}}
 
     # Initialize the data
     data = {var: None for var in varStrings}
