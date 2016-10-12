@@ -100,8 +100,9 @@ postProcessLin  = False
 postProcessTrub = False
 # Extra post-processors
 postProcessLinProfiles     = False
+postProcessGrowthRates     = True
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = True
+postProcessProbesAndEnergy = False
 
 #{{{Main options
 #{{{The scan
@@ -399,6 +400,40 @@ linear_dmp_folders, _ = linearRun.execute_runs(\
                                  **fieldPlotterKwargs           ,\
                                 )
 
+#}}}
+#{{{ If growth rates are to be plotted
+if postProcessGrowthRates:
+    scanParam  = "B0"
+    theRunName = "0-TestScan-all-growthRates"
+    curPostProcessor = postBoutRunner
+
+    _, _ = linearRun.execute_runs(\
+                                 remove_old               = remove_old,\
+                                 post_processing_function = curPostProcessor,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = False,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName       = "plotGrowthRates",\
+                                 # PostProcessDriver input
+                                 **commonPlotterKwargs                 ,\
+                                 theRunName        = theRunName        ,\
+                                 # StatsAndSignalsDrivers input
+                                 paths            = linear_dmp_folders,\
+                                 # DriversProbes input
+                                 var              = var                  ,\
+                                 scanParam        = scanParam            ,\
+                                 yInd             = yInd                 ,\
+                                 nProbes          = nProbes              ,\
+                                 steadyStatePaths = expand_dmp_folders   ,\
+                                 maxMode          = maxMode              ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                )
 #}}}
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
