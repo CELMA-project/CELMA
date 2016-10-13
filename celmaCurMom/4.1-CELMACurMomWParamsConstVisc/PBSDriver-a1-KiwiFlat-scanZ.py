@@ -106,11 +106,12 @@ postProcessProbesAndEnergy = False
 
 #{{{Main options
 #{{{The scan
-len = [1       , 2       , 4       , 6       , 8       , 10       ]
-Ly  = [102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346]
+# NOTE: Calling this len will overshadow the len() function
+length = [1       , 2       , 4       , 6       , 8       , 10       ]
+Ly     = [102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346]
 scanParameters  = ["len", "Ly"]
 series_add = [\
-              ('input', 'len', len),\
+              ('input', 'len', length),\
               ('geom' , 'Ly' , Ly),\
              ]
 #}}}
@@ -208,7 +209,7 @@ ownFilterType = "none"
 #Switches
 useHyperViscAzVortD = [False]
 # Specify the numbers used for the BOUT runs
-BOUT_walltime         = '05:00:00'
+BOUT_walltime         = '08:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '0:29:00'
@@ -284,7 +285,7 @@ aScanPath = init_dmp_folders[0]
 # Name
 theRunName = "a1-KiwiFlatZ-1-expand"
 # PBS options
-BOUT_walltime         = '06:00:00'
+BOUT_walltime         = '08:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '0:29:00'
