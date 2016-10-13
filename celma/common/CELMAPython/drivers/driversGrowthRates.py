@@ -96,17 +96,15 @@ FIXME:
                          )
 
             # Initialize the probes in order to calculate
-            curProbe.initializeInputOutput(self._probes.radialProbesIndices,\
-                                           [self._probes.yInd],\
+            curProbe.initializeInputOutput(curProbe.radialProbesIndices,\
+                                           [curProbe.yInd],\
                                            [0])
 
             # Calculate the FFT
             curProbe.calcFFTs()
 
-            import pdb; pdb.set_trace()
-            # CHECKME
             # Get the positionKey of the probe
-            positionKey = curProbe.results.keys()
+            positionKey = list(curProbe.results.keys())[0]
 
             # Obtain the current scan value
             scanValue = path.split("_")
@@ -118,6 +116,12 @@ FIXME:
             # We will also clip so that approximately only the linear
             # mode is present (less data to process)
             linClip = curProbe.results[positionKey]["zFFTLinearIndex"]
+            if linClip >= initClip:
+                message = ("{0}{1}WARNING: "\
+                           "Could not find a proper startpoint for the "
+                           "linear stage{1}{0}")
+                linClip = None
+                print(message.format("\n"*2, "!"*5))
             # Clipping modes and time
             modes = curProbe.results[positionKey]["zFFT"][initClip:linClip, :]
             time  = curProbe.time[initClip:linClip]
