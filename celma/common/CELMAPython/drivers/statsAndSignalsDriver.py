@@ -42,8 +42,8 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
         self._paths   = paths
         self._pltSize = (12, 9)
 
-        # Convert the paths
-        if self._scanParameters:
+        # Convert the paths (if only one of them)
+        if self._scanParameters and type(self._dmp_folder) != list:
             self._paths = [self._convertToCurrentScanParameters(path)
                            for path in paths]
     #}}}
