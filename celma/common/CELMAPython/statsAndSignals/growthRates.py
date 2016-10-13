@@ -125,7 +125,7 @@ def calcGrowthRate(modes, time, maxMode = 7):
 
     Returns
     -------
-    results : dict
+    results : [dict | None]
         A dictionary of dictionary. The top level key is the mode number
         and the bottom level keys are
             * angFreq       - The angular frequency
@@ -134,6 +134,7 @@ def calcGrowthRate(modes, time, maxMode = 7):
             * growthRateStd - The standard deviation of the growth rate
             * startTime     - Start time of the linear segment
             * endTime       - End time of the linear segment
+        None is returned if exception occured
     """
     #}}}
 
@@ -149,6 +150,12 @@ def calcGrowthRate(modes, time, maxMode = 7):
     # Bin the time axis
     binSize = 20
     bins = np.arange(0,len(modes[:,0]),binSize)
+
+    if bins.shape[0] == 0:
+        message = ("{0}{1}WARNING: "\
+                   "No proper bins could be made, returning None{1}{0}")
+        print(message.format("\n"*2, "!"*5))
+        return None
 
     # Finding mode number
     results = {}

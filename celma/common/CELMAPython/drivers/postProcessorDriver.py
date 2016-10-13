@@ -234,9 +234,6 @@ class PostProcessorDriver(object):
         # Get the values from the current self._dmp_folder
         values = {}
         for scanParameter in self._scanParameters:
-            # FIXME: Delme: self._dmp_folder is a list if
-            #        post_processing_after_each_run is false
-            import pdb; pdb.set_trace()
             hits = [m.start() for m in \
                     re.finditer(scanParameter, self._dmp_folder)]
             # Choose the first hit to get the value from (again we assume
