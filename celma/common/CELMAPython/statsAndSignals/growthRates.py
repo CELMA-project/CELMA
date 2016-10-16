@@ -138,12 +138,24 @@ def calcGrowthRate(modes, time, maxMode = 7):
     """
     #}}}
 
+    #{{{ NOTE: We are dealing with a real signal:
+    #          As the fourier transform breaks the signal up in cisoids
+    #          there will be one part of the signal in the positive
+    #          rotating ciscoid and one in the negative (negative
+    #          frequencies) for a given mode number. We need to take
+    #          into account both in order to calculate the amplitude. As
+    #          the signal is real only one of the phase sifts are
+    #          needed. Notice that for a real signal the imaginary part
+    #          occurs as a complex conjugate pair
+    # http://dsp.stackexchange.com/questions/431/what-is-the-physical-significance-of-negative-frequencies?noredirect=1&lq=1
+    # http://dsp.stackexchange.com/questions/4825/why-is-the-fft-mirrored
+    #}}}
+
+    # Number of points
+    N = modes.shape[1]
+
     # Select modes from 1 to maxMode+1 (exclude the offset mode)
     modes = modes[:, 1:maxMode+1]
-
-    # The absolute value is the magnitude of the signal
-    # http://dsp.stackexchange.com/questions/23994/meaning-of-real-and-imaginary-part-of-fourier-transform-of-a-signal
-    absModes = np.abs(modes)
 
     # This is part of the algorithm used to detect the straigth line in
     # the logarithm of the signal
@@ -160,8 +172,9 @@ def calcGrowthRate(modes, time, maxMode = 7):
     # Finding mode number
     results = {}
 
-    # Transpose in order to loop over the modes
-    for modeNr, curMode in enumerate(absModes.transpose()):
+    # Start on 1 as we have neglegted the DC mode, +1 as range excludes
+    # the last point
+    for mNr in range(1, modes.shape[1]+1):
         # Place holders for the growth rates and the mean square error
         growthRates  = []
         startIndices = []
@@ -169,12 +182,15 @@ def calcGrowthRate(modes, time, maxMode = 7):
         # Loop over the bins, start from 1 as we will index b-1
         for bNr, b in enumerate(range(1, len(bins))):
             # Find the growth rate of the current bin
-            startIndex    = bins[b-1]
-            endIndex      = bins[b]
-            curTime       = time[startIndex: endIndex]
-            modeAtCurTime = curMode[startIndex: endIndex]
+            startIndex = bins[b-1]
+            endIndex   = bins[b]
+            curTime    = time[startIndex: endIndex]
+            # Magnitude of the signal
+            # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
+            modeMag = (np.abs(mode[startIndex: endIndex][ mNr]) +\
+                       np.abs(mode[startIndex: endIndex][-mNr]))/N
 
-            growthRate, _ = linRegOfExp(curTime, modeAtCurTime)
+            growthRate, _ = linRegOfExp(curTime, modeMag)
             growthRates .append(growthRate)
             startIndices.append(startIndex)
 
@@ -208,10 +224,12 @@ def calcGrowthRate(modes, time, maxMode = 7):
                 hits += 1
             else:
                 if hits >= 4:
-                    endIndex           = bins[int(startIndex/binSize) + hits]
-                    curTime            = time[startIndex: endIndex]
-                    modeAtCurTime      = curMode[startIndex: endIndex]
-                    growthRate, sigmaB = linRegOfExp(curTime, modeAtCurTime)
+                    endIndex = bins[int(startIndex/binSize) + hits]
+                    curTime  = time[startIndex: endIndex]
+                    modeMag  = \
+                        (np.abs(mode[startIndex: endIndex][ mNr]) +\
+                         np.abs(mode[startIndex: endIndex][-mNr]))/N
+                    growthRate, sigmaB = linRegOfExp(curTime, modeMag)
                     growthRates.append(growthRate)
                     sigmaBs    .append(sigmaB)
                     # We will currently use indices for the start times
@@ -226,10 +244,12 @@ def calcGrowthRate(modes, time, maxMode = 7):
 
         # If the last element in the growthRates gave a hit
         if hits >= 4:
-            endIndex           = bins[int(startIndex/binSize) + hits]
-            curTime            = time[startIndex: endIndex]
-            modeAtCurTime      = curMode[startIndex: endIndex]
-            growthRate, sigmaB = linRegOfExp(curTime, modeAtCurTime)
+            endIndex = bins[int(startIndex/binSize) + hits]
+            curTime  = time[startIndex: endIndex]
+            modeMag  = \
+                (np.abs(mode[startIndex: endIndex][ mNr]) +\
+                 np.abs(mode[startIndex: endIndex][-mNr]))/N
+            growthRate, sigmaB = linRegOfExp(curTime, modeMag)
             growthRates.append(growthRate)
             sigmaBs    .append(sigmaB)
             # We will currently use indices for the start times
@@ -247,21 +267,21 @@ def calcGrowthRate(modes, time, maxMode = 7):
                 print(message.format("\n"*2, "!"*5, len(growthRates)))
 
             # Select the first real growth rate
-            results[modeNr]["growthRate"]    = growthRates[0]
-            results[modeNr]["growthRateStd"] = sigmaBs    [0]
-            results[modeNr]["startIndex"]    = startTimes [0]
-            results[modeNr]["endIndex"]      = endTimes   [0]
+            results[mNr]["growthRate"]    = growthRates[0]
+            results[mNr]["growthRateStd"] = sigmaBs    [0]
+            results[mNr]["startIndex"]    = startTimes [0]
+            results[mNr]["endIndex"]      = endTimes   [0]
         else:
-            results[modeNr] = None
+            results[mNr] = None
         #}}}
 
         #{{{Finding the real part
         # If no growth rate was found
-        if results[modeNr] is None:
+        if results[mNr] is None:
             continue
         # Remember: The startTime and endTime are currently indices
-        startIndex = results[modeNr]["startTime"]
-        endIndex   = results[modeNr]["endTime"]
+        startIndex = results[mNr]["startTime"]
+        endIndex   = results[mNr]["endTime"]
         deltaT     = time[1] - time[0]
         # Create the place holder for the angular frequency
         angularFreq = np.zeros(endIndex-startIndex)
@@ -270,20 +290,28 @@ def calcGrowthRate(modes, time, maxMode = 7):
         # endIndex+1 to include the last point
         for nr, i in enumerate(range(startIndex+1, endIndex+1)):
             # atan2 in [-pi, pi]
-            prevPhaseShift = np.arctan2(curMode[i-1].imag, curMode[i-1].real)
-            curPhaseShift  = np.arctan2(curMode[i  ].imag, curMode[i  ].real)
+            prevPhaseShift =\
+                np.arctan2(mode[i-1][mNr].imag, mode[i-1][mNr].real)
+            curPhaseShift  =\
+                np.arctan2(mode[i  ][mNr].imag, mode[i  ][mNr].real)
             # phaseShiftDiff in [0, 2*pi]
-            phaseShiftDiff = curPhaseShift - prevPhaseShift
-            # Ensure that no wrap around has occured
-            if max(prevPhaseShift,curPhaseShift)+abs(phaseShiftDiff) > 2*np.pi:
-                # Wrap around occured, adding 2*pi to smallest and
-                # recalculating
-                if prevPhaseShift > curPhaseShift:
-                    curPhaseShift += 2*np.pi
+            phaseShiftDiff = prevPhaseShift - curPhaseShift
+            if curPhaseShift*prevPhaseShift < 0\
+               and abs(curPhaseShift) + abs(prevPhaseShift) > np.pi:
+                if curPhaseShift < 0:
+                    # We are going from pi to -pi
+                    # In order to avoid the discontinuity, we turn curPhaseShift
+                    # and prevPhaseShift to the opposite quadrants
+                    tempCurPhase   = np.pi + curPhaseShift
+                    tempPrevPhase  = np.pi - prevPhaseShift
+                    phaseShiftDiff = -(tempCurPhase + tempPrevPhase)
                 else:
-                    prevPhaseShift += 2*np.pi
-                # Recalculate the diff
-                phaseShiftDiff = curPhaseShift - prevPhaseShift
+                    # We are going from -pi to pi
+                    # In order to avoid the discontinuity, we turn curPhaseShift
+                    # and prevPhaseShift to the opposite quadrants
+                    tempCurPhase   = np.pi - curPhaseShift
+                    tempPrevPhase  = np.pi + prevPhaseShift
+                    phaseShiftDiff = tempCurPhase + tempPrevPhase
 
             # The angular speed (angular frequency) has units rad/s.
             # Remember that if angularFreq*t = 2*pi the perturbation has
@@ -293,8 +321,8 @@ def calcGrowthRate(modes, time, maxMode = 7):
         # Calculate the mean and the spread (the standard deviation), note
         # that numpys std misses a minus 1 in the denominator, but as N is
         # high, this is negligible
-        results[modeNr]["angFreq"]    = angularFreq.mean()
-        results[modeNr]["angFreqStd"] = angularFreq.std()
+        results[mNr]["angFreq"]    = angularFreq.mean()
+        results[mNr]["angFreqStd"] = angularFreq.std()
         #}}}
 
         return results
