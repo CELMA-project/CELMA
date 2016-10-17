@@ -11,6 +11,7 @@ from .drivers1D2D         import Drivers1D2D
 from .driversProbes       import DriversProbes
 from .driversEnergy       import DriversEnergy
 from .driversEnergyProbes import DriversEnergyProbes
+from .driversGrowthRates  import DriversGrowthRates
 
 #{{{postBoutRunner
 def postBoutRunner(path, driverName = None, **kwargs):
@@ -99,6 +100,13 @@ def postBoutRunner(path, driverName = None, **kwargs):
         driver = DriversProbes(path, **kwargs)
         # Call the driver
         driver.plotProbes()
+    #}}}
+    #{{{DriversGrowthRates
+    elif driverName == "plotGrowthRates":
+        # Make the driver object
+        driver = DriversGrowthRates(path, **kwargs)
+        # Call the driver
+        driver.plotGrowthRates()
     #}}}
     else:
         message = "The driverName {} is not implemented".format(driverName)
