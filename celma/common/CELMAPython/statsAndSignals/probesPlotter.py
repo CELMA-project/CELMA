@@ -409,6 +409,9 @@ class PlotProbes(object):
             ax  = fig.add_subplot(111)
             colors = seqCMap2(np.linspace(0, 1, maxMode))
 
+            # Number of points
+            N = self._probes.results[positionKey]["zFFT"].shape[1]
+
             # Skip the offset mode
             for modeNr in range(1, maxMode+1):
                 # Clip where the modes has been added
@@ -418,9 +421,30 @@ class PlotProbes(object):
                 else:
                     linearClip = None
 
+                #{{{ NOTE: We are dealing with a real signal:
+                #          As the fourier transform breaks the signal up
+                #          in cisoids there will be one part of the
+                #          signal in the positive rotating ciscoid and
+                #          one in the negative (negative frequencies)
+                #          for a given mode number. We need to take into
+                #          account both in order to calculate the
+                #          amplitude. As the signal is real only one of
+                #          the phase sifts are needed. Notice that for a
+                #          real signal the imaginary part occurs as a
+                #          complex conjugate pair
+                # http://dsp.stackexchange.com/questions/431/what-is-the-physical-significance-of-negative-frequencies?noredirect=1&lq=1
+                # http://dsp.stackexchange.com/questions/4825/why-is-the-fft-mirrored
+                #}}}
+                # Magnitude of the signal
+                # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
+                posFreq = np.abs(self._probes.results[positionKey]["zFFT"]\
+                            [clip:linearClip, modeNr ])
+                negFreq = np.abs(self._probes.results[positionKey]["zFFT"]\
+                            [clip:linearClip, -modeNr])
+                modeMag = (posFreq + negFreq)/N
+
                 ax.plot(self._probes.time[clip:linearClip],\
-                        np.abs(self._probes.results[positionKey]["zFFT"]\
-                            [clip:linearClip, modeNr]),\
+                        modeMag,\
                         color=colors[modeNr-1],\
                         label=r"$k_\theta={}$".format(modeNr),
                         alpha=self._alpha)
