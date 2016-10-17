@@ -514,21 +514,28 @@ class Probes(object):
             curMax = 0
             # Skip the offset mode in range
             for mode in range(1, self.results[key]["zFFT"].shape[-1]):
-                maxOfThisMode = np.max(self.results[key]["zFFT"][:,mode])
+                # Do not take into account the three first time steps
+                # (which is after the initial perturbation)
+                clip = 3
+                maxOfThisMode = np.max(np.abs(self.results[key]["zFFT"][clip:,mode]))
                 if maxOfThisMode > curMax:
                     curMax      = maxOfThisMode
                     modeWithMax = mode
             # Find the first occurence where the mode is above or equal to 15%
             try:
                 self.results[key]["zFFTLinearIndex"] =\
-                    int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
-                                 curMax*fracOfMax)[0])
+                    int(np.where(np.abs(\
+                        self.results[key]["zFFT"][clip:,modeWithMax]) >\
+                        curMax*fracOfMax\
+                    )[0])
             except TypeError as er:
                 if "only length-1 arrays" in er.args[0]:
                     # Need to subscript one more time
                     self.results[key]["zFFTLinearIndex"] =\
-                        int(np.where(self.results[key]["zFFT"][:,modeWithMax] >\
-                                     curMax*fracOfMax)[0][0])
+                        int(np.where(np.abs(\
+                            self.results[key]["zFFT"][clip:,modeWithMax]) >\
+                            curMax*fracOfMax\
+                        )[0][0])
                 else:
                     raise er
     #}}}
