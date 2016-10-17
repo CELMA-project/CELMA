@@ -12,7 +12,7 @@ import numpy as np
 #{{{DriversProbes
 class DriversProbes(StatsAndSignalsDrivers):
     """
-    Class which handles the stats and signal data.
+    Class which handles the probe data.
     """
 
     #{{{Constructor
@@ -38,6 +38,10 @@ class DriversProbes(StatsAndSignalsDrivers):
             See the constructor of StatsAndSignalsDrivers for details.
         var : str
             Variable to collect
+        tIndSaturatedTurb : int
+            Time index where saturated turbulence starts (this is needed
+            in order to filter away the initial energy overshoot from
+            the statistics)
         yInd : int
             yInd of the simulation data to use
         nProbes : int
@@ -81,17 +85,17 @@ class DriversProbes(StatsAndSignalsDrivers):
         """ Calculates the statistics of the probes """
         # Create the probes
         self._probes = PerpPlaneProbes(\
-                      self._var                                    ,\
-                      paths               = self._paths            ,\
-                      yInd                = self._yInd             ,\
-                      nProbes             = self._nProbes          ,\
-                      convertToPhysical   = self._convertToPhysical,\
-                      steadyStatePath     = self._steadyStatePath  ,\
-                      tIndSaturatedTurb   = self._tIndSaturatedTurb,\
-                      radialProbesIndices = None                   ,\
-                     )
+                         self._var                                    ,\
+                         paths               = self._paths            ,\
+                         yInd                = self._yInd             ,\
+                         nProbes             = self._nProbes          ,\
+                         convertToPhysical   = self._convertToPhysical,\
+                         steadyStatePath     = self._steadyStatePath  ,\
+                         tIndSaturatedTurb   = self._tIndSaturatedTurb,\
+                         radialProbesIndices = None                   ,\
+                       )
 
-        # Create the probe
+        # Initialize the probes in order to calculate
         self._probes.initializeInputOutput(self._probes.radialProbesIndices,\
                                      [self._probes.yInd],\
                                      [0])
