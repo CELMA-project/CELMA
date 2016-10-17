@@ -82,7 +82,6 @@ FIXME:
         self._dmp_folder.sort()
         self._steadyStatePaths.sort()
         for path, steadyStatePath in zip(self._paths, self._steadyStatePaths):
-            import pdb; pdb.set_trace()
             # FIXME: The loop is parallelizable
             # We only find the growth rates at position of highest gradient,
             # as we from theory expect the highest growth rates to be there
@@ -137,6 +136,7 @@ FIXME:
                     calcGrowthRate(modes   = modes,\
                                    time    = time ,\
                                    maxMode = self._maxMode)
+        # FIXME:
         import pickle
         with open('data.pickle', 'wb') as f:
             # Pickle the 'data' dictionary using the highest
