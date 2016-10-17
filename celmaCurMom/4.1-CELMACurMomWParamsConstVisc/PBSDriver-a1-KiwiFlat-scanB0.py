@@ -593,7 +593,6 @@ if postProcessTurbProfiles:
 #}}}
 #}}}
 
-
 #{{{Growth rates (run this driver after all, as we need the collectionFolders)
 if postProcessGrowthRates:
     scanParam  = "B0"
@@ -604,7 +603,6 @@ if postProcessGrowthRates:
     # in collectiveCollect
     collectionFolders = list(zip(linear_dmp_folders, turbo_dmp_folders))
 
-    # It is arbitrary that we use the linearRun runner here
     _, _ = linearRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
