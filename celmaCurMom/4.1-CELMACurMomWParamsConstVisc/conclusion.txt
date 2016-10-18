@@ -59,7 +59,7 @@ B0 = 0.05
 a1-KiwiFlatMagField-0-initialize      - 2h2m
 a1-KiwiFlatMagField-1-expand          - 1h49m
 a1-KiwiFlatMagField-2-linearPhase1    - 10h17m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 964 of 5000, something went wrong...rerunning
+a1-KiwiFlatMagField-3-turbulentPhase1 - 60h28m
 
 
 
@@ -208,38 +208,38 @@ Turbul : 5000 timesteps
 z = 1
 a1-KiwiFlatZ-0-initialize      - 5h22m
 a1-KiwiFlatZ-1-expand          - 7h19m
-a1-KiwiFlatZ-2-linearPhase1    -
+a1-KiwiFlatZ-2-linearPhase1    - 29h42m
 a1-KiwiFlatZ-3-turbulentPhase1 -
 
 z = 2
 a1-KiwiFlatZ-0-initialize      - 1h43m
 a1-KiwiFlatZ-1-expand          - 1h22m
 a1-KiwiFlatZ-2-linearPhase1    - 4h4m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - 40h52m
 
 z = 4
 a1-KiwiFlatZ-0-initialize      - 24m
 a1-KiwiFlatZ-1-expand          - 40m
 a1-KiwiFlatZ-2-linearPhase1    - 3h35m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - 22h35m
 
 z = 6
 a1-KiwiFlatZ-0-initialize      - 13m
 a1-KiwiFlatZ-1-expand          - 28m
 a1-KiwiFlatZ-2-linearPhase1    - 2h6m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - 16h35m
 
 z = 8
 a1-KiwiFlatZ-0-initialize      - 9m
 a1-KiwiFlatZ-1-expand          - 9m
 a1-KiwiFlatZ-2-linearPhase1    - 1h5m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - 11h33m
 
 z = 10
 a1-KiwiFlatZ-0-initialize      - 7m
 a1-KiwiFlatZ-1-expand          - 17m
 a1-KiwiFlatZ-2-linearPhase1    - 1h1m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - 13h20m
 
 
 
