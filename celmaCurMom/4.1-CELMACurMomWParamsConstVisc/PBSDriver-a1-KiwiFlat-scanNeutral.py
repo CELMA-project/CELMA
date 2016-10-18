@@ -93,16 +93,17 @@ def restartFromFunc(dmp_folder     = None,\
 #}}}
 
 # If you just want to post-process
-justPostProcess = False
+justPostProcess = True
 # Normal post-processors
-postProcessInit = False
-postProcessExp  = False
-postProcessLin  = False
-postProcessTrub = False
+postProcessInit = True
+postProcessExp  = True
+postProcessLin  = True
+postProcessTrub = True
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = False
+postProcessProbesAndEnergy = True
+postProcessGrowthRates     = False
 
 #{{{Main options
 #{{{The scan
@@ -453,7 +454,6 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  # Common kwargs
                                  **fieldPlotterKwargs           ,\
                                 )
-
 #}}}
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
@@ -589,7 +589,46 @@ if postProcessTurbProfiles:
 #}}}
 #}}}
 
-#{{{ Probes and energy (run this driver after all, as we need the collectionFolders)
+#{{{Growth rates (run this driver after all, as we need the collectionFolders)
+if postProcessGrowthRates:
+    scanParam  = "B0"
+    theRunName = "a1-KiwiFlatNeutral-growthRates"
+    curPostProcessor = postBoutRunner
+
+    # Make a list of list, where each sublist will be used as the paths
+    # in collectiveCollect
+    collectionFolders = list(zip(linear_dmp_folders, turbo_dmp_folders))
+
+    _, _ = linearRun.execute_runs(\
+                                 remove_old               = remove_old,\
+                                 post_processing_function = curPostProcessor,\
+                                 # This function will be called every time after
+                                 # performing a run
+                                 post_process_after_every_run = False,\
+                                 # Below are the kwargs arguments being passed to
+                                 # the post processing function
+                                 # Switches
+                                 driverName       = "plotGrowthRates"  ,\
+                                 # PostProcessDriver input
+                                 **commonPlotterKwargs                 ,\
+                                 theRunName       = theRunName         ,\
+                                 # StatsAndSignalsDrivers input
+                                 paths            = collectionFolders  ,\
+                                 # DriversProbes input
+                                 var              = var                  ,\
+                                 scanParam        = scanParam            ,\
+                                 yInd             = yInd                 ,\
+                                 nProbes          = nProbes              ,\
+                                 steadyStatePaths = expand_dmp_folders   ,\
+                                 maxMode          = maxMode              ,\
+                                 # Below are the kwargs given to the
+                                 # restartFromFunc
+                                 aScanPath      = aScanPath     ,\
+                                 scanParameters = scanParameters,\
+                                )
+#}}}
+
+#{{{Probes and energy (run this driver after all, as we need the collectionFolders)
 if postProcessProbesAndEnergy:
     collectionFolders = [linear_dmp_folders[0],\
                          turbo_dmp_folders[0]]
