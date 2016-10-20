@@ -5,7 +5,10 @@ Contains functions to calculate and plot the angular frequency and
 growth rate of a time trace of a spatial FFT
 """
 
+from ..plotHelpers import PlotHelper
 import numpy as np
+import matplotlib.pylab as plt
+from matplotlib.gridspec import GridSpec
 
 #{{{linRegOfExp
 def linRegOfExp(x,y):
@@ -374,6 +377,139 @@ FIXME: Implement
             * startTime     - Start time of the linear segment
             * endTime       - End time of the linear segment
     """
+
+    # FIXME: ALWAYS NORMALIZED WITH OMCI
+    # FIXME: Consider make this a class
+    showPlot = False
+    savePlot = True
+    extension = "png"
+
+    errorbarOptions = {"color"     :"k",\
+                       "fmt"       :"o",\
+                       "fmt"       :"o",\
+                       "markersize":10 ,\
+                       "ecolor"    :"k",\
+                       "capsize"   :7  ,\
+                       "elinewidth":3  ,\
+                       }
+
+    figSize = (9,12)
+    markeredgewidth = 3
+
+    i = 0
+    # Must cast to list as dictkeys are not subsrciptable
+    while gR[list(gR.keys())[i]] is not None:
+        i += 1
+        break
+
+    scanName = list(gR.keys())[i].split("=")[0]
+    if scanName == "B0":
+        titleName = "$B_0$"
+    # FIXME: Add different titleNames
+    else:
+        titleName = "${}$".format(scanName)
+
+    # The scan is stored in the outermost dict
+    # The modeNumber is stored in the innermost dict
+    if growthRatesAsAFunctionOf == "scan":
+        firstIt  = gR[list(gR.keys())[i]].keys()
+        secondIt = gR.keys()
+    elif growthRatesAsAFunctionOf == "modeNumber":
+        firstIt  = gR.keys()
+        secondIt = gR[list(gR.keys())[i]].keys()
+    else:
+        possibilities = ["scan", "modeNumber"]
+        message  = "'{}' not valid as 'growthRatesAsAFunctionOf'\n"
+        message += "Possibilties are:\n"
+        for possibility in possibilities:
+            message += possibility + "\n"
+        raise ValueError(message)
+
+
+    # Loop through the figures
+    for first in firstIt():
+        fig = plt.figure(figsize = figSize)
+        gs  = GridSpec(nrows=2, ncols=1)
+
+        imAx   = fig.add_subplot(gs[0])
+        realAx = fig.add_subplot(gs[1], sharex=imAx)
+
+        if growthRatesAsAFunctionOf == "modeNumberr":
+            scanVal = float(first.split("=")[1])
+
+        # Placeholder for xData (used to format ticks)
+        xData = []
+
+        # Loop through the points in the plot
+        for mNr in gR[list(gR.keys())[i]].keys():
+            if growthRatesAsAFunctionOf == "modeNumberr":
+                if gR[first][second] is None:
+                    print("\nWarning: Modenumber {} in {} is empty".\
+                          format(first, second))
+                    continue
+            elif growthRatesAsAFunctionOf == "scan":
+                if gR[second][first] is None:
+                    print("\nWarning: Modenumber {} in {} is empty".\
+                          format(second, first))
+                    continue
+
+            if growthRatesAsAFunctionOf == "scan":
+                scanVal = float(second.split("=")[1])
+
+            xData.append(mNr)
+            # Growth rates
+            # FIXME: SecondIt on x
+            (_, caps, _) = imAx.errorbar(mNr,\
+                                gR[scanKey][mNr]["growthRate"],\
+                                yerr=gR[scanKey][mNr]["growthRateStd"],\
+                                **errorbarOptions)
+
+            # Set capsize
+            for cap in caps:
+                cap.set_markeredgewidth(markeredgewidth)
+
+            # Angular frequencies
+            # FIXME: SecondIt on x
+            (_, caps, _) = realAx.errorbar(mNr,\
+                                gR[scanKey][mNr]["angFreq"],\
+                                yerr=gR[scanKey][mNr]["angFreqStd"],\
+                                **errorbarOptions)
+
+            # Set capsize
+            for cap in caps:
+                cap.set_markeredgewidth(markeredgewidth)
+
+        # Add 10% margins for readability
+        imAx  .margins(x=0.1, y=0.1)
+        realAx.margins(x=0.1, y=0.1)
+
+        # FIXME: Rotation
+        PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = None)
+        PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = None)
+
+        # FIXME: Title:  FirstIT
+        fig.suptitle("{} = ${}$".format(titleName, scanVal))
+        imAx  .set_ylabel("$\omega_I$ $[]$")
+        realAx.set_ylabel("$\omega_R$ $[]$")
+
+        # FIXME: SecondIt
+        imAx.tick_params(labelbottom="off")
+        xlabel = "$\mathrm{{Modenumber}}$"
+        realAx.set_xlabel(xlabel)
+
+        # Adjust the subplots
+        fig.subplots_adjust(hspace=0)
+
+        # Sort the xData and use it as ticks
+        xData.sort()
+        realAx.xaxis.set_ticks(xData)
+
+        if savePlot:
+            PlotHelper.savePlot(fig,\
+                "growthrate_{}_{}_MNr_scan.{}".format(scanName, scanVal, extension))
+
+        if showPlot:
+            plt.show()
 
     raise NotImplementedError("plotGrowthRates not implemented")
 #}}}
