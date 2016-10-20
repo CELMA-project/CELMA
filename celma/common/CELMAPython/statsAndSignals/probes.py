@@ -319,7 +319,6 @@ class Probes(object):
                                    "Setting manually to 1{1}{0}".format("\n"*2, "!"*3))
                         self.results[key]["pdfX"] = self.results[key]["pdfY"] = [0.99,1]
                         print(message)
-
     #}}}
 
     #{{{calcPSDs
@@ -365,17 +364,35 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
-        fs = self.fluctTime[1] - self.fluctTime[0]
-        for xInd in self._xInds:
-            for yInd, actualYInd in zip(self._yInds, self._actualYInds):
-                for zInd in self._zInds:
-                    key = "{},{},{}".format(xInd, actualYInd, zInd)
+        try:
+            fs = self.fluctTime[1] - self.fluctTime[0]
+        except IndexError as ie:
+            if "out of bounds" in ie.args[0]:
+                message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out of "
+                           "range when calculating PSD.{1}{0}")
+                print(message.format("\n", "!"*3))
+            setToNone = True
 
-                    # window = None => window = "boxcar"
-                    # scaling = density gives the correct units
-                    self.results[key]["psdX"], self.results[key]["psdY"] =\
-                        periodogram(self.timeTraceOfVarFluct[key],\
-                                    fs=fs, window=None, scaling="density")
+        if setToNone:
+            for xInd in self._xInds:
+                for yInd, actualYInd in zip(self._yInds, self._actualYInds):
+                    for zInd in self._zInds:
+                        key = "{},{},{}".format(xInd, actualYInd, zInd)
+
+                        # window = None => window = "boxcar"
+                        # scaling = density gives the correct units
+                        self.results[key]["psdX"] = None
+        else:
+            for xInd in self._xInds:
+                for yInd, actualYInd in zip(self._yInds, self._actualYInds):
+                    for zInd in self._zInds:
+                        key = "{},{},{}".format(xInd, actualYInd, zInd)
+
+                        # window = None => window = "boxcar"
+                        # scaling = density gives the correct units
+                        self.results[key]["psdX"], self.results[key]["psdY"] =\
+                            periodogram(self.timeTraceOfVarFluct[key],\
+                                        fs=fs, window=None, scaling="density")
     #}}}
 
     #{{{calcAvgFluxThroughVolumeElement
