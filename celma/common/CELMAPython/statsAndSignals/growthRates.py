@@ -237,8 +237,6 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
                     modeMag  = \
                         (np.abs(modes[startIndex: endIndex,  mNr]) +\
                          np.abs(modes[startIndex: endIndex, -mNr]))/N
-                    if mNr == 3:
-                        import pdb; pdb.set_trace()
                     growthRate, sigmaB = linRegOfExp(curTime, modeMag)
                     finalGrowthRates.append(growthRate)
                     sigmaBs    .append(sigmaB)

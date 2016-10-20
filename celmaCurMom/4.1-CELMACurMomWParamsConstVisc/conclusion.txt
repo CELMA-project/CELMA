@@ -209,7 +209,7 @@ z = 1
 a1-KiwiFlatZ-0-initialize      - 5h22m
 a1-KiwiFlatZ-1-expand          - 7h19m
 a1-KiwiFlatZ-2-linearPhase1    - 29h42m
-a1-KiwiFlatZ-3-turbulentPhase1 -
+a1-KiwiFlatZ-3-turbulentPhase1 - Walltime(100h)
 
 z = 2
 a1-KiwiFlatZ-0-initialize      - 1h43m

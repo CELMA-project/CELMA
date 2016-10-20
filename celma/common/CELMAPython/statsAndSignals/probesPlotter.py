@@ -174,6 +174,10 @@ class PlotProbes(object):
         ax  = fig.add_subplot(111)
 
         for nr, key in enumerate(self._probes.probesKeys):
+            if np.isnan(self._probes.results[key]["pdfY"][0]):
+                message = ("{0}{1} WARNING No PDF created for {2}{1}{0}")
+                print(message.format("\n", "!"*3, key))
+                continue
             # Make the labels
             self._probes.helper.rhoTxtDict["value"] =\
                     plotNumberFormatter(self._probes.rho[key], None)
@@ -192,6 +196,11 @@ class PlotProbes(object):
                     color=self._colors[nr],\
                     label=label,\
                     alpha=self._alpha)
+
+        if len(list(ax.get_lines())) == 0:
+            message = "{0}{1}WARNING No PDFs to plot. Returning{1}{0}"
+            print(message.format("\n", "!"*3))
+            return
 
         # Set logscale
         ax.set_yscale("log")
@@ -229,6 +238,9 @@ class PlotProbes(object):
               The normalization would be
               variableNormalization**2/(tOmegaCI)
         """
+
+        if self._probes.results[self._probes.probesKeys[0]]["psdX"] is None:
+            return
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
