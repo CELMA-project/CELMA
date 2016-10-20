@@ -101,8 +101,8 @@ postProcessTrub = False
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = False
-postProcessGrowthRates     = True
+postProcessProbesAndEnergy = True
+postProcessGrowthRates     = False
 
 #{{{Main options
 #{{{The scan
