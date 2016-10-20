@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+"""
+Scripts which plots the analytic viscosity coefficients.
+
+These are given in for example
+Helander, P. and Sigmar, D.J.
+Collisional Transport in Magnetized Plasmas
+"""
+
 import numpy as np
 from numpy import log, sqrt
 import scipy.constants as cst
