@@ -76,7 +76,7 @@ def linRegOfExp(x,y):
 #}}}
 
 #{{{calcGrowthRate
-def calcGrowthRate(modes, time, maxMode = 7):
+def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
     #{{{docstring
     r"""
     Calculates the angular frequency and growth rate of a time trace of
@@ -106,7 +106,7 @@ def calcGrowthRate(modes, time, maxMode = 7):
 
     In order to find straight lines, the signal is first binned, and the
     gradient of each bin is found using linear regression. If the
-    difference in the gradient is less than 1% for successive bins, the
+    difference in the gradient is less than 5% for successive bins, the
     bins will be registered as a hit. A straigth line in the logarithmic
     signal is defined to be where there has been at least 4 hits.
 
@@ -122,6 +122,8 @@ def calcGrowthRate(modes, time, maxMode = 7):
         Time corresponding to the modes
     maxMode : int
         How many modes to investigate
+    diagnose : bool
+        Will print extra diagnostics if True
 
     Returns
     -------
@@ -154,9 +156,6 @@ def calcGrowthRate(modes, time, maxMode = 7):
     # Number of points
     N = modes.shape[1]
 
-    # Select modes from 1 to maxMode+1 (exclude the offset mode)
-    modes = modes[:, 1:maxMode+1]
-
     # This is part of the algorithm used to detect the straigth line in
     # the logarithm of the signal
     # Bin the time axis
@@ -172,9 +171,11 @@ def calcGrowthRate(modes, time, maxMode = 7):
     # Finding mode number
     results = {}
 
-    # Start on 1 as we have neglegted the DC mode, +1 as range excludes
-    # the last point
-    for mNr in range(1, modes.shape[1]+1):
+
+    # Start on 1 as we have neglegted the DC mode
+    # +1 as we skip the DC mode
+    # +1 as range excludes the last point
+    for mNr in range(1, maxMode+2):
         # Place holders for the growth rates and the mean square error
         growthRates  = []
         startIndices = []
@@ -187,33 +188,40 @@ def calcGrowthRate(modes, time, maxMode = 7):
             curTime    = time[startIndex: endIndex]
             # Magnitude of the signal
             # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
-            modeMag = (np.abs(mode[startIndex: endIndex][ mNr]) +\
-                       np.abs(mode[startIndex: endIndex][-mNr]))/N
+            modeMag = (np.abs(modes[startIndex: endIndex,  mNr]) +\
+                       np.abs(modes[startIndex: endIndex, -mNr]))/N
 
             growthRate, _ = linRegOfExp(curTime, modeMag)
             growthRates .append(growthRate)
             startIndices.append(startIndex)
 
-        #{{{Find growth rates from what is defined as straight segments in the plot
+            if diagnose:
+                # Print diagnostics
+                message = ("mode = {:<8} startIndex={:<8} endIndex={:<8} "
+                           "growthRate={:<+8.3f} ")
+                print(message.format(mNr, startIndex, endIndex, growthRate))
 
+        #{{{Find growth rates from definition of straight segments in the plot
         # Initialize the previous growth rate
         prevRate = growthRates[0]
 
-        # The growth rates and the corresponding standar deviation is found by the
-        # criteria that the growth rate should stay the same ober at least 4
-        # bins. If the criterion is met, a new linear regression will be taken from
-        # the max and min of the time indices.
+        # The growth rates and the corresponding standard deviation is found by
+        # the criteria that the growth rate should stay the same ober at least
+        # 4 bins. If the criterion is met, a new linear regression will be
+        # taken from the max and min of the time indices.
 
         # Place holders (used in case there are several hits)
-        growthRates = []
-        sigmaBs     = []
-        startTimes  = []
-        endTimes    = []
+        finalGrowthRates  = []
+        sigmaBs           = []
+        finalStartIndices = []
+        finalEndIndices   = []
         startIndex = 0
-        hits = 0
+        hits       = 0
+
+        # Looping from 1 as we already have the previous growth rate
         for gNr, growthRate in enumerate(growthRates[1:]):
-            # If the growth rate is within 1%
-            if growthRate*0.99 <= prevRate <= growthRate*1.01:
+            # If the growth rate is within 5%
+            if growthRate*0.95 <= prevRate <= growthRate*1.05:
                 if hits == 0:
                     # Include the index of the previous (not subtracting
                     # with 1 as gNr lags the growthRates by 1)
@@ -227,17 +235,19 @@ def calcGrowthRate(modes, time, maxMode = 7):
                     endIndex = bins[int(startIndex/binSize) + hits]
                     curTime  = time[startIndex: endIndex]
                     modeMag  = \
-                        (np.abs(mode[startIndex: endIndex][ mNr]) +\
-                         np.abs(mode[startIndex: endIndex][-mNr]))/N
+                        (np.abs(modes[startIndex: endIndex,  mNr]) +\
+                         np.abs(modes[startIndex: endIndex, -mNr]))/N
+                    if mNr == 3:
+                        import pdb; pdb.set_trace()
                     growthRate, sigmaB = linRegOfExp(curTime, modeMag)
-                    growthRates.append(growthRate)
+                    finalGrowthRates.append(growthRate)
                     sigmaBs    .append(sigmaB)
                     # We will currently use indices for the start times
                     # as these are easier to deal with when finding the
                     # angular velocity. The indices will be converted to
                     # actual time in the end
-                    startTimes.append(startIndex)
-                    endTimes  .append(endIndex)
+                    finalStartIndices.append(startIndex)
+                    finalEndIndices  .append(endIndex)
                 # Reset the counter
                 hits = 0
             prevRate = growthRate
@@ -247,30 +257,33 @@ def calcGrowthRate(modes, time, maxMode = 7):
             endIndex = bins[int(startIndex/binSize) + hits]
             curTime  = time[startIndex: endIndex]
             modeMag  = \
-                (np.abs(mode[startIndex: endIndex][ mNr]) +\
-                 np.abs(mode[startIndex: endIndex][-mNr]))/N
+                (np.abs(modes[startIndex: endIndex,  mNr]) +\
+                 np.abs(modes[startIndex: endIndex, -mNr]))/N
             growthRate, sigmaB = linRegOfExp(curTime, modeMag)
-            growthRates.append(growthRate)
-            sigmaBs    .append(sigmaB)
-            # We will currently use indices for the start times
-            # as these are easier to deal with when finding the
-            # angular velocity. The indices will be converted to
-            # actual time in the end
-            startTimes.append(startIndex)
-            endTimes  .append(endIndex)
+            finalGrowthRates .append(growthRate)
+            sigmaBs          .append(sigmaB)
+            finalStartIndices.append(startIndex)
+            finalEndIndices  .append(endIndex)
 
-        if len(growthRates) > 0:
-            if len(growthRates) > 1:
+        if len(finalGrowthRates) > 0:
+            # Select the first growth rate
+            finalStartIndex = finalStartIndices[0]
+            finalEndIndex   = finalEndIndices  [0]
+            results[mNr]    = {\
+                    "growthRate"    : finalGrowthRates[0              ],\
+                    "growthRateStd" : sigmaBs         [0              ],\
+                    "startTime"     : time            [finalStartIndex],\
+                    "endTime"       : time            [finalEndIndex  ],\
+            }
+
+            if len(finalGrowthRates) > 1:
                 message = ("{0}{1}WARNING: "\
                            "Found {2} different linear segments. "\
-                           "Selecting first{1}{0}")
-                print(message.format("\n"*2, "!"*5, len(growthRates)))
-
-            # Select the first real growth rate
-            results[mNr]["growthRate"]    = growthRates[0]
-            results[mNr]["growthRateStd"] = sigmaBs    [0]
-            results[mNr]["startIndex"]    = startTimes [0]
-            results[mNr]["endIndex"]      = endTimes   [0]
+                           "Selecting the first in the key 'growthRates'. "\
+                           "Storing all growth rates in the key "\
+                           "'allGrowthRates'{1}{0}")
+                results[mNr]["allGrowthRates"] = finalGrowthRates
+                print(message.format("\n"*2, "!"*5, len(finalGrowthRates)))
         else:
             results[mNr] = None
         #}}}
@@ -279,36 +292,41 @@ def calcGrowthRate(modes, time, maxMode = 7):
         # If no growth rate was found
         if results[mNr] is None:
             continue
-        # Remember: The startTime and endTime are currently indices
-        startIndex = results[mNr]["startTime"]
-        endIndex   = results[mNr]["endTime"]
-        deltaT     = time[1] - time[0]
+        deltaT = time[1] - time[0]
         # Create the place holder for the angular frequency
-        angularFreq = np.zeros(endIndex-startIndex)
+        angularFreq = np.zeros(finalEndIndex-finalStartIndex)
         # Loop over the indices between start and stop
-        # startIndex+1 as we will index i-1
-        # endIndex+1 to include the last point
-        for nr, i in enumerate(range(startIndex+1, endIndex+1)):
+        # finalStartIndex+1 as we will index i-1
+        # finalEndIndex+1 to include the last point
+        for nr, i in enumerate(range(finalStartIndex+1, finalEndIndex+1)):
+            # The phase shift is found from atan2
+            # http://dsp.stackexchange.com/questions/23994/meaning-of-real-and-imaginary-part-of-fourier-transform-of-a-signal
             # atan2 in [-pi, pi]
             prevPhaseShift =\
-                np.arctan2(mode[i-1][mNr].imag, mode[i-1][mNr].real)
+                np.arctan2(modes[i-1, mNr].imag, modes[i-1, mNr].real)
             curPhaseShift  =\
-                np.arctan2(mode[i  ][mNr].imag, mode[i  ][mNr].real)
+                np.arctan2(modes[i  , mNr].imag, modes[i  , mNr].real)
             # phaseShiftDiff in [0, 2*pi]
             phaseShiftDiff = prevPhaseShift - curPhaseShift
+
             if curPhaseShift*prevPhaseShift < 0\
                and abs(curPhaseShift) + abs(prevPhaseShift) > np.pi:
                 if curPhaseShift < 0:
+                    if diagnose:
+                        print("Phase shift shifted from pi to -pi")
                     # We are going from pi to -pi
-                    # In order to avoid the discontinuity, we turn curPhaseShift
-                    # and prevPhaseShift to the opposite quadrants
+                    # In order to avoid the discontinuity, we turn
+                    # curPhaseShift and prevPhaseShift to the opposite
+                    # quadrants
                     tempCurPhase   = np.pi + curPhaseShift
                     tempPrevPhase  = np.pi - prevPhaseShift
                     phaseShiftDiff = -(tempCurPhase + tempPrevPhase)
                 else:
+                    if diagnose:
+                        print("Phase shift shifted from -pi to pi")
                     # We are going from -pi to pi
-                    # In order to avoid the discontinuity, we turn curPhaseShift
-                    # and prevPhaseShift to the opposite quadrants
+                    # In order to avoid the discontinuity, we turn
+                    #curPhaseShift and prevPhaseShift to the opposite quadrants
                     tempCurPhase   = np.pi - curPhaseShift
                     tempPrevPhase  = np.pi + prevPhaseShift
                     phaseShiftDiff = tempCurPhase + tempPrevPhase
@@ -318,14 +336,24 @@ def calcGrowthRate(modes, time, maxMode = 7):
             # revolved one time
             angularFreq[nr] = phaseShiftDiff/deltaT
 
+            if diagnose:
+                # Print diagnostics
+                message = ("mode = {:<8} index={:<8} angFreq={:<+8.3f} "\
+                           "phase={:<+8.3f} phaseDiff={:<+8.3f}")
+                print(message.format(mNr, i, angularFreq[nr],\
+                                     curPhaseShift, phaseShiftDiff))
+
         # Calculate the mean and the spread (the standard deviation), note
         # that numpys std misses a minus 1 in the denominator, but as N is
         # high, this is negligible
+        # NOTE: A negative angular frequency means that the
+        #       perturbations are moving in the negative theta
+        #       direction.
         results[mNr]["angFreq"]    = angularFreq.mean()
         results[mNr]["angFreqStd"] = angularFreq.std()
         #}}}
 
-        return results
+    return results
 #}}}
 
 #{{{plotGrowthRates

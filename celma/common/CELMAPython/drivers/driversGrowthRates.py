@@ -78,16 +78,16 @@ FIXME:
         self._growthRatesDict = {}
 
         # Create the probes (one for each scan point)
+        # Sort the folders (ensures that they come in the right order)
+        self._dmp_folder.sort()
+        self._steadyStatePaths.sort()
         for path, steadyStatePath in zip(self._paths, self._steadyStatePaths):
-            # FIXME: Consider to relax the following restriction
-            # NOTE: The user is responsible for that the order of
-            #       self._paths and self._steadyStatePaths are the same
-
+            # FIXME: The loop is parallelizable
             # We only find the growth rates at position of highest gradient,
             # as we from theory expect the highest growth rates to be there
             curProbe = PerpPlaneProbes(\
                           self._var                                    ,\
-                          paths               = [path]                 ,\
+                          paths               = path                   ,\
                           yInd                = self._yInd             ,\
                           convertToPhysical   = self._convertToPhysical,\
                           steadyStatePath     = steadyStatePath        ,\
@@ -107,7 +107,12 @@ FIXME:
             positionKey = list(curProbe.results.keys())[0]
 
             # Obtain the current scan value
-            scanValue = path.split("_")
+            if hasattr(path, "__iter__") and type(path) != str:
+                # The path is a list
+                scanValue = path[0].split("_")
+            else:
+                # The path is a string
+                scanValue = path.split("_")
             # +1 as the value is immediately after the scan parameter
             scanValue = scanValue[scanValue.index(self._scanParam)+1]
             # The time and the time is clipped with three to clip away
@@ -116,7 +121,7 @@ FIXME:
             # We will also clip so that approximately only the linear
             # mode is present (less data to process)
             linClip = curProbe.results[positionKey]["zFFTLinearIndex"]
-            if linClip >= initClip:
+            if linClip <= initClip:
                 message = ("{0}{1}WARNING: "\
                            "Could not find a proper startpoint for the "
                            "linear stage{1}{0}")
@@ -131,6 +136,12 @@ FIXME:
                     calcGrowthRate(modes   = modes,\
                                    time    = time ,\
                                    maxMode = self._maxMode)
+        # FIXME:
+        import pickle
+        with open('data.pickle', 'wb') as f:
+            # Pickle the 'data' dictionary using the highest
+            # protocol available.
+            pickle.dump(self._growthRatesDict, f, pickle.HIGHEST_PROTOCOL)
     #}}}
 
     #{{{plotGrowthRates
