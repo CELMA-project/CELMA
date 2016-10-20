@@ -138,7 +138,7 @@ FIXME:
                                    maxMode = self._maxMode)
         # FIXME:
         import pickle
-        with open('data.pickle', 'wb') as f:
+        with open('growthRates.pickle', 'wb') as f:
             # Pickle the 'data' dictionary using the highest
             # protocol available.
             pickle.dump(self._growthRatesDict, f, pickle.HIGHEST_PROTOCOL)
