@@ -26,40 +26,40 @@ Linear : 500  timesteps
 Turbul : 5000 timesteps
 
 B0 = 0.1
-a1-KiwiFlat-0-initialize      - 1h52m
-a1-KiwiFlat-1-expand          - 4h2m
-a1-KiwiFlat-2-linearPhase1    - 13h21m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 1h52m
+a1-KiwiFlatMagField-1-expand          - 4h2m
+a1-KiwiFlatMagField-2-linearPhase1    - 13h21m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 57h43m
 
 B0 = 0.09
-a1-KiwiFlat-0-initialize      - 1h51m
-a1-KiwiFlat-1-expand          - 3h20m
-a1-KiwiFlat-2-linearPhase1    - 8h31m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 1h51m
+a1-KiwiFlatMagField-1-expand          - 3h20m
+a1-KiwiFlatMagField-2-linearPhase1    - 8h31m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 50h24m
 
 B0 = 0.08
-a1-KiwiFlat-0-initialize      - 1h50m
-a1-KiwiFlat-1-expand          - 2h50m
-a1-KiwiFlat-2-linearPhase1    - 11h4m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 1h50m
+a1-KiwiFlatMagField-1-expand          - 2h50m
+a1-KiwiFlatMagField-2-linearPhase1    - 11h4m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 46h56m
 
 B0 = 0.07
-a1-KiwiFlat-0-initialize      - 1h40m
-a1-KiwiFlat-1-expand          - 3h12m
-a1-KiwiFlat-2-linearPhase1    - 10h58m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 1h40m
+a1-KiwiFlatMagField-1-expand          - 3h12m
+a1-KiwiFlatMagField-2-linearPhase1    - 10h58m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 46h57m
 
 B0 = 0.06
-a1-KiwiFlat-0-initialize      - 1h33m
-a1-KiwiFlat-1-expand          - 3h9m
-a1-KiwiFlat-2-linearPhase1    - 12h53m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 1h33m
+a1-KiwiFlatMagField-1-expand          - 3h9m
+a1-KiwiFlatMagField-2-linearPhase1    - 12h53m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 52h49m
 
 B0 = 0.05
-a1-KiwiFlat-0-initialize      - 2h2m
-a1-KiwiFlat-1-expand          - 1h49m
-a1-KiwiFlat-2-linearPhase1    - 10h17m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatMagField-0-initialize      - 2h2m
+a1-KiwiFlatMagField-1-expand          - 1h49m
+a1-KiwiFlatMagField-2-linearPhase1    - 10h17m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 60h28m
 
 
 
@@ -88,37 +88,164 @@ Linear : 500  timesteps
 Turbul : 5000 timesteps
 
 Te0 = 14.0
-a1-KiwiFlat-0-initialize      - 1h55m
-a1-KiwiFlat-1-expand          - 3h59m
-a1-KiwiFlat-2-linearPhase1    - 11h10m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatElTemp-0-initialize      - 1h55m
+a1-KiwiFlatElTemp-1-expand          - 3h59m
+a1-KiwiFlatElTemp-2-linearPhase1    - 11h10m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - 50h4m
 
 Te0 = 12.0
-a1-KiwiFlat-0-initialize      - 1h41m
-a1-KiwiFlat-1-expand          - 3h39m
-a1-KiwiFlat-2-linearPhase1    - SUNDIALS 254 of 500 9h55m
-a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 2h3m
+a1-KiwiFlatElTemp-0-initialize      - 1h41m
+a1-KiwiFlatElTemp-1-expand          - 3h39m
+a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 254 of 500 9h55m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 2h3m
 
 Te0 = 10.0
-a1-KiwiFlat-0-initialize      - 1h34m
-a1-KiwiFlat-1-expand          - 4h9m
-a1-KiwiFlat-2-linearPhase1    - SUNDIALS 294 of 500 9h42m
-a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 0h37m
+a1-KiwiFlatElTemp-0-initialize      - 1h34m
+a1-KiwiFlatElTemp-1-expand          - 4h9m
+a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 294 of 500 9h42m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 0h37m
 
 Te0 = 8.0
-a1-KiwiFlat-0-initialize      - 1h39m
-a1-KiwiFlat-1-expand          - 4h19m
-a1-KiwiFlat-2-linearPhase1    - SUNDIALS 285 of 500 13h13m
-a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 3h46m
+a1-KiwiFlatElTemp-0-initialize      - 1h39m
+a1-KiwiFlatElTemp-1-expand          - 4h19m
+a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 285 of 500 13h13m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 3h46m
 
 Te0 = 6.0
-a1-KiwiFlat-0-initialize      - 1h47m
-a1-KiwiFlat-1-expand          - 4h32m
-a1-KiwiFlat-2-linearPhase1    - 11h15m
-a1-KiwiFlat-3-turbulentPhase1 -
+a1-KiwiFlatElTemp-0-initialize      - 1h47m
+a1-KiwiFlatElTemp-1-expand          - 4h32m
+a1-KiwiFlatElTemp-2-linearPhase1    - 11h15m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - 41h45m
 
 Te0 = 5.0
-a1-KiwiFlat-0-initialize      - 1h42m
-a1-KiwiFlat-1-expand          - 3h49m
-a1-KiwiFlat-2-linearPhase1    - SUNDIALS 285 of 500 11h29m
-a1-KiwiFlat-3-turbulentPhase1 - Failed (not even one timestep) 29m
+a1-KiwiFlatElTemp-0-initialize      - 1h42m
+a1-KiwiFlatElTemp-1-expand          - 3h49m
+a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 285 of 500 11h29m
+a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 29m
+
+
+
+
+
+
+
+
+
+
+a1-KiwiFlatNeutral
+------------------
+Checklist:
+[ ] - Fields steady state
+[ ] - All OK on expand
+[ ] - Linear modes: Radial and poloidal
+[ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
+[ ] - Profiles during linear - still grid size oscillation?
+[ ] - Profiles during turbulence - still grid size oscillation?
+[ ] - Time of energy overshoot
+[ ] - Probe data
+
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
+nn = 1e15
+a1-KiwiFlatNeutral-0-initialize      - 1h35m
+a1-KiwiFlatNeutral-1-expand          - 3h19m
+a1-KiwiFlatNeutral-2-linearPhase1    - 277 of 500 - Failed in NaulinSolver
+a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
+
+nn = 5e15
+a1-KiwiFlatNeutral-0-initialize      - 1h42m
+a1-KiwiFlatNeutral-1-expand          - 3h7m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h47m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 45h9m
+
+nn = 1e16
+a1-KiwiFlatNeutral-0-initialize      - 1h39m
+a1-KiwiFlatNeutral-1-expand          - 3h43m
+a1-KiwiFlatNeutral-2-linearPhase1    - 288 of 500 - SUNDIALS
+a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
+
+nn = 5e16
+a1-KiwiFlatNeutral-0-initialize      - 1h35m
+a1-KiwiFlatNeutral-1-expand          - 4h1m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h32m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 46h44m
+
+nn = 1e17
+a1-KiwiFlatNeutral-0-initialize      - 1h46m
+a1-KiwiFlatNeutral-1-expand          - 3h12m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h15m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 48h43m
+
+
+
+
+
+
+
+
+
+
+a1-KiwiFlatZ
+------------
+Checklist:
+[ ] - Fields steady state
+[ ] - All OK on expand
+[ ] - Linear modes: Radial and poloidal
+[ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
+[ ] - Profiles during linear - still grid size oscillation?
+[ ] - Profiles during turbulence - still grid size oscillation?
+[ ] - Time of energy overshoot
+[ ] - Probe data
+
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
+z = 1
+a1-KiwiFlatZ-0-initialize      - 5h22m
+a1-KiwiFlatZ-1-expand          - 7h19m
+a1-KiwiFlatZ-2-linearPhase1    - 29h42m
+a1-KiwiFlatZ-3-turbulentPhase1 - Walltime(100h)
+
+z = 2
+a1-KiwiFlatZ-0-initialize      - 1h43m
+a1-KiwiFlatZ-1-expand          - 1h22m
+a1-KiwiFlatZ-2-linearPhase1    - 4h4m
+a1-KiwiFlatZ-3-turbulentPhase1 - 40h52m
+
+z = 4
+a1-KiwiFlatZ-0-initialize      - 24m
+a1-KiwiFlatZ-1-expand          - 40m
+a1-KiwiFlatZ-2-linearPhase1    - 3h35m
+a1-KiwiFlatZ-3-turbulentPhase1 - 22h35m
+
+z = 6
+a1-KiwiFlatZ-0-initialize      - 13m
+a1-KiwiFlatZ-1-expand          - 28m
+a1-KiwiFlatZ-2-linearPhase1    - 2h6m
+a1-KiwiFlatZ-3-turbulentPhase1 - 16h35m
+
+z = 8
+a1-KiwiFlatZ-0-initialize      - 9m
+a1-KiwiFlatZ-1-expand          - 9m
+a1-KiwiFlatZ-2-linearPhase1    - 1h5m
+a1-KiwiFlatZ-3-turbulentPhase1 - 11h33m
+
+z = 10
+a1-KiwiFlatZ-0-initialize      - 7m
+a1-KiwiFlatZ-1-expand          - 17m
+a1-KiwiFlatZ-2-linearPhase1    - 1h1m
+a1-KiwiFlatZ-3-turbulentPhase1 - 13h20m
+
+
+
+
+
+
+TODO:
+1. Check if crashes can be explained by energy overshoot
+2. Check if fails can be restarted from another turbulent state
