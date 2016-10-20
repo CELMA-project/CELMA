@@ -13,7 +13,6 @@ import numpy as np
 from boutdata import collect
 from bout_runners import PBS_runner
 from CELMAPython.drivers import postBoutRunner
-from CELMAPython.plotHelpers import findLargestRadialGrad
 
 #{{{restartFromFunc
 def restartFromFunc(dmp_folder     = None,\
