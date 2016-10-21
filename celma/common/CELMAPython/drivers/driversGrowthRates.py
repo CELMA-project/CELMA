@@ -157,6 +157,9 @@ FIXME:
             for mNr in self._growthRatesDict[scan].keys():
                 # Replace None with NaN
                 if self._growthRatesDict[scan][mNr] is None:
+                    message = ("{0}{1}WARNING: No hits in mode nr {2} in {3}. "
+                               "Setting to NaN{1}{0}")
+                    print(message.format("\n", "!"*4, mNr, scan))
                     self._growthRatesDict[scan][mNr] =\
                         {"growthRate"   :np.nan,\
                          "growthRateStd":np.nan,\
@@ -207,6 +210,9 @@ FIXME:
 
         # Finally we make either "Mode" or "Scan" the column and the "Data" 
         # the index
+        # http://nikgrozev.com/2015/07/01/reshaping-in-pandas-pivot-pivot-table-stack-and-unstack-explained-with-pictures/
+        # This can be done by stack: Rotating column index to row index
+        # And unstack              : Rotating row index to column index
         if self._useSubProcess:
             #{{{ Function call through subprocess
             proc = {}
@@ -234,7 +240,7 @@ FIXME:
         else:
             #{{{Normal function call
             # We would like to have "Scan" on the x axis
-            plotGrowthRates(growthRatesDF.unstack("Scan").stack("Data"))
+            plotGrowthRates(df = growthRatesDF.unstack("Scan").stack("Data"))
             # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
             #       and would've liked to swap "Mode" and "Scan" with the
             #       current dataframe, we would have to
@@ -244,7 +250,7 @@ FIXME:
             #
             #       The swap needed to make the "Data" the innermost level
             # We would like to thave "Mode" on the x axis
-            plotGrowthRates(growthRatesDF.unstack("Mode").stack("Data"))
+            plotGrowthRates(df = growthRatesDF.unstack("Mode").stack("Data"))
             #}}}
     #}}}
 #}}}
