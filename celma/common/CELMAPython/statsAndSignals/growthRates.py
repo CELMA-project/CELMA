@@ -174,7 +174,6 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
     # Finding mode number
     results = {}
 
-
     # Start on 1 as we have neglegted the DC mode
     # +1 as we skip the DC mode
     # +1 as range excludes the last point
@@ -358,29 +357,34 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 #}}}
 
 #{{{plotGrowthRates
-def plotGrowthRates():
+def plotGrowthRates(df):
+    #{{{docstring
     """
     Plots the growth rates
 
     Parameters
     ----------
-FIXME: Implement
-    results : dict
-        A dictionary of dictionary. The top level key is the mode number
-        and the bottom level keys are
-            * angFreq       - The angular frequency
-            * angFreqStd    - The standard deviation of the angular frequency
-            * growthRate    - The growth rate
-            * growthRateStd - The standard deviation of the growth rate
-            * startTime     - Start time of the linear segment
-            * endTime       - End time of the linear segment
+    df : DataFrame
+        The data frame to be plotted. The data frame must be orgnized
+        such that:
+        1. The x axis will be given by splitting df.columns by "=" and take
+           the value right og the "="
+        2. The index only has two levels
+        3. The plot name is given at the first level of df.index
+        4. The growth rate, angular frequency and their standar
+           deviation is given in the innermost level of df
     """
+    #}}}
 
-    # FIXME: ALWAYS NORMALIZED WITH OMCI
-    # FIXME: Consider make this a class
-    showPlot = False
-    savePlot = True
-    extension = "png"
+    # FIXME: T ALWAYS NORMALIZED WITH OMCI
+    # FIXME: Other normalizations
+    #{{{ FIXME: Consider make this a class
+    # Dict used as an equivalent to C++ maps
+    mapToPltText = {"modeNr":"$Mode number$",\
+                    "B0"    :"$B_0$"        ,\
+                    "Te0"   :"$T_e$"        ,\
+                    "nn"    :"$n_n$"        ,\
+                   }
 
     errorbarOptions = {"color"     :"k",\
                        "fmt"       :"o",\
@@ -394,88 +398,53 @@ FIXME: Implement
     figSize = (9,12)
     markeredgewidth = 3
 
-    i = 0
-    # Must cast to list as dictkeys are not subsrciptable
-    while gR[list(gR.keys())[i]] is not None:
-        i += 1
-        break
+    showPlot = False
+    savePlot = True
+    extension = "png"
 
-    scanName = list(gR.keys())[i].split("=")[0]
-    if scanName == "B0":
-        titleName = "$B_0$"
-    # FIXME: Add different titleNames
-    else:
-        titleName = "${}$".format(scanName)
-
-    # The scan is stored in the outermost dict
-    # The modeNumber is stored in the innermost dict
-    if growthRatesAsAFunctionOf == "scan":
-        firstIt  = gR[list(gR.keys())[i]].keys()
-        secondIt = gR.keys()
-    elif growthRatesAsAFunctionOf == "modeNumber":
-        firstIt  = gR.keys()
-        secondIt = gR[list(gR.keys())[i]].keys()
-    else:
-        possibilities = ["scan", "modeNumber"]
-        message  = "'{}' not valid as 'growthRatesAsAFunctionOf'\n"
-        message += "Possibilties are:\n"
-        for possibility in possibilities:
-            message += possibility + "\n"
-        raise ValueError(message)
+    All = slice(None)
+    #}}}
 
 
     # Loop through the figures
-    for first in firstIt():
+    for plotLabel in df.index.levels[0]:
         fig = plt.figure(figsize = figSize)
         gs  = GridSpec(nrows=2, ncols=1)
 
         imAx   = fig.add_subplot(gs[0])
         realAx = fig.add_subplot(gs[1], sharex=imAx)
 
-        if growthRatesAsAFunctionOf == "modeNumberr":
-            scanVal = float(first.split("=")[1])
+        # We can now access unsing the loc method
+        # The syntax is
+        # df.loc[("indexLevel1", "indexLevel2", ...),\
+        #        ("columnsLevel1", "columnsLevel2", ...)]
+        # http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook-selection
+        xAxis   = [float(txt.split("=")[1])\
+                   for txt in df.loc[(plotLabel, "growthRate"), All].index]
+        yAxisIm = df.loc[(plotLabel, "growthRate"), All].values
+        yErrIm  = df.loc[(plotLabel, "growthRateStd"), All].values
+        yAxisRe = df.loc[(plotLabel, "angularFreq"), All].values
+        yErrRe  = df.loc[(plotLabel, "angularFreq"), All].values
 
-        # Placeholder for xData (used to format ticks)
-        xData = []
+# FIXME: Instead of errorbar use a partial function?
+        (_, caps, _) = imAx.errorbar(xAxis,\
+                                     yAxisIm,\
+                                     yerr=yErrIm,\
+                                     **errorbarOptions)
 
-        # Loop through the points in the plot
-        for mNr in gR[list(gR.keys())[i]].keys():
-            if growthRatesAsAFunctionOf == "modeNumberr":
-                if gR[first][second] is None:
-                    print("\nWarning: Modenumber {} in {} is empty".\
-                          format(first, second))
-                    continue
-            elif growthRatesAsAFunctionOf == "scan":
-                if gR[second][first] is None:
-                    print("\nWarning: Modenumber {} in {} is empty".\
-                          format(second, first))
-                    continue
+        # Set capsize
+        for cap in caps:
+            cap.set_markeredgewidth(markeredgewidth)
 
-            if growthRatesAsAFunctionOf == "scan":
-                scanVal = float(second.split("=")[1])
+        # Angular frequencies
+        (_, caps, _) = realAx.errorbar(xAxis,\
+                                       yAxisRe,\
+                                       yerr=yErrRe,\
+                                       **errorbarOptions)
 
-            xData.append(mNr)
-            # Growth rates
-            # FIXME: SecondIt on x
-            (_, caps, _) = imAx.errorbar(mNr,\
-                                gR[scanKey][mNr]["growthRate"],\
-                                yerr=gR[scanKey][mNr]["growthRateStd"],\
-                                **errorbarOptions)
-
-            # Set capsize
-            for cap in caps:
-                cap.set_markeredgewidth(markeredgewidth)
-
-            # Angular frequencies
-            # FIXME: SecondIt on x
-            (_, caps, _) = realAx.errorbar(mNr,\
-                                gR[scanKey][mNr]["angFreq"],\
-                                yerr=gR[scanKey][mNr]["angFreqStd"],\
-                                **errorbarOptions)
-
-            # Set capsize
-            for cap in caps:
-                cap.set_markeredgewidth(markeredgewidth)
+        # Set capsize
+        for cap in caps:
+            cap.set_markeredgewidth(markeredgewidth)
 
         # Add 10% margins for readability
         imAx  .margins(x=0.1, y=0.1)
@@ -485,29 +454,29 @@ FIXME: Implement
         PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = None)
         PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = None)
 
-        # FIXME: Title:  FirstIT
-        fig.suptitle("{} = ${}$".format(titleName, scanVal))
+        fig.suptitle(mapToPltText[plotLabel.split("=")[0]])
         imAx  .set_ylabel("$\omega_I$ $[]$")
         realAx.set_ylabel("$\omega_R$ $[]$")
 
-        # FIXME: SecondIt
         imAx.tick_params(labelbottom="off")
-        xlabel = "$\mathrm{{Modenumber}}$"
+        xlabel = mapToPltText[\
+                    df.loc[(plotLabel, "growthRate"), All].index[0].\
+                    split("=")[0]\
+                 ]
         realAx.set_xlabel(xlabel)
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0)
 
         # Sort the xData and use it as ticks
-        xData.sort()
-        realAx.xaxis.set_ticks(xData)
+        xAxis.sort()
+        realAx.xaxis.set_ticks(xAxis)
 
         if savePlot:
             PlotHelper.savePlot(fig,\
-                "growthrate_{}_{}_MNr_scan.{}".format(scanName, scanVal, extension))
+                "growthrate_{}_{}.{}".\
+                format(plotLabel, xlabel, extension))
 
         if showPlot:
             plt.show()
-
-    raise NotImplementedError("plotGrowthRates not implemented")
 #}}}
