@@ -6,6 +6,8 @@ Contains drivers for calculation of the growth rates
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import PerpPlaneProbes, calcGrowthRate, plotGrowthRates
+import pandas as pd
+import numpy as np
 from multiprocessing import Process
 
 #{{{DriversGrowthRates
@@ -146,52 +148,81 @@ FIXME:
         if self._growthRatesDict == None:
             self.calcProbes()
 
-# FIXME: Make one plot per mode
-        # Create the probesPlotter
-        probesPlotter = plotGrowthRates()
-        #PlotProbes(\
-        #        self._probes,\
-        #        showPlot  = self._showPlot         ,\
-        #        savePlot  = self._savePlot         ,\
-        #        extension = self._extension        ,\
-        #        savePath  = self._savePath         ,\
-        #        pltSize   = self._pltSize          ,\
-        #                          )
+        #{{{ Cast to dataframe in order to plot more easily
+        # We start by cleaning up the dict by removing "allGrowthRates"
+        # and replace "None" with NaN
+        # Loop over the scan
+        for scan in self._growthRatesDict.keys():
+            # Loop over the mode numbers
+            for mNr in self._growthRatesDict[scan].keys():
+                # Replace None with NaN
+                if self._growthRatesDict[scan][mNr] is None:
+                    self._growthRatesDict[scan][mNr] =\
+                        {"growthRate"   :np.nan,\
+                         "growthRateStd":np.nan,\
+                         "angFreq"      :np.nan,\
+                         "angFreqStd"   :np.nan}
+                else:
+                    # Remove "allGrowthRates" by pop (pop returns the
+                    # key)
+                    # The second argument specifies what should be
+                    # returned if the key is not found. If unspecified
+                    # as keyError will be thrown
+                    self._growthRatesDict[scan][mNr].pop("allGrowthRates",None)
 
+        # We would now like to write the mode numbers as modeNr=mNr,
+        # rather than just mNr
+        # In order to avoid memory problems, it will be done in the
+        # following way
+        firstDict = list(self._growthRatesDict.keys())
+        secondDict = list(self._growthRatesDict[firstDict[0]].keys())
+        for f in firstDict:
+            for s in secondDict:
+                self._growthRatesDict[f]["modeNr={}".format(s)] =\
+                    self._growthRatesDict[f].pop(s)
+
+        # Reform a dict of dict of dict so that we get a dict with tuple keys
+        # http://stackoverflow.com/questions/24988131/nested-dictionary-to-multiindex-dataframe-where-dictionary-keys-are-column-label
+        reform = {(outerKey, innerKey): values\
+                  for outerKey, innerDict in self._growthRatesDict.items()\
+                  for innerKey, values in innerDict.items()}
+
+        # This can now be made to a data frame
+        growthRatesDF = pd.DataFrame.from_dict(reform)
+
+        # NOTE: The format is now
+        #       cols = ["Scan", "Mode"] and the indices are the
+        #       different angFreq, growthRates etc (hereby refered to as
+        #       the "Data")
+        # NOTE: We would rather like
+        #       Columns to be either "Scan" or "mNr" (depending on what
+        #       we would like to plot) and make the rest indices When
+        #       this is done we can easily slice the data.
+        # We start by transposing the indices and columns
+        growthRatesDF=growthRatesDF.T
+        # Then we add names to the frame (easier unstack and stack)
+        growthRatesDF.index.names = ["Scan", "Mode"]
+        growthRatesDF.columns.name="Data"
+        #}}}
+
+        # Finally we make either "Mode" or "Scan" the column and the "Data" 
+        # the index
         if self._useSubProcess:
             #{{{ Function call through subprocess
             proc = {}
             # Create process
-            proc["plotTimeTrace"] =\
-                    Process(\
-                            target = probesPlotter.plotTimeTrace,\
-                            args   = ()                         ,\
-                            kwargs = {}
-                           )
-            proc["plotPDFs"] =\
-                    Process(\
-                            target = probesPlotter.plotPDFs,\
-                            args   = ()                    ,\
-                            kwargs = {}
-                           )
-            proc["plotPSDs"] =\
-                    Process(\
-                            target = probesPlotter.plotPSDs,\
-                            args   = ()                    ,\
-                            kwargs = {}
-                           )
-            proc["plotAvgFluxThroughVolumeElement"] =\
-                    Process(\
-                target =  probesPlotter.plotAvgFluxThroughVolumeElement,\
-                args   = (self._uName, self._labelName)                ,\
-                kwargs = {}
-                           )
-            proc["plotZFFT"] =\
-                    Process(\
-                            target = probesPlotter.plotZFFT            ,\
-                            args   = (self._positionKey, self._maxMode),\
-                            kwargs = {}
-                           )
+            proc["scanOnXAxis"] =\
+                Process(\
+                    target = plotGrowthRates                              ,\
+                    args   = (growthRatesDF.unstack("Scan").stack("Data")),\
+                    kwargs = {}                                            \
+                       )
+            proc["modeOnXAxis"] =\
+                Process(\
+                    target = plotGrowthRates                              ,\
+                    args   = (growthRatesDF.unstack("Mode").stack("Data")),\
+                    kwargs = {}                                            \
+                       )
 
             # Start processes
             for key in proc.keys():
@@ -202,13 +233,18 @@ FIXME:
             #}}}
         else:
             #{{{Normal function call
-                probesPlotter.plotTimeTrace()
-                probesPlotter.plotPDFs()
-                probesPlotter.plotPSDs()
-                probesPlotter.plotAvgFluxThroughVolumeElement(\
-                                                    uName     = self._uName,\
-                                                    labelName = self._labelName)
-                probesPlotter.plotZFFT(self._positionKey, self._maxMode)
+            # We would like to have "Scan" on the x axis
+            plotGrowthRates(growthRatesDF.unstack("Scan").stack("Data"))
+            # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
+            #       and would've liked to swap "Mode" and "Scan" with the
+            #       current dataframe, we would have to
+            #
+            #       growthRatesDF =
+            #       growthRatesDF.unstack("Mode").stack("Scan").swaplevel()
+            #
+            #       The swap needed to make the "Data" the innermost level
+            # We would like to thave "Mode" on the x axis
+            plotGrowthRates(growthRatesDF.unstack("Mode").stack("Data"))
             #}}}
     #}}}
 #}}}
