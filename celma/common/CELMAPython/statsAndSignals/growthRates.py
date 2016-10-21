@@ -5,6 +5,10 @@ Contains functions to calculate and plot the angular frequency and
 growth rate of a time trace of a spatial FFT
 """
 
+# FIXME: Correct save path
+# FIXME: Numbers in the suptitle
+# FIXME: To class
+# FIXME: When scaling the xaxis, remove nans
 from ..plotHelpers import PlotHelper
 import numpy as np
 import matplotlib.pylab as plt
@@ -380,10 +384,10 @@ def plotGrowthRates(df):
     # FIXME: Other normalizations
     #{{{ FIXME: Consider make this a class
     # Dict used as an equivalent to C++ maps
-    mapToPltText = {"modeNr":"$Mode number$",\
-                    "B0"    :"$B_0$"        ,\
-                    "Te0"   :"$T_e$"        ,\
-                    "nn"    :"$n_n$"        ,\
+    mapToPltText = {"modeNr":"$\mathrm{Mode number}$",\
+                    "B0"    :"$B_0$"                 ,\
+                    "Te0"   :"$T_e$"                 ,\
+                    "nn"    :"$n_n$"                 ,\
                    }
 
     errorbarOptions = {"color"     :"k",\
@@ -419,12 +423,17 @@ def plotGrowthRates(df):
         # df.loc[("indexLevel1", "indexLevel2", ...),\
         #        ("columnsLevel1", "columnsLevel2", ...)]
         # http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook-selection
-        xAxis   = [float(txt.split("=")[1])\
-                   for txt in df.loc[(plotLabel, "growthRate"), All].index]
+        try:
+            xAxis   = [float(txt.split("=")[1])\
+                       for txt in df.loc[(plotLabel, "growthRate"), All].index]
+        except KeyError as ke:
+            message = "{0}{1}WARNING: Only NaNs found in {2}. Skipping{1}{0}"
+            print(message.format("\n", "!"*4, ke.args[0]))
+            continue
         yAxisIm = df.loc[(plotLabel, "growthRate"), All].values
         yErrIm  = df.loc[(plotLabel, "growthRateStd"), All].values
-        yAxisRe = df.loc[(plotLabel, "angularFreq"), All].values
-        yErrRe  = df.loc[(plotLabel, "angularFreq"), All].values
+        yAxisRe = df.loc[(plotLabel, "angFreq"), All].values
+        yErrRe  = df.loc[(plotLabel, "angFreqStd"), All].values
 
 # FIXME: Instead of errorbar use a partial function?
         (_, caps, _) = imAx.errorbar(xAxis,\
