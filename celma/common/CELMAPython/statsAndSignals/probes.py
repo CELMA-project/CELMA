@@ -85,7 +85,7 @@ class Probes(object):
         # Make the PlotHelper object
         # Public as used in the driver
         self.helper = PlotHelper(collectPath                           ,\
-                                  time                                 ,\
+                                  t                 = time             ,\
                                   xguards           = False            ,\
                                   yguards           = False            ,\
                                   convertToPhysical = convertToPhysical,\
@@ -501,10 +501,14 @@ class Probes(object):
             The fourier transformed of the z-direction for each time. Notice
             that the result will be the same for every z-index for a fixed x-
             and y-index.
-        zFFTLinearIndex : array
-            Index for the end of the linear phase. The end is here
+        zFFTNonSaturatedIndex : int
+            Index for the end of the non-saturated phase. The end is here
             defined as the first point where the max of all the modes is
             15% of the max value.
+        zFFTLinearIndex : int
+            Index for the end of the linear phase. The end is here
+            defined as the index where the first mode which reaches
+            1e-7 (excluding the clip).
         """
         #}}}
 
@@ -525,30 +529,60 @@ class Probes(object):
                     # Save the results and reshape the data
                     self.results[key]["zFFT"] = varFFT[:,0,0,:]
 
-        # Find the linear phase end for each key
-        fracOfMax = 0.15
+        # Find the non saturated phase end and linear phase end for each key
+        fracOfMax           = 0.15
+        firstIndexEndLinear = self.results[key]["zFFT"].shape[0]
+        # Do not take into account the three first time steps (which is
+        # after the initial perturbation)
+        clip = 3
         for key in self.results.keys():
             curMax = 0
             # Skip the offset mode in range
             for mode in range(1, self.results[key]["zFFT"].shape[-1]):
-                # Do not take into account the three first time steps
-                # (which is after the initial perturbation)
-                clip = 3
-                maxOfThisMode = np.max(np.abs(self.results[key]["zFFT"][clip:,mode]))
+                #{{{ NOTE: We are dealing with a real signal:
+                #          As the fourier transform breaks the signal up
+                #          in cisoids there will be one part of the
+                #          signal in the positive rotating ciscoid and
+                #          one in the negative (negative frequencies)
+                #          for a given mode number. We need to take into
+                #          account both in order to calculate the
+                #          amplitude. As the signal is real only one of
+                #          the phase sifts are needed. Notice that for a
+                #          real signal the imaginary part occurs as a
+                #          complex conjugate pair
+                # http://dsp.stackexchange.com/questions/431/what-is-the-physical-significance-of-negative-frequencies?noredirect=1&lq=1
+                # http://dsp.stackexchange.com/questions/4825/why-is-the-fft-mirrored
+                #}}}
+                # Magnitude of the signal
+                # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
+                magnitude = (np.abs(np.abs(self.results[key]["zFFT"][clip:, mode]))
+                            +np.abs(np.abs(self.results[key]["zFFT"][clip:,-mode]))
+                            )/self.results[key]["zFFT"].shape[-1]
+                # Non saturated phase
+                maxOfThisMode = np.max(magnitude)
                 if maxOfThisMode > curMax:
                     curMax      = maxOfThisMode
                     modeWithMax = mode
-            # Find the first occurence where the mode is above or equal to 15%
+                # Linear phase
+                curIndicesEndLinear = np.where(magnitude >= 1e-7)
+                if len(curIndicesEndLinear) > 0:
+                    if curIndicesEndLinear < firstIndexEndLinear:
+                        firstIndexEndLinear = curIndicesEndLinear 
+
+            self.results[key]["zFFTLinearIndex"] = firstIndexEndLinear
+
             try:
-                self.results[key]["zFFTLinearIndex"] =\
+                # Find the first occurence where the mode is above or
+                # equal to 15%
+                self.results[key]["zFFTNonSaturatedIndex"] =\
                     int(np.where(np.abs(\
                         self.results[key]["zFFT"][clip:,modeWithMax]) >\
                         curMax*fracOfMax\
                     )[0])
             except TypeError as er:
                 if "only length-1 arrays" in er.args[0]:
-                    # Need to subscript one more time
-                    self.results[key]["zFFTLinearIndex"] =\
+                    # Need to subscript once more 
+                    self.results[key]["zFFTNonSaturatedIndex"] =\
                         int(np.where(np.abs(\
                             self.results[key]["zFFT"][clip:,modeWithMax]) >\
                             curMax*fracOfMax\
