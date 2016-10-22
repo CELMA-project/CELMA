@@ -379,7 +379,8 @@ class PlotProbes(object):
     #}}}
 
     #{{{plotZFFT
-    def plotZFFT(self, positionKey, maxMode, clip=True, plotLinear=True):
+    def plotZFFT(self, positionKey, maxMode, clip=True,\
+                 plotNonSaturated=True, plotLinear=True):
         r"""
         Plots the fourier transform at the given position.
 
@@ -400,19 +401,23 @@ class PlotProbes(object):
         clip : bool
             If True, the first three points (typically where the
             perturbed noise decays) is removed from the plot.
+        plotNonSaturated : bool
+            If True, the non saturated phase will be plotted as well
         plotLinear : bool
             If True, the linear phase will be plotted as well
         """
 
         #{{{plotFunc
-        def plotFunc(linear=False):
+        def plotFunc(plotRange="normal"):
             """
             The function which plots and saves the FFT plot
 
             Parameters
             ----------
-            linear : bool
-                If True, "linear" will be appended to the plot name.
+            plotRange : ["normal"|"nonSaturated"|"linear"]
+                * "normal" plots without restricting the end time
+                * "nonSaturated" plots all the way until the saturated state
+                * "linear" plots only the linear stage
             """
             # Create figure and colors
             # NOTE: We use a different colormap here to distinguish from the
@@ -428,10 +433,12 @@ class PlotProbes(object):
             for modeNr in range(1, maxMode+1):
                 # Clip where the modes has been added
                 clip = 3
-                if linear:
-                    linearClip = self._probes.results[positionKey]["zFFTLinearIndex"]
-                else:
-                    linearClip = None
+                if plotRange == "normal":
+                    endClip = None
+                elif plotRange == "nonSaturated":
+                    endClip = self._probes.results[positionKey]["zFFTNonSaturatedIndex"]
+                elif plotRange == "linear":
+                    endClip = self._probes.results[positionKey]["zFFTLinearIndex"]
 
                 #{{{ NOTE: We are dealing with a real signal:
                 #          As the fourier transform breaks the signal up
@@ -450,12 +457,12 @@ class PlotProbes(object):
                 # Magnitude of the signal
                 # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
                 posFreq = np.abs(self._probes.results[positionKey]["zFFT"]\
-                            [clip:linearClip, modeNr ])
+                            [clip:endClip, modeNr ])
                 negFreq = np.abs(self._probes.results[positionKey]["zFFT"]\
-                            [clip:linearClip, -modeNr])
+                            [clip:endClip, -modeNr])
                 modeMag = (posFreq + negFreq)/N
 
-                ax.plot(self._probes.time[clip:linearClip],\
+                ax.plot(self._probes.time[clip:endClip],\
                         modeMag,\
                         color=colors[modeNr-1],\
                         label=r"$k_\theta={}$".format(modeNr),
@@ -496,14 +503,18 @@ class PlotProbes(object):
                 plt.show()
 
             if self._savePlot:
-                if linear:
-                    linearOrNot = "Linear"
-                else:
-                    linearOrNot = ""
+
+                if plotRange == "normal":
+                    extraString = ""
+                elif plotRange == "nonSaturated":
+                    extraString = "NonSaturated"
+                elif plotRange == "linear":
+                    extraString = "Linear"
+
                 fileName = "{}{}.{}".\
                     format(os.path.join(self._savePath,\
                                 "zFFT_at_{}".format(positionKey)),\
-                           linearOrNot,\
+                           extraString,\
                            self._extension)
                 self._probes.helper.savePlot(fig, fileName)
 
@@ -511,9 +522,10 @@ class PlotProbes(object):
         #}}}
 
         # Call the plot function
-        plotFunc(linear=False)
-
+        plotFunc(plotRange="normal")
+        if plotNonSaturated:
+            plotFunc(plotRange="nonSaturated")
         if plotLinear:
-            plotFunc(linear=True)
+            plotFunc(plotRange="linear")
     #}}}
 #}}}

@@ -166,7 +166,7 @@ class Plot(object):
         # Make the PlotHelper object
         # Public as used in the driver
         self.helper = PlotHelper(path                                 ,\
-                                 t                                    ,\
+                                 t                 = t                ,\
                                  xguards           = xguards          ,\
                                  yguards           = yguards          ,\
                                  convertToPhysical = convertToPhysical,\
