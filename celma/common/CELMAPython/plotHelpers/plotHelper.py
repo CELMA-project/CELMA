@@ -15,9 +15,10 @@ class PlotHelper(object):
     """Contains common routines used when making plots"""
 
     #{{{__init__
-    def  __init__(self,\
-                  path,\
-                  t,\
+    def  __init__(self                     ,\
+                  path                     ,\
+                  t                 = None ,\
+                  useSpatial        = True ,\
                   xguards           = False,\
                   yguards           = False,\
                   convertToPhysical = False):
@@ -35,6 +36,8 @@ class PlotHelper(object):
             The path to collect from.
         t : array
             The time array.
+        useSpatial : bool
+            Whether or not to collect the spatial domain.
         xguards : bool
             If xguards should be included when collecting.
         yguards : bool
@@ -45,14 +48,17 @@ class PlotHelper(object):
         #}}}
 
         # Set the member data
-        self._path              = path
-        self._xguards           = xguards
-        self._yguards           = yguards
+        self._path             = path
+        self._xguards          = xguards
+        self._yguards          = yguards
         self.convertToPhysical = convertToPhysical
-        self.t                  = t
+        self.t                 = t
 
-        # Get the coordinates
-        self.rho, self.theta, self.z = self._getCoordinates()
+        if self._useSpatial:
+            # Get the coordinates
+            self.rho, self.theta, self.z = self._getCoordinates()
+        else:
+            self.rho, self.theta, self.z = None, None, None
 
         # Get the conversionDict
         self._convDict = self._getConversionDict()
@@ -299,7 +305,6 @@ class PlotHelper(object):
     #}}}
 
     #{{{physicalUnitsConverter
-    # FIXME: Add growthrates
     def physicalUnitsConverter(self, var, varName):
         #{{{docstring
         """
@@ -373,14 +378,23 @@ class PlotHelper(object):
                 var *= self._convDict["omCI"]*\
                        self._convDict["n0"]
                 units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
-            elif varName == "t":
-                var /= self._convDict["omCI"]
+            elif varName == "t" or varName == "growthRate":
+                if var is None:
+                    var = None
+                else:
+                    var /= self._convDict["omCI"]
                 units = r"\mathrm{s}"
             elif varName == "rho":
-                var *= self._convDict["rhoS"]
+                if var is None:
+                    var = None
+                else:
+                    var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
             elif varName == "z":
-                var *= self._convDict["rhoS"]
+                if var is None:
+                    var = None
+                else:
+                    var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
             elif "EE" in varName:
                 # NOTE: The masses are not included in the integral

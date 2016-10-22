@@ -107,7 +107,7 @@ class PlotEnergy(object):
 
         # Make the PlotHelper object
         self._helper = PlotHelper(paths[0]                                   ,\
-                                  energy["t"]                                ,\
+                                  t                 = energy["t"]            ,\
                                   xguards           = False                  ,\
                                   yguards           = False                  ,\
                                   convertToPhysical = convertToPhysical,\
@@ -119,10 +119,6 @@ class PlotEnergy(object):
         for key in list(self._energy.keys()):
             self._energy[key], self._energy[key+"Norm"], self._energy[key+"Units"] =\
                 self._helper.physicalUnitsConverter(self._energy[key], key)
-
-        # Set default time label
-        self._timeLabel = self._helper.tTxtDict["tTxtLabel"].\
-                          format(self._helper.tTxtDict)
 
         # Set the variable label
         if self._helper.convertToPhysical:
@@ -151,11 +147,6 @@ class PlotEnergy(object):
         ----------
         speciesType : ["electron"|"ion"]
             What species one should plot for
-
-        Return
-        ------
-        self._energy : dict
-            A dictionary of the self._energy
         """
 
         # Create the plot
