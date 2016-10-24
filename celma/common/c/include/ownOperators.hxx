@@ -73,6 +73,8 @@ class OwnOperators
         Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
         //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry
         Vector3D Grad_perp(const Field3D &f);
+        //! Operator for \f$\partial_z_\mathbf{v}\f$ in cylinder geometry
+        Vector3D DDY(const Vector3D &f);
 
         /* NOTE: Child classes can have new memberfunctions...
          *       which are not declared in the parent class.

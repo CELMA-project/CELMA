@@ -24,6 +24,11 @@ OwnBCs::OwnBCs()
      */
     piIndex = (mesh->ngz -1)/2;
 
+    /* NOTE: xend
+     *       xend = index value of last inner point on this processor
+     *       xend+1 = first guard point
+     */
+    firstOuterXGhost = mesh->xend+1;
     /* NOTE: yend
      *       yend = index value of last inner point on this processor
      *       yend+1 = first guard point
@@ -124,6 +129,33 @@ void OwnBCs::innerRhoCylinder(Field3D &f)
         if (mesh->lastY()){
             // Note that ngy starts counting from 1
             innerRhoCylinderLoop(f, firstUpperYGhost, mesh->ngy - 1);
+        }
+    }
+}
+
+/*!
+ * Extrapolates to the first upper ghost point using a 4th order Newton
+ * polynomial
+ *
+ * \param[in] f The original field
+ * \param[out] f The field after extrapolating to the first upper ghost point
+ *
+ * \sa extrapolateYGhost
+ */
+void OwnBCs::extrapolateXOutGhost(Field3D &f)
+{
+    TRACE("Halt in OwnBCs::extrapolateXOutGhost");
+
+    if (mesh->lastX()){
+        for(int yInd = mesh->ystart; yInd <= mesh->xend; yInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                f(firstOuterXGhost, yInd, zInd) =
+                      4.0*f(firstOuterXGhost-1, yInd, zInd)
+                    - 6.0*f(firstOuterXGhost-2, yInd, zInd)
+                    + 4.0*f(firstOuterXGhost-3, yInd, zInd)
+                    -     f(firstOuterXGhost-4, yInd, zInd)
+                    ;
+            }
         }
     }
 }

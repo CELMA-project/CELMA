@@ -526,6 +526,35 @@ Vector3D OwnOperators::Grad_perp(const Field3D &f)
 }
 
 /*!
+ * \f$\partial_z_\mathbf{v}\f$. We note that in cylindrical geometry, all the
+ * metrics are independant of \f$z\f$. Hence, this operator only calls the DDY
+ * for each vector component.
+ *
+ * \param[in] f The original vector field
+ *
+ * \warning Only siutable for cylindrical geometry
+ *
+ * \return result The result of the operation.
+ */
+Vector3D OwnOperators::DDY(const Vector3D &v)
+{
+    TRACE("Halt in OwnOperators::DDY");
+    Vector3D result;
+
+    result.covariant = v.covariant;
+
+    /* NOTE: DDY is the name of the member function, but we would like to call
+     *       the function from the global scope. Using the scope operation
+     *       without a namespace fixes this
+     */
+    result.x = ::DDY(v.x);
+    result.y = ::DDY(v.y);
+    result.z = ::DDY(v.z);
+
+    return result;
+}
+
+/*!
  * Getter for incXBndry
  *
  * \return incXBndry Used to determine if derivatives of the ghost cells are
