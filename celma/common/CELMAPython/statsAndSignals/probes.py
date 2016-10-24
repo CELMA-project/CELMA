@@ -566,6 +566,12 @@ class Probes(object):
                 # Linear phase
                 curIndicesEndLinear = np.where(magnitude >= 1e-7)
                 if len(curIndicesEndLinear) > 0:
+                    # First index where value is above 1e-7
+                    try:
+                        curIndicesEndLinear = curIndicesEndLinear[0][0]
+                    except IndexError as ie:
+                        if "index 0 is out of bounds" in ie.args[0]:
+                            curIndicesEndLinear = firstIndexEndLinear
                     if curIndicesEndLinear < firstIndexEndLinear:
                         firstIndexEndLinear = curIndicesEndLinear 
 

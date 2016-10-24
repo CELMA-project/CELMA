@@ -54,7 +54,7 @@ class PlotHelper(object):
         self.convertToPhysical = convertToPhysical
         self.t                 = t
 
-        if self._useSpatial:
+        if useSpatial:
             # Get the coordinates
             self.rho, self.theta, self.z = self._getCoordinates()
         else:
@@ -335,7 +335,13 @@ class PlotHelper(object):
             normalization = ""
             # Calculate back to physical units
             if varName == "n":
+                # NOTE: n0 is input parameter, but n is from an evolving
+                #       field
                 var *= self._convDict["n0"]
+                units = r"\mathrm{m}^{-3}"
+            elif varName == "nn":
+                # NOTE: nn is an input parameter, and is thus already
+                #       given in physcial units
                 units = r"\mathrm{m}^{-3}"
             elif varName == "vort":
                 var *= self._convDict["omCI"]
@@ -344,6 +350,10 @@ class PlotHelper(object):
                 var *= self._convDict["omCI"]*\
                        self._convDict["n0"]
                 units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
+            elif varName == "B0":
+                # NOTE: B0 is an input parameter, and is thus already
+                #       given in physcial units
+                units = r"\mathrm{T}"
             elif varName == "phi":
                 var *= self._convDict["Te0"]/cst.e
                 units = r"\mathrm{J}\mathrm{C}^{-1}"
@@ -390,6 +400,10 @@ class PlotHelper(object):
                 else:
                     var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
+            elif varName == "Ly":
+                # NOTE: Ly is an input parameter, and is thus already
+                #       given in physcial units
+                units = r"\mathrm{m}"
             elif varName == "z":
                 if var is None:
                     var = None
@@ -416,11 +430,23 @@ class PlotHelper(object):
             units = ""
             # Return normalization
             if varName == "n":
+                # NOTE: n0 is input parameter, but n is from an evolving
+                #       field
+                normalization = r"/n_0"
+            elif varName == "nn":
+                # NOTE: nn is an input parameter, and is by default
+                #       given in physcial units
+                var /= self._convDict["n0"]
                 normalization = r"/n_0"
             elif varName == "vort":
                 normalization = r"/\omega_{{ci}}"
             elif varName == "vortD":
                 normalization = r"/\omega_{{ci}}n_0"
+            elif varName == "B0":
+                # NOTE: B0 is an input parameter, and is thus already
+                #       given in physcial units
+                # FIXME: Check if it is correct that B0 = B
+                normalization = r""
             elif varName == "phi":
                 normalization = r" q/T_{{e,0}}"
             elif varName == "jPar":
@@ -436,6 +462,11 @@ class PlotHelper(object):
             elif varName == "t":
                 normalization = r"\omega_{{ci}}"
             elif varName == "rho":
+                normalization = r"/\rho_s"
+            elif varName == "Ly":
+                # NOTE: B0 is an input parameter, and is thus already
+                #       given in physcial units
+                var /= self._convDict["rhoS"]
                 normalization = r"/\rho_s"
             elif varName == "z":
                 normalization = r"/\rho_s"

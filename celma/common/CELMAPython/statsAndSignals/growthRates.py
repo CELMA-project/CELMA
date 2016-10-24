@@ -5,12 +5,11 @@ Contains functions to calculate and plot the angular frequency and
 growth rate of a time trace of a spatial FFT
 """
 
-# FIXME: Correct save path
-# FIXME: To class
 from ..plotHelpers import PlotHelper
 import numpy as np
 import matplotlib.pylab as plt
 from matplotlib.gridspec import GridSpec
+import os
 
 #{{{linRegOfExp
 def linRegOfExp(x,y):
@@ -419,27 +418,6 @@ class PlotGrowthRates(object):
                                   convertToPhysical = convertToPhysical,\
                                  )
 
-        # FIXME: Check how to multiply a dataframe
-        #        YOU ARE HERE
-        # Get the units (eventually convert to physical units)
-        # NOTE: Need to cast to a list to avoid
-        #       "RuntimeError: dictionary changed size during iteration"
-        for key in list(self._energy.keys()):
-            self._energy[key], self._energy[key+"Norm"], self._energy[key+"Units"] =\
-                self._helper.physicalUnitsConverter(self._energy[key], key)
-
-        # FIXME: FixME
-        # Set the variable label
-        if self._helper.convertToPhysical:
-            self._varLabel = r"$\mathrm{{Energy}}$ $[{}]$".\
-                                  format(self._energy["totKinEIUnits"])
-        else:
-            self._varLabel = r"$\mathrm{{Energy}}{}$".\
-                                  format(self._energy["totKinEINorm"])
-
-        # Set the generic legend
-        self._genLeg = r"$E_{{{}, {}}}$"
-
         # Set the plot size
         self._pltSize = pltSize
 
@@ -462,93 +440,6 @@ class PlotGrowthRates(object):
         self._markeredgewidth = 3
         self._all = slice(None)
     #}}}
-
-    #{{{plotEnergies
-    def plotEnergies(self, speciesType):
-        """
-        Plots the energies
-
-        Parameters
-        ----------
-        speciesType : ["electron"|"ion"]
-            What species one should plot for
-
-        Return
-        ------
-        self._energy : dict
-            A dictionary of the self._energy
-        """
-
-        # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
-        gs = GridSpec(nrows=3, ncols=1)
-        axes = {"totAx"  : fig.add_subplot(gs[0])}
-        axes["parAx" ] = fig.add_subplot(gs[1], sharex=axes["totAx"])
-        axes["perpAx"] = fig.add_subplot(gs[2], sharex=axes["totAx"])
-
-        if speciesType == "electrons":
-            searchString = "EE"
-            species = "e"
-        elif speciesType == "ions":
-            searchString = "EI"
-            species = "i"
-        else:
-            message = "speciesType {} not implemented.".format(speciesType)
-            raise NotImplementedError(message)
-
-        # Find the keys to plot
-        keys = [key for key in self._energy.keys()\
-                if (searchString in key)\
-                and ("Units" not in key)\
-                and ("Norm" not in key)]
-
-        for nr, key in enumerate(keys):
-            if "tot" in key:
-                ax    = axes["totAx"]
-                label = self._genLeg.format(species, r"\mathrm{tot}")
-                color = self._colors[0]
-            elif "par" in key:
-                ax    = axes["parAx"]
-                label = self._genLeg.format(species, r"\parallel")
-                color = self._colors[1]
-            elif "perp" in key:
-                ax    = axes["perpAx"]
-                label = self._genLeg.format(species, r"\perp")
-                color = self._colors[2]
-            ax.plot(self._energy["t"],\
-                    self._energy[key],\
-                    color = color    ,\
-                    label = label)
-
-        # Turn of x-labels
-        axes["totAx"].tick_params(labelbottom="off")
-        axes["parAx"].tick_params(labelbottom="off")
-        # Set axis labels
-        axes["parAx"] .set_ylabel(self._varLabel, labelpad=50)
-        axes["perpAx"].set_xlabel(self._timeLabel)
-
-        # Make the plot look nice
-        for key in ["totAx", "parAx", "perpAx"]:
-            self._helper.makePlotPretty(axes[key]              ,\
-                                        yprune   = "both"      ,\
-                                        rotation = 45          ,\
-                                        loc      = "lower right")
-
-        # Adjust the subplots
-        fig.subplots_adjust(hspace=0)
-
-        if self._showPlot:
-            plt.show()
-
-        if self._savePlot:
-            fileName = "{}.{}".\
-                format(os.path.join(self._savePath,\
-                       "{}Energy".format(species)),\
-                       self._extension)
-            self._helper.savePlot(fig, fileName)
-
-        plt.close(fig)
-    #}}}
     
     #{{{plotGrowthRates
     def plotGrowthRates(self):
@@ -558,17 +449,16 @@ class PlotGrowthRates(object):
         """
         #}}}
     
-        # FIXME: T ALWAYS NORMALIZED WITH OMCI
-        # FIXME: Other normalizations
-
         # Loop through the figures
         for plotLabel in self._df.index.levels[0]:
-            fig = plt.figure(figsize = figSize)
+            fig = plt.figure(figsize = self._pltSize)
             gs  = GridSpec(nrows=2, ncols=1)
     
             imAx   = fig.add_subplot(gs[0])
             realAx = fig.add_subplot(gs[1], sharex=imAx)
     
+            plotLabelSplit = plotLabel.split("=")
+
             # We can now access unsing the loc method
             # The syntax is
             # self._df.loc[("indexLevel1", "indexLevel2", ...),\
@@ -583,11 +473,35 @@ class PlotGrowthRates(object):
                 message="{0}{1}WARNING: Only NaNs found in {2}. Skipping{1}{0}"
                 print(message.format("\n", "!"*4, ke.args[0]))
                 continue
-            yAxisIm=self._df.loc[(plotLabel, "growthRate"), self._all].values
-            yErrIm =self._df.loc[(plotLabel, "growthRateStd"), self._all].values
-            yAxisRe=self._df.loc[(plotLabel, "angFreq"), self._all].values
-            yErrRe =self._df.loc[(plotLabel, "angFreqStd"), self._all].values
-    
+
+            yAxisIm=self._df.loc[(plotLabel,"growthRate"), self._all].values
+            yErrIm =self._df.loc[(plotLabel,"growthRateStd"), self._all].values
+            yAxisRe=self._df.loc[(plotLabel,"angFreq"), self._all].values
+            yErrRe =self._df.loc[(plotLabel,"angFreqStd"), self._all].values
+
+            indexTxt =\
+                self._df.loc[(plotLabel, "growthRate"), self._all].index[0].\
+                                                                split("=")[0]
+
+            # Convert units
+            plotLabelSplit[-1], plotLabelNorm, plotLabelUnits =\
+                self._helper.physicalUnitsConverter(plotLabelSplit[-1],\
+                                                    plotLabelSplit[0])
+            # NOTE: The whole dataframe can be multiplied using
+            #       df.multiply, but we here only multiply the array for
+            #       cleaner "helper" code
+            xAxis, xAxisNorm, xAxisUnits =\
+                self._helper.physicalUnitsConverter(xAxis  , indexTxt)
+            yAxisIm, yAxisNorm, yAxisUnits =\
+                self._helper.physicalUnitsConverter(yAxisIm, "t")
+            yErrIm, _, _  =\
+                self._helper.physicalUnitsConverter(yErrIm , "t")
+            yAxisRe, _, _ =\
+                self._helper.physicalUnitsConverter(yAxisRe, "t")
+            yErrRe, _, _  =\
+                self._helper.physicalUnitsConverter(yErrRe , "t")
+
+            # Plot the growth rates
             (_, caps, _) = imAx.errorbar(xAxis,\
                                          yAxisIm,\
                                          yerr=yErrIm,\
@@ -611,34 +525,47 @@ class PlotGrowthRates(object):
             imAx  .margins(x=0.1, y=0.1)
             realAx.margins(x=0.1, y=0.1)
     
-            # FIXME: Rotation
-            PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = None)
-            PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = None)
+            rot = None if indexTxt == "modeNr" else 45
+            PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = rot)
+            PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = rot)
     
-            suptitleSplit = plotLabel.split("=")
-            suptitle = "{}$={}$".\
-                format(self._mapToPltText[suptitleSplit[0]], suptitleSplit[1])
+            # Set the text
+            if self._helper.convertToPhysical:
+                suptitle = "{}$={}$ $[{}]$".\
+                    format(self._mapToPltText[plotLabelSplit[0]],\
+                           plotLabelSplit[1],\
+                           plotLabelUnits)
+                imLabel = r"$\omega_I$ $[{}]$".format(yAxisUnits)
+                reLabel = r"$\omega_R$ $[{}]$".format(yAxisUnits)
+            else:
+                suptitle = "{}$={}{}$".\
+                    format(self._mapToPltText[plotLabelSplit[0]],\
+                           plotLabelSplit[1],\
+                           plotLabelNorm)
+                imLabel = r"$\omega_I{}$".format(yAxisNorm)
+                reLabel = r"$\omega_R{}$".format(yAxisNorm)
+
             fig.suptitle(suptitle)
-            imAx  .set_ylabel("$\omega_I$ $[]$")
-            realAx.set_ylabel("$\omega_R$ $[]$")
+            imAx  .set_ylabel(imLabel)
+            realAx.set_ylabel(reLabel)
     
             imAx.tick_params(labelbottom="off")
-            indexTxt =\
-                self._df.loc[(plotLabel, "growthRate"), self._all].index[0].\
-                                                                split("=")[0]
             xlabel = self._mapToPltText[indexTxt]
             realAx.set_xlabel(xlabel)
     
             # Adjust the subplots
             fig.subplots_adjust(hspace=0)
     
-            # Sort the xAxis, remove NaN's, and use them as ticks
-            ticks = [el for el in xAxis if not(np.isnan(el))]
-            # +1 as arange excludes the last point
-            ticks = list(np.arange(np.min(ticks), np.max(ticks)+1))
-    
-            xAxis.sort()
-            realAx.xaxis.set_ticks(xAxis)
+            # Sort the xAxis and yAxis, remove NaN's, and use them as ticks
+            xAxis, yAxisIm = zip(*sorted(zip(xAxis, yAxisIm)))
+            nonNan = np.where(np.isfinite(yAxisIm))[0]
+            # Cut the NaN values from the xAxis (plus 1 as slice
+            # excludes the last)
+            ticks = list(xAxis[nonNan[0]:nonNan[-1]+1])
+            
+            # Set the ticks
+            realAx.xaxis.set_ticks(ticks)
+            imAx  .xaxis.set_ticks(ticks)
     
             if self._savePlot:
                 fileName = "{}.{}".\
