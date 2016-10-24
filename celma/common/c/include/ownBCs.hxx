@@ -20,6 +20,7 @@ class OwnBCs
     private:
         // Data members
         int piIndex;          //!< Index corresponding to \f$\pi\f$
+        int firstOuterXGhost; //!< Given that the processor has a boundary
         int firstUpperYGhost; //!< Given that the processor has a boundary
         int firstLowerYGhost; //!< Given that the processor has a boundary
 
@@ -62,7 +63,9 @@ class OwnBCs
         // Member functions
         //! Specify ghost at inner \f$\rho\f$
         void innerRhoCylinder(Field3D &the_field);
-        //! Extrapolate the first yup and ydown ghost point
+        //! Specify ghost at outer \f$\rho\f$
+        void extrapolateXOutGhost(Field3D &f);
+        //! Extrapolate to first outer ghost
         void extrapolateYGhost(Field3D &f);
         //! Extrapolate to first upper ghosts
         void extrapolateYUp(Field3D &f);
