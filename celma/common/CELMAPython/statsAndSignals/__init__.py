@@ -8,4 +8,4 @@ from .polAvg import polAvg
 from .energy import collectEnergy, PlotEnergy
 from .probes import PerpPlaneProbes, Probes
 from .probesPlotter import PlotProbes
-from .growthRates import calcGrowthRate, plotGrowthRates
+from .growthRates import calcGrowthRate, PlotGrowthRates
