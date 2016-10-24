@@ -86,7 +86,7 @@ class Drivers1D2D(Drivers1D, Drivers2D):
                     target = self.plot1DAnd2DDriver,\
                     args   = ()                    ,\
                     kwargs = {}
-                   )
+                   ).start()
 
             # Plot fluctuation fields
             self._setSubPolAvg(True)
@@ -94,7 +94,7 @@ class Drivers1D2D(Drivers1D, Drivers2D):
                     target = self.plot1DAnd2DDriver,\
                     args   = ()                    ,\
                     kwargs = {}
-                   )
+                   ).start()
             #}}}
         else:
             #{{{ Normal function call
