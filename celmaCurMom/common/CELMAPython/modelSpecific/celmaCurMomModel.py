@@ -17,6 +17,8 @@ def getOrgObjFromModel(path, labelName):
         orgObj = momDensParFields(path)
     elif labelName == "vortDFields":
         orgObj = getVortDFields(path)
+    elif labelName == "vortFields":
+        orgObj = getVortFields(path)
     else:
         raise NotImplementedError("{} is not implemented".format(labelName))
 
@@ -185,5 +187,40 @@ def getVortDFields(path):
          r"D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D"             ))
 
     return vortD
+#}}}
+
+#{{{getVortFields
+def getVortFields(path):
+    """
+    Prepares the vort fields
+    """
+
+    # Making the orgObj instance
+    vort = Organizer(r"\Omega", combLineName="vort",\
+                      useCombinedPlot=True, path = path)
+    # Making lines in the pattern name, lable, plotPos
+    vort.lines.append(Line("vortNeutral"                       ,\
+         r"-\nu_{in}n\Omega"                                   ))
+    vort.lines.append(Line("potNeutral"                        ,\
+         r"-\nu_{in}\nabla_\perp \phi \cdot \nabla_\perp n"    ))
+    vort.lines.append(Line("vortAdv"                           ,\
+         r"-\frac{1}{JB}\{\phi, \Omega\}"                      ))
+    vort.lines.append(Line("vortParAdv"                        ,\
+         r"-u_{i,\parallel}\partial_\parallel\Omega"           ))
+    vort.lines.append(Line("DDYGradPerpPhiGradPerpUI"          ,\
+         r"-\partial_\parallel \left( \nabla_\perp \phi\right)"+\
+         r"\cdot \nabla_\perp u_{i,\parallel}"                 ))
+    vort.lines.append(Line("divSourcePhi"                      ,\
+        r"-\nabla\cdot\left(S\nabla_\perp\phi\right)"          ))
+    vort.lines.append(Line("divParCur"                         ,\
+        r"\partial_{\parallel}j_{\parallel}"                   ))
+    vort.lines.append(Line("divParCur"                         ,\
+        r"\partial_{\parallel}j_{\parallel}"                   ))
+    vort.lines.append(Line("vortParArtVisc"                    ,\
+         r"D_{\Omega} \partial^2_{\parallel}\Omega"            ))
+    vort.lines.append(Line("vortPerpArtVisc"                   ,\
+         r"D_{\Omega, \perp} \nabla_\perp^2\Omega"             ))
+
+    return vort
 #}}}
 #}}}

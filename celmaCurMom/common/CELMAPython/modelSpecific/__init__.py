@@ -9,6 +9,7 @@ labelNames = ["mainFields",\
               "jParFields",\
               "momDensParFields",\
               "vortDFields",\
+              "vortFields",\
               ]
 
 varAndPlotNames = [
