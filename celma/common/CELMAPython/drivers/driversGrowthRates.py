@@ -5,10 +5,11 @@ Contains drivers for calculation of the growth rates
 """
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import PerpPlaneProbes, calcGrowthRate, plotGrowthRates
+from ..statsAndSignals import PerpPlaneProbes, calcGrowthRate, PlotGrowthRates
+from multiprocessing import Process, Pool
+from collections import ChainMap
 import pandas as pd
 import numpy as np
-from multiprocessing import Process
 
 #{{{DriversGrowthRates
 class DriversGrowthRates(StatsAndSignalsDrivers):
@@ -83,66 +84,107 @@ FIXME:
         # Sort the folders (ensures that they come in the right order)
         self._dmp_folder.sort()
         self._steadyStatePaths.sort()
-        for path, steadyStatePath in zip(self._paths, self._steadyStatePaths):
-            # FIXME: The loop is parallelizable
-            # We only find the growth rates at position of highest gradient,
-            # as we from theory expect the highest growth rates to be there
-            curProbe = PerpPlaneProbes(\
-                          self._var                                    ,\
-                          paths               = path                   ,\
-                          yInd                = self._yInd             ,\
-                          convertToPhysical   = self._convertToPhysical,\
-                          steadyStatePath     = steadyStatePath        ,\
-                          nProbes             = 1                      ,\
-                          radialProbesIndices = None                   ,\
-                         )
 
-            # Initialize the probes in order to calculate
-            curProbe.initializeInputOutput(curProbe.radialProbesIndices,\
-                                           [curProbe.yInd],\
-                                           [0])
+        # Obtain the growth rates dictionary
+        pathsAndSteadyStatePathsTuple =\
+                list(zip(self._paths, self._steadyStatePaths))
+        # Appendable list
+        listOfDicts = []
+        if self._useSubProcess:
+            with Pool(len(pathsAndSteadyStatePathsTuple)) as p:
+                listOfDicts =\
+                    p.map(self._getGrowthRatesDict,\
+                          pathsAndSteadyStatePathsTuple)
+        else:
+            for curTuple in pathsAndSteadyStatePathsTuple:
+                listOfDicts.append(\
+                        self._getGrowthRatesDict(curTuple))
 
-            # Calculate the FFT
-            curProbe.calcFFTs()
+        # Combine the dictionaries to one
+        self._growthRatesDict = dict(ChainMap(*listOfDicts))
+    #}}}
 
-            # Get the positionKey of the probe
-            positionKey = list(curProbe.results.keys())[0]
+    #{{{_getGrowthRatesDict
+    def _getGrowthRatesDict(self, pathsAndSteadyStatePathsTuple):
+        """
+        Obtain the growth rates
 
-            # Obtain the current scan value
-            if hasattr(path, "__iter__") and type(path) != str:
-                # The path is a list
-                scanValue = path[0].split("_")
-            else:
-                # The path is a string
-                scanValue = path.split("_")
-            # +1 as the value is immediately after the scan parameter
-            scanValue = scanValue[scanValue.index(self._scanParam)+1]
-            # The time and the time is clipped with three to clip away
-            # where initial modes decay
-            initClip = 3
-            # We will also clip so that approximately only the linear
-            # mode is present (less data to process)
-            linClip = curProbe.results[positionKey]["zFFTLinearIndex"]
-            if linClip <= initClip:
-                message = ("{0}{1}WARNING: "\
-                           "Could not find a proper startpoint for the "
-                           "linear stage{1}{0}")
-                linClip = None
-                print(message.format("\n"*2, "!"*5))
-            # Clipping modes and time
-            modes = curProbe.results[positionKey]["zFFT"][initClip:linClip, :]
-            time  = curProbe.time[initClip:linClip]
+        Parameters
+        ----------
+        pathsAndSteadyStatePathsTuple : tuple
+            Tuple of paths and steady state paths
 
-            # Find the growth rates
-            self._growthRatesDict["{}={}".format(self._scanParam, scanValue)]=\
-                    calcGrowthRate(modes   = modes,\
-                                   time    = time ,\
-                                   maxMode = self._maxMode)
+        Returns
+        -------
+        growthRatesDict : dict
+            Dictionary of the growth rates, where the scan parameter is
+            the outermost dict, and the modenumber is at the next level
+        """
+
+        # Unpack
+        path, steadyStatePath = pathsAndSteadyStatePathsTuple
+        # We only find the growth rates at position of highest gradient,
+        # as we from theory expect the highest growth rates to be there
+        curProbe = PerpPlaneProbes(\
+                      self._var                                    ,\
+                      paths               = path                   ,\
+                      yInd                = self._yInd             ,\
+                      convertToPhysical   = self._convertToPhysical,\
+                      steadyStatePath     = steadyStatePath        ,\
+                      nProbes             = 1                      ,\
+                      radialProbesIndices = None                   ,\
+                     )
+
+        # Initialize the probes in order to calculate
+        curProbe.initializeInputOutput(curProbe.radialProbesIndices,\
+                                       [curProbe.yInd],\
+                                       [0])
+
+        # Calculate the FFT
+        curProbe.calcFFTs()
+
+        # Get the positionKey of the probe
+        positionKey = list(curProbe.results.keys())[0]
+
+        # Obtain the current scan value
+        if hasattr(path, "__iter__") and type(path) != str:
+            # The path is a list
+            scanValue = path[0].split("_")
+        else:
+            # The path is a string
+            scanValue = path.split("_")
+        # +1 as the value is immediately after the scan parameter
+        scanValue = scanValue[scanValue.index(self._scanParam)+1]
+        # The time and the time is clipped with three to clip away
+        # where initial modes decay
+        initClip = 3
+        # We will also clip so that approximately only the linear
+        # mode is present (less data to process)
+        linClip = curProbe.results[positionKey]["zFFTLinearIndex"]
+        if linClip <= initClip:
+            message = ("{0}{1}WARNING: "\
+                       "Could not find a proper startpoint for the "
+                       "linear stage{1}{0}")
+            linClip = None
+            print(message.format("\n"*2, "!"*5))
+        # Clipping modes and time
+        modes = curProbe.results[positionKey]["zFFT"][initClip:linClip, :]
+        time  = curProbe.time[initClip:linClip]
+
+        # Find the growth rates
+        growthRatesDict =\
+            {"{}={}".format(self._scanParam, scanValue) :\
+                calcGrowthRate(modes   = modes,\
+                               time    = time ,\
+                               maxMode = self._maxMode)\
+            }
+
+        return growthRatesDict
     #}}}
 
     #{{{plotGrowthRates
     def plotGrowthRates(self):
-        """ Plot the growth rates"""
+        """Plot the growth rates"""
 
         # Calculate the probes if not already done
         if self._growthRatesDict == None:
@@ -215,20 +257,51 @@ FIXME:
         # And unstack              : Rotating row index to column index
         if self._useSubProcess:
             #{{{ Function call through subprocess
+            # We would like to have "Scan" on the x axis
+            df = growthRatesDF.unstack("Scan").stack("Data")
+            gRPlotterScan = PlotGrowthRates(\
+                                self._paths                                ,\
+                                growthRates       = df                     ,\
+                                convertToPhysical = self._convertToPhysical,\
+                                showPlot          = self._showPlot         ,\
+                                savePlot          = self._savePlot         ,\
+                                extension         = self._extension        ,\
+                                savePath          = self._savePath         ,\
+                                pltSize           = self._pltSize          ,\
+                                )
+            # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
+            #       and would've liked to swap "Mode" and "Scan" with the
+            #       current dataframe, we would have to
+            #
+            #       growthRatesDF =
+            #       growthRatesDF.unstack("Mode").stack("Scan").swaplevel()
+            #
+            #       The swap needed to make the "Data" the innermost level
+            # We would like to thave "Mode" on the x axis
+            df = growthRatesDF.unstack("Mode").stack("Data")
+            gRPlotterMNr = PlotGrowthRates(\
+                                self._paths                                ,\
+                                growthRates       = df                     ,\
+                                convertToPhysical = self._convertToPhysical,\
+                                showPlot          = self._showPlot         ,\
+                                savePlot          = self._savePlot         ,\
+                                extension         = self._extension        ,\
+                                savePath          = self._savePath         ,\
+                                pltSize           = self._pltSize          ,\
+                                )
+
             proc = {}
             # Create process
             proc["scanOnXAxis"] =\
                 Process(\
-                    target = plotGrowthRates                              ,\
-                    args   = (growthRatesDF.unstack("Scan").stack("Data")),\
-                    kwargs = {}                                            \
-                       )
+                    target = gRPlotterScan.plotGrowthRates(),\
+                    args   = ()                             ,\
+                    kwargs = {})
             proc["modeOnXAxis"] =\
                 Process(\
-                    target = plotGrowthRates                              ,\
-                    args   = (growthRatesDF.unstack("Mode").stack("Data")),\
-                    kwargs = {}                                            \
-                       )
+                    target = gRPlotterMNr.plotGrowthRates(),\
+                    args   = ()                            ,\
+                    kwargs = {})
 
             # Start processes
             for key in proc.keys():
@@ -240,7 +313,19 @@ FIXME:
         else:
             #{{{Normal function call
             # We would like to have "Scan" on the x axis
-            plotGrowthRates(df = growthRatesDF.unstack("Scan").stack("Data"))
+            df = growthRatesDF.unstack("Scan").stack("Data")
+            gRPlotter = PlotGrowthRates(\
+                            self._paths                                ,\
+                            growthRates       = df                     ,\
+                            convertToPhysical = self._convertToPhysical,\
+                            showPlot          = self._showPlot         ,\
+                            savePlot          = self._savePlot         ,\
+                            extension         = self._extension        ,\
+                            savePath          = self._savePath         ,\
+                            pltSize           = self._pltSize          ,\
+                            )
+
+            gRPlotter.plotGrowthRates()
             # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
             #       and would've liked to swap "Mode" and "Scan" with the
             #       current dataframe, we would have to
@@ -250,7 +335,18 @@ FIXME:
             #
             #       The swap needed to make the "Data" the innermost level
             # We would like to thave "Mode" on the x axis
-            plotGrowthRates(df = growthRatesDF.unstack("Mode").stack("Data"))
+            df = growthRatesDF.unstack("Mode").stack("Data")
+            gRPlotter = PlotGrowthRates(\
+                            self._paths                                ,\
+                            growthRates       = df                     ,\
+                            convertToPhysical = self._convertToPhysical,\
+                            showPlot          = self._showPlot         ,\
+                            savePlot          = self._savePlot         ,\
+                            extension         = self._extension        ,\
+                            savePath          = self._savePath         ,\
+                            pltSize           = self._pltSize          ,\
+                            )
+            gRPlotter.plotGrowthRates()
             #}}}
     #}}}
 #}}}
