@@ -45,9 +45,9 @@ public:
     // ############################################################################
     // Evolved variables
     // *****************************************************************************
-    Field3D jPar, momDensPar;     // Parallel velocities
+    Field3D jPar, momDensPar;  // Parallel velocities
     Field3D lnN;               // Logarithm of density
-    Field3D vortD;              // Vorticity like quantity
+    Field3D vortD;             // Vorticity like quantity
     // *****************************************************************************
 
     // Non-evolved stored fields
