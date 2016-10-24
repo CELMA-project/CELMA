@@ -137,10 +137,10 @@ class Drivers2D(FieldPlottersDriver):
                         }
         try:
             # Make the plotter object
-            plotter = Plot2D(self._dmp_folder           ,\
-                             self._varName              ,\
-                             var             = self._var,\
-                             **plotterKwargs            ,\
+            plotter = Plot2D(self._dmp_folder,\
+                             self._varName   ,\
+                             var = self._var ,\
+                             **plotterKwargs ,\
                             )
         except (KeyError, ValueError) as collectError:
 
@@ -182,7 +182,7 @@ class Drivers2D(FieldPlottersDriver):
 
                 self._var = np.exp(lnN)
                 #}}}
-            if self._varName == "jPar":
+            elif self._varName == "jPar":
                 #{{{jPar
                 lnN = collect("lnN"                     ,\
                               path    = self._dmp_folder,\
@@ -210,6 +210,14 @@ class Drivers2D(FieldPlottersDriver):
 
                 self._var = np.exp(lnN)*(uIPar - uEPar)
                 #}}}
+            elif self._varName == "vortD":
+                #{{{vortD
+                print("{0}{1}WARNING: vortD not found. Returning{1}{0}".\
+                        format("\n", "!"*4))
+                return
+                #}}}
+            else:
+                raise collectError
 
             # Make the plotter object
             plotter = Plot2D(self._dmp_folder           ,\
@@ -219,5 +227,9 @@ class Drivers2D(FieldPlottersDriver):
                             )
 
         plotter.plotDriver(self._pltName, savePath = self._savePath)
+
+        # Unset the variable if set (if this is not used, the variable
+        # will be reused if running in serial)
+        self._var = None
     #}}}
 #}}}
