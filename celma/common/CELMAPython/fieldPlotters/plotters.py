@@ -101,6 +101,11 @@ class Plot(object):
         """
         #}}}
 
+        # Set the bitrates, fps and codec for ffmpeg (currently magic numbers)
+        self._bitrate = 10000
+        self._fps     = 10
+        self._codec   = "h264"
+
         # Set member data from input
         self._path       = path
         self._xguards    = xguards
@@ -643,6 +648,18 @@ class Plot1D(Plot):
                                            )
 
             if self._savePlot:
+                if self._writer == "ffmpeg":
+                    FFMpegWriter = animation.writers['ffmpeg']
+                    # * bitrate is set high in order to have ok quality
+                    # * fps sets the speed
+                    #   http://stackoverflow.com/questions/22010586/matplotlib-animation-duration
+                    # * codec is by default mpeg4, but as this creates large
+                    #   files. h264 is preferred.
+                    # * For installation, see
+                    #   https://github.com/loeiten/usingLinux/blob/master/installationProcedures/ffmpeg.md
+                    self._writer = FFMpegWriter(bitrate = self._bitrate,\
+                                                fps     = self._fps    ,\
+                                                codec   = self._codec)
                 # Save the animation
                 anim.save(fileName + self._animExtension   ,\
                           writer = self._writer            ,\
@@ -1362,6 +1379,18 @@ class Plot2D(Plot):
                                            )
 
             if self._savePlot:
+                if self._writer == "ffmpeg":
+                    FFMpegWriter = animation.writers['ffmpeg']
+                    # * bitrate is set high in order to have ok quality
+                    # * fps sets the speed
+                    #   http://stackoverflow.com/questions/22010586/matplotlib-animation-duration
+                    # * codec is by default mpeg4, but as this creates large
+                    #   files. h264 is preferred.
+                    # * For installation, see
+                    #   https://github.com/loeiten/usingLinux/blob/master/installationProcedures/ffmpeg.md
+                    self._writer = FFMpegWriter(bitrate = self._bitrate,\
+                                                fps     = self._fps    ,\
+                                                codec   = self._codec)
                 # Save the animation
                 anim.save(fileName + self._animExtension,\
                           writer = self._writer         ,\
