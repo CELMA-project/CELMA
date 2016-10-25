@@ -490,7 +490,7 @@ if postProcessLinProfiles:
 #}}}
 
 #{{{Turbulence runner
-if postProcessTrub:
+if postProcessTurb:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
