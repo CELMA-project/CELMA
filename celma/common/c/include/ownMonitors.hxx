@@ -25,7 +25,10 @@ public:
                    std::vector<BoutReal> *kinE);
 
     //! Calculates the kinetic energy
-    void totalN(Field3D  const &n, BoutReal *N);
+    void potEnergy(Field3D const &n, BoutReal *potE);
+
+    //! Calculates the kinetic energy
+    void totalN(Field3D const &n, BoutReal *N);
 };
 
 
