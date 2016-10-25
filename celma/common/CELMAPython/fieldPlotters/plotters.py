@@ -102,7 +102,6 @@ class Plot(object):
         #}}}
 
         # Set the bitrates, fps and codec for ffmpeg (currently magic numbers)
-# Tried 10000, 5000
         self._bitrate = -1
         self._fps     = 10
         self._codec   = "h264"
