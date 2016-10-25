@@ -97,7 +97,7 @@ justPostProcess = True
 postProcessInit = True
 postProcessExp  = True
 postProcessLin  = True
-postProcessTrub = True
+postProcessTurb = True
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
@@ -490,7 +490,7 @@ if postProcessLinProfiles:
 #}}}
 
 #{{{Turbulence runner
-if postProcessTrub:
+if postProcessTurb:
     curPostProcessor = postBoutRunner
 else:
     curPostProcessor = None
