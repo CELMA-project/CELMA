@@ -94,15 +94,15 @@ def restartFromFunc(dmp_folder     = None,\
 # If you just want to post-process
 justPostProcess = True
 # Normal post-processors
-postProcessInit = False
-postProcessExp  = False
-postProcessLin  = False
-postProcessTrub = False
+postProcessInit = True
+postProcessExp  = True
+postProcessLin  = True
+postProcessTrub = True
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
 postProcessProbesAndEnergy = True
-postProcessGrowthRates     = False
+postProcessGrowthRates     = True
 
 #{{{Main options
 #{{{The scan
