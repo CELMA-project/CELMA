@@ -348,27 +348,28 @@ expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
 if postProcessLinProfiles or postProcessTurbProfiles:
     noutProfile                 = 3
     timestepProfile             = 10
+    restartProfile              = "overwrite"
     useHyperViscAzVortDProfile  = True
     saveTermsProfile            = True
 
-    # Create a new runner as we would like to save all the fields
-    profileRun = PBS_runner(\
+    # Create the options for the runners
+    # Notice that we would like to save all the fields here
+    profileRunOptions = {\
                   # Set temporal domain
-                  nout         = noutProfile    ,\
-                  timestep     = timestepProfile,\
+                  "nout"         : noutProfile    ,\
+                  "timestep"     : timestepProfile,\
                   # Set restart options
-                  restart      = restart        ,\
-                  restart_from = restartFromFunc,\
+                  "restart"      : restartProfile ,\
+                  "restart_from" : restartFromFunc,\
                   # Set additional options
-                  additional = [
-                                ('tag',theRunName,0),\
+                  "additional" : [
                                 ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortDProfile),\
                                 ('switch'      , 'saveTerms'          ,saveTermsProfile),\
                                ],\
-                  series_add = series_add                      ,\
+                  "series_add" : series_add       ,\
                   # Common options
-                  **commonRunnerKwargs                         ,\
-                  )
+                  **commonRunnerKwargs            ,\
+                        }
 #}}}
 
 #{{{The linear runner
@@ -398,10 +399,10 @@ post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
 # Post processing options
-tSlice           = slice(-500, None, 2)
-varyMaxMin       = True
-subPolAvg        = True
-mode             = "perpAndPol"
+tSlice     = slice(0, None, 2)
+varyMaxMin = True
+subPolAvg  = True
+mode       = "perpAndPol"
 #}}}
 #{{{Run and post processing
 linearRun = PBS_runner(\
@@ -461,11 +462,18 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a2-KiwiFlatElTempTi0-2-linearPhaseParProfiles"
+    theRunName = "a1-KiwiFlatElTemp-2-linearPhaseParProfiles"
     aScanPathProfiles = linear_dmp_folders[0]
-    tSlice = slice(-30, None, 10)
+    tSlice = None
 
-    _, _ = linearRun.execute_runs(\
+    # Add the tag and the run name
+    profileRunOptions["additional"].append(('tag',theRunName,0))
+    profileRunOptions["BOUT_run_name"] = theRunName
+
+    # Create the runner
+    profileRun = PBS_runner(**profileRunOptions)
+    # Execute
+    _, _ = profileRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
                                  # Declare dependencies
@@ -564,15 +572,25 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
 #{{{ If linear profiles are to be plotted
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a2-KiwiFlatElTempTi0-3-turbulentPhase1ParProfiles"
-    tSlice = slice(-30, None, 10)
+    theRunName = "a1-KiwiFlatElTemp-3-turbulentPhase1ParProfiles"
     aScanPathProfiles = turbo_dmp_folders[0]
+    tSlice = None
 
-    _, _ = turboRun.execute_runs(\
-                                 remove_old               = remove_old      ,\
+    # Add the tag and the run name
+    if postProcessLinProfiles:
+        # Tag is already present in the dict:
+        _ = profileRunOptions["additional"].pop()
+
+    profileRunOptions["additional"].append(('tag',theRunName,0))
+    profileRunOptions["BOUT_run_name"] = theRunName
+    # Create the runner
+    profileRun = PBS_runner(**profileRunOptions)
+    # Execute
+    _, _ = profileRun.execute_runs(\
+                                 remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
                                  # Declare dependencies
-                                 job_dependencies = PBS_ids         ,\
+                                 job_dependencies = PBS_ids,\
                                  # This function will be called every time after
                                  # performing a run
                                  post_process_after_every_run = True,\
@@ -594,7 +612,7 @@ if postProcessTurbProfiles:
 
 #{{{Growth rates (run this driver after all, as we need the collectionFolders)
 if postProcessGrowthRates:
-    scanParam  = "B0"
+    scanParam  = scanParameters[0]
     theRunName = "a2-KiwiFlatElTempTi0-growthRates"
     curPostProcessor = postBoutRunner
 
