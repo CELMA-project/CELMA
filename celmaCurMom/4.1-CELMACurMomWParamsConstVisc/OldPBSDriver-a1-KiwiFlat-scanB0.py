@@ -102,17 +102,18 @@ postProcessTurb = True
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
 postProcessProbesAndEnergy = True
-postProcessGrowthRates     = False
+postProcessGrowthRates     = True
 
 #{{{Main options
 #{{{The scan
-# NOTE: Calling this len will overshadow the len() function
-length = [1       , 2       , 4       , 6       , 8       , 10       ]
-Ly     = [102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346]
-scanParameters  = ["len", "Ly"]
+B0 = [1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2 , 6.0e-2  , 5.0e-2   ]
+Lx = [4.8296  , 4.3466  , 3.8637  , 3.3807 , 2.8978  , 2.4148   ]
+Ly = [270.4579, 243.4121, 216.3663, 189.3205, 162.2747, 135.2289]
+scanParameters  = ["B0", "Lx", "Ly"]
 series_add = [\
-              ('input', 'len', length),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'B0', B0),\
+              ('geom' , 'Lx', Lx),\
+              ('geom' , 'Ly', Ly),\
              ]
 #}}}
 #{{{The options for the post processing function
@@ -138,7 +139,7 @@ useSubProcess          = True
 #}}}
 #{{{File handeling options
 remove_old = False
-directory  = "a1-KiwiFlatZ"
+directory  = "a1-KiwiFlatMagField"
 make       = False
 cpy_source = True
 #}}}
@@ -197,7 +198,7 @@ else:
     curPostProcessor = None
 #{{{Init options
 # Name
-theRunName = "a1-KiwiFlatZ-0-initialize"
+theRunName = "a1-KiwiFlatMagField-0-initialize"
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
@@ -209,7 +210,7 @@ ownFilterType = "none"
 #Switches
 useHyperViscAzVortD = [False]
 # Specify the numbers used for the BOUT runs
-BOUT_walltime         = '08:00:00'
+BOUT_walltime         = '05:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '0:29:00'
@@ -283,9 +284,9 @@ useHyperViscAzVortD = [False]
 # From previous outputs
 aScanPath = init_dmp_folders[0]
 # Name
-theRunName = "a1-KiwiFlatZ-1-expand"
+theRunName = "a1-KiwiFlatMagField-1-expand"
 # PBS options
-BOUT_walltime         = '08:00:00'
+BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
 post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '0:29:00'
@@ -390,7 +391,7 @@ aScanPath = expand_dmp_folders[0]
 timestep  = [1]
 nout     = [500]
 # Name
-theRunName = "a1-KiwiFlatZ-2-linearPhase1"
+theRunName = "a1-KiwiFlatMagField-2-linearPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -461,11 +462,18 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
 #{{{ If linear profiles are to be plotted
 if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
-    theRunName = "a1-KiwiFlatZ-2-linearPhaseParProfiles"
+    theRunName = "a1-KiwiFlatElTemp-2-linearPhaseParProfiles"
     aScanPathProfiles = linear_dmp_folders[0]
-    tSlice = slice(-30, None, 10)
+    tSlice = None
 
-    _, _ = linearRun.execute_runs(\
+    # Add the tag and the run name
+    profileRunOptions["additional"].append(('tag',theRunName,0))
+    profileRunOptions["BOUT_run_name"] = theRunName
+
+    # Create the runner
+    profileRun = PBS_runner(**profileRunOptions)
+    # Execute
+    _, _ = profileRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
                                  # Declare dependencies
@@ -502,7 +510,7 @@ useHyperViscAzVortD = [True]
 nout     = [5000]
 timestep = [1]
 # Name
-theRunName = "a1-KiwiFlatZ-3-turbulentPhase1"
+theRunName = "a1-KiwiFlatMagField-3-turbulentPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -605,7 +613,7 @@ if postProcessTurbProfiles:
 #{{{Growth rates (run this driver after all, as we need the collectionFolders)
 if postProcessGrowthRates:
     scanParam  = scanParameters[0]
-    theRunName = "a1-KiwiFlatZ-growthRates"
+    theRunName = "a1-KiwiFlatMagField-growthRates"
     curPostProcessor = postBoutRunner
 
     # Make a list of list, where each sublist will be used as the paths
@@ -645,7 +653,7 @@ if postProcessGrowthRates:
 if postProcessProbesAndEnergy:
     collectionFolders = [linear_dmp_folders[0],\
                          turbo_dmp_folders[0]]
-    theRunName = "a1-KiwiFlatZ-all-energyProbesPlot"
+    theRunName = "a1-KiwiFlatMagField-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
 
     # Found from the overshoot at the energy plot
