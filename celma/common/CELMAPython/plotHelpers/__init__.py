@@ -26,6 +26,7 @@ except RuntimeError:
 plt.close(0)
 
 # Set the colorfunc
-seqCMap  = plt.get_cmap("viridis")
+seqCMap  = plt.get_cmap("inferno")
 seqCMap2 = plt.get_cmap("plasma")
+seqCMap3 = plt.get_cmap("viridis")
 divCMap  = plt.get_cmap("BrBG")

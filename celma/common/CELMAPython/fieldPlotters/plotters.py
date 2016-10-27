@@ -553,7 +553,8 @@ class Plot1D(Plot):
                                      tind    = self._tind   ,\
                                      info    = False)
             except ValueError:
-                pass
+                # Raise an OSError as this is excepted
+                raise OSError("Could not collect")
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
@@ -583,7 +584,8 @@ class Plot1D(Plot):
                                      tind    = self._tind   ,\
                                      info    = False)
             except ValueError:
-                pass
+                # Raise an OSError as this is excepted
+                raise OSError("Could not collect")
 
             # If Variable not saved each timestep
             if len(line.field.shape) == 3:
