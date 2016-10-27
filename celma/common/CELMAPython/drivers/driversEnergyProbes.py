@@ -58,8 +58,7 @@ class DriversEnergyProbes(DriversProbes, DriversEnergy):
         else:
             #{{{ Normal function call
             # Plot the energy
-# FIXME:
-#            self.plotEnergy()
+            self.plotEnergy()
 
             # Plot the probes
             self.plotProbes()

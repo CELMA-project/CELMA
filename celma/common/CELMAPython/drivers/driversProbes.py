@@ -103,11 +103,11 @@ class DriversProbes(StatsAndSignalsDrivers):
         # FIXME: Use subprocesses to calculate
         #        May have to define a calling classe, see
         #        http://stackoverflow.com/questions/35717109/python-class-object-sharing-between-processes-created-using-multiprocessing-modu
-#        self._probes.calcStatsMoments()
-#        self._probes.calcPDFs()
-#        self._probes.calcPSDs()
-#        self._probes.calcAvgFluxThroughVolumeElement(self._probes.radialExB,\
-#                                                     self._uName)
+        self._probes.calcStatsMoments()
+        self._probes.calcPDFs()
+        self._probes.calcPSDs()
+        self._probes.calcAvgFluxThroughVolumeElement(self._probes.radialExB,\
+                                                     self._uName)
         self._probes.calcFFTs()
 
         # Set the position of the FFT plot to be the middle of the probes
@@ -177,13 +177,12 @@ class DriversProbes(StatsAndSignalsDrivers):
             #}}}
         else:
             #{{{Normal function call
-# FIXME:
-#                probesPlotter.plotTimeTrace()
-#                probesPlotter.plotPDFs()
-#                probesPlotter.plotPSDs()
-#                probesPlotter.plotAvgFluxThroughVolumeElement(\
-#                                                    uName     = self._uName,\
-#                                                    labelName = self._labelName)
+                probesPlotter.plotTimeTrace()
+                probesPlotter.plotPDFs()
+                probesPlotter.plotPSDs()
+                probesPlotter.plotAvgFluxThroughVolumeElement(\
+                                                    uName     = self._uName,\
+                                                    labelName = self._labelName)
                 probesPlotter.plotZFFT(self._positionKey, self._maxMode)
             #}}}
     #}}}
