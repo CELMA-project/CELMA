@@ -110,7 +110,7 @@ class GenericScanDriver(object):
                     "commonRunnerOptions"  : False,\
                     "commonPlotterOptions" : False,\
                     "fieldPlotterOptions"  : False,\
-                    "probesPlotterOptions" : False,\
+                    "probePlotterOptions"  : False,\
                 }
 
         # Set default parameters
@@ -198,7 +198,7 @@ class GenericScanDriver(object):
         """
         #}}}
 
-        self._calledFunctions["setMainOptions"] = True
+        self._calledFunctions["mainOptions"] = True
 
         self._directory      = directory
         self._scanParameters = scanParameters
@@ -438,23 +438,23 @@ class GenericScanDriver(object):
         Calls the drivers used for running scans
         """
 
-        if not(self._calledFunctions["setMainOptions"]):
+        if not(self._calledFunctions["mainOptions"]):
             message = "self.setMainOptions must be called prior to a run"
             raise ValueError(message)
 
         for key, val in self._calledFunctions.items():
             if val == True:
-                print("{} has been called".format(key))
+                print("{:<25} has been called".format(key))
             else:
-                print("{} is not called (using defaults)".format(key))
+                print("{:<25} is not called (using defaults)".format(key))
 
         # Make dictionary to variables
         for (flag, value) in self._postProcessingFlags.items():
             setattr(self, flag, value)
 
         # Update dicts
-        self._fieldPlotterOptions.upate(self._commonPlotterOptions)
-        self._commonPlotterOptions["directory"] = self._directory
+        self._fieldPlotterOptions.update(self._commonPlotterOptions)
+        self._commonRunnerOptions["directory"] = self._directory
 
         #{{{Init runner
         if self.postProcessInit:
@@ -481,7 +481,7 @@ class GenericScanDriver(object):
         post_process_walltime = '0:29:00'
         post_process_queue    = 'xpresq'
         # Post processing option
-        tSlice     = slice(-2, None)
+        tSlice = None
         #}}}
         #{{{Run and post processing
         initRunner = PBS_runner(\
@@ -558,7 +558,7 @@ class GenericScanDriver(object):
         post_process_walltime = '0:29:00'
         post_process_queue    = 'xpresq'
         # Post processing option
-        tSlice     = slice(-2, None)
+        tSlice = None
         #}}}
         #{{{Run and post processing
         expandRunner = PBS_runner(\
@@ -781,7 +781,7 @@ class GenericScanDriver(object):
         post_process_walltime = '03:00:00'
         post_process_queue    = 'workq'
         # Post processing options
-        tSlice    = slice(-5000, None, 10)
+        tSlice    = slice(0, None, 10)
         aScanPath = linear_dmp_folders[0]
         #}}}
         #{{{Run and post processing
