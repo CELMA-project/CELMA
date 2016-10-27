@@ -518,12 +518,17 @@ class PlotHelper(object):
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         # Plot the legend
-        if ax.get_legend() is not None:
+        try:
             leg = ax.legend(loc       = loc ,\
                             fancybox  = True,\
                             numpoints = 1   ,\
                             )
             leg.get_frame().set_alpha(0.5)
+        except AttributeError as ae:
+            if "NoneType" in ae.args[0] and "get_frame" in ae.args[0]:
+                print("{0}{1}WARNING: Could not set legend{1}{0}".format("\n","!"*4))
+            else:
+                raise ae
         # Plot the grid
         ax.grid()
         # Make sure no collision between the ticks

@@ -2,7 +2,7 @@
 
 """ Collection of plotting results for the probes """
 
-from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap2
+from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from matplotlib.gridspec import GridSpec
@@ -60,7 +60,7 @@ class PlotProbes(object):
         self._alpha     = 0.7
 
         # Get the colors
-        self._colors = seqCMap(np.linspace(0, 1, len(probes.probesKeys)))
+        self._colors = seqCMap3(np.linspace(0, 1, len(probes.probesKeys)))
 
         # Make the default title
         # NOTE: Theta should be the same for all probes
@@ -332,9 +332,9 @@ class PlotProbes(object):
                                          uName.capitalize()],\
                           color=self._colors[nr],\
                           label=label)
-            # Plot the legends
-            leg = axes[nr].legend(loc="upper right", fancybox = True, numpoints=1)
-            leg.get_frame().set_alpha(0.5)
+#            # Plot the legends
+#            leg = axes[nr].legend(loc="upper right", fancybox = True, numpoints=1)
+#            leg.get_frame().set_alpha(0.5)
 
         # Set axis label
         if self._probes.helper.convertToPhysical:
@@ -354,7 +354,7 @@ class PlotProbes(object):
         # Make the plot look nice
         for ax in axes:
             self._probes.helper.makePlotPretty(ax, yprune = "both",\
-                                               rotation = 45)
+                                               rotation = 45, loc="upper right")
 
         for ax in axes[0:-1]:
             ax.tick_params(labelbottom="off")
@@ -465,7 +465,7 @@ class PlotProbes(object):
                 ax.plot(self._probes.time[clip:endClip],\
                         modeMag,\
                         color=colors[modeNr-1],\
-                        label=r"$k_\theta={}$".format(modeNr),
+                        label=r"$m_\theta={}$".format(modeNr),
                         alpha=self._alpha)
 
             # Set logscale
