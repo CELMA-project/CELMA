@@ -364,6 +364,7 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
+        setToNone = False
         try:
             fs = self.fluctTime[1] - self.fluctTime[0]
         except IndexError as ie:
@@ -573,7 +574,7 @@ class Probes(object):
                         if "index 0 is out of bounds" in ie.args[0]:
                             curIndicesEndLinear = firstIndexEndLinear
                     if curIndicesEndLinear < firstIndexEndLinear:
-                        firstIndexEndLinear = curIndicesEndLinear 
+                        firstIndexEndLinear = curIndicesEndLinear
 
             self.results[key]["zFFTLinearIndex"] = firstIndexEndLinear
 
@@ -587,7 +588,7 @@ class Probes(object):
                     )[0])
             except TypeError as er:
                 if "only length-1 arrays" in er.args[0]:
-                    # Need to subscript once more 
+                    # Need to subscript once more
                     self.results[key]["zFFTNonSaturatedIndex"] =\
                         int(np.where(np.abs(\
                             self.results[key]["zFFT"][clip:,modeWithMax]) >\
