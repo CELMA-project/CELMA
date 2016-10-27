@@ -205,6 +205,8 @@ class PlotHelper(object):
                     convDict[normalizer] =\
                             collect(normalizer, path=self._path, info=False)
 
+                # The collected Te0 is given in eV, we convert this to J
+                convDict["Te0"] *= cst.e
             except ValueError:
                 # An OSError is thrown if the file is not found
                 message = ("{0}{1}WARNING: Normalized quantities not found. "
@@ -445,7 +447,6 @@ class PlotHelper(object):
             elif varName == "B0":
                 # NOTE: B0 is an input parameter, and is thus already
                 #       given in physcial units
-                # FIXME: Check if it is correct that B0 = B
                 normalization = r""
             elif varName == "phi":
                 normalization = r" q/T_{{e,0}}"
@@ -473,10 +474,10 @@ class PlotHelper(object):
             elif "EE" in varName:
                 # NOTE: The masses are not included in the integral
                 var *= cst.m_e/cst.m_p
-                normalization = r"/m_in_0c_s^2\rho_s^3"
+                normalization = r"/n_0T_e\rho_s^3"
             elif "EI" in varName:
                 # NOTE: The masses are not included in the integral
-                normalization = r"/m_in_0c_s^2\rho_s^3"
+                normalization = r"/n_0T_e\rho_s^3"
             else:
                 normalization = " "
 
@@ -532,7 +533,8 @@ class PlotHelper(object):
         # Plot the grid
         ax.grid()
         # Make sure no collision between the ticks
-        ax.xaxis.set_major_locator(MaxNLocator(prune=xprune))
+        if ax.get_xscale() != "log":
+            ax.xaxis.set_major_locator(MaxNLocator(prune=xprune))
 
         if ax.get_yscale() != "log":
             # This destroys the ticks on log plots
