@@ -32,8 +32,8 @@ def restartFromFunc(dmp_folder     = None,\
         values.
     aScanPath : str
         One of the restart paths from a previously run simulation.
-    scanParameters : list
-        List of strings of the names of the scan paramemters.
+    scanParameters : sequence except str
+        Sequence of strings of the names of the scan paramemters.
     **kwargs : keyword dictionary
         Dictionary with additional keyword arguments, given by
         bout_runners.
@@ -183,9 +183,9 @@ class GenericScanDriver(object):
         ----------
         directory : str
             Path to BOUT.inp
-        scanParameters : list of string
-            List of all quantities that will change during a scan
-        series_add : list of tuples
+        scanParameters : sequence of strings
+            Sequence of all quantities that will change during a scan
+        series_add : sequence of sequence which is not string
             The series_add for the scan
         theRunName : str
             Name of the run
@@ -468,12 +468,12 @@ class GenericScanDriver(object):
         nz = 1
         # Set the temporal domain
         restart    = None
-        timestep   = [2e3]
-        nout       = [2]
+        timestep   = (2e3)
+        nout       = (2)
         # Filter
         ownFilterType = "none"
         #Switches
-        useHyperViscAzVortD = [False]
+        useHyperViscAzVortD = (False)
         # Specify the numbers used for the BOUT runs
         BOUT_walltime         = '05:00:00'
         BOUT_run_name         = theRunName
@@ -495,11 +495,11 @@ class GenericScanDriver(object):
                         # Set the restart option
                         restart    = restart   ,\
                         # Set additional option
-                        additional = [
+                        additional = (
                                       ('tag',theRunName,0),\
                                       ('ownFilters'  , 'type', ownFilterType),\
                                       ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
-                                     ],\
+                                     ),\
                         series_add = self._series_add                      ,\
                         # PBS options
                         BOUT_walltime         = BOUT_walltime        ,\
@@ -541,12 +541,12 @@ class GenericScanDriver(object):
         # Set the spatial domain
         nz = 256
         # Set the temporal domain
-        timestep   = [50]
-        nout       = [2]
+        timestep   = (50)
+        nout       = (2)
         # Filter
         ownFilterType = "none"
         #Switches
-        useHyperViscAzVortD = [False]
+        useHyperViscAzVortD = (False)
         # From previous outputs
         aScanPath = init_dmp_folders[0]
         # Name
@@ -571,11 +571,11 @@ class GenericScanDriver(object):
                         restart      = restart          ,\
                         restart_from = restartFromFunc  ,\
                         # Set additional options
-                        additional = [
+                        additional = (
                                       ('tag',theRunName,0),\
                                       ('ownFilters'  , 'type', ownFilterType),\
                                       ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
-                                     ],\
+                                     ),\
                         series_add = self._series_add                ,\
                         # PBS options
                         BOUT_walltime         = BOUT_walltime        ,\
@@ -645,7 +645,7 @@ class GenericScanDriver(object):
         #{{{ Linear options
         #Switches
         saveTerms           = False
-        useHyperViscAzVortD = [True]
+        useHyperViscAzVortD = (True)
         includeNoise     = True
         forceAddNoise    = True
         # As this is scan dependent, the driver finds the correct folder
@@ -653,8 +653,8 @@ class GenericScanDriver(object):
         # From previous outputs
         aScanPath = expand_dmp_folders[0]
         # Set the temporal domain
-        timestep = [1]
-        nout     = [500]
+        timestep = (1)
+        nout     = (500)
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
@@ -678,13 +678,13 @@ class GenericScanDriver(object):
                     restart      = restart        ,\
                     restart_from = restartFromFunc,\
                     # Set additional options
-                    additional = [
+                    additional = (
                                   ('tag',theRunName,0),\
                                   ('switch'      , 'includeNoise'       , includeNoise ),\
                                   ('switch'      , 'forceAddNoise'      ,forceAddNoise),\
                                   ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                                   ('switch'      , 'saveTerms'          ,saveTerms),\
-                                 ],\
+                                 ),\
                     series_add = self._series_add                ,\
                     # PBS options
                     BOUT_walltime         = BOUT_walltime        ,\
@@ -768,10 +768,10 @@ class GenericScanDriver(object):
         #{{{Turbulence options
         # Switches
         saveTerms           = False
-        useHyperViscAzVortD = [True]
+        useHyperViscAzVortD = (True)
         # Set the temporal domain
-        nout     = [5000]
-        timestep = [1]
+        nout     = (5000)
+        timestep = (1)
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
@@ -792,11 +792,11 @@ class GenericScanDriver(object):
                         # Set restart options
                         restart      = restart          ,\
                         restart_from = restartFromFunc  ,\
-                        additional = [
+                        additional = (
                                       ('tag',theRunName,0),\
                                       ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
                                       ('switch'      , 'saveTerms'          ,saveTerms),\
-                                     ],\
+                                     ),\
                         series_add = self._series_add                ,\
                         # PBS options
                         BOUT_walltime         = BOUT_walltime        ,\
@@ -876,9 +876,9 @@ class GenericScanDriver(object):
             theRunName = self._theRunName + "-growthRates"
             curPostProcessor = postBoutRunner
 
-            # Make a list of list, where each sublist will be used as the paths
+            # Make a tuple of tuples, where each subtuple will be used as the paths
             # in collectiveCollect
-            collectionFolders = list(zip(linear_dmp_folders, turbo_dmp_folders))
+            collectionFolders = tuple(zip(linear_dmp_folders, turbo_dmp_folders))
 
             _, _ = linearRun.execute_runs(\
                                          post_processing_function = curPostProcessor,\
@@ -908,8 +908,8 @@ class GenericScanDriver(object):
 
         #{{{Probes and energy (run this driver after all, as we need the collectionFolders)
         if self.postProcessProbesAndEnergy:
-            collectionFolders = [linear_dmp_folders[0],\
-                                 turbo_dmp_folders[0]]
+            collectionFolders = (linear_dmp_folders[0],\
+                                 turbo_dmp_folders[0])
 
             theRunName = self._theRunName + "-energyProbesPlot"
             curPostProcessor = postBoutRunner

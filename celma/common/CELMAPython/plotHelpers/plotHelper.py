@@ -200,7 +200,7 @@ class PlotHelper(object):
         convDict = {}
         if self.convertToPhysical:
             try:
-                normalizers = ["omCI", "rhoS", "n0", "Te0"]
+                normalizers = ("omCI", "rhoS", "n0", "Te0")
                 for normalizer in normalizers:
                     convDict[normalizer] =\
                             collect(normalizer, path=self._path, info=False)

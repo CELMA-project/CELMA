@@ -147,7 +147,7 @@ class PlotProbes(object):
                               )
         self._leg.get_frame().set_alpha(0.5)
         # Manual tweeking as we want legends outside the plot
-        fig.tight_layout(rect=[0,0,0.7,1])
+        fig.tight_layout(rect=(0,0,0.7,1))
 
         if self._showPlot:
             plt.show()
@@ -197,7 +197,7 @@ class PlotProbes(object):
                     label=label,\
                     alpha=self._alpha)
 
-        if len(list(ax.get_lines())) == 0:
+        if len(tuple(ax.get_lines())) == 0:
             message = "{0}{1}WARNING No PDFs to plot. Returning{1}{0}"
             print(message.format("\n", "!"*3))
             return

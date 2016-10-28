@@ -164,10 +164,10 @@ class Probes(object):
         self._xInds = xInds
         if self.yInd is not None:
             # If the perpPlaneClass has selected the variable
-            actualYInds = [self.yInd]
-            yInds       = [0]
+            actualYInds = (self.yInd)
+            yInds       = (0)
         else:
-            actualYInds = [yInds]
+            actualYInds = (yInds)
 
         self._yInds       = yInds
         self._actualYInds = actualYInds
@@ -212,15 +212,15 @@ class Probes(object):
                         z[actualYInd]
 
         # Organize the keys
-        probesKeys = list(self.results.keys())
+        probesKeys = tuple(self.results.keys())
 
-        # Sort the probesKeys list (this cannot be done alphabethically
+        # Sort the probesKeys tuple (this cannot be done alphabethically
         # Instead we cast the key into a number, and sort it from that
         probesKeysForSorting = [int(el.replace(",","")) for el in probesKeys]
         self.probesKeys =\
-            [list(el) for el in zip(*sorted(\
-                zip(probesKeysForSorting, probesKeys), key=lambda pair:
-                pair[0]))][1]
+            tuple([tuple(el) for el in zip(*sorted(\
+                  zip(probesKeysForSorting, probesKeys), key=lambda pair:
+                  pair[0]))][1])
     #}}}
 
     #{{{calcStatsMoments
@@ -320,7 +320,7 @@ class Probes(object):
                     except MemoryError:
                         message = ("{0}{1}WARNING: MemoryError in histogram. "
                                    "Setting manually to 1{1}{0}".format("\n"*2, "!"*3))
-                        self.results[key]["pdfX"] = self.results[key]["pdfY"] = [0.99,1]
+                        self.results[key]["pdfX"] = self.results[key]["pdfY"] = (0.99,1)
                         print(message)
     #}}}
 
@@ -661,7 +661,7 @@ class PerpPlaneProbes(Probes):
         # Collect the variable
         varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
                                         collectGhost = False,\
-                                        yInd = [yInd, yInd],\
+                                        yInd = (yInd, yInd),\
                                         )
 
         var  = varTimeDict[collectVarName]
@@ -700,7 +700,7 @@ class PerpPlaneProbes(Probes):
         #       drift
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
-                                yInd = [self.yInd, self.yInd],\
+                                yInd = (self.yInd, self.yIn)],\
                                 )["phi"]
 
         # The ExB velocity for a Clebsch system can be found in section B.5.1
@@ -731,8 +731,8 @@ class PerpPlaneProbes(Probes):
 
         Returns
         -------
-        indices : list
-            A list of the rho index to put the probes on (including indexIn)
+        indices : tuple
+            A tuple of the rho index to put the probes on (including indexIn)
         """
         #}}}
 
@@ -756,7 +756,7 @@ class PerpPlaneProbes(Probes):
         # Floor in order not to get indices out of bounds
         indexSep = int(np.floor(indexSpan/halfNProbes))
 
-        indices = [indexIn]
+        indices = (indexIn)
 
         for i in range(1, halfNProbes):
             # Insert before
