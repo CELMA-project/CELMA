@@ -413,7 +413,7 @@ class PlotGrowthRates(object):
         self._savePath  = savePath
 
         # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                             ,\
+        self._helper = PlotHelper(paths[0][0]                          ,\
                                   useSpatial        = False            ,\
                                   convertToPhysical = convertToPhysical,\
                                  )
@@ -427,7 +427,7 @@ class PlotGrowthRates(object):
                               "Te0"   :"$T_e$"                 ,\
                               "nn"    :"$n_n$"                 ,\
                              }
-    
+
         self._errorbarOptions = {"color"     :"k",\
                                  "fmt"       :"o",\
                                  "fmt"       :"o",\
@@ -436,11 +436,11 @@ class PlotGrowthRates(object):
                                  "capsize"   :7  ,\
                                  "elinewidth":3  ,\
                                  }
-    
+
         self._markeredgewidth = 3
         self._all = slice(None)
     #}}}
-    
+
     #{{{plotGrowthRates
     def plotGrowthRates(self):
         #{{{docstring
@@ -448,15 +448,15 @@ class PlotGrowthRates(object):
         Plots the growth rates.
         """
         #}}}
-    
+
         # Loop through the figures
         for plotLabel in self._df.index.levels[0]:
             fig = plt.figure(figsize = self._pltSize)
             gs  = GridSpec(nrows=2, ncols=1)
-    
+
             imAx   = fig.add_subplot(gs[0])
             realAx = fig.add_subplot(gs[1], sharex=imAx)
-    
+
             plotLabelSplit = plotLabel.split("=")
 
             # We can now access unsing the loc method
@@ -506,29 +506,29 @@ class PlotGrowthRates(object):
                                          yAxisIm,\
                                          yerr=yErrIm,\
                                          **self._errorbarOptions)
-    
+
             # Set capsize
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
-    
+
             # Angular frequencies
             (_, caps, _) = realAx.errorbar(xAxis,\
                                            yAxisRe,\
                                            yerr=yErrRe,\
                                            **self._errorbarOptions)
-    
+
             # Set capsize
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
-    
+
             # Add 10% margins for readability
             imAx  .margins(x=0.1, y=0.1)
             realAx.margins(x=0.1, y=0.1)
-    
+
             rot = None if indexTxt == "modeNr" else 45
             PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = rot)
             PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = rot)
-    
+
             # Set the text
             if self._helper.convertToPhysical:
                 suptitle = "{}$={}$ $[{}]$".\
@@ -548,32 +548,32 @@ class PlotGrowthRates(object):
             fig.suptitle(suptitle)
             imAx  .set_ylabel(imLabel)
             realAx.set_ylabel(reLabel)
-    
+
             imAx.tick_params(labelbottom="off")
             xlabel = self._mapToPltText[indexTxt]
             realAx.set_xlabel(xlabel)
-    
+
             # Adjust the subplots
             fig.subplots_adjust(hspace=0)
-    
+
             # Sort the xAxis and yAxis, remove NaN's, and use them as ticks
             xAxis, yAxisIm = zip(*sorted(zip(xAxis, yAxisIm)))
             nonNan = np.where(np.isfinite(yAxisIm))[0]
             # Cut the NaN values from the xAxis (plus 1 as slice
             # excludes the last)
             ticks = list(xAxis[nonNan[0]:nonNan[-1]+1])
-            
+
             # Set the ticks
             realAx.xaxis.set_ticks(ticks)
             imAx  .xaxis.set_ticks(ticks)
-    
+
             if self._savePlot:
                 fileName = "{}.{}".\
                     format(os.path.join(self._savePath,\
                            "growthrate_{}_{}".format(plotLabel, indexTxt)),\
                            self._extension)
                 self._helper.savePlot(fig, fileName)
-    
+
             if self._showPlot:
                 plt.show()
     #}}}
