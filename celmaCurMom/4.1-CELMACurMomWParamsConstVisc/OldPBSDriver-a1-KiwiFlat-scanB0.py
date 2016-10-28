@@ -97,7 +97,7 @@ justPostProcess = True
 postProcessInit = True
 postProcessExp  = True
 postProcessLin  = True
-postProcessTrub = True
+postProcessTurb = True
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
@@ -137,7 +137,7 @@ useSteadyStatePathFunc = True
 extension              = "png"
 useSubProcess          = True
 #}}}
-#{{{File handling options
+#{{{File handeling options
 remove_old = False
 directory  = "a1-KiwiFlatMagField"
 make       = False
@@ -399,10 +399,10 @@ post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
 # Post processing options
-tSlice           = slice(0, None, 2)
-varyMaxMin       = True
-subPolAvg        = True
-mode             = "perpAndPol"
+tSlice     = slice(0, None, 2)
+varyMaxMin = True
+subPolAvg  = True
+mode       = "perpAndPol"
 #}}}
 #{{{Run and post processing
 linearRun = PBS_runner(\
