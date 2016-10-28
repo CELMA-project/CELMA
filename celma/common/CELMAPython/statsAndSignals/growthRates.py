@@ -413,7 +413,7 @@ class PlotGrowthRates(object):
         self._savePath  = savePath
 
         # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                             ,\
+        self._helper = PlotHelper(paths[0][0]                          ,\
                                   useSpatial        = False            ,\
                                   convertToPhysical = convertToPhysical,\
                                  )
