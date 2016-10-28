@@ -241,7 +241,7 @@ class PostProcessorDriver(object):
             value_start = hits[0] + len(scanParameter) + 1
             # Here we assume that the value is not separated by an
             # underscore
-            values[scanParameter] = self._dmp_folder[value_start:].split("_")[0]
+            values[scanParameter]=self._dmp_folder[value_start:].split("_")[0]
 
         # Insert the values
         scanPath = scanPathTemplate.format(values)

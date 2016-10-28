@@ -317,11 +317,14 @@ class Probes(object):
                         for k in range(self.results[key]["pdfY"].size):
                             # Only the bin edges are saved. Interpolate to the
                             # center of the bin
-                            self.results[key]["pdfX"][k] = 0.5*(bins[k]+bins[k+1])
+                            self.results[key]["pdfX"][k] =\
+                                0.5*(bins[k]+bins[k+1])
                     except MemoryError:
                         message = ("{0}{1}WARNING: MemoryError in histogram. "
-                                   "Setting manually to 1{1}{0}".format("\n"*2, "!"*3))
-                        self.results[key]["pdfX"] = self.results[key]["pdfY"] = (0.99,1)
+                                   "Setting manually to 1{1}{0}".\
+                                    format("\n"*2, "!"*3))
+                        self.results[key]["pdfX"]=self.results[key]["pdfY"]=\
+                            (0.99,1)
                         print(message)
     #}}}
 
@@ -374,8 +377,8 @@ class Probes(object):
             fs = 1/(self.fluctTime[1] - self.fluctTime[0])
         except IndexError as ie:
             if "out of bounds" in ie.args[0]:
-                message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out of "
-                           "range when calculating PSD.{1}{0}")
+                message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out "
+                           "of range when calculating PSD.{1}{0}")
                 print(message.format("\n", "!"*3))
             setToNone = True
 
@@ -561,9 +564,10 @@ class Probes(object):
                 #}}}
                 # Magnitude of the signal
                 # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
-                magnitude = (np.abs(np.abs(self.results[key]["zFFT"][clip:, mode]))
-                            +np.abs(np.abs(self.results[key]["zFFT"][clip:,-mode]))
-                            )/self.results[key]["zFFT"].shape[-1]
+                magnitude =\
+                    (np.abs(np.abs(self.results[key]["zFFT"][clip:, mode]))
+                    +np.abs(np.abs(self.results[key]["zFFT"][clip:,-mode]))
+                    )/self.results[key]["zFFT"].shape[-1]
                 # Non saturated phase
                 maxOfThisMode = np.max(magnitude)
                 if maxOfThisMode > curMax:
@@ -683,7 +687,7 @@ class PerpPlaneProbes(Probes):
         if radialProbesIndices is None:
             # Collect dx and MXG
             # xguards will be collected as derivatives will be taken
-            dx        = safeCollect("dx",  path=paths[0], xguards=True, info=False)
+            dx = safeCollect("dx",  path=paths[0], xguards=True, info=False)
             self._MXG = safeCollect("MXG", path=paths[0], info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
             _, maxGradInd =\
@@ -701,7 +705,7 @@ class PerpPlaneProbes(Probes):
         #       drift
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
-                                yInd = (self.yInd, self.yIn)],\
+                                yInd = (self.yInd, self.yIn),\
                                 )["phi"]
 
         # The ExB velocity for a Clebsch system can be found in section B.5.1

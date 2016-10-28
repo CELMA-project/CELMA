@@ -119,13 +119,9 @@ class PlotEnergy(object):
         # NOTE: Need to cast to a tuple to avoid
         #       "RuntimeError: dictionary changed size during iteration"
         for key in tuple(self._energy.keys()):
-            if key == "t":
-                # The array share memory
-                # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers, or maybe even http://scottlobdell.me/2013/08/understanding-python-variables-as-pointers/)
-                if id(self._helper.t) == id(self._energy["t"]):
-                    # The time has already been normalized
-                    continue
-            self._energy[key], self._energy[key+"Norm"], self._energy[key+"Units"] =\
+            self._energy[key],\
+            self._energy[key+"Norm"],\
+            self._energy[key+"Units"] =\
                 self._helper.physicalUnitsConverter(self._energy[key], key)
 
         # Set the variable label
