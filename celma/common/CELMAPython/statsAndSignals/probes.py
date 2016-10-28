@@ -7,12 +7,12 @@ Contains classes which probes the data
 from .polAvg import polAvg
 from ..plotHelpers import (PlotHelper,\
                            collectiveCollect,\
+                           safeCollect,\
                            DDZ,\
                            findLargestRadialGrad)
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
-from boutdata import collect
 
 #{{{class Probes
 class Probes(object):
@@ -84,11 +84,12 @@ class Probes(object):
 
         # Make the PlotHelper object
         # Public as used in the driver
-        self.helper = PlotHelper(collectPath                           ,\
-                                  t                 = time             ,\
-                                  xguards           = False            ,\
-                                  yguards           = False            ,\
-                                  convertToPhysical = convertToPhysical,\
+        self.helper = PlotHelper(collectPath                          ,\
+                                 # Copying as we do not want to share memory
+                                 t                 = time.copy()      ,\
+                                 xguards           = False            ,\
+                                 yguards           = False            ,\
+                                 convertToPhysical = convertToPhysical,\
                                  )
 
         # Get the units (eventually convert to physical units)
@@ -110,14 +111,14 @@ class Probes(object):
 
         # Set the Jacobian
         # Contains the ghost points as we are using this in DDZ
-        self._J = collect("J", path=collectPath,\
+        self._J = safeCollect("J", path=collectPath,\
                           xguards=True, yguards=True, info=False)
 
         if radialProbesIndices == None:
             # Note that the ghost cells are collected, as we are taking
             # derivatives of the field
             self._varSteadyState =\
-                collect(collectVarName, path=collectPath,\
+                safeCollect(collectVarName, path=collectPath,\
                         xguards=True, yguards=True, info=False)
 
             if varName == "n":
@@ -618,12 +619,12 @@ class PerpPlaneProbes(Probes):
     #}}}
 
     #{{{Constructor
-    def __init__(self                          ,\
-                 varName                       ,\
-                 paths                         ,\
-                 yInd                          ,\
-                 nProbes                = 5    ,\
-                 radialProbesIndices    = None ,\
+    def __init__(self                      ,\
+                 varName                   ,\
+                 paths                     ,\
+                 yInd                      ,\
+                 nProbes             = 5   ,\
+                 radialProbesIndices = None,\
                  **kwargs):
         #{{{docstring
         """
@@ -682,8 +683,8 @@ class PerpPlaneProbes(Probes):
         if radialProbesIndices is None:
             # Collect dx and MXG
             # xguards will be collected as derivatives will be taken
-            dx        = collect("dx",  path=paths[0], xguards=True, info=False)
-            self._MXG = collect("MXG", path=paths[0], info=False)
+            dx        = safeCollect("dx",  path=paths[0], xguards=True, info=False)
+            self._MXG = safeCollect("MXG", path=paths[0], info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
             _, maxGradInd =\
                 findLargestRadialGrad(\
