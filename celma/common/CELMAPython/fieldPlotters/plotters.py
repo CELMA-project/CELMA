@@ -198,8 +198,8 @@ class Plot(object):
 
         Returns
         -------
-        curIndices : list
-            A list of the start and the stop values in the slice
+        curIndices : sequence (not str)
+            A sequence of the start and the stop values in the slice
         """
 
         if type(curSlice) == slice:
@@ -754,7 +754,7 @@ class Plot2D(Plot):
         #}}}
 
         # Check that mode is set correctly:
-        implementedModes = ["perpAndPar",  "perpAndPol", "perp", "par", "pol"]
+        implementedModes = ("perpAndPar",  "perpAndPol", "perp", "par", "pol")
         found = False
         for checkMode in implementedModes:
             if mode == checkMode:
@@ -793,8 +793,8 @@ class Plot2D(Plot):
                              xguards = True                        ,\
                              yguards = False                       ,\
                              info    = False                       ,\
-                             yind    = [self._ySlice, self._ySlice],\
-                             zind    = [self._zSlice, self._zSlice],\
+                             yind    = (self._ySlice, self._ySlice),\
+                             zind    = (self._zSlice, self._zSlice),\
                              )
             if varName == "n":
                 tmpVar = np.exp(tmpVar)
@@ -804,7 +804,7 @@ class Plot2D(Plot):
                           xguards = True                        ,\
                           yguards = False                       ,\
                           info    = False                       ,\
-                          yind    = [self._ySlice, self._ySlice],\
+                          yind    = (self._ySlice, self._ySlice),\
                           )
             MXG = collect(varname = "MXG", path = path, info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
@@ -916,7 +916,7 @@ class Plot2D(Plot):
         self._fig    = plt.figure(figsize = pltSize)
         #{{{if self._mode == "perpAndPar".lower()
         if self._mode == "perpAndPar".lower():
-            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
             self._perpAx = self._fig.add_subplot(gs[0])
             self._parAx  = self._fig.add_subplot(gs[1])
             self._cBarAx = self._fig.add_subplot(gs[2])
@@ -926,7 +926,7 @@ class Plot2D(Plot):
         #}}}
         #{{{elif self._mode == "perpAndPol".lower()
         elif self._mode == "perpAndPol".lower():
-            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
             self._perpAx = self._fig.add_subplot(gs[0])
             self._polAx  = self._fig.add_subplot(gs[1])
             self._cBarAx = self._fig.add_subplot(gs[2])
@@ -1355,7 +1355,7 @@ class Plot2D(Plot):
         if self._mode == "perpAndPar".lower() or\
            self._mode == "perpAndPol".lower():
             # Need to specify rect in order to have top text
-            self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
+            self._fig.tight_layout(w_pad = 2.5, rect=(0,0,1,0.97))
 
         if self._savePlot:
             # Make dir if not exists

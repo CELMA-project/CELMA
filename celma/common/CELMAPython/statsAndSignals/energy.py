@@ -28,7 +28,7 @@ def collectEnergy(paths):
     """
 
 
-    varStrings= [\
+    varStrings= (\
                  "perpKinEE",\
                  "parKinEE",\
                  "totKinEE",\
@@ -36,7 +36,7 @@ def collectEnergy(paths):
                  "parKinEI",\
                  "totKinEI",\
                  "t_array",\
-                ]
+                )
 
     energies = collectiveCollect(paths, varStrings)
 
@@ -114,9 +114,9 @@ class PlotEnergy(object):
                                  )
 
         # Get the units (eventually convert to physical units)
-        # NOTE: Need to cast to a list to avoid
+        # NOTE: Need to cast to a tuple to avoid
         #       "RuntimeError: dictionary changed size during iteration"
-        for key in list(self._energy.keys()):
+        for key in tuple(self._energy.keys()):
             if key == "t":
                 # The array share memory
                 # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers, or maybe even http://scottlobdell.me/2013/08/understanding-python-variables-as-pointers/)
@@ -173,10 +173,10 @@ class PlotEnergy(object):
             raise NotImplementedError(message)
 
         # Find the keys to plot
-        keys = [key for key in self._energy.keys()\
+        keys = tuple(key for key in self._energy.keys()\
                 if (searchString in key)\
                 and ("Units" not in key)\
-                and ("Norm" not in key)]
+                and ("Norm" not in key))
 
         for nr, key in enumerate(keys):
             if "tot" in key:

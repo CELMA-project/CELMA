@@ -146,7 +146,7 @@ class Drivers2D(FieldPlottersDriver):
 
             # Get the tind
             if self._tSlice is not None:
-                self._tind = [self._tSlice.start]
+                self._tind = (self._tSlice.start)
                 if self._tSlice.stop == None:
                     t = collect("t_array", path=self._dmp_folder, info=False)
                     dimLen = len(t)
@@ -160,7 +160,7 @@ class Drivers2D(FieldPlottersDriver):
             if self._tind is not None:
                 for ind in range(len(self._tind)):
                     if ind < 0:
-                        t   = collect("t_array", path=self._dmp_folder, info=False)
+                        t = collect("t_array", path=self._dmp_folder, info=False)
                         dimLen = len(t)
                         # Subtract 1 in the end as indices counts from 0
                         realInd = dimLen + self._tind[ind] - 1
@@ -180,7 +180,8 @@ class Drivers2D(FieldPlottersDriver):
                               tind    = self._tind      ,\
                               info    = False           ,\
                               )
-
+                # Ensure no accidential overwrite
+                lnN.setflags(write = False)
                 self._var = np.exp(lnN)
                 #}}}
             elif self._varName == "jPar":
@@ -192,6 +193,8 @@ class Drivers2D(FieldPlottersDriver):
                               tind    = self._tind      ,\
                               info    = False           ,\
                               )
+                # Ensure no accidential overwrite
+                lnN.setflags(write = False)
 
                 uEPar = collect("uEPar"                   ,\
                                 path    = self._dmp_folder,\
@@ -199,7 +202,9 @@ class Drivers2D(FieldPlottersDriver):
                                 xguards = self._xguards   ,\
                                 tind    = self._tind      ,\
                                 info    = False           ,\
-                                )
+                               )
+                # Ensure no accidential overwrite
+                uEPar.setflags(write = False)
 
                 uIPar = collect("uIPar"                   ,\
                                 path    = self._dmp_folder,\
@@ -207,9 +212,12 @@ class Drivers2D(FieldPlottersDriver):
                                 xguards = self._xguards   ,\
                                 tind    = self._tind      ,\
                                 info    = False           ,\
-                                )
+                               )
+                # Ensure no accidential overwrite
+                uIPar.setflags(write = False)
 
                 self._var = np.exp(lnN)*(uIPar - uEPar)
+                self._var.setflags(write = False)
                 #}}}
             elif self._varName == "vortD":
                 #{{{vortD
@@ -221,10 +229,11 @@ class Drivers2D(FieldPlottersDriver):
                 raise collectError
 
             # Make the plotter object
-            plotter = Plot2D(self._dmp_folder           ,\
-                             self._varName              ,\
-                             var             = self._var,\
-                             **plotterKwargs            ,\
+            # NOTE: Pointer self._var is passed
+            plotter = Plot2D(self._dmp_folder,\
+                             self._varName   ,\
+                             var = self._var ,\
+                             **plotterKwargs ,\
                             )
 
         plotter.plotDriver(self._pltName, savePath = self._savePath)
