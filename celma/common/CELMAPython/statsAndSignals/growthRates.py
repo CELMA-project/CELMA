@@ -359,7 +359,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 
 #{{{PlotGrowthRates
 class PlotGrowthRates(object):
-    """ Class which contains the growth rates and the plotting configuration."""
+    """Class which contains the growth rates and the plotting configuration."""
 
     #{{{__init___
     def __init__(self                      ,\
@@ -466,9 +466,9 @@ class PlotGrowthRates(object):
             # http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook-selection
             try:
                 xAxis = tuple(float(txt.split("=")[1])\
-                            for txt in\
-                            self._df.loc[(plotLabel, "growthRate"), self._all].\
-                                                                         index)
+                        for txt in\
+                        self._df.loc[(plotLabel, "growthRate"), self._all].\
+                        index)
             except KeyError as ke:
                 message="{0}{1}WARNING: Only NaNs found in {2}. Skipping{1}{0}"
                 print(message.format("\n", "!"*4, ke.args[0]))

@@ -189,7 +189,7 @@ class Organizer(object):
             except IndexError:
                 # Only one column
                 if self.useCombinedPlot:
-                    print("WARNING: Only combLine found. Will not plot!!!\n\n\n")
+                    print("WARNING: Only combLine found. Will not plot!!!\n\n")
                     plt.close(fig)
                     return None
                 break
