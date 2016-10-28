@@ -95,6 +95,9 @@ class Probes(object):
         self._var, self.varNormalization, self.varUnits =\
             self.helper.physicalUnitsConverter(var, varName)
 
+        # The array share memory, so if self.helper.t is converted to
+        # physical units, so will time be
+        # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers)
         self.time      = time
         self.fluctTime = time[tIndSaturatedTurb:]
 
@@ -364,8 +367,10 @@ class Probes(object):
                        "initializeInputOutput")
             raise RuntimeError(message)
 
+        setToNone = False
         try:
-            fs = self.fluctTime[1] - self.fluctTime[0]
+            # Sampling frequency
+            fs = 1/(self.fluctTime[1] - self.fluctTime[0])
         except IndexError as ie:
             if "out of bounds" in ie.args[0]:
                 message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out of "
@@ -561,19 +566,20 @@ class Probes(object):
                 # Non saturated phase
                 maxOfThisMode = np.max(magnitude)
                 if maxOfThisMode > curMax:
-                    curMax      = maxOfThisMode
-                    modeWithMax = mode
-                # Linear phase
-                curIndicesEndLinear = np.where(magnitude >= 1e-7)
-                if len(curIndicesEndLinear) > 0:
-                    # First index where value is above 1e-7
-                    try:
-                        curIndicesEndLinear = curIndicesEndLinear[0][0]
-                    except IndexError as ie:
-                        if "index 0 is out of bounds" in ie.args[0]:
-                            curIndicesEndLinear = firstIndexEndLinear
-                    if curIndicesEndLinear < firstIndexEndLinear:
-                        firstIndexEndLinear = curIndicesEndLinear 
+                    curMax          = maxOfThisMode
+                    modeWithMax     = mode
+                    magnitudesOfMax = magnitude
+
+            # Linear phase
+            curIndicesEndLinear = np.where(magnitudesOfMax/curMax >= 1e-10)
+            # First index where value is equal or above 1e-10 of normalized max
+            try:
+                curIndicesEndLinear = curIndicesEndLinear[0][0]
+            except IndexError as ie:
+                if "index 0 is out of bounds" in ie.args[0]:
+                    curIndicesEndLinear = firstIndexEndLinear
+            if curIndicesEndLinear < firstIndexEndLinear:
+                firstIndexEndLinear = curIndicesEndLinear
 
             self.results[key]["zFFTLinearIndex"] = firstIndexEndLinear
 
@@ -587,7 +593,7 @@ class Probes(object):
                     )[0])
             except TypeError as er:
                 if "only length-1 arrays" in er.args[0]:
-                    # Need to subscript once more 
+                    # Need to subscript once more
                     self.results[key]["zFFTNonSaturatedIndex"] =\
                         int(np.where(np.abs(\
                             self.results[key]["zFFT"][clip:,modeWithMax]) >\

@@ -67,6 +67,7 @@ public:
     // Monitors
     // *****************************************************************************
     BoutReal kinE;
+    BoutReal potE;
     BoutReal N;
     // *****************************************************************************
 
@@ -172,6 +173,7 @@ private:
     bool constViscPar;        // If the input par viscosity is the simulation viscosity
     bool constViscPerp;       // If the input perp viscosity is the simulation viscosity
     bool constViscHyper;      // If the input hyper viscosity is the simulation viscosity
+    bool viscosityGuard;      // If a check should be performed for the artificial viscosity 
     // *****************************************************************************
 
     // Runtime switches

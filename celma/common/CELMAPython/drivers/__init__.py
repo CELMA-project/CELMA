@@ -3,3 +3,4 @@
 """ Init for the driver package"""
 
 from .postBoutRunner import postBoutRunner
+from .genericScanDriver import GenericScanDriver

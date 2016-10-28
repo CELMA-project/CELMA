@@ -159,16 +159,17 @@ class Drivers2D(FieldPlottersDriver):
             # Check for negative indices
             if self._tind is not None:
                 for ind in range(len(self._tind)):
-                    t   = collect("t_array", path=self._dmp_folder, info=False)
-                    dimLen = len(t)
-                    # Subtract 1 in the end as indices counts from 0
-                    realInd = dimLen + self._tind[ind] - 1
-                    if realInd < 0:
-                        message  = ("Index {0} out of range for t"
-                                    ", as t has only {2} elements").\
-                            format(self._tind[ind], dimLen)
-                        raise IndexError(message)
-                    self._tind[ind] = realInd
+                    if ind < 0:
+                        t   = collect("t_array", path=self._dmp_folder, info=False)
+                        dimLen = len(t)
+                        # Subtract 1 in the end as indices counts from 0
+                        realInd = dimLen + self._tind[ind] - 1
+                        if realInd < 0:
+                            message  = ("Index {0} out of range for t"
+                                        ", as t has only {2} elements").\
+                                format(self._tind[ind], dimLen)
+                            raise IndexError(message)
+                        self._tind[ind] = realInd
 
             if self._varName == "n":
                 #{{{n

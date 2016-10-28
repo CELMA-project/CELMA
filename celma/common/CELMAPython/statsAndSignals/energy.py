@@ -4,7 +4,7 @@
 Contains function which deals with the post-processing of energies
 """
 
-from ..plotHelpers import PlotHelper, collectiveCollect, seqCMap
+from ..plotHelpers import PlotHelper, collectiveCollect, seqCMap3
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
@@ -103,13 +103,13 @@ class PlotEnergy(object):
         self._savePath  = savePath
 
         # Get the colors
-        self._colors = seqCMap(np.linspace(0, 1, 3))
+        self._colors = seqCMap3(np.linspace(0, 1, 3))
 
         # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                                   ,\
-                                  t                 = energy["t"]            ,\
-                                  xguards           = False                  ,\
-                                  yguards           = False                  ,\
+        self._helper = PlotHelper(paths[0]                             ,\
+                                  t                 = energy["t"]      ,\
+                                  xguards           = False            ,\
+                                  yguards           = False            ,\
                                   convertToPhysical = convertToPhysical,\
                                  )
 
@@ -117,6 +117,12 @@ class PlotEnergy(object):
         # NOTE: Need to cast to a list to avoid
         #       "RuntimeError: dictionary changed size during iteration"
         for key in list(self._energy.keys()):
+            if key == "t":
+                # The array share memory
+                # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers, or maybe even http://scottlobdell.me/2013/08/understanding-python-variables-as-pointers/)
+                if id(self._helper.t) == id(self._energy["t"]):
+                    # The time has already been normalized
+                    continue
             self._energy[key], self._energy[key+"Norm"], self._energy[key+"Units"] =\
                 self._helper.physicalUnitsConverter(self._energy[key], key)
 
@@ -175,15 +181,15 @@ class PlotEnergy(object):
         for nr, key in enumerate(keys):
             if "tot" in key:
                 ax    = axes["totAx"]
-                label = self._genLeg.format(species, r"\mathrm{tot}")
+                label = self._genLeg.format(species, r"\mathrm{kin, tot}")
                 color = self._colors[0]
             elif "par" in key:
                 ax    = axes["parAx"]
-                label = self._genLeg.format(species, r"\parallel")
+                label = self._genLeg.format(species, r"\mathrm{kin},\parallel")
                 color = self._colors[1]
             elif "perp" in key:
                 ax    = axes["perpAx"]
-                label = self._genLeg.format(species, r"\perp")
+                label = self._genLeg.format(species, r"\mathrm{kin},\perp")
                 color = self._colors[2]
             ax.plot(self._energy["t"],\
                     self._energy[key],\
