@@ -65,7 +65,10 @@ class CylinderMesh(object):
         if len(field.shape) == 3:
             # Field is of x,y,z
             # Append one new dimension in the front
-            field4D = np.empty((nFrames ,field.shape[0], field.shape[1], field.shape[2]))
+            field4D = np.empty((nFrames,\
+                                field.shape[0],\
+                                field.shape[1],\
+                                field.shape[2]))
             field4D[:] = field
             field = field4D
 

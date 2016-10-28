@@ -158,7 +158,7 @@ class Plot(object):
         self._tSlice = tSlice
 
         # Get the time
-        t = safeCollect("t_array", path=self._path, tind=self._tind, info=False)
+        t=safeCollect("t_array", path=self._path, tind=self._tind, info=False)
 
         # Slice in t
         if self._tSlice is not None:
@@ -249,9 +249,10 @@ class Plot(object):
                         dimLen = dy.shape[1]
                     if dimension == "z":
                         # Subtract 1, as MZ includes the last point
-                        dimLen = safeCollect("MZ", path=self._path, info=False) - 1
+                        dimLen =\
+                            safeCollect("MZ", path=self._path, info=False) - 1
                     if dimension == "t":
-                        t   = safeCollect("t_array", path=self._path, info=False)
+                        t = safeCollect("t_array", path=self._path, info=False)
                         dimLen = len(t)
                     # Subtract 1 in the end as indices counts from 0
                     realInd = dimLen + curIndices[ind] - 1
@@ -810,7 +811,8 @@ class Plot2D(Plot):
             MXG = safeCollect(varname = "MXG", path = path, info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
             # Copying as we do not want common memory
-            _, self._xSlice = findLargestRadialGrad(tmpVar, dx.copy(), MXG.copy())
+            _, self._xSlice =\
+                findLargestRadialGrad(tmpVar, dx.copy(), MXG.copy())
             # Update _xind
             self._xind = self._getIndices(self._xSlice, "x")
         #}}}
@@ -902,16 +904,17 @@ class Plot2D(Plot):
             self._Z_RZ = self._variable[:, :, :, self._zind[-1]]
             # Get the Z value in the RZ plane which is pi from the current index
             if self._zind[-1] > piInd:
-                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] - piInd]
+                self._Z_RZ_P_PI=self._variable[:, :, :, self._zind[-1] - piInd]
             else:
-                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
+                self._Z_RZ_P_PI=self._variable[:, :, :, self._zind[-1] + piInd]
 
         if self._mode == "perpAndPar".lower()\
            or self._mode == "perpAndPol".lower():
             self._createLines()
 
         # Create the figure and axis
-        if self._mode == "perpAndPar".lower() or self._mode == "perpAndPol".lower():
+        if self._mode == "perpAndPar".lower() or\
+           self._mode == "perpAndPol".lower():
             pltSize = (30,15)
         else:
             pltSize = (20,15)
@@ -1213,7 +1216,8 @@ class Plot2D(Plot):
 
         # Titles
         polTitle =\
-            self.helper.rhoTxtDict["constRhoTxt"].format(self.helper.rhoTxtDict)
+            self.helper.rhoTxtDict["constRhoTxt"].\
+                format(self.helper.rhoTxtDict)
         perpTitle =\
             self.helper.zTxtDict["constZTxt"].format(self.helper.zTxtDict)
         parTitle =\
@@ -1269,24 +1273,24 @@ class Plot2D(Plot):
         #{{{elif self._mode == "pol"
         elif self._mode == "pol":
             self._polTxt = self._polAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(polTitle, timeTitle),\
-                                         transform = self._polAx.transAxes,\
-                                         **txtKwargs)
+                                    "{}$,$ {}".format(polTitle, timeTitle),\
+                                    transform = self._polAx.transAxes,\
+                                    **txtKwargs)
         #}}}
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
             self._perpTxt = self._perpAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(perpTitle, timeTitle),\
-                                         transform = self._perpAx.transAxes,\
-                                         **txtKwargs)
+                                    "{}$,$ {}".format(perpTitle, timeTitle),\
+                                    transform = self._perpAx.transAxes,\
+                                    **txtKwargs)
             self._txtSet = True
         #}}}
         #{{{elif self._mode == "par"
         elif self._mode == "par":
             self._parTxt = self._parAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(parTitle, timeTitle),\
-                                         transform = self._parAx.transAxes,\
-                                         **txtKwargs)
+                                     "{}$,$ {}".format(parTitle, timeTitle),\
+                                     transform = self._parAx.transAxes,\
+                                     **txtKwargs)
             self._txtSet = True
         #}}}
         #}}}
