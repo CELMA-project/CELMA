@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from .line import Line
-from ..plotHelpers import seqCMap
+from ..plotHelpers import seqCMap2
 import numpy as np
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
@@ -32,6 +32,7 @@ class Organizer(object):
                  combLineName    = None  ,\
                  cols            = 2     ,\
                  useCombinedPlot = False ,\
+                 forceCombined   = True  ,\
                  path            = "data",\
                  ):
         """
@@ -48,6 +49,8 @@ class Organizer(object):
             The total number of columns to be used in the plot
         useCombinedPlot : bool
             Toggles if a plot of combined lines are to be plotted
+        forceCombined : bool
+            Will still plot combined lines, even if lines are not found
         path : str
             Path to collect from
         """
@@ -57,6 +60,7 @@ class Organizer(object):
         self.useCombinedPlot = useCombinedPlot
         self.pltName         = pltName
         self.combLineName    = combLineName
+        self._forceCombined   = forceCombined
 
         # Initialize non-input members
         self._pltSize             = (18,12)
@@ -94,12 +98,18 @@ class Organizer(object):
         for line in self.lines:
             lowerCaseLin = line.name.lower()
             if lowerCaseLin not in self._dataFileVars:
-                print("\n\n!!! Warning: {} could not be found\n\n".\
-                      format(line.name))
+                if self._forceCombined:
+                    message = ("{0}!!! Warning: {1} could not be found. "
+                               "A combined line will still be plotted as "
+                               "forceCombined is set to True.{0}")
+                else:
+                    message = "{0}!!! Warning: {1} could not be found{0}"
+                print(message.format("\n"*2, line.name))
                 notFound.append(line)
         for missing in notFound:
             self.lines.remove(missing)
-            self.useCombinedPlot = False
+            if not(self._forceCombined):
+                self.useCombinedPlot = False
 
         # Append lines with eventual extra lines
         # The extra lines are treated specially since they are not
@@ -142,7 +152,7 @@ class Organizer(object):
 
         # Set the colors
         colorSpace = np.arange(len(self.lines))
-        colors = seqCMap(np.linspace(0, 1, len(colorSpace)))
+        colors = seqCMap2(np.linspace(0, 1, len(colorSpace)))
 
         for lineNr, line in enumerate(self.lines):
             line.color = colors[lineNr]
@@ -218,6 +228,7 @@ class Organizer(object):
 
         try:
             plotter.collectLine(self.combLine)
+            print("ddt was collected")
         except OSError:
             # OSError is thrown if filed is not found
 
@@ -226,6 +237,8 @@ class Organizer(object):
 
             for line in self.lines:
                 self.combLine.field += line.field
+
+            print("ddt was obtained by summation")
 
         # Re-add the combLine to the list
         self.lines.append(self.combLine)

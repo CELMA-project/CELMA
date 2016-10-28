@@ -93,6 +93,42 @@ void OwnMonitors::kinEnergy(Field3D  const &n          ,
 }
 
 /*!
+ * Calculates the potential energy of the system
+ *
+ * ## Derivation
+ * A proper derivation can be done where one use the variational
+ * principle of the Langrangian of the system to find the energy of the
+ * system.
+ *
+ * One can also derive the potential energy in a less formal way by
+ * looking at the transfer terms of the equations, and find which energy
+ * terms which are not the kinetic energy. If one neglects the small
+ * energy from the fields, one is left with. When this is done, one find
+ * that 
+ *
+ * \f{eqnarray}{
+ * E_{pot} = nT_e\log(n),
+ * \f}*
+ *
+ * \warning This function does not multiply with \f$T_e\f$.
+ *
+ * \param[in] n       The density
+ *
+ * \param[out] potE   Variable where the kinetic energy is stored
+ */
+void OwnMonitors::potEnergy(Field3D const &n, BoutReal *potE)
+{
+    TRACE("Halt in OwnMonitors::potEnergy");
+
+    // Reset result
+    *potE = 0.0;
+
+    // Calculate the potential energy
+    volInt.volumeIntegral(n*log(n), *potE);
+}
+
+
+/*!
  * Calculates the total particle number of the system
  *
  * \param[in] n       The density
@@ -100,9 +136,9 @@ void OwnMonitors::kinEnergy(Field3D  const &n          ,
  *
  * \param[out] N      The total particle number
  */
-void OwnMonitors::totalN(Field3D  const &n, BoutReal *N)
+void OwnMonitors::totalN(Field3D const &n, BoutReal *N)
 {
-    TRACE("Halt in OwnMonitors::kinEnergy");
+    TRACE("Halt in OwnMonitors::totalN");
 
     volInt.volumeIntegral(n, *N);
 }

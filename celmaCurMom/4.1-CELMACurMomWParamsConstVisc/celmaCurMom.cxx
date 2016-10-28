@@ -91,12 +91,16 @@ int CelmaCurMom::init(bool restarting)
     }
     // Monitor variables to be solved for
     if(monitorEnergy){
-        dump.add(kinEE[0], "perpKinEE", 1);
-        dump.add(kinEE[1], "parKinEE" , 1);
-        dump.add(kinEE[2], "totKinEE" , 1);
-        dump.add(kinEI[0], "perpKinEI", 1);
-        dump.add(kinEI[1], "parKinEI" , 1);
-        dump.add(kinEI[2], "totKinEI" , 1);
+        dump.add   (kinEE[0], "perpKinEE", 1);
+        dump.add   (kinEE[1], "parKinEE" , 1);
+        dump.add   (kinEE[2], "totKinEE" , 1);
+        dump.add   (kinEI[0], "perpKinEI", 1);
+        dump.add   (kinEI[1], "parKinEI" , 1);
+        dump.add   (kinEI[2], "totKinEI" , 1);
+        SAVE_REPEAT(potE);
+    }
+    if(monitorN){
+        SAVE_REPEAT(N);
     }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
@@ -255,6 +259,7 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
     if(monitorEnergy){
         ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
         ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
+        ownMon.potEnergy(n, &potE);
     }
     if(monitorN){
         ownMon.totalN(n, &N);
@@ -525,6 +530,8 @@ void CelmaCurMom::setSwithces(bool &restarting)
     switches->get("constViscHyper"     , constViscHyper     , false);
     switches->get("saveTerms"          , saveTerms          , true );
     switches->get("monitorEnergy"      , monitorEnergy      , true );
+    switches->get("monitorN"           , monitorN           , false);
+    switches->get("viscosityGuard"     , viscosityGuard     , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){
@@ -644,12 +651,14 @@ void CelmaCurMom::setAndSaveViscosities()
     perpVisc.push_back(artViscParMomDens);
     perpVisc.push_back(artViscParVortD  );
 
-    for (std::vector<BoutReal>::iterator it = perpVisc.begin();
-         it != perpVisc.end();
-         ++it){
-        if(*it > 100.0*eta0INorm){
-            throw BoutException("One of the parallel viscosities "
-                                "is 100.0 times larger than eta0I");
+    if(viscosityGuard){
+        for (std::vector<BoutReal>::iterator it = perpVisc.begin();
+             it != perpVisc.end();
+             ++it){
+            if(*it > 100.0*eta0INorm){
+                throw BoutException("One of the parallel viscosities "
+                                    "is 100.0 times larger than eta0I");
+            }
         }
     }
 

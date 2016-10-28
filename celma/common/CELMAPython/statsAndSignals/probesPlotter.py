@@ -2,7 +2,7 @@
 
 """ Collection of plotting results for the probes """
 
-from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap2
+from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from matplotlib.gridspec import GridSpec
@@ -60,7 +60,7 @@ class PlotProbes(object):
         self._alpha     = 0.7
 
         # Get the colors
-        self._colors = seqCMap(np.linspace(0, 1, len(probes.probesKeys)))
+        self._colors = seqCMap3(np.linspace(0, 1, len(probes.probesKeys)))
 
         # Make the default title
         # NOTE: Theta should be the same for all probes
@@ -207,13 +207,17 @@ class PlotProbes(object):
 
         # Set axis label
         ax.set_xlabel(self._varLabelFLuct)
-        ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
-                format(self._probes.varName))
+        if self._probes.helper.convertToPhysical:
+            ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}}{})$".\
+                    format(self._probes.varName, self._probes.varNormalization))
+        else:
+            ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
+                    format(self._probes.varName))
 
         ax.set_title(self._defaultTitle)
 
         # Make the plot look nice
-        self._probes.helper.makePlotPretty(ax)
+        self._probes.helper.makePlotPretty(ax, rotation = 45)
         fig.tight_layout()
 
         if self._showPlot:
@@ -239,56 +243,103 @@ class PlotProbes(object):
               variableNormalization**2/(tOmegaCI)
         """
 
-        if self._probes.results[self._probes.probesKeys[0]]["psdX"] is None:
-            return
+        #{{{plotFunc
+        def plotFunc(mode = "normal"):
+            if self._probes.results[self._probes.probesKeys[0]]["psdX"] is None:
+                return
 
-        # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
+            # Create the plot
+            fig = plt.figure(figsize = self._pltSize)
+            ax  = fig.add_subplot(111)
 
-        for nr, key in enumerate(self._probes.probesKeys):
-            # Make the labels
-            self._probes.helper.rhoTxtDict["value"] =\
-                    plotNumberFormatter(self._probes.rho[key], None)
-            label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
-                        format(self._probes.helper.rhoTxtDict)
-            # Clip the very first point as this is rediculously low
-            ax.plot(self._probes.results[key]["psdX"][1:],\
-                    self._probes.results[key]["psdY"][1:],\
-                    color=self._colors[nr],\
-                    label=label,\
-                    alpha=self._alpha)
+            if mode == "normal":
+                for nr, key in enumerate(self._probes.probesKeys):
+                    # Make the labels
+                    self._probes.helper.rhoTxtDict["value"] =\
+                            plotNumberFormatter(self._probes.rho[key], None)
+                    label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                                format(self._probes.helper.rhoTxtDict)
+                    # Clip the very first point as this is rediculously low
+                    ax.plot(self._probes.results[key]["psdX"][1:],\
+                            self._probes.results[key]["psdY"][1:],\
+                            color=self._colors[nr],\
+                            label=label,\
+                            alpha=self._alpha)
 
-        # Set logscale
-        ax.set_yscale("log")
+            elif mode == "dB":
+                # Find max:
+                curMax = 0
+                for nr, key in enumerate(self._probes.probesKeys):
+                    if np.max(self._probes.results[key]["psdY"][1:]) > curMax:
+                        curMax = np.max(self._probes.results[key]["psdY"][1:])
+                        keyMax = key
 
-        # Set axis label
-        if self._probes.helper.convertToPhysical:
-            inverse = "$/Hz$"
-            xlabel = "$\mathrm{f}$ $\mathrm{[Hz]}$"
-        else:
-            inverse = "$/${}".format(self._timeLabel)
-            xlabel = "$(1/${}$)$".format(self._timeLabel)
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(r"${}^2${}".format(self._probes.varName, inverse))
+                # Make the plots
+                for nr, key in enumerate(self._probes.probesKeys):
+                    # Make the labels
+                    self._probes.helper.rhoTxtDict["value"] =\
+                            plotNumberFormatter(self._probes.rho[key], None)
+                    label = self._probes.helper.rhoTxtDict["constRhoTxt"].\
+                                format(self._probes.helper.rhoTxtDict)
+                    # Clip the very first point as this is rediculously low
+                    ax.plot(self._probes.results[key]["psdX"][1:],\
+                            np.log10(\
+                                self._probes.results[key]["psdY"][1:]/\
+                                curMax),\
+                            color=self._colors[nr],\
+                            label=label,\
+                            alpha=self._alpha)
 
-        ax.set_title(self._defaultTitle)
 
-        # Make the plot look nice
-        self._probes.helper.makePlotPretty(ax, rotation = 45)
+            if mode == "normal":
+                # Set logscale
+                ax.set_yscale("log")
+            else:
+                ax.set_xscale("log")
 
-        fig.tight_layout()
+            # Set axis label
+            if self._probes.helper.convertToPhysical:
+                inverse = "$/\mathrm{Hz}]$"
+                xlabel = "$\mathrm{f}$ $\mathrm{[Hz]}$"
+                if mode == "normal":
+                    ax.set_ylabel(r"$\mathrm{{PSD}}$ $[({})^2${}".\
+                            format(self._probes.varUnits, inverse))
+                elif mode == "dB":
+                    ax.set_ylabel(r"$\mathrm{dB}$")
+            else:
+                inverse = "{}".format(self._timeLabel)
+                xlabel = "$(1/${}$)$".format(self._timeLabel)
+                if mode == "normal":
+                    ax.set_ylabel(r"${}{}^2${}".\
+                            format(self._probes.varName,\
+                                   self._probes.varNormalization,\
+                                   inverse))
+                elif mode == "dB":
+                    ax.set_ylabel(r"$\mathrm{PSD}$ $\mathrm{dB}$")
 
-        if self._showPlot:
-            plt.show()
+            ax.set_xlabel(xlabel)
 
-        if self._savePlot:
-            fileName = "{}.{}".\
-                format(os.path.join(self._savePath, "PSDs"),\
-                       self._extension)
-            self._probes.helper.savePlot(fig, fileName)
+            ax.set_title(self._defaultTitle)
 
-        plt.close(fig)
+            # Make the plot look nice
+            self._probes.helper.makePlotPretty(ax, rotation = 45)
+            fig.tight_layout()
+
+            if self._showPlot:
+                plt.show()
+
+            if self._savePlot:
+                name = os.path.join(self._savePath, "PSDs")
+                if mode == "dB":
+                    name += "dB"
+                fileName = "{}.{}".format(name, self._extension)
+                self._probes.helper.savePlot(fig, fileName)
+
+            plt.close(fig)
+        #}}}
+
+        plotFunc(mode = "normal")
+        plotFunc(mode = "dB")
     #}}}
 
     #{{{plotAvgFluxThroughVolumeElement
@@ -332,9 +383,6 @@ class PlotProbes(object):
                                          uName.capitalize()],\
                           color=self._colors[nr],\
                           label=label)
-            # Plot the legends
-            leg = axes[nr].legend(loc="upper right", fancybox = True, numpoints=1)
-            leg.get_frame().set_alpha(0.5)
 
         # Set axis label
         if self._probes.helper.convertToPhysical:
@@ -354,7 +402,7 @@ class PlotProbes(object):
         # Make the plot look nice
         for ax in axes:
             self._probes.helper.makePlotPretty(ax, yprune = "both",\
-                                               rotation = 45)
+                                               rotation = 45, loc="upper right")
 
         for ax in axes[0:-1]:
             ax.tick_params(labelbottom="off")
@@ -465,7 +513,7 @@ class PlotProbes(object):
                 ax.plot(self._probes.time[clip:endClip],\
                         modeMag,\
                         color=colors[modeNr-1],\
-                        label=r"$k_\theta={}$".format(modeNr),
+                        label=r"$m_\theta={}$".format(modeNr),
                         alpha=self._alpha)
 
             # Set logscale
