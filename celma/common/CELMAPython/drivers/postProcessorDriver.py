@@ -38,7 +38,7 @@ class PostProcessorDriver(object):
 
         Parameters
         ----------
-        dmp_folder : [str|list]
+        dmp_folder : [str|sequence of str]
             The path to collect from. This is the output dmp_folder from
             bout_runners.
         convertToPhysical : bool
@@ -59,8 +59,8 @@ class PostProcessorDriver(object):
             plots should be made in series.
         extension : str
             The extension to use when saving non-animated plots
-        scanParameters : [None|list]
-            List of parameters changed in the scan. If this is not None,
+        scanParameters : [None|sequence (not string)]
+            Sequence of parameters changed in the scan. If this is not None,
             calls to convertToCurrentScanParameters will be triggered in
             the child classes.
         **kwargs : keyword arguments
@@ -105,10 +105,10 @@ class PostProcessorDriver(object):
             dmp_folder = dmp_folder[0]
 
         # Create the savepath (based on the first dmp_folder string)
-        saveDirs = [os.path.normpath(dmp_folder).split(os.sep)[0],\
+        saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
                     'visualization',\
                     saveFolder,\
-                    self._timeFolder]
+                    self._timeFolder)
         if self._subPolAvg:
             saveDirs.append("fluctuation")
         self._savePath = ""
@@ -174,7 +174,7 @@ class PostProcessorDriver(object):
         if self._subPolAvg != value:
             if self._subPolAvg == True and value == False:
                 # Remove fluctuation from the path
-                paths = list(os.path.split(self._savePath))
+                paths = tuple(os.path.split(self._savePath))
                 paths.remove("fluctuation")
                 self._savePath = os.path.join(*paths)
                 self._subPolAvg = value
