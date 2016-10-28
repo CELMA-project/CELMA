@@ -148,7 +148,7 @@ class Drivers2D(FieldPlottersDriver):
             if self._tSlice is not None:
                 self._tind = (self._tSlice.start)
                 if self._tSlice.stop == None:
-                    t = collect("t_array", path=self._dmp_folder, info=False)
+                    t = safeCollect("t_array", path=self._dmp_folder, info=False)
                     dimLen = len(t)
                     # Subtract 1 in the end as indices counts from 0
                     self._tind.append(dimLen - 1)
@@ -160,7 +160,7 @@ class Drivers2D(FieldPlottersDriver):
             if self._tind is not None:
                 for ind in range(len(self._tind)):
                     if ind < 0:
-                        t = collect("t_array", path=self._dmp_folder, info=False)
+                        t = safeCollect("t_array", path=self._dmp_folder, info=False)
                         dimLen = len(t)
                         # Subtract 1 in the end as indices counts from 0
                         realInd = dimLen + self._tind[ind] - 1
@@ -173,7 +173,7 @@ class Drivers2D(FieldPlottersDriver):
 
             if self._varName == "n":
                 #{{{n
-                lnN = collect("lnN"                     ,\
+                lnN = safeCollect("lnN"                     ,\
                               path    = self._dmp_folder,\
                               yguards = self._yguards   ,\
                               xguards = self._xguards   ,\
@@ -186,7 +186,7 @@ class Drivers2D(FieldPlottersDriver):
                 #}}}
             elif self._varName == "jPar":
                 #{{{jPar
-                lnN = collect("lnN"                     ,\
+                lnN = safeCollect("lnN"                     ,\
                               path    = self._dmp_folder,\
                               yguards = self._yguards   ,\
                               xguards = self._xguards   ,\
@@ -196,7 +196,7 @@ class Drivers2D(FieldPlottersDriver):
                 # Ensure no accidential overwrite
                 lnN.setflags(write = False)
 
-                uEPar = collect("uEPar"                   ,\
+                uEPar = safeCollect("uEPar"                   ,\
                                 path    = self._dmp_folder,\
                                 yguards = self._yguards   ,\
                                 xguards = self._xguards   ,\
@@ -206,7 +206,7 @@ class Drivers2D(FieldPlottersDriver):
                 # Ensure no accidential overwrite
                 uEPar.setflags(write = False)
 
-                uIPar = collect("uIPar"                   ,\
+                uIPar = safeCollect("uIPar"                   ,\
                                 path    = self._dmp_folder,\
                                 yguards = self._yguards   ,\
                                 xguards = self._xguards   ,\
