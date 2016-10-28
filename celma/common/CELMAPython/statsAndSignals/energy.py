@@ -106,11 +106,13 @@ class PlotEnergy(object):
         self._colors = seqCMap3(np.linspace(0, 1, 3))
 
         # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                             ,\
-                                  t                 = energy["t"]      ,\
-                                  xguards           = False            ,\
-                                  yguards           = False            ,\
-                                  convertToPhysical = convertToPhysical,\
+        self._helper = PlotHelper(paths[0]                              ,\
+                                  # Copy the array as we do not want to
+                                  # share memory
+                                  t                 = energy["t"].copy(),\
+                                  xguards           = False             ,\
+                                  yguards           = False             ,\
+                                  convertToPhysical = convertToPhysical ,\
                                  )
 
         # Get the units (eventually convert to physical units)
