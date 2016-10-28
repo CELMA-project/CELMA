@@ -3,7 +3,7 @@
 """ Contains the PlotHelper class """
 
 from .plotNumberFormatter import plotNumberFormatter
-from boutdata import collect
+from .improvedCollect import safeCollect
 from boututils.options import BOUTOptions
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 import scipy.constants as cst
@@ -92,16 +92,16 @@ class PlotHelper(object):
         #}}}
 
         #{{{rho
-        dx = collect("dx"                   ,\
-                     path    = self._path   ,\
-                     xguards = self._xguards,\
-                     yguards = self._yguards,\
-                     info    = False)
-        MXG = collect("MXG"                  ,\
-                      path    = self._path   ,\
-                      xguards = self._xguards,\
-                      yguards = self._yguards,\
-                      info    = False)
+        dx = safeCollect("dx"                   ,\
+                         path    = self._path   ,\
+                         xguards = self._xguards,\
+                         yguards = self._yguards,\
+                         info    = False)
+        MXG = safeCollect("MXG"                  ,\
+                          path    = self._path   ,\
+                          xguards = self._xguards,\
+                          yguards = self._yguards,\
+                          info    = False)
 
         nPoints = dx.shape[0]
         dx      = dx[0,0]
@@ -133,16 +133,16 @@ class PlotHelper(object):
         #}}}
 
         #{{{z
-        dy  = collect("dy"                   ,\
-                      path    = self._path   ,\
-                      xguards = self._xguards,\
-                      yguards = self._yguards,\
-                      info    = False)
-        MYG = collect("MYG"                  ,\
-                      path    = self._path   ,\
-                      xguards = self._xguards,\
-                      yguards = self._yguards,\
-                      info    = False)
+        dy  = safeCollect("dy"                   ,\
+                          path    = self._path   ,\
+                          xguards = self._xguards,\
+                          yguards = self._yguards,\
+                          info    = False)
+        MYG = safeCollect("MYG"                  ,\
+                          path    = self._path   ,\
+                          xguards = self._xguards,\
+                          yguards = self._yguards,\
+                          info    = False)
 
         nPoints  = dy.shape[1]
         dy = dy[0,0]
@@ -161,16 +161,16 @@ class PlotHelper(object):
         #}}}
 
         #{{{theta
-        self.dz = collect("dz"                   ,\
-                          path    = self._path   ,\
-                          xguards = self._xguards,\
-                          yguards = self._yguards,\
-                          info    = False)
-        MZ       = collect("MZ"                   ,\
-                           path    = self._path   ,\
-                           xguards = self._xguards,\
-                           yguards = self._yguards,\
-                           info    = False)
+        self.dz = safeCollect("dz"                   ,\
+                              path    = self._path   ,\
+                              xguards = self._xguards,\
+                              yguards = self._yguards,\
+                              info    = False)
+        MZ       = safeCollect("MZ"                   ,\
+                               path    = self._path   ,\
+                               xguards = self._xguards,\
+                               yguards = self._yguards,\
+                               info    = False)
 
         # Subtract the unused plane
         innerPoints = MZ - 1
@@ -203,7 +203,7 @@ class PlotHelper(object):
                 normalizers = ("omCI", "rhoS", "n0", "Te0")
                 for normalizer in normalizers:
                     convDict[normalizer] =\
-                            collect(normalizer, path=self._path, info=False)
+                            safeCollect(normalizer, path=self._path, info=False)
 
                 # The collected Te0 is given in eV, we convert this to J
                 convDict["Te0"] *= cst.e
@@ -313,6 +313,8 @@ class PlotHelper(object):
         Calculates physical parameters from the normalized if
         convertToPhysical is set. Returns the units.
 
+        **NOTE**: This temporarily gives write access to var
+
         Parameters
         ----------
         var : array
@@ -332,6 +334,10 @@ class PlotHelper(object):
             LaTeX. An empty string is returned if convertToPhysical is False.
         """
         #}}}
+
+        # Give temporarily write access
+        if hasattr(var, "setflags"):
+            var.setflags(write = True)
 
         if self.convertToPhysical:
             normalization = ""
@@ -480,6 +486,10 @@ class PlotHelper(object):
                 normalization = r"/n_0T_e\rho_s^3"
             else:
                 normalization = " "
+
+        # Turn off write access
+        if hasattr(var, "setflags"):
+            var.setflags(write = False)
 
         return var, normalization, units
     #}}}
