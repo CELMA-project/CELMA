@@ -92,28 +92,24 @@ def restartFromFunc(dmp_folder     = None,\
 #}}}
 
 # If you just want to post-process
-justPostProcess = True
+justPostProcess = False
 # Normal post-processors
-postProcessInit = True
-postProcessExp  = True
-postProcessLin  = True
-postProcessTurb = True
+postProcessInit = False
+postProcessExp  = False
+postProcessLin  = False
+postProcessTurb = False
 # Extra post-processors
 postProcessLinProfiles     = False
 postProcessTurbProfiles    = False
-postProcessProbesAndEnergy = True
+postProcessProbesAndEnergy = False
 postProcessGrowthRates     = False
 
 #{{{Main options
 #{{{The scan
-Te0 = [14.0    , 12.0    , 10.0    , 8.0     , 6.0     , 5.0     ]
-Lx  = [4.8296  , 5.0295  , 5.2565  , 5.5174  , 5.8213  , 5.9934  ]
-Ly  = [270.4579, 281.6539, 294.3664, 308.9719, 325.9921, 335.6294]
-scanParameters  = ["Te0", "Lx", "Ly"]
+nn             = [1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17]
+scanParameters = ["nn"]
 series_add = [\
-              ('input', 'Te0', Te0),\
-              ('geom' , 'Lx' , Lx),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'nn', nn),\
              ]
 #}}}
 #{{{The options for the post processing function
@@ -139,7 +135,7 @@ useSubProcess          = True
 #}}}
 #{{{File handling options
 remove_old = False
-directory  = "a1-KiwiFlatElTemp"
+directory  = "a2-KiwiFlatNeutralTi0"
 make       = False
 cpy_source = True
 #}}}
@@ -198,7 +194,7 @@ else:
     curPostProcessor = None
 #{{{Init options
 # Name
-theRunName = "a1-KiwiFlatElTemp-0-initialize"
+theRunName = "a2-KiwiFlatNeutralTi0-0-initialize"
 # Set the spatial domain
 nz = 1
 # Set the temporal domain
@@ -284,7 +280,7 @@ useHyperViscAzVortD = [False]
 # From previous outputs
 aScanPath = init_dmp_folders[0]
 # Name
-theRunName = "a1-KiwiFlatElTemp-1-expand"
+theRunName = "a2-KiwiFlatNeutralTi0-1-expand"
 # PBS options
 BOUT_walltime         = '06:00:00'
 BOUT_run_name         = theRunName
@@ -348,27 +344,28 @@ expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
 if postProcessLinProfiles or postProcessTurbProfiles:
     noutProfile                 = 3
     timestepProfile             = 10
+    restartProfile              = "overwrite"
     useHyperViscAzVortDProfile  = True
     saveTermsProfile            = True
 
-    # Create a new runner as we would like to save all the fields
-    profileRun = PBS_runner(\
+    # Create the options for the runners
+    # Notice that we would like to save all the fields here
+    profileRunOptions = {\
                   # Set temporal domain
-                  nout         = noutProfile    ,\
-                  timestep     = timestepProfile,\
+                  "nout"         : noutProfile    ,\
+                  "timestep"     : timestepProfile,\
                   # Set restart options
-                  restart      = restart        ,\
-                  restart_from = restartFromFunc,\
+                  "restart"      : restartProfile ,\
+                  "restart_from" : restartFromFunc,\
                   # Set additional options
-                  additional = [
-                                ('tag',theRunName,0),\
+                  "additional" : [
                                 ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortDProfile),\
                                 ('switch'      , 'saveTerms'          ,saveTermsProfile),\
                                ],\
-                  series_add = series_add                      ,\
+                  "series_add" : series_add       ,\
                   # Common options
-                  **commonRunnerKwargs                         ,\
-                  )
+                  **commonRunnerKwargs            ,\
+                        }
 #}}}
 
 #{{{The linear runner
@@ -390,7 +387,7 @@ aScanPath = expand_dmp_folders[0]
 timestep  = [1]
 nout     = [500]
 # Name
-theRunName = "a1-KiwiFlatElTemp-2-linearPhase1"
+theRunName = "a2-KiwiFlatNeutralTi0-2-linearPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -398,10 +395,10 @@ post_process_run_name = 'post' + theRunName.capitalize()
 post_process_walltime = '03:00:00'
 post_process_queue    = 'workq'
 # Post processing options
-tSlice           = slice(-500, None, 2)
-varyMaxMin       = True
-subPolAvg        = True
-mode             = "perpAndPol"
+tSlice     = slice(0, None, 2)
+varyMaxMin = True
+subPolAvg  = True
+mode       = "perpAndPol"
 #}}}
 #{{{Run and post processing
 linearRun = PBS_runner(\
@@ -463,9 +460,16 @@ if postProcessLinProfiles:
     curPostProcessor = postBoutRunner
     theRunName = "a1-KiwiFlatElTemp-2-linearPhaseParProfiles"
     aScanPathProfiles = linear_dmp_folders[0]
-    tSlice = slice(-30, None, 10)
+    tSlice = None
 
-    _, _ = linearRun.execute_runs(\
+    # Add the tag and the run name
+    profileRunOptions["additional"].append(('tag',theRunName,0))
+    profileRunOptions["BOUT_run_name"] = theRunName
+
+    # Create the runner
+    profileRun = PBS_runner(**profileRunOptions)
+    # Execute
+    _, _ = profileRun.execute_runs(\
                                  remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
                                  # Declare dependencies
@@ -502,7 +506,7 @@ useHyperViscAzVortD = [True]
 nout     = [5000]
 timestep = [1]
 # Name
-theRunName = "a1-KiwiFlatElTemp-3-turbulentPhase1"
+theRunName = "a2-KiwiFlatNeutralTi0-3-turbulentPhase1"
 # PBS options
 BOUT_run_name         = theRunName
 BOUT_walltime         = '100:00:00'
@@ -565,14 +569,24 @@ turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
 if postProcessTurbProfiles:
     curPostProcessor = postBoutRunner
     theRunName = "a1-KiwiFlatElTemp-3-turbulentPhase1ParProfiles"
-    tSlice = slice(-30, None, 10)
     aScanPathProfiles = turbo_dmp_folders[0]
+    tSlice = None
 
-    _, _ = turboRun.execute_runs(\
-                                 remove_old               = remove_old      ,\
+    # Add the tag and the run name
+    if postProcessLinProfiles:
+        # Tag is already present in the dict:
+        _ = profileRunOptions["additional"].pop()
+
+    profileRunOptions["additional"].append(('tag',theRunName,0))
+    profileRunOptions["BOUT_run_name"] = theRunName
+    # Create the runner
+    profileRun = PBS_runner(**profileRunOptions)
+    # Execute
+    _, _ = profileRun.execute_runs(\
+                                 remove_old               = remove_old,\
                                  post_processing_function = curPostProcessor,\
                                  # Declare dependencies
-                                 job_dependencies = PBS_ids         ,\
+                                 job_dependencies = PBS_ids,\
                                  # This function will be called every time after
                                  # performing a run
                                  post_process_after_every_run = True,\
@@ -594,8 +608,8 @@ if postProcessTurbProfiles:
 
 #{{{Growth rates (run this driver after all, as we need the collectionFolders)
 if postProcessGrowthRates:
-    scanParam  = "B0"
-    theRunName = "a1-KiwiFlatElTemp-growthRates"
+    scanParam  = scanParameters[0]
+    theRunName = "a2-KiwiFlatNeutralTi0-growthRates"
     curPostProcessor = postBoutRunner
 
     # Make a list of list, where each sublist will be used as the paths
@@ -635,7 +649,7 @@ if postProcessGrowthRates:
 if postProcessProbesAndEnergy:
     collectionFolders = [linear_dmp_folders[0],\
                          turbo_dmp_folders[0]]
-    theRunName = "a1-KiwiFlatElTemp-all-energyProbesPlot"
+    theRunName = "a2-KiwiFlatNeutralTi0-all-energyProbesPlot"
     curPostProcessor = postBoutRunner
 
     # Found from the overshoot at the energy plot
