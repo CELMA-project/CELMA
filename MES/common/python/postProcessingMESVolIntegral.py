@@ -5,8 +5,6 @@
 from boutdata import collect
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import matplotlib.cm as cm
-from pylab import plot
 import numpy as np
 import os
 
@@ -33,8 +31,6 @@ def perform_MES_test(\
         error = collect('e', path=path, info=False)
 
         # Add the error field to data
-        Lx = collect('Lx', path=path, info=False)
-        Ly = collect('Ly', path=path, info=False)
         dx = collect('dx', path=path, info=False)
         dy = collect('dy', path=path, info=False)
         dz = collect('dz', path=path, info=False)

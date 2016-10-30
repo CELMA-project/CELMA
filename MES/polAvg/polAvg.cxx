@@ -1,16 +1,16 @@
-// *************** Simulation of VolIntCyl *********************
+// *************** Simulation of PolAvgTest *********************
 /* Geometry
  *  x - The radial coordinate (rho)
  *  y - The height of the cylinder (z)
  *  z - The azimuthal coordinate (theta)
  */
 
-#include "VolIntCyl.hxx"
+#include "polAvg.hxx"
 
 // Initialization of the physics
 // ############################################################################
-int VolIntCyl::init(bool restarting) {
-    TRACE("Halt in VolIntCyl::init");
+int PolAvgTest::init(bool restarting) {
+    TRACE("Halt in PolAvgTest::init");
 
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
@@ -34,30 +34,21 @@ int VolIntCyl::init(bool restarting) {
         ->create3D("f:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
 
     // S
-    Options *SOpt = options->getSection("S");
-    SOpt->get("solution", S, 0.0);
+    S = FieldFactory::get()
+        ->create3D("S:solution", Options::getRoot(), mesh, CELL_CENTRE, 0);
     // ************************************************************************
 
     // Add a FieldGroup to communicate
     // ************************************************************************
-    // Only these fields will be integrated
+    // Only these fields will be averaged
     com_group.add(f);
-    // ************************************************************************
-
-    // Set boundaries manually
-    // ************************************************************************
-    f.setBoundary("f");
-    f.applyBoundary();
-    ownBC.innerRhoCylinder(f);
-    // ************************************************************************
-
-    // Communicate before integrating
     mesh->communicate(com_group);
+    // ************************************************************************
 
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    volInt.volumeIntegral(f, S_num);
+    S_num = avg.polAvg(f);
 
     // Error in S
     e = S_num - S;
@@ -84,15 +75,15 @@ int VolIntCyl::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int VolIntCyl::rhs(BoutReal t) {
+int PolAvgTest::rhs(BoutReal t) {
     return 0;
 }
 // ############################################################################
 
 // Create a simple main() function
-BOUTMAIN(VolIntCyl);
+BOUTMAIN(PolAvgTest);
 
 // Destructor
-VolIntCyl::~VolIntCyl(){
-    TRACE("VolIntCyl::~VolIntCyl");
+PolAvgTest::~PolAvgTest(){
+    TRACE("PolAvgTest::~PolAvgTest");
 }
