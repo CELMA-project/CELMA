@@ -35,8 +35,9 @@ class Drivers1D(FieldPlottersDriver):
         ----------
         *args : positional arguments
             See the constructor of FieldPlottersDriver for details.
-        skipPlots : list
-            List of plots to skip when plotting for several.
+        skipPlots : sequence of str
+            Sequence of string of names of plots to skip when plotting for
+            several.
         marker : str
             The type of marker to be used in the plot.
         labelName : str

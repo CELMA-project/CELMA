@@ -87,7 +87,7 @@ FIXME:
 
         # Obtain the growth rates dictionary
         pathsAndSteadyStatePathsTuple =\
-                list(zip(self._paths, self._steadyStatePaths))
+                tuple(zip(self._paths, self._steadyStatePaths))
         # Appendable list
         listOfDicts = []
         if self._useSubProcess:
@@ -144,11 +144,11 @@ FIXME:
         curProbe.calcFFTs()
 
         # Get the positionKey of the probe
-        positionKey = list(curProbe.results.keys())[0]
+        positionKey = tuple(curProbe.results.keys())[0]
 
         # Obtain the current scan value
         if hasattr(path, "__iter__") and type(path) != str:
-            # The path is a list
+            # The path is a sequence
             scanValue = path[0].split("_")
         else:
             # The path is a string
@@ -219,8 +219,8 @@ FIXME:
         # rather than just mNr
         # In order to avoid memory problems, it will be done in the
         # following way
-        firstDict = list(self._growthRatesDict.keys())
-        secondDict = list(self._growthRatesDict[firstDict[0]].keys())
+        firstDict = tuple(self._growthRatesDict.keys())
+        secondDict = tuple(self._growthRatesDict[firstDict[0]].keys())
         for f in firstDict:
             for s in secondDict:
                 self._growthRatesDict[f]["modeNr={}".format(s)] =\
@@ -236,7 +236,7 @@ FIXME:
         growthRatesDF = pd.DataFrame.from_dict(reform)
 
         # NOTE: The format is now
-        #       cols = ["Scan", "Mode"] and the indices are the
+        #       cols = ("Scan", "Mode") and the indices are the
         #       different angFreq, growthRates etc (hereby refered to as
         #       the "Data")
         # NOTE: We would rather like
@@ -246,11 +246,11 @@ FIXME:
         # We start by transposing the indices and columns
         growthRatesDF=growthRatesDF.T
         # Then we add names to the frame (easier unstack and stack)
-        growthRatesDF.index.names = ["Scan", "Mode"]
+        growthRatesDF.index.names = ("Scan", "Mode")
         growthRatesDF.columns.name="Data"
         #}}}
 
-        # Finally we make either "Mode" or "Scan" the column and the "Data" 
+        # Finally we make either "Mode" or "Scan" the column and the "Data"
         # the index
         # http://nikgrozev.com/2015/07/01/reshaping-in-pandas-pivot-pivot-table-stack-and-unstack-explained-with-pictures/
         # This can be done by stack: Rotating column index to row index

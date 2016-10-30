@@ -4,14 +4,14 @@
 
 from .celmaModel import getOrgObjFromModel
 
-labelNames = ["mainFields" ,\
+labelNames = ("mainFields" ,\
               "lnNFields"  ,\
               "uEParFields",\
               "uIParFields",\
               "vortDFields",\
-              ]
+              )
 
-varAndPlotNames = [
+varAndPlotNames = (
                    ("lnN", r"\ln(n)"),\
                    ("phi", r"\phi"),\
                    ("n", r"n"),\
@@ -19,4 +19,4 @@ varAndPlotNames = [
                    ("vortD", r"\Omega^D"),\
                    ("uIPar", r"u_{i,\parallel}"),\
                    ("uEPar", r"u_{e,\parallel}"),\
-                  ]
+                  )
