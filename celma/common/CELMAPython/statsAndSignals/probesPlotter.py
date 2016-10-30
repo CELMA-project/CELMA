@@ -4,7 +4,7 @@
 
 from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from matplotlib.ticker import MaxNLocator
 from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
@@ -70,8 +70,8 @@ class PlotProbes(object):
         probes.helper.zTxtDict["value"] =\
                 plotNumberFormatter(probes.z[probes.probesKeys[0]], None)
         self._defaultTitle = r"{}$,$ {}".\
-             format(probes.helper.thetaTxtDict["constThetaTxt"].format(theta),\
-                    probes.helper.zTxtDict["constZTxt"].format(probes.helper.zTxtDict))
+            format(probes.helper.thetaTxtDict["constThetaTxt"].format(theta),\
+            probes.helper.zTxtDict["constZTxt"].format(probes.helper.zTxtDict))
 
         # Set default time label
         self._timeLabel = probes.helper.tTxtDict["tTxtLabel"].\
@@ -85,9 +85,9 @@ class PlotProbes(object):
                                   format(probes.varName, probes.varUnits)
         else:
             self._varLabel = r"${}{}$".\
-                                  format(probes.varName, probes.varNormalization)
+                                format(probes.varName, probes.varNormalization)
             self._varLabelFLuct = r"$\tilde{{{}}}{}$".\
-                                  format(probes.varName, probes.varNormalization)
+                                format(probes.varName, probes.varNormalization)
 
         # Set the plot size
         self._pltSize = pltSize
@@ -147,7 +147,7 @@ class PlotProbes(object):
                               )
         self._leg.get_frame().set_alpha(0.5)
         # Manual tweeking as we want legends outside the plot
-        fig.tight_layout(rect=[0,0,0.7,1])
+        fig.tight_layout(rect=(0,0,0.7,1))
 
         if self._showPlot:
             plt.show()
@@ -182,9 +182,9 @@ class PlotProbes(object):
             self._probes.helper.rhoTxtDict["value"] =\
                     plotNumberFormatter(self._probes.rho[key], None)
             fluctSkew =\
-               plotNumberFormatter(self._probes.results[key]["fluctSkew"], None)
+              plotNumberFormatter(self._probes.results[key]["fluctSkew"], None)
             fluctKurt =\
-               plotNumberFormatter(self._probes.results[key]["fluctKurt"], None)
+              plotNumberFormatter(self._probes.results[key]["fluctKurt"], None)
 
             rho = self._probes.helper.rhoTxtDict["constRhoTxt"].\
                     format(self._probes.helper.rhoTxtDict)
@@ -197,7 +197,7 @@ class PlotProbes(object):
                     label=label,\
                     alpha=self._alpha)
 
-        if len(list(ax.get_lines())) == 0:
+        if len(tuple(ax.get_lines())) == 0:
             message = "{0}{1}WARNING No PDFs to plot. Returning{1}{0}"
             print(message.format("\n", "!"*3))
             return
@@ -209,7 +209,7 @@ class PlotProbes(object):
         ax.set_xlabel(self._varLabelFLuct)
         if self._probes.helper.convertToPhysical:
             ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}}{})$".\
-                    format(self._probes.varName, self._probes.varNormalization))
+                format(self._probes.varName, self._probes.varNormalization))
         else:
             ax.set_ylabel(r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
                     format(self._probes.varName))
@@ -272,7 +272,6 @@ class PlotProbes(object):
                 for nr, key in enumerate(self._probes.probesKeys):
                     if np.max(self._probes.results[key]["psdY"][1:]) > curMax:
                         curMax = np.max(self._probes.results[key]["psdY"][1:])
-                        keyMax = key
 
                 # Make the plots
                 for nr, key in enumerate(self._probes.probesKeys):
@@ -360,8 +359,6 @@ class PlotProbes(object):
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
 
-        totalPlots = 0
-
         gs = GridSpec(nrows=len(self._probes.probesKeys), ncols=1)
 
         axes = []
@@ -402,7 +399,7 @@ class PlotProbes(object):
         # Make the plot look nice
         for ax in axes:
             self._probes.helper.makePlotPretty(ax, yprune = "both",\
-                                               rotation = 45, loc="upper right")
+                                              rotation = 45, loc="upper right")
 
         for ax in axes[0:-1]:
             ax.tick_params(labelbottom="off")
@@ -484,9 +481,11 @@ class PlotProbes(object):
                 if plotRange == "normal":
                     endClip = None
                 elif plotRange == "nonSaturated":
-                    endClip = self._probes.results[positionKey]["zFFTNonSaturatedIndex"]
+                    endClip = self._probes.results[positionKey]\
+                                                  ["zFFTNonSaturatedIndex"]
                 elif plotRange == "linear":
-                    endClip = self._probes.results[positionKey]["zFFTLinearIndex"]
+                    endClip = self._probes.results[positionKey]\
+                                                  ["zFFTLinearIndex"]
 
                 #{{{ NOTE: We are dealing with a real signal:
                 #          As the fourier transform breaks the signal up

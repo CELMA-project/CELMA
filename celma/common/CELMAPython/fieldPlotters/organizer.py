@@ -36,7 +36,7 @@ class Organizer(object):
                  path            = "data",\
                  ):
         """
-        The constructor initializes the list of lines
+        The constructor initializes the sequence of lines
 
         Parameters
         ----------
@@ -63,18 +63,17 @@ class Organizer(object):
         self._forceCombined   = forceCombined
 
         # Initialize non-input members
-        self._pltSize             = (18,12)
-        self.combLine             = None
-        self.combLineLineObjs     = []
-        self.lines                = []
-        self.extraLines           = {}
-        self.axes                 = []
+        self._pltSize         = (18,12)
+        self.combLine         = None
+        self.combLineLineObjs = []
+        self.lines            = []
+        self.extraLines       = {}
+        self.axes             = []
 
         # Variables collectable in the dump file
-        dataFileVars =\
-            DataFile(os.path.join(path,"BOUT.dmp.0.nc")).list()
+        dataFileVars = DataFile(os.path.join(path,"BOUT.dmp.0.nc")).list()
         # Make everything lowercase in order to easen comparison
-        self._dataFileVars = [el.lower() for el in dataFileVars]
+        self._dataFileVars = tuple(el.lower() for el in dataFileVars)
     #}}}
 
     #{{{pltPrepare
@@ -137,7 +136,7 @@ class Organizer(object):
                     break
         if len(self.lines) > 0 and self.allFieldsPresent:
             # Get the free indices in newLines
-            indices = [i for i, el in enumerate(newLines) if el is None]
+            indices = tuple(i for i, el in enumerate(newLines) if el is None)
             for index, line in zip(indices, self.lines):
                 newLines[index] = line
 
@@ -189,7 +188,7 @@ class Organizer(object):
             except IndexError:
                 # Only one column
                 if self.useCombinedPlot:
-                    print("WARNING: Only combLine found. Will not plot!!!\n\n\n")
+                    print("WARNING: Only combLine found. Will not plot!!!\n\n")
                     plt.close(fig)
                     return None
                 break
