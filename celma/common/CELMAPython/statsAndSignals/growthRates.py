@@ -493,13 +493,13 @@ class PlotGrowthRates(object):
             xAxis, xAxisNorm, xAxisUnits =\
                 self._helper.physicalUnitsConverter(xAxis  , indexTxt)
             yAxisIm, yAxisNorm, yAxisUnits =\
-                self._helper.physicalUnitsConverter(yAxisIm, "t")
+                self._helper.physicalUnitsConverter(yAxisIm, "growthRate")
             yErrIm, _, _  =\
-                self._helper.physicalUnitsConverter(yErrIm , "t")
+                self._helper.physicalUnitsConverter(yErrIm , "growthRate")
             yAxisRe, _, _ =\
-                self._helper.physicalUnitsConverter(yAxisRe, "t")
+                self._helper.physicalUnitsConverter(yAxisRe, "growthRate")
             yErrRe, _, _  =\
-                self._helper.physicalUnitsConverter(yErrRe , "t")
+                self._helper.physicalUnitsConverter(yErrRe , "growthRate")
 
             # Plot the growth rates
             (_, caps, _) = imAx.errorbar(xAxis,\
@@ -531,10 +531,15 @@ class PlotGrowthRates(object):
 
             # Set the text
             if self._helper.convertToPhysical:
-                suptitle = "{}$={}$ $[{}]$".\
-                    format(self._mapToPltText[plotLabelSplit[0]],\
-                           plotLabelSplit[1],\
-                           plotLabelUnits)
+                if plotLabelSplit[0] == "modeNr":
+                    suptitle = "{}$={}$".\
+                        format(self._mapToPltText[plotLabelSplit[0]],\
+                               plotLabelSplit[1])
+                else:
+                    suptitle = "{}$={}$ $[{}]$".\
+                        format(self._mapToPltText[plotLabelSplit[0]],\
+                               plotLabelSplit[1],\
+                               plotLabelUnits)
                 imLabel = r"$\omega_I$ $[{}]$".format(yAxisUnits)
                 reLabel = r"$\omega_R$ $[{}]$".format(yAxisUnits)
             else:
@@ -550,7 +555,18 @@ class PlotGrowthRates(object):
             realAx.set_ylabel(reLabel)
 
             imAx.tick_params(labelbottom="off")
-            xlabel = self._mapToPltText[indexTxt]
+
+            # Set xlabel
+            if indexTxt == "modeNr":
+                xlabel = self._mapToPltText[indexTxt]
+            else:
+                if self._helper.convertToPhysical:
+                    xlabel = "{} $[{}]$".\
+                            format(self._mapToPltText[indexTxt], xAxisUnits)
+                else:
+                    xlabel = "{}{}".\
+                            format(self._mapToPltText[indexTxt], xAxisNorm)
+
             realAx.set_xlabel(xlabel)
 
             # Adjust the subplots
