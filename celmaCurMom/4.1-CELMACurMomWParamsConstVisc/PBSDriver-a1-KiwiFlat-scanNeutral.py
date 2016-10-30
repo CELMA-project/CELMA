@@ -11,23 +11,17 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanB0 = GenericScanDriver()
+scanNn = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2 , 6.0e-2  , 5.0e-2   )
-Lx = (4.8296  , 4.3466  , 3.8637  , 3.3807 , 2.8978  , 2.4148   )
-Ly = (270.4579, 243.4121, 216.3663, 189.3205, 162.2747, 135.2289)
-scanParameters  = ("B0", "Lx", "Ly")
-series_add = (\
-              ('input', 'B0', B0),\
-              ('geom' , 'Lx', Lx),\
-              ('geom' , 'Ly', Ly),\
-             )
+nn             = (1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17)
+scanParameters = ("nn",)
+series_add = ('input', 'nn', nn)
 
-directory = "a1-KiwiFlatMagField"
+directory = "a1-KiwiFlatNeutral"
 
 # Set the main options
-scanB0.setMainOptions(\
+scanNn.setMainOptions(\
                        directory      = directory     ,\
                        scanParameters = scanParameters,\
                        series_add     = series_add    ,\
@@ -38,7 +32,7 @@ scanB0.setMainOptions(\
                      )
 
 # Set the flags
-scanB0.setPostProcessingFlags(\
+scanNn.setPostProcessingFlags(\
                               justPostProcess            = True ,\
                               postProcessInit            = True ,\
                               postProcessExp             = True ,\
@@ -51,7 +45,7 @@ scanB0.setPostProcessingFlags(\
                              )
 
 # Set common plotter options
-scanB0.setCommonPlotterOptions(\
+scanNn.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -61,14 +55,14 @@ scanB0.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanB0.setProbePlottersOptions(\
+scanNn.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanB0.setFieldPlottersOptions(\
+scanNn.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -78,7 +72,7 @@ scanB0.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanB0.setCommonRunnerOptions(\
+scanNn.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -89,4 +83,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan()
+scanNn.runScan()

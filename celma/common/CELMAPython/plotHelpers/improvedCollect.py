@@ -7,6 +7,33 @@ Contains function which collects a variable over several output timesteps
 import numpy as np
 from boutdata import collect
 
+#{{{safeCollect
+def safeCollect(*args, **kwargs):
+    #{{{docstring
+    """
+    Wrapper around collect which sets the data immutable
+
+    Parameters
+    ----------
+    *args : positional arguments
+        Positional arguments to collect
+    *kwargs : keyword arguments
+        Keyword arguments to collect
+
+    Return
+    ------
+    data : array
+        The array is not writeable
+    """
+    #}}}
+
+    data = collect(*args, **kwargs)
+    # write = False prevents writing
+    data.setflags(write=False)
+
+    return data
+#}}}
+
 #{{{collectiveCollect
 def collectiveCollect(paths               ,\
                       varStrings          ,\
@@ -58,7 +85,7 @@ def collectiveCollect(paths               ,\
                 # Make a local var which is reused for every interation,
                 # then concatenate the dictionary
                 localVar =\
-                    collect(var,\
+                    safeCollect(var,\
                             path     = path        ,\
                             tind     = tInd        ,\
                             xind     = xInd        ,\

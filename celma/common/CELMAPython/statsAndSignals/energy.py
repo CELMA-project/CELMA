@@ -28,7 +28,7 @@ def collectEnergy(paths):
     """
 
 
-    varStrings= [\
+    varStrings= (\
                  "perpKinEE",\
                  "parKinEE",\
                  "totKinEE",\
@@ -36,7 +36,7 @@ def collectEnergy(paths):
                  "parKinEI",\
                  "totKinEI",\
                  "t_array",\
-                ]
+                )
 
     energies = collectiveCollect(paths, varStrings)
 
@@ -106,24 +106,22 @@ class PlotEnergy(object):
         self._colors = seqCMap3(np.linspace(0, 1, 3))
 
         # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                             ,\
-                                  t                 = energy["t"]      ,\
-                                  xguards           = False            ,\
-                                  yguards           = False            ,\
-                                  convertToPhysical = convertToPhysical,\
+        self._helper = PlotHelper(paths[0]                              ,\
+                                  # Copy the array as we do not want to
+                                  # share memory
+                                  t                 = energy["t"].copy(),\
+                                  xguards           = False             ,\
+                                  yguards           = False             ,\
+                                  convertToPhysical = convertToPhysical ,\
                                  )
 
         # Get the units (eventually convert to physical units)
-        # NOTE: Need to cast to a list to avoid
+        # NOTE: Need to cast to a tuple to avoid
         #       "RuntimeError: dictionary changed size during iteration"
-        for key in list(self._energy.keys()):
-            if key == "t":
-                # The array share memory
-                # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers, or maybe even http://scottlobdell.me/2013/08/understanding-python-variables-as-pointers/)
-                if id(self._helper.t) == id(self._energy["t"]):
-                    # The time has already been normalized
-                    continue
-            self._energy[key], self._energy[key+"Norm"], self._energy[key+"Units"] =\
+        for key in tuple(self._energy.keys()):
+            self._energy[key],\
+            self._energy[key+"Norm"],\
+            self._energy[key+"Units"] =\
                 self._helper.physicalUnitsConverter(self._energy[key], key)
 
         # Set the variable label
@@ -173,10 +171,10 @@ class PlotEnergy(object):
             raise NotImplementedError(message)
 
         # Find the keys to plot
-        keys = [key for key in self._energy.keys()\
+        keys = tuple(key for key in self._energy.keys()\
                 if (searchString in key)\
                 and ("Units" not in key)\
-                and ("Norm" not in key)]
+                and ("Norm" not in key))
 
         for nr, key in enumerate(keys):
             if "tot" in key:

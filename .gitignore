@@ -53,7 +53,7 @@ html/
 *.pdf
 
 # CELMA-dev
-visualization/
+visualization*/
 celma/*/celma
 celma/*/celmaSLEPc
 celmaCurMom/*/celmaCurMom

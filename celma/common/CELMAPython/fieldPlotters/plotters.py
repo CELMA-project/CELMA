@@ -17,7 +17,7 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from boutdata import collect
+from ..plotHelpers import safeCollect
 import numpy as np
 import os
 import warnings
@@ -158,7 +158,7 @@ class Plot(object):
         self._tSlice = tSlice
 
         # Get the time
-        t = collect("t_array", path=self._path, tind=self._tind, info=False)
+        t=safeCollect("t_array", path=self._path, tind=self._tind, info=False)
 
         # Slice in t
         if self._tSlice is not None:
@@ -171,7 +171,8 @@ class Plot(object):
         # Make the PlotHelper object
         # Public as used in the driver
         self.helper = PlotHelper(path                                 ,\
-                                 t                 = t                ,\
+                                 # Copying as we do not want common memory
+                                 t                 = t.copy()         ,\
                                  xguards           = xguards          ,\
                                  yguards           = yguards          ,\
                                  convertToPhysical = convertToPhysical,\
@@ -198,8 +199,8 @@ class Plot(object):
 
         Returns
         -------
-        curIndices : list
-            A list of the start and the stop values in the slice
+        curIndices : sequence (not str)
+            A sequence of the start and the stop values in the slice
         """
 
         if type(curSlice) == slice:
@@ -208,20 +209,20 @@ class Plot(object):
             if curSlice.stop == None:
                 # Find the last index
                 if dimension == "x" or dimension == "y":
-                    dx = collect("dx",\
+                    dx = safeCollect("dx",\
                                  path=self._path, xguards = self._xguards,\
                                  info=False)
                     dimLen = dx.shape[0]
                 if dimension == "y":
-                    dy = collect("dy",\
+                    dy = safeCollect("dy",\
                                  path=self._path, yguards = self._yguards,\
                                  info=False)
                     dimLen = dy.shape[1]
                 if dimension == "z":
                     # Subtract 1, as MZ includes the last point
-                    dimLen = collect("MZ", path=self._path, info=False) - 1
+                    dimLen = safeCollect("MZ", path=self._path, info=False) - 1
                 if dimension == "t":
-                    t = collect("t_array", path=self._path, info=False)
+                    t = safeCollect("t_array", path=self._path, info=False)
                     dimLen = len(t)
                 # Subtract 1 in the end as indices counts from 0
                 curIndices.append(dimLen - 1)
@@ -237,20 +238,21 @@ class Plot(object):
             for ind in range(len(curIndices)):
                 if curIndices[ind] < 0:
                     if dimension == "x" or dimension == "y":
-                        dx = collect("dx",\
+                        dx = safeCollect("dx",\
                                      path=self._path, xguards = self._xguards,\
                                      info=False)
                         dimLen = dx.shape[0]
                     if dimension == "y":
-                        dy = collect("dy",\
+                        dy = safeCollect("dy",\
                                      path=self._path, yguards = self._yguards,\
                                      info=False)
                         dimLen = dy.shape[1]
                     if dimension == "z":
                         # Subtract 1, as MZ includes the last point
-                        dimLen = collect("MZ", path=self._path, info=False) - 1
+                        dimLen =\
+                            safeCollect("MZ", path=self._path, info=False) - 1
                     if dimension == "t":
-                        t   = collect("t_array", path=self._path, info=False)
+                        t = safeCollect("t_array", path=self._path, info=False)
                         dimLen = len(t)
                     # Subtract 1 in the end as indices counts from 0
                     realInd = dimLen + curIndices[ind] - 1
@@ -546,12 +548,12 @@ class Plot1D(Plot):
             # We need to collect the whole field if we would like to do
             # poloidal averages
             try:
-                line.field = collect(line.name,\
-                                     path    = self._path   ,\
-                                     xguards = self._xguards,\
-                                     yguards = self._yguards,\
-                                     tind    = self._tind   ,\
-                                     info    = False)
+                line.field = safeCollect(line.name,\
+                                         path    = self._path   ,\
+                                         xguards = self._xguards,\
+                                         yguards = self._yguards,\
+                                         tind    = self._tind   ,\
+                                         info    = False)
             except ValueError:
                 # Raise an OSError as this is excepted
                 raise OSError("Could not collect")
@@ -574,15 +576,15 @@ class Plot1D(Plot):
 
         else:
             try:
-                line.field = collect(line.name,\
-                                     path    = self._path   ,\
-                                     xguards = self._xguards,\
-                                     yguards = self._yguards,\
-                                     xind    = self._xind   ,\
-                                     yind    = self._yind   ,\
-                                     zind    = self._zind   ,\
-                                     tind    = self._tind   ,\
-                                     info    = False)
+                line.field = safeCollect(line.name,\
+                                         path    = self._path   ,\
+                                         xguards = self._xguards,\
+                                         yguards = self._yguards,\
+                                         xind    = self._xind   ,\
+                                         yind    = self._yind   ,\
+                                         zind    = self._zind   ,\
+                                         tind    = self._tind   ,\
+                                         info    = False)
             except ValueError:
                 # Raise an OSError as this is excepted
                 raise OSError("Could not collect")
@@ -754,7 +756,7 @@ class Plot2D(Plot):
         #}}}
 
         # Check that mode is set correctly:
-        implementedModes = ["perpAndPar",  "perpAndPol", "perp", "par", "pol"]
+        implementedModes = ("perpAndPar",  "perpAndPol", "perp", "par", "pol")
         found = False
         for checkMode in implementedModes:
             if mode == checkMode:
@@ -788,27 +790,29 @@ class Plot2D(Plot):
                 curVarName = varName
             # Need the x-guards as derivatives will be taken (subtracted
             # in findLargestRadialGrad
-            tmpVar = collect(varname = curVarName                  ,\
-                             path    = maxGradRhoFolder            ,\
-                             xguards = True                        ,\
-                             yguards = False                       ,\
-                             info    = False                       ,\
-                             yind    = [self._ySlice, self._ySlice],\
-                             zind    = [self._zSlice, self._zSlice],\
-                             )
+            tmpVar = safeCollect(varname = curVarName                  ,\
+                                 path    = maxGradRhoFolder            ,\
+                                 xguards = True                        ,\
+                                 yguards = False                       ,\
+                                 info    = False                       ,\
+                                 yind    = (self._ySlice, self._ySlice),\
+                                 zind    = (self._zSlice, self._zSlice),\
+                                 )
             if varName == "n":
                 tmpVar = np.exp(tmpVar)
             # Collect variables needed for findLargestRadialGrad
-            dx  = collect(varname = "dx"                        ,\
-                          path    = path                        ,\
-                          xguards = True                        ,\
-                          yguards = False                       ,\
-                          info    = False                       ,\
-                          yind    = [self._ySlice, self._ySlice],\
-                          )
-            MXG = collect(varname = "MXG", path = path, info=False)
+            dx  = safeCollect(varname = "dx"                        ,\
+                              path    = path                        ,\
+                              xguards = True                        ,\
+                              yguards = False                       ,\
+                              info    = False                       ,\
+                              yind    = (self._ySlice, self._ySlice),\
+                              )
+            MXG = safeCollect(varname = "MXG", path = path, info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
-            _, self._xSlice = findLargestRadialGrad(tmpVar, dx, MXG)
+            # Copying as we do not want common memory
+            _, self._xSlice =\
+                findLargestRadialGrad(tmpVar, dx.copy(), MXG.copy())
             # Update _xind
             self._xind = self._getIndices(self._xSlice, "x")
         #}}}
@@ -836,13 +840,13 @@ class Plot2D(Plot):
         # Collect the full variable
         # Stored as an ndarray with the indices [t,x,y,z] (=[t,rho,z,theta])
         if var is None:
-            self._variable = collect(varName             ,\
-                                     path    = path      ,\
-                                     yguards = yguards   ,\
-                                     xguards = xguards   ,\
-                                     tind    = self._tind,\
-                                     info    = False     ,\
-                                     )
+            self._variable = safeCollect(varName             ,\
+                                         path    = path      ,\
+                                         yguards = yguards   ,\
+                                         xguards = xguards   ,\
+                                         tind    = self._tind,\
+                                         info    = False     ,\
+                                        )
         else:
             self._variable = var
 
@@ -900,23 +904,24 @@ class Plot2D(Plot):
             self._Z_RZ = self._variable[:, :, :, self._zind[-1]]
             # Get the Z value in the RZ plane which is pi from the current index
             if self._zind[-1] > piInd:
-                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] - piInd]
+                self._Z_RZ_P_PI=self._variable[:, :, :, self._zind[-1] - piInd]
             else:
-                self._Z_RZ_P_PI = self._variable[:, :, :, self._zind[-1] + piInd]
+                self._Z_RZ_P_PI=self._variable[:, :, :, self._zind[-1] + piInd]
 
         if self._mode == "perpAndPar".lower()\
            or self._mode == "perpAndPol".lower():
             self._createLines()
 
         # Create the figure and axis
-        if self._mode == "perpAndPar".lower() or self._mode == "perpAndPol".lower():
+        if self._mode == "perpAndPar".lower() or\
+           self._mode == "perpAndPol".lower():
             pltSize = (30,15)
         else:
             pltSize = (20,15)
         self._fig    = plt.figure(figsize = pltSize)
         #{{{if self._mode == "perpAndPar".lower()
         if self._mode == "perpAndPar".lower():
-            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
             self._perpAx = self._fig.add_subplot(gs[0])
             self._parAx  = self._fig.add_subplot(gs[1])
             self._cBarAx = self._fig.add_subplot(gs[2])
@@ -926,7 +931,7 @@ class Plot2D(Plot):
         #}}}
         #{{{elif self._mode == "perpAndPol".lower()
         elif self._mode == "perpAndPol".lower():
-            gs           = GridSpec(1, 3, width_ratios=[20, 20, 1])
+            gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
             self._perpAx = self._fig.add_subplot(gs[0])
             self._polAx  = self._fig.add_subplot(gs[1])
             self._cBarAx = self._fig.add_subplot(gs[2])
@@ -1211,7 +1216,8 @@ class Plot2D(Plot):
 
         # Titles
         polTitle =\
-            self.helper.rhoTxtDict["constRhoTxt"].format(self.helper.rhoTxtDict)
+            self.helper.rhoTxtDict["constRhoTxt"].\
+                format(self.helper.rhoTxtDict)
         perpTitle =\
             self.helper.zTxtDict["constZTxt"].format(self.helper.zTxtDict)
         parTitle =\
@@ -1267,24 +1273,24 @@ class Plot2D(Plot):
         #{{{elif self._mode == "pol"
         elif self._mode == "pol":
             self._polTxt = self._polAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(polTitle, timeTitle),\
-                                         transform = self._polAx.transAxes,\
-                                         **txtKwargs)
+                                    "{}$,$ {}".format(polTitle, timeTitle),\
+                                    transform = self._polAx.transAxes,\
+                                    **txtKwargs)
         #}}}
         #{{{elif self._mode == "perp"
         elif self._mode == "perp":
             self._perpTxt = self._perpAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(perpTitle, timeTitle),\
-                                         transform = self._perpAx.transAxes,\
-                                         **txtKwargs)
+                                    "{}$,$ {}".format(perpTitle, timeTitle),\
+                                    transform = self._perpAx.transAxes,\
+                                    **txtKwargs)
             self._txtSet = True
         #}}}
         #{{{elif self._mode == "par"
         elif self._mode == "par":
             self._parTxt = self._parAx.text(0.5, 1.05,\
-                                         "{}$,$ {}".format(parTitle, timeTitle),\
-                                         transform = self._parAx.transAxes,\
-                                         **txtKwargs)
+                                     "{}$,$ {}".format(parTitle, timeTitle),\
+                                     transform = self._parAx.transAxes,\
+                                     **txtKwargs)
             self._txtSet = True
         #}}}
         #}}}
@@ -1355,7 +1361,7 @@ class Plot2D(Plot):
         if self._mode == "perpAndPar".lower() or\
            self._mode == "perpAndPol".lower():
             # Need to specify rect in order to have top text
-            self._fig.tight_layout(w_pad = 2.5, rect=[0,0,1,0.97])
+            self._fig.tight_layout(w_pad = 2.5, rect=(0,0,1,0.97))
 
         if self._savePlot:
             # Make dir if not exists
