@@ -6,11 +6,11 @@ from bout_runners.bout_runners import basic_runner
 import numpy as np
 import sys, os
 # If we add to sys.path, then it must be an absolute path
-common_dir = os.path.abspath('./../../')
+common_dir = os.path.abspath('./../')
 # Sys path is a list of system paths
 sys.path.append(common_dir)
 
-from common.python.postProcessingMES import perform_MES_test
+from common.python.postProcessingMES import perform_MES_test as postProcess
 
 # The options for the run
 # =============================================================================
@@ -19,7 +19,7 @@ nz = [2**n+2 for n in range(4, 12)]
 
 # Additional options
 remove_old = True
-directory  = "gaussianWSinAndParabola"
+directory  = "zHat"
 make       = True
 nproc      = 4
 # =============================================================================
@@ -46,7 +46,7 @@ my_runs = basic_runner(\
 my_runs.execute_runs(\
                      remove_old = remove_old,\
                      # Set the proper directory
-                     post_processing_function = perform_MES_test,\
+                     post_processing_function = postProcess,\
                      post_process_after_every_run = False,\
                      # Below are the kwargs arguments being passed to
                      # the post processing function
@@ -55,5 +55,6 @@ my_runs.execute_runs(\
                      use_dy        = False,\
                      use_dz        = True ,\
                      xz_error_plot = True ,\
+                     extension     = 'png',\
                     )
 # =============================================================================
