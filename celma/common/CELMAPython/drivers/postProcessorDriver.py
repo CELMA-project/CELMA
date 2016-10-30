@@ -105,10 +105,11 @@ class PostProcessorDriver(object):
             dmp_folder = dmp_folder[0]
 
         # Create the savepath (based on the first dmp_folder string)
-        saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
-                    'visualization',\
+        visualizationType = "Physical" if convertToPhysical else "Normalized"
+        saveDirs = [os.path.normpath(dmp_folder).split(os.sep)[0],\
+                    "visualization{}".format(visualizationType),\
                     saveFolder,\
-                    self._timeFolder)
+                    self._timeFolder]
         if self._subPolAvg:
             saveDirs.append("fluctuation")
         self._savePath = ""

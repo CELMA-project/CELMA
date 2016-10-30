@@ -44,7 +44,7 @@ class StatsAndSignalsDrivers(PostProcessorDriver):
 
         # Convert the paths (if only one of them)
         if self._scanParameters and type(self._dmp_folder) == str:
-            self._paths = (self._convertToCurrentScanParameters(path)
-                           for path in paths)
+            self._paths = tuple(self._convertToCurrentScanParameters(path)
+                                for path in paths)
     #}}}
 #}}}

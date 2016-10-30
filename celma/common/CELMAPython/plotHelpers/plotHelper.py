@@ -206,15 +206,21 @@ class PlotHelper(object):
                             safeCollect(normalizer, path=self._path, info=False)
 
                 # The collected Te0 is given in eV, we convert this to J
+                convDict["Te0"].setflags(write=True)
                 convDict["Te0"] *= cst.e
-            except ValueError:
-                # An OSError is thrown if the file is not found
-                message = ("{0}{1}WARNING: Normalized quantities not found. "
-                           "The time remains normalized".format("\n"*3,"!"*3))
-                print(message)
+                convDict["Te0"].setflags(write=False)
+            except ValueError as ve:
+                if "not found" in ve.args[0]:
+                    # An OSError is thrown if the file is not found
+                    message = ("{0}{1}WARNING: {2} not found. "\
+                               "Variables remains normalized"\
+                               ).format("\n"*3, "!"*3, normalizer)
+                    print(message)
 
-                # Reset convertToPhysical
-                self.convertToPhysical = False
+                    # Reset convertToPhysical
+                    self.convertToPhysical = False
+                else:
+                    raise ve
 
         return convDict
     #}}}
@@ -337,7 +343,12 @@ class PlotHelper(object):
 
         # Give temporarily write access
         if hasattr(var, "setflags"):
-            var.setflags(write = True)
+            if var.flags.owndata:
+                var.setflags(write = True)
+            else:
+                # Have to make a copy
+                var = var.copy()
+                var.setflags(write = True)
 
         if self.convertToPhysical:
             normalization = ""
@@ -396,12 +407,17 @@ class PlotHelper(object):
                 var *= self._convDict["omCI"]*\
                        self._convDict["n0"]
                 units = r"\mathrm{m}^{-3}\mathrm{s}^{-1}"
-            elif varName == "t" or varName == "growthRate":
+            elif varName == "t":
                 if var is None:
                     var = None
                 else:
                     var /= self._convDict["omCI"]
                 units = r"\mathrm{s}"
+            elif varName == "growthRate":
+                # NOTE: The growth rates are in physical units if the
+                #       time is in physical units. We are here assuming
+                #       that the time is in physical units
+                units = r"1/\mathrm{s}"
             elif varName == "rho":
                 if var is None:
                     var = None
@@ -467,6 +483,8 @@ class PlotHelper(object):
             elif varName == "S":
                 normalization = r"/\omega_{{ci}}n_0"
             elif varName == "t":
+                normalization = r"\omega_{{ci}}"
+            elif varName == "growthRate":
                 normalization = r"\omega_{{ci}}"
             elif varName == "rho":
                 normalization = r"/\rho_s"
