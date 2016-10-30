@@ -137,7 +137,7 @@ useSteadyStatePathFunc = True
 extension              = "png"
 useSubProcess          = True
 #}}}
-#{{{File handeling options
+#{{{File handling options
 remove_old = False
 directory  = "a1-KiwiFlatMagField"
 make       = False

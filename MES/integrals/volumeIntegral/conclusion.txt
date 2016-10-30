@@ -1,14 +1,34 @@
-Copied from MMS/singleOperators/0-DDXCylinder/
+Copied from MES/singleOperators/0-DDXCylinder/
 
 - Check that the volume integral is properly working
 
 Results:
 ========
 - sumSines    : Looks to be converging, but not in z
-- sumSinesHat : Looks to be converging, but not in z
-- zHat        : Gives convergence
-- zSines      : Does not converge in z (small errors though)
+                dx = 1.88 (errors ABOVE 1e-6)
+                dy = 1.58 (errors ABOVE 1e-6)
+                dz = 0.00 (errors around 1e-6)
 
+                Explanation: z is periodic, and we are here using sum of
+                             sines
+
+- sumSinesHat : Looks to be converging, but not in z
+                dx =  1.56 (errors ABOVE 1e-6)
+                dy =  1.88 (errors ABOVE 1e-6)
+                dz = -0.01 (errors around 1e-6)
+
+                Explanation: Just a hypothesis: The tanh is working, but is
+                computed accurately already with 2^4 points/it's not contributing
+                to the integral
+
+- zHat        : Gives convergence
+                dz = 2.00 (errors goes to around 1e-8)
+
+- zSines      : Does not converge in z (small errors though)
+                dz = -0.02 (errors around 1e-9)
+
+                Explanation: z is periodic, and we are here using sum of
+                             sines
 Conclusion:
 ===========
-To be run
+Probably converging, but needs a better function

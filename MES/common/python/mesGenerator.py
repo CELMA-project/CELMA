@@ -1,5 +1,5 @@
 # Generate MMS solutions for the laplace inversion
-from boutdata.mms import x, y, z, t
+from boutdata.mms import x, y, z
 from boutdata.mms import exprToStr
 from boutdata.mms import Metric
 from boututils.options import BOUTOptions
@@ -128,7 +128,7 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                 # Plot the plot
                 ax1 = fig.gca(projection='3d')
                 ax1.plot_surface(X_ax_len, Y_ax_len, cur_plt(X_ax_len, Y_ax_len),\
-                                 cmap = cm.RdYlBu_r,\
+                                 cmap = cm.inferno,\
                                  linewidth = 0)
                 # Set the labels
                 ax1.set_xlabel('x')
@@ -155,7 +155,7 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                 # Plot the plot
                 # zorder decides what should be drawn first
                 cont = ax2.contourf(X_RT, Y_RT, cur_plt(X_ax_len, Y_ax_len),\
-                                    N, cmap = cm.RdYlBu_r, zorder=-20)
+                                    N, cmap = cm.inferno, zorder=-20)
                 cbar = plt.colorbar(cont)
                 cbar.ax.set_ylabel(cur_var_key)
                 # Set the labels

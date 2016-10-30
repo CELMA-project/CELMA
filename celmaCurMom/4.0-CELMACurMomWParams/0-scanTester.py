@@ -137,7 +137,7 @@ useSteadyStatePathFunc = True
 extension              = "png"
 useSubProcess          = False
 #}}}
-#{{{File handeling options
+#{{{File handling options
 remove_old = False
 directory  = "0-scanTest"
 make       = False
