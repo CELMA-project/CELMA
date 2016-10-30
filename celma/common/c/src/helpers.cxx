@@ -17,7 +17,7 @@ Field3D const PolAvg::polAvg(const Field3D &f)
     Field3D result = 0.0;
     BoutReal avg;
 
-    for(xInd = mesh->xstart+1; xInd <= mesh->xend-1; xInd++){
+    for(xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
         for(yInd = mesh->ystart; yInd <= mesh->yend; yInd++){
             // Find the average
             avg = 0.0;
@@ -60,7 +60,7 @@ void VolumeIntegral::volumeIntegral(Field3D const &f, BoutReal &result)
 {
     TRACE("Halt in VolumeIntegral::volumeIntegral");
 
-    // Make a local variable (which will be collected by MPI_Allreduce)
+    // Make a local variable (which will be safeCollected by MPI_Allreduce)
     BoutReal localResult = 0.0;
 
     /* NOTE: Addressing "off by one" looping over the local range

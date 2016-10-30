@@ -1,0 +1,12 @@
+Copied from MMS/integrals/volumeIntegral/
+
+- Check that the poloidal average is properly working
+
+Results:
+========
+- zHat : Convergence of 2 observed. 
+         2 Comes from the rectangular integration
+
+Conclusion:
+===========
+To be run
