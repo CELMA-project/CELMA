@@ -7,12 +7,12 @@ Contains classes which probes the data
 from .polAvg import polAvg
 from ..plotHelpers import (PlotHelper,\
                            collectiveCollect,\
+                           safeCollect,\
                            DDZ,\
                            findLargestRadialGrad)
 import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
-from boutdata import collect
 
 #{{{class Probes
 class Probes(object):
@@ -84,22 +84,21 @@ class Probes(object):
 
         # Make the PlotHelper object
         # Public as used in the driver
-        self.helper = PlotHelper(collectPath                           ,\
-                                  t                 = time             ,\
-                                  xguards           = False            ,\
-                                  yguards           = False            ,\
-                                  convertToPhysical = convertToPhysical,\
+        self.helper = PlotHelper(collectPath                          ,\
+                                 # Copying as we do not want to share memory
+                                 t                 = time.copy()      ,\
+                                 xguards           = False            ,\
+                                 yguards           = False            ,\
+                                 convertToPhysical = convertToPhysical,\
                                  )
 
         # Get the units (eventually convert to physical units)
         self._var, self.varNormalization, self.varUnits =\
             self.helper.physicalUnitsConverter(var, varName)
 
-        # The array share memory, so if self.helper.t is converted to
-        # physical units, so will time be
-        # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers)
-        self.time      = time
-        self.fluctTime = time[tIndSaturatedTurb:]
+        # Set time and fluctuation time
+        self.time      = self.helper.t
+        self.fluctTime = self.helper.t[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
         self._varAvg   = polAvg(var[tIndSaturatedTurb:, :, :, :])
@@ -110,14 +109,14 @@ class Probes(object):
 
         # Set the Jacobian
         # Contains the ghost points as we are using this in DDZ
-        self._J = collect("J", path=collectPath,\
+        self._J = safeCollect("J", path=collectPath,\
                           xguards=True, yguards=True, info=False)
 
         if radialProbesIndices == None:
             # Note that the ghost cells are collected, as we are taking
             # derivatives of the field
             self._varSteadyState =\
-                collect(collectVarName, path=collectPath,\
+                safeCollect(collectVarName, path=collectPath,\
                         xguards=True, yguards=True, info=False)
 
             if varName == "n":
@@ -164,10 +163,10 @@ class Probes(object):
         self._xInds = xInds
         if self.yInd is not None:
             # If the perpPlaneClass has selected the variable
-            actualYInds = [self.yInd]
-            yInds       = [0]
+            actualYInds = (self.yInd,)
+            yInds       = (0,)
         else:
-            actualYInds = [yInds]
+            actualYInds = (yInds,)
 
         self._yInds       = yInds
         self._actualYInds = actualYInds
@@ -212,15 +211,15 @@ class Probes(object):
                         z[actualYInd]
 
         # Organize the keys
-        probesKeys = list(self.results.keys())
+        probesKeys = tuple(self.results.keys())
 
-        # Sort the probesKeys list (this cannot be done alphabethically
+        # Sort the probesKeys tuple (this cannot be done alphabethically
         # Instead we cast the key into a number, and sort it from that
         probesKeysForSorting = [int(el.replace(",","")) for el in probesKeys]
         self.probesKeys =\
-            [list(el) for el in zip(*sorted(\
-                zip(probesKeysForSorting, probesKeys), key=lambda pair:
-                pair[0]))][1]
+            tuple([tuple(el) for el in zip(*sorted(\
+                  zip(probesKeysForSorting, probesKeys), key=lambda pair:
+                  pair[0]))][1])
     #}}}
 
     #{{{calcStatsMoments
@@ -316,11 +315,14 @@ class Probes(object):
                         for k in range(self.results[key]["pdfY"].size):
                             # Only the bin edges are saved. Interpolate to the
                             # center of the bin
-                            self.results[key]["pdfX"][k] = 0.5*(bins[k]+bins[k+1])
+                            self.results[key]["pdfX"][k] =\
+                                0.5*(bins[k]+bins[k+1])
                     except MemoryError:
                         message = ("{0}{1}WARNING: MemoryError in histogram. "
-                                   "Setting manually to 1{1}{0}".format("\n"*2, "!"*3))
-                        self.results[key]["pdfX"] = self.results[key]["pdfY"] = [0.99,1]
+                                   "Setting manually to 1{1}{0}".\
+                                    format("\n"*2, "!"*3))
+                        self.results[key]["pdfX"]=self.results[key]["pdfY"]=\
+                            (0.99,1)
                         print(message)
     #}}}
 
@@ -373,8 +375,8 @@ class Probes(object):
             fs = 1/(self.fluctTime[1] - self.fluctTime[0])
         except IndexError as ie:
             if "out of bounds" in ie.args[0]:
-                message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out of "
-                           "range when calculating PSD.{1}{0}")
+                message = ("{0}{1}WARNING Specified tIndSaturatedTurb was out "
+                           "of range when calculating PSD.{1}{0}")
                 print(message.format("\n", "!"*3))
             setToNone = True
 
@@ -560,9 +562,10 @@ class Probes(object):
                 #}}}
                 # Magnitude of the signal
                 # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
-                magnitude = (np.abs(np.abs(self.results[key]["zFFT"][clip:, mode]))
-                            +np.abs(np.abs(self.results[key]["zFFT"][clip:,-mode]))
-                            )/self.results[key]["zFFT"].shape[-1]
+                magnitude =\
+                    (np.abs(np.abs(self.results[key]["zFFT"][clip:, mode]))
+                    +np.abs(np.abs(self.results[key]["zFFT"][clip:,-mode]))
+                    )/self.results[key]["zFFT"].shape[-1]
                 # Non saturated phase
                 maxOfThisMode = np.max(magnitude)
                 if maxOfThisMode > curMax:
@@ -571,8 +574,8 @@ class Probes(object):
                     magnitudesOfMax = magnitude
 
             # Linear phase
-            curIndicesEndLinear = np.where(magnitudesOfMax/curMax >= 1e-10)
-            # First index where value is equal or above 1e-10 of normalized max
+            curIndicesEndLinear = np.where(magnitudesOfMax/curMax >= 7.5e-11)
+            # First index where value is equal or above 7.5e-11 of normalized max
             try:
                 curIndicesEndLinear = curIndicesEndLinear[0][0]
             except IndexError as ie:
@@ -618,12 +621,12 @@ class PerpPlaneProbes(Probes):
     #}}}
 
     #{{{Constructor
-    def __init__(self                          ,\
-                 varName                       ,\
-                 paths                         ,\
-                 yInd                          ,\
-                 nProbes                = 5    ,\
-                 radialProbesIndices    = None ,\
+    def __init__(self                      ,\
+                 varName                   ,\
+                 paths                     ,\
+                 yInd                      ,\
+                 nProbes             = 5   ,\
+                 radialProbesIndices = None,\
                  **kwargs):
         #{{{docstring
         """
@@ -661,7 +664,7 @@ class PerpPlaneProbes(Probes):
         # Collect the variable
         varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
                                         collectGhost = False,\
-                                        yInd = [yInd, yInd],\
+                                        yInd = (yInd, yInd),\
                                         )
 
         var  = varTimeDict[collectVarName]
@@ -682,8 +685,8 @@ class PerpPlaneProbes(Probes):
         if radialProbesIndices is None:
             # Collect dx and MXG
             # xguards will be collected as derivatives will be taken
-            dx        = collect("dx",  path=paths[0], xguards=True, info=False)
-            self._MXG = collect("MXG", path=paths[0], info=False)
+            dx = safeCollect("dx",  path=paths[0], xguards=True, info=False)
+            self._MXG = safeCollect("MXG", path=paths[0], info=False)
             # Find the max gradient of the variable (subtracts the guard cells)
             _, maxGradInd =\
                 findLargestRadialGrad(\
@@ -700,7 +703,7 @@ class PerpPlaneProbes(Probes):
         #       drift
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
-                                yInd = [self.yInd, self.yInd],\
+                                yInd = (self.yInd, self.yInd),\
                                 )["phi"]
 
         # The ExB velocity for a Clebsch system can be found in section B.5.1
@@ -731,8 +734,8 @@ class PerpPlaneProbes(Probes):
 
         Returns
         -------
-        indices : list
-            A list of the rho index to put the probes on (including indexIn)
+        indices : tuple
+            A tuple of the rho index to put the probes on (including indexIn)
         """
         #}}}
 
@@ -763,6 +766,9 @@ class PerpPlaneProbes(Probes):
             indices.insert(0, indexIn - i*indexSep)
             # Insert after
             indices.append(indexIn + i*indexSep)
+
+        # Cast to tuple to make immutable
+        indices = tuple(indices)
 
         return indices
     #}}}

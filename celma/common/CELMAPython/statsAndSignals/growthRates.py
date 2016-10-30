@@ -283,7 +283,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
                            "Selecting the first in the key 'growthRates'. "\
                            "Storing all growth rates in the key "\
                            "'allGrowthRates'{1}{0}")
-                results[mNr]["allGrowthRates"] = finalGrowthRates
+                results[mNr]["allGrowthRates"] = tuple(finalGrowthRates)
                 print(message.format("\n"*2, "!"*5, len(finalGrowthRates)))
         else:
             results[mNr] = None
@@ -359,7 +359,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 
 #{{{PlotGrowthRates
 class PlotGrowthRates(object):
-    """ Class which contains the growth rates and the plotting configuration."""
+    """Class which contains the growth rates and the plotting configuration."""
 
     #{{{__init___
     def __init__(self                      ,\
@@ -465,10 +465,10 @@ class PlotGrowthRates(object):
             #              ("columnsLevel1", "columnsLevel2", ...)]
             # http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook-selection
             try:
-                xAxis   = [float(txt.split("=")[1])\
-                           for txt in\
-                           self._df.loc[(plotLabel, "growthRate"), self._all].\
-                                                                        index]
+                xAxis = tuple(float(txt.split("=")[1])\
+                        for txt in\
+                        self._df.loc[(plotLabel, "growthRate"), self._all].\
+                        index)
             except KeyError as ke:
                 message="{0}{1}WARNING: Only NaNs found in {2}. Skipping{1}{0}"
                 print(message.format("\n", "!"*4, ke.args[0]))
@@ -493,13 +493,13 @@ class PlotGrowthRates(object):
             xAxis, xAxisNorm, xAxisUnits =\
                 self._helper.physicalUnitsConverter(xAxis  , indexTxt)
             yAxisIm, yAxisNorm, yAxisUnits =\
-                self._helper.physicalUnitsConverter(yAxisIm, "t")
+                self._helper.physicalUnitsConverter(yAxisIm, "growthRate")
             yErrIm, _, _  =\
-                self._helper.physicalUnitsConverter(yErrIm , "t")
+                self._helper.physicalUnitsConverter(yErrIm , "growthRate")
             yAxisRe, _, _ =\
-                self._helper.physicalUnitsConverter(yAxisRe, "t")
+                self._helper.physicalUnitsConverter(yAxisRe, "growthRate")
             yErrRe, _, _  =\
-                self._helper.physicalUnitsConverter(yErrRe , "t")
+                self._helper.physicalUnitsConverter(yErrRe , "growthRate")
 
             # Plot the growth rates
             (_, caps, _) = imAx.errorbar(xAxis,\
@@ -531,10 +531,15 @@ class PlotGrowthRates(object):
 
             # Set the text
             if self._helper.convertToPhysical:
-                suptitle = "{}$={}$ $[{}]$".\
-                    format(self._mapToPltText[plotLabelSplit[0]],\
-                           plotLabelSplit[1],\
-                           plotLabelUnits)
+                if plotLabelSplit[0] == "modeNr":
+                    suptitle = "{}$={}$".\
+                        format(self._mapToPltText[plotLabelSplit[0]],\
+                               plotLabelSplit[1])
+                else:
+                    suptitle = "{}$={}$ $[{}]$".\
+                        format(self._mapToPltText[plotLabelSplit[0]],\
+                               plotLabelSplit[1],\
+                               plotLabelUnits)
                 imLabel = r"$\omega_I$ $[{}]$".format(yAxisUnits)
                 reLabel = r"$\omega_R$ $[{}]$".format(yAxisUnits)
             else:
@@ -550,7 +555,18 @@ class PlotGrowthRates(object):
             realAx.set_ylabel(reLabel)
 
             imAx.tick_params(labelbottom="off")
-            xlabel = self._mapToPltText[indexTxt]
+
+            # Set xlabel
+            if indexTxt == "modeNr":
+                xlabel = self._mapToPltText[indexTxt]
+            else:
+                if self._helper.convertToPhysical:
+                    xlabel = "{} $[{}]$".\
+                            format(self._mapToPltText[indexTxt], xAxisUnits)
+                else:
+                    xlabel = "{}{}".\
+                            format(self._mapToPltText[indexTxt], xAxisNorm)
+
             realAx.set_xlabel(xlabel)
 
             # Adjust the subplots
@@ -561,7 +577,7 @@ class PlotGrowthRates(object):
             nonNan = np.where(np.isfinite(yAxisIm))[0]
             # Cut the NaN values from the xAxis (plus 1 as slice
             # excludes the last)
-            ticks = list(xAxis[nonNan[0]:nonNan[-1]+1])
+            ticks = tuple(xAxis[nonNan[0]:nonNan[-1]+1])
 
             # Set the ticks
             realAx.xaxis.set_ticks(ticks)

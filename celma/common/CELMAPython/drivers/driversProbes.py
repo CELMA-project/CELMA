@@ -181,8 +181,8 @@ class DriversProbes(StatsAndSignalsDrivers):
                 probesPlotter.plotPDFs()
                 probesPlotter.plotPSDs()
                 probesPlotter.plotAvgFluxThroughVolumeElement(\
-                                                    uName     = self._uName,\
-                                                    labelName = self._labelName)
+                                                   uName     = self._uName,\
+                                                   labelName = self._labelName)
                 probesPlotter.plotZFFT(self._positionKey, self._maxMode)
             #}}}
     #}}}
