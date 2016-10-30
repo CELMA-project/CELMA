@@ -17,8 +17,8 @@ from CELMAPython.drivers import postBoutRunner
 # Set the temporal domain
 restart    = None
 remove_old = False
-nout       = 2
-timestep   = 1e-10
+nout       = (2,)
+timestep   = (1e-10,)
 directory  = "a1-KiwiFlatMagField"
 # Shall we make?
 make       = False
