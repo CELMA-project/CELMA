@@ -96,11 +96,9 @@ class Probes(object):
         self._var, self.varNormalization, self.varUnits =\
             self.helper.physicalUnitsConverter(var, varName)
 
-        # The array share memory, so if self.helper.t is converted to
-        # physical units, so will time be
-        # (see http://stackoverflow.com/questions/13530998/python-variables-are-pointers)
-        self.time      = time
-        self.fluctTime = time[tIndSaturatedTurb:]
+        # Set time and fluctuation time
+        self.time      = self.helper.t
+        self.fluctTime = self.helper.t[tIndSaturatedTurb:]
 
         # Find the fluctuations in var
         self._varAvg   = polAvg(var[tIndSaturatedTurb:, :, :, :])
@@ -165,10 +163,10 @@ class Probes(object):
         self._xInds = xInds
         if self.yInd is not None:
             # If the perpPlaneClass has selected the variable
-            actualYInds = (self.yInd)
-            yInds       = (0)
+            actualYInds = (self.yInd,)
+            yInds       = (0,)
         else:
-            actualYInds = (yInds)
+            actualYInds = (yInds,)
 
         self._yInds       = yInds
         self._actualYInds = actualYInds
@@ -576,8 +574,8 @@ class Probes(object):
                     magnitudesOfMax = magnitude
 
             # Linear phase
-            curIndicesEndLinear = np.where(magnitudesOfMax/curMax >= 1e-10)
-            # First index where value is equal or above 1e-10 of normalized max
+            curIndicesEndLinear = np.where(magnitudesOfMax/curMax >= 7.5e-11)
+            # First index where value is equal or above 7.5e-11 of normalized max
             try:
                 curIndicesEndLinear = curIndicesEndLinear[0][0]
             except IndexError as ie:
@@ -705,7 +703,7 @@ class PerpPlaneProbes(Probes):
         #       drift
         phi = collectiveCollect(paths, ["phi"],\
                                 collectGhost = True,\
-                                yInd = (self.yInd, self.yIn),\
+                                yInd = (self.yInd, self.yInd),\
                                 )["phi"]
 
         # The ExB velocity for a Clebsch system can be found in section B.5.1
@@ -761,13 +759,16 @@ class PerpPlaneProbes(Probes):
         # Floor in order not to get indices out of bounds
         indexSep = int(np.floor(indexSpan/halfNProbes))
 
-        indices = (indexIn)
+        indices = [indexIn]
 
         for i in range(1, halfNProbes):
             # Insert before
             indices.insert(0, indexIn - i*indexSep)
             # Insert after
             indices.append(indexIn + i*indexSep)
+
+        # Cast to tuple to make immutable
+        indices = tuple(indices)
 
         return indices
     #}}}

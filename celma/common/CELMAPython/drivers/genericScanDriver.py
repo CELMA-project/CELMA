@@ -13,6 +13,7 @@ def restartFromFunc(dmp_folder     = None,\
                     aScanPath      = None,\
                     scanParameters = None,\
                     **kwargs):
+    #{{{docstring
     """
     Function which converts a path belonging to one paths in a scan
     to the path belonging to the current scan.
@@ -43,9 +44,15 @@ def restartFromFunc(dmp_folder     = None,\
     scanPath : str
         aScanPath converted to the scan parameters of the current run.
     """
+    #}}}
 
     # Make a template string of aScanPath
     scanPathTemplate = aScanPath
+    if type(scanParameters) == str:
+        message = ("restartFromFunc was given the string '{}' as an "
+                   "input parameter when a non-string sequence was required").\
+                    format(scanParameters)
+        raise ValueError(message)
     for scanParameter in scanParameters:
         hits = [m.start() for m in \
                 re.finditer(scanParameter, scanPathTemplate)]
@@ -730,7 +737,11 @@ class GenericScanDriver(object):
             tSlice = None
 
             # Add the tag and the run name
+            profileRunOptions["additional"] =\
+                    list(profileRunOptions["additional"])
             profileRunOptions["additional"].append(('tag',theRunName,0))
+            profileRunOptions["additional"] =\
+                    tuple(profileRunOptions["additional"])
             profileRunOptions["BOUT_run_name"] = theRunName
 
             # Create the runner
@@ -839,9 +850,15 @@ class GenericScanDriver(object):
             # Add the tag and the run name
             if self.postProcessLinProfiles:
                 # Tag is already present in the dict:
+                profileRunOptions["additional"] =\
+                        list(profileRunOptions["additional"])
                 _ = profileRunOptions["additional"].pop()
+                profileRunOptions["additional"] =\
+                        tuple(profileRunOptions["additional"])
 
+            profileRunOptions["additional"] = list(profileRunOptions["additional"])
             profileRunOptions["additional"].append(('tag',theRunName,0))
+            profileRunOptions["additional"] = tuple(profileRunOptions["additional"])
             profileRunOptions["BOUT_run_name"] = theRunName
             # Create the runner
             profileRun = PBS_runner(**profileRunOptions)

@@ -146,7 +146,7 @@ class Drivers2D(FieldPlottersDriver):
 
             # Get the tind
             if self._tSlice is not None:
-                self._tind = (self._tSlice.start)
+                self._tind = [self._tSlice.start]
                 if self._tSlice.stop == None:
                     t = safeCollect("t_array",\
                                     path=self._dmp_folder,\
@@ -174,6 +174,8 @@ class Drivers2D(FieldPlottersDriver):
                                 format(self._tind[ind], dimLen)
                             raise IndexError(message)
                         self._tind[ind] = realInd
+            # Cast to tuple for safety
+            self._tind = tuple(self._tind)
 
             if self._varName == "n":
                 #{{{n
