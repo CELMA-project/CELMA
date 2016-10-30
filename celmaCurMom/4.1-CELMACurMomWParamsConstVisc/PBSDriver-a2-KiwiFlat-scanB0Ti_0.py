@@ -24,7 +24,7 @@ series_add = (\
               ('geom' , 'Ly', Ly),\
              )
 
-directory = "a1-KiwiFlatMagField"
+directory = "a1-KiwiFlatMagFieldTi0"
 
 # Set the main options
 scanB0.setMainOptions(\

@@ -71,10 +71,9 @@ class Organizer(object):
         self.axes             = []
 
         # Variables collectable in the dump file
-        dataFileVars =\
-            tuple(DataFile(os.path.join(path,"BOUT.dmp.0.nc")).list())
+        dataFileVars = DataFile(os.path.join(path,"BOUT.dmp.0.nc")).list()
         # Make everything lowercase in order to easen comparison
-        self._dataFileVars = (el.lower() for el in dataFileVars)
+        self._dataFileVars = tuple(el.lower() for el in dataFileVars)
     #}}}
 
     #{{{pltPrepare
