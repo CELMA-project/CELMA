@@ -18,7 +18,7 @@ nn             = (1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17)
 scanParameters = ("nn",)
 series_add = ('input', 'nn', nn)
 
-directory = "a1-KiwiFlatNeutralTi0"
+directory = "a2-KiwiFlatNeutralTi0"
 
 # Set the main options
 scanNn.setMainOptions(\
