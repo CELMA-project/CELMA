@@ -6,11 +6,20 @@
 /*!
  * Returns the poloidal average of a field
  *
+ * Returns the numerical equivalence of
+ *
+ * \f{eqnarray}{
+ *      \frac{\int_0^{2\pi} f d\theta}{\int_0^{2\pi} d\theta}
+ *      = \frac{\int_0^{2\pi} f d\theta}{2\pi}
+ * \f}
+ *
+ * by using the rectangular rule for integration
+ *
  * \param[in] f     The field to take the average of
  *
  * \returns result  The poloidal average of the field
  */
-Field3D const PolAvg::polAvg(const Field3D &f)
+Field3D const PolAvg::poloidalAverage(const Field3D &f)
 {
     TRACE("Halt in PolAvg::polAvg");
 
@@ -54,13 +63,14 @@ Field3D const PolAvg::polAvg(const Field3D &f)
  * \param[in] f      The field to integrate over
  * \param[in] result Variable to store the result
  *
- * \param[out] result The volume integral of field f
+ * \return result The volume integral of field f
  */
-void VolumeIntegral::volumeIntegral(Field3D const &f, BoutReal &result)
+BoutReal VolumeIntegral::volumeIntegral(Field3D const &f)
 {
     TRACE("Halt in VolumeIntegral::volumeIntegral");
 
     // Make a local variable (which will be safeCollected by MPI_Allreduce)
+    BoutReal result = 0.0;
     BoutReal localResult = 0.0;
 
     /* NOTE: Addressing "off by one" looping over the local range
@@ -94,6 +104,7 @@ void VolumeIntegral::volumeIntegral(Field3D const &f, BoutReal &result)
     MPI_Allreduce(&localResult, &result,
                   1, MPI_DOUBLE, MPI_SUM, BoutComm::get());
 
+    return result;
 }
 
 #endif
