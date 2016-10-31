@@ -21,6 +21,10 @@ Results:
                 computed accurately already with 2^4 points/it's not contributing
                 to the integral
 
+- xHat        : Gives convergence
+                dx = 2.01 (errors around 10^-9)
+- yHat        : Gives convergence
+                dy = 2.21 (errors around 10^-10)
 - zHat        : Gives convergence
                 dz = 2.00 (errors goes to around 1e-8)
 
@@ -31,4 +35,4 @@ Results:
                              sines
 Conclusion:
 ===========
-Probably converging, but needs a better function
+Converging
