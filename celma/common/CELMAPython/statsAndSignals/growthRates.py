@@ -422,10 +422,10 @@ class PlotGrowthRates(object):
         self._pltSize = pltSize
 
         # Dict used as an equivalent to C++ maps
-        self._mapToPltText = {"modeNr":"$\mathrm{Mode number}$",\
-                              "B0"    :"$B_0$"                 ,\
-                              "Te0"   :"$T_e$"                 ,\
-                              "nn"    :"$n_n$"                 ,\
+        self._mapToPltText = {"modeNr":"$\mathrm{Mode\quad number}$",\
+                              "B0"    :"$B_0$"                      ,\
+                              "Te0"   :"$T_e$"                      ,\
+                              "nn"    :"$n_n$"                      ,\
                              }
 
         self._errorbarOptions = {"color"     :"k",\
