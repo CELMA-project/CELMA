@@ -14,9 +14,9 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2 , 6.0e-2  , 5.0e-2   )
-Lx = (4.8296  , 4.3466  , 3.8637  , 3.3807 , 2.8978  , 2.4148   )
-Ly = (270.4579, 243.4121, 216.3663, 189.3205, 162.2747, 135.2289)
+B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
+Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
+Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ('input', 'B0', B0),\
@@ -24,7 +24,7 @@ series_add = (\
               ('geom' , 'Ly', Ly),\
              )
 
-directory = "a1-KiwiFlatMagFieldTi0"
+directory = "a2-KiwiFlatMagFieldTi0"
 
 # Set the main options
 scanB0.setMainOptions(\

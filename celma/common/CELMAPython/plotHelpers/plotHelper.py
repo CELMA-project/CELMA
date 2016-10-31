@@ -389,7 +389,7 @@ class PlotHelper(object):
                     self._convDict["rhoS"]*\
                     self._convDict["omCI"]*\
                     self._convDict["n0"]
-                units = r"\mathrm{kg }\mathrm{m}^{-2}\mathrm{s}^{-1}"
+                units = r"\mathrm{kg\; m}^{-2}\mathrm{\; s}^{-1}"
             elif varName == "uIPar":
                 var *= self._convDict["rhoS"]*\
                        self._convDict["omCI"]
@@ -435,19 +435,21 @@ class PlotHelper(object):
                     var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
             elif "EE" in varName:
-                # NOTE: The masses are not included in the integral
-                var *= cst.m_e*\
+                # NOTE: The masses are not included in the integral from
+                #       the simulations
+                var *= (cst.m_e/cst.m_p)*\
                        self._convDict["n0"]*\
-                       (self._convDict["rhoS"]*self._convDict["omCI"])**2*\
+                       self._convDict["Te0"]*\
                        (self._convDict["rhoS"])**3
-                units = r"\mathrm{kgm}^2\mathrm{s}^{-2}"
+                units = r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}"
             elif "EI" in varName:
-                # NOTE: The masses are not included in the integral
-                var *= cst.m_p*\
-                       self._convDict["n0"]*\
-                       (self._convDict["rhoS"]*self._convDict["omCI"])**2*\
+                # NOTE: The masses are not included in the integral from
+                #       the simulations
+                # NOTE: mi/mi = 2
+                var *= self._convDict["n0"]*\
+                       self._convDict["Te0"]*\
                        (self._convDict["rhoS"])**3
-                units = r"\mathrm{kgm}^2\mathrm{s}^{-2}"
+                units = r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}"
             else:
                 units = " "
         else:
