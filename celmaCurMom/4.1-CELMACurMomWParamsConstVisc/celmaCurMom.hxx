@@ -10,11 +10,12 @@
 #define __CELMACURMOM_H__
 
 #include <bout/physicsmodel.hxx>
-#include <invert_laplace.hxx>                   // Gives invert laplace option
-#include <field_factory.hxx>                    // Gives field factory
-#include <derivs.hxx>                           // Gives the bracket method
-#include <difops.hxx>                           // Gives the diff options
-#include <vecops.hxx>                           // Gives the vec diff options
+#include <invert_laplace.hxx>     // Gives invert laplace option
+#include <field_factory.hxx>      // Gives field factory
+#include <derivs.hxx>             // Gives the bracket method
+#include <difops.hxx>             // Gives the diff options
+#include <vecops.hxx>             // Gives the vec diff options
+#include <map>                    // Gives std::map
 // Gives own boundaries (doing so by setting ghost points)
 #include "../common/c/include/ownBCs.hxx"
 // Gives own operators
@@ -62,13 +63,6 @@ public:
     Field3D S;               // Particle source
     Field3D invJ;            // 1/J (used in front of the bracket operator)
     Vector3D gradPerpLnN;    // gradPerpLnN
-    // *****************************************************************************
-
-    // Monitors
-    // *****************************************************************************
-    BoutReal kinE;
-    BoutReal potE;
-    BoutReal N;
     // *****************************************************************************
 
     // Additional methods and solvers
@@ -173,7 +167,7 @@ private:
     bool constViscPar;        // If the input par viscosity is the simulation viscosity
     bool constViscPerp;       // If the input perp viscosity is the simulation viscosity
     bool constViscHyper;      // If the input hyper viscosity is the simulation viscosity
-    bool viscosityGuard;      // If a check should be performed for the artificial viscosity 
+    bool viscosityGuard;      // If a check should be performed for the artificial viscosity
     // *****************************************************************************
 
     // Runtime switches
@@ -181,15 +175,16 @@ private:
     bool noiseAdded;          // A check whether the noise is added or not
     // *****************************************************************************
 
-    // Monitor variables
-    // *****************************************************************************
-    std::vector<BoutReal> kinEE;       // Kinetic energy
-    std::vector<BoutReal> kinEI;       // Kinetic energy
-    // *****************************************************************************
-
     // Make a field group to communicate
     // *****************************************************************************
     FieldGroup comGroup;
+    // *****************************************************************************
+
+    // Monitors
+    // *****************************************************************************
+    std::map<std::string, BoutReal> kinE;
+    std::map<std::string, BoutReal> potE;
+    std::map<std::string, BoutReal> totN;
     // *****************************************************************************
 
     // Initialization functions

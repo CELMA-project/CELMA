@@ -4,9 +4,48 @@
 #include "../include/ownMonitors.hxx"
 
 /*!
- * Calculates the kinetic energy of the system
+ * \brief Constructor
+ *
+ * Constructor which sets the private member data
+ */
+OwnMonitors::OwnMonitors()
+ :
+    polAvgN_    (0.0),
+    polAvgLogN_ (0.0),
+    polAvgUEPar_(0.0),
+    polAvgUIPar_(0.0)
+{
+    TRACE("Halt in OwnMonitors::OwnMonitors");
+
+    polAvgGradPerpPhi_ = 0.0;
+}
+
+/*!
+ * Calculates the poloidal average of n.
+ *
+ * The result is stored in the member data polAvgN_
+ *
+ * \param[in] n The density
+ */
+void OwnMonitors::calcPolAvgN(Field3D const &n)
+{
+    TRACE("Halt in OwnMonitors::calcPolAvgN");
+
+    polAvgN_ = polAvg_.poloidalAverage(n);
+}
+
+/*!
+ * Calculates the kinetic energy and the poloidal averaged energy of the system
+ *
+ *  ## CAUTION!!!
+ *
+ * \warning calcPolAvgN must be called in advance of this function.
+ * \warning This function does not multiply with \f$\frac{m_{\alpha}}{m_i}\f$.
  *
  * ## Derivation
+ * \note A tilde in this section denotes a normalized quantity, **NOT** a
+ * fluctuation.
+ *
  * For a single particle, we have
  *
  * \f{eqnarray}{
@@ -43,57 +82,212 @@
  *                      \tilde{n}\tilde{u}_\alpha^2
  *                      \tilde{J} \widetilde{d\rho} d\theta \widetilde{dz}\\
  *                =& m_in_0c_s^2\rho_s^3 \tilde{E}_{kin,\alpha}
+ *                =& n_0T_e\rho_s^3 \tilde{E}_{kin,\alpha}
  * \f}
  *
  * where we have used (V.4) in D'Haeseleer, and where \f$\alpha\f$ is the
  * particle species. This function calculates
  * \f$\frac{m_i}{m_{\alpha}}\tilde{E}_{kin,\alpha}\f$
  *
- * \warning This function does not multiply with \f$\frac{m_{\alpha}}{m_i}\f$.
+ * ## Poloidal averaging
+ * \note A tilde in this section denotes a fluctuation, **NOT** a normalized
+ * quantity.
  *
- * \param[in] n       The density
- * \param[in] phi     The potential
- * \param[in] uPar    The parallel velocity of species \f$\alpha\f$
+ * We will here use the notation
+ *
+ * \f{eqnarray}{
+ *      \langle f \rangle =& \frac{\int_0^{2\pi} f d\theta}{2\pi}\\
+ *      \widetilde{f} =& f - \langle f \rangle
+ * \f}
+ *
+ * this gives
+ *
+ * \f{eqnarray}{
+ *      nu^2 =& (\langle n \rangle + \widetilde{n})
+ *              (\langle u \rangle + \widetilde{u})^2\\
+ *      nu^2 =& (\langle n \rangle + \widetilde{n})
+ *              (\langle u \rangle^2
+ *              + 2\widetilde{u}\langle u \rangle
+ *              + \widetilde{ u }^2
+ *              )\\
+ *      nu^2 =& \langle n \rangle \langle u \rangle^2
+ *              + 2 \langle n \rangle \widetilde{u}\langle u \rangle
+ *              + \langle n \rangle\widetilde{ u }^2
+ *              +
+ *              \widetilde{n} \langle u \rangle^2
+ *              + 2 \widetilde{n} \widetilde{u}\langle u \rangle
+ *              + \widetilde{n}\widetilde{ u }^2\\
+ *      nu^2 - \langle n \rangle \langle u \rangle^2
+ *              =& 2 \langle n \rangle \widetilde{u}\langle u \rangle
+ *              + \langle n \rangle\widetilde{ u }^2
+ *              +
+ *              \widetilde{n} \langle u \rangle^2
+ *              + 2 \widetilde{n} \widetilde{u}\langle u \rangle
+ *              + \widetilde{n}\widetilde{ u }^2
+ * \f}
+ *
+ * as this quantity is integrated over the volume, it will be integrated
+ * poloidally, which means that we are going to take the equvialence of an
+ * \f$2\pi\langle f \rangle\f$ operation on the above. As
+ * \f$\langle f \rangle\f$ is merely a constant, and as
+ * \f$\langle \widetilde{f} \rangle = 0\f$ (as many fluctuations above the mean
+ * as below, we get
+ *
+ * \f{eqnarray}{
+ *     \langle nu^2 - \langle n \rangle \langle u \rangle^2 \rangle
+ *      =& \langle n \rangle \langle u \rangle^2
+ *         + \widetilde{n}\widetilde{ u }^2
+ * \f}
+ *
+ * Notice that this means that
+ *
+ * \f{eqnarray}{
+ *      E_{kin} = \langle E_{kin} \rangle + \widetilde{E}_{kin}
+ * \f}
+ *
+ *
+ * ## Input output
+ *
+ * \param[in] n        The density
+ * \param[in] uSquared The parallel velocity of species \f$\alpha\f$
  * \param[in] kinE    Variable where the kinetic energy will be stored\n
- *                    kinE[0] - The perpendicular kinetic energy\n
- *                    kinE[1] - The parallel kinetic energy\n
- *                    kinE[2] - The total kinetic energy\n
+ *                    Must contain the following keys:\n
+ *                    perpKinEE       - Electron perpendicular kinetic energy\n
+ *                    parKinEE        - Electron parallel kinetic energy\n
+ *                    totKinEE        - Electron total kinetic energy\n
+ *                    perpKinEI       - Ion perpendicular kinetic energy\n
+ *                    parKinEI        - Ion parallel kinetic energy\n
+ *                    totKinEI        - Ion total kinetic energy\n
+ *                    polAvgPerpKinEE - Poloidally averaged electron
+ *                                      perpendicular kinetic energy\n
+ *                    polAvgParKinEE  - Poloidally averaged electron parallel
+ *                                      kinetic energy\n
+ *                    polAvgPerpKinEE - Poloidally averaged electron total
+ *                                      kinetic energy\n
+ *                    polAvgPerpKinEI - Poloidally averaged ion perpendicular
+ *                                      kinetic energy\n
+ *                    polAvgParKinEI  - Poloidally averaged ion parallel kinetic
+ *                                      energy\n
+ *                    polAvgPerpKinEI - Poloidally averaged ion total kinetic
+ *                                      energy
  *
  * \param[out] kinE   Variable where the kinetic energy is stored
- *                    kinE[0] - The perpendicular kinetic energy\n
- *                    kinE[1] - The parallel kinetic energy\n
- *                    kinE[2] - The total kinetic energy\n
  */
-void OwnMonitors::kinEnergy(Field3D  const &n          ,
-                            Vector3D const &gradPerpPhi,
-                            Field3D  const &uPar       ,
-                            std::vector<BoutReal> *kinE)
+void OwnMonitors::kinEnergy(Field3D  const &n                    ,
+                            Vector3D const &gradPerpPhi          ,
+                            Field3D  const &uEPar                ,
+                            Field3D  const &uIPar                ,
+                            std::map<std::string, BoutReal> *kinE)
 {
     TRACE("Halt in OwnMonitors::kinEnergy");
 
-    // Guard
-    if ((*kinE).size() != 3){
-        throw BoutException("'kinE' must have length 3");
+    // Electron energy
+    if((*kinE).count("perpKinEE")){
+        (*kinE)["perpKinEE"] =
+            volInt_.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi);
+    }
+    else{
+        throw BoutException("'perpKinEE' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("parKinEE")){
+        (*kinE)["parKinEE"] =
+            volInt_.volumeIntegral(0.5*n*SQ(uEPar));
+    }
+    else{
+        throw BoutException("'parKinEE' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("totKinEE" )){
+        (*kinE)["toKinEE"] = (*kinE)["perpKinEE"] + (*kinE)["parKinEE"];
+    }
+    else{
+        throw BoutException("'totKinEE' was not a key in the input 'kinE'");
     }
 
-    // Reset result
-    for (std::vector<BoutReal>::iterator it = kinE->begin();
-         it != kinE->end();
-         ++it)
-    {
-        *it = 0.0;
+    // Ion energy
+    if((*kinE).count("perpKinEI")){
+        (*kinE)["perpKinEI"] = (*kinE)["perpKinEE"];
+    }
+    else{
+        throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("parKinEI")){
+        (*kinE)["parKinEI"] =
+            volInt_.volumeIntegral(0.5*n*SQ(uIPar));
+    }
+    else{
+        throw BoutException("'parKinEI' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("totKinEI" )){
+        (*kinE)["toKinEI"] = (*kinE)["perpKinEI"] + (*kinE)["parKinEI"];
+    }
+    else{
+        throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
     }
 
-    // Calculate the perpendicular kinetic energy
-    volInt.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi, (*kinE)[0]);
-    // Calculate the parallel kinetic energy
-    volInt.volumeIntegral(0.5*n*SQ(uPar), (*kinE)[1]);
-    // Calculate the total kinetic energy
-    (*kinE)[2] = (*kinE)[0] + (*kinE)[1];
+    // Calculate the poloidal averages
+    /* NOTE: <f>^2 neq <f^2>
+     *       As f = <f> + \tilde{f}
+     *       As a consequence, we must take the mean before squaring gradPerpPhi
+     */
+    polAvgGradPerpPhi_.x = polAvg_.poloidalAverage(gradPerpPhi.x);
+    polAvgGradPerpPhi_.x = polAvg_.poloidalAverage(gradPerpPhi.x);
+    polAvgGradPerpPhi_.y = polAvg_.poloidalAverage(gradPerpPhi.y);
+    polAvgGradPerpPhi_.z = polAvg_.poloidalAverage(gradPerpPhi.z);
+    polAvgUEPar_         = polAvg_.poloidalAverage(uEPar);
+    polAvgUIPar_         = polAvg_.poloidalAverage(uIPar);
+
+    // Poloidally averaged electron energy
+     if((*kinE).count("polAvgPerpKinEE")){
+        (*kinE)["polAvgPerpKinEE"] =
+            volInt_.volumeIntegral(0.5*polAvgN_*polAvgGradPerpPhi_*polAvgGradPerpPhi_);
+    }
+    else{
+        throw BoutException("'polAvgPerpKinEE' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("polAvgParKinEE")){
+        (*kinE)["polAvgParKinEE"] =
+            volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUEPar_));
+    }
+    else{
+        throw BoutException("'polAvgParKinEE' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("polAvgTotKinEE" )){
+        (*kinE)["polAvgTotKinEE"] = (*kinE)["polAvgPerpKinEE"] + (*kinE)["polAvgParKinEE"];
+    }
+    else{
+        throw BoutException("'polAvgTotKinEE' was not a key in the input 'kinE'");
+    }
+
+    // Poloidally averaged ion energy
+    if((*kinE).count("polAvgPerpKinEI")){
+        (*kinE)["polAvgPerpKinEI"] = (*kinE)["polAvgPerpKinEE"];
+    }
+    else{
+        throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("polAvgParKinEI")){
+        (*kinE)["polAvgParKinEI"] =
+            volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUIPar_));
+    }
+    else{
+        throw BoutException("'polAvgParKinEI' was not a key in the input 'kinE'");
+    }
+    if((*kinE).count("polAvgTotKinEI" )){
+        (*kinE)["polTotPerpKinEI"] = (*kinE)["polAvgPerpKinEI"] + (*kinE)["polAvgParKinEI"];
+    }
+    else{
+        throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
+    }
 }
 
 /*!
- * Calculates the potential energy of the system
+ * Calculates the electron potential energy and the poloidal averaged potential
+ * energy of the system
+ *
+ * ## CAUTION !!
+ *
+ * \warning calcPolAvgN must be called in advance of this function.
+ * \warning This function does not multiply with \f$T_e\f$.
  *
  * ## Derivation
  * A proper derivation can be done where one use the variational
@@ -104,42 +298,109 @@ void OwnMonitors::kinEnergy(Field3D  const &n          ,
  * looking at the transfer terms of the equations, and find which energy
  * terms which are not the kinetic energy. If one neglects the small
  * energy from the fields, one is left with. When this is done, one find
- * that 
+ * that (since the system is isotherm)
  *
  * \f{eqnarray}{
- * E_{pot} = nT_e\log(n),
- * \f}*
+ * E_{pot} =& \int nT_{e, 0}\log(n/n_0) dV
+ * \f}
  *
- * \warning This function does not multiply with \f$T_e\f$.
+ * \note As \f$ T_{i, 0} = 0 \f$, there is no ion potential energy in the
+ * system
+ *
+ * ## Poloidal averaging
+ * For derivation
+ *
+ * \sa kinEnergy
+ *
+ * (using \f$ n\log(n) \f$ for \f$ u^2 \f$, and \f$ 1 \f$ for \f$ n \f$).
+ *
+ * As we are dealing with a logarithm here, care must be taken in what we
+ * define as the fluctuation and the mean. We still have that
+ *
+ * \f{eqnarray}{
+ *      E_{pot} = \langle E_{pot} \rangle + \widetilde{E}_{pot}
+ * \f}
+ *
+ * if we define (as \f$ T_{e,0} \f$ is constant in this isothermal approach)
+ *
+ * \f{eqnarray}{
+ *      \langle E_{pot} \rangle
+ *      = T_{e, 0}\int \langle n \rangle\langle \log(n/n_0)\rangle dV
+ * \f}
+ *
+ * \note \f$ \langle \log(n/n_0) \rangle \neq \log(\langle n \rangle/n_0) \f$
  *
  * \param[in] n       The density
  *
- * \param[out] potE   Variable where the kinetic energy is stored
+ * \param[in] potE    Variable where the potential will be stored\n
+ *                    Must contain the following keys:\n
+ *                    potEE       - Electron potential energy\n
+ *                    polAvgPotEE - Poloidally averaged electron potential
+ *                                  energy
+ *
+ * \param[out] potE   Variable where the potential electron energy is stored
  */
-void OwnMonitors::potEnergy(Field3D const &n, BoutReal *potE)
+void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *potE)
 {
     TRACE("Halt in OwnMonitors::potEnergy");
 
-    // Reset result
-    *potE = 0.0;
+    // The full part
+    if((*potE).count("potEE")){
+        (*potE)["potEE"] =
+            volInt_.volumeIntegral(n*log(n));
+    }
+    else{
+        throw BoutException("'potEE' was not a key in the input 'potE'");
+    }
 
-    // Calculate the potential energy
-    volInt.volumeIntegral(n*log(n), *potE);
+    polAvgLogN_ = polAvg_.poloidalAverage(log(n));
+
+    // The poloidal average
+    if((*potE).count("polAvgPotEE")){
+        (*potE)["polAvgPotEE"] =
+            volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
+    }
+    else{
+        throw BoutException("'polAvgPotEE' was not a key in the input 'potE'");
+    }
 }
 
 
 /*!
- * Calculates the total particle number of the system
+ * Calculates the total particle number and the fluctuation of the total
+ * particle number in the system
  *
  * \param[in] n       The density
- * \param[in] N       Variable where the total particle number is stored
+ * \param[in] totN    Variable where the potential will be stored\n
+ *                    Must contain the following keys:\n
+ *                    totN       - Total particle number\n
+ *                    polAvgTotN - Poloidally averaged of total particle number
  *
- * \param[out] N      The total particle number
+ * \param[out] totN  Variable where the potential electron energy is stored
  */
-void OwnMonitors::totalN(Field3D const &n, BoutReal *N)
+void OwnMonitors::totalN(Field3D const &n, std::map<std::string, BoutReal> *totN)
 {
     TRACE("Halt in OwnMonitors::totalN");
 
-    volInt.volumeIntegral(n, *N);
+    // The full part
+    if((*totN).count("totN")){
+        (*totN)["totN"] =
+            volInt_.volumeIntegral(n*log(n));
+    }
+    else{
+        throw BoutException("'totN' was not a key in the input 'totN'");
+    }
+
+    polAvgLogN_ = polAvg_.poloidalAverage(log(n));
+
+    // The poloidal average
+    if((*totN).count("polAvgTotN")){
+        (*totN)["polAvgTotN"] =
+            volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
+    }
+    else{
+        throw BoutException("'polAvgTotN' was not a key in the input 'totN'");
+    }
+
 }
 #endif

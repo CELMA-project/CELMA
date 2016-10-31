@@ -35,7 +35,7 @@ class PolAvg : private Helpers
 {
     public:
         //! Function which returns the poloidal average of a field
-        Field3D const polAvg(Field3D const &f);
+        Field3D const poloidalAverage(Field3D const &f);
 };
 
 /*!
@@ -50,7 +50,7 @@ class VolumeIntegral : private Helpers
 {
     public:
         //! Volume integral
-        void volumeIntegral(Field3D const &f, BoutReal &result);
+        BoutReal volumeIntegral(Field3D const &f);
 };
 
 #include "../src/helpers.cxx"
