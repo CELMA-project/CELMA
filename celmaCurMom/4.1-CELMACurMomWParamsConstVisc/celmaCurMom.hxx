@@ -150,7 +150,7 @@ private:
     BRACKET_METHOD bm;              // The bracket method
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
     OwnLaplacianInversions ownLapl; // Class containing own laplacian
-    OwnFilters *ownFilter;          // Pointer to the chosen filter class
+    OwnFilters *ownFilter;          // Pointer to the filter class
     OwnMonitors ownMon;             // Own monitors
     int outputMonitor(BoutReal simtime, int iter, int NOUT);    // Monitors every output
     // *****************************************************************************
