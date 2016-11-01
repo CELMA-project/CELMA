@@ -39,15 +39,18 @@ scanTe0.setMainOptions(\
 
 # Set the flags
 scanTe0.setPostProcessingFlags(\
-                              justPostProcess            = True ,\
-                              postProcessInit            = True ,\
-                              postProcessExp             = True ,\
-                              postProcessLin             = True ,\
-                              postProcessTurb            = True ,\
-                              postProcessLinProfiles     = True ,\
-                              postProcessTurbProfiles    = True ,\
-                              postProcessProbesAndEnergy = True ,\
-                              postProcessGrowthRates     = True ,\
+                              justPostProcess            = False,\
+                              postProcessInit            = False,\
+                              postProcessExp             = False,\
+                              postProcessLin             = False,\
+                              postProcessTurb            = False,\
+                              postProcessLinProfiles     = False,\
+                              postProcessTurbProfiles    = False,\
+                              postProcessProbesAndEnergy = False,\
+                              postProcessGrowthRates     = False,\
+                              # FIXME: Check that this is true
+                              # Calculated from the energy overshoot
+                              tIndSaturatedTurb          = 600  ,\
                              )
 
 # Set common plotter options
