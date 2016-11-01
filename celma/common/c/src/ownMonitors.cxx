@@ -3,6 +3,11 @@
 
 #include "../include/ownMonitors.hxx"
 
+/* FIXME: Monitors are not printing traces or BoutException at the moment
+ *        (see BOUT-dev #355)
+ *        As a quickfix std::cout is used for the errors
+ */
+
 /*!
  * \brief Constructor
  *
@@ -187,6 +192,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi);
     }
     else{
+        std::cout << "'perpKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEE' was not a key in the input 'kinE'");
     }
     if((*kinE).count("parKinEE")){
@@ -194,12 +200,14 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*SQ(uEPar));
     }
     else{
+        std::cout << "'parKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'parKinEE' was not a key in the input 'kinE'");
     }
     if((*kinE).count("totKinEE" )){
         (*kinE)["toKinEE"] = (*kinE)["perpKinEE"] + (*kinE)["parKinEE"];
     }
     else{
+        std::cout << "'totKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'totKinEE' was not a key in the input 'kinE'");
     }
 
@@ -208,6 +216,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
         (*kinE)["perpKinEI"] = (*kinE)["perpKinEE"];
     }
     else{
+        std::cout << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
     }
     if((*kinE).count("parKinEI")){
@@ -215,12 +224,14 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*SQ(uIPar));
     }
     else{
+        std::cout << "'parKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'parKinEI' was not a key in the input 'kinE'");
     }
     if((*kinE).count("totKinEI" )){
         (*kinE)["toKinEI"] = (*kinE)["perpKinEI"] + (*kinE)["parKinEI"];
     }
     else{
+        std::cout << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
     }
 
@@ -242,6 +253,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*polAvgN_*polAvgGradPerpPhi_*polAvgGradPerpPhi_);
     }
     else{
+        std::cout << "'polAvgPerpKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgPerpKinEE' was not a key in the input 'kinE'");
     }
     if((*kinE).count("polAvgParKinEE")){
@@ -249,12 +261,14 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUEPar_));
     }
     else{
+        std::cout << "'polAvgParKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgParKinEE' was not a key in the input 'kinE'");
     }
     if((*kinE).count("polAvgTotKinEE" )){
         (*kinE)["polAvgTotKinEE"] = (*kinE)["polAvgPerpKinEE"] + (*kinE)["polAvgParKinEE"];
     }
     else{
+        std::cout << "'polAvgTotKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgTotKinEE' was not a key in the input 'kinE'");
     }
 
@@ -263,6 +277,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
         (*kinE)["polAvgPerpKinEI"] = (*kinE)["polAvgPerpKinEE"];
     }
     else{
+        std::cout << "'polAvgPerpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
     }
     if((*kinE).count("polAvgParKinEI")){
@@ -270,12 +285,14 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUIPar_));
     }
     else{
+        std::cout << "'polAvgParKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgParKinEI' was not a key in the input 'kinE'");
     }
     if((*kinE).count("polAvgTotKinEI" )){
         (*kinE)["polTotPerpKinEI"] = (*kinE)["polAvgPerpKinEI"] + (*kinE)["polAvgParKinEI"];
     }
     else{
+        std::cout << "'polAvgPerpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
     }
 }
@@ -350,6 +367,7 @@ void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *p
             volInt_.volumeIntegral(n*log(n));
     }
     else{
+        std::cout << "'potEE' was not a key in the input 'potE'" << std::endl;
         throw BoutException("'potEE' was not a key in the input 'potE'");
     }
 
@@ -361,6 +379,7 @@ void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *p
             volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
     }
     else{
+        std::cout << "'polAvgPotEE' was not a key in the input 'potE'" << std::endl;
         throw BoutException("'polAvgPotEE' was not a key in the input 'potE'");
     }
 }
@@ -388,6 +407,7 @@ void OwnMonitors::totalN(Field3D const &n, std::map<std::string, BoutReal> *totN
             volInt_.volumeIntegral(n*log(n));
     }
     else{
+        std::cout << "'totN' was not a key in the input 'totN'" << std::endl;
         throw BoutException("'totN' was not a key in the input 'totN'");
     }
 
@@ -399,6 +419,7 @@ void OwnMonitors::totalN(Field3D const &n, std::map<std::string, BoutReal> *totN
             volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
     }
     else{
+        std::cout << "'polAvgTotN' was not a key in the input 'totN'" << std::endl;
         throw BoutException("'polAvgTotN' was not a key in the input 'totN'");
     }
 
