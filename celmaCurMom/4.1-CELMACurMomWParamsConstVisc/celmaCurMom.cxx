@@ -251,16 +251,36 @@ int CelmaCurMom::rhs(BoutReal t)
 // Constructor
 // ############################################################################
 CelmaCurMom::CelmaCurMom()
-:
-    kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
-           {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
-           {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
-           {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
-           ),
-    potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
-    totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
+/* FIXME: c++11 is unsupported on jess
+ * :
+ *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
+ *            {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
+ *            {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
+ *            {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
+ *            ),
+ *     potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
+ *     totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
+ */
 {
     TRACE("Halt in CelmaCurMom::CelmaCurMom");
+
+    // Non c++11 initialization
+    kinE["perpKinEE"]       = 0.0;
+    kinE["parKinEE"]        = 0.0;
+    kinE["totKinEE"]        = 0.0;
+    kinE["perpKinEI"]       = 0.0;
+    kinE["parKinEI"]        = 0.0;
+    kinE["totKinEI"]        = 0.0;
+    kinE["polAvgPerpKinEE"] = 0.0;
+    kinE["polAvgParKinEE"]  = 0.0;
+    kinE["polAvgTotKinEE"]  = 0.0;
+    kinE["polAvgPerpKinEI"] = 0.0;
+    kinE["polAvgParKinEI"]  = 0.0;
+    kinE["polAvgTotKinEI"]  = 0.0;
+    potE["potEE"]           = 0.0;
+    potE["polAvgPotEE"]     = 0.0;
+    totN["totN"]            = 0.0;
+    totN["polAvgTotN"]      = 0.0;
 }
 // ############################################################################
 
