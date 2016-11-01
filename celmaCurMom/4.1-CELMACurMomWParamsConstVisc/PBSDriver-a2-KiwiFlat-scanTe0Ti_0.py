@@ -24,7 +24,7 @@ series_add = (\
               ('geom' , 'Ly' , Ly),\
              )
 
-directory = "a1-KiwiFlatElTempTi0"
+directory = "a2-KiwiFlatElTempTi0"
 
 # Set the main options
 scanTe0.setMainOptions(\
