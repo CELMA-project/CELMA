@@ -22,7 +22,7 @@ series_add = (\
               ('geom' , 'Ly' , Ly),\
              )
 
-directory = "a1-KiwiFlatZTi0"
+directory = "a2-KiwiFlatZTi0"
 
 # Set the main options
 scanZ.setMainOptions(\
