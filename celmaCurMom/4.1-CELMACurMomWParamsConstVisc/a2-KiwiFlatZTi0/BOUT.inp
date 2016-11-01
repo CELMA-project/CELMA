@@ -136,7 +136,7 @@ nn     = 0.0    # m^-3
 # Geometry
 # =============================================================================
 [geom]
-Lx =   6.5393 # The normalized radius (must agree with radius up to fourth decimal)
+Lx =   3.4603 # The normalized radius (must agree with radius up to fourth decimal)
 Ly = 366.2017 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
