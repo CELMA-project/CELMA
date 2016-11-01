@@ -103,7 +103,7 @@ class GenericScanDriver(object):
     """
     #}}}
 
-    #{{{Construct
+    #{{{Constructor
     def __init__(self):
         #{{{docstring
         """
@@ -173,14 +173,15 @@ class GenericScanDriver(object):
         #}}}
 
     #{{{setMainOptions
-    def setMainOptions(self           ,\
-                       directory      ,\
-                       scanParameters ,\
-                       series_add     ,\
-                       theRunName     ,\
-                       make    = False,\
-                       varName = "n"  ,\
-                       pltName = "n"  ,\
+    def setMainOptions(self                         ,\
+                       directory                    ,\
+                       scanParameters               ,\
+                       series_add                   ,\
+                       theRunName                   ,\
+                       make                  = False,\
+                       varName               = "n"  ,\
+                       pltName               = "n"  ,\
+                       timeStepMultiplicator = 1    ,\
                       ):
         #{{{docstring
         """
@@ -202,19 +203,22 @@ class GenericScanDriver(object):
             Name to be collected
         pltName : str
             Name to be plotted
+        timeStepMultiplicator : int
+            How much the default time step should be multiplied with
         """
         #}}}
 
         self._calledFunctions["mainOptions"] = True
 
-        self._directory      = directory
-        self._scanParameters = scanParameters
-        self._series_add     = series_add
-        self._theRunName     = theRunName
-        self._varName        = varName
-        self._make           = make
-        self._var            = varName
-        self._pltName        = pltName
+        self._directory             = directory
+        self._scanParameters        = scanParameters
+        self._series_add            = series_add
+        self._theRunName            = theRunName
+        self._varName               = varName
+        self._make                  = make
+        self._var                   = varName
+        self._pltName               = pltName
+        self._timeStepMultiplicator = timeStepMultiplicator
     #}}}
 
     #{{{setPostProcessingFlags
@@ -228,7 +232,7 @@ class GenericScanDriver(object):
                                postProcessTurbProfiles    = False,\
                                postProcessProbesAndEnergy = False,\
                                postProcessGrowthRates     = False,\
-
+                               tIndSaturatedTurb          = None ,\
             ):
         #{{{docstring
         """
@@ -257,6 +261,10 @@ class GenericScanDriver(object):
             If the probe data and the energy should be plotted
         postProcessGrowthRates : bool
             If the growth rates should be plotted
+        tIndSaturatedTurb : int
+            The index in the turbulence run where the turbulence is
+            saturated (usually taken to be after the overshoot in the
+            kinetic energy)
         """
         #}}}
 
@@ -272,6 +280,7 @@ class GenericScanDriver(object):
                 "postProcessTurbProfiles"    : postProcessTurbProfiles   ,\
                 "postProcessProbesAndEnergy" : postProcessProbesAndEnergy,\
                 "postProcessGrowthRates"     : postProcessGrowthRates    ,\
+                "tIndSaturatedTurb"          : tIndSaturatedTurb         ,\
                 }
     #}}}
 
@@ -475,12 +484,12 @@ class GenericScanDriver(object):
         nz = 1
         # Set the temporal domain
         restart    = None
-        timestep   = (2e3)
-        nout       = (2)
+        timestep   = (2e3*self._timeStepMultiplicator,)
+        nout       = (2,)
         # Filter
         ownFilterType = "none"
         #Switches
-        useHyperViscAzVortD = (False)
+        useHyperViscAzVortD = (False,)
         # Specify the numbers used for the BOUT runs
         BOUT_walltime         = '05:00:00'
         BOUT_run_name         = theRunName
@@ -548,12 +557,12 @@ class GenericScanDriver(object):
         # Set the spatial domain
         nz = 256
         # Set the temporal domain
-        timestep   = (50)
-        nout       = (2)
+        timestep   = (50*self._timeStepMultiplicator,)
+        nout       = (2,)
         # Filter
         ownFilterType = "none"
         #Switches
-        useHyperViscAzVortD = (False)
+        useHyperViscAzVortD = (False,)
         # From previous outputs
         aScanPath = init_dmp_folders[0]
         # Name
@@ -619,7 +628,7 @@ class GenericScanDriver(object):
         #{{{ If profiles are to be plotted
         if self.postProcessLinProfiles or self.postProcessTurbProfiles:
             noutProfile                 = 3
-            timestepProfile             = 10
+            timestepProfile             = 10*self._timeStepMultiplicator
             restartProfile              = "overwrite"
             useHyperViscAzVortDProfile  = True
             saveTermsProfile            = True
@@ -652,7 +661,7 @@ class GenericScanDriver(object):
         #{{{ Linear options
         #Switches
         saveTerms           = False
-        useHyperViscAzVortD = (True)
+        useHyperViscAzVortD = (True,)
         includeNoise     = True
         forceAddNoise    = True
         # As this is scan dependent, the driver finds the correct folder
@@ -660,8 +669,8 @@ class GenericScanDriver(object):
         # From previous outputs
         aScanPath = expand_dmp_folders[0]
         # Set the temporal domain
-        timestep = (1)
-        nout     = (500)
+        timestep = (1*self._timeStepMultiplicator,)
+        nout     = (500,)
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
@@ -778,10 +787,10 @@ class GenericScanDriver(object):
         #{{{Turbulence options
         # Switches
         saveTerms           = False
-        useHyperViscAzVortD = (True)
+        useHyperViscAzVortD = (True,)
         # Set the temporal domain
-        nout     = (5000)
-        timestep = (1)
+        nout     = (5000,)
+        timestep = (1*self._timeStepMultiplicator,)
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
@@ -931,11 +940,6 @@ class GenericScanDriver(object):
             theRunName = self._theRunName + "-energyProbesPlot"
             curPostProcessor = postBoutRunner
 
-            # Found from the overshoot at the energy plot
-            # Overshoot happening around timestep 4400, timestep 4700 looks ok
-            # Init + expand = 4100 => 4700 - 4100 = 600
-            tIndSaturatedTurb = 600
-
             _, _ = turboRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
                 # Declare dependencies
@@ -946,16 +950,16 @@ class GenericScanDriver(object):
                 # Below are the kwargs arguments being passed to
                 # the post processing function
                 # postBoutRunner option
-                driverName = "plotEnergyAndProbes"   ,\
+                driverName = "plotEnergyAndProbes"         ,\
                 # PostProcessDriver input
-                **self._commonPlotterOptions         ,\
-                theRunName        = theRunName       ,\
+                **self._commonPlotterOptions               ,\
+                theRunName        = theRunName             ,\
                 # StatsAndSignalsDrivers input
-                paths             = collectionFolders,\
+                paths             = collectionFolders      ,\
                 # DriversProbes input
-                var               = self._var        ,\
-                **self._probesPlotterOptions         ,\
-                tIndSaturatedTurb = tIndSaturatedTurb,\
+                var               = self._var              ,\
+                **self._probesPlotterOptions               ,\
+                tIndSaturatedTurb = self.tIndSaturatedTurb ,\
                 # The steady state path will be
                 # converted using convertToCurrentScanParameters
                 steadyStatePath = expand_dmp_folders[0],\
