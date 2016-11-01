@@ -14,8 +14,8 @@ from CELMAPython.drivers import GenericScanDriver
 scanZ = GenericScanDriver()
 
 # Set the scan
-length = (1       , 2       , 4       , 6       , 8        , 10       )
-Ly     = (138.4112, 276.8224, 553.6449, 830.4673, 1107.2898, 1384.1122)
+length = (4       , 5       , 6       , 8        , 10       ,  12       )
+Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
 scanParameters  = ("len", "Ly")
 series_add = (\
               ('input', 'len', length),\
