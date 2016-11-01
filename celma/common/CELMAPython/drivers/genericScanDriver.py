@@ -568,7 +568,7 @@ class GenericScanDriver(object):
         # Name
         theRunName = self._theRunName + "-1-expand"
         # PBS options
-        BOUT_walltime         = '06:00:00'
+        BOUT_walltime         = '24:00:00'
         BOUT_run_name         = theRunName
         post_process_run_name = 'post' + theRunName.capitalize()
         post_process_walltime = '0:29:00'
@@ -675,7 +675,7 @@ class GenericScanDriver(object):
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
         BOUT_run_name         = theRunName
-        BOUT_walltime         = '100:00:00'
+        BOUT_walltime         = '72:00:00'
         post_process_run_name = 'post' + theRunName.capitalize()
         post_process_walltime = '03:00:00'
         post_process_queue    = 'workq'
@@ -795,7 +795,7 @@ class GenericScanDriver(object):
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
         BOUT_run_name         = theRunName
-        BOUT_walltime         = '100:00:00'
+        BOUT_walltime         = '72:00:00'
         post_process_run_name = 'post' + theRunName.capitalize()
         post_process_walltime = '03:00:00'
         post_process_queue    = 'workq'
