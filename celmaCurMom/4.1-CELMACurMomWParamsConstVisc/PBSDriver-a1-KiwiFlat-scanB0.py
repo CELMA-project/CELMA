@@ -48,6 +48,8 @@ scanB0.setPostProcessingFlags(\
                               postProcessTurbProfiles    = True ,\
                               postProcessProbesAndEnergy = True ,\
                               postProcessGrowthRates     = True ,\
+                              # Calculated from the energy overshoot
+                              tIndSaturatedTurb          = 600  ,\
                              )
 
 # Set common plotter options
