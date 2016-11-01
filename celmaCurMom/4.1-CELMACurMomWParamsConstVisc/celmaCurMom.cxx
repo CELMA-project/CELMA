@@ -254,11 +254,11 @@ CelmaCurMom::CelmaCurMom()
 :
     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
            {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
-           {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgPerpKinEE", 0.0},
-           {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgPerpKinEI", 0.0}}
+           {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
+           {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
            ),
     potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
-    totN ({{"totN", 0.0}, {"polAvgtotN", 0.0}})
+    totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
 {
     TRACE("Halt in CelmaCurMom::CelmaCurMom");
 }
@@ -543,7 +543,7 @@ void CelmaCurMom::setSwithces(bool &restarting)
     switches->get("constViscHyper"     , constViscHyper     , false);
     switches->get("saveTerms"          , saveTerms          , true );
     switches->get("monitorEnergy"      , monitorEnergy      , true );
-    switches->get("monitorN"           , monitorN           , false);
+    switches->get("monitorN"           , monitorN           , true );
     switches->get("viscosityGuard"     , viscosityGuard     , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
