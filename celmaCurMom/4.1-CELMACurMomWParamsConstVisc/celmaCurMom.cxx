@@ -251,16 +251,36 @@ int CelmaCurMom::rhs(BoutReal t)
 // Constructor
 // ############################################################################
 CelmaCurMom::CelmaCurMom()
-:
-    kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
-           {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
-           {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
-           {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
-           ),
-    potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
-    totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
+/* FIXME: c++11 is unsupported on jess
+ * :
+ *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
+ *            {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
+ *            {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
+ *            {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
+ *            ),
+ *     potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
+ *     totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
+ */
 {
     TRACE("Halt in CelmaCurMom::CelmaCurMom");
+
+    // Non c++11 initialization
+    kinE["perpKinEE"]       = 0.0;
+    kinE["parKinEE"]        = 0.0;
+    kinE["totKinEE"]        = 0.0;
+    kinE["perpKinEI"]       = 0.0;
+    kinE["parKinEI"]        = 0.0;
+    kinE["totKinEI"]        = 0.0;
+    kinE["polAvgPerpKinEE"] = 0.0;
+    kinE["polAvgParKinEE"]  = 0.0;
+    kinE["polAvgTotKinEE"]  = 0.0;
+    kinE["polAvgPerpKinEI"] = 0.0;
+    kinE["polAvgParKinEI"]  = 0.0;
+    kinE["polAvgTotKinEI"]  = 0.0;
+    potE["potEE"]           = 0.0;
+    potE["polAvgPotEE"]     = 0.0;
+    totN["totN"]            = 0.0;
+    totN["polAvgTotN"]      = 0.0;
 }
 // ############################################################################
 
@@ -370,9 +390,10 @@ void CelmaCurMom::setAndSaveParameters()
 
     // Check that Lx and LxParams is the same up until the fourt decimal point
     // ************************************************************************
+    std::ostringstream stream;
+    int precision = 4;
+    bool throwError = false;
     if ( ( fabs(round(LxParam*1e4)/1e4 - round(Lx*1e4)/1e4))>DBL_EPSILON ){
-        int precision = 4;
-        std::ostringstream stream;
         stream << "Mismatch between 'Lx' calculated from 'radius' "
                << "and input 'Lx'\n"
                << "Calculated = "
@@ -382,15 +403,10 @@ void CelmaCurMom::setAndSaveParameters()
                << "Input      = "
                << std::fixed
                << std::setprecision(precision) << round(Lx*1e4)/1e4
-               << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "\n\n";
+        throwError = true;
     }
     if ( ( fabs(round(LyParam*1e4)/1e4 - round(Ly*1e4)/1e4))>DBL_EPSILON ){
-        int precision = 4;
-        std::ostringstream stream;
         stream << "Mismatch between 'Ly' calculated from 'length' "
                << "and input 'Ly'\n"
                << "Calculated = "
@@ -400,8 +416,11 @@ void CelmaCurMom::setAndSaveParameters()
                << "Input      = "
                << std::fixed
                << std::setprecision(precision) << round(Ly*1e4)/1e4
-               << "\n";
-        std::string str =  stream.str();
+               << "\n\n";
+        throwError = true;
+    }
+    if(throwError){
+        std::string str = stream.str();
         // Cast the stream to a const char in order to use it in BoutException
         const char* message = str.c_str();
         throw BoutException(message);
@@ -450,31 +469,27 @@ void CelmaCurMom::printPointsPerRhoS()
     root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,3.0);
     root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.0e-1);
 
+    std::ostringstream stream;
+    bool throwError = false;
     if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled in x.\n"
                << "Limit is         " << minPointsPerRhoSXZ << "\n"
-               << "Current value is " << pointsPerRhoSRadially << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "Current value is " << pointsPerRhoSRadially << "\n\n";
+        throwError = true;
     }
     if (mesh->ngz > 3 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
                << "Limit is         " << minPointsPerRhoSXZ << "\n"
-               << "Current value is " << pointsPerRhoSAzimuthally << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
+        throwError = true;
     }
     if (pointsPerRhoSParallely < minPointsPerRhoSY){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled in y.\n"
                << "Limit is         " << minPointsPerRhoSY << "\n"
-               << "Current value is " << pointsPerRhoSParallely << "\n";
+               << "Current value is " << pointsPerRhoSParallely << "\n\n";
+        throwError = true;
+    }
+    if(throwError){
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
         const char* message = str.c_str();
