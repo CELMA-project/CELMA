@@ -22,15 +22,13 @@ OwnFilters::OwnFilters(Options *options)
 
     ncz = mesh->ngz-1;
 
-    /* FIXME: Write the Nyquist sampling theorem
-     *        Found that can be expressed as
-     *        dz = (1/(2k))*2*pi => nz = 2k
-     *        but need to formalize it
-     */
     // Calculate the kMax from the Nyquist sampling theorem
     kMax = int(ncz/2.0);
 
     // Use the Orzag's 2/3 rule
+    /* NOTE: Floor selects the closest lower number.
+     *       This ensures that we do not get one spurious mode.
+     */
     kMax = int (floor((2.0/3.0)*kMax));
 
     // Allocate fourierArray
@@ -121,6 +119,7 @@ const Field3D OwnFiltAllPass::ownFilter(const Field3D &var)
  * \note Do not confuse the mode number with the inverse wavelength. Instead,
  *       the relation \f$\lambda = \frac{C}{k}\f$ holds, where \f$C\f$ is the
  *       circumference
+ * \warning Only works on grid equidistant in \f$\rho\f$
  */
 OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) : OwnFilters(options)
 {
@@ -131,19 +130,39 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) : OwnFilters(option
     options = Options::getRoot();
     options->get("MXG", MXG, 2);
 
-    // GlobalNx includes the ghost points
+    /* NOTE: outerRho
+     * GlobalNx includes the ghost points and counts from one
+     * The length made up by the inner points is therefore
+     * (mesh->GlobalNx - 2*MXG - 1)*dx
+     * However, we also need the line segment from the boundary (in our case
+     * the origin of the cylinder) to the first inner point, located dx/2 away.
+     * Thus:
+     */
     BoutReal outerRho = (mesh->GlobalNx - 2*MXG - 0.5)*mesh->dx(0,0);
     BoutReal outerCircumference = TWOPI*outerRho;
 
-    // Calculate the corresponding minimum wavelength
+    // Calculate the corresponding minimum resolvable wavelength
     lambdaMin = outerCircumference/kMax;
 
-    // Throw exception if the only mode present in the center is the offset mode
-    circumference = TWOPI*mesh->J(1, 0);  // Lowest circumference
+    // Whether or not to throw exception if the only mode present in the center is the offset mode
+    bool throwWarning;
+    options->get("throwWarning", throwWarning, true);
+
+    circumference = TWOPI*mesh->J(0, 0);  // Lowest circumference
     kMaxCurrent   = int(floor(circumference/lambdaMin));
     if(kMaxCurrent <= 0){
-        throw BoutException("kMaxCurrent at inner rho is equal or below 0.\n"
-                            "Fix by increasing nz");
+        if(throwWarning){
+            std::cout << "WARNING: At inner rho, kMax = circumference/lambdaMin = "
+                      << circumference/lambdaMin
+                      << ", so floor(circumference/lambdaMin) <= 0" << std::endl;
+        }
+        else{
+            std::cout << "At inner rho circumference/lambdaMin = "
+                      << circumference/lambdaMin << std::endl;
+            throw BoutException("kMax at inner rho is equal or below 0."
+                                "\nFix it by increasing nz, decreasing nx or "
+                                "decreasing Lx");
+        }
     }
 }
 
