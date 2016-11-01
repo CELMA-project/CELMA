@@ -175,7 +175,8 @@ class Drivers2D(FieldPlottersDriver):
                             raise IndexError(message)
                         self._tind[ind] = realInd
             # Cast to tuple for safety
-            self._tind = tuple(self._tind)
+            if self._tind is not None:
+                self._tind = tuple(self._tind)
 
             if self._varName == "n":
                 #{{{n

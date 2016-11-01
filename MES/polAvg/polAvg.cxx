@@ -48,7 +48,7 @@ int PolAvgTest::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    S_num = avg.polAvg(f);
+    S_num = avg.poloidalAverage(f);
 
     // Error in S
     e = S_num - S;

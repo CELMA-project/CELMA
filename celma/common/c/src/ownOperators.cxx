@@ -526,7 +526,7 @@ Vector3D OwnOperators::Grad_perp(const Field3D &f)
 }
 
 /*!
- * \f$\partial_z_\mathbf{v}\f$. We note that in cylindrical geometry, all the
+ * \f$\partial_z \mathbf{v}\f$. We note that in cylindrical geometry, all the
  * metrics are independant of \f$z\f$. Hence, this operator only calls the DDY
  * for each vector component.
  *
