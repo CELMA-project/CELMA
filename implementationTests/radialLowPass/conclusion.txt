@@ -1,0 +1,5 @@
+- Check that the radial low pass filter is working as expected
+
+Conclusion:
+===========
+Up to round off error, the filter is working

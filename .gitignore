@@ -85,6 +85,7 @@ MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 MES/integrals/volumeIntegral/VolIntCyl
 MES/integrals/surfaceEdgeIntegral/SurfEdgeIntCyl
 MES/polAvg/polAvg
+implementationTests/radialLowPass/radialLowPass
 parameters/c++/params
 parameters/c++/data/input_*
 
