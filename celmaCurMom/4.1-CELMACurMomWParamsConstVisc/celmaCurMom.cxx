@@ -91,16 +91,23 @@ int CelmaCurMom::init(bool restarting)
     }
     // Monitor variables to be solved for
     if(monitorEnergy){
-        dump.add   (kinEE[0], "perpKinEE", 1);
-        dump.add   (kinEE[1], "parKinEE" , 1);
-        dump.add   (kinEE[2], "totKinEE" , 1);
-        dump.add   (kinEI[0], "perpKinEI", 1);
-        dump.add   (kinEI[1], "parKinEI" , 1);
-        dump.add   (kinEI[2], "totKinEI" , 1);
-        SAVE_REPEAT(potE);
+        for (std::map<std::string, BoutReal>::iterator it=kinE.begin();
+             it!=kinE.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
+        for (std::map<std::string, BoutReal>::iterator it=potE.begin();
+             it!=potE.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
     }
     if(monitorN){
-        SAVE_REPEAT(N);
+        for (std::map<std::string, BoutReal>::iterator it=totN.begin();
+             it!=totN.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
     }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
@@ -243,8 +250,15 @@ int CelmaCurMom::rhs(BoutReal t)
 
 // Constructor
 // ############################################################################
-CelmaCurMom::CelmaCurMom() : kinEE      (3, 0.0),
-                             kinEI      (3, 0.0)
+CelmaCurMom::CelmaCurMom()
+:
+    kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
+           {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
+           {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
+           {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
+           ),
+    potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
+    totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
 {
     TRACE("Halt in CelmaCurMom::CelmaCurMom");
 }
@@ -257,12 +271,11 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
     TRACE("Halt in CelmaCurMom::outputMonitor");
 
     if(monitorEnergy){
-        ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
-        ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
+        ownMon.kinEnergy(n, gradPerpPhi, uEPar, uIPar, &kinE);
         ownMon.potEnergy(n, &potE);
     }
     if(monitorN){
-        ownMon.totalN(n, &N);
+        ownMon.totalN(n, &totN);
     }
 
     return 0;
@@ -530,7 +543,7 @@ void CelmaCurMom::setSwithces(bool &restarting)
     switches->get("constViscHyper"     , constViscHyper     , false);
     switches->get("saveTerms"          , saveTerms          , true );
     switches->get("monitorEnergy"      , monitorEnergy      , true );
-    switches->get("monitorN"           , monitorN           , false);
+    switches->get("monitorN"           , monitorN           , true );
     switches->get("viscosityGuard"     , viscosityGuard     , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
