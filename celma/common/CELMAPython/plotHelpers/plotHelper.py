@@ -434,6 +434,10 @@ class PlotHelper(object):
                 else:
                     var *= self._convDict["rhoS"]
                 units = r"\mathrm{m}"
+            elif varName == "length":
+                # NOTE: len is an input parameter (Ly), and is thus already
+                #       given in physcial units
+                units = r"\mathrm{m}"
             elif "EE" in varName:
                 # NOTE: The masses are not included in the integral from
                 #       the simulations
@@ -491,11 +495,16 @@ class PlotHelper(object):
             elif varName == "rho":
                 normalization = r"/\rho_s"
             elif varName == "Ly":
-                # NOTE: B0 is an input parameter, and is thus already
+                # NOTE: Ly is an input parameter, and is thus already
                 #       given in physcial units
                 var /= self._convDict["rhoS"]
                 normalization = r"/\rho_s"
             elif varName == "z":
+                normalization = r"/\rho_s"
+            elif varName == "length":
+                # NOTE: len is an input parameter (Ly), and is thus already
+                #       given in physcial units
+                var /= self._convDict["rhoS"]
                 normalization = r"/\rho_s"
             elif "EE" in varName:
                 # NOTE: The masses are not included in the integral
