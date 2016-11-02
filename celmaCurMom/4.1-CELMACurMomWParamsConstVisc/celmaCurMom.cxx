@@ -361,7 +361,7 @@ void CelmaCurMom::setAndSaveParameters()
     // ************************************************************************
     Options *input = options->getSection("input");
     input->get("radius"         , radius         , 0.0);
-    input->get("length"         , lenght         , 0.0);
+    input->get("length"         , length         , 0.0);
     input->get("n0"             , n0             , 0.0);
     input->get("Te0"            , Te0            , 0.0);
     input->get("Ti0"            , Ti0            , 0.0);
