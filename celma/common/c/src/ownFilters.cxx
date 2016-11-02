@@ -148,7 +148,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) : OwnFilters(option
     bool throwWarning;
     options->get("throwWarning", throwWarning, true);
 
-    circumference = TWOPI*mesh->J(0, 0);  // Lowest circumference
+    circumference = TWOPI*mesh->J(mesh->xstart, 0);  // Lowest circumference (inner point)
     kMaxCurrent   = int(floor(circumference/lambdaMin));
     if(kMaxCurrent <= 0){
         if(throwWarning){
@@ -193,6 +193,7 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var)
     for(int xInd=0; xInd<mesh->ngx; xInd++) {
         // Set the current kMax (J = rho in cylinder coordinates)
         circumference = TWOPI*mesh->J(xInd, 0);
+        // Abs since the inner ghost point of the Jacobian can be negative
         kMaxCurrent   = int(abs(floor(circumference/lambdaMin)));
         for(int yInd=0; yInd<mesh->ngy; yInd++) {
             // Take the FFT for a given radius at a given parallel plane
