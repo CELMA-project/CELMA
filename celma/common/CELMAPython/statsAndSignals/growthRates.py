@@ -206,6 +206,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 
         #{{{Find growth rates from definition of straight segments in the plot
         # Initialize the previous growth rate
+        import pdb; pdb.set_trace()
         prevRate = growthRates[0]
 
         # The growth rates and the corresponding standard deviation is found by
@@ -426,6 +427,7 @@ class PlotGrowthRates(object):
                               "B0"    :"$B_0$"                      ,\
                               "Te0"   :"$T_e$"                      ,\
                               "nn"    :"$n_n$"                      ,\
+                              "length":"$z$"                        ,\
                              }
 
         self._errorbarOptions = {"color"     :"k",\

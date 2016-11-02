@@ -18,8 +18,8 @@ length = (4       , 5       , 6       , 8        , 10       ,  12       )
 Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
 scanParameters  = ("len", "Ly")
 series_add = (\
-              ('input', 'len', length),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'length', length),\
+              ('geom' , 'Ly'    , Ly),\
              )
 
 directory = "a2-KiwiFlatZTi0"
