@@ -66,7 +66,8 @@ class DriversEnergy(StatsAndSignalsDrivers):
                 pltSize           = self._pltSize          ,\
                                   )
 
-        energyPlotter.plotEnergies("ions")
-        energyPlotter.plotEnergies("electrons")
+        energyPlotter.plotKinEnergy("ions")
+        energyPlotter.plotKinEnergy("electrons")
+        energyPlotter.plotPotEnergy()
     #}}}
 #}}}
