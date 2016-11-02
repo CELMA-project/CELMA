@@ -18,7 +18,7 @@
  * \param[in] S      The source [m^-3s^-1]
  */
 Parameters::Parameters(BoutReal const &radius,
-                       BoutReal const &len,
+                       BoutReal const &length,
                        BoutReal const &n0,
                        BoutReal const &Te0,
                        BoutReal const &Ti0,
@@ -26,7 +26,7 @@ Parameters::Parameters(BoutReal const &radius,
                        BoutReal const &S,
                        BoutReal const &nn
                        )
-: radius_(radius), len_(len),
+: radius_(radius), length_(length),
   n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
   nn_(nn),
   separatorLen(57), separator(' '),
@@ -74,7 +74,7 @@ Parameters::Parameters(BoutReal const &radius,
     iLarmour = mi*vThI/(e*B0_);
     rhoS     = cS/omCI;
     Lx       = radius_/rhoS;
-    Ly       = len_/rhoS;
+    Ly       = length_/rhoS;
 
     // Collisions
     /*Friedberg:
@@ -188,7 +188,7 @@ void Parameters::printTable() const
     printVar("Te0"   , Te0_    , "eV"      );
     printVar("S"     , S_      , "m^-3s^-1");
     printVar("radius", radius_ , "m"       );
-    printVar("len"   , len_    , "m"       );
+    printVar("length", length_ , "m"       );
     printVar("nn"    , nn_     , "m^-3"    );
     output << std::string(separatorLen, '-') << std::endl;
     output << "CONVERTED UNITS" << std::endl;
