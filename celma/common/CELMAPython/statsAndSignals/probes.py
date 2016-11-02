@@ -541,7 +541,7 @@ class Probes(object):
         firstIndexEndLinear = self.results[key]["zFFT"].shape[0]
         # Do not take into account the three first time steps (which is
         # after the initial perturbation)
-        clip = 3
+        clip = 15
         for key in self.results.keys():
             curMax = 0
             # Skip the offset mode in range
