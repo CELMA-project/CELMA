@@ -85,7 +85,7 @@ class Plot(object):
             the largest gradient in rho direction.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
-        subPolAvg : vool
+        subPolAvg : bool
             Whether or not the poloidal average should be.
             subtracted from the data.
         showPlot : bool
@@ -107,7 +107,7 @@ class Plot(object):
         self._codec   = "h264"
 
         # Set member data from input
-        self._path       = path
+        self._path       = path[0]      # Originally given as a tuple
         self._xguards    = xguards
         self._yguards    = yguards
         self._showPlot   = showPlot
@@ -1205,7 +1205,6 @@ class Plot2D(Plot):
         #}}}
         #}}}
 
-
         # Title preparation
         self.helper.rhoTxtDict["value"] =\
                 plotNumberFormatter(self.helper.rho[self._xSlice], None)
@@ -1336,7 +1335,15 @@ class Plot2D(Plot):
         # Clear the axis
         # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
         self._cBarAx.cla()
-        self._fig.colorbar(self._cbarPlane, cax = self._cBarAx,\
+        if self._subPolAvg:
+            # Create the ticks (11 with 0 in the center)
+            nTicks = 11
+            ticks  = np.linspace(self._varMin, self._varMax, nTicks)
+        else:
+            ticks = None
+        self._fig.colorbar(self._cbarPlane,\
+                           cax    = self._cBarAx,\
+                           ticks  = ticks,\
                            format = FuncFormatter(plotNumberFormatter))
     #}}}
 
