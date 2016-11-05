@@ -166,11 +166,11 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
     binSize = 20
     bins = np.arange(0,len(modes[:,0]),binSize)
 
-    if bins.shape[0] == 0:
+    if bins.shape[0] <= 4:
         message = ("{0}{1}WARNING: "\
-                   "No proper bins could be made, returning None{1}{0}")
+                   "No proper bins could be made, returning {'NA': None}{1}{0}")
         print(message.format("\n"*2, "!"*5))
-        return None
+        return {"NA":None}
 
     # Finding mode number
     results = {}
@@ -206,7 +206,6 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 
         #{{{Find growth rates from definition of straight segments in the plot
         # Initialize the previous growth rate
-        import pdb; pdb.set_trace()
         prevRate = growthRates[0]
 
         # The growth rates and the corresponding standard deviation is found by
