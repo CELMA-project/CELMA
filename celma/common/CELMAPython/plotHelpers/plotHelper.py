@@ -48,7 +48,7 @@ class PlotHelper(object):
         #}}}
 
         # Set the member data
-        self._path             = path[0]            # Originally tuple
+        self._path             = path
         self._xguards          = xguards
         self._yguards          = yguards
         self.convertToPhysical = convertToPhysical
