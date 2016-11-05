@@ -82,11 +82,11 @@ FIXME:
 
         # Create the probes (one for each scan point)
         # Sort the folders (ensures that they come in the right order)
-        self._dmp_folder       = list(self._dmp_folder)
+        self._dmp_folders       = list(self._dmp_folders)
         self._steadyStatePaths = list(self._steadyStatePaths)
-        self._dmp_folder.sort()
+        self._dmp_folders.sort()
         self._steadyStatePaths.sort()
-        self._dmp_folder       = tuple(self._dmp_folder)
+        self._dmp_folders       = tuple(self._dmp_folders)
         self._steadyStatePaths = tuple(self._steadyStatePaths)
 
         # Obtain the growth rates dictionary

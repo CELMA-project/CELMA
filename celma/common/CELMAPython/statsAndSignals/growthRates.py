@@ -168,9 +168,13 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
 
     if bins.shape[0] <= 4:
         message = ("{0}{1}WARNING: "\
-                   "No proper bins could be made, returning {'NA': None}{1}{0}")
+                   "No proper bins could be made, returning nans{1}{0}")
         print(message.format("\n"*2, "!"*5))
-        return {"NA":None}
+        results = {}
+        for mNr in range(1, maxMode+2):
+            results[mNr] = None
+
+        return results
 
     # Finding mode number
     results = {}

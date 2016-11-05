@@ -527,7 +527,7 @@ class GenericScanDriver(object):
             **self._commonRunnerOptions                  ,\
                         )
 
-        init_dmp_folders, PBS_ids = initRunner.execute_runs(\
+        init_dmp_folderss, PBS_ids = initRunner.execute_runs(\
             post_processing_function = curPostProcessor,\
             # This function will be called every time after
             # performing a run
@@ -564,7 +564,7 @@ class GenericScanDriver(object):
         #Switches
         useHyperViscAzVortD = (False,)
         # From previous outputs
-        aScanPath = init_dmp_folders[0]
+        aScanPath = init_dmp_folderss[0]
         # Name
         theRunName = self._theRunName + "-1-expand"
         # PBS options
@@ -603,7 +603,7 @@ class GenericScanDriver(object):
             **self._commonRunnerOptions                  ,\
                         )
 
-        expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
+        expand_dmp_folderss, PBS_ids = expandRunner.execute_runs(\
             post_processing_function = curPostProcessor,\
             # Declare dependencies
             job_dependencies = PBS_ids,\
@@ -665,9 +665,9 @@ class GenericScanDriver(object):
         includeNoise     = True
         forceAddNoise    = True
         # As this is scan dependent, the driver finds the correct folder
-        maxGradRhoFolder = expand_dmp_folders[0]
+        maxGradRhoFolder = expand_dmp_folderss[0]
         # From previous outputs
-        aScanPath = expand_dmp_folders[0]
+        aScanPath = expand_dmp_folderss[0]
         # Set the temporal domain
         timestep = (1*self._timeStepMultiplicator,)
         nout     = (500,)
@@ -712,7 +712,7 @@ class GenericScanDriver(object):
             **self._commonRunnerOptions                  ,\
                     )
 
-        linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
+        linear_dmp_folderss, PBS_ids = linearRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
                 # Declare dependencies
                 job_dependencies = PBS_ids,\
@@ -801,7 +801,7 @@ class GenericScanDriver(object):
         post_process_queue    = 'workq'
         # Post processing options
         tSlice    = slice(0, None, 10)
-        aScanPath = linear_dmp_folders[0]
+        aScanPath = linear_dmp_folderss[0]
         #}}}
         #{{{Run and post processing
         turboRun = PBS_runner(\
@@ -827,7 +827,7 @@ class GenericScanDriver(object):
             **self._commonRunnerOptions                  ,\
                         )
 
-        turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
+        turbo_dmp_folderss, PBS_ids = turboRun.execute_runs(\
             post_processing_function = curPostProcessor,\
             # Declare dependencies
             job_dependencies = PBS_ids,\
@@ -904,7 +904,7 @@ class GenericScanDriver(object):
             # Make a tuple of tuples, where each subtuple will be used as the
             # paths in collectiveCollect
             collectionFolders =\
-                tuple(zip(linear_dmp_folders, turbo_dmp_folders))
+                tuple(zip(linear_dmp_folderss, turbo_dmp_folderss))
 
             _, _ = linearRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
@@ -923,7 +923,7 @@ class GenericScanDriver(object):
                 # DriversProbes input
                 var              = self._var          ,\
                 scanParam        = scanParam          ,\
-                steadyStatePaths = expand_dmp_folders ,\
+                steadyStatePaths = expand_dmp_folderss ,\
                 **self._probesPlotterOptions          ,\
                 # Below are the kwargs given to the
                 # restartFromFunc
@@ -934,8 +934,8 @@ class GenericScanDriver(object):
 
         #{{{Probes and energy (run this driver after all, as we need the collectionFolders)
         if self.postProcessProbesAndEnergy:
-            collectionFolders = (linear_dmp_folders[0],\
-                                 turbo_dmp_folders[0])
+            collectionFolders = (linear_dmp_folderss[0],\
+                                 turbo_dmp_folderss[0])
 
             theRunName = self._theRunName + "-energyProbesPlot"
             curPostProcessor = postBoutRunner
@@ -962,7 +962,7 @@ class GenericScanDriver(object):
                 tIndSaturatedTurb = self.tIndSaturatedTurb ,\
                 # The steady state path will be
                 # converted using convertToCurrentScanParameters
-                steadyStatePath = expand_dmp_folders[0],\
+                steadyStatePath = expand_dmp_folderss[0],\
                 # Below are the kwargs given to the
                 # restartFromFunc and convertToCurrentScanParameters
                 aScanPath      = aScanPath           ,\
