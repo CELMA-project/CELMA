@@ -107,7 +107,7 @@ class Plot(object):
         self._codec   = "h264"
 
         # Set member data from input
-        self._path       = path[0]      # Originally given as a tuple
+        self._path       = path
         self._xguards    = xguards
         self._yguards    = yguards
         self._showPlot   = showPlot
@@ -1339,6 +1339,8 @@ class Plot2D(Plot):
             # Create the ticks (11 with 0 in the center)
             nTicks = 11
             ticks  = np.linspace(self._varMin, self._varMax, nTicks)
+            # Enforce the center one to be 0 (without round off)
+            ticks[int((nTicks - 1)/2)]
         else:
             ticks = None
         self._fig.colorbar(self._cbarPlane,\
