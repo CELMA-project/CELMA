@@ -89,12 +89,23 @@ int CelmaCurMom::init(bool restarting)
     }
     // Monitor variables to be solved for
     if(monitorEnergy){
-        dump.add(kinEE[0], "perpKinEE", 1);
-        dump.add(kinEE[1], "parKinEE" , 1);
-        dump.add(kinEE[2], "totKinEE" , 1);
-        dump.add(kinEI[0], "perpKinEI", 1);
-        dump.add(kinEI[1], "parKinEI" , 1);
-        dump.add(kinEI[2], "totKinEI" , 1);
+        for (std::map<std::string, BoutReal>::iterator it=kinE.begin();
+             it!=kinE.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
+        for (std::map<std::string, BoutReal>::iterator it=potE.begin();
+             it!=potE.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
+    }
+    if(monitorN){
+        for (std::map<std::string, BoutReal>::iterator it=totN.begin();
+             it!=totN.end();
+             ++it){
+            dump.add(it->second, it->first.c_str(), 1);
+        }
     }
     // Variables to be solved for
     SOLVE_FOR4(vort, lnN, momDensPar, jPar);
@@ -263,10 +274,37 @@ int CelmaCurMom::rhs(BoutReal t)
 
 // Constructor
 // ############################################################################
-CelmaCurMom::CelmaCurMom() : kinEE      (3, 0.0),
-                             kinEI      (3, 0.0)
+CelmaCurMom::CelmaCurMom()
+/* FIXME: c++11 is unsupported on jess
+ * :
+ *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"totKinEE", 0.0},
+ *            {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"totKinEI", 0.0},
+ *            {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgTotKinEE", 0.0},
+ *            {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgTotKinEI", 0.0}}
+ *            ),
+ *     potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
+ *     totN ({{"totN", 0.0}, {"polAvgTotN", 0.0}})
+ */
 {
     TRACE("Halt in CelmaCurMom::CelmaCurMom");
+
+    // Non c++11 initialization
+    kinE["perpKinEE"]       = 0.0;
+    kinE["parKinEE"]        = 0.0;
+    kinE["totKinEE"]        = 0.0;
+    kinE["perpKinEI"]       = 0.0;
+    kinE["parKinEI"]        = 0.0;
+    kinE["totKinEI"]        = 0.0;
+    kinE["polAvgPerpKinEE"] = 0.0;
+    kinE["polAvgParKinEE"]  = 0.0;
+    kinE["polAvgTotKinEE"]  = 0.0;
+    kinE["polAvgPerpKinEI"] = 0.0;
+    kinE["polAvgParKinEI"]  = 0.0;
+    kinE["polAvgTotKinEI"]  = 0.0;
+    potE["potEE"]           = 0.0;
+    potE["polAvgPotEE"]     = 0.0;
+    totN["totN"]            = 0.0;
+    totN["polAvgTotN"]      = 0.0;
 }
 // ############################################################################
 
@@ -277,11 +315,11 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
     TRACE("Halt in CelmaCurMom::outputMonitor");
 
     if(monitorEnergy){
-        ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
-        ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
+        ownMon.kinEnergy(n, gradPerpPhi, uEPar, uIPar, &kinE);
+        ownMon.potEnergy(n, &potE);
     }
     if(monitorN){
-        ownMon.totalN(n, &N);
+        ownMon.totalN(n, &totN);
     }
 
     return 0;
@@ -359,7 +397,7 @@ void CelmaCurMom::setAndSaveParameters()
     // ************************************************************************
     Options *input = options->getSection("input");
     input->get("radius"         , radius         , 0.0);
-    input->get("len"            , len            , 0.0);
+    input->get("length"         , length         , 0.0);
     input->get("n0"             , n0             , 0.0);
     input->get("Te0"            , Te0            , 0.0);
     input->get("Ti0"            , Ti0            , 0.0);
@@ -367,7 +405,7 @@ void CelmaCurMom::setAndSaveParameters()
     input->get("Sn"             , Sn             , 0.0);
     input->get("nn"             , nn             , 0.0);
 
-    Parameters params(radius, len, n0, Te0, Ti0, B0, Sn, nn);
+    Parameters params(radius, length, n0, Te0, Ti0, B0, Sn, nn);
     // ************************************************************************
 
     // Get the variables
@@ -388,9 +426,10 @@ void CelmaCurMom::setAndSaveParameters()
 
     // Check that Lx and LxParams is the same up until the fourt decimal point
     // ************************************************************************
+    std::ostringstream stream;
+    int precision = 4;
+    bool throwError = false;
     if ( ( fabs(round(LxParam*1e4)/1e4 - round(Lx*1e4)/1e4))>DBL_EPSILON ){
-        int precision = 4;
-        std::ostringstream stream;
         stream << "Mismatch between 'Lx' calculated from 'radius' "
                << "and input 'Lx'\n"
                << "Calculated = "
@@ -400,15 +439,10 @@ void CelmaCurMom::setAndSaveParameters()
                << "Input      = "
                << std::fixed
                << std::setprecision(precision) << round(Lx*1e4)/1e4
-               << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "\n\n";
+        throwError = true;
     }
     if ( ( fabs(round(LyParam*1e4)/1e4 - round(Ly*1e4)/1e4))>DBL_EPSILON ){
-        int precision = 4;
-        std::ostringstream stream;
         stream << "Mismatch between 'Ly' calculated from 'length' "
                << "and input 'Ly'\n"
                << "Calculated = "
@@ -418,8 +452,11 @@ void CelmaCurMom::setAndSaveParameters()
                << "Input      = "
                << std::fixed
                << std::setprecision(precision) << round(Ly*1e4)/1e4
-               << "\n";
-        std::string str =  stream.str();
+               << "\n\n";
+        throwError = true;
+    }
+    if(throwError){
+        std::string str = stream.str();
         // Cast the stream to a const char in order to use it in BoutException
         const char* message = str.c_str();
         throw BoutException(message);
@@ -468,31 +505,27 @@ void CelmaCurMom::printPointsPerRhoS()
     root->getSection("geom")->get("minPointsPerRhoSXZ",minPointsPerRhoSXZ,3.0);
     root->getSection("geom")->get("minPointsPerRhoSY",minPointsPerRhoSY,1.0e-1);
 
+    std::ostringstream stream;
+    bool throwError = false;
     if (pointsPerRhoSRadially < minPointsPerRhoSXZ){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled in x.\n"
                << "Limit is         " << minPointsPerRhoSXZ << "\n"
-               << "Current value is " << pointsPerRhoSRadially << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "Current value is " << pointsPerRhoSRadially << "\n\n";
+        throwError = true;
     }
     if (mesh->ngz > 3 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
                << "Limit is         " << minPointsPerRhoSXZ << "\n"
-               << "Current value is " << pointsPerRhoSAzimuthally << "\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
-        throw BoutException(message);
+               << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
+        throwError = true;
     }
     if (pointsPerRhoSParallely < minPointsPerRhoSY){
-        std::ostringstream stream;
         stream << "Minimum points per rhoS not fulfilled in y.\n"
                << "Limit is         " << minPointsPerRhoSY << "\n"
-               << "Current value is " << pointsPerRhoSParallely << "\n";
+               << "Current value is " << pointsPerRhoSParallely << "\n\n";
+        throwError = true;
+    }
+    if(throwError){
         std::string str =  stream.str();
         // Cast the stream to a const char in order to use it in BoutException
         const char* message = str.c_str();
@@ -561,6 +594,8 @@ void CelmaCurMom::setSwithces(bool &restarting)
     switches->get("constViscHyper"    , constViscHyper    , false);
     switches->get("saveTerms"         , saveTerms         , true );
     switches->get("monitorEnergy"     , monitorEnergy     , true );
+    switches->get("monitorN"          , monitorN          , true );
+    switches->get("viscosityGuard"    , viscosityGuard    , true );
     noiseAdded = false;
     // Decide whether noise should be added upon restart
     if (restarting && includeNoise && !(forceAddNoise)){
@@ -680,12 +715,14 @@ void CelmaCurMom::setAndSaveViscosities()
     perpVisc.push_back(artViscParMomDens);
     perpVisc.push_back(artViscParVort   );
 
-    for (std::vector<BoutReal>::iterator it = perpVisc.begin();
-         it != perpVisc.end();
-         ++it){
-        if(*it > 100.0*eta0INorm){
-            throw BoutException("One of the parallel viscosities "
-                                "is 100.0 times larger than eta0I");
+    if(viscosityGuard){
+        for (std::vector<BoutReal>::iterator it = perpVisc.begin();
+             it != perpVisc.end();
+             ++it){
+            if(*it > 100.0*eta0INorm){
+                throw BoutException("One of the parallel viscosities "
+                                    "is 100.0 times larger than eta0I");
+            }
         }
     }
 

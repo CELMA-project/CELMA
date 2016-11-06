@@ -42,7 +42,7 @@ saveFolderFunc    = "scanWTagSaveFunc"
 convertToPhysical = False
 extension         = "png"
 axisEqualParallel = False
-useSubProcess     = True
+useSubProcess     = False
 # =============================================================================
 
 
