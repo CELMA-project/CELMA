@@ -11,34 +11,33 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanTe0 = GenericScanDriver()
+scanZ = GenericScanDriver()
 
 # Set the scan
-Te0 = (14.0    , 12.0    , 10.0    , 8.0     , 6.0     , 5.0     )
-Lx  = (4.8296  , 5.0295  , 5.2565  , 5.5174  , 5.8213  , 5.9934  )
-Ly  = (270.4579, 281.6539, 294.3664, 308.9719, 325.9921, 335.6294)
-scanParameters  = ("Te0", "Lx", "Ly")
+length = (4       , 5       , 6       , 8        , 10       ,  12       )
+Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
+scanParameters  = ("len", "Ly")
 series_add = (\
-              ('input', 'Te0', Te0),\
-              ('geom' , 'Lx' , Lx),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'length', length),\
+              ('geom' , 'Ly'    , Ly),\
              )
 
-directory = "a2-KiwiFlatElTempTi0"
+directory = "a2-KiwiFlatZTi0HalfPointsZ"
 
 # Set the main options
-scanTe0.setMainOptions(\
-                       directory      = directory     ,\
-                       scanParameters = scanParameters,\
-                       series_add     = series_add    ,\
-                       theRunName     = directory     ,\
-                       make           = False         ,\
-                       varName        = "n"           ,\
-                       pltName        = "n"           ,\
+scanZ.setMainOptions(\
+                       directory             = directory     ,\
+                       scanParameters        = scanParameters,\
+                       series_add            = series_add    ,\
+                       theRunName            = directory     ,\
+                       make                  = False         ,\
+                       varName               = "n"           ,\
+                       pltName               = "n"           ,\
+                       timeStepMultiplicator = 10            ,\
                      )
 
 # Set the flags
-scanTe0.setPostProcessingFlags(\
+scanZ.setPostProcessingFlags(\
                               justPostProcess            = False,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
@@ -53,8 +52,11 @@ scanTe0.setPostProcessingFlags(\
                               tIndSaturatedTurb          = None ,\
                              )
 
+# Modify nz from default
+scanZ.setExpandOptions(nz = 128)
+
 # Set common plotter options
-scanTe0.setCommonPlotterOptions(\
+scanZ.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -64,14 +66,14 @@ scanTe0.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanTe0.setProbePlottersOptions(\
+scanZ.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanTe0.setFieldPlottersOptions(\
+scanZ.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -81,7 +83,7 @@ scanTe0.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanTe0.setCommonRunnerOptions(\
+scanZ.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -92,4 +94,4 @@ scanTe0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanTe0.runScan()
+scanZ.runScan()
