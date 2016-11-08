@@ -14,42 +14,46 @@ from CELMAPython.drivers import GenericScanDriver
 scanZ = GenericScanDriver()
 
 # Set the scan
-length = (1       , 2       , 4       , 6       , 8       , 10       )
-Ly     = (102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346)
-scanParameters  = ("length", "Ly")
+length = (4       , 5       , 6       , 8        , 10       ,  12       )
+Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
+scanParameters  = ("len", "Ly")
 series_add = (\
               ('input', 'length', length),\
               ('geom' , 'Ly'    , Ly),\
              )
 
-directory = "a1-KiwiFlatZ"
+directory = "a2-KiwiFlatZTi0HalfPointsZ"
 
 # Set the main options
 scanZ.setMainOptions(\
-                       directory      = directory     ,\
-                       scanParameters = scanParameters,\
-                       series_add     = series_add    ,\
-                       theRunName     = directory     ,\
-                       make           = False         ,\
-                       varName        = "n"           ,\
-                       pltName        = "n"           ,\
+                       directory             = directory     ,\
+                       scanParameters        = scanParameters,\
+                       series_add            = series_add    ,\
+                       theRunName            = directory     ,\
+                       make                  = False         ,\
+                       varName               = "n"           ,\
+                       pltName               = "n"           ,\
+                       timeStepMultiplicator = 10            ,\
                      )
 
 # Set the flags
 scanZ.setPostProcessingFlags(\
-                              justPostProcess            = True ,\
+                              justPostProcess            = False,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
                               postProcessLin             = False,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
-                              postProcessProbesAndEnergy = True ,\
-                              postProcessGrowthRates     = True ,\
+                              postProcessProbesAndEnergy = False,\
+                              postProcessGrowthRates     = False,\
                               # FIXME: Check that this is true
                               # Calculated from the energy overshoot
                               tIndSaturatedTurb          = None ,\
                              )
+
+# Modify nz from default
+scanZ.setExpandOptions(nz = 128)
 
 # Set common plotter options
 scanZ.setCommonPlotterOptions(\

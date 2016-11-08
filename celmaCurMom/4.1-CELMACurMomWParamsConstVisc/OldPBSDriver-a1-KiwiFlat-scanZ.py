@@ -109,10 +109,10 @@ postProcessGrowthRates     = True
 # NOTE: Calling this len will overshadow the len() function
 length = [1       , 2       , 4       , 6       , 8       , 10       ]
 Ly     = [102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346]
-scanParameters  = ["len", "Ly"]
+scanParameters  = ["length", "Ly"]
 series_add = [\
-              ('input', 'len', length),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'length', length),\
+              ('geom' , 'Ly'    , Ly),\
              ]
 #}}}
 #{{{The options for the post processing function
