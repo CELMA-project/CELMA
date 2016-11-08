@@ -11,21 +11,23 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanZ = GenericScanDriver()
+scanB0 = GenericScanDriver()
 
 # Set the scan
-length = (1       , 2       , 4       , 6       , 8       , 10       )
-Ly     = (102.2235, 204.4469, 408.8938, 613.3408, 817.7877, 1022.2346)
-scanParameters  = ("length", "Ly")
+B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
+Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
+Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
+scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
-              ('input', 'length', length),\
-              ('geom' , 'Ly'    , Ly),\
+              ('input', 'B0', B0),\
+              ('geom' , 'Lx', Lx),\
+              ('geom' , 'Ly', Ly),\
              )
 
-directory = "a1-KiwiFlatZ"
+directory = "a2-KiwiFlatMagFieldTi0"
 
 # Set the main options
-scanZ.setMainOptions(\
+scanB0.setMainOptions(\
                        directory      = directory     ,\
                        scanParameters = scanParameters,\
                        series_add     = series_add    ,\
@@ -36,7 +38,7 @@ scanZ.setMainOptions(\
                      )
 
 # Set the flags
-scanZ.setPostProcessingFlags(\
+scanB0.setPostProcessingFlags(\
                               justPostProcess            = True ,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
@@ -45,14 +47,14 @@ scanZ.setPostProcessingFlags(\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
                               postProcessProbesAndEnergy = True ,\
-                              postProcessGrowthRates     = True ,\
-                              # FIXME: Check that this is true
+                              postProcessGrowthRates     = False,\
                               # Calculated from the energy overshoot
+                              # FIXME: Check when this happens
                               tIndSaturatedTurb          = None ,\
                              )
 
 # Set common plotter options
-scanZ.setCommonPlotterOptions(\
+scanB0.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -62,14 +64,14 @@ scanZ.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanZ.setProbePlottersOptions(\
+scanB0.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanZ.setFieldPlottersOptions(\
+scanB0.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -79,7 +81,7 @@ scanZ.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanZ.setCommonRunnerOptions(\
+scanB0.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -90,4 +92,4 @@ scanZ.setCommonRunnerOptions(\
                              )
 
 # Run
-scanZ.runScan()
+scanB0.runScan()

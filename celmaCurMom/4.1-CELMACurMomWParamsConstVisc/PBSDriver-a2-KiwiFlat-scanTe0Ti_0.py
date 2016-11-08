@@ -50,7 +50,7 @@ scanTe0.setPostProcessingFlags(\
                               postProcessGrowthRates     = False,\
                               # FIXME: Check that this is true
                               # Calculated from the energy overshoot
-                              tIndSaturatedTurb          = 600  ,\
+                              tIndSaturatedTurb          = None ,\
                              )
 
 # Set common plotter options

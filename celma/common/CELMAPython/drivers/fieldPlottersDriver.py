@@ -62,13 +62,15 @@ class FieldPlottersDriver(PostProcessorDriver):
         super().__init__(*args, **kwargs)
 
         # Set the member data
-        self._xguards = xguards
-        self._yguards = yguards
-        self._xSlice  = xSlice
-        self._ySlice  = ySlice
-        self._zSlice  = zSlice
-        self._tSlice  = tSlice
-        self._writer  = writer
+        # Casting one dimensional tuple to string
+        self._dmp_folder = self._dmp_folders[0]
+        self._xguards    = xguards
+        self._yguards    = yguards
+        self._xSlice     = xSlice
+        self._ySlice     = ySlice
+        self._zSlice     = zSlice
+        self._tSlice     = tSlice
+        self._writer     = writer
 
         # Get the current scan
         if maxGradRhoFolder:

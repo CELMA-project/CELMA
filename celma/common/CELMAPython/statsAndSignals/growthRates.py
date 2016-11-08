@@ -166,11 +166,15 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
     binSize = 20
     bins = np.arange(0,len(modes[:,0]),binSize)
 
-    if bins.shape[0] == 0:
+    if bins.shape[0] <= 4:
         message = ("{0}{1}WARNING: "\
-                   "No proper bins could be made, returning None{1}{0}")
+                   "No proper bins could be made, returning nans{1}{0}")
         print(message.format("\n"*2, "!"*5))
-        return None
+        results = {}
+        for mNr in range(1, maxMode+2):
+            results[mNr] = None
+
+        return results
 
     # Finding mode number
     results = {}
@@ -426,6 +430,7 @@ class PlotGrowthRates(object):
                               "B0"    :"$B_0$"                      ,\
                               "Te0"   :"$T_e$"                      ,\
                               "nn"    :"$n_n$"                      ,\
+                              "length":"$z$"                        ,\
                              }
 
         self._errorbarOptions = {"color"     :"k",\

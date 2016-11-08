@@ -1,5 +1,5 @@
 #
-# Input file for "4.1-CELMACurMomWParamsConstVisc/KiwiFlatMagField"
+# Input file for "4.1-CELMACurMomWParamsConstVisc/KiwiFlatZTi0HalfPointsZ"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -29,7 +29,7 @@ MYG = 1
 # Number of points
 nx = 32 + 2*MXG
 ny = 66
-nz = 256           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
+nz = 128           # O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*r)
 # The grid spacing
 # As the points are located half between grid points, there will be as many
 # line segments as points
@@ -111,6 +111,7 @@ saveDdt             = true
 constViscPar        = true
 constViscPerp       = true
 constViscHyper      = false
+viscosityGuard      = false
 # =============================================================================
 ###############################################################################
 
@@ -121,25 +122,27 @@ constViscHyper      = false
 # Input
 # =============================================================================
 [input]
-radius = 0.025    # The length of x from boundary to boundary in [m]
-length = 1.40     # The length of y from boundary to boundary in [m]
-n0     = 5.0e17   # m^-3
-Te0    = 14.0     # eV
-Ti0    = 7.0      # eV
-B0     = 1.0e-1   # T
-Sn     = 2.25e22  # m^-3s^-1
-nn     = 0.0      # m^-3
+radius = 0.025  # The length of x from boundary to boundary in [m]
+length = 1.40   # The length of y from boundary to boundary in [m]
+n0     = 1.0e16 # m^-3
+Te0    = 2.0    # eV
+Ti0    = 0.0    # eV
+B0     = 2.0e-2 # T
+Sn     = 4.5e20 # m^-3s^-1
+nn     = 0.0    # m^-3
 # =============================================================================
 
 
 # Geometry
 # =============================================================================
 [geom]
-Lx =   4.8296 # The normalized radius (must agree with radius up to fourth decimal)
-Ly = 270.4579 # The normalized length (must agree with len up to fourth decimal)
+Lx =   3.4603 # The normalized radius (must agree with radius up to fourth decimal)
+Ly = 366.2017 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
+
+minPointsPerRhoSY = 1e-3
 # =============================================================================
 
 
