@@ -69,7 +69,7 @@ class PostProcessorDriver(object):
         #}}}
 
         # Set the member data
-        self._dmp_folder        = dmp_folder
+        self._dmp_folders        = dmp_folder
         self._convertToPhysical = convertToPhysical
         self._subPolAvg         = subPolAvg
         self._showPlot          = showPlot
@@ -195,9 +195,9 @@ class PostProcessorDriver(object):
         to the path belonging to the current scan.
 
         The function obtains the current scan parameters from
-        self._dmp_folder, and inserts the current scan parameters into
-        aScanPath (the function input which is one of the paths
-        belonging to the scan).
+        self._dmp_folders (should be tuple with one element), and
+        inserts the current scan parameters into aScanPath (the function
+        input which is one of the paths belonging to the scan).
 
         Parameters
         ----------
@@ -232,17 +232,17 @@ class PostProcessorDriver(object):
                 # Update hits
                 hits.remove(hits[0])
 
-        # Get the values from the current self._dmp_folder
+        # Get the values from the current self._dmp_folders
         values = {}
         for scanParameter in self._scanParameters:
             hits = [m.start() for m in \
-                    re.finditer(scanParameter, self._dmp_folder)]
+                    re.finditer(scanParameter, self._dmp_folders[0])]
             # Choose the first hit to get the value from (again we assume
             # that the value does not contain a _)
             value_start = hits[0] + len(scanParameter) + 1
             # Here we assume that the value is not separated by an
             # underscore
-            values[scanParameter]=self._dmp_folder[value_start:].split("_")[0]
+            values[scanParameter]=self._dmp_folders[0][value_start:].split("_")[0]
 
         # Insert the values
         scanPath = scanPathTemplate.format(values)

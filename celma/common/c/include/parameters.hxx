@@ -19,7 +19,7 @@
 class Parameters
 {
     private:
-        BoutReal const len_;    //<! Cylinder length [m]
+        BoutReal const length_; //<! Cylinder length [m]
         BoutReal const radius_; //<! Plasma radius [m]
         BoutReal const n0_;     //<! Density normalization [m^-3]
         BoutReal const Te0_;    //<! Electron temperature [eV]
@@ -96,7 +96,7 @@ class Parameters
     public:
         // Constructor
         Parameters(BoutReal const &radius,
-                   BoutReal const &len,
+                   BoutReal const &length,
                    BoutReal const &n0,
                    BoutReal const &Te0,
                    BoutReal const &Ti0,

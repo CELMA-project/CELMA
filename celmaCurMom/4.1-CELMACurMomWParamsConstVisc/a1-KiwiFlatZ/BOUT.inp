@@ -122,7 +122,7 @@ constViscHyper      = false
 # =============================================================================
 [input]
 radius = 0.025  # The length of x from boundary to boundary in [m]
-len    = 1.40   # The length of y from boundary to boundary in [m]
+length = 1.40   # The length of y from boundary to boundary in [m]
 n0     = 1.0e16 # m^-3
 Te0    = 2.0    # eV
 Ti0    = 1.0    # eV
