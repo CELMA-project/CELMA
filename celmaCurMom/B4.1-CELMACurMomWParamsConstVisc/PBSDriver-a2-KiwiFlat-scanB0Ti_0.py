@@ -11,23 +11,23 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanTe0 = GenericScanDriver()
+scanB0 = GenericScanDriver()
 
 # Set the scan
-Te0 = (14.0    , 12.0    , 10.0    , 8.0     , 6.0     , 5.0     )
-Lx  = (4.8296  , 5.0295  , 5.2565  , 5.5174  , 5.8213  , 5.9934  )
-Ly  = (270.4579, 281.6539, 294.3664, 308.9719, 325.9921, 335.6294)
-scanParameters  = ("Te0", "Lx", "Ly")
+B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
+Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
+Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
+scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
-              ('input', 'Te0', Te0),\
-              ('geom' , 'Lx' , Lx),\
-              ('geom' , 'Ly' , Ly),\
+              ('input', 'B0', B0),\
+              ('geom' , 'Lx', Lx),\
+              ('geom' , 'Ly', Ly),\
              )
 
-directory = "a2-KiwiFlatElTempTi0"
+directory = "a2-KiwiFlatMagFieldTi0"
 
 # Set the main options
-scanTe0.setMainOptions(\
+scanB0.setMainOptions(\
                        directory      = directory     ,\
                        scanParameters = scanParameters,\
                        series_add     = series_add    ,\
@@ -38,23 +38,23 @@ scanTe0.setMainOptions(\
                      )
 
 # Set the flags
-scanTe0.setPostProcessingFlags(\
-                              justPostProcess            = False,\
+scanB0.setPostProcessingFlags(\
+                              justPostProcess            = True ,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
                               postProcessLin             = False,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
-                              postProcessProbesAndEnergy = False,\
+                              postProcessProbesAndEnergy = True ,\
                               postProcessGrowthRates     = False,\
-                              # FIXME: Check that this is true
                               # Calculated from the energy overshoot
+                              # FIXME: Check when this happens
                               tIndSaturatedTurb          = None ,\
                              )
 
 # Set common plotter options
-scanTe0.setCommonPlotterOptions(\
+scanB0.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -64,14 +64,14 @@ scanTe0.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanTe0.setProbePlottersOptions(\
+scanB0.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanTe0.setFieldPlottersOptions(\
+scanB0.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -81,7 +81,7 @@ scanTe0.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanTe0.setCommonRunnerOptions(\
+scanB0.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -92,4 +92,4 @@ scanTe0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanTe0.runScan()
+scanB0.runScan()
