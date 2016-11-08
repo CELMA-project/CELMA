@@ -10,7 +10,7 @@
  *
  *
  * \param[in] radius Plasma radius [m]
- * \param[in] len    The cylinder length [m]
+ * \param[in] length The cylinder length [m]
  * \param[in] n0     The density [m^-3]
  * \param[in] Te0    The electron temperature [eV]
  * \param[in] Ti0    The ion temperature [eV]
