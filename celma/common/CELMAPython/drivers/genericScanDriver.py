@@ -4,9 +4,14 @@
 Contains the restartFromFunc and GenericScanDriver
 """
 
-import re
-from bout_runners import PBS_runner
 from .postBoutRunner import postBoutRunner
+from bout_runners import PBS_runner
+import re
+import inspect
+
+# FIXME: Could make a setOption for the post processing of each type as
+#        well
+# FIXME: Could also add kwargs in runner options
 
 #{{{restartFromFunc
 def restartFromFunc(dmp_folder     = None,\
@@ -118,6 +123,10 @@ class GenericScanDriver(object):
                     "commonPlotterOptions" : False,\
                     "fieldPlotterOptions"  : False,\
                     "probePlotterOptions"  : False,\
+                    "initOptions"          : False,\
+                    "expandOptions"        : False,\
+                    "linearOptions"        : False,\
+                    "turbulenceOptions"    : False,\
                 }
 
         # Set default parameters
@@ -182,6 +191,7 @@ class GenericScanDriver(object):
                        varName               = "n"  ,\
                        pltName               = "n"  ,\
                        timeStepMultiplicator = 1    ,\
+                       addOwnNoise           = True ,\
                       ):
         #{{{docstring
         """
@@ -205,6 +215,8 @@ class GenericScanDriver(object):
             Name to be plotted
         timeStepMultiplicator : int
             How much the default time step should be multiplied with
+        addOwnNoise : bool
+            Should the own noise generator be used in the linear runs
         """
         #}}}
 
@@ -219,6 +231,7 @@ class GenericScanDriver(object):
         self._var                   = varName
         self._pltName               = pltName
         self._timeStepMultiplicator = timeStepMultiplicator
+        self._addOwnNoise           = addOwnNoise
     #}}}
 
     #{{{setPostProcessingFlags
@@ -448,6 +461,183 @@ class GenericScanDriver(object):
                 }
     #}}}
 
+    #{{{setInitOptions
+    def setInitOptions(self                              ,\
+                       timestep              = 2e3       ,\
+                       nout                  = 2         ,\
+                       BOUT_walltime         = "05:00:00",\
+                       post_process_walltime = "0:29:00" ,\
+                       post_process_queue    = "xpresq"  ,\
+            ):
+        #{{{docstring
+        """
+        Sets the kwargs for the init run.
+
+        Parameters
+        ----------
+        NOTE: timestep will be multiplied with timeStepMultiplicator
+        For details, see bout_runners input
+        """
+        #}}}
+        if self._calledFunctions["mainOptions"] == False:
+            message =\
+                "self.setMainOptions must be called prior to setInitOptions"
+            raise ValueError(message)
+
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["setInitOptions"] = True
+
+        self._initOptions =\
+                {\
+                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "nout"     : (nout,),\
+                }
+
+        self._initPBSOptions =\
+                {\
+                 "BOUT_walltime"         : BOUT_walltime        ,\
+                 "post_process_walltime" : post_process_walltime,\
+                 "post_process_queue"    : post_process_queue   ,\
+                }
+
+    #}}}
+
+    #{{{setExpandOptions
+    def setExpandOptions(self                              ,\
+                         nz                    = 256       ,\
+                         timestep              = 50        ,\
+                         nout                  = 2         ,\
+                         BOUT_walltime         = "24:00:00",\
+                         post_process_walltime = "0:29:00" ,\
+                         post_process_queue    = "xpresq"  ,\
+            ):
+        #{{{docstring
+        """
+        Sets the kwargs for the expand run.
+
+        Parameters
+        ----------
+        NOTE: timestep will be multiplied with timeStepMultiplicator
+        For details, see bout_runners input
+        """
+        #}}}
+        if self._calledFunctions["mainOptions"] == False:
+            message =\
+                "self.setMainOptions must be called prior to setExpandOptions"
+            raise ValueError(message)
+
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["setExpandOptions"] = True
+
+        self._expandOptions =\
+                {\
+                 "nz"       : nz,\
+                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "nout"     : (nout,),\
+                }
+
+        self._expandPBSOptions =\
+                {\
+                 "BOUT_walltime"         : BOUT_walltime        ,\
+                 "post_process_walltime" : post_process_walltime,\
+                 "post_process_queue"    : post_process_queue   ,\
+                }
+
+    #}}}
+
+    #{{{setLinearOptions
+    def setLinearOptions(self                              ,\
+                         timestep              = 1         ,\
+                         nout                  = 500       ,\
+                         BOUT_walltime         = '72:00:00',\
+                         post_process_walltime = '03:00:00',\
+                         post_process_queue    = 'workq'   ,\
+                        ):
+        #{{{docstring
+        """
+        Sets the kwargs for the linear run.
+
+        Parameters
+        ----------
+        NOTE: timestep will be multiplied with timeStepMultiplicator
+        For details, see bout_runners input
+        """
+        #}}}
+        if self._calledFunctions["mainOptions"] == False:
+            message =\
+                "self.setMainOptions must be called prior to setLinearOptions"
+            raise ValueError(message)
+
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["setLinearOptions"] = True
+
+        self._linearOptions =\
+                {\
+                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "nout"     : (nout,),\
+                }
+
+        self._linearPBSOptions =\
+                {\
+                 "BOUT_walltime"         : BOUT_walltime        ,\
+                 "post_process_walltime" : post_process_walltime,\
+                 "post_process_queue"    : post_process_queue   ,\
+                }
+
+    #}}}
+
+    #{{{setTurbulenceOptions
+    def setTurbulenceOptions(self                              ,\
+                             timestep              = 1         ,\
+                             nout                  = 5000      ,\
+                             BOUT_walltime         = "72:00:00",\
+                             post_process_walltime = "03:00:00",\
+                             post_process_queue    = "workq"   ,\
+            ):
+        #{{{docstring
+        """
+        Sets the kwargs for the turbulence run.
+
+        Parameters
+        ----------
+        NOTE: timestep will be multiplied with timeStepMultiplicator
+        For details, see bout_runners input
+        """
+        #}}}
+        if self._calledFunctions["mainOptions"] == False:
+            message =\
+                "self.setMainOptions must be called prior to setTurbulenceOptions"
+            raise ValueError(message)
+
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["setTurbulenceOptions"] = True
+
+        self._turbulenceOptions =\
+                {\
+                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "nout"     : (nout,),\
+                }
+
+        self._turbulencePBSOptions =\
+                {\
+                 "BOUT_walltime"         : BOUT_walltime        ,\
+                 "post_process_walltime" : post_process_walltime,\
+                 "post_process_queue"    : post_process_queue   ,\
+                }
+    #}}}
+
     #{{{runScan
     def runScan(self):
         """
@@ -458,11 +648,26 @@ class GenericScanDriver(object):
             message = "self.setMainOptions must be called prior to a run"
             raise ValueError(message)
 
+        keysToBeCalled = []
+
         for key, val in self._calledFunctions.items():
-            if val == True:
+            if val:
                 print("{:<25} has been called".format(key))
             else:
-                print("{:<25} is not called (using defaults)".format(key))
+                keysToBeCalled.append(key)
+                print("{:<25} has NOT been called (using defaults)".format(key))
+
+        # Set default runner options if not set
+        for key in keysToBeCalled:
+            if key == "initOptions":
+                self.setInitOptions()
+            elif key == "expandOptions":
+                self.setExpandOptions()
+            elif key == "linearOptions":
+                self.setLinearOptions()
+            elif key == "turbulenceOptions":
+                self.setTurbulenceOptions()
+
 
         # Make dictionary to variables
         for (flag, value) in self._postProcessingFlags.items():
@@ -484,45 +689,38 @@ class GenericScanDriver(object):
         nz = 1
         # Set the temporal domain
         restart    = None
-        timestep   = (2e3*self._timeStepMultiplicator,)
-        nout       = (2,)
         # Filter
         ownFilterType = "none"
         #Switches
         useHyperViscAzVortD = (False,)
-        # Specify the numbers used for the BOUT runs
-        BOUT_walltime         = '05:00:00'
-        BOUT_run_name         = theRunName
-        post_process_run_name = 'post' + theRunName.capitalize()
-        post_process_walltime = '0:29:00'
-        post_process_queue    = 'xpresq'
         # Post processing option
         tSlice = None
+        # PBS options
+        BOUT_run_name         = theRunName
+        post_process_run_name = 'post' + theRunName.capitalize()
         #}}}
+
         #{{{Run and post processing
         initRunner = PBS_runner(\
             # Shall we make
             make       = self._make,\
             # Set spatial domain
             nz         = nz        ,\
-            # Set temporal domain
-            nout       = nout      ,\
-            timestep   = timestep  ,\
             # Set the restart option
             restart    = restart   ,\
+            # Init options
+            **self._initOptions    ,\
             # Set additional option
             additional = (
                 ('tag',theRunName,0),\
                 ('ownFilters'  , 'type', ownFilterType),\
                 ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
                          ),\
-            series_add = self._series_add                      ,\
+            series_add = self._series_add,\
             # PBS options
-            BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
+            **self._initPBSOptions                       ,\
             # Common options
             **self._commonRunnerOptions                  ,\
                         )
@@ -555,10 +753,6 @@ class GenericScanDriver(object):
             curPostProcessor = None
         #{{{Expand runner options
         # Set the spatial domain
-        nz = 256
-        # Set the temporal domain
-        timestep   = (50*self._timeStepMultiplicator,)
-        nout       = (2,)
         # Filter
         ownFilterType = "none"
         #Switches
@@ -568,24 +762,19 @@ class GenericScanDriver(object):
         # Name
         theRunName = self._theRunName + "-1-expand"
         # PBS options
-        BOUT_walltime         = '24:00:00'
         BOUT_run_name         = theRunName
         post_process_run_name = 'post' + theRunName.capitalize()
-        post_process_walltime = '0:29:00'
-        post_process_queue    = 'xpresq'
         # Post processing option
         tSlice = None
         #}}}
+
         #{{{Run and post processing
         expandRunner = PBS_runner(\
-            # Set spatial domain
-            nz           = nz               ,\
-            # Set temporal domain
-            nout         = nout             ,\
-            timestep     = timestep         ,\
+            # Expand options
+            **self._expandOptions         ,\
             # Set restart options
-            restart      = restart          ,\
-            restart_from = restartFromFunc  ,\
+            restart      = restart        ,\
+            restart_from = restartFromFunc,\
             # Set additional options
             additional = (
                 ('tag',theRunName,0),\
@@ -594,11 +783,9 @@ class GenericScanDriver(object):
                          ),\
             series_add = self._series_add                ,\
             # PBS options
-            BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
+            **self._expandPBSOptions                     ,\
             # Common options
             **self._commonRunnerOptions                  ,\
                         )
@@ -662,23 +849,23 @@ class GenericScanDriver(object):
         #Switches
         saveTerms           = False
         useHyperViscAzVortD = (True,)
-        includeNoise     = True
-        forceAddNoise    = True
+        if self._addOwnNoise:
+            includeNoise  = True
+            forceAddNoise = True
+            add_noise     = None
+        else:
+            includeNoise  = False
+            forceAddNoise = False
+            add_noise     = {"lnN":1e-3}
         # As this is scan dependent, the driver finds the correct folder
         maxGradRhoFolder = expand_dmp_folderss[0]
         # From previous outputs
         aScanPath = expand_dmp_folderss[0]
-        # Set the temporal domain
-        timestep = (1*self._timeStepMultiplicator,)
-        nout     = (500,)
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
         BOUT_run_name         = theRunName
-        BOUT_walltime         = '72:00:00'
         post_process_run_name = 'post' + theRunName.capitalize()
-        post_process_walltime = '03:00:00'
-        post_process_queue    = 'workq'
         # Post processing options
         tSlice     = slice(0, None, 2)
         varyMaxMin = True
@@ -687,27 +874,26 @@ class GenericScanDriver(object):
         #}}}
         #{{{Run and post processing
         linearRun = PBS_runner(\
-            # Set temporal domain
-            nout         = nout           ,\
-            timestep     = timestep       ,\
+            # Linear options
+            **self._linearOptions         ,\
             # Set restart options
             restart      = restart        ,\
             restart_from = restartFromFunc,\
             # Set additional options
             additional = (
-                ('tag'   ,theRunName            ,0),\
+                ('tag'   , theRunName           ,0),\
                 ('switch', 'includeNoise'       , includeNoise ),\
                 ('switch', 'forceAddNoise'      ,forceAddNoise),\
                 ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
                 ('switch', 'saveTerms'          ,saveTerms),\
                          ),\
             series_add = self._series_add                ,\
+            # Set eventual noise
+            add_noise             = add_noise            ,\
             # PBS options
-            BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
+            **self._linearPBSOptions                     ,\
             # Common options
             **self._commonRunnerOptions                  ,\
                     )
@@ -788,26 +974,19 @@ class GenericScanDriver(object):
         # Switches
         saveTerms           = False
         useHyperViscAzVortD = (True,)
-        # Set the temporal domain
-        nout     = (5000,)
-        timestep = (1*self._timeStepMultiplicator,)
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
         BOUT_run_name         = theRunName
-        BOUT_walltime         = '72:00:00'
         post_process_run_name = 'post' + theRunName.capitalize()
-        post_process_walltime = '03:00:00'
-        post_process_queue    = 'workq'
         # Post processing options
         tSlice    = slice(0, None, 10)
         aScanPath = linear_dmp_folderss[0]
         #}}}
         #{{{Run and post processing
         turboRun = PBS_runner(\
-            # Set temporal domain
-            nout       = nout               ,\
-            timestep   = timestep           ,\
+            # Set turbulence options
+            **self._turbulenceOptions       ,\
             # Set restart options
             restart      = restart          ,\
             restart_from = restartFromFunc  ,\
@@ -818,11 +997,9 @@ class GenericScanDriver(object):
                          ),\
             series_add = self._series_add                ,\
             # PBS options
-            BOUT_walltime         = BOUT_walltime        ,\
             BOUT_run_name         = BOUT_run_name        ,\
-            post_process_walltime = post_process_walltime,\
-            post_process_queue    = post_process_queue   ,\
             post_process_run_name = post_process_run_name,\
+            **self._turbulencePBSOptions                 ,\
             # Common options
             **self._commonRunnerOptions                  ,\
                         )
