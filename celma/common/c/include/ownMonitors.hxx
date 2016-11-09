@@ -41,7 +41,7 @@ public:
     void potEnergy(Field3D const &n, std::map<std::string, BoutReal> *potE);
 
     //! Calculates the kinetic energy
-    void totalN(Field3D const &n, std::map<std::string, BoutReal> *totN);
+    void numberOfParticles(Field3D const &n, std::map<std::string, BoutReal> *N);
 };
 
 

@@ -166,7 +166,7 @@ private:
     bool forceAddNoise;       // Add noise on restart as well
     bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
     bool monitorEnergy;       // If energy should be monitored
-    bool monitorN;            // If total particle number should be monitored
+    bool monitorParticleNumber;            // If total particle number should be monitored
     // *****************************************************************************
 
     // Runtime switches
