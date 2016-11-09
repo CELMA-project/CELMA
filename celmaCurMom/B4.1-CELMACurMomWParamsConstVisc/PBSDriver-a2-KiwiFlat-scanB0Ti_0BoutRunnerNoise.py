@@ -28,15 +28,15 @@ directory = "a2-KiwiFlatMagFieldTi0BoutRunnerNoise"
 
 # Set the main options
 scanB0.setMainOptions(\
-                       directory      = directory     ,\
-                       scanParameters = scanParameters,\
-                       series_add     = series_add    ,\
-                       theRunName     = directory     ,\
-                       make           = False         ,\
-                       varName        = "n"           ,\
-                       pltName        = "n"           ,\
-                       addOwnNoise    = False         ,\
-                     )
+                       directory        = directory     ,\
+                       scanParameters   = scanParameters,\
+                       series_add       = series_add    ,\
+                       theRunName       = directory     ,\
+                       make             = False         ,\
+                       varName          = "n"           ,\
+                       pltName          = "n"           ,\
+                       boutRunnersNoise = 1e-10         ,\
+                       )
 
 # Set the flags
 scanB0.setPostProcessingFlags(\

@@ -29,23 +29,22 @@ def collectEnergy(paths):
 
 
     varStrings= (\
-                 "perpKinEE"      ,\
-                 "parKinEE"       ,\
-                 "totKinEE"       ,\
-                 "perpKinEI"      ,\
-                 "parKinEI"       ,\
-                 "totKinEI"       ,\
-                 "polAvgPerpKinEE",\
-                 "polAvgParKinEE" ,\
-                 "polAvgTotKinEE" ,\
-                 "polAvgPerpKinEI",\
-                 "polAvgParKinEI" ,\
-                 "polAvgTotKinEI" ,\
-                 "potEE"          ,\
-                 "polAvgPotEE"    ,\
-                 "totN"           ,\
-                 "polAvgTotN"     ,\
-                 "t_array"        ,\
+                 "perpKinEE"           ,\
+                 "parKinEE"            ,\
+                 "sumKinEE"            ,\
+                 "perpKinEI"           ,\
+                 "parKinEI"            ,\
+                 "sumKinEI"            ,\
+                 "polAvgPerpKinEE"     ,\
+                 "polAvgParKinEE"      ,\
+                 "polAvgSumKinEE"      ,\
+                 "polAvgPerpKinEI"     ,\
+                 "polAvgParKinEI"      ,\
+                 "polAvgSumKinEI"      ,\
+                 "potEE"               ,\
+                 "polAvgPotEE"         ,\
+                 "particleNumber"      ,\
+                 "t_array"             ,\
                 )
 
     energies = collectiveCollect(paths, varStrings)
@@ -107,10 +106,10 @@ class PlotEnergy(object):
             Contains the energy in the following keys:
                 * perpKinEE - The perpendicular kinetic electron energy
                 * parKinEE  - The paralell kinetic electron energy
-                * totKinEE  - The total kinetic electron energy
+                * sumKinEE  - The total kinetic electron energy
                 * perpKinEI - The perpendicular kinetic ion energy
                 * parKinEI  - The parallel kinetic ion energy
-                * totKinEI  - The total kinetic ion energy
+                * sumKinEI  - The total kinetic ion energy
                 * t_array   - The time
         showPlot : bool
             If the plots should be displayed.
@@ -154,10 +153,10 @@ class PlotEnergy(object):
         # Set the variable label
         if self._helper.convertToPhysical:
             self._varLabel = r"$\mathrm{{Energy}}$ $[{}]$".\
-                                  format(self._energy["totKinEIUnits"])
+                                  format(self._energy["sumKinEIUnits"])
         else:
             self._varLabel = r"$\mathrm{{Energy}}{}$".\
-                                  format(self._energy["totKinEINorm"])
+                                  format(self._energy["sumKinEINorm"])
 
         # Set the time label
         self._timeLabel = self._helper.tTxtDict["tTxtLabel"].\
@@ -195,9 +194,9 @@ class PlotEnergy(object):
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
         gs = GridSpec(nrows=3, ncols=1)
-        axes = {"totAx"  : fig.add_subplot(gs[0])}
-        axes["parAx" ] = fig.add_subplot(gs[1], sharex=axes["totAx"])
-        axes["perpAx"] = fig.add_subplot(gs[2], sharex=axes["totAx"])
+        axes = {"sumAx"  : fig.add_subplot(gs[0])}
+        axes["parAx" ] = fig.add_subplot(gs[1], sharex=axes["sumAx"])
+        axes["perpAx"] = fig.add_subplot(gs[2], sharex=axes["sumAx"])
 
         # Get the colors
         colors = seqCMap3(np.linspace(0, 1, 3))
@@ -219,8 +218,8 @@ class PlotEnergy(object):
                 and ("Norm" not in key))
 
         for nr, key in enumerate(keys):
-            if "tot" in key.lower():
-                ax    = axes["totAx"]
+            if "sum" in key.lower():
+                ax    = axes["sumAx"]
                 label = "{} $+$ {}".format(
                     self._genLeg.format(species, r"\mathrm{kin},\perp"),\
                     self._genLeg.format(species, r"\mathrm{kin},\parallel"))
@@ -260,14 +259,14 @@ class PlotEnergy(object):
                     label = label)
 
         # Turn of x-labels
-        axes["totAx"].tick_params(labelbottom="off")
+        axes["sumAx"].tick_params(labelbottom="off")
         axes["parAx"].tick_params(labelbottom="off")
         # Set axis labels
         axes["parAx"] .set_ylabel(self._varLabel, labelpad=50)
         axes["perpAx"].set_xlabel(self._timeLabel)
 
         # Make the plot look nice
-        for key in ["totAx", "parAx", "perpAx"]:
+        for key in ["sumAx", "parAx", "perpAx"]:
             self._helper.makePlotPretty(axes[key]              ,\
                                         yprune   = "both"      ,\
                                         rotation = 45          ,\
@@ -320,14 +319,14 @@ class PlotEnergy(object):
         for key, ax in axes.items():
             if "full" in key:
                 #{{{Full variable
-                lines["el" ] = {"line" : self._energy["totKinEE"],\
+                lines["el" ] = {"line" : self._energy["sumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                                     (r"$E_{e, \mathrm{kin}, \perp} + "
                                      r" E_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["totKinEI"],\
+                lines["ion"] = {"line" : self._energy["sumKinEI"],\
                                 "color": colors[1],\
                                 "label":\
                                     (r"$E_{i, \mathrm{kin}, \perp} + "
@@ -341,14 +340,14 @@ class PlotEnergy(object):
                 #}}}
             elif "avg" in key:
                 #{{{Poloidally averaged variable
-                lines["el" ] = {"line" : self._energy["polAvgTotKinEE"],\
+                lines["el" ] = {"line" : self._energy["polAvgSumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                       (r"$\langle E \rangle_{e, \mathrm{kin}, \perp} + "
                        r" \langle E \rangle_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["polAvgTotKinEI"],\
+                lines["ion"] = {"line" : self._energy["polAvgSumKinEI"],\
                                 "color": colors[1],\
                                 "label":\
                       (r"$\langle E \rangle_{i, \mathrm{kin}, \perp} + "
@@ -363,14 +362,14 @@ class PlotEnergy(object):
                 #}}}
             elif "fluct" in key:
                 #{{{Fluctuating variable
-                lines["el" ] = {"line" : self._energy["fluctTotKinEE"],\
+                lines["el" ] = {"line" : self._energy["fluctSumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                       (r"$\widetilde{E}_{e, \mathrm{kin}, \perp} + "
                        r" \widetilde{E}_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["fluctTotKinEI"],\
+                lines["ion"] = {"line" : self._energy["fluctSumKinEI"],\
                                 "color": colors[2],\
                                 "label":\
                       (r"$\widetilde{E}_{i, \mathrm{kin}, \perp} + "

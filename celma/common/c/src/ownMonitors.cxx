@@ -5,7 +5,7 @@
 
 /* FIXME: Monitors are not printing traces or BoutException at the moment
  *        (see BOUT-dev #355)
- *        As a quickfix std::cout is used for the errors
+ *        As a quickfix output is used for the errors
  */
 
 /*!
@@ -159,21 +159,21 @@ void OwnMonitors::calcPolAvgN(Field3D const &n)
  *                    Must contain the following keys:\n
  *                    perpKinEE       - Electron perpendicular kinetic energy\n
  *                    parKinEE        - Electron parallel kinetic energy\n
- *                    totKinEE        - Electron total kinetic energy\n
+ *                    sumKinEE        - Electron total kinetic energy\n
  *                    perpKinEI       - Ion perpendicular kinetic energy\n
  *                    parKinEI        - Ion parallel kinetic energy\n
- *                    totKinEI        - Ion total kinetic energy\n
+ *                    sumKinEI        - Ion total kinetic energy\n
  *                    polAvgPerpKinEE - Poloidally averaged electron
  *                                      perpendicular kinetic energy\n
  *                    polAvgParKinEE  - Poloidally averaged electron parallel
  *                                      kinetic energy\n
- *                    polAvgPerpKinEE - Poloidally averaged electron total
+ *                    polAvgSumKinEE  - Poloidally averaged electron total
  *                                      kinetic energy\n
  *                    polAvgPerpKinEI - Poloidally averaged ion perpendicular
  *                                      kinetic energy\n
  *                    polAvgParKinEI  - Poloidally averaged ion parallel kinetic
  *                                      energy\n
- *                    polAvgPerpKinEI - Poloidally averaged ion total kinetic
+ *                    polAvgSumKinEI  - Poloidally averaged ion total kinetic
  *                                      energy
  *
  * \param[out] kinE   Variable where the kinetic energy is stored
@@ -192,7 +192,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi);
     }
     else{
-        std::cout << "'perpKinEE' was not a key in the input 'kinE'" << std::endl;
+        output << "'perpKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEE' was not a key in the input 'kinE'");
     }
     if((*kinE).count("parKinEE")){
@@ -200,15 +200,15 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*SQ(uEPar));
     }
     else{
-        std::cout << "'parKinEE' was not a key in the input 'kinE'" << std::endl;
+        output << "'parKinEE' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'parKinEE' was not a key in the input 'kinE'");
     }
-    if((*kinE).count("totKinEE" )){
-        (*kinE)["toKinEE"] = (*kinE)["perpKinEE"] + (*kinE)["parKinEE"];
+    if((*kinE).count("sumKinEE" )){
+        (*kinE)["sumKinEE"] = (*kinE)["perpKinEE"] + (*kinE)["parKinEE"];
     }
     else{
-        std::cout << "'totKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'totKinEE' was not a key in the input 'kinE'");
+        output << "'sumKinEE' was not a key in the input 'kinE'" << std::endl;
+        throw BoutException("'sumKinEE' was not a key in the input 'kinE'");
     }
 
     // Ion energy
@@ -216,7 +216,7 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
         (*kinE)["perpKinEI"] = (*kinE)["perpKinEE"];
     }
     else{
-        std::cout << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
+        output << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
     }
     if((*kinE).count("parKinEI")){
@@ -224,14 +224,14 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
             volInt_.volumeIntegral(0.5*n*SQ(uIPar));
     }
     else{
-        std::cout << "'parKinEI' was not a key in the input 'kinE'" << std::endl;
+        output << "'parKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'parKinEI' was not a key in the input 'kinE'");
     }
-    if((*kinE).count("totKinEI" )){
-        (*kinE)["toKinEI"] = (*kinE)["perpKinEI"] + (*kinE)["parKinEI"];
+    if((*kinE).count("sumKinEI" )){
+        (*kinE)["sumKinEI"] = (*kinE)["perpKinEI"] + (*kinE)["parKinEI"];
     }
     else{
-        std::cout << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
+        output << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
         throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
     }
 
@@ -241,7 +241,6 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
      *       As a consequence, we must take the mean before squaring gradPerpPhi
      */
     polAvgGradPerpPhi_.x = polAvg_.poloidalAverage(gradPerpPhi.x);
-    polAvgGradPerpPhi_.x = polAvg_.poloidalAverage(gradPerpPhi.x);
     polAvgGradPerpPhi_.y = polAvg_.poloidalAverage(gradPerpPhi.y);
     polAvgGradPerpPhi_.z = polAvg_.poloidalAverage(gradPerpPhi.z);
     polAvgUEPar_         = polAvg_.poloidalAverage(uEPar);
@@ -250,26 +249,38 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
     // Poloidally averaged electron energy
      if((*kinE).count("polAvgPerpKinEE")){
         (*kinE)["polAvgPerpKinEE"] =
-            volInt_.volumeIntegral(0.5*polAvgN_*polAvgGradPerpPhi_*polAvgGradPerpPhi_);
+            volInt_.volumeIntegral(0.5*polAvgN_
+                                      *polAvgGradPerpPhi_
+                                      *polAvgGradPerpPhi_);
     }
     else{
-        std::cout << "'polAvgPerpKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgPerpKinEE' was not a key in the input 'kinE'");
+        output << "'polAvgPerpKinEE' was not a key in the input 'kinE'"
+               << std::endl;
+        throw BoutException(
+                "'polAvgPerpKinEE' was not a key in the input 'kinE'"
+                );
     }
     if((*kinE).count("polAvgParKinEE")){
         (*kinE)["polAvgParKinEE"] =
             volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUEPar_));
     }
     else{
-        std::cout << "'polAvgParKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgParKinEE' was not a key in the input 'kinE'");
+        output << "'polAvgParKinEE' was not a key in the input 'kinE'"
+               << std::endl;
+        throw BoutException(
+                "'polAvgParKinEE' was not a key in the input 'kinE'"
+                );
     }
-    if((*kinE).count("polAvgTotKinEE" )){
-        (*kinE)["polAvgTotKinEE"] = (*kinE)["polAvgPerpKinEE"] + (*kinE)["polAvgParKinEE"];
+    if((*kinE).count("polAvgSumKinEE" )){
+        (*kinE)["polAvgSumKinEE"] =   (*kinE)["polAvgPerpKinEE"]
+                                    + (*kinE)["polAvgParKinEE"];
     }
     else{
-        std::cout << "'polAvgTotKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgTotKinEE' was not a key in the input 'kinE'");
+        output << "'polAvgSumKinEE' was not a key in the input 'kinE'"
+               << std::endl;
+        throw BoutException(
+                "'polAvgSumKinEE' was not a key in the input 'kinE'"
+                );
     }
 
     // Poloidally averaged ion energy
@@ -277,23 +288,33 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
         (*kinE)["polAvgPerpKinEI"] = (*kinE)["polAvgPerpKinEE"];
     }
     else{
-        std::cout << "'polAvgPerpKinEI' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
+        output << "'polAvgPerpKinEI' was not a key in the input 'kinE'"
+               << std::endl;
+        throw BoutException(
+                "'polAvgPerpKinEI' was not a key in the input 'kinE'"
+                );
     }
     if((*kinE).count("polAvgParKinEI")){
         (*kinE)["polAvgParKinEI"] =
             volInt_.volumeIntegral(0.5*polAvgN_*SQ(polAvgUIPar_));
     }
     else{
-        std::cout << "'polAvgParKinEI' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgParKinEI' was not a key in the input 'kinE'");
+        output << "'polAvgParKinEI' was not a key in the input 'kinE'"
+                  << std::endl;
+        throw BoutException(
+                "'polAvgParKinEI' was not a key in the input 'kinE'"
+                );
     }
-    if((*kinE).count("polAvgTotKinEI" )){
-        (*kinE)["polTotPerpKinEI"] = (*kinE)["polAvgPerpKinEI"] + (*kinE)["polAvgParKinEI"];
+    if((*kinE).count("polAvgSumKinEI" )){
+        (*kinE)["polAvgSumKinEI"] =   (*kinE)["polAvgPerpKinEI"]
+                                    + (*kinE)["polAvgParKinEI"];
     }
     else{
-        std::cout << "'polAvgPerpKinEI' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'polAvgPerpKinEI' was not a key in the input 'kinE'");
+        output << "'polAvgPerpKinEI' was not a key in the input 'kinE'"
+                  << std::endl;
+        throw BoutException(
+                "'polAvgPerpKinEI' was not a key in the input 'kinE'"
+                );
     }
 }
 
@@ -357,7 +378,8 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
  *
  * \param[out] potE   Variable where the potential electron energy is stored
  */
-void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *potE)
+void OwnMonitors::potEnergy(Field3D const &n,
+                            std::map<std::string, BoutReal> *potE)
 {
     TRACE("Halt in OwnMonitors::potEnergy");
 
@@ -367,7 +389,7 @@ void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *p
             volInt_.volumeIntegral(n*log(n));
     }
     else{
-        std::cout << "'potEE' was not a key in the input 'potE'" << std::endl;
+        output << "'potEE' was not a key in the input 'potE'" << std::endl;
         throw BoutException("'potEE' was not a key in the input 'potE'");
     }
 
@@ -379,49 +401,43 @@ void OwnMonitors::potEnergy(Field3D const &n, std::map<std::string, BoutReal> *p
             volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
     }
     else{
-        std::cout << "'polAvgPotEE' was not a key in the input 'potE'" << std::endl;
+        output << "'polAvgPotEE' was not a key in the input 'potE'"
+                  << std::endl;
         throw BoutException("'polAvgPotEE' was not a key in the input 'potE'");
     }
 }
-
 
 /*!
  * Calculates the total particle number and the fluctuation of the total
  * particle number in the system
  *
- * \param[in] n       The density
- * \param[in] totN    Variable where the potential will be stored\n
- *                    Must contain the following keys:\n
- *                    totN       - Total particle number\n
- *                    polAvgTotN - Poloidally averaged of total particle number
+ * \note No poloidal average is returned as
+ *      \f$\int_{0}^{2\pi}\langle f\rangle d\theta=\int_{0}^{2\pi}f d\theta\f$.
  *
- * \param[out] totN  Variable where the potential electron energy is stored
+ * \param[in] n    The density
+ * \param[in] particleNumber    Variable where the potential will be stored\n
+ *                              Must contain the following key:\n
+ *                              particleNumber       - Total particle number\n
+ *
+ * \param[out] particleNumber  Variable where the potential electron energy is
+ *                             stored
  */
-void OwnMonitors::totalN(Field3D const &n, std::map<std::string, BoutReal> *totN)
+void OwnMonitors::numberOfParticles(Field3D const &n,
+                                std::map<std::string, BoutReal> *particleNumber)
 {
-    TRACE("Halt in OwnMonitors::totalN");
+    TRACE("Halt in OwnMonitors::numberOfParticles");
 
     // The full part
-    if((*totN).count("totN")){
-        (*totN)["totN"] =
-            volInt_.volumeIntegral(n*log(n));
+    if((*particleNumber).count("particleNumber")){
+        (*particleNumber)["particleNumber"] = volInt_.volumeIntegral(n);
     }
     else{
-        std::cout << "'totN' was not a key in the input 'totN'" << std::endl;
-        throw BoutException("'totN' was not a key in the input 'totN'");
+        output
+            << "'particleNumber' was not a key in the input 'particleNumber'"
+            << std::endl;
+        throw BoutException(
+                "'particleNumber' was not a key in the input 'particleNumber'"
+                );
     }
-
-    polAvgLogN_ = polAvg_.poloidalAverage(log(n));
-
-    // The poloidal average
-    if((*totN).count("polAvgTotN")){
-        (*totN)["polAvgTotN"] =
-            volInt_.volumeIntegral(polAvgN_*polAvgLogN_);
-    }
-    else{
-        std::cout << "'polAvgTotN' was not a key in the input 'totN'" << std::endl;
-        throw BoutException("'polAvgTotN' was not a key in the input 'totN'");
-    }
-
 }
 #endif
