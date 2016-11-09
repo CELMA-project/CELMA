@@ -1,0 +1,46 @@
+Results:
+========
+
+a1-KiwiFlatMagField
+-------------------
+
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
+B0 = 0.1
+a1-KiwiFlatMagField-0-initialize      - 1h52m
+a1-KiwiFlatMagField-1-expand          - 4h2m
+a1-KiwiFlatMagField-2-linearPhase1    - 13h21m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 57h43m
+
+B0 = 0.09
+a1-KiwiFlatMagField-0-initialize      - 1h51m
+a1-KiwiFlatMagField-1-expand          - 3h20m
+a1-KiwiFlatMagField-2-linearPhase1    - 8h31m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 50h24m
+
+B0 = 0.08
+a1-KiwiFlatMagField-0-initialize      - 1h50m
+a1-KiwiFlatMagField-1-expand          - 2h50m
+a1-KiwiFlatMagField-2-linearPhase1    - 11h4m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 46h56m
+
+B0 = 0.07
+a1-KiwiFlatMagField-0-initialize      - 1h40m
+a1-KiwiFlatMagField-1-expand          - 3h12m
+a1-KiwiFlatMagField-2-linearPhase1    - 10h58m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 46h57m
+
+B0 = 0.06
+a1-KiwiFlatMagField-0-initialize      - 1h33m
+a1-KiwiFlatMagField-1-expand          - 3h9m
+a1-KiwiFlatMagField-2-linearPhase1    - 12h53m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 52h49m
+
+B0 = 0.05
+a1-KiwiFlatMagField-0-initialize      - 2h2m
+a1-KiwiFlatMagField-1-expand          - 1h49m
+a1-KiwiFlatMagField-2-linearPhase1    - 10h17m
+a1-KiwiFlatMagField-3-turbulentPhase1 - 60h28m

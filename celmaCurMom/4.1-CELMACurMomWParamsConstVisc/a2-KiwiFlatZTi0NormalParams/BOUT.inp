@@ -141,6 +141,8 @@ Ly = 366.2017 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
+
+minPointsPerRhoSY = 1e-3
 # =============================================================================
 
 
