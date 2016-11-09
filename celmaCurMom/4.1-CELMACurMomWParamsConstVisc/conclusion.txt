@@ -5,237 +5,33 @@ Copied from 4.0-CELMACurMomWParams
 - Better parameter display (as 5.0)
 - New implementation of neutral collision
 
+
 Results:
 ========
 
-a1-KiwiFlatMagField
--------------------
-Checklist:
-[ ] - Fields steady state
-[ ] - All OK on expand
-[ ] - Linear modes: Radial and poloidal
-[ ] - Turbulence (long, include parallel structures) ... turbulence level would be nice
-[ ] - Profiles during linear - still grid size oscillation?
-[ ] - Profiles during turbulence - still grid size oscillation?
-[ ] - Time of energy overshoot
-[ ] - Probe data
+CHECK results.txt in the subfolders for the results
 
-Init   : 4000 timesteps
-Expand : 100  timesteps
-Linear : 500  timesteps
-Turbul : 5000 timesteps
-
-B0 = 0.1
-a1-KiwiFlatMagField-0-initialize      - 1h52m
-a1-KiwiFlatMagField-1-expand          - 4h2m
-a1-KiwiFlatMagField-2-linearPhase1    - 13h21m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 57h43m
-
-B0 = 0.09
-a1-KiwiFlatMagField-0-initialize      - 1h51m
-a1-KiwiFlatMagField-1-expand          - 3h20m
-a1-KiwiFlatMagField-2-linearPhase1    - 8h31m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 50h24m
-
-B0 = 0.08
-a1-KiwiFlatMagField-0-initialize      - 1h50m
-a1-KiwiFlatMagField-1-expand          - 2h50m
-a1-KiwiFlatMagField-2-linearPhase1    - 11h4m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 46h56m
-
-B0 = 0.07
-a1-KiwiFlatMagField-0-initialize      - 1h40m
-a1-KiwiFlatMagField-1-expand          - 3h12m
-a1-KiwiFlatMagField-2-linearPhase1    - 10h58m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 46h57m
-
-B0 = 0.06
-a1-KiwiFlatMagField-0-initialize      - 1h33m
-a1-KiwiFlatMagField-1-expand          - 3h9m
-a1-KiwiFlatMagField-2-linearPhase1    - 12h53m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 52h49m
-
-B0 = 0.05
-a1-KiwiFlatMagField-0-initialize      - 2h2m
-a1-KiwiFlatMagField-1-expand          - 1h49m
-a1-KiwiFlatMagField-2-linearPhase1    - 10h17m
-a1-KiwiFlatMagField-3-turbulentPhase1 - 60h28m
-
-
-
-
-
-
-
-
-
-
-a1-KiwiFlatElTemp
------------------
-
-Init   : 4000 timesteps
-Expand : 100  timesteps
-Linear : 500  timesteps
-Turbul : 5000 timesteps
-
-Te0 = 14.0
-a1-KiwiFlatElTemp-0-initialize      - 1h55m
-a1-KiwiFlatElTemp-1-expand          - 3h59m
-a1-KiwiFlatElTemp-2-linearPhase1    - 11h10m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - 50h4m
-
-Te0 = 12.0
-a1-KiwiFlatElTemp-0-initialize      - 1h41m
-a1-KiwiFlatElTemp-1-expand          - 3h39m
-a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 254 of 500 9h55m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 2h3m
-
-Te0 = 10.0
-a1-KiwiFlatElTemp-0-initialize      - 1h34m
-a1-KiwiFlatElTemp-1-expand          - 4h9m
-a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 294 of 500 9h42m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 0h37m
-
-Te0 = 8.0
-a1-KiwiFlatElTemp-0-initialize      - 1h39m
-a1-KiwiFlatElTemp-1-expand          - 4h19m
-a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 285 of 500 13h13m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 3h46m
-
-Te0 = 6.0
-a1-KiwiFlatElTemp-0-initialize      - 1h47m
-a1-KiwiFlatElTemp-1-expand          - 4h32m
-a1-KiwiFlatElTemp-2-linearPhase1    - 11h15m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - 41h45m
-
-Te0 = 5.0
-a1-KiwiFlatElTemp-0-initialize      - 1h42m
-a1-KiwiFlatElTemp-1-expand          - 3h49m
-a1-KiwiFlatElTemp-2-linearPhase1    - SUNDIALS 285 of 500 11h29m
-a1-KiwiFlatElTemp-3-turbulentPhase1 - Failed (not even one timestep) 29m
-
-
-
-
-
-
-
-
-
-
-a1-KiwiFlatNeutral
-------------------
-
-Init   : 4000 timesteps
-Expand : 100  timesteps
-Linear : 500  timesteps
-Turbul : 5000 timesteps
-
-nn = 1e15
-a1-KiwiFlatNeutral-0-initialize      - 1h35m
-a1-KiwiFlatNeutral-1-expand          - 3h19m
-a1-KiwiFlatNeutral-2-linearPhase1    - 277 of 500 - Failed in NaulinSolver
-a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
-
-nn = 5e15
-a1-KiwiFlatNeutral-0-initialize      - 1h42m
-a1-KiwiFlatNeutral-1-expand          - 3h7m
-a1-KiwiFlatNeutral-2-linearPhase1    - 9h47m
-a1-KiwiFlatNeutral-3-turbulentPhase1 - 45h9m
-
-nn = 1e16
-a1-KiwiFlatNeutral-0-initialize      - 1h39m
-a1-KiwiFlatNeutral-1-expand          - 3h43m
-a1-KiwiFlatNeutral-2-linearPhase1    - 288 of 500 - SUNDIALS
-a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
-
-nn = 5e16
-a1-KiwiFlatNeutral-0-initialize      - 1h35m
-a1-KiwiFlatNeutral-1-expand          - 4h1m
-a1-KiwiFlatNeutral-2-linearPhase1    - 9h32m
-a1-KiwiFlatNeutral-3-turbulentPhase1 - 46h44m
-
-nn = 1e17
-a1-KiwiFlatNeutral-0-initialize      - 1h46m
-a1-KiwiFlatNeutral-1-expand          - 3h12m
-a1-KiwiFlatNeutral-2-linearPhase1    - 9h15m
-a1-KiwiFlatNeutral-3-turbulentPhase1 - 48h43m
-
-
-
-
-
-
-
-
-
-
-a1-KiwiFlatZ
-------------
-Checklist:
-
-Init   : 4000 timesteps
-Expand : 100  timesteps
-Linear : 500  timesteps
-Turbul : 5000 timesteps
-
-z = 1
-! Modes grow up properly
-! Turbulence like
-! Good growth rates
-a1-KiwiFlatZ-0-initialize      - 5h22m
-a1-KiwiFlatZ-1-expand          - 7h19m
-a1-KiwiFlatZ-2-linearPhase1    - 29h42m
-a1-KiwiFlatZ-3-turbulentPhase1 - Walltime(100h)
-
-z = 2
-! "Blinking", then modes growing up properly
-! Turbulence like
-! Good growth rates
-a1-KiwiFlatZ-0-initialize      - 1h43m
-a1-KiwiFlatZ-1-expand          - 1h22m
-a1-KiwiFlatZ-2-linearPhase1    - 4h4m
-a1-KiwiFlatZ-3-turbulentPhase1 - 40h52m
-
-z = 4
-! Thick outer mode, looks like turbulence, modes not biggest in center
-! One turbulence burst
-! Messed up growth rates and spectre
-a1-KiwiFlatZ-0-initialize      - 24m
-a1-KiwiFlatZ-1-expand          - 40m
-a1-KiwiFlatZ-2-linearPhase1    - 3h35m
-a1-KiwiFlatZ-3-turbulentPhase1 - 22h35m
-
-z = 6
-! Thick outer mode, look likes turbulence, big modes grows up, but not in center
-! No turbulence burst
-! Messed up gorwth rates and spectre
-a1-KiwiFlatZ-0-initialize      - 13m
-a1-KiwiFlatZ-1-expand          - 28m
-a1-KiwiFlatZ-2-linearPhase1    - 2h6m
-a1-KiwiFlatZ-3-turbulentPhase1 - 16h35m
-
-z = 8
-! Thin outer mode
-! No turbulence burst
-! Somewhat OK growth rates. But linear rates fates
-a1-KiwiFlatZ-0-initialize      - 9m
-a1-KiwiFlatZ-1-expand          - 9m
-a1-KiwiFlatZ-2-linearPhase1    - 1h5m
-a1-KiwiFlatZ-3-turbulentPhase1 - 11h33m
-
-z = 10
-! Thin outer mode
-! Plasma starts spinning
-! Very unexpected growth rates. Modes damped, and then growing
-! Dominant mode number around 46-47
-a1-KiwiFlatZ-0-initialize      - 7m
-a1-KiwiFlatZ-1-expand          - 17m
-a1-KiwiFlatZ-2-linearPhase1    - 1h1m
-a1-KiwiFlatZ-3-turbulentPhase1 - 13h20m
-
-
-
+a1-KiwiFlatMagField - works ok
+a1-KiwiFlatElTemp   - success 2/6
+    Te = 14: Success
+    Te = 12: SUNDIALS fails in linear phase
+    Te = 10: SUNDIALS fails in linear phase
+    Te =  8: SUNDIALS fails in linear phase
+    Te =  6: Success
+    Te =  5: SUNDIALS fails in linear phase
+a1-KiwiFlatNeutral  - success 3/5
+    nn = 1e15: Failed in Naulin Solver
+    nn = 5e15: Sucess
+    nn = 1e16: SUNDIALS fails in linear phase
+    nn = 5e16: Success
+    nn = 1e17: Success
+a1-KiwiFlatZ  - Runs successfully, but unsatisfactory ring modes
+    z =  1: Proper modes
+    z =  2: Starts by blinking, then growing up properly
+    z =  4: Thick outer mode
+    z =  6: Thick outer mode
+    z =  8: Thin outer mode
+    z = 10: Thin outer mode
 
 
 TODO:
