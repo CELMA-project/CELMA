@@ -1,0 +1,40 @@
+Results:
+========
+
+a1-KiwiFlatNeutral
+------------------
+
+Init   : 4000 timesteps
+Expand : 100  timesteps
+Linear : 500  timesteps
+Turbul : 5000 timesteps
+
+nn = 1e15
+a1-KiwiFlatNeutral-0-initialize      - 1h35m
+a1-KiwiFlatNeutral-1-expand          - 3h19m
+a1-KiwiFlatNeutral-2-linearPhase1    - 277 of 500 - Failed in NaulinSolver
+a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
+
+nn = 5e15
+a1-KiwiFlatNeutral-0-initialize      - 1h42m
+a1-KiwiFlatNeutral-1-expand          - 3h7m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h47m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 45h9m
+
+nn = 1e16
+a1-KiwiFlatNeutral-0-initialize      - 1h39m
+a1-KiwiFlatNeutral-1-expand          - 3h43m
+a1-KiwiFlatNeutral-2-linearPhase1    - 288 of 500 - SUNDIALS
+a1-KiwiFlatNeutral-3-turbulentPhase1 - SUNDIALS failed
+
+nn = 5e16
+a1-KiwiFlatNeutral-0-initialize      - 1h35m
+a1-KiwiFlatNeutral-1-expand          - 4h1m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h32m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 46h44m
+
+nn = 1e17
+a1-KiwiFlatNeutral-0-initialize      - 1h46m
+a1-KiwiFlatNeutral-1-expand          - 3h12m
+a1-KiwiFlatNeutral-2-linearPhase1    - 9h15m
+a1-KiwiFlatNeutral-3-turbulentPhase1 - 48h43m
