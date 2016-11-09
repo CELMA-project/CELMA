@@ -14,9 +14,9 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
-Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
-Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
+B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  ,)# 5.0e-2  )
+Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  ,)# 3.2697  )
+Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210,)# 183.1008)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ('input', 'B0', B0),\
@@ -39,14 +39,14 @@ scanB0.setMainOptions(\
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
-                              justPostProcess            = False,\
+                              justPostProcess            = True,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
                               postProcessLin             = False,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
-                              postProcessProbesAndEnergy = False,\
+                              postProcessProbesAndEnergy = True,\
                               postProcessGrowthRates     = False,\
                               # Calculated from the energy overshoot
                               tIndSaturatedTurb          = 600  ,\
