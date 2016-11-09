@@ -43,7 +43,7 @@ scanB0.setPostProcessingFlags(\
                               justPostProcess            = False,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
-                              postProcessLin             = False,\
+                              postProcessLin             = True,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
