@@ -856,7 +856,7 @@ class GenericScanDriver(object):
         else:
             includeNoise  = False
             forceAddNoise = False
-            add_noise     = {"lnN":1e-3}
+            add_noise     = {"lnN":1e-15}
         # As this is scan dependent, the driver finds the correct folder
         maxGradRhoFolder = expand_dmp_folderss[0]
         # From previous outputs
