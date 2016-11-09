@@ -54,14 +54,24 @@ def collectEnergy(paths):
     energies["t"] = energies.pop("t_array")
 
     firstCharToLower = lambda s: s[:1].lower() + s[1:] if s else ""
+    firstCharToUpper = lambda s: s[:1].upper() + s[1:] if s else ""
 
     # Calculate fluctuating quantities
+    # NOTE: We must generate a new dictionary in order not to get
+    #       "dictionary changed size during iteration"
+    fluctEnergies = {}
     for key in energies.keys():
         if "polAvg" in key:
             # Strip polAvg, and cast first letter to lowercase
             quantity = firstCharToLower(key.replace("polAvg", ""))
-            energies["fluct{}".format(quantity.capitalize())] =\
-                    energies[quantity] - energies[key]
+            fluctEnergies["fluct{}".format(firstCharToUpper(quantity))] =\
+                          energies[quantity] - energies[key]
+            # Protect data
+            fluctEnergies["fluct{}".format(firstCharToUpper(quantity))].\
+                          setflags(write=False)
+
+    # Merge dicts
+    energies.update(fluctEnergies)
 
     return energies
 #}}}
@@ -209,15 +219,15 @@ class PlotEnergy(object):
                 and ("Norm" not in key))
 
         for nr, key in enumerate(keys):
-            if "tot" in key:
+            if "tot" in key.lower():
                 ax    = axes["totAx"]
                 label = "{} $+$ {}".format(
                     self._genLeg.format(species, r"\mathrm{kin},\perp"),\
                     self._genLeg.format(species, r"\mathrm{kin},\parallel"))
-            elif "perp" in key:
+            elif "perp" in key.lower():
                 ax    = axes["perpAx"]
                 label = self._genLeg.format(species, r"\mathrm{kin},\perp")
-            elif "par" in key:
+            elif "par" in key.lower():
                 ax    = axes["parAx"]
                 label = self._genLeg.format(species, r"\mathrm{kin},\parallel")
 
@@ -231,7 +241,7 @@ class PlotEnergy(object):
                         format(labels[0][0], labels[0][1] )
                 # Join the labels
                 label  = "_".join(labels)
-            elif "fluctuation" in key:
+            elif "fluct" in key:
                 color = colors[2]
                 # Reset label
                 labels = label.split("_")
@@ -326,7 +336,7 @@ class PlotEnergy(object):
 
                 lines["pot"] = {"line" : self._energy["potEE"],\
                                 "color": colors[2],\
-                                "label": r"$E_{e, \mathrm{pot}, \perp}",\
+                                "label": r"$E_{e, \mathrm{pot}, \perp}$",\
                                 }
                 #}}}
             elif "avg" in key:
@@ -348,7 +358,7 @@ class PlotEnergy(object):
                 lines["pot"] = {"line" : self._energy["polAvgPotEE"],\
                                 "color": colors[2],\
                                 "label":\
-                      r"$\langle E \rangle_{e, \mathrm{pot}, \perp}",\
+                      r"$\langle E \rangle_{e, \mathrm{pot}, \perp}$",\
                                 }
                 #}}}
             elif "fluct" in key:
@@ -370,15 +380,15 @@ class PlotEnergy(object):
                 lines["pot"] = {"line" : self._energy["fluctPotEE"],\
                                 "color": colors[2],\
                                 "label":\
-                      r"$\widetilde{E}_{e, \mathrm{pot}, \perp}",\
+                      r"$\widetilde{E}_{e, \mathrm{pot}, \perp}$",\
                                 }
                 #}}}
 
-            for key, line in lines.item():
-                ax.plot(self._energy["t"]         ,\
-                        line[key]["line"]         ,\
-                        color = line[key]["color"],\
-                        label = line[key]["label"])
+            for _, line in lines.items():
+                ax.plot(self._energy["t"]    ,\
+                        line["line"]         ,\
+                        color = line["color"],\
+                        label = line["label"])
 
         # Turn of x-labels
         axes["fullAx"].tick_params(labelbottom="off")
