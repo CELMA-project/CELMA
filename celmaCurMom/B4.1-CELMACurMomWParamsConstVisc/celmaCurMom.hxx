@@ -160,7 +160,7 @@ private:
     bool forceAddNoise;       // Add noise on restart as well
     bool useHyperViscAzVort;  // If hyperviscosity should be used in the vorticity
     bool monitorEnergy;       // If energy should be monitored
-    bool monitorN;            // If total particle number should be monitored
+    bool monitorParticleNumber;            // If total particle number should be monitored
     bool constViscPar;        // If the input par viscosity is the simulation viscosity
     bool constViscPerp;       // If the input perp viscosity is the simulation viscosity
     bool constViscHyper;      // If the input hyper viscosity is the simulation viscosity
@@ -181,7 +181,7 @@ private:
     // *****************************************************************************
     std::map<std::string, BoutReal> kinE;
     std::map<std::string, BoutReal> potE;
-    std::map<std::string, BoutReal> totN;
+    std::map<std::string, BoutReal> particleNumber;
     // *****************************************************************************
 
     // Initialization functions

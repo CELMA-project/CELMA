@@ -191,7 +191,7 @@ class GenericScanDriver(object):
                        varName               = "n"  ,\
                        pltName               = "n"  ,\
                        timeStepMultiplicator = 1    ,\
-                       addOwnNoise           = True ,\
+                       boutRunnersNoise      = None ,\
                       ):
         #{{{docstring
         """
@@ -215,10 +215,15 @@ class GenericScanDriver(object):
             Name to be plotted
         timeStepMultiplicator : int
             How much the default time step should be multiplied with
-        addOwnNoise : bool
-            Should the own noise generator be used in the linear runs
+        boutRunnersNoise : [None|float]
+            Should the noise generator from bout runners be used in the
+            linear runs. If this is None, the noise will be generated
+            from the noise generator in noiseGenerator.cxx
         """
         #}}}
+
+        if boutRunnersNoise is None:
+            boutRunnersNoise = False
 
         self._calledFunctions["mainOptions"] = True
 
@@ -231,7 +236,7 @@ class GenericScanDriver(object):
         self._var                   = varName
         self._pltName               = pltName
         self._timeStepMultiplicator = timeStepMultiplicator
-        self._addOwnNoise           = addOwnNoise
+        self._boutRunnersNoise      = boutRunnersNoise
     #}}}
 
     #{{{setPostProcessingFlags
@@ -554,7 +559,7 @@ class GenericScanDriver(object):
     #{{{setLinearOptions
     def setLinearOptions(self                              ,\
                          timestep              = 1         ,\
-                         nout                  = 500       ,\
+                         nout                  = 1000      ,\
                          BOUT_walltime         = '72:00:00',\
                          post_process_walltime = '03:00:00',\
                          post_process_queue    = 'workq'   ,\
@@ -849,14 +854,14 @@ class GenericScanDriver(object):
         #Switches
         saveTerms           = False
         useHyperViscAzVortD = (True,)
-        if self._addOwnNoise:
+        if not(self._boutRunnersNoise):
             includeNoise  = True
             forceAddNoise = True
             add_noise     = None
         else:
             includeNoise  = False
             forceAddNoise = False
-            add_noise     = {"lnN":1e-15}
+            add_noise     = {"lnN":self._boutRunnersNoise}
         # As this is scan dependent, the driver finds the correct folder
         maxGradRhoFolder = expand_dmp_folderss[0]
         # From previous outputs

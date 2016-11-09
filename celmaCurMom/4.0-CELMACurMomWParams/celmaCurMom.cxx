@@ -93,10 +93,10 @@ int CelmaCurMom::init(bool restarting)
     if(monitorEnergy){
         dump.add(kinEE[0], "perpKinEE", 1);
         dump.add(kinEE[1], "parKinEE" , 1);
-        dump.add(kinEE[2], "totKinEE" , 1);
+        dump.add(kinEE[2], "sumKinEE" , 1);
         dump.add(kinEI[0], "perpKinEI", 1);
         dump.add(kinEI[1], "parKinEI" , 1);
-        dump.add(kinEI[2], "totKinEI" , 1);
+        dump.add(kinEI[2], "sumKinEI" , 1);
     }
     // Variables to be solved for
     SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
@@ -256,8 +256,8 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
         ownMon.kinEnergy(n, gradPerpPhi, uEPar, &kinEE);
         ownMon.kinEnergy(n, gradPerpPhi, uIPar, &kinEI);
     }
-    if(monitorN){
-        ownMon.totalN(n, &N);
+    if(monitorParticleNumber){
+        ownMon.numberOfParticles(n, &N);
     }
 
     return 0;
