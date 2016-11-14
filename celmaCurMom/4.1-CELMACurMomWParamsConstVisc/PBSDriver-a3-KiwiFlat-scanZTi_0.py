@@ -11,51 +11,53 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanB0 = GenericScanDriver()
+scanZ = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
-Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
-Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
-scanParameters  = ("B0", "Lx", "Ly")
+length = (4       , 5       , 6       , 8        , 10       ,  12       )
+Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
+scanParameters  = ("length", "Ly")
 series_add = (\
-              ('input', 'B0', B0),\
-              ('geom' , 'Lx', Lx),\
-              ('geom' , 'Ly', Ly),\
+              ('input', 'length', length),\
+              ('geom' , 'Ly'    , Ly),\
              )
 
-directory = "a2-KiwiFlatMagFieldTi0BoutRunnerNoise"
+directory = "a3-KiwiFlatZTi0"
 
 # Set the main options
-scanB0.setMainOptions(\
-                       directory        = directory     ,\
-                       scanParameters   = scanParameters,\
-                       series_add       = series_add    ,\
-                       theRunName       = directory     ,\
-                       make             = False         ,\
-                       varName          = "n"           ,\
-                       pltName          = "n"           ,\
-                       boutRunnersNoise = 1e-10         ,\
-                       )
+scanZ.setMainOptions(\
+                       directory             = directory     ,\
+                       scanParameters        = scanParameters,\
+                       series_add            = series_add    ,\
+                       theRunName            = directory     ,\
+                       make                  = False         ,\
+                       varName               = "n"           ,\
+                       pltName               = "n"           ,\
+                       timeStepMultiplicator = 10            ,\
+                       boutRunnersNoise      = 1e-10         ,\
+                     )
+
+# These runs needs longer init time
+scanZ.setInitOptions(BOUT_walltime = "10:00:00")
 
 # Set the flags
-scanB0.setPostProcessingFlags(\
-                              justPostProcess            = False,\
+scanZ.setPostProcessingFlags(\
+                              justPostProcess            = True,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
-                              postProcessLin             = False,\
+                              postProcessLin             = True,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
                               postProcessProbesAndEnergy = False,\
                               postProcessGrowthRates     = False,\
+                              # FIXME: Check that this is true
                               # Calculated from the energy overshoot
-                              # FIXME: Check when this happens
                               tIndSaturatedTurb          = None ,\
                              )
 
 # Set common plotter options
-scanB0.setCommonPlotterOptions(\
+scanZ.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -65,14 +67,14 @@ scanB0.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanB0.setProbePlottersOptions(\
+scanZ.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanB0.setFieldPlottersOptions(\
+scanZ.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -82,7 +84,7 @@ scanB0.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanB0.setCommonRunnerOptions(\
+scanZ.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -93,4 +95,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan()
+scanZ.runScan()
