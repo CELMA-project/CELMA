@@ -34,6 +34,10 @@ a1-KiwiFlatZ  - Runs successfully, but unsatisfactory ring modes
     z = 10: Thin outer mode
 
 
+a2 series - Needs documentation
+
+a3-KiwiFlat-scanZTi_0 - Running
+
 TODO:
 1. Check if crashes can be explained by energy overshoot
 2. Check if fails can be restarted from another turbulent state
