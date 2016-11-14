@@ -118,6 +118,7 @@ class GenericScanDriver(object):
         # Set warning flags
         self._calledFunctions = {
                     "mainOptions"          : False,\
+                    "runOptions"           : False,\
                     "postProcessingFlag"   : False,\
                     "commonRunnerOptions"  : False,\
                     "commonPlotterOptions" : False,\
@@ -147,7 +148,7 @@ class GenericScanDriver(object):
                  "nproc"              : 48   ,\
                  "cpy_source"         : True ,\
                  "BOUT_nodes"         : 3    ,\
-                 "BOUT_ppn"           : 16   ,\
+                 "BOUT_ppn"           : 20   ,\
                  "post_process_nproc" : 1    ,\
                  "post_process_nodes" : 1    ,\
                  "post_process_ppn"   : 20   ,\
@@ -215,10 +216,12 @@ class GenericScanDriver(object):
             Name to be plotted
         timeStepMultiplicator : int
             How much the default time step should be multiplied with
-        boutRunnersNoise : [None|float]
-            Should the noise generator from bout runners be used in the
-            linear runs. If this is None, the noise will be generated
+        boutRunnersNoise : [None|dict]
+            If this is None, the noise will be generated
             from the noise generator in noiseGenerator.cxx
+            If this is set as a dict, the dict must have the key of one
+            of the variables evolved in time, and the value must be the
+            amplitude of the noise.
         """
         #}}}
 
@@ -237,6 +240,44 @@ class GenericScanDriver(object):
         self._pltName               = pltName
         self._timeStepMultiplicator = timeStepMultiplicator
         self._boutRunnersNoise      = boutRunnersNoise
+    #}}}
+
+    #{{{setRunOptions
+    def setRunOptions(self            ,\
+                      runInit   = True,\
+                      runExpand = True,\
+                      runLin    = True,\
+                      runTurb   = True,\
+            ):
+        #{{{docstring
+        """
+        Set which runs which will be simulated.
+
+        Parameters
+        ----------
+        runInit : bool
+            Inital run will be performed if True
+        runExpand : bool
+            Expand run will be performed if True
+        runLin : bool
+            Linear run will be performed if True
+        runTurb : bool
+            Turbulence run will be performed if True
+        """
+        #}}}
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["runOptions"] = True
+
+        self._runOptions =\
+                {\
+                  "runInit"   : runInit  ,\
+                  "runExpand" : runExpand,\
+                  "runLin"    : runLin   ,\
+                  "runTurb"   : runTurb  ,\
+                }
     #}}}
 
     #{{{setPostProcessingFlags
@@ -493,7 +534,7 @@ class GenericScanDriver(object):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if calframe[1][3] != "__init__":
-            self._calledFunctions["setInitOptions"] = True
+            self._calledFunctions["initOptions"] = True
 
         self._initOptions =\
                 {\
@@ -538,7 +579,7 @@ class GenericScanDriver(object):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if calframe[1][3] != "__init__":
-            self._calledFunctions["setExpandOptions"] = True
+            self._calledFunctions["expandOptions"] = True
 
         self._expandOptions =\
                 {\
@@ -583,7 +624,7 @@ class GenericScanDriver(object):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if calframe[1][3] != "__init__":
-            self._calledFunctions["setLinearOptions"] = True
+            self._calledFunctions["linearOptions"] = True
 
         self._linearOptions =\
                 {\
@@ -627,7 +668,7 @@ class GenericScanDriver(object):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if calframe[1][3] != "__init__":
-            self._calledFunctions["setTurbulenceOptions"] = True
+            self._calledFunctions["turbulenceOptions"] = True
 
         self._turbulenceOptions =\
                 {\
@@ -664,7 +705,9 @@ class GenericScanDriver(object):
 
         # Set default runner options if not set
         for key in keysToBeCalled:
-            if key == "initOptions":
+            if key == "runOptions":
+                self.setRunOptions()
+            elif key == "initOptions":
                 self.setInitOptions()
             elif key == "expandOptions":
                 self.setExpandOptions()
@@ -673,9 +716,10 @@ class GenericScanDriver(object):
             elif key == "turbulenceOptions":
                 self.setTurbulenceOptions()
 
-
         # Make dictionary to variables
         for (flag, value) in self._postProcessingFlags.items():
+            setattr(self, flag, value)
+        for (flag, value) in self._runOptions.items():
             setattr(self, flag, value)
 
         # Update dicts
@@ -683,67 +727,68 @@ class GenericScanDriver(object):
         self._commonRunnerOptions["directory"] = self._directory
 
         #{{{Init runner
-        if self.postProcessInit:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
-        #{{{Init options
-        # Name
-        theRunName = self._theRunName + "-0-initialize"
-        # Set the spatial domain
-        nz = 1
-        # Set the temporal domain
-        restart    = None
-        # Filter
-        ownFilterType = "none"
-        #Switches
-        useHyperViscAzVortD = (False,)
-        # Post processing option
-        tSlice = None
-        # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = 'post' + theRunName.capitalize()
-        #}}}
-
-        #{{{Run and post processing
-        initRunner = PBS_runner(\
-            # Shall we make
-            make       = self._make,\
-            # Set spatial domain
-            nz         = nz        ,\
-            # Set the restart option
-            restart    = restart   ,\
-            # Init options
-            **self._initOptions    ,\
-            # Set additional option
-            additional = (
-                ('tag',theRunName,0),\
-                ('ownFilters'  , 'type', ownFilterType),\
-                ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
-                         ),\
-            series_add = self._series_add,\
+        if self.runInit:
+            if self.postProcessInit:
+                curPostProcessor = postBoutRunner
+            else:
+                curPostProcessor = None
+            #{{{Init options
+            # Name
+            theRunName = self._theRunName + "-0-initialize"
+            # Set the spatial domain
+            nz = 1
+            # Set the temporal domain
+            restart    = None
+            # Filter
+            ownFilterType = "none"
+            #Switches
+            useHyperViscAzVortD = (False,)
+            # Post processing option
+            tSlice = None
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
-            **self._initPBSOptions                       ,\
-            # Common options
-            **self._commonRunnerOptions                  ,\
-                        )
+            BOUT_run_name         = theRunName
+            post_process_run_name = 'post' + theRunName.capitalize()
+            #}}}
 
-        init_dmp_folderss, PBS_ids = initRunner.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            driverName        = "plot1DAnd2DDriver",\
-            tSlice            = tSlice             ,\
-            theRunName        = theRunName         ,\
-            # Common kwargs
-            **self._fieldPlotterOptions            ,\
-                                    )
-        #}}}
+            #{{{Run and post processing
+            initRunner = PBS_runner(\
+                # Shall we make
+                make       = self._make,\
+                # Set spatial domain
+                nz         = nz        ,\
+                # Set the restart option
+                restart    = restart   ,\
+                # Init options
+                **self._initOptions    ,\
+                # Set additional option
+                additional = (
+                    ('tag',theRunName,0),\
+                    ('ownFilters'  , 'type', ownFilterType),\
+                    ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                             ),\
+                series_add = self._series_add,\
+                # PBS options
+                BOUT_run_name         = BOUT_run_name        ,\
+                post_process_run_name = post_process_run_name,\
+                **self._initPBSOptions                       ,\
+                # Common options
+                **self._commonRunnerOptions                  ,\
+                            )
+
+            init_dmp_folders, PBS_ids = initRunner.execute_runs(\
+                post_processing_function = curPostProcessor,\
+                # This function will be called every time after
+                # performing a run
+                post_process_after_every_run = True,\
+                # Below are the kwargs arguments being passed to
+                # the post processing function
+                driverName        = "plot1DAnd2DDriver",\
+                tSlice            = tSlice             ,\
+                theRunName        = theRunName         ,\
+                # Common kwargs
+                **self._fieldPlotterOptions            ,\
+                                        )
+            #}}}
         #}}}
 
         if self.justPostProcess:
@@ -752,69 +797,70 @@ class GenericScanDriver(object):
             restart = "overwrite"
 
         #{{{The expand runner
-        if self.postProcessExp:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
-        #{{{Expand runner options
-        # Set the spatial domain
-        # Filter
-        ownFilterType = "none"
-        #Switches
-        useHyperViscAzVortD = (False,)
-        # From previous outputs
-        aScanPath = init_dmp_folderss[0]
-        # Name
-        theRunName = self._theRunName + "-1-expand"
-        # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = 'post' + theRunName.capitalize()
-        # Post processing option
-        tSlice = None
-        #}}}
-
-        #{{{Run and post processing
-        expandRunner = PBS_runner(\
-            # Expand options
-            **self._expandOptions         ,\
-            # Set restart options
-            restart      = restart        ,\
-            restart_from = restartFromFunc,\
-            # Set additional options
-            additional = (
-                ('tag',theRunName,0),\
-                ('ownFilters'  , 'type', ownFilterType),\
-                ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
-                         ),\
-            series_add = self._series_add                ,\
+        if self.runExpand:
+            if self.postProcessExp:
+                curPostProcessor = postBoutRunner
+            else:
+                curPostProcessor = None
+            #{{{Expand runner options
+            # Set the spatial domain
+            # Filter
+            ownFilterType = "none"
+            #Switches
+            useHyperViscAzVortD = (False,)
+            # From previous outputs
+            aScanPath = init_dmp_folders[0]
+            # Name
+            theRunName = self._theRunName + "-1-expand"
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
-            **self._expandPBSOptions                     ,\
-            # Common options
-            **self._commonRunnerOptions                  ,\
-                        )
+            BOUT_run_name         = theRunName
+            post_process_run_name = 'post' + theRunName.capitalize()
+            # Post processing option
+            tSlice = None
+            #}}}
 
-        expand_dmp_folderss, PBS_ids = expandRunner.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # Declare dependencies
-            job_dependencies = PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            driverName        = "plot1DAnd2DDriver",\
-            tSlice            = tSlice             ,\
-            theRunName        = theRunName         ,\
-            # Below are the kwargs given to the
-            # restartFromFunc
-            aScanPath      = aScanPath            ,\
-            scanParameters = self._scanParameters ,\
-            # Common kwargs
-            **self._fieldPlotterOptions           ,\
-                                      )
-        #}}}
+            #{{{Run and post processing
+            expandRunner = PBS_runner(\
+                # Expand options
+                **self._expandOptions         ,\
+                # Set restart options
+                restart      = restart        ,\
+                restart_from = restartFromFunc,\
+                # Set additional options
+                additional = (
+                    ('tag',theRunName,0),\
+                    ('ownFilters'  , 'type', ownFilterType),\
+                    ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                             ),\
+                series_add = self._series_add                ,\
+                # PBS options
+                BOUT_run_name         = BOUT_run_name        ,\
+                post_process_run_name = post_process_run_name,\
+                **self._expandPBSOptions                     ,\
+                # Common options
+                **self._commonRunnerOptions                  ,\
+                            )
+
+            expand_dmp_folders, PBS_ids = expandRunner.execute_runs(\
+                post_processing_function = curPostProcessor,\
+                # Declare dependencies
+                job_dependencies = PBS_ids,\
+                # This function will be called every time after
+                # performing a run
+                post_process_after_every_run = True,\
+                # Below are the kwargs arguments being passed to
+                # the post processing function
+                driverName        = "plot1DAnd2DDriver",\
+                tSlice            = tSlice             ,\
+                theRunName        = theRunName         ,\
+                # Below are the kwargs given to the
+                # restartFromFunc
+                aScanPath      = aScanPath            ,\
+                scanParameters = self._scanParameters ,\
+                # Common kwargs
+                **self._fieldPlotterOptions           ,\
+                                          )
+            #}}}
         #}}}
 
         #{{{ If profiles are to be plotted
@@ -846,215 +892,172 @@ class GenericScanDriver(object):
         #}}}
 
         #{{{The linear runner
-        if self.postProcessLin:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
-        #{{{ Linear options
-        #Switches
-        saveTerms           = False
-        useHyperViscAzVortD = (True,)
-        if not(self._boutRunnersNoise):
-            includeNoise  = True
-            forceAddNoise = True
-            add_noise     = None
-        else:
-            includeNoise  = False
-            forceAddNoise = False
-            add_noise     = {"lnN":self._boutRunnersNoise}
-        # As this is scan dependent, the driver finds the correct folder
-        maxGradRhoFolder = expand_dmp_folderss[0]
-        # From previous outputs
-        aScanPath = expand_dmp_folderss[0]
-        # Name
-        theRunName = self._theRunName + "-2-linearPhase1"
-        # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = 'post' + theRunName.capitalize()
-        # Post processing options
-        tSlice     = slice(0, None, 2)
-        varyMaxMin = True
-        subPolAvg  = True
-        mode       = "perpAndPol"
-        #}}}
-        #{{{Run and post processing
-        linearRun = PBS_runner(\
-            # Linear options
-            **self._linearOptions         ,\
-            # Set restart options
-            restart      = restart        ,\
-            restart_from = restartFromFunc,\
-            # Set additional options
-            additional = (
-                ('tag'   , theRunName           ,0),\
-                ('switch', 'includeNoise'       , includeNoise ),\
-                ('switch', 'forceAddNoise'      ,forceAddNoise),\
-                ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                ('switch', 'saveTerms'          ,saveTerms),\
-                         ),\
-            series_add = self._series_add                ,\
-            # Set eventual noise
-            add_noise             = add_noise            ,\
+        if self.runLin:
+            if self.postProcessLin:
+                curPostProcessor = postBoutRunner
+            else:
+                curPostProcessor = None
+            #{{{ Linear options
+            #Switches
+            saveTerms           = False
+            useHyperViscAzVortD = (True,)
+            if not(self._boutRunnersNoise):
+                includeNoise  = True
+                forceAddNoise = True
+                add_noise     = None
+            else:
+                includeNoise  = False
+                forceAddNoise = False
+                add_noise     = self._boutRunnersNoise
+            # As this is scan dependent, the driver finds the correct folder
+            maxGradRhoFolder = expand_dmp_folders[0]
+            # From previous outputs
+            aScanPath = expand_dmp_folders[0]
+            # Name
+            theRunName = self._theRunName + "-2-linearPhase1"
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
-            **self._linearPBSOptions                     ,\
-            # Common options
-            **self._commonRunnerOptions                  ,\
-                    )
+            BOUT_run_name         = theRunName
+            post_process_run_name = 'post' + theRunName.capitalize()
+            # Post processing options
+            tSlice     = slice(0, None, 2)
+            varyMaxMin = True
+            subPolAvg  = True
+            mode       = "perpAndPol"
+            #}}}
+            #{{{Run and post processing
+            linearRun = PBS_runner(\
+                # Linear options
+                **self._linearOptions         ,\
+                # Set restart options
+                restart      = restart        ,\
+                restart_from = restartFromFunc,\
+                # Set additional options
+                additional = (
+                    ('tag'   , theRunName           ,0),\
+                    ('switch', 'includeNoise'       , includeNoise ),\
+                    ('switch', 'forceAddNoise'      ,forceAddNoise),\
+                    ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                    ('switch', 'saveTerms'          ,saveTerms),\
+                             ),\
+                series_add = self._series_add                ,\
+                # Set eventual noise
+                add_noise             = add_noise            ,\
+                # PBS options
+                BOUT_run_name         = BOUT_run_name        ,\
+                post_process_run_name = post_process_run_name,\
+                **self._linearPBSOptions                     ,\
+                # Common options
+                **self._commonRunnerOptions                  ,\
+                        )
 
-        linear_dmp_folderss, PBS_ids = linearRun.execute_runs(\
-                post_processing_function = curPostProcessor,\
-                # Declare dependencies
-                job_dependencies = PBS_ids,\
-                # This function will be called every time after
-                # performing a run
-                post_process_after_every_run = True,\
-                # Below are the kwargs arguments being passed to
-                # the post processing function
-                # Switches
-                driverName       = "single2DDriver",\
-                theRunName       = theRunName      ,\
-                tSlice           = tSlice          ,\
-                subPolAvg        = subPolAvg       ,\
-                varName          = self._varName   ,\
-                pltName          = self._pltName   ,\
-                varyMaxMin       = varyMaxMin      ,\
-                mode             = mode            ,\
-                maxGradRhoFolder = maxGradRhoFolder,\
-                # Below are the kwargs given to the
-                # restartFromFunc
-                aScanPath      = aScanPath         ,\
-                scanParameters = self._scanParameters,\
-                # Common kwargs
-                **self._fieldPlotterOptions          ,\
-                                        )
-        #}}}
-        #{{{ If linear profiles are to be plotted
-        if self.postProcessLinProfiles:
-            curPostProcessor = postBoutRunner
-            theRunName = self._theRunName + "-2-linearPhaseParProfiles"
-            tSlice = None
+            linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
+                    post_processing_function = curPostProcessor,\
+                    # Declare dependencies
+                    job_dependencies = PBS_ids,\
+                    # This function will be called every time after
+                    # performing a run
+                    post_process_after_every_run = True,\
+                    # Below are the kwargs arguments being passed to
+                    # the post processing function
+                    # Switches
+                    driverName       = "single2DDriver",\
+                    theRunName       = theRunName      ,\
+                    tSlice           = tSlice          ,\
+                    subPolAvg        = subPolAvg       ,\
+                    varName          = self._varName   ,\
+                    pltName          = self._pltName   ,\
+                    varyMaxMin       = varyMaxMin      ,\
+                    mode             = mode            ,\
+                    maxGradRhoFolder = maxGradRhoFolder,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc
+                    aScanPath      = aScanPath         ,\
+                    scanParameters = self._scanParameters,\
+                    # Common kwargs
+                    **self._fieldPlotterOptions          ,\
+                                            )
+            #}}}
+            #{{{ If linear profiles are to be plotted
+            if self.postProcessLinProfiles:
+                curPostProcessor = postBoutRunner
+                theRunName = self._theRunName + "-2-linearPhaseParProfiles"
+                tSlice = None
 
-            # Add the tag and the run name
-            profileRunOptions["additional"] =\
-                    list(profileRunOptions["additional"])
-            profileRunOptions["additional"].append(('tag',theRunName,0))
-            profileRunOptions["additional"] =\
-                    tuple(profileRunOptions["additional"])
-            profileRunOptions["BOUT_run_name"] = theRunName
+                # Add the tag and the run name
+                profileRunOptions["additional"] =\
+                        list(profileRunOptions["additional"])
+                profileRunOptions["additional"].append(('tag',theRunName,0))
+                profileRunOptions["additional"] =\
+                        tuple(profileRunOptions["additional"])
+                profileRunOptions["BOUT_run_name"] = theRunName
 
-            # Create the runner
-            profileRun = PBS_runner(**profileRunOptions)
-            # Execute
-            _, _ = profileRun.execute_runs(\
-                post_processing_function = curPostProcessor,\
-                # Declare dependencies
-                job_dependencies = PBS_ids,\
-                # This function will be called every time after
-                # performing a run
-                post_process_after_every_run = True,\
-                # Below are the kwargs arguments being passed to
-                # the post processing function
-                # Switches
-                driverName     = "parDriver"   ,\
-                tSlice         = tSlice        ,\
-                theRunName     = theRunName    ,\
-                # Below are the kwargs given to the
-                # restartFromFunc
-                aScanPath      = aScanPath     ,\
-                scanParameters = self._scanParameters,\
-                # Common kwargs
-                **self._fieldPlotterOptions     ,\
-                                        )
-        #}}}
+                # Create the runner
+                profileRun = PBS_runner(**profileRunOptions)
+                # Execute
+                _, _ = profileRun.execute_runs(\
+                    post_processing_function = curPostProcessor,\
+                    # Declare dependencies
+                    job_dependencies = PBS_ids,\
+                    # This function will be called every time after
+                    # performing a run
+                    post_process_after_every_run = True,\
+                    # Below are the kwargs arguments being passed to
+                    # the post processing function
+                    # Switches
+                    driverName     = "parDriver"   ,\
+                    tSlice         = tSlice        ,\
+                    theRunName     = theRunName    ,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc
+                    aScanPath      = aScanPath     ,\
+                    scanParameters = self._scanParameters,\
+                    # Common kwargs
+                    **self._fieldPlotterOptions     ,\
+                                            )
+            #}}}
         #}}}
 
         #{{{Turbulence runner
-        if self.postProcessTurb:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
-        #{{{Turbulence options
-        # Switches
-        saveTerms           = False
-        useHyperViscAzVortD = (True,)
-        # Name
-        theRunName = self._theRunName + "-3-turbulentPhase1"
-        # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = 'post' + theRunName.capitalize()
-        # Post processing options
-        tSlice    = slice(0, None, 10)
-        aScanPath = linear_dmp_folderss[0]
-        #}}}
-        #{{{Run and post processing
-        turboRun = PBS_runner(\
-            # Set turbulence options
-            **self._turbulenceOptions       ,\
-            # Set restart options
-            restart      = restart          ,\
-            restart_from = restartFromFunc  ,\
-            additional = (
-                ('tag',theRunName,0),\
-                ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                ('switch'      , 'saveTerms'          ,saveTerms),\
-                         ),\
-            series_add = self._series_add                ,\
-            # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
-            **self._turbulencePBSOptions                 ,\
-            # Common options
-            **self._commonRunnerOptions                  ,\
-                        )
-
-        turbo_dmp_folderss, PBS_ids = turboRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # Declare dependencies
-            job_dependencies = PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
+        if self.runTurb:
+            if self.postProcessTurb:
+                curPostProcessor = postBoutRunner
+            else:
+                curPostProcessor = None
+            #{{{Turbulence options
             # Switches
-            driverName     = "single2DDriver",\
-            tSlice         = tSlice          ,\
-            theRunName     = theRunName      ,\
-            varName        = self._varName   ,\
-            pltName        = self._pltName   ,\
-            # Below are the kwargs given to the
-            # restartFromFunc
-            aScanPath      = aScanPath           ,\
-            scanParameters = self._scanParameters,\
-            # Common kwargs
-            **self._fieldPlotterOptions          ,\
-                                        )
-        #}}}
-        #{{{ If linear profiles are to be plotted
-        if self.postProcessTurbProfiles:
-            curPostProcessor = postBoutRunner
-            theRunName = self._theRunName + "-3-turbulentPhase1ParProfiles"
-            tSlice = None
+            saveTerms           = False
+            useHyperViscAzVortD = (True,)
+            # Name
+            theRunName = self._theRunName + "-3-turbulentPhase1"
+            # PBS options
+            BOUT_run_name         = theRunName
+            post_process_run_name = 'post' + theRunName.capitalize()
+            # Post processing options
+            tSlice    = slice(0, None, 10)
+            aScanPath = linear_dmp_folders[0]
+            #}}}
+            #{{{Run and post processing
+            turboRun = PBS_runner(\
+                # Set turbulence options
+                **self._turbulenceOptions       ,\
+                # Set restart options
+                restart      = restart          ,\
+                restart_from = restartFromFunc  ,\
+                additional = (
+                    ('tag',theRunName,0),\
+                    ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
+                    ('switch'      , 'saveTerms'          ,saveTerms),\
+                             ),\
+                series_add = self._series_add                ,\
+                # PBS options
+                BOUT_run_name         = BOUT_run_name        ,\
+                post_process_run_name = post_process_run_name,\
+                **self._turbulencePBSOptions                 ,\
+                # Common options
+                **self._commonRunnerOptions                  ,\
+                            )
 
-            # Add the tag and the run name
-            if self.postProcessLinProfiles:
-                # Tag is already present in the dict:
-                profileRunOptions["additional"] =\
-                        list(profileRunOptions["additional"])
-                _ = profileRunOptions["additional"].pop()
-                profileRunOptions["additional"] =\
-                        tuple(profileRunOptions["additional"])
-
-            profileRunOptions["additional"] = list(profileRunOptions["additional"])
-            profileRunOptions["additional"].append(('tag',theRunName,0))
-            profileRunOptions["additional"] = tuple(profileRunOptions["additional"])
-            profileRunOptions["BOUT_run_name"] = theRunName
-            # Create the runner
-            profileRun = PBS_runner(**profileRunOptions)
-            # Execute
-            _, _ = profileRun.execute_runs(\
+            turbo_dmp_folders, PBS_ids = turboRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
                 # Declare dependencies
                 job_dependencies = PBS_ids,\
@@ -1064,17 +1067,62 @@ class GenericScanDriver(object):
                 # Below are the kwargs arguments being passed to
                 # the post processing function
                 # Switches
-                driverName     = "parDriver"   ,\
-                tSlice         = tSlice        ,\
-                theRunName     = theRunName    ,\
+                driverName     = "single2DDriver",\
+                tSlice         = tSlice          ,\
+                theRunName     = theRunName      ,\
+                varName        = self._varName   ,\
+                pltName        = self._pltName   ,\
                 # Below are the kwargs given to the
                 # restartFromFunc
-                aScanPath      = aScanPath     ,\
+                aScanPath      = aScanPath           ,\
                 scanParameters = self._scanParameters,\
                 # Common kwargs
-                **self._fieldPlotterOptions    ,\
-                                        )
-        #}}}
+                **self._fieldPlotterOptions          ,\
+                                            )
+            #}}}
+            #{{{ If linear profiles are to be plotted
+            if self.postProcessTurbProfiles:
+                curPostProcessor = postBoutRunner
+                theRunName = self._theRunName + "-3-turbulentPhase1ParProfiles"
+                tSlice = None
+
+                # Add the tag and the run name
+                if self.postProcessLinProfiles:
+                    # Tag is already present in the dict:
+                    profileRunOptions["additional"] =\
+                            list(profileRunOptions["additional"])
+                    _ = profileRunOptions["additional"].pop()
+                    profileRunOptions["additional"] =\
+                            tuple(profileRunOptions["additional"])
+
+                profileRunOptions["additional"] = list(profileRunOptions["additional"])
+                profileRunOptions["additional"].append(('tag',theRunName,0))
+                profileRunOptions["additional"] = tuple(profileRunOptions["additional"])
+                profileRunOptions["BOUT_run_name"] = theRunName
+                # Create the runner
+                profileRun = PBS_runner(**profileRunOptions)
+                # Execute
+                _, _ = profileRun.execute_runs(\
+                    post_processing_function = curPostProcessor,\
+                    # Declare dependencies
+                    job_dependencies = PBS_ids,\
+                    # This function will be called every time after
+                    # performing a run
+                    post_process_after_every_run = True,\
+                    # Below are the kwargs arguments being passed to
+                    # the post processing function
+                    # Switches
+                    driverName     = "parDriver"   ,\
+                    tSlice         = tSlice        ,\
+                    theRunName     = theRunName    ,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc
+                    aScanPath      = aScanPath     ,\
+                    scanParameters = self._scanParameters,\
+                    # Common kwargs
+                    **self._fieldPlotterOptions    ,\
+                                            )
+            #}}}
         #}}}
 
         #{{{Growth rates (run after all others, as collectionFolders is needed)
@@ -1086,7 +1134,7 @@ class GenericScanDriver(object):
             # Make a tuple of tuples, where each subtuple will be used as the
             # paths in collectiveCollect
             collectionFolders =\
-                tuple(zip(linear_dmp_folderss, turbo_dmp_folderss))
+                tuple(zip(linear_dmp_folders, turbo_dmp_folders))
 
             _, _ = linearRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
@@ -1105,7 +1153,7 @@ class GenericScanDriver(object):
                 # DriversProbes input
                 var              = self._var          ,\
                 scanParam        = scanParam          ,\
-                steadyStatePaths = expand_dmp_folderss ,\
+                steadyStatePaths = expand_dmp_folders ,\
                 **self._probesPlotterOptions          ,\
                 # Below are the kwargs given to the
                 # restartFromFunc
@@ -1116,8 +1164,8 @@ class GenericScanDriver(object):
 
         #{{{Probes and energy (run this driver after all, as we need the collectionFolders)
         if self.postProcessProbesAndEnergy:
-            collectionFolders = (linear_dmp_folderss[0],\
-                                 turbo_dmp_folderss[0])
+            collectionFolders = (linear_dmp_folders[0],\
+                                 turbo_dmp_folders[0])
 
             theRunName = self._theRunName + "-energyProbesPlot"
             curPostProcessor = postBoutRunner
@@ -1144,7 +1192,7 @@ class GenericScanDriver(object):
                 tIndSaturatedTurb = self.tIndSaturatedTurb ,\
                 # The steady state path will be
                 # converted using convertToCurrentScanParameters
-                steadyStatePath = expand_dmp_folderss[0],\
+                steadyStatePath = expand_dmp_folders[0],\
                 # Below are the kwargs given to the
                 # restartFromFunc and convertToCurrentScanParameters
                 aScanPath      = aScanPath           ,\
