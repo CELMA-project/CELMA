@@ -8,6 +8,7 @@ from .postBoutRunner import postBoutRunner
 from bout_runners import PBS_runner
 import re
 import inspect
+import os
 
 # FIXME: Could make a setOption for the post processing of each type as
 #        well
@@ -601,9 +602,9 @@ class GenericScanDriver(object):
     def setLinearOptions(self                              ,\
                          timestep              = 1         ,\
                          nout                  = 1000      ,\
-                         BOUT_walltime         = '72:00:00',\
-                         post_process_walltime = '03:00:00',\
-                         post_process_queue    = 'workq'   ,\
+                         BOUT_walltime         = "72:00:00",\
+                         post_process_walltime = "03:00:00",\
+                         post_process_queue    = "workq"   ,\
                         ):
         #{{{docstring
         """
@@ -638,7 +639,6 @@ class GenericScanDriver(object):
                  "post_process_walltime" : post_process_walltime,\
                  "post_process_queue"    : post_process_queue   ,\
                 }
-
     #}}}
 
     #{{{setTurbulenceOptions
@@ -747,7 +747,7 @@ class GenericScanDriver(object):
             tSlice = None
             # PBS options
             BOUT_run_name         = theRunName
-            post_process_run_name = 'post' + theRunName.capitalize()
+            post_process_run_name = "post" + theRunName.capitalize()
             #}}}
 
             #{{{Run and post processing
@@ -762,9 +762,9 @@ class GenericScanDriver(object):
                 **self._initOptions    ,\
                 # Set additional option
                 additional = (
-                    ('tag',theRunName,0),\
-                    ('ownFilters'  , 'type', ownFilterType),\
-                    ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                    ("tag",theRunName,0),\
+                    ("ownFilters"  , "type", ownFilterType),\
+                    ("switch"      , "useHyperViscAzVortD", useHyperViscAzVortD),\
                              ),\
                 series_add = self._series_add,\
                 # PBS options
@@ -814,7 +814,7 @@ class GenericScanDriver(object):
             theRunName = self._theRunName + "-1-expand"
             # PBS options
             BOUT_run_name         = theRunName
-            post_process_run_name = 'post' + theRunName.capitalize()
+            post_process_run_name = "post" + theRunName.capitalize()
             # Post processing option
             tSlice = None
             #}}}
@@ -828,9 +828,9 @@ class GenericScanDriver(object):
                 restart_from = restartFromFunc,\
                 # Set additional options
                 additional = (
-                    ('tag',theRunName,0),\
-                    ('ownFilters'  , 'type', ownFilterType),\
-                    ('switch'      , 'useHyperViscAzVortD', useHyperViscAzVortD),\
+                    ("tag",theRunName,0),\
+                    ("ownFilters"  , "type", ownFilterType),\
+                    ("switch"      , "useHyperViscAzVortD", useHyperViscAzVortD),\
                              ),\
                 series_add = self._series_add                ,\
                 # PBS options
@@ -882,8 +882,8 @@ class GenericScanDriver(object):
                 "restart_from" : restartFromFunc,\
                 # Set additional options
                 "additional" : (
-                 ('switch', 'useHyperViscAzVortD',useHyperViscAzVortDProfile),\
-                 ('switch', 'saveTerms'          ,saveTermsProfile),\
+                 ("switch", "useHyperViscAzVortD",useHyperViscAzVortDProfile),\
+                 ("switch", "saveTerms"          ,saveTermsProfile),\
                              ),\
                 "series_add" : self._series_add,\
                 # Common options
@@ -917,7 +917,7 @@ class GenericScanDriver(object):
             theRunName = self._theRunName + "-2-linearPhase1"
             # PBS options
             BOUT_run_name         = theRunName
-            post_process_run_name = 'post' + theRunName.capitalize()
+            post_process_run_name = "post" + theRunName.capitalize()
             # Post processing options
             tSlice     = slice(0, None, 2)
             varyMaxMin = True
@@ -933,11 +933,11 @@ class GenericScanDriver(object):
                 restart_from = restartFromFunc,\
                 # Set additional options
                 additional = (
-                    ('tag'   , theRunName           ,0),\
-                    ('switch', 'includeNoise'       , includeNoise ),\
-                    ('switch', 'forceAddNoise'      ,forceAddNoise),\
-                    ('switch', 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                    ('switch', 'saveTerms'          ,saveTerms),\
+                    ("tag"   , theRunName           ,0),\
+                    ("switch", "includeNoise"       , includeNoise ),\
+                    ("switch", "forceAddNoise"      ,forceAddNoise),\
+                    ("switch", "useHyperViscAzVortD",useHyperViscAzVortD),\
+                    ("switch", "saveTerms"          ,saveTerms),\
                              ),\
                 series_add = self._series_add                ,\
                 # Set eventual noise
@@ -976,6 +976,14 @@ class GenericScanDriver(object):
                     # Common kwargs
                     **self._fieldPlotterOptions          ,\
                                             )
+
+            if self._boutRunnersNoise:
+                # Add file which states what noise is used
+                # If ownNoise is used, params are written to the BOUT.log file
+                for dmp in linear_dmp_folders:
+                    # Create the file
+                    with open(os.path.join(dmp, "addnoise.log"), "w") as f:
+                        f.write("{}".format(self._boutRunnersNoise))
             #}}}
             #{{{ If linear profiles are to be plotted
             if self.postProcessLinProfiles:
@@ -986,7 +994,7 @@ class GenericScanDriver(object):
                 # Add the tag and the run name
                 profileRunOptions["additional"] =\
                         list(profileRunOptions["additional"])
-                profileRunOptions["additional"].append(('tag',theRunName,0))
+                profileRunOptions["additional"].append(("tag",theRunName,0))
                 profileRunOptions["additional"] =\
                         tuple(profileRunOptions["additional"])
                 profileRunOptions["BOUT_run_name"] = theRunName
@@ -1031,7 +1039,7 @@ class GenericScanDriver(object):
             theRunName = self._theRunName + "-3-turbulentPhase1"
             # PBS options
             BOUT_run_name         = theRunName
-            post_process_run_name = 'post' + theRunName.capitalize()
+            post_process_run_name = "post" + theRunName.capitalize()
             # Post processing options
             tSlice    = slice(0, None, 10)
             aScanPath = linear_dmp_folders[0]
@@ -1044,9 +1052,9 @@ class GenericScanDriver(object):
                 restart      = restart          ,\
                 restart_from = restartFromFunc  ,\
                 additional = (
-                    ('tag',theRunName,0),\
-                    ('switch'      , 'useHyperViscAzVortD',useHyperViscAzVortD),\
-                    ('switch'      , 'saveTerms'          ,saveTerms),\
+                    ("tag",theRunName,0),\
+                    ("switch"      , "useHyperViscAzVortD",useHyperViscAzVortD),\
+                    ("switch"      , "saveTerms"          ,saveTerms),\
                              ),\
                 series_add = self._series_add                ,\
                 # PBS options
@@ -1096,7 +1104,7 @@ class GenericScanDriver(object):
                             tuple(profileRunOptions["additional"])
 
                 profileRunOptions["additional"] = list(profileRunOptions["additional"])
-                profileRunOptions["additional"].append(('tag',theRunName,0))
+                profileRunOptions["additional"].append(("tag",theRunName,0))
                 profileRunOptions["additional"] = tuple(profileRunOptions["additional"])
                 profileRunOptions["BOUT_run_name"] = theRunName
                 # Create the runner

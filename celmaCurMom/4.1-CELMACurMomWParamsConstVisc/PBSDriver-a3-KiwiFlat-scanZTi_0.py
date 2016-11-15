@@ -33,19 +33,22 @@ scanZ.setMainOptions(\
                        make                  = False         ,\
                        varName               = "n"           ,\
                        pltName               = "n"           ,\
-                       timeStepMultiplicator = 10            ,\
-                       boutRunnersNoise      = 1e-10         ,\
+                       boutRunnersNoise      = {"vortD":1e-5},\
                      )
+
+# FIXME: Could be that these are not needed
+scanZ.setInitOptions(timestep   = 2e4)
+scanZ.setExpandOptions(timestep = 500)
 
 # These runs needs longer init time
 scanZ.setInitOptions(BOUT_walltime = "10:00:00")
 
 # Set the flags
 scanZ.setPostProcessingFlags(\
-                              justPostProcess            = True,\
+                              justPostProcess            = False,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
-                              postProcessLin             = True,\
+                              postProcessLin             = False,\
                               postProcessTurb            = False,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
