@@ -10,8 +10,6 @@ import re
 import inspect
 import os
 
-# FIXME: Check if we always want to call restart from func in expand, linear and turbulence
-
 #{{{restartFromFunc
 def restartFromFunc(dmp_folder     = None,\
                     aScanPath      = None,\
@@ -551,9 +549,9 @@ class GenericScanDriver(object):
             # Make the field plotter
             self._initUsesFieldPlotter = True
 
-            if self._calledFunctions["fieldPlotterOption"] == None:
+            if self._calledFunctions["fieldPlotterOptions"] == None:
                 self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOption"] == False
+                self._calledFunctions["fieldPlotterOptions"] == False
 
             self._initPostOptions =\
                     {"driverName" : "plot1DAnd2DDriver",\
@@ -569,9 +567,9 @@ class GenericScanDriver(object):
             # Check that field plotter is called first (if set)
             if useFieldPlotterOptions:
                 self._initUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOption"] == None:
+                if self._calledFunctions["fieldPlotterOptions"] == None:
                     self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOption"] == False
+                    self._calledFunctions["fieldPlotterOptions"] == False
             else:
                 self._initUsesFieldPlotter = False
 
@@ -660,9 +658,9 @@ class GenericScanDriver(object):
             # Make the field plotter
             self._expandUsesFieldPlotter = True
 
-            if self._calledFunctions["fieldPlotterOption"] == None:
+            if self._calledFunctions["fieldPlotterOptions"] == None:
                 self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOption"] == False
+                self._calledFunctions["fieldPlotterOptions"] == False
 
             self._expandPostOptions =\
                     {"driverName" : "plot1DAnd2DDriver",\
@@ -678,9 +676,9 @@ class GenericScanDriver(object):
             # Check that field plotter is called first (if set)
             if useFieldPlotterOptions:
                 self._expandUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOption"] == None:
+                if self._calledFunctions["fieldPlotterOptions"] == None:
                     self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOption"] == False
+                    self._calledFunctions["fieldPlotterOptions"] == False
             else:
                 self._expandUsesFieldPlotter = False
 
@@ -772,9 +770,9 @@ class GenericScanDriver(object):
             self._linearPostOptionsUsesMaxGrad = True
 
             # Make the field plotter
-            if self._calledFunctions["fieldPlotterOption"] == None:
+            if self._calledFunctions["fieldPlotterOptions"] == None:
                 self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOption"] == False
+                self._calledFunctions["fieldPlotterOptions"] == False
 
             self._linearPostOptions =\
                     {"driverName" : "single2DDriver" ,\
@@ -793,9 +791,9 @@ class GenericScanDriver(object):
             # Check that field plotter is called first (if set)
             if useFieldPlotterOptions:
                 self._linearUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOption"] == None:
+                if self._calledFunctions["fieldPlotterOptions"] == None:
                     self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOption"] == False
+                    self._calledFunctions["fieldPlotterOptions"] == False
             else:
                 self._linearUsesFieldPlotter = False
 
@@ -883,9 +881,9 @@ class GenericScanDriver(object):
             # Make the field plotter
             self._turbulenceUsesFieldPlotter = True
 
-            if self._calledFunctions["fieldPlotterOption"] == None:
+            if self._calledFunctions["fieldPlotterOptions"] == None:
                 self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOption"] == False
+                self._calledFunctions["fieldPlotterOptions"] == False
 
             self._turbulencePostOptions =\
                     {"driverName" : "single2DDriver"  ,\
@@ -901,9 +899,9 @@ class GenericScanDriver(object):
             # Check that field plotter is called first (if set)
             if useFieldPlotterOptions:
                 self._turbulenceUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOption"] == None:
+                if self._calledFunctions["fieldPlotterOptions"] == None:
                     self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOption"] == False
+                    self._calledFunctions["fieldPlotterOptions"] == False
             else:
                 self._turbulenceUsesFieldPlotter = False
 
@@ -936,7 +934,7 @@ class GenericScanDriver(object):
         # Set default runner options if not set
         for key in keysToBeCalled:
             # Call the function from their names
-            getattr(self, "set{}".format(key[0].upper+key[1:]))()
+            getattr(self, "set{}".format(key[0].upper()+key[1:]))()
 
         # Make dictionary to variables
         for (flag, value) in self._postProcessingFlags.items():
@@ -1157,10 +1155,10 @@ class GenericScanDriver(object):
         if self._linearPostOptionsUsesMaxGrad:
             # As this is scan dependent, the driver finds the correct folder
             maxGradRhoFolder = self._expand_dmp_folders[0]
-            self._linearPostOptions.update("maxGradRhoFolder",\
-                                            maxGradRhoFolder)
+            self._linearPostOptions["maxGradRhoFolder"] =\
+                                            maxGradRhoFolder
         # From previous outputs
-        self._linearAScanPath = self._expand_dmp_folders[0]
+        self._expandAScanPath = self._expand_dmp_folders[0]
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
@@ -1193,7 +1191,7 @@ class GenericScanDriver(object):
             **self._commonRunnerOptions                  ,\
                     )
 
-        self_linear_dmp_folders, self._linear_PBS_ids = \
+        self._linear_dmp_folders, self._linear_PBS_ids = \
         self._linearRun.execute_runs(\
                 post_processing_function = curPostProcessor,\
                 # Declare dependencies
