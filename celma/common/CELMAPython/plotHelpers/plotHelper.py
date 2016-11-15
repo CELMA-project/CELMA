@@ -449,7 +449,7 @@ class PlotHelper(object):
             elif "EI" in varName:
                 # NOTE: The masses are not included in the integral from
                 #       the simulations
-                # NOTE: mi/mi = 2
+                # NOTE: mi/mi = 1
                 var *= self._convDict["n0"]*\
                        self._convDict["Te0"]*\
                        (self._convDict["rhoS"])**3
