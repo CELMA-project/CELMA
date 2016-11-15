@@ -17,9 +17,12 @@ Results:
 
 a2-KiwiFlatMagFieldTi0                - To be run
 a2-KiwiFlatMagFieldTi0BoutRunnerNoise - Rerun
-    noise 1e-3  - Worked
+    noise 1e-3  - Worked, except
+                * B0 - 1.0e-1
+                * B0 - 9.0e-2
     noise 1e-15 - Ring mode
     noise 1e-10 - Worked, except for
         * B0 - 1.0e-1 - Tried twice, no success, note that it enters turbulent state on restart
         * B0 - 9.0e-2 - Tried twice, no success, note that it enters turbulent state on restart
     noise 1e-6 - As 1e-10. There is a small mode growing up, but is damped.
+    noise vortD 1e-3 - Running
