@@ -27,8 +27,6 @@ scanNn.setMainOptions(\
                        series_add     = series_add    ,\
                        theRunName     = directory     ,\
                        make           = False         ,\
-                       varName        = "n"           ,\
-                       pltName        = "n"           ,\
                      )
 
 # Set the flags
