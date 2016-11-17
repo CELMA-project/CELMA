@@ -21,6 +21,8 @@ and post-processing.
 * 5.0-CELMACurMomVisc - As 4.0, but added proper viscosity terms
 * 6.0-CELMAHoleOldVisc - As 4.0, but boundary conditions are so that there is a
   "hole" in the sheath where the velocity is 0
+* 7-CELMACurMomWParamsConstViscClean - As 4.1, but cleaned
 * B4.1-CELMACurMomWParamsConstVisc - As 4.1, but using the simple Boussinesq
   approximation
+* B7-CELMACurMomWParamsConstViscClean - As B4.1, but cleaned
 * common - python post processing and own implementations to BOUT++
