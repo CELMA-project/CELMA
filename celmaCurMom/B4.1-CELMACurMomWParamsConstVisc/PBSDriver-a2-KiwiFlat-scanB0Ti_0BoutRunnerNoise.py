@@ -33,10 +33,13 @@ scanB0.setMainOptions(\
                        series_add       = series_add    ,\
                        theRunName       = directory     ,\
                        make             = False         ,\
-                       varName          = "n"           ,\
-                       pltName          = "n"           ,\
-                       boutRunnersNoise = 1e-10         ,\
+                       boutRunnersNoise = {"vort":1e-6},\
                        )
+
+scanB0.setLinearOptions(timestep              = 1         ,\
+                        nout                  = 3000      ,\
+                        BOUT_walltime         = '24:00:00',\
+                        )
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
