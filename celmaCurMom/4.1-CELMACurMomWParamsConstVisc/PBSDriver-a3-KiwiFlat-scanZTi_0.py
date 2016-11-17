@@ -31,17 +31,14 @@ scanZ.setMainOptions(\
                        series_add            = series_add    ,\
                        theRunName            = directory     ,\
                        make                  = False         ,\
-                       varName               = "n"           ,\
-                       pltName               = "n"           ,\
                        boutRunnersNoise      = {"vortD":1e-5},\
                      )
 
 # FIXME: Could be that these are not needed
-scanZ.setInitOptions(timestep   = 2e4)
+scanZ.setInitOptions  (timestep = 2e4, BOUT_walltime = "10:00:00")
 scanZ.setExpandOptions(timestep = 500)
 
-# These runs needs longer init time
-scanZ.setInitOptions(BOUT_walltime = "10:00:00")
+scanZ.setLinearOptions(nout     = 3000)
 
 # Set the flags
 scanZ.setPostProcessingFlags(\
