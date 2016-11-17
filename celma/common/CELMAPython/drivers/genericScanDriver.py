@@ -139,8 +139,6 @@ class GenericScanDriver(object):
                        series_add                   ,\
                        theRunName                   ,\
                        make                  = False,\
-                       varName               = "n"  ,\
-                       pltName               = "n"  ,\
                        timeStepMultiplicator = 1    ,\
                        boutRunnersNoise      = None ,\
                       ):
@@ -160,10 +158,6 @@ class GenericScanDriver(object):
             Name of the run
         make : bool
             Shall the program be made or not
-        varName : str
-            Name to be collected
-        pltName : str
-            Name to be plotted
         timeStepMultiplicator : int
             How much the default time step should be multiplied with
         boutRunnersNoise : [None|dict]
@@ -184,10 +178,7 @@ class GenericScanDriver(object):
         self._scanParameters        = scanParameters
         self._series_add            = series_add
         self._theRunName            = theRunName
-        self._varName               = varName
         self._make                  = make
-        self._var                   = varName
-        self._pltName               = pltName
         self._timeStepMultiplicator = timeStepMultiplicator
         self._boutRunnersNoise      = boutRunnersNoise
     #}}}
@@ -446,6 +437,7 @@ class GenericScanDriver(object):
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
+                               var     = "n",\
             ):
         #{{{docstring
         """
@@ -459,6 +451,8 @@ class GenericScanDriver(object):
             Maximum mode number to investigate
         yInd : int
             y index to investigate
+        var : str
+            The variable to investigate
         """
         #}}}
 
@@ -469,6 +463,7 @@ class GenericScanDriver(object):
                  "nProbes" : nProbes,\
                  "maxMode" : maxMode,\
                  "yInd"    : yInd   ,\
+                 "var"     : var    ,\
                 }
     #}}}
 
@@ -776,6 +771,8 @@ class GenericScanDriver(object):
 
             self._linearPostOptions =\
                     {"driverName" : "single2DDriver" ,\
+                     "varName"    : "n"              ,\
+                     "pltName"    : "n"              ,\
                      "tSlice"     : slice(0, None, 2),\
                      "varyMaxMin" : True             ,\
                      "subPolAvg"  : True             ,\
@@ -888,6 +885,8 @@ class GenericScanDriver(object):
             self._turbulencePostOptions =\
                     {"driverName" : "single2DDriver"  ,\
                      "tSlice"     : slice(0, None, 10),\
+                     "varName"    : "n"               ,\
+                     "pltName"    : "n"               ,\
                      **self._fieldPlotterOptions
                     }
 
@@ -943,7 +942,11 @@ class GenericScanDriver(object):
             setattr(self, flag, value)
 
         # Update dicts
-        self._fieldPlotterOptions.update(self._commonPlotterOptions)
+        self._fieldPlotterOptions  .update(self._commonPlotterOptions)
+        self._initPostOptions      .update(self._commonPlotterOptions)
+        self._expandPostOptions    .update(self._commonPlotterOptions)
+        self._linearPostOptions    .update(self._commonPlotterOptions)
+        self._turbulencePostOptions.update(self._commonPlotterOptions)
         self._commonRunnerOptions["directory"] = self._directory
 
         # Call the runners
@@ -1186,27 +1189,27 @@ class GenericScanDriver(object):
             # PBS options
             BOUT_run_name         = BOUT_run_name        ,\
             post_process_run_name = post_process_run_name,\
-            **self._linearPBSOptions                     ,\
             # Common options
+            **self._linearPBSOptions                     ,\
             **self._commonRunnerOptions                  ,\
                     )
 
         self._linear_dmp_folders, self._linear_PBS_ids = \
         self._linearRun.execute_runs(\
-                post_processing_function = curPostProcessor,\
-                # Declare dependencies
-                job_dependencies = self._expand_PBS_ids,\
-                # This function will be called every time after
-                # performing a run
-                post_process_after_every_run = True,\
-                # Below are the kwargs arguments being passed to
-                # the post processing function
-                # Switches
-                **self._linearPostOptions             ,\
-                # Below are the kwargs given to the
-                # restartFromFunc
-                aScanPath      = self._expandAScanPath,\
-                scanParameters = self._scanParameters ,\
+            post_processing_function = curPostProcessor,\
+            # Declare dependencies
+            job_dependencies = self._expand_PBS_ids,\
+            # This function will be called every time after
+            # performing a run
+            post_process_after_every_run = True,\
+            # Below are the kwargs arguments being passed to
+            # the post processing function
+            theRunName        = theRunName        ,\
+            **self._linearPostOptions             ,\
+            # Below are the kwargs given to the
+            # restartFromFunc
+            aScanPath      = self._expandAScanPath,\
+            scanParameters = self._scanParameters ,\
                 )
 
         if self._boutRunnersNoise:
@@ -1268,16 +1271,12 @@ class GenericScanDriver(object):
             post_process_after_every_run = True,\
             # Below are the kwargs arguments being passed to
             # the post processing function
-            # Switches
-            theRunName     = theRunName      ,\
-            varName        = self._varName   ,\
-            pltName        = self._pltName   ,\
+            theRunName        = theRunName        ,\
+            **self._turbulencePostOptions         ,\
             # Below are the kwargs given to the
             # restartFromFunc
-            aScanPath      = self._turboAScanPath,\
-            scanParameters = self._scanParameters,\
-            # Common kwargs
-            **self._fieldPlotterOptions          ,\
+            aScanPath      = self._initAScanPath  ,\
+            scanParameters = self._scanParameters ,\
                                         )
         #}}}
      #}}}
@@ -1310,7 +1309,6 @@ class GenericScanDriver(object):
             # StatsAndSignalsDrivers input
             paths            = collectionFolders  ,\
             # DriversProbes input
-            var              = self._var               ,\
             scanParam        = scanParam               ,\
             steadyStatePaths = self._expand_dmp_folders,\
             **self._probesPlotterOptions               ,\
@@ -1348,7 +1346,6 @@ class GenericScanDriver(object):
             # StatsAndSignalsDrivers input
             paths             = collectionFolders      ,\
             # DriversProbes input
-            var               = self._var              ,\
             **self._probesPlotterOptions               ,\
             tIndSaturatedTurb = self.tIndSaturatedTurb ,\
             # The steady state path will be
