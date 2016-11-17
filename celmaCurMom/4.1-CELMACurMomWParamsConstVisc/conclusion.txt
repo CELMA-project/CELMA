@@ -36,13 +36,27 @@ a1-KiwiFlatZ  - Runs successfully, but unsatisfactory ring modes
 
 a2 series - Needs documentation
 
+Seeded lnN 1e-5
 a3-KiwiFlat-scanZTi_0 - Runs almost successfully, nice fluctuation patterns
+    !!!!!!!!! POTENTIAL PITFALL !!!!!!!!!!!!!
+              Looks like have super omci speeds of perturbation
+              Could be that perturbation sitting on top of rotating plasma
     z =  4: Proper modes
     z =  5: Proper modes
     z =  6: Proper modes
     z =  8: Proper modes
     z = 10: Outer ring mode
     z = 12: Outer ring mode
+
+Seeded vortD 1e-7
+a2-KiwiFlatMagField   - !!!!!! Works ok for linear modes (code still crashes though)
+a3-KiwiFlat-scanZTi_0 - Runs almost successfully, nice fluctuation patterns
+    z = 10: Still some outer modes with vortD 1e-7
+    z = 12: Still ring mode with vortD 1e-7
+
+Seeded vortD 1e-5
+    z = 10: Still some outer modes, but good mode becomes dominant
+    z = 12: Outer ring mode (not the thin one) dominant
 
 TODO:
 1. Check if crashes can be explained by energy overshoot
