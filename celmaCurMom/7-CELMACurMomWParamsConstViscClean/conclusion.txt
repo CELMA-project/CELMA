@@ -1,0 +1,8 @@
+Copied from 4.1-CELMACurMomWParamsConstVisc
+
+- As 4.1, but non-bloated
+- Renamed a2 and a3
+
+
+Results:
+========
