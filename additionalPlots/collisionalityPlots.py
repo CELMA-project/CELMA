@@ -8,9 +8,9 @@ Helander, P. and Sigmar, D.J.
 Collisional Transport in Magnetized Plasmas
 """
 
+from parameters import Parameters
 import numpy as np
 from numpy import log, sqrt
-import scipy.constants as cst
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator
@@ -112,68 +112,8 @@ def savePlot(fig, name):
                 )
 #}}}
 
-#{{{calcCoulombLog
-def calcCoulombLog(Te0, n0):
-    coulombLog = log(12.0*pi*(e0*Te0)**(3/2)/(sqrt(n0)*q**3))
-    return coulombLog
-#}}}
-
-#{{{calcVThE
-def calcVThE(Te0):
-    vThE = sqrt(2.0*Te0/me)
-    return vThE
-#}}}
-
-#{{{calcVThI
-def calcVThI(Ti0):
-    vThE = sqrt(2.0*Ti0/mi)
-    return vThE
-#}}}
-
-#{{{calcNuEI
-def calcNuEI(ne0, coulombLog, vThE):
-    nuEI=1.0/(4.0*pi)*(q**4.0*ne0/(e0**2.0*me**2.0))*coulombLog*(1.0/vThE**3.0)
-    return nuEI
-#}}}
-
-#{{{calcNuII
-def calcNuII(ne0, coulombLog, vThI):
-    nuII=1.0/(2.0*pi)*(q**4.0*ne0/(e0**2.0*mi**2.0))*coulombLog*(1.0/vThI**3.0)
-    return nuII
-#}}}
-
-#{{{calcEtaI
-def calcEtaI(n, Ti, tauI, omCI):
-    etaI = {}
-
-    etaI['\eta_{{i,0}}'] = 0.96*n*Ti*tauI
-    etaI['\eta_{{i,1}}'] = 3.0*n*Ti/(10.0*(omCI**2.0)*tauI)
-    etaI['\eta_{{i,2}}'] = 4.0*etaI['\eta_{{i,1}}']
-    etaI['\eta_{{i,3}}'] = n*Ti/(2.0*omCI)
-    etaI['\eta_{{i,4}}'] = 2.0*etaI['\eta_{{i,3}}']
-
-    return etaI
-#}}}
-
-#{{{calcEtaE
-def calcEtaE(n, Te, tauE, omCe):
-    etaE = {}
-
-    etaE['\eta_{{e,0}}'] = 0.73*n*Te*tauE
-    etaE['\eta_{{e,1}}'] = 0.51*n*Te/(omCE**2.0*tauE)
-    etaE['\eta_{{e,2}}'] = 4.0*etaE['\eta_{{e,1}}']
-    etaE['\eta_{{e,3}}'] = n*Te/(2.0*omCE)
-    etaE['\eta_{{e,4}}'] = 2.0*etaE['\eta_{{e,3}}']
-
-    return etaE
-#}}}
-
-# Aliases
-q   = cst.e
-e0  = cst.epsilon_0
-me  = cst.m_e
-mi  = cst.m_p
-pi  = np.pi
+mi = cst.m_p
+p = Parameters(cst.m_p)
 
 B0s   = [1, 1e-1, 1e-2]
 Ti0EV = 7.0
@@ -201,8 +141,8 @@ axEtaITScan  = figEtaITScan.add_subplot(111)
 etaE = {}
 
 for B0, ls in zip(B0s, B0LineType):
-    omCI = q*B0/mi
-    omCE = q*B0/me
+    omCI = p.calcOmCI(B0)
+    omCE = p.calcOmCE(B0)
     N    = 3.0
 
     # Convert to J
@@ -215,25 +155,25 @@ for B0, ls in zip(B0s, B0LineType):
     Te0 = Te0EV*cst.eV
 
     # Calculate normalization variables
-    cS   = sqrt((Te0+((N+2.0)/N)*Ti0)/mi)
-    rhoS = cS/omCI
+    cS   = p.calcCS(Te0, Ti0, N)
+    rhoS = p.calcRhoS(cS, omCI)
 
     # Caclulate collisionalities
-    coulombLog = calcCoulombLog(Te0, n0s)
-    vThE = calcVThE(Te0)
-    vThI = calcVThI(Ti0)
-    nuEI = calcNuEI(n0s, coulombLog, vThE)
-    nuII = calcNuII(n0s, coulombLog, vThI)
+    coulombLog = p.calcCoulombLog(Te0, n0s)
+    vThE = p.calcVThE(Te0)
+    vThI = p.calcVThI(Ti0)
+    nuEI = p.calcNuEI(n0s, coulombLog, vThE)
+    nuII = p.calcNuII(n0s, coulombLog, vThI)
     tauI = 1.0/(sqrt(2.0)*nuII)
     tauE = 1.0/nuEI
 
     # Caclulate ion viscosities
-    etaI = calcEtaI(n0s, Ti0, tauI, omCI)
+    etaI = p.calcEtaI(n0s, Ti0, tauI, omCI)
     sortedEtaIKeys = list(etaI.keys())
     sortedEtaIKeys.sort()
 
     # Caclulate electron viscosities
-    etaE = calcEtaE(n0s, Te0, tauE, omCE)
+    etaE = p.calcEtaE(n0s, Te0, tauE, omCE)
     sortedEtaEKeys = list(etaE.keys())
     sortedEtaEKeys.sort()
 
@@ -309,25 +249,25 @@ for B0, ls in zip(B0s, B0LineType):
     Te0s = Te0sEV*cst.eV
 
     # Calculate normalization variables
-    cS   = sqrt((Te0s+((N+2.0)/N)*Ti0)/mi)
-    rhoS = cS/omCI
+    cS   = p.calcCS(Te0, Ti0, N)
+    rhoS = p.calcRhoS(cS, omCI)
 
     # Caclulate collisionalities
-    coulombLog = calcCoulombLog(Te0s, n0)
-    vThE = calcVThE(Te0s)
-    vThI = calcVThI(Ti0)
-    nuEI = calcNuEI(n0, coulombLog, vThE)
-    nuII = calcNuII(n0, coulombLog, vThI)
+    coulombLog = p.calcCoulombLog(Te0s, n0)
+    vThE = p.calcVThE(Te0s)
+    vThI = p.calcVThI(Ti0)
+    nuEI = p.calcNuEI(n0, coulombLog, vThE)
+    nuII = p.calcNuII(n0, coulombLog, vThI)
     tauI = 1.0/(sqrt(2.0)*nuII)
     tauE = 1.0/nuEI
 
     # Caclulate ion viscosities
-    etaI = calcEtaI(n0, Ti0, tauI, omCI)
+    etaI = p.calcEtaI(n0, Ti0, tauI, omCI)
     sortedEtaIKeys = list(etaI.keys())
     sortedEtaIKeys.sort()
 
     # Caclulate electron viscosities
-    etaE = calcEtaE(n0s, Te0s, tauE, omCE)
+    etaE = p.calcEtaE(n0s, Te0s, tauE, omCE)
     sortedEtaEKeys = list(etaE.keys())
     sortedEtaEKeys.sort()
 
