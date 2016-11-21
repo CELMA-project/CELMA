@@ -4,7 +4,7 @@
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common')
+commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -19,9 +19,9 @@ Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
 Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
-              ('input', 'B0', B0),\
-              ('geom' , 'Lx', Lx),\
-              ('geom' , 'Ly', Ly),\
+              ("input", "B0", B0),\
+              ("geom" , "Lx", Lx),\
+              ("geom" , "Ly", Ly),\
              )
 
 directory = "magFieldScan"
@@ -38,7 +38,7 @@ scanB0.setMainOptions(\
 
 scanB0.setLinearOptions(timestep              = 1         ,\
                         nout                  = 3000      ,\
-                        BOUT_walltime         = '24:00:00',\
+                        BOUT_walltime         = "24:00:00",\
                         )
 
 # Set the flags
