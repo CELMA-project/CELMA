@@ -5,7 +5,7 @@ Contains the restartFromFunc and GenericScanDriver
 """
 
 from .postBoutRunner import postBoutRunner
-from bout_runners import PBS_runner
+from bout_runners import basic_runner, PBS_runner
 import re
 import inspect
 import os
@@ -106,10 +106,15 @@ class GenericScanDriver(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self):
+    def __init__(self, runner = PBS_runner):
         #{{{docstring
         """
-        Sets the default options.
+        Sets the default options and selects the runner.
+
+        Parameters
+        ----------
+        runner : [basic_runner | PBS_runner]
+            The runner to use
         """
         #}}}
         # Set warning flags
@@ -130,6 +135,8 @@ class GenericScanDriver(object):
                     "turbulenceOptions"    : False,\
                     "turbulencePostOptions": False,\
                 }
+
+        self._runner = runner
         #}}}
 
     #{{{setMainOptions
@@ -935,6 +942,17 @@ class GenericScanDriver(object):
             # Call the function from their names
             getattr(self, "set{}".format(key[0].upper()+key[1:]))()
 
+        if self._runner == basic_runner:
+            # Remove PBS option
+            members = tuple(member for member in dir(self) if "PBS" in member)
+            for member in members:
+                setattr(self, member, {})
+            self._commonRunnerOptions.pop("BOUT_nodes")
+            self._commonRunnerOptions.pop("BOUT_ppn")
+            self._commonRunnerOptions.pop("post_process_nproc")
+            self._commonRunnerOptions.pop("post_process_nodes")
+            self._commonRunnerOptions.pop("post_process_ppn")
+
         # Make dictionary to variables
         for (flag, value) in self._postProcessingFlags.items():
             setattr(self, flag, value)
@@ -1029,12 +1047,15 @@ class GenericScanDriver(object):
         #Switches
         useHyperViscAzVortD = (False,)
         # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = "post" + theRunName.capitalize()
+        if self._runner == PBS_runner:
+            self._initPBSOptions.update(\
+                    {"post_process_run_name":"post" + theRunName.capitalize(),
+                     "BOUT_run_name"        : theRunName
+                    })
         #}}}
 
         #{{{Run and post processing
-        initRunner = PBS_runner(\
+        initRunner = self._runner(\
             # Shall we make
             make       = self._make,\
             # Set spatial domain
@@ -1051,8 +1072,6 @@ class GenericScanDriver(object):
                          ),\
             series_add = self._series_add,\
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
             **self._initPBSOptions                       ,\
             # Common options
             **self._commonRunnerOptions                  ,\
@@ -1090,12 +1109,15 @@ class GenericScanDriver(object):
         # Name
         theRunName = self._theRunName + "-1-expand"
         # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = "post" + theRunName.capitalize()
+        if self._runner == PBS_runner:
+            self._expandPBSOptions.update(\
+                    {"post_process_run_name":"post" + theRunName.capitalize(),
+                     "BOUT_run_name"        : theRunName
+                    })
         #}}}
 
         #{{{Run and post processing
-        expandRunner = PBS_runner(\
+        expandRunner = self._runner(\
             # Expand options
             **self._expandOptions         ,\
             # Set restart options
@@ -1109,8 +1131,6 @@ class GenericScanDriver(object):
                          ),\
             series_add = self._series_add                ,\
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
             **self._expandPBSOptions                     ,\
             # Common options
             **self._commonRunnerOptions                  ,\
@@ -1165,11 +1185,14 @@ class GenericScanDriver(object):
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = "post" + theRunName.capitalize()
+        if self._runner == PBS_runner:
+            self._linearPBSOptions.update(\
+                    {"post_process_run_name":"post" + theRunName.capitalize(),
+                     "BOUT_run_name"        : theRunName
+                    })
         #}}}
         #{{{Run and post processing
-        self._linearRun = PBS_runner(\
+        self._linearRun = self._runner(\
             # Linear options
             **self._linearOptions         ,\
             # Set restart options
@@ -1187,10 +1210,8 @@ class GenericScanDriver(object):
             # Set eventual noise
             add_noise             = add_noise            ,\
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
-            # Common options
             **self._linearPBSOptions                     ,\
+            # Common options
             **self._commonRunnerOptions                  ,\
                     )
 
@@ -1235,13 +1256,16 @@ class GenericScanDriver(object):
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
-        BOUT_run_name         = theRunName
-        post_process_run_name = "post" + theRunName.capitalize()
+        if self._runner == PBS_runner:
+            self._turbulencePBSOptions.update(\
+                    {"post_process_run_name":"post" + theRunName.capitalize(),
+                     "BOUT_run_name"        : theRunName
+                    })
         # Set aScanPath
         self._linearAScanPath  = self._linear_dmp_folders[0]
         #}}}
         #{{{Run and post processing
-        self._turboRun = PBS_runner(\
+        self._turboRun = self._runner(\
             # Set turbulence options
             **self._turbulenceOptions       ,\
             # Set restart options
@@ -1254,8 +1278,6 @@ class GenericScanDriver(object):
                          ),\
             series_add = self._series_add                ,\
             # PBS options
-            BOUT_run_name         = BOUT_run_name        ,\
-            post_process_run_name = post_process_run_name,\
             **self._turbulencePBSOptions                 ,\
             # Common options
             **self._commonRunnerOptions                  ,\
@@ -1371,10 +1393,11 @@ class GenericScanDriver(object):
         self._profileRunOptions["additional"].append(("tag",theRunName,0))
         self._profileRunOptions["additional"] =\
                 tuple(self._profileRunOptions["additional"])
-        self._profileRunOptions["BOUT_run_name"] = theRunName
+        if self._runner == PBS_runner:
+            self._profileRunOptions["BOUT_run_name"] = theRunName
 
         # Create the runner
-        profileRun = PBS_runner(**self._profileRunOptions)
+        profileRun = self._runner(**self._profileRunOptions)
         # Execute
         _, _ = profileRun.execute_runs(\
             post_processing_function = curPostProcessor,\
@@ -1417,9 +1440,10 @@ class GenericScanDriver(object):
         self._profileRunOptions["additional"].append(("tag",theRunName,0))
         self._profileRunOptions["additional"] =\
              tuple(self._profileRunOptions["additional"])
-        self._profileRunOptions["BOUT_run_name"] = theRunName
+        if self._runner == PBS_runner:
+            self._profileRunOptions["BOUT_run_name"] = theRunName
         # Create the runner
-        profileRun = PBS_runner(**self._profileRunOptions)
+        profileRun = self._runner(**self._profileRunOptions)
         # Execute
         _, _ = profileRun.execute_runs(\
             post_processing_function = curPostProcessor,\
