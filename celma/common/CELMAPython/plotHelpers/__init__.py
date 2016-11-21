@@ -10,7 +10,12 @@ import matplotlib.pyplot as plt
 
 # Set the plot style for all plots
 titleSize = 30
-plt.rc("font",   size      = 30)
+# WARNING: This makes it slow, but is needed in order not to get
+#          UserWarning: findfont: Font family ['serif'] not found
+plt.rc("text",   usetex=True)
+
+font = {"family":"serif","size":30, "serif": ["computer modern roman"]}
+plt.rc("font",   **font)
 plt.rc("axes",   labelsize = 25, titlesize = titleSize)
 plt.rc("xtick",  labelsize = 25)
 plt.rc("ytick",  labelsize = 25)
