@@ -1238,7 +1238,7 @@ class GenericScanDriver(object):
         BOUT_run_name         = theRunName
         post_process_run_name = "post" + theRunName.capitalize()
         # Set aScanPath
-        self._turboAScanPath  = self._linear_dmp_folders[0]
+        self._linearAScanPath  = self._linear_dmp_folders[0]
         #}}}
         #{{{Run and post processing
         self._turboRun = PBS_runner(\
@@ -1275,7 +1275,7 @@ class GenericScanDriver(object):
             **self._turbulencePostOptions         ,\
             # Below are the kwargs given to the
             # restartFromFunc
-            aScanPath      = self._initAScanPath  ,\
+            aScanPath      = self._linearAScanPath ,\
             scanParameters = self._scanParameters ,\
                                         )
         #}}}
@@ -1314,8 +1314,8 @@ class GenericScanDriver(object):
             **self._probesPlotterOptions               ,\
             # Below are the kwargs given to the
             # restartFromFunc
-            aScanPath      = self._turboAScanPath ,\
-            scanParameters = self._scanParameters ,\
+            aScanPath      = self._linearAScanPath ,\
+            scanParameters = self._scanParameters  ,\
                                     )
     #}}}
 
