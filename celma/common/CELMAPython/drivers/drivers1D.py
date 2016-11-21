@@ -213,7 +213,7 @@ class Drivers1D(FieldPlottersDriver):
                          zSlice            = self._zSlice           ,\
                          tSlice            = self._tSlice           ,\
                          convertToPhysical = self._convertToPhysical,\
-                         subPolAvg         = self._subPolAvg        ,\
+                         fluctuation         = self._fluctuation        ,\
                          showPlot          = self._showPlot         ,\
                          savePlot          = self._savePlot         ,\
                          saveFolder        = self._saveFolder       ,\

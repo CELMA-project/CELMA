@@ -23,7 +23,7 @@ class PostProcessorDriver(object):
     def __init__(self                     ,\
                  dmp_folder               ,\
                  convertToPhysical = False,\
-                 subPolAvg         = False,\
+                 fluctuation         = False,\
                  showPlot          = False,\
                  savePlot          = True ,\
                  saveFolder        = None ,\
@@ -43,7 +43,7 @@ class PostProcessorDriver(object):
             bout_runners.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
-        subPolAvg : bool
+        fluctuation : bool
             If the poloidal average should be subtracted from the data
         showPlot : bool
             If the plot should be displayed.
@@ -71,7 +71,7 @@ class PostProcessorDriver(object):
         # Set the member data
         self._dmp_folders        = dmp_folder
         self._convertToPhysical = convertToPhysical
-        self._subPolAvg         = subPolAvg
+        self._fluctuation         = fluctuation
         self._showPlot          = showPlot
         self._savePlot          = savePlot
         self._saveFolder        = saveFolder
@@ -110,7 +110,7 @@ class PostProcessorDriver(object):
                     "visualization{}".format(visualizationType),\
                     saveFolder,\
                     self._timeFolder]
-        if self._subPolAvg:
+        if self._fluctuation:
             saveDirs.append("fluctuation")
         self._savePath = ""
         for saveDir in saveDirs:
@@ -164,24 +164,24 @@ class PostProcessorDriver(object):
     #{{{_setSubPolAvg
     def _setSubPolAvg(self, value):
         """
-        Sets subPolAvg and modifies savePath
+        Sets fluctuation and modifies savePath
 
         Parameters
         ----------
         value : bool
-            Value to set to subPolAvg
+            Value to set to fluctuation
         """
 
-        if self._subPolAvg != value:
-            if self._subPolAvg == True and value == False:
+        if self._fluctuation != value:
+            if self._fluctuation == True and value == False:
                 # Remove fluctuation from the path
                 paths = tuple(os.path.split(self._savePath))
                 paths.remove("fluctuation")
                 self._savePath = os.path.join(*paths)
-                self._subPolAvg = value
-            elif self._subPolAvg == False and value == True:
+                self._fluctuation = value
+            elif self._fluctuation == False and value == True:
                 self._savePath = os.path.join(self._savePath, "fluctuation")
-                self._subPolAvg = value
+                self._fluctuation = value
 
             # Make dir if not exists
             if not os.path.exists(self._savePath):
