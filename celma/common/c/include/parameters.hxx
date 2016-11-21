@@ -28,6 +28,8 @@ class Parameters
         BoutReal const S_ ;     //<! Particle source [m^-3s^-1]
         BoutReal const nn_;     //<! Neutral density [m^-3]
 
+        bool const warn_;       //<! Warnings instead of exceptions
+
         // Converted
         BoutReal Ti0J;
         BoutReal Te0J;
@@ -102,7 +104,8 @@ class Parameters
                    BoutReal const &Ti0,
                    BoutReal const &B0,
                    BoutReal const &S,
-                   BoutReal const &nn
+                   BoutReal const &nn,
+                   bool     const &warningForException
                    );
 
         //! Prints the table
