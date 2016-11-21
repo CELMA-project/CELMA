@@ -122,7 +122,7 @@ class Drivers2D(FieldPlottersDriver):
                          "zSlice"            : self._zSlice           ,\
                          "tSlice"            : self._tSlice           ,\
                          "maxGradRhoFolder"  : self._maxGradRhoFolder ,\
-                         "subPolAvg"         : self._subPolAvg        ,\
+                         "fluctuation"         : self._fluctuation        ,\
                          "convertToPhysical" : self._convertToPhysical,\
                          "showPlot"          : self._showPlot         ,\
                          "savePlot"          : self._savePlot         ,\

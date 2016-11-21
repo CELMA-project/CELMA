@@ -400,7 +400,7 @@ post_process_queue    = 'workq'
 # Post processing options
 tSlice     = slice(0, None, 2)
 varyMaxMin = True
-subPolAvg  = True
+fluctuation  = True
 mode       = "perpAndPol"
 #}}}
 #{{{Run and post processing
@@ -444,7 +444,7 @@ linear_dmp_folders, PBS_ids = linearRun.execute_runs(\
                                  driverName       = "single2DDriver",\
                                  theRunName       = theRunName      ,\
                                  tSlice           = tSlice          ,\
-                                 subPolAvg        = subPolAvg       ,\
+                                 fluctuation        = fluctuation       ,\
                                  varName          = varName         ,\
                                  pltName          = pltName         ,\
                                  varyMaxMin       = varyMaxMin      ,\
