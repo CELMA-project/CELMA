@@ -48,7 +48,7 @@ class Plot(object):
                  zSlice            = slice(0,None),\
                  tSlice            = None         ,\
                  convertToPhysical = False        ,\
-                 subPolAvg         = False        ,\
+                 fluctuation         = False        ,\
                  showPlot          = False        ,\
                  savePlot          = True         ,\
                  saveFolder        = None         ,\
@@ -85,7 +85,7 @@ class Plot(object):
             the largest gradient in rho direction.
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
-        subPolAvg : bool
+        fluctuation : bool
             Whether or not the poloidal average should be.
             subtracted from the data.
         showPlot : bool
@@ -113,7 +113,7 @@ class Plot(object):
         self._showPlot   = showPlot
         self._savePlot   = savePlot
         self._saveFolder = saveFolder
-        self._subPolAvg  = subPolAvg
+        self._fluctuation  = fluctuation
         self._extension  = extension
         self._writer     = writer
 
@@ -179,7 +179,7 @@ class Plot(object):
                                  )
 
         # Set colormap
-        if self._subPolAvg:
+        if self._fluctuation:
             self._cmap = divCMap
         else:
             self._cmap = seqCMap
@@ -544,7 +544,7 @@ class Plot1D(Plot):
             Line object to set the field to
         """
 
-        if self._subPolAvg:
+        if self._fluctuation:
             # We need to collect the whole field if we would like to do
             # poloidal averages
             try:
@@ -855,7 +855,7 @@ class Plot2D(Plot):
             if self._tSlice.step is not None:
                 self._variable = self._variable[::self._tSlice.step]
 
-        if self._subPolAvg:
+        if self._fluctuation:
             self._variable = self._variable - polAvg(self._variable)
 
         # Add the last theta slice
@@ -875,7 +875,7 @@ class Plot2D(Plot):
         if self._varMin == None:
             self._varMin = np.min(self._variable)
         # Diverging colormap for fluctuations
-        if self._subPolAvg:
+        if self._fluctuation:
             self._varMax = np.max([np.abs(self._varMax), np.abs(self._varMin)])
             self._varMin = - self._varMax
 
@@ -1076,7 +1076,7 @@ class Plot2D(Plot):
             self._varMin = np.min(minList)
 
             # Diverging colormap for fluctuations
-            if self._subPolAvg:
+            if self._fluctuation:
                 self._varMax =\
                         np.max([np.abs(self._varMax), np.abs(self._varMin)])
                 self._varMin = - self._varMax
@@ -1335,7 +1335,7 @@ class Plot2D(Plot):
         # Clear the axis
         # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
         self._cBarAx.cla()
-        if self._subPolAvg:
+        if self._fluctuation:
             # Create the ticks (11 with 0 in the center)
             nTicks = 11
             ticks  = np.linspace(self._varMin, self._varMax, nTicks)

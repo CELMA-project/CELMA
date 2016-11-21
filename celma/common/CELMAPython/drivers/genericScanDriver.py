@@ -775,7 +775,7 @@ class GenericScanDriver(object):
                      "pltName"    : "n"              ,\
                      "tSlice"     : slice(0, None, 2),\
                      "varyMaxMin" : True             ,\
-                     "subPolAvg"  : True             ,\
+                     "fluctuation"  : True             ,\
                      "mode"       : "perpAndPol"     ,\
                      **self._fieldPlotterOptions     ,\
                     }
