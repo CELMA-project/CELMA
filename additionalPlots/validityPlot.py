@@ -27,14 +27,20 @@ from CELMAPython.plotHelpers import plotNumberFormatter, PlotHelper
 
 showPlot  = True
 extention = "pdf"
+# Can be Ar or H
+gas = "H"
+B   = 1e-1
 
 me = cst.m_e
 q  = cst.e
 e0 = cst.epsilon_0
 pi = np.pi
 
-mi   = 39.948*cst.u
-B    = 1e-2
+if gas == "H":
+    mi = cst.m_p
+elif gas == "Ar":
+    mi = 39.948*cst.u
+
 TeEV = np.linspace(1, 15, 20)
 TeJ  = TeEV*cst.eV
 
@@ -78,7 +84,7 @@ ax.fill_between(TeEV, n, facecolor="b", edgecolor="b", alpha=0.5)
 ax.set_xlim((np.min(TeEV), np.max(TeEV)))
 ax.set_xlabel("Te [eV]")
 ax.set_ylabel("n [$m^{-3}$]")
-fig.suptitle("Argon at B$={}$".format(B))
+fig.suptitle("{} at B$={}$".format(gas, B))
 
 xAnnotate = np.max(TeEV)/3
 yAnnotate = np.max(n)*3/4
