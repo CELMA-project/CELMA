@@ -6,3 +6,22 @@ Copied from 4.1-CELMACurMomWParamsConstVisc
 
 Results:
 ========
+CSDXMagFieldScan - Burin et al PoP 2005
+Running with same om_ci and rho_S as Ar
+Want om_cAr = om_cH
+ qB_Ar/m_Ar = qB_H/m_H
+        B_H = B_Ar*m_H/m_Ar
+        B_H = B_Ar*0.025231
+=> heavily breaks the drift approximation
+Idea:
+1. Could run with drift approximation break
+2. Could decrease n0, increase Te
+3. Could just run with same parameters as article, using H
+
+These papers breaks the drift approximation
+Naulin
+Sasaki
+Holland (Tynan et al)  (HW) - See Korsholm
+Kasuya
+Maybe D'Ippolito SOLT?
+Kasuya 2008
