@@ -51,14 +51,6 @@ def get_metric():
 def set_plot_style():
     """ Defines the style for the plots"""
 
-    title_size = 30
-    plt.rc("font", size = 30)
-    plt.rc("axes", labelsize = 25, titlesize = title_size)
-    plt.rc("xtick", labelsize = 25)
-    plt.rc("ytick", labelsize = 25)
-    plt.rc("legend", fontsize = 30)
-    plt.rc("lines", linewidth = 3.0)
-    plt.rc("lines", markersize = 20.0)
     plt_size = (10, 7)
     n_grid_lines = 400
 
