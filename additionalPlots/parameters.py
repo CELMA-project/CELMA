@@ -36,8 +36,8 @@ class Parameters(object):
 
     #{{{calcVThI
     def calcVThI(self, Ti0):
-        vThE = sqrt(2.0*Ti0)
-        return vThE
+        vThI = sqrt(2.0*Ti0/self.mi)
+        return vThI
     #}}}
 
     #{{{calcNuEI
