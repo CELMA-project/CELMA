@@ -9,7 +9,8 @@
  * Returns the numerical equivalence of
  *
  * \f{eqnarray}{
- *      \frac{\int_0^{2\pi} f d\theta}{\int_0^{2\pi} d\theta}
+ *      \frac{\int_0^{2\pi} f \rho d\theta}{\int_0^{2\pi} \rho d\theta}
+ *      = \frac{\int_0^{2\pi} f d\theta}{\int_0^{2\pi} d\theta}
  *      = \frac{\int_0^{2\pi} f d\theta}{2\pi}
  * \f}
  *
