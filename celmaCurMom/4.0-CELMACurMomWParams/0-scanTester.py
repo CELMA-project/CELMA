@@ -350,7 +350,7 @@ theRunName = "0-TestScan-2-linearPhase1"
 # Post processing options
 tSlice           = slice(-2, None)
 varyMaxMin       = True
-subPolAvg        = True
+fluctuation        = True
 mode             = "perpAndPol"
 #}}}
 #{{{Run and post processing
@@ -386,7 +386,7 @@ linear_dmp_folders, _ = linearRun.execute_runs(\
                                  driverName       = "single2DDriver",\
                                  theRunName       = theRunName      ,\
                                  tSlice           = tSlice          ,\
-                                 subPolAvg        = subPolAvg       ,\
+                                 fluctuation        = fluctuation       ,\
                                  varName          = varName         ,\
                                  pltName          = pltName         ,\
                                  varyMaxMin       = varyMaxMin      ,\
