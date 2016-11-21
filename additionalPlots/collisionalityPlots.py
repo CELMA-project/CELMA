@@ -14,39 +14,34 @@ from numpy import log, sqrt
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.ticker import MaxNLocator
+import scipy.constants as cst
 
-showPlots = False
-savePlots = ".pdf"
+import os, sys
+# If we add to sys.path, then it must be an absolute path
+commonDir = os.path.abspath("./../celma/common")
+# Sys path is a list of system paths
+sys.path.append(commonDir)
+
+from CELMAPython.plotHelpers import plotNumberFormatter, PlotHelper
+
+showPlots = True
+savePlots = "png"
 
 #{{{Common for simple plots
 # Set the plotting style
-title_size = 30
 title_height = 1.02
-plt.rc("font", size = 30)
-plt.rc("axes", labelsize = 25, titlesize = title_size)
-plt.rc("xtick", labelsize = 25)
-plt.rc("ytick", labelsize = 25)
-plt.rc("legend", fontsize = 30)
-plt.rc("lines", linewidth = 3.0)
-plt.rc("lines", markersize = 20.0)
-plt_size = (10, 7)
 fig_no = 1
-# Try to make a figure with the current backend
-try:
-    fig = plt.figure(fig_no, figsize = plt_size)
-except:
-    # Switch if a backend needs the display
-    plt.switch_backend('Agg')
-    fig = plt.figure(fig_no, figsize = plt_size)
+plt_size = (10, 7)
+title_size = 30
 #}}}}
 
 #{{{setNScanAxes
 def setNScanAxes(fig, ax, yLabel, Te0EV):
     ax.set_xlabel(r"$n [\mathrm{m}^{-3}]$")
     ax.set_ylabel(yLabel)
-    title = r'$Te=${} $[\mathrm{{eV}}]$'.format(plotNumberFormatter(Te0EV))
+    title = r"$Te=${} $[\mathrm{{eV}}]$".format(plotNumberFormatter(Te0EV, None))
     fig.suptitle(title, y=title_height)
-    makeAxPretty(ax)
+    PlotHelper.makePlotPretty(ax, rotation=45)
 
     # Includes the xlabel if outside
     fig.tight_layout(rect=[0.001,0.001,1,1])
@@ -57,70 +52,23 @@ def setTScanAxes(fig, ax, yLabel, n0):
     # Set axis label
     ax.set_xlabel(r"$Te [\mathrm{eV}]$")
     ax.set_ylabel(yLabel)
-    title = r'$n=${} $[\mathrm{{m}}^{{-3}}]$'.format(plotNumberFormatter(n0))
+    title = r"$n=${} $[\mathrm{{m}}^{{-3}}]$".format(plotNumberFormatter(n0, None))
     fig.suptitle(title, y=title_height)
-    makeAxPretty(ax)
+    PlotHelper.makePlotPretty(ax, rotation=45)
 
     # Includes the xlabel if outside
     fig.tight_layout(rect=[0.001,0.001,1,1])
 #}}}
 
-#{{{plotNumberFormatter
-def plotNumberFormatter(val):
-    """
-    Formatting numbers in the plot
-
-    Input
-    val - The value
-    """
-
-    tickString = '${:.3g}'.format(val)
-    if "e+" in tickString:
-        tickString = tickString.replace('e+', r'\cdot 10^{')
-        tickString += '}$'
-    elif "e-" in tickString:
-        tickString = tickString.replace('e-', r'\cdot 10^{-')
-        tickString += '}$'
-    else:
-        tickString += '$'
-
-    return tickString
-#}}}
-
-#{{{makeAxPretty
-def makeAxPretty(ax):
-    # Reset the tick labels
-    tickLabels = [plotNumberFormatter(el) for el in ax.get_xticks().tolist()]
-    ax.set_xticklabels(tickLabels, rotation='vertical')
-    tickLabels = [plotNumberFormatter(el) for el in ax.get_yticks().tolist()]
-    ax.set_yticklabels(tickLabels)
-    # Plot the legend
-    leg = ax.legend(loc="best", fancybox = True, numpoints=1)
-    leg.get_frame().set_alpha(0.5)
-    # Plot the grid
-    ax.grid()
-    # Make sure no collision between the ticks
-    ax.xaxis.set_major_locator(MaxNLocator(prune='lower'))
-#}}}
-
-#{{{savePlot
-def savePlot(fig, name):
-    fig.savefig(name + savePlots,\
-                transparent = True    ,\
-                bbox_inches = 'tight' ,\
-                pad_inches  = 0       ,\
-                )
-#}}}
-
 mi = cst.m_p
-p = Parameters(cst.m_p)
+p = Parameters(mi)
 
 B0s   = [1, 1e-1, 1e-2]
 Ti0EV = 7.0
 n0s    = np.linspace(1e16, 1e18, 200)
 Te0sEV = np.linspace(7, 21, 200)
 
-B0LineType = ['solid', 'dashed', 'dotted', 'dash_dot']
+B0LineType = ["solid", "dashed", "dotted", "dash_dot"]
 # One color for each eta
 colors = cm.rainbow(np.linspace(0, 1, 5))
 
@@ -198,7 +146,7 @@ for B0, ls in zip(B0s, B0LineType):
     setNScanAxes(figNuEINScan, axNuEINScan, r"$\nu_{ei}/\omega_{ci}$", Te0EV)
 
     if savePlots:
-        savePlot(figNuEINScan, "niEINScan")
+        PlotHelper.savePlot(figNuEINScan, "niEINScan.{}".format(savePlots))
     #}}}
 
     #{{{etaI plot
@@ -214,11 +162,11 @@ for B0, ls in zip(B0s, B0LineType):
                          label = label)
 
     # Set axis
-    axEtaINScan.set_yscale('log')
-    setNScanAxes(figEtaINScan, axEtaINScan, r"$\eta_i/m_i n \rho_S c_S$", Te0EV)
+    axEtaINScan.set_yscale("log")
+    setNScanAxes(figEtaINScan, axEtaINScan, r"$\eta_i/m_i n \rho_s c_s$", Te0EV)
 
     if savePlots:
-        savePlot(figEtaINScan, "etaINScan")
+        PlotHelper.savePlot(figEtaINScan, "etaINScan.{}".format(savePlots))
     #}}}
 
     #{{{etaE plot
@@ -234,11 +182,11 @@ for B0, ls in zip(B0s, B0LineType):
                          label = label)
 
     # Set axis
-    axEtaENScan.set_yscale('log')
-    setNScanAxes(figEtaENScan, axEtaENScan, r"$\eta_e/m_i n \rho_S c_S$", Te0EV)
+    axEtaENScan.set_yscale("log")
+    setNScanAxes(figEtaENScan, axEtaENScan, r"$\eta_e/m_i n \rho_s c_s$", Te0EV)
 
     if savePlots:
-        savePlot(figEtaENScan, "etaENScan")
+        PlotHelper.savePlot(figEtaENScan, "etaENScan.{}".format(savePlots))
     #}}}
     #}}}
 
@@ -262,7 +210,10 @@ for B0, ls in zip(B0s, B0LineType):
     tauE = 1.0/nuEI
 
     # Caclulate ion viscosities
-    etaI = p.calcEtaI(n0, Ti0, tauI, omCI)
+    # Make an array in order to get correct dimensions
+    omCIArray = np.zeros(tauI.shape)
+    omCIArray.fill(omCI)
+    etaI = p.calcEtaI(n0, Ti0, tauI, omCIArray)
     sortedEtaIKeys = list(etaI.keys())
     sortedEtaIKeys.sort()
 
@@ -296,7 +247,7 @@ for B0, ls in zip(B0s, B0LineType):
     setTScanAxes(figNuEITScan, axNuEITScan, r"$\nu_{ei}/\omega_{ci}$", n0)
 
     if savePlots:
-        savePlot(figNuEITScan, "nuEITScan")
+        PlotHelper.savePlot(figNuEITScan, "nuEITScan.{}".format(savePlots))
     #}}}
 
     #{{{etaI plot
@@ -312,11 +263,11 @@ for B0, ls in zip(B0s, B0LineType):
                          label = label)
 
     # Set axis
-    axEtaITScan.set_yscale('log')
-    setTScanAxes(figEtaITScan, axEtaITScan, r"$\eta_i/m_i n \rho_S c_S$", n0)
+    axEtaITScan.set_yscale("log")
+    setTScanAxes(figEtaITScan, axEtaITScan, r"$\eta_i/m_i n \rho_s c_s$", n0)
 
     if savePlots:
-        savePlot(figEtaITScan, "etaITScan")
+        PlotHelper.savePlot(figEtaITScan, "etaITScan.{}".format(savePlots))
     #}}}
 
     #{{{etaE plot
@@ -332,11 +283,11 @@ for B0, ls in zip(B0s, B0LineType):
                          label = label)
 
     # Set axis
-    axEtaETScan.set_yscale('log')
-    setTScanAxes(figEtaETScan, axEtaETScan, r"$\eta_e/m_i n \rho_S c_S$", n0)
+    axEtaETScan.set_yscale("log")
+    setTScanAxes(figEtaETScan, axEtaETScan, r"$\eta_e/m_i n \rho_s c_s$", n0)
 
     if savePlots:
-        savePlot(figEtaETScan, "etaETScan")
+        PlotHelper.savePlot(figEtaETScan, "etaETScan.{}".format(savePlots))
     #}}}
     #}}}
 
