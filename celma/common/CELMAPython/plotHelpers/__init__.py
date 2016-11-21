@@ -7,15 +7,13 @@ from .plotNumberFormatter import plotNumberFormatter
 from .improvedCollect import collectiveCollect, safeCollect
 from .derivatives import DDZ, DDX, findLargestRadialGrad
 import matplotlib.pyplot as plt
+import os
 
 # Set the plot style for all plots
 titleSize = 30
-# WARNING: This makes it slow, but is needed in order not to get
-#          UserWarning: findfont: Font family ['serif'] not found
-plt.rc("text",   usetex=True)
+size = 30
 
-font = {"family":"serif","size":30, "serif": ["computer modern roman"]}
-plt.rc("font",   **font)
+plt.rc("font",   size = size)
 plt.rc("axes",   labelsize = 25, titlesize = titleSize)
 plt.rc("xtick",  labelsize = 25)
 plt.rc("ytick",  labelsize = 25)
@@ -28,6 +26,27 @@ try:
 except RuntimeError:
     plt.switch_backend("Agg")
     plt.figure(0)
+plt.close(0)
+
+oldFont = {"family":plt.rcParams["font.family"],\
+           "serif":plt.rcParams["font.serif"]}
+try:
+    # WARNING: This makes it slow, but is needed in order not to get
+    #          UserWarning: findfont: Font family ['serif'] not found
+    # Requires LaTeX and dvipng and Ghostscript installed
+    plt.rc("text", usetex=True)
+
+    font = {"family":"serif", "serif": ["computer modern roman"]}
+    plt.rc("font", **font)
+
+    fig, ax = plt.subplots()
+    fileName = "tmp.png"
+    plt.savefig(fileName)
+    os.remove(fileName)
+except (RuntimeError, FileNotFoundError) as er:
+    plt.rc("text", usetex=False)
+    plt.rc("font", **oldFont)
+
 plt.close(0)
 
 # Set the colorfunc
