@@ -16,6 +16,8 @@
  * \param[in] Ti0    The ion temperature [eV]
  * \param[in] B0     The magnetic field [T]
  * \param[in] S      The source [m^-3s^-1]
+ * \param[in] warn   Will throw warnings for exceptions if parameters are outside
+ *                   the drift approximation.
  */
 Parameters::Parameters(BoutReal const &radius,
                        BoutReal const &length,
@@ -24,11 +26,12 @@ Parameters::Parameters(BoutReal const &radius,
                        BoutReal const &Ti0,
                        BoutReal const &B0,
                        BoutReal const &S,
-                       BoutReal const &nn
+                       BoutReal const &nn,
+                       bool     const &warningForException
                        )
 : radius_(radius), length_(length),
   n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
-  nn_(nn),
+  nn_(nn), warn_(warningForException),
   separatorLen(57), separator(' '),
   nameWidth(23), numberWidth(15), unitsWidth(16),
   precision(4)
@@ -154,21 +157,48 @@ Parameters::Parameters(BoutReal const &radius,
     printTable();
 
     // Guard
+    bool allPass = true;
+    std::ostringstream stream;
     if(coloumbLog <= 1.0){
         // Huba, J.D. - NRL PLASMA FORMULARY 2013
-        throw BoutException("Coloumb Logarithm under 1.0. Theory fails.");
+        stream << "Coloumb Logarithm under 1.0. Theory fails.\n";
+        allPass = false;
     }
     if(nuEINorm >= 1.0){
-        throw BoutException("Normalized nuEI broke drift approximation");
+        stream << "Normalized nuEI was " << nuEINorm << ", and did thereby "
+                  "break the drift approximation\n";
+        allPass = false;
     }
     if(SNorm >= 1.0){
-        throw BoutException("Normalized SNorm broke drift approximation");
+        stream << "Normalized SNorm was " << SNorm << ", and did thereby "
+                  "break the drift approximation\n";
+        allPass = false;
     }
     if(nuENNorm >= 1.0){
-        throw BoutException("Normalized nuENNorm broke drift approximation");
+        stream << "Normalized nuENNorm was " << nuENNorm << ", and did thereby "
+                  "break the drift approximation\n";
+        allPass = false;
     }
     if(nuINNorm >= 1.0){
-        throw BoutException("Normalized nuINNorm broke drift approximation");
+        stream << "Normalized nuINNorm was " << nuINNorm << ", and did thereby "
+                  "break the drift approximation\n";
+        allPass = false;
+    }
+
+    // Throw error or warning
+    if (!allPass){
+        std::string str = stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+        std::string newlines    = "\n\n\n";
+        std::string exclamation (80, '!');
+        if(warn_){
+            output << newlines << exclamation << "\nWARNING: "
+                   << message << exclamation << newlines << std::endl;
+        }
+        else{
+            throw BoutException(message);
+        }
     }
 }
 
