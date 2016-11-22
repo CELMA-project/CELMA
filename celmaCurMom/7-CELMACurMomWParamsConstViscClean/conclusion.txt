@@ -6,3 +6,34 @@ Copied from 4.1-CELMACurMomWParamsConstVisc
 
 Results:
 ========
+CSDXMagFieldScan - Burin et al PoP 2005
+Running with same om_ci and rho_S as Ar
+Want om_cAr = om_cH
+ qB_Ar/m_Ar = qB_H/m_H
+        B_H = B_Ar*m_H/m_Ar
+        B_H = B_Ar*0.025231
+=> heavily breaks the drift approximation
+Idea:
+1. Could run with drift approximation break
+2. Could decrease n0, increase Te
+3. Could just run with same parameters as article, using H
+
+These papers breaks the drift approximation
+Naulin
+Sasaki
+Holland (Tynan et al)  (HW) - See Korsholm
+Kasuya
+Maybe D'Ippolito SOLT?
+Kasuya 2008
+
+
+
+magFieldScan
+-------------
+B0
+0.05 - lin phase complete 16h54m
+0.06 - lin phase complete 14h10m
+0.07 - lin phase complete 18h17m
+0.08 - lin phase complete 18h13m
+0.09 - lin phase failed after 273 steps 11h
+0.10 - lin phase failed after 252 steps 13h
