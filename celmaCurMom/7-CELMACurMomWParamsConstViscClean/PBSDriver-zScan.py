@@ -4,7 +4,7 @@
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common')
+commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -18,8 +18,8 @@ length = (4       , 5       , 6       , 8        , 10       ,  12       )
 Ly     = (553.6449, 692.0561, 830.4673, 1107.2898, 1384.1122,  1660.9347)
 scanParameters  = ("length", "Ly")
 series_add = (\
-              ('input', 'length', length),\
-              ('geom' , 'Ly'    , Ly),\
+              ("input", "length", length),\
+              ("geom" , "Ly"    , Ly),\
              )
 
 directory = "zScan"
