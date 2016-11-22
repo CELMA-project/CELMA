@@ -4,7 +4,7 @@
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../common')
+commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -16,7 +16,7 @@ scanNn = GenericScanDriver()
 # Set the scan
 nn             = (1.0e15, 5.0e15, 1.0e16, 5.0e16, 1.0e17)
 scanParameters = ("nn",)
-series_add = ('input', 'nn', nn)
+series_add = ("input", "nn", nn)
 
 directory = "neutralScan"
 

@@ -2,6 +2,8 @@
 
 """Driver which runs using PBS."""
 
+from bout_runners import basic_runner
+
 import os, sys
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")
@@ -13,10 +15,12 @@ from CELMAPython.drivers import GenericScanDriver
 # Create object
 scanB0 = GenericScanDriver()
 
+hydrogenArgonMassRatio = 0.025231
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
-Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
-Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
+B0 = (1.0e-1   , 8.0e-2  , 6.0e-2  , 4.0e-2  , 2.0e-2  )
+B0 = tuple(B*hydrogenArgonMassRatio for B in B0)
+Lx = (7.9912   , 6.3929  , 4.7947  , 3.1965  , 1.5982  )
+Ly = (1118.7646, 895.0117, 671.2588, 447.5058, 223.7529)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ("input", "B0", B0),\
@@ -24,22 +28,17 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "magFieldScan"
+directory = "CSDXMagFieldScanAsBurinH"
 
 # Set the main options
 scanB0.setMainOptions(\
-                       directory        = directory     ,\
-                       scanParameters   = scanParameters,\
-                       series_add       = series_add    ,\
-                       theRunName       = directory     ,\
-                       make             = False         ,\
-                       boutRunnersNoise = {"vort":1e-6},\
-                       )
-
-scanB0.setLinearOptions(timestep              = 1         ,\
-                        nout                  = 3000      ,\
-                        BOUT_walltime         = "24:00:00",\
-                        )
+                       directory      = directory       ,\
+                       scanParameters = scanParameters  ,\
+                       series_add     = series_add      ,\
+                       theRunName     = directory       ,\
+                       make           = False           ,\
+                       boutRunnersNoise = {"vortD":1e-6},\
+                     )
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
@@ -53,7 +52,7 @@ scanB0.setPostProcessingFlags(\
                               postProcessProbesAndEnergy = False,\
                               postProcessGrowthRates     = False,\
 # FIXME: Look at energy overshoot, and set correct index (starting from linear run) here
-                              tIndSaturatedTurb          = None ,\
+                              tIndSaturatedTurb          = None,\
                              )
 
 # Set common plotter options
