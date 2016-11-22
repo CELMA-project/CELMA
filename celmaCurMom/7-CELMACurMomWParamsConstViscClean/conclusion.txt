@@ -25,3 +25,15 @@ Holland (Tynan et al)  (HW) - See Korsholm
 Kasuya
 Maybe D'Ippolito SOLT?
 Kasuya 2008
+
+
+
+magFieldScan
+-------------
+B0
+0.05 - lin phase complete 16h54m
+0.06 - lin phase complete 14h10m
+0.07 - lin phase complete 18h17m
+0.08 - lin phase complete 18h13m
+0.09 - lin phase failed after 273 steps 11h
+0.10 - lin phase failed after 252 steps 13h
