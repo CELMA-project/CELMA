@@ -126,6 +126,7 @@ private:
     BoutReal B0;
     BoutReal Sn;    // Particle source amplitude
     BoutReal nn;
+    bool     warningForException;
     // *****************************************************************************
 
     // Output parameters
