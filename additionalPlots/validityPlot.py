@@ -4,13 +4,10 @@
 Scripts which plots the valid region of drift approximation.
 
 NOTE: Although we find the region by inversion, the zero we find is
-      proporitonal to m_i/B.
+      proporitonal to B/m_i.
       To convert to another gas at another B, multiply the y-axis with
       (m_iNew/m_iOld)/(BNew/BOld)
 """
-
-
-# FIXME: y-axis will scale with m_H/m_alpha.  Have this on the y-axis
 
 from scipy.optimize import fsolve
 import scipy.constants as cst
