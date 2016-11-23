@@ -148,6 +148,7 @@ class GenericScanDriver(object):
                        make                  = False,\
                        timeStepMultiplicator = 1    ,\
                        boutRunnersNoise      = None ,\
+                       restartFrom           = None ,\
                       ):
         #{{{docstring
         """
@@ -173,6 +174,9 @@ class GenericScanDriver(object):
             If this is set as a dict, the dict must have the key of one
             of the variables evolved in time, and the value must be the
             amplitude of the noise.
+        restartFrom : [None|str]
+            Set this to a path if you would like to restart the run from
+            one particular file.
         """
         #}}}
 
@@ -188,6 +192,7 @@ class GenericScanDriver(object):
         self._make                  = make
         self._timeStepMultiplicator = timeStepMultiplicator
         self._boutRunnersNoise      = boutRunnersNoise
+        self._restartFrom           = restartFrom
     #}}}
 
     #{{{setRunOptions
@@ -540,6 +545,11 @@ class GenericScanDriver(object):
             processing driver in common/CELMAPython/drivers
         """
         #}}}
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["initPostOptions"] = True
 
         if useDefault and len(kwargs) !=0:
             message = ("No extra keywords should be given when "
@@ -649,6 +659,11 @@ class GenericScanDriver(object):
             processing driver in common/CELMAPython/drivers
         """
         #}}}
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["expandPostOptions"] = True
 
         if useDefault and len(kwargs) !=0:
             message = ("No extra keywords should be given when "
@@ -759,6 +774,12 @@ class GenericScanDriver(object):
             processing driver in common/CELMAPython/drivers
         """
         #}}}
+
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["linearPostOptions"] = True
 
         # Check that field plotter is called first (if set)
         if useDefault and len(kwargs) !=0:
@@ -875,6 +896,12 @@ class GenericScanDriver(object):
         """
         #}}}
 
+        # Check where this function is called from
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        if calframe[1][3] != "__init__":
+            self._calledFunctions["turbulencePostOptions"] = True
+
         if useDefault and len(kwargs) !=0:
             message = ("No extra keywords should be given when "
                        "useDefault is set.\n"
@@ -966,6 +993,26 @@ class GenericScanDriver(object):
         self._linearPostOptions    .update(self._commonPlotterOptions)
         self._turbulencePostOptions.update(self._commonPlotterOptions)
         self._commonRunnerOptions["directory"] = self._directory
+
+        # Check that no troubles running with restart from
+        if self._restartFrom is not None:
+            messageTemplate = "Cannot run {} when restart from is set\n"
+            tests = {"runInit"                    : self.runInit,\
+                     "justPostProcess"            : self.justPostProcess,\
+                     "postProcessGrowthRates"     : self.postProcessGrowthRates,\
+                     "postProcessProbesAndEnergy" : self.postProcessProbesAndEnergy,\
+                     "postProcessLinProfiles"     : self.postProcessLinProfiles,\
+                     "postProcessTurbProfiles"    : self.postProcessTurbProfiles,\
+                    }
+            problem = False
+            message = ""
+            for key in tests.keys():
+                if tests[key]:
+                    problem = True
+                    message += messageTemplate.format(key)
+
+            if problem:
+                raise ValueError(message)
 
         # Call the runners
         if self.runInit:
@@ -1114,15 +1161,16 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+        restart_from =\
+                self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
-
         #{{{Run and post processing
         expandRunner = self._runner(\
             # Expand options
-            **self._expandOptions         ,\
+            **self._expandOptions       ,\
             # Set restart options
-            restart      = self._restart  ,\
-            restart_from = restartFromFunc,\
+            restart      = self._restart,\
+            restart_from = restart_from ,\
             # Set additional options
             additional = (
                 ("tag",theRunName,0),\
@@ -1190,6 +1238,8 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+        restart_from =\
+                self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
         #{{{Run and post processing
         self._linearRun = self._runner(\
@@ -1197,7 +1247,7 @@ class GenericScanDriver(object):
             **self._linearOptions         ,\
             # Set restart options
             restart      = self._restart  ,\
-            restart_from = restartFromFunc,\
+            restart_from = restart_from   ,\
             # Set additional options
             additional = (
                 ("tag"   , theRunName           ,0),\
@@ -1263,14 +1313,16 @@ class GenericScanDriver(object):
                     })
         # Set aScanPath
         self._linearAScanPath  = self._linear_dmp_folders[0]
+        restart_from =\
+                self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
         #{{{Run and post processing
         self._turboRun = self._runner(\
             # Set turbulence options
-            **self._turbulenceOptions       ,\
+            **self._turbulenceOptions   ,\
             # Set restart options
-            restart      = self._restart    ,\
-            restart_from = restartFromFunc  ,\
+            restart      = self._restart,\
+            restart_from = restart_from ,\
             additional = (
                 ("tag",theRunName,0),\
                 ("switch"      , "useHyperViscAzVortD",useHyperViscAzVortD),\
