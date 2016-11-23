@@ -132,7 +132,7 @@ n0     = 1.0e19  # m^-3
 Te0    = 2.5     # eV
 Ti0    = 0.0     # eV
 B0     = 0.1     # T
-Sn     = 2.25e23 # m^-3s^-1
+Sn     = 4.5e21  # m^-3s^-1
 nn     = n0*10   # m^-3 (10 % ionization)
 
 # Print a warning for the exception
