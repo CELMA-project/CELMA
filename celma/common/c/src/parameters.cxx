@@ -8,6 +8,7 @@
  *
  * Inputs initialized through list initialization
  *
+ * \warning Currently only valid for Hydrogen plasmas
  *
  * \param[in] radius Plasma radius [m]
  * \param[in] length The cylinder length [m]
@@ -62,7 +63,7 @@ Parameters::Parameters(BoutReal const &radius,
      */
     vA   = pow(pow(B0_, 2.0)/(ne*mi*mu0), 0.5);
     cS   = pow((Te0J+((N+2.0)/N)*Ti0J)/mi, 0.5);
-    // Goldstone page 12 equation (1.24)
+    // Goldston page 12 equation (1.24)
     vThE = pow(Te0J/me, 0.5);
     vThI = pow(Ti0J/mp, 0.5);
 
@@ -80,14 +81,18 @@ Parameters::Parameters(BoutReal const &radius,
     Ly       = length_/rhoS;
 
     // Collisions
-    /*Friedberg:
+    /* Goldston:
+     * Below equation 11.17 page 169
+     *
+     * Alternatively
+     * Friedberg:
      * Plasma Physics and Fusion Energy - equation (9.35)
      */
-    coloumbLog = log(12.0*PI*pow(eps0*Te0J, 1.5)/(pow(ne, 0.5)*pow(e, 3.0)));
-    /* Braginskii, Goldstone and Helander:
+    coloumbLog = log(12.0*PI*ne*pow(debye, 3.0));
+    /* Braginskii, Goldston and Helander:
      * Maxwellian averaged
      * Braginskii page 215 equation 2.5e)
-     * Goldstone page 172 equation (11.22)
+     * Goldston page 172 equation (11.22)
      * Helander page 5, equation (1.4)
      *
      * NOTE: This differs by approximately 30% from what presented in
@@ -97,10 +102,10 @@ Parameters::Parameters(BoutReal const &radius,
      */
     nuEI = (pow(2.0, 0.5)*ni*pow(e, 4.0)*coloumbLog)/
            (12.0*pow(PI, 1.5)*pow(eps0, 2.0)*pow(me, 0.5)*pow(Te0J, 1.5));
-    /* Braginskii, Goldstone and Helander:
+    /* Braginskii, Goldston and Helander:
      * Maxwellian averaged
      * Braginskii page 215 equation 2.5i)
-     * Goldstone page 173 equation (11.24)
+     * Goldston page 173 equation (11.24)
      * Helander page 5, equation (1.5)
      */
     nuII = (ni*pow(e, 4.0)*coloumbLog)/
