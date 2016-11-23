@@ -14,9 +14,9 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1  , 9.0e-2  , 8.0e-2  , 7.0e-2  , 6.0e-2  , 5.0e-2  )
-Lx = (6.5393  , 5.8854  , 5.2315  , 4.5775  , 3.9236  , 3.2697  )
-Ly = (366.2017, 329.5815, 292.9613, 256.3412, 219.7210, 183.1008)
+B0 = (1.0e-1  , 9.0e-2  )
+Lx = (6.5393  , 5.8854  )
+Ly = (366.2017, 329.5815)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ("input", "B0", B0),\
@@ -26,6 +26,7 @@ series_add = (\
 
 directory = "magFieldScan"
 
+restartFrom = "magFieldScan/geom_Lx_5.2315_geom_Ly_292.9613_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_magFieldScan-3-turbulentPhase1_0/"
 # Set the main options
 scanB0.setMainOptions(\
                        directory      = directory     ,\
@@ -33,6 +34,7 @@ scanB0.setMainOptions(\
                        series_add     = series_add    ,\
                        theRunName     = directory     ,\
                        make           = False         ,\
+                       restartFrom    = restartFrom   ,\
                      )
 
 # Set the flags
