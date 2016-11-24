@@ -8,6 +8,7 @@ import numpy as np
 
 #{{{polAvg
 def polAvg(f):
+    #{{{docstring
     """
     Returns the poloidal average of a field.
 
@@ -23,6 +24,7 @@ def polAvg(f):
     out : array
         The poloidal average of the field
     """
+    #}}}
 
     tLen, xLen, yLen, zLen = f.shape
     out = np.zeros(f.shape)
@@ -36,7 +38,7 @@ def polAvg(f):
 #}}}
 
 #{{{timeAvg
-def timeAvg(f, t, startInd = 0, endInd = -1):
+def timeAvg(f, t = None, startInd = 0, endInd = -1):
     #{{{docstring
     """
     Returns the poloidal average of a field.
@@ -50,23 +52,21 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
     f : array
         The field to find the time average of.
         The field must be a 4D field.
-    t : array
+    t : [None|array]
         The time.
         Must have the same temporal dimension as f.
     startInd : int
-        Start index to take the average from
+        Start index to take the average from.
     endInd : int
-        End index to take the average from
-    stdDev : bool
-        Whether or not to calculate the standard deviation and include
-        this in the output.
+        End index to take the average from.
 
     Returns
     -------
     avgF : array
-        The poloidal average of the field
+        The poloidal average of the field.
     avgT : array
-        Averaged time array
+        Only an output if t is not None.
+        Averaged time array.
     """
     #}}}
 
@@ -93,12 +93,15 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
     outDim  = (tLenOut, xLen, yLen, zLen)
 
     outF = np.zeros(outDim)
-    outT = np.zeros(tLenOut)
 
-    # As the average will be sliding, we now the averaged times in advance
-    startTAvgInd = int(t[startInd:endInd+1].mean())
-    endTAvgInd   = startTAvgInd + tLenOut
-    outT = np.array(range(startTAvgInd, endTAvgInd))
+    if t is not None:
+        outT = np.zeros(tLenOut)
+
+        # As the average will be sliding, we now the averaged times in advance
+        startTAvgInd = int(t[startInd:endInd+1].mean())
+        endTAvgInd   = startTAvgInd + tLenOut
+
+        outT = np.array(range(startTAvgInd, endTAvgInd))
 
     for avgTInd in range(tLenOut):
         tStart = startInd + avgTInd
@@ -109,5 +112,8 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
                     # +1 as slicing does not include last point
                     outF[avgTInd,x,y,z] = f[tStart:tEnd+1,x,y,z].mean()
 
-    return outF, outT
+    if t is not None:
+        return outF, outT
+    else:
+        return outF
 #}}}
