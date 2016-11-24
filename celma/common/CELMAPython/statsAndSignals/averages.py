@@ -1,13 +1,42 @@
 #!/usr/bin/env python
 
 """
-Contains function for taking poloidal average
+Contains functions for taking poloidal averages
 """
 
 import numpy as np
 
+#{{{polAvg
+def polAvg(f):
+    """
+    Returns the poloidal average of a field.
+
+    Parameters
+    ----------
+    f : array
+        The field to find the poloidal average of.
+        The field must be a 4D field, and should not include the last
+        poloidal slice (i.e. the domain should go from [0,2pi[)
+
+    Returns
+    -------
+    out : array
+        The poloidal average of the field
+    """
+
+    tLen, xLen, yLen, zLen = f.shape
+    out = np.zeros(f.shape)
+
+    for t in range(tLen):
+        for x in range(xLen):
+            for y in range(yLen):
+                out[t,x,y,:] = f[t,x,y,:].mean()
+
+    return out
+#}}}
+
 #{{{timeAvg
-def timeAvg(f, t, startInd = 0, endInd = -1, stdDev = False):
+def timeAvg(f, t, startInd = 0, endInd = -1):
     """
     Returns the poloidal average of a field.
 
@@ -36,8 +65,6 @@ def timeAvg(f, t, startInd = 0, endInd = -1, stdDev = False):
         The poloidal average of the field
     t : array
         Averaged time array
-    stdDevVals : array
-        If stdDev is True
     """
 
     tLen, xLen, yLen, zLen = f.shape
@@ -65,7 +92,7 @@ def timeAvg(f, t, startInd = 0, endInd = -1, stdDev = False):
 
     out = np.zeros(outDim)
 
-    for avgTInd in range(tLenOut)
+    for avgTInd in range(tLenOut):
         tStart = startInd + avgTInd
         tEnd   = endInd   + avgTInd
         for x in range(xLen):
@@ -73,8 +100,5 @@ def timeAvg(f, t, startInd = 0, endInd = -1, stdDev = False):
                 for z in range(zLen):
                     out[avgTInd,x,y,z] = f[tStart:tEnd,x,y,z].mean()
 
-    if not(stdDev):
-        return out
-    else:
-        return out, stdDevVals
+    return out, t[startInd:startInd + tLenOut]
 #}}}
