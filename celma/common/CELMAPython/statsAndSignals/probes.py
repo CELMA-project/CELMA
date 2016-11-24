@@ -4,7 +4,7 @@
 Contains classes which probes the data
 """
 
-from .polAvg import polAvg
+from .averages import polAvg
 from ..plotHelpers import (PlotHelper,\
                            collectiveCollect,\
                            safeCollect,\
