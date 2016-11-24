@@ -37,8 +37,13 @@ def polAvg(f):
 
 #{{{timeAvg
 def timeAvg(f, t, startInd = 0, endInd = -1):
+    #{{{docstring
     """
     Returns the poloidal average of a field.
+
+    The average is a sliding the time-window through the time such that
+    The output arrays will have time dimensions of
+    int(np.floor((tLen-1)/(endInd - startInd)))
 
     Parameters
     ----------
@@ -58,14 +63,12 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
 
     Returns
     -------
-    NOTE: Output arrays will have time dimensions of
-    np.floor(endInd - startInd)/len(t)
-
-    out : array
+    avgF : array
         The poloidal average of the field
-    t : array
+    avgT : array
         Averaged time array
     """
+    #}}}
 
     tLen, xLen, yLen, zLen = f.shape
 
@@ -77,20 +80,25 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
             raise ValueError("startInd={} is out of range".\
                     format(startInd))
     if endInd < 0:
-        # Subtract 1 as indices count from 0
-        endInd = (tLen - 1) + endInd
+        endInd = tLen + endInd
         if endInd < 0:
             raise ValueError("endInd={} is out of range".\
                     format(endInd))
 
     diffT = endInd - startInd
-    if dffT < 0:
+    if diffT < 0:
         raise ValueError("Must have endInd>startInd")
 
-    tLenOut = np.floor(endInd - startInd)/tLen
-    outDim  = (tLenOut, f.shape[1], f.shape[2], f.shape[3])
+    tLenOut = int(np.floor((tLen-1)/(endInd - startInd)))
+    outDim  = (tLenOut, xLen, yLen, zLen)
 
-    out = np.zeros(outDim)
+    outF = np.zeros(outDim)
+    outT = np.zeros(tLenOut)
+
+    # As the average will be sliding, we now the averaged times in advance
+    startTAvgInd = int(t[startInd:endInd+1].mean())
+    endTAvgInd   = startTAvgInd + tLenOut
+    outT = np.array(range(startTAvgInd, endTAvgInd))
 
     for avgTInd in range(tLenOut):
         tStart = startInd + avgTInd
@@ -98,7 +106,8 @@ def timeAvg(f, t, startInd = 0, endInd = -1):
         for x in range(xLen):
             for y in range(yLen):
                 for z in range(zLen):
-                    out[avgTInd,x,y,z] = f[tStart:tEnd,x,y,z].mean()
+                    # +1 as slicing does not include last point
+                    outF[avgTInd,x,y,z] = f[tStart:tEnd+1,x,y,z].mean()
 
-    return out, t[startInd:startInd + tLenOut]
+    return outF, outT
 #}}}

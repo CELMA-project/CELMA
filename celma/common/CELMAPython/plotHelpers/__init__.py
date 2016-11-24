@@ -47,7 +47,7 @@ except (RuntimeError, FileNotFoundError) as er:
     plt.rc("text", usetex=False)
     plt.rc("font", **oldFont)
 
-plt.close(0)
+plt.close("all")
 
 # Set the colorfunc
 seqCMap  = plt.get_cmap("inferno")
