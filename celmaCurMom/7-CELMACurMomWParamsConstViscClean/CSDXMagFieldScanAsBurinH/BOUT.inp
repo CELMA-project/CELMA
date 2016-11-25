@@ -126,13 +126,19 @@ viscosityGuard      = false
 #       Dimensions: Burin et al 2005 PoP
 #       Ionization: Burin et al 2005 PoP
 #       n0 and Te : Burin et al 2005 PoP
+# NOTE:
+#       Burin et al uses Ar
+#       We want the om_ci to be the same, so
+#       om_ci = qB_Ar/m_Ar = qB_H/m_H
+#       => B_H = B_Ar*m_H/m_Ar
+hydrogenArgonMassRatio = 0.025231
 radius = 0.020   # The length of x from boundary to boundary in [m]
 length = 2.80    # The length of y from boundary to boundary in [m]
 n0     = 1.0e19  # m^-3
 Te0    = 2.5     # eV
 Ti0    = 0.0     # eV
-B0     = 0.1     # T
-Sn     = 4.5e21  # m^-3s^-1
+B0     = 0.1*hydrogenArgonMassRatio # T
+Sn     = 1.85e23 # m^-3s^-1
 nn     = n0*10   # m^-3 (10 % ionization)
 
 # Print a warning for the exception
@@ -143,8 +149,8 @@ warningForException = True
 # Geometry
 # =============================================================================
 [geom]
-Lx =    7.9912 # The normalized radius (must agree with radius up to fourth decimal)
-Ly = 1118.7646 # The normalized length (must agree with len up to fourth decimal)
+Lx =  0.3124 # The normalized radius (must agree with radius up to fourth decimal)
+Ly = 43.7299 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]

@@ -13,6 +13,7 @@ Want om_cAr = om_cH
         B_H = B_Ar*m_H/m_Ar
         B_H = B_Ar*0.025231
 => heavily breaks the drift approximation
+<- not necessarily...check improved drift approximation
 Idea:
 1. Could run with drift approximation break
 2. Could decrease n0, increase Te
@@ -37,3 +38,11 @@ B0
 0.08 - lin phase complete 18h13m
 0.09 - lin phase failed after 273 steps 11h
 0.10 - lin phase failed after 252 steps 13h
+
+CSDXMagFieldScanAsBurinH
+Only omCI is the same...consider rename this folder
+
+
+CSDXMagFieldScanAsBurinHSameRhoS
+rhoS is the same
+NOTE: Te has changed => collisionality changed (both real and normalized)
