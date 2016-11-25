@@ -1100,7 +1100,6 @@ class GenericScanDriver(object):
                      "BOUT_run_name"        : theRunName
                     })
         #}}}
-
         #{{{Run and post processing
         initRunner = self._runner(\
             # Shall we make
@@ -1152,7 +1151,19 @@ class GenericScanDriver(object):
         #Switches
         useHyperViscAzVortD = (False,)
         # From previous outputs
-        self._initAScanPath = self._init_dmp_folders[0]
+        try:
+            self._initAScanPath = self._init_dmp_folders[0]
+        except AttributeError as er:
+            if "has no attribute" in er.args[0]:
+                message =("{0}WARNING Init was not run, post processor will "
+                          "be set set to None{0}")
+                print(message.format("!"*3))
+                curPostProcessor    = None
+                self._init_PBS_ids  = None
+                self._initAScanPath = None
+            else:
+                raise er
+
         # Name
         theRunName = self._theRunName + "-1-expand"
         # PBS options
@@ -1225,11 +1236,22 @@ class GenericScanDriver(object):
             add_noise     = self._boutRunnersNoise
         if self._linearPostOptionsUsesMaxGrad:
             # As this is scan dependent, the driver finds the correct folder
-            maxGradRhoFolder = self._expand_dmp_folders[0]
+            try:
+                maxGradRhoFolder = self._expand_dmp_folders[0]
+                # From previous outputs
+                self._expandAScanPath = self._expand_dmp_folders[0]
+            except AttributeError as er:
+                if "has no attribute" in er.args[0]:
+                    message =("{0}WARNING Expand was not run, post processor will "
+                              "be set set to None{0}")
+                    print(message.format("!"*3))
+                    curPostProcessor      = None
+                    self._expand_PBS_ids  = None
+                    self._expandAScanPath = None
+                else:
+                    raise er
             self._linearPostOptions["maxGradRhoFolder"] =\
                                             maxGradRhoFolder
-        # From previous outputs
-        self._expandAScanPath = self._expand_dmp_folders[0]
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
@@ -1312,7 +1334,19 @@ class GenericScanDriver(object):
                      "BOUT_run_name"        : theRunName
                     })
         # Set aScanPath
-        self._linearAScanPath  = self._linear_dmp_folders[0]
+        try:
+            self._linearAScanPath  = self._linear_dmp_folders[0]
+        except AttributeError as er:
+            if "has no attribute" in er.args[0]:
+                message =("{0}WARNING Expand was not run, post processor will "
+                          "be set set to None{0}")
+                print(message.format("!"*3))
+                curPostProcessor      = None
+                self._linear_PBS_ids  = None
+                self._linearAScanPath = None
+            else:
+                raise er
+
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
