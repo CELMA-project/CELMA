@@ -26,7 +26,7 @@ series_add = (\
 
 directory = "magFieldScan"
 
-restartFrom = "magFieldScan/geom_Lx_5.2315_geom_Ly_292.9613_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_magFieldScan-3-turbulentPhase1_0/"
+restartFrom = "magFieldScan/nout_5000_timestep_1/geom_Lx_5.2315_geom_Ly_292.9613_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_magFieldScan-3-turbulentPhase1_0/"
 # Set the main options
 scanB0.setMainOptions(\
                        directory      = directory     ,\
@@ -36,6 +36,11 @@ scanB0.setMainOptions(\
                        make           = False         ,\
                        restartFrom    = restartFrom   ,\
                      )
+
+scanB0.setRunOptions(runInit   = False,\
+                     runExpand = False,\
+                     runLin    = False,\
+                     runTurb   = True  )
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
