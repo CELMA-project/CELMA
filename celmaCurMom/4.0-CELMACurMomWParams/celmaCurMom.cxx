@@ -216,7 +216,7 @@ int CelmaCurMom::rhs(BoutReal t)
     divParCur                  =   DDY(jPar);
     vortDParArtVisc  =   artViscParVortD*D2DY2(vortD);
     vortDPerpArtVisc =   artViscPerpVortD*Laplace_perp(vortD);
-    vortDhyperVisc   = - artHyperAzVortD*D4DZ4(vortD);
+    vortDHyperVisc   = - artHyperAzVortD*D4DZ4(vortD);
 
     ddt(vortD) =
           vortNeutral
@@ -227,7 +227,7 @@ int CelmaCurMom::rhs(BoutReal t)
         + kinEnAdvN
         + vortDParArtVisc
         + vortDPerpArtVisc
-        + vortDhyperVisc
+        + vortDHyperVisc
         ;
 
     // Filtering highest modes

@@ -96,7 +96,7 @@ private:
     Field3D parDerDivUIParNGradPerpPhi;
     Field3D vortDAdv, kinEnAdvN;
     Field3D divParCur, vortDParArtVisc, vortDPerpArtVisc;
-    Field3D vortDhyperVisc;
+    Field3D vortDHyperVisc;
     // *****************************************************************************
 
     // Helper fields
