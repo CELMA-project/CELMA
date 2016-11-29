@@ -22,11 +22,10 @@ plt.rc("lines",  linewidth = 2)
 
 # Set proper backend
 try:
-    plt.figure(0)
+    plt.figure()
 except RuntimeError:
     plt.switch_backend("Agg")
-    plt.figure(0)
-plt.close(0)
+    plt.figure()
 
 oldFont = {"family":plt.rcParams["font.family"],\
            "serif":plt.rcParams["font.serif"]}
@@ -47,6 +46,7 @@ except (RuntimeError, FileNotFoundError) as er:
     plt.rc("text", usetex=False)
     plt.rc("font", **oldFont)
 
+# Close all plots
 plt.close("all")
 
 # Set the colorfunc
