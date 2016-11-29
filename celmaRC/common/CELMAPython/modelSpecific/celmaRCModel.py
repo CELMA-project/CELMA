@@ -116,6 +116,8 @@ def getJParFields(path):
     r"D_{j_{\parallel}, \perp}\nabla^2_\perp j_{\parallel}"             ))
     jPar.lines.append(Line("jParParArtVisc"                             ,\
     r"D_{j_{\parallel}, \parallel} \partial^2_{\parallel}j_{\parallel}" ))
+    jPar.lines.append(Line("jParHyperVisc"                              ,\
+    r"D^H_{j_{\parallel}, \parallel} \partial^4_{\parallel}j_{\parallel}"))
 
     return jPar
 #}}}
