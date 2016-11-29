@@ -1,0 +1,6 @@
+Copied from celmaCurMom/7-CELMACurMomWParamsConstViscClean/
+
+- Fixed 0.51 bug
+
+Results:
+========
