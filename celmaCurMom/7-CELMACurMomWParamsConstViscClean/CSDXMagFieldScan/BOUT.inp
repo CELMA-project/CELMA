@@ -1,5 +1,5 @@
 #
-# Input file for "7-CELMACurMomWParamsConstViscClean/CSDXMagFieldScanAsBurinHSameRhoS"
+# Input file for "7-CELMACurMomWParamsConstViscClean/CSDXMagFieldScanH"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -126,24 +126,14 @@ viscosityGuard      = false
 #       Dimensions: Burin et al 2005 PoP
 #       Ionization: Burin et al 2005 PoP
 #       n0 and Te : Burin et al 2005 PoP
-# NOTE:
-#       Burin et al uses Ar
-#       We want the om_ci to be the same, so
-#       om_ci = qB_Ar/m_Ar = qB_H/m_H
-#       => B_H = B_Ar*m_H/m_Ar
-#       We also want c_s to be the same, so
-#       c_s = sqrt(T_eAr/m_Ar) = sqrt(Te_H/m_H)
-#       => T_eH = T_eAr*m_H/m_Ar
-#
-hydrogenArgonMassRatio = 0.025231
-radius = 0.020   # The length of x from boundary to boundary in [m]
+radius = 0.080   # The length of x from boundary to boundary in [m]
 length = 2.80    # The length of y from boundary to boundary in [m]
 n0     = 1.0e19  # m^-3
-Te0    = 2.5*hydrogenArgonMassRatio # eV
+Te0    = 2.5     # eV
 Ti0    = 0.0     # eV
-B0     = 0.1*hydrogenArgonMassRatio # T
-Sn     = 1.85e23 # m^-3s^-1
-nn     = n0*10   # m^-3 (10 % ionization)
+B0     = 0.1     # T
+Sn     = 4.5e21  # m^-3s^-1
+nn     = 0.0     # Clean neutral scan
 
 # Print a warning for the exception
 warningForException = True
@@ -153,13 +143,14 @@ warningForException = True
 # Geometry
 # =============================================================================
 [geom]
-Lx =   1.9665 # The normalized radius (must agree with radius up to fourth decimal)
-Ly = 275.3034 # The normalized length (must agree with len up to fourth decimal)
+Lx =   49.5195 # The normalized radius (must agree with radius up to fourth decimal)
+Ly = 1733.1827 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 
-minPointsPerRhoSY = 1e-3
+minPointsPerRhoSXZ = 0.5    # Should be 1
+minPointsPerRhoSY  = 1.0e-3
 # =============================================================================
 
 
