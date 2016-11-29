@@ -56,7 +56,7 @@ def getVarDict(path, var=''):
                   'divParCur',\
                   'vortDParArtVisc,',\
                   'vortDPerpArtVisc',\
-                  'vortDhyperVisc',\
+                  'vortDHyperVisc',\
                   ]
     else:
         raise ValueError("Input var not recognized")
