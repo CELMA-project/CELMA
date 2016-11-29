@@ -57,6 +57,8 @@ visualization*/
 celma/*/celma
 celma/*/celmaSLEPc
 celmaCurMom/*/celmaCurMom
+celmaRC/*/celmaRC
+celmaRC/*/BCelmaRC
 celmaApar/*/celmaApar
 nx_*/
 ny_*/
