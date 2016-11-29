@@ -69,6 +69,9 @@ class OwnBCs
         void extrapolateYGhost(Field3D &f);
         //! Extrapolate to first upper ghosts
         void extrapolateYUp(Field3D &f);
+        //! Extrapolate to second upper ghosts
+        void extrapolateYUpScondGhost(Field3D &f);
+
         //! Extrapolate to first lower ghosts
         void extrapolateYDown(Field3D &f);
         //! Use sheath condition to set ghost point for ue

@@ -206,6 +206,33 @@ void OwnBCs::extrapolateYUp(Field3D &f)
 }
 
 /*!
+ * Extrapolates to the second upper ghost point using a 4th order Newton
+ * polynomial
+ *
+ * \param[in] f The original field
+ * \param[out] f The field after extrapolating to the first upper ghost point
+ *
+ * \sa extrapolateYGhost
+ */
+void OwnBCs::extrapolateYUpScondGhost(Field3D &f)
+{
+    TRACE("Halt in OwnBCs::extrapolateYUp");
+
+    if (mesh->lastY()){
+        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
+            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
+                f(xInd, firstUpperYGhost+1, zInd) =
+                      4.0*f(xInd, firstUpperYGhost  , zInd)
+                    - 6.0*f(xInd, firstUpperYGhost-1, zInd)
+                    + 4.0*f(xInd, firstUpperYGhost-2, zInd)
+                    -     f(xInd, firstUpperYGhost-3, zInd)
+                    ;
+            }
+        }
+    }
+}
+
+/*!
  * Extrapolates to the first lower ghost point using a 4th order Newton
  * polynomial
  *
