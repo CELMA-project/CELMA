@@ -187,6 +187,8 @@ def getVortDFields(path):
          r"D_{\Omega^D} \partial^2_{\parallel}\Omega^D"            ))
     vortD.lines.append(Line("vortDPerpArtVisc"                     ,\
          r"D_{\Omega^D, \perp} \nabla_\perp^2\Omega^D"             ))
+    vortD.lines.append(Line("vortDHyperVisc"                       ,\
+         r"D^H_{\Omega^D, \theta} \partial_\theta^4\Omega^D"       ))
 
     return vortD
 #}}}
@@ -222,6 +224,8 @@ def getVortFields(path):
          r"D_{\Omega} \partial^2_{\parallel}\Omega"            ))
     vort.lines.append(Line("vortPerpArtVisc"                   ,\
          r"D_{\Omega, \perp} \nabla_\perp^2\Omega"             ))
+    vort.lines.append(Line("vortHyperVisc"                     ,\
+         r"D^H_{\Omega, \theta} \partial_\theta^4\Omega"       ))
 
     return vort
 #}}}
