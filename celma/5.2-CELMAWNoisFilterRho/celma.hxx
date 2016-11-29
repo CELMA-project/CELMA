@@ -63,7 +63,7 @@ private:
     Field3D vortNeutral, potNeutral;
     Field3D divExBAdvGradPerpPhiN, parDerDivUIParNGradPerpPhi;
     Field3D nGradUiUe, uiUeGradN, vortDParArtVisc, vortDPerpArtVisc;
-    Field3D vortDhyperVisc;
+    Field3D vortDHyperVisc;
     // *****************************************************************************
 
     // Temporary fields
