@@ -657,14 +657,17 @@ void CelmaCurMom::setAndSaveViscosities()
     output << "    For j_{\\|}   : " << artViscParJpar    << std::endl;
     output << "    For nu_{i,\\|}: " << artViscParMomDens << std::endl;
     output << "    For vortD    : "  << artViscParVortD   << std::endl;
-    output << "Azimuthal hyperviscosity";
-    if (!constViscHyper){
+    if (constViscHyper){
+        output << "Azimuthal hyperviscosity";
+    }
+    else{
         output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
                   << SQ(SQ(mesh->dz)) << "):";
     }
     output << std::endl;
     output << "    For vortD   : " << artHyperAzVortD << std::endl;
     output << "Parallel hyperviscosity";
+    output << std::endl;
     output << "    For j_{\\|} : " << artHyperParCur  << std::endl;
     output << "***********************************************\n" << std::endl;
 
@@ -705,7 +708,7 @@ void CelmaCurMom::setAndSaveViscosities()
     SAVE_ONCE2(artViscParMomDens, artViscParVortD);
     SAVE_ONCE2(artViscPerpLnN, artViscPerpJPar);
     SAVE_ONCE2(artViscPerpMomDens, artViscPerpVortD);
-    SAVE_ONCE (artHyperAzVortD);
+    SAVE_ONCE2(artHyperAzVortD, artHyperParCur);
     // ************************************************************************
 }
 // ############################################################################
