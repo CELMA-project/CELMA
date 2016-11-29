@@ -385,10 +385,10 @@ int Celma::rhs(BoutReal t) {
     vortDParArtVisc            =   artViscParVortD*D2DY2(vortD);
     vortDPerpArtVisc           =   artViscPerpVortD*Laplace_perp(vortD);
     if (useHyperViscAzVortD){
-        vortDhyperVisc = - artHyperAzVortD*D4DZ4(vortD);
+        vortDHyperVisc = - artHyperAzVortD*D4DZ4(vortD);
     }
     else{
-        vortDhyperVisc = 0.0;
+        vortDHyperVisc = 0.0;
     }
 
     ddt(vortD) =
@@ -400,7 +400,7 @@ int Celma::rhs(BoutReal t) {
             + uiUeGradN
             + vortDParArtVisc
             + vortDPerpArtVisc
-            + vortDhyperVisc
+            + vortDHyperVisc
             ;
     // Filtering highest modes
     ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
