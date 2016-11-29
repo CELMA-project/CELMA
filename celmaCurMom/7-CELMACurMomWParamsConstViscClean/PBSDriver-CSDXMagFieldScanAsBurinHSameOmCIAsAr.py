@@ -19,8 +19,8 @@ hydrogenArgonMassRatio = 0.025231
 # Set the scan
 B0 = (1.0e-1   , 8.0e-2  , 6.0e-2  , 4.0e-2  , 2.0e-2  )
 B0 = tuple(B*hydrogenArgonMassRatio for B in B0)
-Lx = (  1.9665,   1.5732,   1.1799,   0.7866,  0.3933)
-Ly = (275.3034, 220.2427, 165.1820, 110.1214, 55.0607)
+Lx = (0.3124 , 0.2499 , 0.1874 , 0.1249 , 0.0625)
+Ly = (43.7299, 34.9839, 26.2380, 17.4920, 8.7460)
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ("input", "B0", B0),\
@@ -28,7 +28,7 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "CSDXMagFieldScanAsBurinHSameRhoS"
+directory = "CSDXMagFieldScanAsBurinHSameOmCIAsAr"
 
 # Set the main options
 scanB0.setMainOptions(\
