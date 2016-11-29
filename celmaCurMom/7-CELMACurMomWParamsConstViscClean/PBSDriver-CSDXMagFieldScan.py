@@ -14,9 +14,10 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (1.0e-1   , 8.0e-2  , 6.0e-2  , 4.0e-2  , 2.0e-2  )
-Lx = (7.9912   , 6.3929  , 4.7947  , 3.1965  , 1.5982  )
-Ly = (1118.7646, 895.0117, 671.2588, 447.5058, 223.7529)
+B0 = (   1.0e-1,    8.0e-2,    6.0e-2,   4.0e-2,   2.0e-2)
+Lx = (  49.5195,   39.6156,   29.7117,  19.8078,   9.9039)
+Ly = (1733.1827, 1386.5461, 1039.9096, 693.2731, 346.6365)
+
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
               ("input", "B0", B0),\
@@ -24,7 +25,7 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "CSDXMagFieldScanH"
+directory = "CSDXMagFieldScan"
 
 # Set the main options
 scanB0.setMainOptions(\

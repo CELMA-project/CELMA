@@ -362,14 +362,14 @@ void CelmaCurMom::setAndSaveParameters()
     // Load the input and print the output
     // ************************************************************************
     Options *input = options->getSection("input");
-    input->get("radius"         , radius         , 0.0  );
-    input->get("length"         , length         , 0.0  );
-    input->get("n0"             , n0             , 0.0  );
-    input->get("Te0"            , Te0            , 0.0  );
-    input->get("Ti0"            , Ti0            , 0.0  );
-    input->get("B0"             , B0             , 0.0  );
-    input->get("Sn"             , Sn             , 0.0  );
-    input->get("nn"             , nn             , 0.0  );
+    input->get("radius", radius, 0.0);
+    input->get("length", length, 0.0);
+    input->get("n0"    , n0    , 0.0);
+    input->get("Te0"   , Te0   , 0.0);
+    input->get("Ti0"   , Ti0   , 0.0);
+    input->get("B0"    , B0    , 0.0);
+    input->get("Sn"    , Sn    , 0.0);
+    input->get("nn"    , nn    , 0.0);
 
     input->get("warningForException",
                 warningForException , false);
