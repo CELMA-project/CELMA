@@ -119,14 +119,15 @@ private:
 
     // Input parameters
     // *****************************************************************************
-    BoutReal radius; // Plasma radius
-    BoutReal length; // Cylinder length
-    BoutReal n0;
-    BoutReal Ti0,Te0;
-    BoutReal B0;
-    BoutReal Sn;    // Particle source amplitude
-    BoutReal nn;
-    bool     warningForException;
+    BoutReal    radius; // Plasma radius
+    BoutReal    length; // Cylinder length
+    BoutReal    n0;
+    BoutReal    Ti0,Te0;
+    BoutReal    B0;
+    BoutReal    Sn;    // Particle source amplitude
+    BoutReal    nn;
+    std::string gas;
+    bool        warningForException;
     // *****************************************************************************
 
     // Output parameters
