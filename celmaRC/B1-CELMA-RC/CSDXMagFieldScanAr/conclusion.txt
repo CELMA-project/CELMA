@@ -4,11 +4,11 @@ Results of CSDXMagFieldScanAr
 Init
 ----
 B0      Time                Comment
-0.02    Walltime reached - 4.48e+02
-0.04       14m 5s
-0.06     3h53m
-0.08     7h17m
-0.1     12h47m
+0.02    Walltime reached - 4.48e+02     Extreme gradients in jPar in corners, and high gradient towards sheath (balance between 2*uPar*DDY(n*uPar))
+0.04       14m 5s           Less extreme gradients (balance between 2*uPar*DDY(n*uPar))
+0.06     3h53m              Not same gradient, lesser current
+0.08     7h17m              Lesser current
+0.1     12h47m              Lesser current
 
 
 Expand
