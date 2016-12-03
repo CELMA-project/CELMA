@@ -8,7 +8,7 @@
  *
  * Inputs initialized through list initialization
  *
- * \warning Currently only valid for Hydrogen plasmas
+ * \warning Currently assumes singly ionized atoms
  *
  * \param[in] radius Plasma radius [m]
  * \param[in] length The cylinder length [m]
@@ -20,19 +20,20 @@
  * \param[in] warn   Will throw warnings for exceptions if parameters are outside
  *                   the drift approximation.
  */
-Parameters::Parameters(BoutReal const &radius,
-                       BoutReal const &length,
-                       BoutReal const &n0,
-                       BoutReal const &Te0,
-                       BoutReal const &Ti0,
-                       BoutReal const &B0,
-                       BoutReal const &S,
-                       BoutReal const &nn,
-                       bool     const &warningForException
+Parameters::Parameters(BoutReal    const &radius,
+                       BoutReal    const &length,
+                       BoutReal    const &n0,
+                       BoutReal    const &Te0,
+                       BoutReal    const &Ti0,
+                       BoutReal    const &B0,
+                       BoutReal    const &S,
+                       BoutReal    const &nn,
+                       std::string const gas,
+                       bool        const warningForException
                        )
 : radius_(radius), length_(length),
   n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0), S_(S),
-  nn_(nn), warn_(warningForException),
+  nn_(nn), warn_(warningForException), gas_(gas),
   separatorLen(57), separator(' '),
   nameWidth(23), numberWidth(15), unitsWidth(16),
   precision(4)
@@ -44,13 +45,31 @@ Parameters::Parameters(BoutReal const &radius,
     BoutReal const mu0  = 1.2566370614359173e-06;
     BoutReal const e    = 1.6021766208e-19;
     BoutReal const me   = 9.10938356e-31;
-    BoutReal const mp   = 1.672621898e-27;
     BoutReal const a0   = 5.2917721067e-11;
+    BoutReal const u    = 1.660539040e-27;
     int const N = 3; // Degrees of freedom
 
     BoutReal ne = n0_;
     BoutReal ni = n0_;
-    BoutReal mi = mp;
+    BoutReal mi;
+
+    if (gas_ == "H"){
+        // Mass of proton
+        mi = 1.672621898e-27;
+    }
+    else if (gas_ == "Ar"){
+        mi = 39.948*u;
+    }
+    else{
+        std::ostringstream stream;
+        stream << "The current gases are implemented:"
+               << "\nH\nAr\n"
+               << "You specified " << gas_ << std::endl;
+        std::string str = stream.str();
+        // Cast the stream to a const char in order to use it in BoutException
+        const char* message = str.c_str();
+        throw BoutException(message);
+    }
 
     // Recalculate the temperatures to joules
     Te0J = Te0_*e;
@@ -65,7 +84,7 @@ Parameters::Parameters(BoutReal const &radius,
     cS   = pow((Te0J+((N+2.0)/N)*Ti0J)/mi, 0.5);
     // Goldston page 12 equation (1.24)
     vThE = pow(Te0J/me, 0.5);
-    vThI = pow(Ti0J/mp, 0.5);
+    vThI = pow(Ti0J/mi, 0.5);
 
     // Frequencies
     omCI = e*B0_/mi;
@@ -128,7 +147,7 @@ Parameters::Parameters(BoutReal const &radius,
 
     // Additional parameters
     beta   = ne*(Te0J+((N+2.0)/N)*Ti0J)/(pow(B0_, 2.0)/(2.0*mu0));
-    mu     = mp/me;
+    mu     = mi/me;
     Lambda = log(pow(mu/(2.0*PI), 0.5));
 
     // Parallel viscosities
@@ -225,6 +244,7 @@ void Parameters::printTable() const
     printVar("radius", radius_ , "m"       );
     printVar("length", length_ , "m"       );
     printVar("nn"    , nn_     , "m^-3"    );
+    printVar("gas"   , gas_    , "-"       );
     output << std::string(separatorLen, '-') << std::endl;
     output << "CONVERTED UNITS" << std::endl;
     output << std::string(separatorLen, '-') << std::endl;
@@ -321,6 +341,38 @@ void Parameters::printTable() const
  */
 void Parameters::printVar(std::string const &name,
                           BoutReal    const &val,
+                          std::string const &units)
+                          const
+{
+    TRACE("Parameters::printVars");
+
+    output << "| "
+           << std::left
+           << std::setw(nameWidth)
+           << std::setfill(separator)
+           << name
+           << std::setw(numberWidth)
+           << std::setfill(separator)
+           << std::scientific
+           << std::setprecision(precision)
+           << val
+           << std::left
+           << std::setw(unitsWidth)
+           << std::setfill(separator)
+           << "[" + units + "]"
+           << "|"
+           << std::endl;
+}
+
+/*!
+ * Prints each variable
+ *
+ * \param[in] name      Name  of the variable
+ * \param[in] val       Value of the variable
+ * \param[in] units     Units of the variable
+ */
+void Parameters::printVar(std::string const &name,
+                          std::string const &val,
                           std::string const &units)
                           const
 {
