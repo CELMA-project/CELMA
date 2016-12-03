@@ -483,7 +483,7 @@ class GenericScanDriver(object):
     def setInitOptions(self                              ,\
                        timestep              = 2e3       ,\
                        nout                  = 2         ,\
-                       BOUT_walltime         = "05:00:00",\
+                       BOUT_walltime         = "24:00:00",\
                        post_process_walltime = "0:29:00" ,\
                        post_process_queue    = "xpresq"  ,\
             ):
