@@ -4,11 +4,11 @@ Results of CSDXMagFieldScanAr
 Init
 ----
 B0      Time                Comment
-0.02     4h43m
-0.04    15h30m
-0.06    19h41m
-0.08    Walltime reached - 3.62e+04
-0.1     walltime reached - 3.92e+04
+0.02     4h43m              Small density, high current edge
+0.04    15h30m              More density, lower current
+0.06    19h41m              More density, lower current
+0.08    Walltime reached - 3.62e+04 Rerunning Minor see-sawing on jPar
+0.1     walltime reached - 3.92e+04 Rerunning A bit more See-sawing
 
 
 Expand
