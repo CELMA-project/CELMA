@@ -11,7 +11,7 @@
  *
  * \brief Class which sets the normalized quantities
  *
- * \warning Assumes Hydrogen plasma
+ * \warning Currently assumes singly ionized atoms
  *
  * \author Michael Løiten
  * \date 2016.08.24
@@ -19,14 +19,15 @@
 class Parameters
 {
     private:
-        BoutReal const length_; //<! Cylinder length [m]
-        BoutReal const radius_; //<! Plasma radius [m]
-        BoutReal const n0_;     //<! Density normalization [m^-3]
-        BoutReal const Te0_;    //<! Electron temperature [eV]
-        BoutReal const Ti0_;    //<! Ion temperature [eV]
-        BoutReal const B0_;     //<! Magnetic field [T]
-        BoutReal const S_ ;     //<! Particle source [m^-3s^-1]
-        BoutReal const nn_;     //<! Neutral density [m^-3]
+        BoutReal    const length_; //<! Cylinder length [m]
+        BoutReal    const radius_; //<! Plasma radius [m]
+        BoutReal    const n0_;     //<! Density normalization [m^-3]
+        BoutReal    const Te0_;    //<! Electron temperature [eV]
+        BoutReal    const Ti0_;    //<! Ion temperature [eV]
+        BoutReal    const B0_;     //<! Magnetic field [T]
+        BoutReal    const S_ ;     //<! Particle source [m^-3s^-1]
+        BoutReal    const nn_;     //<! Neutral density [m^-3]
+        std::string const gas_;    //<! String of gas
 
         bool const warn_;       //<! Warnings instead of exceptions
 
@@ -97,15 +98,16 @@ class Parameters
 
     public:
         // Constructor
-        Parameters(BoutReal const &radius,
-                   BoutReal const &length,
-                   BoutReal const &n0,
-                   BoutReal const &Te0,
-                   BoutReal const &Ti0,
-                   BoutReal const &B0,
-                   BoutReal const &S,
-                   BoutReal const &nn,
-                   bool     const &warningForException
+        Parameters(BoutReal    const &radius,
+                   BoutReal    const &length,
+                   BoutReal    const &n0,
+                   BoutReal    const &Te0,
+                   BoutReal    const &Ti0,
+                   BoutReal    const &B0,
+                   BoutReal    const &S,
+                   BoutReal    const &nn,
+                   std::string const gas = "H",
+                   bool        const warningForException =false
                    );
 
         //! Prints the table
@@ -113,6 +115,11 @@ class Parameters
         //! Variable printer
         void printVar(std::string const &name,
                       BoutReal const &val,
+                      std::string const &units)
+                      const;
+
+        void printVar(std::string const &name,
+                      std::string const &val,
                       std::string const &units)
                       const;
 
