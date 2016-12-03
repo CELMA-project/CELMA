@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __CELMACURMOM_H__
-#define __CELMACURMOM_H__
+#ifndef __CELMARC_H__
+#define __CELMARC_H__
 
 #include <bout/physicsmodel.hxx>
 #include <invert_laplace.hxx>     // Gives invert laplace option
@@ -116,14 +116,15 @@ private:
 
     // Input parameters
     // *****************************************************************************
-    BoutReal radius; // Plasma radius
-    BoutReal length; // Cylinder length
-    BoutReal n0;
-    BoutReal Ti0,Te0;
-    BoutReal B0;
-    BoutReal Sn;    // Particle source amplitude
-    BoutReal nn;
-    bool     warningForException;
+    BoutReal    radius; // Plasma radius
+    BoutReal    length; // Cylinder length
+    BoutReal    n0;
+    BoutReal    Ti0,Te0;
+    BoutReal    B0;
+    BoutReal    Sn;    // Particle source amplitude
+    BoutReal    nn;
+    std::string gas;
+    bool        warningForException;
     // *****************************************************************************
 
     // Output parameters

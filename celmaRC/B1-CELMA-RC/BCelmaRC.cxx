@@ -406,11 +406,14 @@ void CelmaCurMom::setAndSaveParameters()
     input->get("B0"    , B0    , 0.0);
     input->get("Sn"    , Sn    , 0.0);
     input->get("nn"    , nn    , 0.0);
+    input->get("gas"   , gas   , "H");
+    // Cast to upper
+    gas[0] = toupper(gas[0]);
 
     input->get("warningForException",
                 warningForException , false);
 
-    Parameters params(radius, length, n0, Te0, Ti0, B0, Sn, nn,
+    Parameters params(radius, length, n0, Te0, Ti0, B0, Sn, nn, gas,
                       warningForException);
     // ************************************************************************
 
@@ -503,7 +506,7 @@ void CelmaCurMom::printPointsPerRhoS()
 
     // dx = Lx/(nx-2*MXG) => nx = (Lx/dx) + 2*MXG
     pointsPerRhoSRadially = ((Lx/mesh->dx(0, 0)) + 2*MXG)/Lx;
-    // dy = Ly/ny => ny = Ly/dy
+    // dy = Ly/ny => ny = Ly/dy => ny/Ly = 1/dy
     pointsPerRhoSParallely = 1.0/mesh->dy(0 ,0);
     // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
     pointsPerRhoSAzimuthally = (mesh->ngz - 1)/(2.0*PI*Lx);
