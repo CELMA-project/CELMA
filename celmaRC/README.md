@@ -8,6 +8,9 @@ and post-processing.
 
 * 1-CELMA-RC - As `celmaCurMom/7-CELMACurMomWParamsConstViscClean`, but without
   the `0.51` bug
+* 2-CELMA-RCParHyperVsic - As 1-CELMA-RC, but with hyper viscosities
+* 3-CELMA-RCUpwind - As 1-CELMA-RC, but with upwinding on `n*DDY(lnN-phi)`
+  term. The problem is always failing in the `Naulin Solver`
 * B1-CELMA-RC - As `celmaCurMom/B7-CELMACurMomWParamsConstViscClean`, but without
   the `0.51` bug
 * common - python post processing and own implementations to BOUT++
