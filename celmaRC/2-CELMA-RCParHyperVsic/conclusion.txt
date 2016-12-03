@@ -7,3 +7,6 @@ Copied from 1-CELMA-RC
 
 Results:
 ========
+4e-4 - 4e4 : No noticable effect.
+             At 4e4: Oscillations in hyper ~ diffusion
+4e7: Negates the fluctuations in jPar (remains in lnN - phi), and oscillations in hyper ~ jPar
