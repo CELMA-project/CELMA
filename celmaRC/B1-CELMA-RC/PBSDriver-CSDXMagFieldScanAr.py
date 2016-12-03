@@ -34,7 +34,7 @@ scanB0.setMainOptions(\
                        series_add     = series_add      ,\
                        theRunName     = directory       ,\
                        make           = False           ,\
-                       boutRunnersNoise = {"vortD":1e-6},\
+                       boutRunnersNoise = {"vort":1e-6} ,\
                      )
 
 # Set the flags
