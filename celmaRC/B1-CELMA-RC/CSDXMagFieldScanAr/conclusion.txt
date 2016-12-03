@@ -1,0 +1,21 @@
+Results of CSDXMagFieldScanAr
+=============================
+
+Init
+----
+B0      Time                Comment
+0.02    Walltime reached - 4.48e+02
+0.04       14m 5s
+0.06     3h53m
+0.08     7h17m
+0.1     12h47m
+
+
+Expand
+------
+B0      Time                Comment
+0.02    !!!Check me!
+0.04       14m37s
+0.06        5m53s
+0.08     9h 6m
+0.1     Running
