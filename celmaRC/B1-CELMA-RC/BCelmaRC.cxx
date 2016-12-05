@@ -218,21 +218,6 @@ int CelmaCurMom::rhs(BoutReal t)
     ownBC.extrapolateXOutGhost(gradPerpPhi.x);
     ownBC.extrapolateXOutGhost(gradPerpPhi.y);
     ownBC.extrapolateXOutGhost(gradPerpPhi.z);
-//    // Calculating sourcePhi as we will take divergence of this
-//    sourcePhi = S*gradPerpPhi;
-//    // Set the ghost points in order to take DDY
-//    ownBC.extrapolateYGhost(sourcePhi.x);
-//    ownBC.extrapolateYGhost(sourcePhi.y);
-//    ownBC.extrapolateYGhost(sourcePhi.z);
-//    // Set the ghost points in order to take gradPerp
-//    ownBC.innerRhoCylinder(sourcePhi.x);
-//    ownBC.innerRhoCylinder(sourcePhi.y);
-//    ownBC.innerRhoCylinder(sourcePhi.z);
-//    ownBC.extrapolateXOutGhost(sourcePhi.x);
-//    ownBC.extrapolateXOutGhost(sourcePhi.y);
-//    ownBC.extrapolateXOutGhost(sourcePhi.z);
-//    // We must communicate as we will take DDY and gradPerp
-//    mesh->communicate(gradPerpPhi, sourcePhi);
     mesh->communicate(gradPerpPhi);
     // ************************************************************************
 
@@ -243,9 +228,10 @@ int CelmaCurMom::rhs(BoutReal t)
     potNeutral  = - nuIN*gradPerpPhi*ownOp->Grad_perp(n);
      // NOTE: Basic brackets => vortDAdv is normal bracket adv
     vortAdv         = - ownOp->vortDAdv(phi, vort);
+    // NOTE: Upwinding could be used on this, but use with care as
+    //       dissipation may introduce spurious vorticity
     vortParAdv      = - uIPar*DDY(vort);
     DDYGradPerpPhiGradPerpUI = - ownOp->DDY(gradPerpPhi)*ownOp->Grad_perp(uIPar);
-//    divSourcePhi    = - Div(sourcePhi);
     divSourcePhi    = - S*vort - gradPerpPhi*ownOp->Grad_perp(S);
     divParCur       =   DDY(jPar);
     vortParArtVisc  =   artViscParVort*D2DY2(vort);
