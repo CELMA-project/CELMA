@@ -124,7 +124,7 @@ viscosityGuard      = false
 [input]
 # NOTE:
 #       Length     : Leddy et al 2016 Nuclear Materials and Energy
-#       Radius     : Own
+#       Radius     : Own, but corresponds to KIWI on it's lowest
 #       Temperature: Own
 #       n0         : Own
 radius = 0.040   # The length of x from boundary to boundary in [m]
@@ -133,7 +133,7 @@ n0     = 1.0e19  # m^-3
 Te0    = 14.0    # eV
 Ti0    = 0.0     # eV
 B0     = 0.1     # T
-Sn     = 4.5e21  # m^-3s^-1
+Sn     = 2.5e23  # m^-3s^-1
 nn     = 0.0     # Clean neutral scan
 
 # Print a warning for the exception
