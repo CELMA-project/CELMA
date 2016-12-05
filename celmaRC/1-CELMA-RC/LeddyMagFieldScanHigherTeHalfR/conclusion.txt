@@ -1,0 +1,11 @@
+Results of CSDXMagFieldScanAr
+=============================
+
+Init (2 nout 2000 timestep walltime 72h)
+----------------------------------------
+B0      Time                Comment
+0.02    Running
+0.04    Running
+0.06    Running
+0.08    Running
+0.1     -                   Not included in current run

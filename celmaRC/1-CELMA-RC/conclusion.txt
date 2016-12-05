@@ -7,16 +7,10 @@ Results:
 ========
 CSDXMagFieldScan               - See-sawing in jPar due to lnN - phi
 CSDXMagFieldScanHihgerTe       - Walltime reached
-CSDXMagFieldScanAr             - Gives non-fluctuating results
+CSDXMagFieldScanAr             - Gives non-fluctuating results (check results in own folder)
 LeddyMagFieldScan              - Looks like see-sawing as well (need higher S)
 LeddyMagFieldScanHigherTe      - Walltime reached
-LeddyMagFieldScanHigherTeHalfR -
-
-Now running
------------
-CSDXMagFieldScanAr             - See Ar folder
-LeddyMagFieldScanHigherTe      - ?
-LeddyMagFieldScanHigherTeHalfR - Check me!
+LeddyMagFieldScanHigherTeHalfR - Gives non-fluctuating results (check results in own folder)
 
 
 Discussion

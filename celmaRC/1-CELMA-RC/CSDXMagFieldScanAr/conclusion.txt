@@ -1,21 +1,31 @@
 Results of CSDXMagFieldScanAr
 =============================
 
-Init
-----
+Init (2 nout 2000 timestep walltime 24h)
+----------------------------------------
 B0      Time                Comment
 0.02     4h43m              Small density, high current edge
 0.04    15h30m              More density, lower current
 0.06    19h41m              More density, lower current
-0.08    Walltime reached - 3.62e+04 Rerunning Minor see-sawing on jPar
-0.1     walltime reached - 3.92e+04 Rerunning A bit more See-sawing
+0.08    26h21m              Minor see-sawing on jPar. Initial walltime reached, then restarted: 3.62e+04 = 10h 3m + 16h18m = 26h21m
+0.1     26h51m              A bit more see-sawing.    Initial walltime reached, then restarted: 3.92e+04 = 10h53m + 15h58m = 26h51m
 
 
-Expand
-------
+Expand (2 nout 50 timestep walltime 24h)
+----------------------------------------
 B0      Time                Comment
 0.02    10h21m
+0.04    23h43m
+0.06    Walltime reached    1 step reached with 5.41e+04, will accept as the expand step is just to ensure that solution stays the same when expanding
+0.08    *Running            * Running with 25 timestep in order to save time
+0.1     *Running            * Running with 25 timestep in order to save time
+
+
+Linear (1000 nout 1 timestep walltime 72h)
+------------------------------------------
+B0      Time                Comment
+0.02    Running
 0.04    Running
 0.06    Running
-0.08    Running
-0.1     Running
+0.08    !QUICKFIX run
+0.1     !QUICKFIX run
