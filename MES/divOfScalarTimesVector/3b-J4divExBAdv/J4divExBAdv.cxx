@@ -61,7 +61,7 @@ int J4DivExBAdv::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = (mesh->J^(4.0))*ownOp.div_uE_dot_grad_n_GradPerp_phi(n, phi);
+    S_num = (mesh->J^(4.0))*ownOp->div_uE_dot_grad_n_GradPerp_phi(n, phi);
 
     // Error in phi
     e = S_num - S;
