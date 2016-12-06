@@ -51,7 +51,7 @@ int D3DZ3Cylinder::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = ownOp.D3DZ3(f);
+    S_num = ownOp->D3DZ3(f);
 
     // Error in S
     e = S_num - S;
