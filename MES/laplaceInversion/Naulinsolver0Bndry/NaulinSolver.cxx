@@ -57,7 +57,7 @@ int NaulinSolver::init(bool restarting) {
     // ************************************************************************
     ln_n = log(n);
     mesh->communicate(ln_n);
-    gradPerp_ln_n = ownOp.Grad_perp(ln_n);
+    gradPerp_ln_n = ownOp->Grad_perp(ln_n);
     // ************************************************************************
 
     // Add a FieldGroup to communicate

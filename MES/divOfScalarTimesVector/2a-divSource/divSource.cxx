@@ -61,7 +61,7 @@ int DivSource::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = ownOp.div_f_GradPerp_g(S_n, phi);
+    S_num = ownOp->div_f_GradPerp_g(S_n, phi);
 
     // Error in phi
     e = S_num - S;
