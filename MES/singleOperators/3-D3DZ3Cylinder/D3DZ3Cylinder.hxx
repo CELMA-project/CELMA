@@ -55,7 +55,7 @@ private:
     // Other objects
     // *****************************************************************************
     OwnBCs ownBC;           // Class containing methods which sets the ghost points
-    OwnOperators ownOp;     // Class containing own differential operators
+    OwnOperators *ownOp;     // Class containing own differential operators
     // *****************************************************************************
     // ############################################################################
 };
