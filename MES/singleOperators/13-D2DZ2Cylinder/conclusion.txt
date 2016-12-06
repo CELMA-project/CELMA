@@ -1,0 +1,7 @@
+Copied from DDZCylinder
+
+- Check that own implementation of D2DZ2 is working in cylinder geometry
+
+Results:
+========
+Small errors, machine precision reached
