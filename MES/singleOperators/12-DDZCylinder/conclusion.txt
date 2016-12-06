@@ -1,19 +1,7 @@
-Copied from D2DX2Cylinder
+Copied from DDXCylinder
 
-- Check that own implementation of D3DZ3 is working in cylinder geometry
+- Check that own implementation of DDZ is working in cylinder geometry
 
 Results:
 ========
-- properZ:
-  + Too simple function in z, hits machine precission right away
-  + Divergence behaviour is due to lack of precission
-- gaussian:
-  + Converges in the first point, then hits machine precission
-  + Divergence behaviour is due to lack of precission
-- gaussianWSinAndParabola:
-  + Converges in the two first points, then hits machine precission
-  + Divergence behaviour is due to lack of precission
-
-Conclusion:
-===========
-Implementation is good
+Small errors, machine precision reached
