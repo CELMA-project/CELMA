@@ -264,7 +264,8 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * the sheath boundary condition with an optional profile
  *
  * \param[in] uEPar   The field to set the ghost point for
- * \param[in] phi     The current potential
+ * \param[in] phi     The current potential (must contain a valid yup ghost
+ *                    point)
  * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
  * \param[in] phiRef  The reference potential compared to the ground
  *                    (0 by default)
@@ -279,7 +280,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * \f}
  *
  * where
- *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\fc_s\f$ is normalized)
+ *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\f$c_s\f$ is normalized)
  *      * \f$_B\f$ denotes a value at the boundary
  *      * \f$p\f$ is the profile
  * This gives
@@ -296,11 +297,12 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * f_B = (5f_{n} + 15f_{n-1} - 5f_{n-2} + f_{n-3})/16
  * \f}
  *
- * where \f$f_{n}\f$ denotes the value at the last inner point
+ * where \f$f_{n}\f$ denotes the first upper ghost point in y
  *
  * This gives
  *
  * \f{eqnarray}{
+ * u_{e, \|,B} =
  * (5u_{e, \|, n} + 15 u_{e, \|, n-1} - 5 u_{e, \|, n-2} + u_{e, \|, n-3})/16
  * =
  * \exp(\Lambda
@@ -327,7 +329,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  *        \f$\alpha = \pi/2\f$
  *      * \f$\Lambda = \ln(\mu/2\pi)\f$
  *      * \f$\eta_m = (\phi_{MPE} - \phi_W)/Te\f$
- *      * \f$phi_{MPE} = phi_{CSE}\f$ since we do not have a magnetic presheath
+ *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
  *
@@ -376,9 +378,10 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  *
  * \param[in] jPar    The field to set the ghost point for
  * \param[in] uEPar   The parallel electron velocity
- * \param[in] uIPar   The parallel ion velocity
- * \param[in] phi     The current potential
- * \param[in] n       The density
+ * \param[in] uIPar   The parallel ion velocity (must contain a valid yup
+ *                    ghost point)
+ * \param[in] phi     The current potential (must contain a valid yup ghost)
+ * \param[in] n       The density (must contain a valid yup ghost)
  * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
  * \param[in] phiRef  The reference potential compared to the ground
  *                    (0 by default)
@@ -388,6 +391,9 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  * \note Although we know \f$u_{i, \|, B}\f$ exact, we are here setting the
  *       ghost point, so we need the value at the ghost point as an input
  * \note The value of \f$u_{e, \|, B}\f$ is calculated in the code
+ * \note The ghost point of \f$n\f$, \f$\phi\f$ and \f$u_{i, \|, B}\f$ must be
+ *       set before calling this function, whereas the value of \f$u_{e, \|}\f$
+ *       is calculated within the function.
  *
  * ## Explanation of the procedure:
  *
@@ -399,13 +405,14 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  * \f}
  *
  * where
- *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\fc_s\f$ is normalized)
+ *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\f$c_s\f$ is normalized)
  *      * \f$_B\f$ denotes a value at the boundary
  * This gives
  *
  * \f{eqnarray}{
+ * j_B =
  * n_B(u_{i, \|, B} - u_{e, \|, B}) =
- * n_B(u_{i, \|, B}-\exp(\Lambda-(\phi_{Ref} + \phi_B)))
+ * n_B(1-\exp(\Lambda-(\phi_{Ref} + \phi_B)))
  * \f}
  *
  * We will use a 4th order boundary polynomial to interpolate \f$u_{e,\|}\f$
@@ -413,18 +420,18 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  * grid points. For a field \f$f\f$, this gives
  *
  * \f{eqnarray}{
- * f_B = (5f_{i} + 15f_{i-1} - 5f_{i-2} + f_{i-3})/16
+ * f_B = (5f_{k} + 15f_{k-1} - 5f_{k-2} + f_{k-3})/16
  * \f}
  *
- * where \f$f_{i}\f$ denotes the value at the last inner point
+ * where \f$f_{k}\f$ denotes the value at the first upper ghost point in y
  *
  * This gives
  *
  * \f{eqnarray}{
- * (5u_{e, \|, i} + 15 u_{e, \|, i-1} - 5 u_{e, \|, i-2} + u_{e, \|, i-3})/16
+ * u_{e, \|, B} = (5u_{e, \|, k} + 15 u_{e, \|, k-1} - 5 u_{e, \|, k-2} + u_{e, \|, k-3})/16
  * =
  * \exp(\Lambda
- *      - ((\phi_{Ref} + 5 \phi_{i} + 15 \phi_{i-1} - 5\phi_{i-2} + \phi_{i-3})
+ *      - ((\phi_{Ref} + 5 \phi_{k} + 15 \phi_{k-1} - 5\phi_{k-2} + \phi_{k-3})
  *         /16)
  * )p
  * \f}
@@ -432,14 +439,32 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  * Which rearranged gives
  *
  * \f{eqnarray}{
- * u_{e, \|, i}
+ * u_{e, \|, k}
  * =
  * (16/5)\exp(\Lambda
- *      - ((\phi_{Ref} + 5 \phi_{i} + 15 \phi_{i-1} - 5\phi_{i-2} + \phi_{i-3})
+ *      - ((\phi_{Ref} + 5 \phi_{k} + 15 \phi_{k-1} - 5\phi_{k-2} + \phi_{k-3})
  *         /16)
  * )p
- * - 3 u_{e, \|, i-1} + u_{e, \|, i-2} - (1/5)u_{e, \|, i-3}
+ * - 3 u_{e, \|, k-1} + u_{e, \|, k-2} - (1/5)u_{e, \|, k-3}
  * \f}
+ *
+ * and inserted in the original equation yields
+ *
+ * \f{eqnarray}{
+ * j_{\|, k}
+ * =
+ * n_k(
+ * u_{i, \|, k}
+ * -
+ * (
+ * (16/5)\exp(\Lambda
+ *      - ((\phi_{Ref} + 5 \phi_{k} + 15 \phi_{k-1} - 5\phi_{k-2} + \phi_{k-3})
+ *         /16)
+ * )p
+ * - 3 u_{e, \|, k-1} + u_{e, \|, k-2} - (1/5)u_{e, \|, k-3}
+ * )
+ * \f}
+ *
  *
  * \par Sources:
  * 1. Eq (26) in Loizu et al Pop 19-2012, using
@@ -447,9 +472,12 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  *        \f$\alpha = \pi/2\f$
  *      * \f$\Lambda = \ln(\mu/2\pi)\f$
  *      * \f$\eta_m = (\phi_{MPE} - \phi_W)/Te\f$
- *      * \f$phi_{MPE} = phi_{CSE}\f$ since we do not have a magnetic presheath
+ *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
+ *
+ *
+ * \sa jParSheathProfiled
  */
 void OwnBCs::jParSheath(Field3D &jPar,
                          const Field3D &uEPar,
@@ -496,9 +524,10 @@ void OwnBCs::jParSheath(Field3D &jPar,
  *
  * \param[in] jPar    The field to set the ghost point for
  * \param[in] uEPar   The parallel electron velocity
- * \param[in] uIPar   The parallel ion velocity
- * \param[in] phi     The current potential
- * \param[in] n       The density
+ * \param[in] uIPar   The parallel ion velocity (must contain a valid yup
+ *                    ghost point)
+ * \param[in] phi     The current potential (must contain a valid yup ghost)
+ * \param[in] n       The density (must contain a valid yup ghost)
  * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
  * \param[in] phiRef  The reference potential compared to the ground
  *                    (0 by default)
