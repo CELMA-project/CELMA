@@ -1,0 +1,43 @@
+Gaussian with sinus and parabola
+======================================================================================================================================
+# The potential
+
+# The skew sinus
+# In cartesian coordinates we would like a sinus with with a wave-vector in the direction
+# 45 degrees with respect to the first quadrant. This can be achieved with a wave vector
+# k = [1/sqrt(2), 1/sqrt(2)]
+# sin((1/sqrt(2))*(x + y))
+# We would like 2 nodes, so we may write
+# sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+the_vars['phi'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
+
+# The density
+the_vars['n'] = cos(2*pi*y/Ly)*sin(2*pi*x/Lx)**2
+
+# The current
+the_vars['uIPar'] = sin(y/Ly)*cos(2+2*pi*x/Lx)**2
+
+# The parallel electron velocity, given by the sheath boundary condition
+the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))
+
+# The parallel velocity, given by the sheath boundary condition
+the_vars['jPar'] = the_vars['n']*(the_vars['uIPar']-the_vars['uEPar'])
+
+
+
+
+[n]
+sin(pi*geom:xl/15)^2*cos(pi*geom:yl/75)
+
+[uIPar]
+sin(geom:yl/150)*cos(pi*geom:xl/15 + 2)^2
+
+[uEPar]
+0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + geom:yl)/60))/sqrt(pi)
+
+[phi]
+sin(sqrt(2)*pi*(geom:xl + geom:yl)/60)
+
+[jPar]
+(sin(geom:yl/150)*cos(pi*geom:xl/15 + 2)^2 - 0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + geom:yl)/60))/sqrt(pi))*sin(pi*geom:xl/15)^2*cos(pi*geom:yl/75)
+======================================================================================================================================
