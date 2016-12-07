@@ -43,7 +43,7 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix 
+# Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
@@ -96,13 +96,6 @@ floats = false # floats = false => output in double
 [switch]
 # Give a warning rather than throwing error when insufficient number of points
 warnPoints = true
-###############################################################################
-
-
-# Own operators
-###############################################################################
-[ownOperators]
-type = 3Brackets
 ###############################################################################
 
 
