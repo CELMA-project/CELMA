@@ -1,5 +1,6 @@
 Copied from 1-ModifiedArakawa
 
+  NOTE: This is does not use ownOperators, but rather bracket(((DDXPhi)^(2.0)), n, bm)!!!
 - Check that {(partial_rho phi)^2, n} is convergent
 
 Results:
