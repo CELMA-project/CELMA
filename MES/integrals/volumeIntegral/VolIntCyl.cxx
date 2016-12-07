@@ -57,7 +57,7 @@ int VolIntCyl::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate the integral
-    volInt.volumeIntegral(f, S_num);
+    S_num = volInt.volumeIntegral(f);
 
     // Error in S
     e = S_num - S;
