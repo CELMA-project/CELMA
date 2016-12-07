@@ -150,6 +150,8 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                                     N, cmap = cm.inferno, zorder=-20)
                 cbar = plt.colorbar(cont)
                 cbar.ax.set_ylabel(cur_var_key)
+                cbar.formatter.set_useOffset(False)
+                cbar.update_ticks()
                 # Set the labels
                 ax2.set_xlabel(r'$\rho$')
                 if direction == 'x':
