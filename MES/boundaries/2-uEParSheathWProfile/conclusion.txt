@@ -1,6 +1,7 @@
 Copied from 1-yExtrapolation/
 
 - Check that extrapolation is set properly
+NOTE: We are here profiling the the boundary condition!!!
 
 Results:
 ========
