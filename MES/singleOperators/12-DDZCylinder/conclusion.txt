@@ -1,0 +1,7 @@
+Copied from DDXCylinder
+
+- Check that own implementation of DDZ is working in cylinder geometry
+
+Results:
+========
+Small errors, machine precision reached

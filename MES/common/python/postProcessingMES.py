@@ -4,10 +4,40 @@
 
 from boutdata import collect
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, FuncFormatter
 import matplotlib.cm as cm
 import numpy as np
 import os
+
+#{{{plotNumberFormatter
+def plotNumberFormatter(val, pos, precision=3):
+    #{{{docstring
+    """
+    Formatting numbers in the plot
+
+    Parameters
+    ----------
+    val : float
+        The value.
+    pos : [None | float]
+        The position (needed as input from FuncFormatter).
+    """
+    #}}}
+
+    tickString = "${{:.{}g}}".format(precision).format(val)
+    if "e+" in tickString:
+        tickString = tickString.replace("e+0", r"\cdot 10^{")
+        tickString = tickString.replace("e+" , r"\cdot 10^{")
+        tickString += "}$"
+    elif "e-" in tickString:
+        tickString = tickString.replace("e-0", r"\cdot 10^{-")
+        tickString = tickString.replace("e-" , r"\cdot 10^{-")
+        tickString += "}$"
+    else:
+        tickString += "$"
+
+    return tickString
+#}}}
 
 #{{{perform_MES_test
 def perform_MES_test(\
@@ -284,9 +314,10 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
     leg = ax.legend(loc="best", fancybox = True, numpoints=1)
     leg.get_frame().set_alpha(0.5)
     # Plot the grid
-    ax.grid()
-    # Make sure no collision between the ticks
-    ax.xaxis.set_major_locator(MaxNLocator(prune='lower'))
+    # NOTE: Adding which="both" would make gridlines on the minors as
+    #       well, but this may be harder to read
+    #       http://stackoverflow.com/questions/9127434/how-to-create-major-and-minor-gridlines-with-different-linestyles-in-python
+    ax.grid(True)
     # Includes the xlabel if outside
     plt.tight_layout()
 
@@ -341,7 +372,7 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
         ax.set_rasterization_zorder(-10)
 
         # Decorations
-        cbar = plt.colorbar(cplot)
+        cbar = plt.colorbar(cplot, format=FuncFormatter(plotNumberFormatter))
         cbar.ax.set_ylabel('Error')
         # Plot the grid
         ax.grid()
@@ -403,6 +434,8 @@ def plot_xy_errors(data, root_folder, extension, z_plane, directions):
         # Decorations
         cbar = plt.colorbar(cplot)
         cbar.ax.set_ylabel('Error')
+        cbar.formatter.set_useOffset(False)
+        cbar.update_ticks()
         # Plot the grid
         ax.grid()
         ax.set_xlabel(r"$\rho$")
