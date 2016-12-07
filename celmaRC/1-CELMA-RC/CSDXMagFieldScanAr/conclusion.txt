@@ -17,15 +17,25 @@ B0      Time                Comment
 0.02    10h21m
 0.04    23h43m
 0.06    Walltime reached    1 step reached with 5.41e+04, will accept as the expand step is just to ensure that solution stays the same when expanding
-0.08    *Running            * Running with 25 timestep in order to save time
-0.1     *Running            * Running with 25 timestep in order to save time
+0.08    20h24m              Run with 25 timestep in order to save time
+0.1     22h14m              Running with 25 timestep in order to save time
 
 
 Linear (1000 nout 1 timestep walltime 72h)
 ------------------------------------------
 B0      Time                Comment
+0.02    32h26m34s
+0.04    Walltime reached    4.881e3
+0.06    Walltime reached    4.917e3
+0.08    Running
+0.1     Running
+
+
+Expand (1000 nout 1 timestep walltime 72h)
+------------------------------------------
+B0      Time                Comment
 0.02    Running
 0.04    Running
 0.06    Running
-0.08    !QUICKFIX run
-0.1     !QUICKFIX run
+0.08    * Running after QUICKFIX run
+0.1     * Running after QUICKFIX run
