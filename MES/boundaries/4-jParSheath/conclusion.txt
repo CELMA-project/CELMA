@@ -1,0 +1,14 @@
+Copied from 2-uEParSheathWProfile/
+
+- Check that extrapolation is set properly
+NOTE: We are here profiling the the boundary condition!!!
+
+Results:
+========
+- gaussianWSinAndParabola:
+    Converges
+
+
+Conclusion:
+===========
+Converges
