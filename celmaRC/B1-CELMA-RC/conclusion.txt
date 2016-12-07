@@ -4,3 +4,4 @@ Copied from celmaCurMom/B7-CELMACurMomWParamsConstViscClean/
 
 Results:
 ========
+CSDXMagFieldScanAr - see folder for results
