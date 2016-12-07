@@ -4,6 +4,26 @@ Results of CSDXMagFieldScanAr
 Init (2 nout 2000 timestep walltime 72h)
 ----------------------------------------
 B0      Time                Comment
+0.02     3h34m
+0.04     5h23m
+0.06     5h49m
+0.08    10h23m
+0.1     -                   Not included in current run
+
+
+Expand (2 nout 50 timestep walltime 72h)
+----------------------------------------
+B0      Time                Comment
+0.02     1h57m
+0.04     3h12m
+0.06     5h47m
+0.08    20h34m
+0.1     -                   Not included in current run
+
+
+Linear (1000 nout 1 timestep walltime 72h)
+------------------------------------------
+B0      Time                Comment
 0.02    Running
 0.04    Running
 0.06    Running
