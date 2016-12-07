@@ -14,7 +14,7 @@ B0      Time                Comment
 Expand (2 nout 50 timestep walltime 24h)
 ----------------------------------------
 B0      Time                Comment
-0.02    !!!!!!!!!!!!
+0.02    ?  16m12s           Ending at 6.1e3
 0.04       14m37s
 0.06        5m53s
 0.08     9h 6m
@@ -24,7 +24,17 @@ B0      Time                Comment
 Linear (1000 nout 1 timestep walltime 72h)
 ------------------------------------------
 B0      Time                Comment
-0.02    !!!!
+0.02    Running             MUST RERUN!!! previous ??? 12h23m
+0.04    4h46m
+0.06    Walltime reached    4.942e3
+0.08    Walltime reached    4.775e3
+0.1     Walltime reached    4.381e3
+
+
+Turbulence (5000 nout 1 timestep walltime 72h)
+----------------------------------------------
+B0      Time                Comment
+0.02    Must rerun
 0.04    Running
 0.06    Running
 0.08    Running
