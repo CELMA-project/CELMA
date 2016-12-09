@@ -34,7 +34,7 @@ B0      Time                Comment
 Turbulence (5000 nout 1 timestep walltime 72h)
 ----------------------------------------------
 B0      Time                Comment
-0.02    Must rerun
+0.02    39h53m
 0.04    Running
 0.06    Running
 0.08    Running
