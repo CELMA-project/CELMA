@@ -27,12 +27,12 @@ B0      Time                Comment
 0.02    32h26m34s
 0.04    Walltime reached    4.881e3
 0.06    Walltime reached    4.917e3
-0.08    Running
+0.08    Running     ????***28h26m           SUNDIALS failed at step 4.661e3
 0.1     Running
 
 
-Expand (1000 nout 1 timestep walltime 72h)
-------------------------------------------
+Turbulence (5000 nout 1 timestep walltime 72h)
+----------------------------------------------
 B0      Time                Comment
 0.02    Running
 0.04    Running
