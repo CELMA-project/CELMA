@@ -98,3 +98,6 @@ parameters/c++/data/input_*
 *delme*
 *tmp*
 nout*/
+*.pickle
+*.avi
+*.mp4
