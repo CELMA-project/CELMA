@@ -24,8 +24,18 @@ B0      Time                Comment
 Linear (1000 nout 1 timestep walltime 72h)
 ------------------------------------------
 B0      Time                Comment
+0.02    58h38m
+0.04    37h14m
+0.06    *** 28h26m          SUNDIALS Failed at timestep 4.661e3
+0.08    *** 47h57m          SUNDIALS Failed at timestep 4.309e3
+0.1     -                   Not included in current run
+
+
+Turbulence (5000 nout 1 timestep walltime 72h)
+----------------------------------------------
+B0      Time                Comment
 0.02    Running
 0.04    Running
 0.06    Running
 0.08    Running
-0.1     -                   Not included in current run
+0.1     -
