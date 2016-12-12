@@ -1,5 +1,5 @@
 #
-# Input file for "B1-CELMA-RC/CSDXMagFieldScan/"
+# Input file for "1-CELMA-RC/WRONGBCS-CSDXMagFieldScan/"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -105,7 +105,7 @@ floats = false # floats = false => output in double
 [switch]
 includeNoise        = false
 forceAddNoise       = false
-useHyperViscAzVort  = true
+useHyperViscAzVortD = true
 saveTerms           = true
 saveDdt             = true
 constViscPar        = true
@@ -163,17 +163,17 @@ artPar = 40                # From 4.0/B=0.08 (actually scales with 1/B)
 artViscParLnN     = artPar # Density
 artViscParJPar    = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
-artViscParVort    = 1.0e-1 # Vorticity. From 1-CELMACurMom/PBSDriver-3-d-1.0-ViscPerpScanRestart31a0
+artViscParVortD   = 1.0e-1 # Modified vorticity. From 1-CELMACurMom/PBSDriver-3-d-1.0-ViscPerpScanRestart31a0
 
 # Perpendicular artificial viscosity
 artPerp = 3.0e-3             # From 4.0/B=0.08 (actually scales with 1/B)
 artViscPerpLnN     = artPerp
 artViscPerpJPar    = artPerp
 artViscPerpMomDens = artPerp
-artViscPerpVort    = 2.4e-4  # From 1-CELMACurMom/PBSDriver-3-d-1.0-ViscPerpScanRestart31a0
+artViscPerpVortD   = 2.4e-4  # From 1-CELMACurMom/PBSDriver-3-d-1.0-ViscPerpScanRestart31a0
 
 # Azimuthal hyper viscosity
-artHyperAzVort = 16.0
+artHyperAzVortD = 16.0
 # =============================================================================
 
 
@@ -275,7 +275,7 @@ bndry_ydown = dirichlet_o4(0.0) # Stagnation point
 
 # Non-boussinesq vorticity
 # =============================================================================
-[vort]
+[vortD]
 scale       = 1.0
 function    = 0.0               # Initial vorticity (set in the code)
 # Boundaries
