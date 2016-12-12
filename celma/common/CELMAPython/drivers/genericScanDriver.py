@@ -297,14 +297,16 @@ class GenericScanDriver(object):
     #}}}
 
     #{{{setCommonRunnerOptions
-    def setCommonRunnerOptions(self                     ,\
-                               nproc              = 48  ,\
-                               cpy_source         = True,\
-                               BOUT_nodes         = 3   ,\
-                               BOUT_ppn           = 16  ,\
-                               post_process_nproc = 1   ,\
-                               post_process_nodes = 1   ,\
-                               post_process_ppn   = 20  ,\
+    def setCommonRunnerOptions(self                       ,\
+                               nproc                = 48  ,\
+                               cpy_source           = True,\
+                               BOUT_nodes           = 3   ,\
+                               BOUT_ppn             = 16  ,\
+                               BOUT_account         = None,\
+                               post_process_nproc   = 1   ,\
+                               post_process_nodes   = 1   ,\
+                               post_process_ppn     = 20  ,\
+                               post_process_account = None,\
             ):
         #{{{docstring
         """
@@ -320,12 +322,16 @@ class GenericScanDriver(object):
             How many nodes to run on
         BOUT_ppn : int
             How many processors per node
+        BOUT_account : [None|str]
+            Account number to use for the runs
         post_process_nproc : int
             How many processors for post processor
         post_process_nodes : int
             How many nodes for post processor
         post_process_ppn : int
             How many processors per node for post processor
+        post_prcess_account : [None|str]
+            Account number to use for post processor
         """
         #}}}
 
@@ -333,13 +339,15 @@ class GenericScanDriver(object):
 
         self._commonRunnerOptions =\
                 {\
-                 "nproc"              : nproc             ,\
-                 "cpy_source"         : cpy_source        ,\
-                 "BOUT_nodes"         : BOUT_nodes        ,\
-                 "BOUT_ppn"           : BOUT_ppn          ,\
-                 "post_process_nproc" : post_process_nproc,\
-                 "post_process_nodes" : post_process_nodes,\
-                 "post_process_ppn"   : post_process_ppn  ,\
+                 "nproc"               : nproc               ,\
+                 "cpy_source"          : cpy_source          ,\
+                 "BOUT_nodes"          : BOUT_nodes          ,\
+                 "BOUT_ppn"            : BOUT_ppn            ,\
+                 "BOUT_account"        : BOUT_account        ,\
+                 "post_process_nproc"  : post_process_nproc  ,\
+                 "post_process_nodes"  : post_process_nodes  ,\
+                 "post_process_ppn"    : post_process_ppn    ,\
+                 "post_process_account": post_process_account,\
                 }
     #}}}
 
