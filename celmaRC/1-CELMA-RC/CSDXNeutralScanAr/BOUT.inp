@@ -1,5 +1,5 @@
 #
-# Input file for "1-CELMA-RC/CSDXMagFieldScanAr/"
+# Input file for "1-CELMA-RC/CSDXNeutralScanAr/"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -126,14 +126,14 @@ viscosityGuard      = false
 #       Dimensions: Burin et al 2005 PoP
 #       Ionization: Burin et al 2005 PoP
 #       n0 and Te : Burin et al 2005 PoP
-radius = 0.080   # The length of x from boundary to boundary in [m]
-length = 2.80    # The length of y from boundary to boundary in [m]
+radius = 0.080   # The length of x from boundary to boundary in m
+length = 2.80    # The length of y from boundary to boundary in m
 n0     = 1.0e19  # m^-3
 Te0    = 2.5     # eV
 Ti0    = 0.0     # eV
-B0     = 0.1     # T
+B0     = 0.06    # T
 Sn     = 8.25e21 # m^-3s^-1
-nn     = 0.0     # Clean neutral scan
+nn     = n0/0.2  # 20% ionization
 gas    = Ar
 
 # Print a warning for the exception
@@ -144,8 +144,8 @@ warningForException = True
 # Geometry
 # =============================================================================
 [geom]
-Lx =   7.8633 # The normalized radius (must agree with radius up to fourth decimal)
-Ly = 275.2144 # The normalized length (must agree with len up to fourth decimal)
+Lx =   4.7180 # The normalized radius (must agree with radius up to fourth decimal)
+Ly = 165.1286 # The normalized length (must agree with len up to fourth decimal)
 
 xl = x * geom:Lx            # x in range [0,Lx]
 yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]

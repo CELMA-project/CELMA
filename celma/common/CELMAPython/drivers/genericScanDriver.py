@@ -1464,6 +1464,52 @@ class GenericScanDriver(object):
             aScanPath      = self._linearAScanPath ,\
             scanParameters = self._scanParameters ,\
                                         )
+
+        if self._restartTurb is not None:
+            # Make extra turbulence folder
+            self._extra_turbo_folders = []
+            # Make a list of the turbo_dmp_folders
+            self._turbo_dmp_folders = list(self._turbo_dmp_folders)
+            # Create new runner
+            self._turboRun = self._runner(\
+                # Set turbulence options
+                **self._turbulenceOptions   ,\
+                # Set restart options
+                restart    = "overwrite"    ,\
+                additional = (
+                    ("tag",theRunName,0),\
+                    ("switch"      , "saveTerms"          ,saveTerms),\
+                    hyper,\
+                             ),\
+                series_add = self._series_add                ,\
+                # PBS options
+                **self._turbulencePBSOptions                 ,\
+                # Common options
+                **self._commonRunnerOptions                  ,\
+                            )
+
+            for _ in self._restartTurb:
+            turbo_dmp_folders, self._turbo_PBS_ids =\
+                self._turboRun.execute_runs(\
+                    post_processing_function = curPostProcessor,\
+                    # Declare dependencies
+                    job_dependencies = self._turbo_PBS_ids,\
+                    # This function will be called every time after
+                    # performing a run
+                    post_process_after_every_run = True,\
+                    # Below are the kwargs arguments being passed to
+                    # the post processing function
+                    theRunName        = theRunName        ,\
+                    **self._turbulencePostOptions         ,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc
+                    aScanPath      = self._linearAScanPath ,\
+                    scanParameters = self._scanParameters ,\
+                                                )
+                    # Update the list
+                    self._extra_turbo_folders.append(turbo_dmp_folders)
+            # Recast to tuple
+            self._extra_turbo_folders = tuple(self._extra_turbo_folders)
         #}}}
      #}}}
 
@@ -1477,8 +1523,15 @@ class GenericScanDriver(object):
 
         # Make a tuple of tuples, where each subtuple will be used as the
         # paths in collectiveCollect
-        collectionFolders =\
-            tuple(zip(self._linear_dmp_folders, self._turbo_dmp_folders))
+        if self._restartTurb is not None:
+            collectionFolders =\
+                tuple(zip(self._linear_dmp_folders ,\
+                          self._turbo_dmp_folders  ,\
+                          self._extra_turbo_folders,\
+                          ))
+        else:
+            collectionFolders =\
+                tuple(zip(self._linear_dmp_folders, self._turbo_dmp_folders))
 
         _, _ = self._linearRun.execute_runs(\
             post_processing_function = curPostProcessor,\
@@ -1509,8 +1562,16 @@ class GenericScanDriver(object):
     def _callPostProcessProbesAndEnergy(self):
         """Calls the post processor for the growth rates"""
 
-        collectionFolders = (self._linear_dmp_folders[0],\
-                             self._turbo_dmp_folders[0])
+        if self._restartTurb is not None:
+            collectionFolders = [self._linear_dmp_folders[0],\
+                                 self._turbo_dmp_folders[0]]
+            for folder in self._expand_dmp_folders:
+                collectionFolders.append(folder)
+            collectionFolders = tuple(collectionFolders)
+        else:
+            collectionFolders = (self._linear_dmp_folders[0],\
+                                 self._turbo_dmp_folders[0])
+
 
         theRunName = self._theRunName + "-energyProbesPlot"
         curPostProcessor = postBoutRunner
