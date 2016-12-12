@@ -25,17 +25,17 @@ Linear (1000 nout 1 timestep walltime 72h)
 ------------------------------------------
 B0      Time                Comment
 0.02    32h26m34s
-0.04    Walltime reached    4.881e3
-0.06    Walltime reached    4.917e3
-0.08    Walltime reached    4.368e3
-0.1     Walltime reached    4.371e3
+0.04    Walltime reached    4881
+0.06    Walltime reached    4917
+0.08    Walltime reached    4368
+0.1     Walltime reached    4371
 
 
 Turbulence (5000 nout 1 timestep walltime 72h)
 ----------------------------------------------
 B0      Time                Comment
-0.02    Running
-0.04    Running
-0.06    Running
+0.02    Walltime reached    7468
+0.04    Walltime reached    5586
+0.06    Walltime reached    7448
 0.08    Running
 0.1     Running
