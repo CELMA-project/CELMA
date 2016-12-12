@@ -6,8 +6,14 @@ from .plotHelper import PlotHelper
 from .plotNumberFormatter import plotNumberFormatter
 from .improvedCollect import collectiveCollect, safeCollect
 from .derivatives import DDZ, DDX, findLargestRadialGrad
-import matplotlib.pyplot as plt
 import os
+import matplotlib as mpl
+# Set proper backend from display
+try:
+    os.environ["DISPLAY"]
+except KeyError:
+    mpl.use("Agg")
+import matplotlib.pyplot as plt
 
 # Set the plot style for all plots
 titleSize = 30
@@ -19,13 +25,6 @@ plt.rc("xtick",  labelsize = 25)
 plt.rc("ytick",  labelsize = 25)
 plt.rc("legend", fontsize  = 20)
 plt.rc("lines",  linewidth = 2)
-
-# Set proper backend
-try:
-    plt.figure()
-except RuntimeError:
-    plt.switch_backend("Agg")
-    plt.figure()
 
 oldFont = {"family":plt.rcParams["font.family"],\
            "serif":plt.rcParams["font.serif"]}
