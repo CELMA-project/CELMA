@@ -2,6 +2,7 @@
 
 """Driver which runs using PBS."""
 
+from boututils.options import BOUTOptions
 import os, sys
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")
@@ -11,37 +12,40 @@ sys.path.append(commonDir)
 from CELMAPython.drivers import GenericScanDriver
 
 # Create object
-scanB0 = GenericScanDriver()
+scanNn = GenericScanDriver()
+
+directory = "CSDXNeutralScanAr"
+option = BOUTOptions(directory)
 
 # Set the scan
-B0 = ( 2.0e-2,)
-Lx = ( 1.5727,)
-Ly = (55.0429,)
+ionizationPercents = (80, 60, 40, 20)
+n0 = float(option.input["n0"])
+nn = tuple(n0/((pct)/100) for pct in ionizationPercents)
 
-scanParameters  = ("B0", "Lx", "Ly")
+scanParameters  = ("nn",)
 series_add = (\
-              ("input", "B0", B0),\
-              ("geom" , "Lx", Lx),\
-              ("geom" , "Ly", Ly),\
+              ("input", "nn", nn),\
              )
 
-directory = "CSDXMagFieldScanAr"
-
 # Set the main options
-scanB0.setMainOptions(\
+scanNn.setMainOptions(\
                        directory      = directory       ,\
                        scanParameters = scanParameters  ,\
                        series_add     = series_add      ,\
                        theRunName     = directory       ,\
                        make           = False           ,\
-                       boutRunnersNoise = {"vort":1e-6} ,\
+                       boutRunnersNoise = {"vortD":1e-6},\
                      )
 
-# Increase timestep just in case
-scanB0.setExpandOptions(BOUT_walltime = "72:00:00")
+# Increase to max walltime
+scanNn.setInitOptions(BOUT_walltime = "72:00:00")
+# Do timestep 25 rather than 50 in order to save time
+scanNn.setExpandOptions(timestep      = 25,\
+                        nout          = 2,\
+                        BOUT_walltime = "72:00:00")
 
 # Set the flags
-scanB0.setPostProcessingFlags(\
+scanNn.setPostProcessingFlags(\
                               justPostProcess            = False,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
@@ -56,7 +60,7 @@ scanB0.setPostProcessingFlags(\
                              )
 
 # Set common plotter options
-scanB0.setCommonPlotterOptions(\
+scanNn.setCommonPlotterOptions(\
                                saveFolderFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = True              ,\
                                showPlot          = False             ,\
@@ -66,14 +70,14 @@ scanB0.setCommonPlotterOptions(\
                               )
 
 # Set probe plotter options
-scanB0.setProbePlottersOptions(\
+scanNn.setProbePlottersOptions(\
                                nProbes = 5  ,\
                                maxMode = 10 ,\
                                yInd    = 16 ,\
                               )
 
 # Set field plotter options
-scanB0.setFieldPlottersOptions(\
+scanNn.setFieldPlottersOptions(\
                                xguards           = False,\
                                yguards           = False,\
                                xSlice            = 0    ,\
@@ -83,7 +87,7 @@ scanB0.setFieldPlottersOptions(\
                               )
 
 # Set common runner options
-scanB0.setCommonRunnerOptions(\
+scanNn.setCommonRunnerOptions(\
                               nproc              = 48  ,\
                               cpy_source         = True,\
                               BOUT_nodes         = 3   ,\
@@ -94,4 +98,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan()
+scanNn.runScan()
