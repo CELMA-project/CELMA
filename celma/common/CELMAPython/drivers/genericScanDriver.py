@@ -885,6 +885,7 @@ class GenericScanDriver(object):
     def setTurbulencePostOptions(self,
                                  useDefault             = True,\
                                  useFieldPlotterOptions = True,\
+                                 useMaxGrad             = False,\
                                  **kwargs):
         #{{{docstring
         """
@@ -895,6 +896,9 @@ class GenericScanDriver(object):
         useDefault : bool
         useFieldPlotterOptions : bool
             Whether or not the fieldPlotterOptions should be used.
+        useMaxGrad : bool
+            Whether or not to use the max gradient calculated from the
+            expand runs.
         kwargs : keyword arguments
             Do not use keyword arguments if useDefault is True.
             keywords to the post processors.
@@ -919,6 +923,7 @@ class GenericScanDriver(object):
         if useDefault:
             # Make the field plotter
             self._turbulenceUsesFieldPlotter = True
+            self._turbulencePostOptionsUsesMaxGrad = True
 
             if self._calledFunctions["fieldPlotterOptions"] == None:
                 self.setFieldPlottersOptions()
@@ -946,6 +951,8 @@ class GenericScanDriver(object):
             else:
                 self._turbulenceUsesFieldPlotter = False
 
+            self._turbulencePostOptionsUsesMaxGrad =\
+                    True if useMaxGrad else False
             self._turbulencePostOptions = {**kwargs}
 
             if useFieldPlotterOptions:
@@ -953,10 +960,18 @@ class GenericScanDriver(object):
     #}}}
 
     #{{{runScan
-    def runScan(self):
+    def runScan(self, boussinesq=False):
         """
         Calls the drivers used for running scans
+
+        Parameters
+        ----------
+        boussinesq : bool
+            Whether or not boussinesq approximation is used
         """
+
+        # Set boussinesq
+        self._boussinesq = boussinesq
 
         if not(self._calledFunctions["mainOptions"]):
             message = "self.setMainOptions must be called prior to a run"
@@ -1049,11 +1064,14 @@ class GenericScanDriver(object):
         #{{{ If profiles are to be plotted
         # FIXME: Consider making this into a function
         if self.postProcessLinProfiles or self.postProcessTurbProfiles:
-            noutProfile                 = 3
-            timestepProfile             = 10*self._timeStepMultiplicator
-            restartProfile              = "overwrite"
-            useHyperViscAzVortDProfile  = True
-            saveTermsProfile            = True
+            noutProfile      = 3
+            timestepProfile  = 10*self._timeStepMultiplicator
+            restartProfile   = "overwrite"
+            saveTermsProfile = True
+            if not(self._boussinesq):
+                hyper = ("switch", "useHyperViscAzVortD",True)
+            else:
+                hyper = ("switch", "useHyperViscAzVort",True)
 
             # Create the options for the runners
             # Notice that we would like to save all the fields here
@@ -1066,8 +1084,8 @@ class GenericScanDriver(object):
                 "restart_from" : restartFromFunc,\
                 # Set additional options
                 "additional" : (
-                 ("switch", "useHyperViscAzVortD",useHyperViscAzVortDProfile),\
-                 ("switch", "saveTerms"          ,saveTermsProfile),\
+                 ("switch", "saveTerms", saveTermsProfile),\
+                 hyper,\
                              ),\
                 "series_add" : self._series_add,\
                 # Common options
@@ -1099,8 +1117,10 @@ class GenericScanDriver(object):
         self._restart = None
         # Filter
         ownFilterType = "none"
-        #Switches
-        useHyperViscAzVortD = (False,)
+        if not(self._boussinesq):
+            hyper = ("switch", "useHyperViscAzVortD",False)
+        else:
+            hyper = ("switch", "useHyperViscAzVort",False)
         # PBS options
         if self._runner == PBS_runner:
             self._initPBSOptions.update(\
@@ -1122,7 +1142,7 @@ class GenericScanDriver(object):
             additional = (
                 ("tag",theRunName,0),\
                 ("ownFilters"  , "type", ownFilterType),\
-                ("switch"      , "useHyperViscAzVortD", useHyperViscAzVortD),\
+                hyper,\
                          ),\
             series_add = self._series_add,\
             # PBS options
@@ -1156,8 +1176,10 @@ class GenericScanDriver(object):
         # Set the spatial domain
         # Filter
         ownFilterType = "none"
-        #Switches
-        useHyperViscAzVortD = (False,)
+        if not(self._boussinesq):
+            hyper = ("switch", "useHyperViscAzVortD",False)
+        else:
+            hyper = ("switch", "useHyperViscAzVort",False)
         # From previous outputs
         try:
             self._initAScanPath = self._init_dmp_folders[0]
@@ -1194,7 +1216,7 @@ class GenericScanDriver(object):
             additional = (
                 ("tag",theRunName,0),\
                 ("ownFilters"  , "type", ownFilterType),\
-                ("switch"      , "useHyperViscAzVortD", useHyperViscAzVortD),\
+                hyper,\
                          ),\
             series_add = self._series_add                ,\
             # PBS options
@@ -1233,7 +1255,10 @@ class GenericScanDriver(object):
         #{{{ Linear options
         #Switches
         saveTerms           = False
-        useHyperViscAzVortD = (True,)
+        if not(self._boussinesq):
+            hyper = ("switch", "useHyperViscAzVortD",True)
+        else:
+            hyper = ("switch", "useHyperViscAzVort",True)
         if not(self._boutRunnersNoise):
             includeNoise  = True
             forceAddNoise = True
@@ -1248,6 +1273,8 @@ class GenericScanDriver(object):
                 maxGradRhoFolder = self._expand_dmp_folders[0]
                 # From previous outputs
                 self._expandAScanPath = self._expand_dmp_folders[0]
+                self._linearPostOptions["maxGradRhoFolder"] =\
+                                                maxGradRhoFolder
             except AttributeError as er:
                 if "has no attribute" in er.args[0]:
                     message =("{0}WARNING Expand was not run, post processor will "
@@ -1258,8 +1285,6 @@ class GenericScanDriver(object):
                     self._expandAScanPath = None
                 else:
                     raise er
-            self._linearPostOptions["maxGradRhoFolder"] =\
-                                            maxGradRhoFolder
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
@@ -1283,8 +1308,8 @@ class GenericScanDriver(object):
                 ("tag"   , theRunName           ,0),\
                 ("switch", "includeNoise"       , includeNoise ),\
                 ("switch", "forceAddNoise"      ,forceAddNoise),\
-                ("switch", "useHyperViscAzVortD",useHyperViscAzVortD),\
                 ("switch", "saveTerms"          ,saveTerms),\
+                hyper,\
                          ),\
             series_add = self._series_add                ,\
             # Set eventual noise
@@ -1332,7 +1357,29 @@ class GenericScanDriver(object):
         #{{{Turbulence options
         # Switches
         saveTerms           = False
-        useHyperViscAzVortD = (True,)
+        if not(self._boussinesq):
+            hyper = ("switch", "useHyperViscAzVortD",True)
+        else:
+            hyper = ("switch", "useHyperViscAzVort",True)
+
+        if self._turbulencePostOptionsUsesMaxGrad:
+            # As this is scan dependent, the driver finds the correct folder
+            try:
+                maxGradRhoFolder = self._expand_dmp_folders[0]
+                # From previous outputs
+                self._expandAScanPath = self._expand_dmp_folders[0]
+                self._turbulencePostOptions["maxGradRhoFolder"] =\
+                                                maxGradRhoFolder
+            except AttributeError as er:
+                if "has no attribute" in er.args[0]:
+                    message =("{0}WARNING Expand was not run, post processor will "
+                              "be set set to None{0}")
+                    print(message.format("!"*3))
+                    curPostProcessor      = None
+                    self._expand_PBS_ids  = None
+                    self._expandAScanPath = None
+                else:
+                    raise er
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
@@ -1367,8 +1414,8 @@ class GenericScanDriver(object):
             restart_from = restart_from ,\
             additional = (
                 ("tag",theRunName,0),\
-                ("switch"      , "useHyperViscAzVortD",useHyperViscAzVortD),\
                 ("switch"      , "saveTerms"          ,saveTerms),\
+                hyper,\
                          ),\
             series_add = self._series_add                ,\
             # PBS options
