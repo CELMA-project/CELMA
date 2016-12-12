@@ -302,10 +302,12 @@ class GenericScanDriver(object):
                                cpy_source           = True,\
                                BOUT_nodes           = 3   ,\
                                BOUT_ppn             = 16  ,\
+                               BOUT_queue           = None,\
                                BOUT_account         = None,\
                                post_process_nproc   = 1   ,\
                                post_process_nodes   = 1   ,\
                                post_process_ppn     = 20  ,\
+                               post_process_queue   = None,\
                                post_process_account = None,\
             ):
         #{{{docstring
@@ -343,10 +345,12 @@ class GenericScanDriver(object):
                  "cpy_source"          : cpy_source          ,\
                  "BOUT_nodes"          : BOUT_nodes          ,\
                  "BOUT_ppn"            : BOUT_ppn            ,\
+                 "BOUT_queue"          : BOUT_queue          ,\
                  "BOUT_account"        : BOUT_account        ,\
                  "post_process_nproc"  : post_process_nproc  ,\
                  "post_process_nodes"  : post_process_nodes  ,\
                  "post_process_ppn"    : post_process_ppn    ,\
+                 "post_process_queue"  : post_process_queue  ,\
                  "post_process_account": post_process_account,\
                 }
     #}}}
@@ -1037,6 +1041,8 @@ class GenericScanDriver(object):
             if problem:
                 raise ValueError(message)
 
+        self._commonPostProcessorQueue = None
+
         # Call the runners
         if self.runInit:
             self._callInitRunner()
@@ -1127,6 +1133,11 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+            if self._commonRunnerOptions["post_process_queue"] is not None:
+                self._commonPostProcessorQueue =\
+                    self._commonRunnerOptions.pop("post_process_queue")
+                self._initPBSOptions["post_process_queue"] =\
+                    self._commonPostProcessorQueue
         #}}}
         #{{{Run and post processing
         initRunner = self._runner(\
@@ -1202,6 +1213,10 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+            if self._commonPostProcessorQueue is not None:
+                self._expandPBSOptions["post_process_queue"] =\
+                    self._commonPostProcessorQueue
+
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
@@ -1293,6 +1308,10 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+            if self._commonPostProcessorQueue is not None:
+                self._linearPBSOptions["post_process_queue"] =\
+                    self._commonPostProcessorQueue
+
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
@@ -1388,6 +1407,10 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+            if self._commonPostProcessorQueue is not None:
+                self._turbulencePBSOptions["post_process_queue"] =\
+                    self._commonPostProcessorQueue
+
         # Set aScanPath
         try:
             self._linearAScanPath  = self._linear_dmp_folders[0]
