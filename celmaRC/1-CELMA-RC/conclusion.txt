@@ -8,6 +8,7 @@ Results:
 CSDXMagFieldScan               - See-sawing in jPar due to lnN - phi
 CSDXMagFieldScanHihgerTe       - Walltime reached
 CSDXMagFieldScanAr             - Gives non-fluctuating results (check results in own folder)
+CSDXMagFieldScanNeutralScanAr  - As CSDXMagFieldScanAr with B0=0.06 (check results in own folder)
 LeddyMagFieldScan              - Looks like see-sawing as well (need higher S)
 LeddyMagFieldScanHigherTe      - Walltime reached
 LeddyMagFieldScanHigherTeHalfR - Gives non-fluctuating results (check results in own folder)
@@ -35,6 +36,3 @@ Keeping all fixed but Ly gives Ly ~ 0.533
 Keeping all fixed but B  gives B  ~ 0.2
 Keeping all fixed but Te gives Te ~ 68
 Keeping all fixed but nz gives nz ~ 347
-
-Should really find another device...
-Trying Leddy decive
