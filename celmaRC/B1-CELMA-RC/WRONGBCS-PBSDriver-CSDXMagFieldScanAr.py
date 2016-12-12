@@ -25,7 +25,7 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "CSDXMagFieldScanAr"
+directory = "WRONGBCS-CSDXMagFieldScanAr"
 
 # Set the main options
 scanB0.setMainOptions(\
@@ -36,10 +36,6 @@ scanB0.setMainOptions(\
                        make           = False           ,\
                        boutRunnersNoise = {"vort":1e-6} ,\
                      )
-
-# Increase walltime just in case
-scanB0.setInitOptions  (BOUT_walltime = "72:00:00")
-scanB0.setExpandOptions(BOUT_walltime = "72:00:00")
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
@@ -95,4 +91,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan(boussinesq = True)
+scanB0.runScan()
