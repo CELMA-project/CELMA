@@ -964,7 +964,7 @@ class GenericScanDriver(object):
     #}}}
 
     #{{{runScan
-    def runScan(self, boussinesq=False):
+    def runScan(self, boussinesq=False, restartTurb=None):
         """
         Calls the drivers used for running scans
 
@@ -972,10 +972,13 @@ class GenericScanDriver(object):
         ----------
         boussinesq : bool
             Whether or not boussinesq approximation is used
+        restartTurb : [None|int]
+            Number of times to restart the trubulence runs
         """
 
-        # Set boussinesq
-        self._boussinesq = boussinesq
+        # Set boussinesq and restart turb
+        self._boussinesq  = boussinesq
+        self._restartTurb = restartTurb
 
         if not(self._calledFunctions["mainOptions"]):
             message = "self.setMainOptions must be called prior to a run"
@@ -1133,11 +1136,16 @@ class GenericScanDriver(object):
                     {"post_process_run_name":"post" + theRunName.capitalize(),
                      "BOUT_run_name"        : theRunName
                     })
+
+            # This self._commonRunnerOptions.pop("post_process_queue")
+            # As runs is called consecutively
             if self._commonRunnerOptions["post_process_queue"] is not None:
                 self._commonPostProcessorQueue =\
                     self._commonRunnerOptions.pop("post_process_queue")
                 self._initPBSOptions["post_process_queue"] =\
                     self._commonPostProcessorQueue
+            else:
+                self._commonRunnerOptions.pop("post_process_queue")
         #}}}
         #{{{Run and post processing
         initRunner = self._runner(\
@@ -1488,26 +1496,27 @@ class GenericScanDriver(object):
                 **self._commonRunnerOptions                  ,\
                             )
 
-            for _ in self._restartTurb:
-            turbo_dmp_folders, self._turbo_PBS_ids =\
-                self._turboRun.execute_runs(\
-                    post_processing_function = curPostProcessor,\
-                    # Declare dependencies
-                    job_dependencies = self._turbo_PBS_ids,\
-                    # This function will be called every time after
-                    # performing a run
-                    post_process_after_every_run = True,\
-                    # Below are the kwargs arguments being passed to
-                    # the post processing function
-                    theRunName        = theRunName        ,\
-                    **self._turbulencePostOptions         ,\
-                    # Below are the kwargs given to the
-                    # restartFromFunc
-                    aScanPath      = self._linearAScanPath ,\
-                    scanParameters = self._scanParameters ,\
-                                                )
-                    # Update the list
-                    self._extra_turbo_folders.append(turbo_dmp_folders)
+            for _ in range(self._restartTurb):
+                turbo_dmp_folders, self._turbo_PBS_ids =\
+                    self._turboRun.execute_runs(\
+                        post_processing_function = curPostProcessor,\
+                        # Declare dependencies
+                        job_dependencies = self._turbo_PBS_ids,\
+                        # This function will be called every time after
+                        # performing a run
+                        post_process_after_every_run = True,\
+                        # Below are the kwargs arguments being passed to
+                        # the post processing function
+                        theRunName        = theRunName        ,\
+                        **self._turbulencePostOptions         ,\
+                        # Below are the kwargs given to the
+                        # restartFromFunc
+                        aScanPath      = self._linearAScanPath ,\
+                        scanParameters = self._scanParameters ,\
+                                                    )
+            # Update the list
+            self._extra_turbo_folders.append(turbo_dmp_folders)
+
             # Recast to tuple
             self._extra_turbo_folders = tuple(self._extra_turbo_folders)
         #}}}
