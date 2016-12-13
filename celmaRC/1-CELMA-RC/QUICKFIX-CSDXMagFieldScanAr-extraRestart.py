@@ -14,9 +14,12 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (  1.0e-1,   8.0e-2,   6.0e-2,   4.0e-2,  2.0e-2)
-Lx = ( 10.4629,   8.3703,   6.2777,   4.1852,  2.0926)
-Ly = (313.8871, 251.1097, 188.3323, 125.5549, 62.7774)
+# NOTE: This will B0.1 and B0.08 has different timestep for expand
+#       Here we will just leave the dummy folder for this for easier
+#       post-processing
+B0 = (  1.0e-1,   8.0e-2,   6.0e-2,   4.0e-2,)
+Lx = (  7.8633,   6.2906,   4.7180,   3.1453,)
+Ly = (275.2144, 220.1715, 165.1286, 110.0858,)
 
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
@@ -25,7 +28,7 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "LeddyMagFieldScanHigherTeHalfR"
+directory = "CSDXMagFieldScanAr"
 
 # Set the main options
 scanB0.setMainOptions(\
@@ -36,14 +39,6 @@ scanB0.setMainOptions(\
                        make           = False           ,\
                        boutRunnersNoise = {"vortD":1e-6},\
                      )
-
-# Do timestep 25 rather than 50 in order to save time
-scanB0.setInitOptions(BOUT_walltime = "48:00:00")
-
-# Do timestep 25 rather than 50 in order to save time
-scanB0.setExpandOptions(timestep      = 25,\
-                        nout          = 2,\
-                        BOUT_walltime = "72:00:00")
 
 # Set the flags
 scanB0.setPostProcessingFlags(\
@@ -99,4 +94,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan()
+scanB0.runScan(restartTurb=1)

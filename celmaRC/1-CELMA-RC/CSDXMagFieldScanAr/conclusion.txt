@@ -24,7 +24,7 @@ B0      Time                Comment
 Linear (1000 nout 1 timestep walltime 72h)
 ------------------------------------------
 B0      Time                Comment
-0.02    32h26m34s
+0.02    32h26m34s           Dampening of modes
 0.04    Walltime reached    4881
 0.06    Walltime reached    4917
 0.08    Walltime reached    4368
@@ -34,8 +34,19 @@ B0      Time                Comment
 Turbulence (5000 nout 1 timestep walltime 72h)
 ----------------------------------------------
 B0      Time                Comment
-0.02    Walltime reached    7468
-0.04    Walltime reached    5586
-0.06    Walltime reached    7448
-0.08    Running
-0.1     Running
+0.02    Walltime reached    7468 - Mode damped completely
+0.04    Walltime reached    5586 - Mode still growing up, must rerun!
+0.06    Walltime reached    7448 - Looks like reached turbulence
+0.08    Walltime reached    6281
+0.1     Walltime reached    4741
+
+
+Restart turbulence (5000 nout 1 timestep walltime 72h)
+------------------------------------------------------
+NOTE: Previous runs are stored in restart_1 and up
+B0      Time                Comment
+0.02    -
+0.04    Running
+0.06    -
+0.08    -
+0.1     -
