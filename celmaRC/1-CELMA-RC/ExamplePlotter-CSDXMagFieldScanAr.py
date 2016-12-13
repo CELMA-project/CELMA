@@ -14,9 +14,9 @@ from CELMAPython.drivers import GenericScanDriver
 scanB0 = GenericScanDriver()
 
 # Set the scan
-B0 = (  1.0e-1,   8.0e-2,   6.0e-2,   4.0e-2,  2.0e-2)
-Lx = ( 10.4629,   8.3703,   6.2777,   4.1852,  2.0926)
-Ly = (313.8871, 251.1097, 188.3323, 125.5549, 62.7774)
+B0 = (  6.0e-2,   4.0e-2,  2.0e-2)
+Lx = (  4.7180,   3.1453,  1.5727)
+Ly = (165.1286, 110.0858, 55.0429)
 
 scanParameters  = ("B0", "Lx", "Ly")
 series_add = (\
@@ -25,7 +25,7 @@ series_add = (\
               ("geom" , "Ly", Ly),\
              )
 
-directory = "LeddyMagFieldScanHigherTeHalfR"
+directory = "CSDXMagFieldScanAr"
 
 # Set the main options
 scanB0.setMainOptions(\
@@ -37,21 +37,13 @@ scanB0.setMainOptions(\
                        boutRunnersNoise = {"vortD":1e-6},\
                      )
 
-# Do timestep 25 rather than 50 in order to save time
-scanB0.setInitOptions(BOUT_walltime = "48:00:00")
-
-# Do timestep 25 rather than 50 in order to save time
-scanB0.setExpandOptions(timestep      = 25,\
-                        nout          = 2,\
-                        BOUT_walltime = "72:00:00")
-
 # Set the flags
 scanB0.setPostProcessingFlags(\
-                              justPostProcess            = False,\
+                              justPostProcess            = True ,\
                               postProcessInit            = False,\
                               postProcessExp             = False,\
                               postProcessLin             = False,\
-                              postProcessTurb            = False,\
+                              postProcessTurb            = True ,\
                               postProcessLinProfiles     = False,\
                               postProcessTurbProfiles    = False,\
                               postProcessProbesAndEnergy = False,\
@@ -59,6 +51,25 @@ scanB0.setPostProcessingFlags(\
 # FIXME: Look at energy overshoot, and set correct index (starting from linear run) here
                               tIndSaturatedTurb          = None,\
                              )
+turbPost=\
+  {"driverName" : "single2DDriver" ,\
+   "varName"    : "n"              ,\
+   "pltName"    : "n"              ,\
+   "tSlice"     : slice(0, None, 2),\
+   "varyMaxMin" : True             ,\
+   "fluctuation": True             ,\
+   "mode"       : "perpAndPol"     ,\
+  }
+
+scanB0.setTurbulencePostOptions(useDefault             = False,\
+                                useFieldPlotterOptions = True ,\
+                                useMaxGrad             = True,\
+                                **turbPost)
+
+scanB0.setRunOptions(runInit   = True,\
+                     runExpand = True,\
+                     runLin    = True,\
+                     runTurb   = True)
 
 # Set common plotter options
 scanB0.setCommonPlotterOptions(\
