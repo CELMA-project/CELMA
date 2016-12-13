@@ -1,3 +1,5 @@
+# Collect stuff
+#%%
 %load_ext autoreload
 %autoreload 2
 
@@ -35,7 +37,7 @@ for t in range(tLen):
 stdDev = np.sqrt(polAvg(timeAvg(nTZFluct**2.0)))
 
 avgStd = [nAvgTZ, stdDev]
-with open("/home/mmag/avgStd", "wb") as f:
+with open("/home/mmag/avgStd.pickle", "wb") as f:
     pickle.dump(avgStd, f)
 
 #%%
@@ -54,17 +56,24 @@ t = collect("t_array")
 n = np.exp(lnN)
 steadyStateN = n[0,:,0,0]
 
-with open("/home/mmag/steadyStateN", "wb") as f:
+with open("steadyStateN.pickle", "wb") as f:
     pickle.dump(steadyStateN, f)
+#%%
+
+
+
+
+
+# Plot stuff
 #%%
 import numpy as np
 import matplotlib.pylab as plt
 
 import pickle
 
-with open("avgStd", "rb") as f:
+with open("avgStd.pickle", "rb") as f:
     avg, std = pickle.load(f)
-with open("steadyStateN", "rb") as f:
+with open("steadyStateN.pickle", "rb") as f:
     steadyStateN = pickle.load(f)
 
 avg = avg[0,:,0,0]
