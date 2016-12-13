@@ -1,1 +1,3 @@
-../../../celma/common/CELMAPython/__init__.py
+#!/usr/bin/env python
+
+""" Init for the CELMAPython package"""
