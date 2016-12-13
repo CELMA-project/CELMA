@@ -35,6 +35,7 @@ zind
 # So nYind has higher precedence than yind
 # xind etc should still have dimension
 # they are called from the outside (e.g. generic driver)
+# Make a super class of point type classes, which only contains the init
 #--------------
 
 
