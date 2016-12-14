@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains the PSD calculation
+Contains the radial flux calculation
 """
 
 from .averages import polAvg
@@ -14,34 +14,18 @@ import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
 
-#{{{calcPSD
-def calcPSD(paths                      ,\
-            varName                    ,\
-            xInd                       ,\
-            yInd                       ,\
-            zInd                       ,\
-            convertToPhysical = True   ,\
-            mode              = "fluct",\
-            tSlice            = None):
+#{{{calcRadialFlux
+def calcRadialFlux(paths                      ,\
+                   varName                    ,\
+                   xInd                       ,\
+                   yInd                       ,\
+                   zInd                       ,\
+                   convertToPhysical = True   ,\
+                   mode              = "fluct",\
+                   tSlice            = None):
     #{{{docstring
     """
-    Function which calculates the power spectral density.
-
-    Power spectral density
-    ----------------------
-        * Tells us what frequencies are present in the signal.
-        * The average power of the signal is the integrated of the PSD
-        * The bandwidth of the process (turbulence) is defined as
-          the frequency width where the signal is within 3dB of its
-          peak value.
-        * PSD is a deterministic description of the spectral
-          characteristic of the signal. Cannot use fourier transform on
-          random variables as this is not necessarily definied etc.
-        * PSD is the fourier transformed of the auto-correlation
-          function, and cross spectral density is the fourier
-          transformed of the cross correlation function
-        * The periodogram estimate is the same as autocorrelation with a
-          triangular window
+    Function which calculates the radial flux.
 
     Parameters
     ----------
@@ -65,10 +49,10 @@ def calcPSD(paths                      ,\
 
     Returns
     -------
-    PSD : dict
+    radialFLux : dict
         Dictionary where the keys are on the form "rho,theta,z".
         The value is a dict containing of
-        {varPSDX:psdX, varPSDY:psdY}
+        {varRadialFlux:radialFlux, "time":time}
     """
     #}}}
 
@@ -83,6 +67,22 @@ def calcPSD(paths                      ,\
                       mode              = mode             ,\
                       tSlice            = tSlice           ,\
                       )
+
+    YOU ARE HERE!
+                    nu      <nu>                        tilde n tilde u
+    user choose, normal,  pol avg (collect profile), fluct
+    these subtracted gives <<n><u>>
+    # To lowest order ExB is the only radial advection
+    radialExB = calcTimeTrace(paths                        ,\
+                      varName                              ,\
+                      xInd                                 ,\
+                      yInd                                 ,\
+                      zInd                                 ,\
+                      convertToPhysical = convertToPhysical,\
+                      mode              = mode             ,\
+                      tSlice            = tSlice           ,\
+                      )
+
 
     # Initialize the output
     PSD = {}

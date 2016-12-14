@@ -111,7 +111,8 @@ def collectiveCollect(paths               ,\
 #}}}
 
 #{{{collectPointTime
-def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
+def collectPointTime(paths, varName, xInd, yInd, zInd,\
+                     mode="normal", tInd = None):
     #{{{docstring
     """
     Collects the variable in one spatial point
@@ -130,6 +131,9 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
         yInd to collect from
     zInd : int
         zInd to collect from
+    mode : ["normal"|"fluct"]
+        If the output should be the raw data or the fluctuation
+        (subtracted the poloidal average)
     tInd : [None|tuple]
         Start and end of the time if not None
 
@@ -145,15 +149,16 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
 
     if varName == "n":
         collectVarName = "lnN"
+    else:
+        collectVarName = varName
 
-    # Collect the variable
-    varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    yInd = (yInd, yInd),\
-                                    zInd = (zInd, zInd),\
-                                    tInd = tInd
-                                    )
+        varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
+                                        collectGhost = False,\
+                                        xInd = (xInd, xInd),\
+                                        yInd = (yInd, yInd),\
+                                        zInd = (zInd, zInd),\
+                                        tInd = tInd
+                                        )
 
     var  = varTimeDict[collectVarName]
     time = varTimeDict["t_array"]
@@ -196,6 +201,8 @@ def collectRadialProfileTime(paths, varName, yInd, zInd, tInd = None):
 
     if varName == "n":
         collectVarName = "lnN"
+    else:
+        collectVarName = varName
 
     # Collect the variable
     varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
@@ -246,6 +253,8 @@ def collectPoloidalProfileTime(paths, varName, xInd, yInd, tInd=None):
 
     if varName == "n":
         collectVarName = "lnN"
+    else:
+        collectVarName = varName
 
     # Collect the variable
     varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
