@@ -7,8 +7,42 @@ Contains drivers for the probes
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import collectEnergy, PlotEnergy
 
+# Find the max gradient of the variable (subtracts the guard cells)
+_, maxGradInd =\
+    findLargestRadialGrad(\
+      self._varSteadyState[0:1, :, self.yInd:self.yInd+1, 0:1],\
+      dx,\
+      self._MXG)
+
+
+# Get radial indices -> equidistanced indices
+xind
+yind
+zind
+
+OR
+
+nXind + center
+yind
+zind
+
+OR
+
+xind
+nYind
+zind
+
+# So nYind has higher precedence than yind
+# xind etc should still have dimension
+# they are called from the outside (e.g. generic driver)
+# Make a super class of point type classes, which only contains the init
+#--------------
+
+
+
+
 #{{{DriverTimeTrace
-class DriverTimeTrace(CommonPostProcessingDriver):
+class DriverTimeTrace(PointsSuperClass):
     """
     Class which handles the stats and signal data.
     """
@@ -16,48 +50,18 @@ class DriverTimeTrace(CommonPostProcessingDriver):
     #{{{Constructor
     def __init__(self,\
                  *args,\
-                 paths,\
-                 xInd,\
-                 yInd,\
-                 zInd,\
-                 tSlice,\
-                 varName   = "n",\
-                 timeTrace = None,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
 
         1. Calls the parent constructor
-        2. Sets path and pltSize
+        2. Sets pltSize
 
         Parameters
         ----------
         *args : positional arguments
             See the parent constructor for details.
-        paths  : tuple of strings
-            The paths to collect from
-        xInd : [int|sequence of ints]
-            xInd to use when collecting.
-            If given as a sequence, the length of the sequence must
-            match the other input dimensions.
-        yInd : [int|sequence of ints]
-            yInd to use when collecting.
-            If given as a sequence, the length of the sequence must
-            match the other input dimensions.
-        zInd : [int|sequence of ints]
-            zInd to use when collecting.
-            If given as a sequence, the length of the sequence must
-            match the other input dimensions.
-        tSlice : [slice|sequence of slices]
-            Slice of t to use when collecting.
-            If given as a sequence, the length of the sequence must
-            match the other input dimensions.
-        varName : str
-            Name to collect.
-        timeTrace : array
-            Array of the time trace.
-            Will be collected if not given.
         **kwargs : keyword arguments
             See the parent constructor for details.
         """
@@ -67,14 +71,6 @@ class DriverTimeTrace(CommonPostProcessingDriver):
         super().__init__(*args, **kwargs)
 
         # Set member data
-        self._paths   = paths
-        self._xInd    = xInd
-        self._yInd    = yInd
-        self._zInd    = zInd
-        self._tSlice  = tSlice
-        self._varName = varName
-
-        self._pltName = getPltName(varName)
         self._pltSize = (12, 9)
 
         # Placeholder for the timeTrace
