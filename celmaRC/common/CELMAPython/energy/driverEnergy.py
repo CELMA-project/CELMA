@@ -7,6 +7,7 @@ Contains drivers for the probes
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import collectEnergy, PlotEnergy
 
+FIXME: normFactor for eEnergy
 #{{{DriverEnergy
 class DriverEnergy(CommonPostProcessingDriver):
     """
