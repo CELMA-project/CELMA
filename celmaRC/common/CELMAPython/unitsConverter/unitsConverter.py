@@ -131,7 +131,7 @@ class UnitsConverter(object):
         """
         #}}}
 
-        self._conversionDict = {\
+        self.conversionDict = {\
         # NOTE: n0 is input parameter, but n is from an evolving field
         "n"         :{"units"        :r"\mathrm{m}^{-3}",\
                       "normalization":r"/n_0",\
@@ -259,7 +259,7 @@ class UnitsConverter(object):
         var : array
             The variable.
         key : str
-            Key to use in self._conversionDict
+            Key to use in self.conversionDict
 
         Returns
         -------
@@ -277,7 +277,7 @@ class UnitsConverter(object):
                     var = var.copy()
                     var.setflags(write = True)
 
-            var *= self._conversionDict["factor"]
+            var *= self.conversionDict["factor"]
 
             # Turn off write access
             if hasattr(var, "setflags"):
@@ -299,7 +299,7 @@ class UnitsConverter(object):
         var : array
             The variable.
         key : str
-            Key to use in self._conversionDict
+            Key to use in self.conversionDict
 
         Returns
         -------
@@ -317,7 +317,7 @@ class UnitsConverter(object):
                     var = var.copy()
                     var.setflags(write = True)
 
-            var *= self._conversionDict["normFactor"]
+            var *= self.conversionDict["normFactor"]
 
             # Turn off write access
             if hasattr(var, "setflags"):
@@ -338,7 +338,7 @@ class UnitsConverter(object):
         Parameters
         ----------
         key : str
-            Key to use in self._conversionDict
+            Key to use in self.conversionDict
 
         Returns
         -------
@@ -348,7 +348,7 @@ class UnitsConverter(object):
         #}}}
 
         if self._convertToPhysical:
-            return self._conversionDict[key]["units"]
+            return self.conversionDict[key]["units"]
         else:
             return ""
     #}}}
@@ -365,7 +365,7 @@ class UnitsConverter(object):
         Parameters
         ----------
         key : str
-            Key to use in self._conversionDict
+            Key to use in self.conversionDict
 
         Returns
         -------
@@ -377,6 +377,6 @@ class UnitsConverter(object):
         if self._convertToPhysical:
             return ""
         else:
-            return self._conversionDict[key]["normalization"]
+            return self.conversionDict[key]["normalization"]
     #}}}
 #}}}
