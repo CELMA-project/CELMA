@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains classes which probes the data
+Contains the calcTimeTrace calculation
 """
 
 from .averages import polAvg
@@ -14,48 +14,93 @@ import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
 
+#{{{calcTimeTrace
+def calcTimeTrace(paths                      ,\
+                  varName                    ,\
+                  xInd                       ,\
+                  yInd                       ,\
+                  zInd                       ,\
+                  convertToPhysical = True   ,\
+                  mode              = "fluct",\
+                  tSlice            = None):
+    #{{{docstring
+    """
+    Function which calculates the time traces
 
-# Get radial indices -> equidistanced indices
-xind
-yind
-zind
+    Parameters
+    ----------
+    paths : tuple of strings
+        The paths to collect from
+    varName : str
+        Variable to collect
+    xInd : tuple of ints
+        A tuple of the xInds to collect use when collecting.
+    yInd : tuple of ints
+        The same as xInd, but for the y-index.
+    zInd : tuple of ints
+        The same as xInd, but for the z-index.
+    convertToPhysical : bool
+        Whether or not to convert to physical units.
+    mode : ["normal"|"fluct"]
+        If mode is "normal" the raw data is given as an output.
+        If mode is "fluct" the fluctuations are given as an output.
+    tSlice : [None|Slice}
+        Whether to slice the time trace
 
-OR
+    Returns
+    -------
+    timeTraces : dict
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {varName:timeTrace, "time":time}
+    """
+    #}}}
 
-nXind + center
-yind
-zind
+    # Create the units convertor object
+    uc = UnitsConverter(paths[0], convertToPhysical)
+    # Toggle convertToPhysical in case of errors
+    convertToPhysical = uc.convertToPhysical
+    # Create the dimensions helper object
+    self.dh = DimensionsHelper(paths[0], uc)
 
-OR
+    timeTraces = {}
+    tCounter = 0
+    for x, y, z in zip(xInd, yInd, zInd):
+        # NOTE: The indices
+        rho   = dh.rho  (int(x))
+        theta = dh.theta(int(z))
+        z     = dh.z    (int(y))
 
-xind
-nYind
-zind
+        # Add key and dict to timeTraces
+        key = "{},{},{}".format(x,y,z)
+        timeTraces[key] = {}
 
-# So nYind has higher precedence than yind
-# xind etc should still have dimension
-# they are called from the outside (e.g. generic driver)
-# Make a super class of point type classes, which only contains the init
-#--------------
+        if tSlice is not None:
+            tStart = tSlice[tCounter].start
+            tEnd   = tSlice[tCounter].end
+            tCounter += 1
+        else:
+            tStart = None
+            tEnd   = None
 
+        t = (tStart, tEnd)
 
+        var, time = collectPointTime(paths, varName, x, y, z, t)
 
-# Find the fluctuations in var
-self._varAvg   = polAvg(var[tIndSaturatedTurb:, :, :, :])
-self._varFluct = var[tIndSaturatedTurb:, :, :, :] - self._varAvg
+        # Reshape
+        var = var.flatten()
 
-# Get the units (eventually convert to physical units)
-self._var, self.varNormalization, self.varUnits =\
-    self.helper.physicalUnitsConverter(var, varName)
+        if mode == "fluct"
+            var = var - var.mean()
+        elif mode != "normal":
+            raise NotImplementedError("'{}'-mode not implemented".format(mode))
 
+        if convertToPhysical:
+            timeTraces[key][varName] = uc.physicalConversion(var , varName)
+            timeTraces[key]["time"]  = uc.physicalConversion(time, "t")
+        else:
+            timeTraces[key][varName] = var
+            timeTraces[key]["time"]  = time
 
-# Find the max gradient of the variable (subtracts the guard cells)
-_, maxGradInd =\
-    findLargestRadialGrad(\
-      self._varSteadyState[0:1, :, self.yInd:self.yInd+1, 0:1],\
-      dx,\
-      self._MXG)
-
-self.timeTraceOfVarFluct\
-        ["{},{},{}".format(xInd, actualYInd, zInd)] =\
-            self._varFluct[:, xInd, yInd, zInd]
+    return timeTraces
+#}}}

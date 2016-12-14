@@ -17,9 +17,9 @@ class UnitsConverter(object):
     """
 
     #{{{__init__
-    def  __init__(self                     ,\
-                  path                     ,\
-                  convertToPhysical = False):
+    def  __init__(self                    ,\
+                  path                    ,\
+                  convertToPhysical = True):
         #{{{docstring
         """
         The constructor for UnitsConverter, which:
@@ -245,8 +245,8 @@ class UnitsConverter(object):
         }
     #}}}
 
-    #{{{convertToPhysical
-    def convertToPhysical(self, var, key):
+    #{{{physicalConversion
+    def physicalConversion(self, var, key):
         #{{{docstring
         """
         Convert a variable from normalized to physical units.
@@ -286,8 +286,8 @@ class UnitsConverter(object):
         return var
     #}}}
 
-    #{{{convertToNormalized
-    def convertToNormalized(self, var, key):
+    #{{{normalizedConversion
+    def normalizedConversion(self, var, key):
         #{{{docstring
         """
         Convert a variable from physical units to normalized.
