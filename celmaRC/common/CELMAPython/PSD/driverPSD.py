@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for the PDF
+Contains drivers for the PSD
 """
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import collectEnergy, PlotEnergy
 
-#{{{DriverPDF
-class DriverPDF(PointsSuperClass):
+#{{{DriverPSD
+class DriverPSD(PointsSuperClass):
     """
-    Class which handles the PDF data.
+    Class which handles the PSD data.
     """
 
     #{{{Constructor
@@ -40,14 +40,14 @@ class DriverPDF(PointsSuperClass):
         self._pltSize = (12, 9)
 
         # Placeholder for the timeTrace
-        self._PDF = None
+        self._PSD = None
     #}}}
 
-    #{{{getPDF
-    def getPDF(self):
-        """Obtain the PDF"""
+    #{{{getPSD
+    def getPSD(self):
+        """Obtain the PSD"""
         # Create the probes
-        self._PDF = calcPDF(self._paths,\
+        self._PSD = calcPSD(self._paths,\
                             self._varName,\
                             self._xInd,\
                             self._yInd,\
@@ -58,18 +58,18 @@ class DriverPDF(PointsSuperClass):
                             )
     #}}}
 
-    #{{{plotPDF
-    def plotPDF(self):
-        """Plots the PDF"""
+    #{{{plotPSD
+    def plotPSD(self):
+        """Plots the PSD"""
 
         # Calculate the probes if not already done
-        if self._PDF == None:
-            self.getPDF()
+        if self._timeTrace == None:
+            self.getTimeTraces()
 
         # Create the energyPlotter
-        PDFPlotter = PlotPDF(\
+        PSDPlotter = PlotPSD(\
                 self._paths                                ,\
-                self._PDF                                  ,\
+                self._PSD                                  ,\
                 convertToPhysical = self._convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
@@ -78,6 +78,6 @@ class DriverPDF(PointsSuperClass):
                 pltSize           = self._pltSize          ,\
                                   )
 
-        PDFPlotter.plotPDF()
+        PSDPlotter.plotPSD()
     #}}}
 #}}}
