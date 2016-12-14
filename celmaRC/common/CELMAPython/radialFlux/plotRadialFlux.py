@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Class for timeTrace plot"""
+"""Class for radial flux plot"""
 
 from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import matplotlib.pyplot as plt
@@ -9,8 +9,18 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
 
-#{{{PlotPDF
-class PlotPDF(PlotsSuperClass):
+YOU ARE HERE:
+THESE ARE FIXMES
+▸ commonDrivers/
+▸ energy/
+▸ fieldPlotters/
+▸ growthRates/
+▸ radialFlux/
+▸ skewnessKurtosis/
+
+
+#{{{PlotRadialFlux
+class PlotRadialFlux(PlotsSuperClass):
     """
     Class which contains the PDF data and the plotting configuration.
     """
