@@ -17,10 +17,9 @@ class DimensionsHelper(object):
     #{{{__init__
     def  __init__(self                     ,\
                   path                     ,\
-                  t                        ,\
+                  unitsConverter           ,\
                   xguards           = False,\
-                  yguards           = False,\
-                  convertToPhysical = False):
+                  yguards           = False):
         #{{{docstring
         """
         The constructor for DimensionsHelper, which:
@@ -32,14 +31,10 @@ class DimensionsHelper(object):
         ----------
         path : str
             The path to collect from.
-        t : array
-            The time array (given as input as slices may be possible)
         xguards : bool
             If xguards should be included when collecting.
         yguards : bool
             If yguards should be included when collecting.
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
         unitsConverter : UnitsConverter
             UnitsConverter object which contains the conversion factors.
         """
@@ -47,11 +42,10 @@ class DimensionsHelper(object):
 
         # Set the member data
         self._path              = path
+        self._unitsConverter    = unitsConverter
         self._xguards           = xguards
         self._yguards           = yguards
-        self._convertToPhysical = convertToPhysical
-        self.t                  = t
-        self.dt                 = t[1]-t[0]
+        self._convertToPhysical = unitsConverter.convertToPhysical
 
         # Get the coordinates
         self._getCoordinates()
@@ -183,11 +177,9 @@ class DimensionsHelper(object):
         #}}}
 
         if self._convertToPhysical:
-            self.t   = unitsConverter.convertToPhysical(self.t  , "t"  )
-            self.dt  = unitsConverter.convertToPhysical(self.dt , "t"  )
-            self.rho = unitsConverter.convertToPhysical(self.rho, "rho")
-            self.dx  = unitsConverter.convertToPhysical(self.dx , "rho")
-            self.z   = unitsConverter.convertToPhysical(self.z  , "z"  )
-            self.dy  = unitsConverter.convertToPhysical(self.dy , "z"  )
+            self.rho = self._unitsConverter.physicalConversion(self.rho, "rho")
+            self.dx  = self._unitsConverter.physicalConversion(self.dx , "rho")
+            self.z   = self._unitsConverter.physicalConversion(self.z  , "z"  )
+            self.dy  = self._unitsConverter.physicalConversion(self.dy , "z"  )
     #}}}
 #}}}
