@@ -14,6 +14,20 @@ import os
 class PlotHelper(object):
     """Contains common routines used when making plots"""
 
+    #{{{Static members
+    _varPltName = {\
+        "lnN"        :  "\ln(n)"          ,\
+        "n"          :  "n"               ,\
+        "vort"       :  "\Om"             ,\
+        "vortD"      :  "\Om^D"           ,\
+        "phi"        :  "\phi"            ,\
+        "jPar"       :  "j_{\parallel}"   ,\
+        "momDensPar" :  "nu_{i,\parallel}",\
+        "uIPar"      :  "u_{i,\parallel}" ,\
+        "uEPar"      :  "u_{e,\parallel}" ,\
+        }
+    #}}}
+
     #{{{__init__
     def  __init__(self                     ,\
                   convertToPhysical = False):
@@ -98,8 +112,29 @@ class PlotHelper(object):
             self.tTxtDict  ["tTxtLabel"] = r"$t{0[normalization]}$"
     #}}}
 
-    #{{{makePlotPretty
     @staticmethod
+    #{{{getVarPltName
+    def getVarPltName(var):
+        """
+        Routine that returns the variable plot name.
+        The return value does not include the $
+
+        Parameters
+        ----------
+        var : str
+            The variable to find the plot name for.
+
+        Retruns
+        -------
+        varPltName : str
+            The plot name
+        """
+
+        return self._varPltName[var]
+    #}}}
+
+    @staticmethod
+    #{{{makePlotPretty
     def makePlotPretty(ax                     ,\
                        xprune   = "lower"     ,\
                        yprune   = None        ,\
@@ -155,8 +190,8 @@ class PlotHelper(object):
             ax.yaxis.set_major_locator(MaxNLocator(prune=yprune))
     #}}}
 
-    #{{{savePlot
     @staticmethod
+    #{{{savePlot
     def savePlot(fig, fileName, extraArtists=None):
         """
         Saves the figure

@@ -10,93 +10,80 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
 
-# FIXME:
 #{{{PlotEnergy
-class PlotEnergy(object):
+class PlotEnergy(PlotsSuperClass):
     """
     Class which contains the energy data and the plotting configuration.
     """
 
     #{{{__init___
-    def __init__(self                     ,\
-                 paths                    ,\
-                 energy                   ,\
-                 convertToPhysical = False,\
-                 showPlot          = False,\
-                 savePlot          = False,\
-                 extension         = "png",\
-                 savePath          = "."  ,\
-                 pltSize           = None ,\
+    def __init__(self    ,\
+                 *args   ,\
+                 energies,\
+                 **kwargs,\
                  ):
         #{{{docstring
         """
-        The constructor for the PlotEnergy object.
+        This constructor:
 
-        Sets the member data.
+        1. Calls the parent constructor
+        2. Sets the member data
+        3. Prepares the labels
 
         Parameters
         ----------
-        paths : str
-            Paths to collect from (used to make the PlotHelper object)
-        energy : dictionary
-            Contains the energy in the following keys:
-                * perpKinEE - The perpendicular kinetic electron energy
-                * parKinEE  - The paralell kinetic electron energy
-                * sumKinEE  - The total kinetic electron energy
-                * perpKinEI - The perpendicular kinetic ion energy
-                * parKinEI  - The parallel kinetic ion energy
-                * sumKinEI  - The total kinetic ion energy
-                * t_array   - The time
-        showPlot : bool
-            If the plots should be displayed.
-        savePlot : bool
-            If the plots should be saved.
-        extension : str
-            Extension to use on the plots
-        savePath : str
-            Path to save destination. Must exist.
-        pltSize : tuple
-            Size of the plots given as (x, y)
+        energies : dict
+FIXME: Bug in monitors, needs to be fixed
+FIXME: No longer support for Helmholtz like energy
+            A dictionary of the energies containing the following keys
+            * fluctPerpKinEE  - Fluctuation of perpendicular kinetic electron energy
+            * fluctParKinEE   - Fluctuation of parallel kinetic electron energy
+            * fluctSumKinEE   - Fluctuation of sum of the kinetic electron energy
+            * fluctPerpKinEI  - Fluctuation of perpendicular kinetic ion energy
+            * fluctParKinEI   - Fluctuation of parallel kinetic ion energy
+            * fluctSumKinEI   - Fluctuation of sum of the kinetic ion energy
+            * fluctAvgPotEE   - Theta avg of ppotential electron energy (from nT)
+            * polAvgPerpKinEE - Theta avg perpendicular kinetic electron energy
+            * polAvgParKinEE  - Theta avg parallel kinetic electron energy
+            * polAvgSumKinEE  - Theta avg sum of the kinetic electron energy
+            * polAvgPerpKinEI - Theta avg perpendicular kinetic ion energy
+            * polAvgParKinEI  - Theta avg parallel kinetic ion energy
+            * polAvgSumKinEI  - Theta avg sum of the kinetic ion energy
+            * polAvgPotEE     - Theta avg of ppotential electron energy (from nT)
+            * totPerpKinEE    - Total perpendicular kinetic electron energy
+            * totParKinEE     - Total parallel kinetic electron energy
+            * totSumKinEE     - Total sum of the kinetic electron energy
+            * totPerpKinEI    - Total perpendicular kinetic ion energy
+            * totParKinEI     - Total parallel kinetic ion energy
+            * totSumKinEI     - Total sum of the kinetic ion energy
+            * t               - Time
         """
         #}}}
 
-        # Set the member data
-        self._energy    = energy
-        self._showPlot  = showPlot
-        self._savePlot  = savePlot
-        self._extension = extension
-        self._savePath  = savePath
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
 
-        # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0]                              ,\
-                                  # Copy the array as we do not want to
-                                  # share memory
-                                  t                 = energy["t"].copy(),\
-                                  xguards           = False             ,\
-                                  yguards           = False             ,\
-                                  convertToPhysical = convertToPhysical ,\
-                                 )
+        # Set the member data
+        self._energies = energies
 
         # Get the units (eventually convert to physical units)
         # NOTE: Need to cast to a tuple to avoid
         #       "RuntimeError: dictionary changed size during iteration"
-        for key in tuple(self._energy.keys()):
-            self._energy[key],\
-            self._energy[key+"Norm"],\
-            self._energy[key+"Units"] =\
-                self._helper.physicalUnitsConverter(self._energy[key], key)
+        for key in tuple(self._energies.keys()):
+            # Ions and electrons are normalized in the same manner and
+            # have the same units
+            norm  = self.uc.conversionDict["eEnergy"]["normalization"]
+            units = self.uc.conversionDict["eEnergy"]["units"]
 
         # Set the variable label
-        if self._helper.convertToPhysical:
-            self._varLabel = r"$\mathrm{{Energy}}$ $[{}]$".\
-                                  format(self._energy["sumKinEIUnits"])
+        if self.convertToPhysical:
+            self._varLabel = r"$\mathrm{{Energy}}$ $[{}]$".format(units)
         else:
-            self._varLabel = r"$\mathrm{{Energy}}{}$".\
-                                  format(self._energy["sumKinEINorm"])
+            self._varLabel = r"$\mathrm{{Energy}}{}$".format(norm)
 
         # Set the time label
-        self._timeLabel = self._helper.tTxtDict["tTxtLabel"].\
-                          format(self._helper.tTxtDict)
+        self._timeLabel = self.ph.tTxtDict["tTxtLabel"].\
+                          format(self.uc.conversionDict["t"])
 
         # Set the generic legend
         self._genLeg = r"$E_{{{}, {}}}$"
@@ -148,10 +135,8 @@ class PlotEnergy(object):
             message = "speciesType {} not implemented.".format(speciesType)
             raise NotImplementedError(message)
 
-        keys = tuple(key for key in self._energy.keys()\
-                if (searchString in key)\
-                and ("Units" not in key)\
-                and ("Norm" not in key))
+        keys = tuple(key for key in self._energies.keys()\
+                     if (searchString in key))
 
         for nr, key in enumerate(keys):
             if "sum" in key.lower():
@@ -189,8 +174,8 @@ class PlotEnergy(object):
             else:
                 color = colors[0]
 
-            ax.plot(self._energy["t"],\
-                    self._energy[key],\
+            ax.plot(self._energies["t"],\
+                    self._energies[key],\
                     color = color    ,\
                     label = label)
 
@@ -255,42 +240,42 @@ class PlotEnergy(object):
         for key, ax in axes.items():
             if "full" in key:
                 #{{{Full variable
-                lines["el" ] = {"line" : self._energy["sumKinEE"],\
+                lines["el" ] = {"line" : self._energies["sumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                                     (r"$E_{e, \mathrm{kin}, \perp} + "
                                      r" E_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["sumKinEI"],\
+                lines["ion"] = {"line" : self._energies["sumKinEI"],\
                                 "color": colors[1],\
                                 "label":\
                                     (r"$E_{i, \mathrm{kin}, \perp} + "
                                      r" E_{i, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["pot"] = {"line" : self._energy["potEE"],\
+                lines["pot"] = {"line" : self._energies["potEE"],\
                                 "color": colors[2],\
                                 "label": r"$E_{e, \mathrm{pot}, \perp}$",\
                                 }
                 #}}}
             elif "avg" in key:
                 #{{{Poloidally averaged variable
-                lines["el" ] = {"line" : self._energy["polAvgSumKinEE"],\
+                lines["el" ] = {"line" : self._energies["polAvgSumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                       (r"$\langle E \rangle_{e, \mathrm{kin}, \perp} + "
                        r" \langle E \rangle_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["polAvgSumKinEI"],\
+                lines["ion"] = {"line" : self._energies["polAvgSumKinEI"],\
                                 "color": colors[1],\
                                 "label":\
                       (r"$\langle E \rangle_{i, \mathrm{kin}, \perp} + "
                        r" \langle E \rangle_{i, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["pot"] = {"line" : self._energy["polAvgPotEE"],\
+                lines["pot"] = {"line" : self._energies["polAvgPotEE"],\
                                 "color": colors[2],\
                                 "label":\
                       r"$\langle E \rangle_{e, \mathrm{pot}, \perp}$",\
@@ -298,21 +283,21 @@ class PlotEnergy(object):
                 #}}}
             elif "fluct" in key:
                 #{{{Fluctuating variable
-                lines["el" ] = {"line" : self._energy["fluctSumKinEE"],\
+                lines["el" ] = {"line" : self._energies["fluctSumKinEE"],\
                                 "color": colors[0],\
                                 "label":\
                       (r"$\widetilde{E}_{e, \mathrm{kin}, \perp} + "
                        r" \widetilde{E}_{e, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["ion"] = {"line" : self._energy["fluctSumKinEI"],\
+                lines["ion"] = {"line" : self._energies["fluctSumKinEI"],\
                                 "color": colors[2],\
                                 "label":\
                       (r"$\widetilde{E}_{i, \mathrm{kin}, \perp} + "
                        r" \widetilde{E}_{i, \mathrm{kin}, \parallel}$"),\
                                 }
 
-                lines["pot"] = {"line" : self._energy["fluctPotEE"],\
+                lines["pot"] = {"line" : self._energies["fluctPotEE"],\
                                 "color": colors[2],\
                                 "label":\
                       r"$\widetilde{E}_{e, \mathrm{pot}, \perp}$",\
@@ -320,7 +305,7 @@ class PlotEnergy(object):
                 #}}}
 
             for _, line in lines.items():
-                ax.plot(self._energy["t"]    ,\
+                ax.plot(self._energies["t"]    ,\
                         line["line"]         ,\
                         color = line["color"],\
                         label = line["label"])
