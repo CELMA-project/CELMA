@@ -111,8 +111,7 @@ def collectiveCollect(paths               ,\
 #}}}
 
 #{{{collectPointTime
-def collectPointTime(paths, varName, xInd, yInd, zInd,\
-                     mode="normal", tInd = None):
+def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
     #{{{docstring
     """
     Collects the variable in one spatial point
@@ -131,9 +130,6 @@ def collectPointTime(paths, varName, xInd, yInd, zInd,\
         yInd to collect from
     zInd : int
         zInd to collect from
-    mode : ["normal"|"fluct"]
-        If the output should be the raw data or the fluctuation
-        (subtracted the poloidal average)
     tInd : [None|tuple]
         Start and end of the time if not None
 
