@@ -86,7 +86,13 @@ def calcTimeTrace(paths                      ,\
 
         t = (tStart, tEnd)
 
-        var, time = collectPointTime(paths, varName, x, y, z, t)
+        if mode == "normal":
+            var, time = collectPointTime(paths, varName, x, y, z, tInd=t)
+        elif mode == "fluct":
+            var, time = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
+            var = var - polAvg(var)
+        else:
+            raise NotImplementedError("'{}'-mode not implemented".format(mode))
 
         # Reshape
         var = var.flatten()
@@ -99,11 +105,6 @@ def calcTimeTrace(paths                      ,\
 
             var  = var [newSlice]
             time = time[newSlice]
-
-        if mode == "fluct"
-            var = var - var.mean()
-        elif mode != "normal":
-            raise NotImplementedError("'{}'-mode not implemented".format(mode))
 
         if convertToPhysical:
             timeTraces[key][varName] = uc.physicalConversion(var , varName)
