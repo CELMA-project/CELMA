@@ -45,7 +45,7 @@ def calcTimeTrace(paths                      ,\
         If mode is "normal" the raw data is given as an output.
         If mode is "fluct" the fluctuations are given as an output.
     tSlice : [None|Slice}
-        Whether to slice the time trace
+        Whether or not to slice the time trace
 
     Returns
     -------
@@ -89,6 +89,15 @@ def calcTimeTrace(paths                      ,\
 
         # Reshape
         var = var.flatten()
+
+        if tSlice is not None:
+            # Slice the variables with the step
+            # Make a new slice as the collect dealt with the start and
+            # the stop of the slice
+            newSlice = slice(None, None, tSlice.step)
+
+            var  = var [newSlice]
+            time = time[newSlice]
 
         if mode == "fluct"
             var = var - var.mean()
