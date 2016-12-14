@@ -56,8 +56,9 @@ def calcTimeTrace(paths                      ,\
     """
     #}}}
 
-    # Create the units convertor object
-    uc = UnitsConverter(paths[0], convertToPhysical)
+    if uc is None:
+        # Create the units convertor object
+        uc = UnitsConverter(paths[0], convertToPhysical)
     # Toggle convertToPhysical in case of errors
     convertToPhysical = uc.convertToPhysical
     # Create the dimensions helper object

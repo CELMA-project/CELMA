@@ -16,15 +16,16 @@ class PointsSuperClass(CommonPostProcessingDriver):
     """
 
     #{{{Constructor
-    def __init__(self            ,\
-                 *args           ,\
-                 paths           ,\
-                 tSlice          ,\
-                 xInd      = None,\
-                 yInd      = None,\
-                 zInd      = None,\
-                 nPints    = None,\
-                 varName   = "n" ,\
+    def __init__(self             ,\
+                 *args            ,\
+                 paths            ,\
+                 tSlice           ,\
+                 xInd             ,\
+                 yInd             ,\
+                 zInd             ,\
+                 nPints  = None   ,\
+                 varName = "n"    ,\
+                 mode    = "fluct",\
                  **kwargs):
         #{{{docstring
         """
@@ -64,6 +65,7 @@ class PointsSuperClass(CommonPostProcessingDriver):
         timeTrace : array
             Array of the time trace.
             Will be collected if not given.
+        mode : ["normal"|"fluct"]
         **kwargs : keyword arguments
             See the parent constructor for details.
         """
@@ -79,6 +81,7 @@ class PointsSuperClass(CommonPostProcessingDriver):
         self._zInd    = zInd
         self._tSlice  = tSlice
         self._varName = varName
+        self._mode    = mode
 
         # Guard
         if (type(self._xInd) == int and type(self._yInd) == int) or\
@@ -93,9 +96,5 @@ class PointsSuperClass(CommonPostProcessingDriver):
             self._yInd = getEvenlySpacedIndices(path, "y", self._yInd, nPoints)
         elif type(self._zInd) == int:
             self._zInd = getEvenlySpacedIndices(path, "z", self._zInd, nPoints)
-
-        # FIXME: Implement getPltName
-        # FIXME: Generic driver gives indices
-        self._varPltName = getVarPltName(varName)
     #}}}
 #}}}

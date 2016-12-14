@@ -69,11 +69,11 @@ FIXME: No longer support for Helmholtz like energy
         # Get the units (eventually convert to physical units)
         # NOTE: Need to cast to a tuple to avoid
         #       "RuntimeError: dictionary changed size during iteration"
-        for key in tuple(self._energies.keys()):
-            # Ions and electrons are normalized in the same manner and
-            # have the same units
-            norm  = self.uc.conversionDict["eEnergy"]["normalization"]
-            units = self.uc.conversionDict["eEnergy"]["units"]
+
+        # Ions and electrons are normalized in the same manner and have
+        # the same units
+        norm  = self.uc.conversionDict["eEnergy"]["normalization"]
+        units = self.uc.conversionDict["eEnergy"]["units"]
 
         # Set the variable label
         if self.convertToPhysical:
@@ -138,7 +138,7 @@ FIXME: No longer support for Helmholtz like energy
         keys = tuple(key for key in self._energies.keys()\
                      if (searchString in key))
 
-        for nr, key in enumerate(keys):
+        for key in keys:
             if "sum" in key.lower():
                 ax    = axes["sumAx"]
                 label = "{} $+$ {}".format(
