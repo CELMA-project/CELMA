@@ -7,10 +7,10 @@ Contains drivers for the probes
 from .statsAndSignalsDriver import StatsAndSignalsDrivers
 from ..statsAndSignals import collectEnergy, PlotEnergy
 
-#{{{DriverTimeTrace
-class DriverTimeTrace(PointsSuperClass):
+#{{{DriverPDF
+class DriverPDF(PointsSuperClass):
     """
-    Class which handles the time trace data.
+    Class which handles the PDF data.
     """
 
     #{{{Constructor
@@ -22,7 +22,7 @@ class DriverTimeTrace(PointsSuperClass):
         This constructor:
 
         1. Calls the parent constructor
-        2. Sets the member data
+        2. Sets pltSize
 
         Parameters
         ----------
@@ -40,23 +40,22 @@ class DriverTimeTrace(PointsSuperClass):
         self._pltSize = (12, 9)
 
         # Placeholder for the timeTrace
-        self._timeTrace = None
+        self._PDF = None
     #}}}
 
-    #{{{getTimeTraces
-    def getTimeTraces(self):
-        """Obtain the timeTrace"""
+    #{{{getPDF
+    def getPDF(self):
+        """Obtain the PDF"""
         # Create the probes
-        self._timeTrace = calcTimeTrace(\
-                self._paths,\
-                self._varName,\
-                self._xInd,\
-                self._yInd,\
-                self._zInd,\
-                convertToPhysical = self._convertToPhysical,\
-                mode              = self._mode,\
-                tSlice            = self._tSlice,\
-                )
+        self._PDF = calcPDF(self._paths,\
+                            self._varName,\
+                            self._xInd,\
+                            self._yInd,\
+                            self._zInd,\
+                            converToPhysical = self._convertToPhysical,\
+                            mode             = self._mode,\
+                            tSlice           = self._tSlice,\
+                            )
     #}}}
 
     #{{{plotTimeTrace
@@ -68,9 +67,9 @@ class DriverTimeTrace(PointsSuperClass):
             self.getTimeTraces()
 
         # Create the energyPlotter
-        timeTracePlotter = PlotEnergy(\
+        energyPlotter = PlotEnergy(\
                 self._paths                                ,\
-                self._timeTrace                            ,\
+                self._energy                               ,\
                 convertToPhysical = self._convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
@@ -79,6 +78,8 @@ class DriverTimeTrace(PointsSuperClass):
                 pltSize           = self._pltSize          ,\
                                   )
 
-        timeTracePlotter.plotTimeTrace()
+        energyPlotter.plotKinEnergy("ions")
+        energyPlotter.plotKinEnergy("electrons")
+        energyPlotter.plotPotEnergy()
     #}}}
 #}}}
