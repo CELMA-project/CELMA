@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Class for PDF plot"""
+"""Class for timeTrace plot"""
 
 from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import matplotlib.pyplot as plt
