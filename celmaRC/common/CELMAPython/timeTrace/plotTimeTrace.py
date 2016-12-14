@@ -28,6 +28,7 @@ class PlotTimeTrace(PlotsSuperClass):
 
         1. Calls the parent constructor
         2. Sets the member data
+        3. Prepares the labels
 
         Parameters
         ----------
@@ -54,17 +55,17 @@ class PlotTimeTrace(PlotsSuperClass):
 
         # Set the labels
         self._timeLabel = self.ph.tTxtDict["tTxtLabel"].\
-                          format(self.uc._conversionDict["t"])
-        # FIXME: Implement getVarPltName
-        pltVarName = getVarPltName(self._varname)
+                          format(self.uc.conversionDict["t"])
+
+        pltVarName = self.ph.getVarPltName(self._varname)
         if mode == "normal":
             self._varLabel = r"${}$ $[{}]$".\
                     format(pltVarName,\
-                           self.uc._conversionDict[self._varName])
+                           self.uc.conversionDict[self._varName])
         elif mode == "fluct":
             self._varLabel = r"$\tilde{{{}}}$ $[{}]$".\
                     format(pltVarName,\
-                           self.uc._conversionDict[self._varName])
+                           self.uc.conversionDict[self._varName])
         else:
             raise NotImplementedError("'{}'-mode not implemented.")
     #}}}
