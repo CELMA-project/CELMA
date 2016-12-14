@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for the probes
+Contains drivers for the time traces
 """
 
 from .statsAndSignalsDriver import StatsAndSignalsDrivers

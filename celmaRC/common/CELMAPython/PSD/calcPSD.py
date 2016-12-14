@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains the PDF calculation
+Contains the PSD calculation
 """
 
 from .averages import polAvg
@@ -14,8 +14,8 @@ import numpy as np
 from scipy.stats import kurtosis, skew
 from scipy.signal import periodogram
 
-#{{{calcPDF
-def calcPDF(paths                      ,\
+#{{{calcPSD
+def calcPSD(paths                      ,\
             varName                    ,\
             xInd                       ,\
             yInd                       ,\
@@ -25,12 +25,23 @@ def calcPDF(paths                      ,\
             tSlice            = None):
     #{{{docstring
     """
-    Function which calculates the probability distribution function.
+    Function which calculates the power spectral density.
 
-    Probability distribution function
-    ---------------------------------
-    Probability that the measurement falls within an infinite small
-    interval.
+    Power spectral density
+    ----------------------
+        * Tells us what frequencies are present in the signal.
+        * The average power of the signal is the integrated of the PSD
+        * The bandwidth of the process (turbulence) is defined as
+          the frequency width where the signal is within 3dB of its
+          peak value.
+        * PSD is a deterministic description of the spectral
+          characteristic of the signal. Cannot use fourier transform on
+          random variables as this is not necessarily definied etc.
+        * PSD is the fourier transformed of the auto-correlation
+          function, and cross spectral density is the fourier
+          transformed of the cross correlation function
+        * The periodogram estimate is the same as autocorrelation with a
+          triangular window
 
     Parameters
     ----------
@@ -54,10 +65,10 @@ def calcPDF(paths                      ,\
 
     Returns
     -------
-    PDF : dict
+    PSD : dict
         Dictionary where the keys are on the form "rho,theta,z".
         The value is a dict containing of
-        {varPDFX:pdfX, varPDFY:"pdfY"}
+        {varPSDX:psdX, varPSDY:"psdY"}
     """
     #}}}
 
@@ -74,33 +85,27 @@ def calcPDF(paths                      ,\
                       )
 
     # Initialize the output
-    PDF = {}
+    PSD = {}
 
     # Make the keys
-    xKey = "{}PDFX".format(varName)
-    yKey = "{}PDFY".format(varName)
+    xKey = "{}PSDX".format(varName)
+    yKey = "{}PSDY".format(varName)
 
-    # Histogram counts the occurences of values within a specific interval
-    # Density normalizes so that the integral (of the continuous variable)
-    # equals one, note that the sum of histograms is not necessarily 1)
-    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
-    # http://stackoverflow.com/questions/36150257/probability-distribution-function-python/36248810
+    # Obtain the PSD
     for key in timeTraces.keys():
-        # Initialize the PDF
-        PDF[key] = {}
+        # Initialize the PSD
+        PSD[key] = {}
 
-        # Calculate pdfY
-        PDF[key][yKey], bins =\
-            np.histogram(timeTraces[key], bins="auto", density=True)
+        # Sampling frequency
+        fs = 1/(timeTraces[key]["time"][1] - timeTraces[key]["time"][0])
 
-        # Initialize x
-        PDF[key][xKey] = np.zeros(timeTraces[key][varName].size)
+        # window = None => window = "boxcar"
+        # scaling = density gives the correct units
+        PSD[key][xKey], PSD[key][yKey] =\
+            periodogram(timeTraces[key],\
+                        fs=fs, window=None, scaling="density")
 
-        # Only the bin edges are saved. Interpolate to the center of the bin
-        for k in range(PDF[key][yKey].size):
-            PDF[key][xKey][k] = 0.5*(bins[k]+bins[k+1])
-
-    # NOTE: If timeTraces was converted to physical units, then PDF is
+    # NOTE: If timeTraces was converted to physical units, then PSD is
     #       in physical units as well
-    return PDF
+    return PSD
 #}}}
