@@ -3,7 +3,7 @@
 """Contains parent class for plotter classes"""
 
 from ..unitsConverter import UnitsConverter
-from ..plotHelper import PlotHelper
+from ..plotHelpers import PlotHelper
 
 #{{{PlotsSuperClass
 class PlotsSuperClass(object):
