@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Init-file for statistics
+Init-file for PSD
 """
 
-from .probes import PerpPlaneProbes, Probes
-from .probesPlotter import PlotProbes
-from .growthRates import calcGrowthRate, PlotGrowthRates
+from .calcPSD import calcPSD
+from .driverPSD import DriverPSD
+from .plotPSD import PlotPSD

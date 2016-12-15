@@ -4,15 +4,8 @@
 Contains the PDF calculation
 """
 
-from .averages import polAvg
-from ..plotHelpers import (PlotHelper,\
-                           collectiveCollect,\
-                           safeCollect,\
-                           DDZ,\
-                           findLargestRadialGrad)
+from ..timeTrace import calcTimeTrace
 import numpy as np
-from scipy.stats import kurtosis, skew
-from scipy.signal import periodogram
 
 #{{{calcPDF
 def calcPDF(paths                      ,\
@@ -91,10 +84,10 @@ def calcPDF(paths                      ,\
 
         # Calculate pdfY
         PDF[key][yKey], bins =\
-            np.histogram(timeTraces[key], bins="auto", density=True)
+            np.histogram(timeTraces[key][varName], bins="auto", density=True)
 
         # Initialize x
-        PDF[key][xKey] = np.zeros(timeTraces[key][varName].size)
+        PDF[key][xKey] = np.zeros(PDF[key][yKey].size)
 
         # Only the bin edges are saved. Interpolate to the center of the bin
         for k in range(PDF[key][yKey].size):
