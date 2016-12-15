@@ -5,7 +5,8 @@ Contains drivers for the time traces
 """
 
 from ..superClasses import PointsSuperClass
-from . import PlotTimeTrace, calcTimeTrace
+from .plotTimeTrace import PlotTimeTrace
+from .calcTimeTrace import calcTimeTrace
 
 #{{{DriverTimeTrace
 class DriverTimeTrace(PointsSuperClass):
