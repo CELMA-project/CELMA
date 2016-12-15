@@ -2,22 +2,11 @@
 
 """Class for radial flux plot"""
 
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.gridspec import GridSpec
+from ..superClasses import PlotsSuperClass
+from ..plotHelpers import seqCMap3
 import numpy as np
+import matplotlib.pyplot as plt
 import os
-
-YOU ARE HERE:
-THESE ARE FIXMES
-▸ commonDrivers/
-▸ energy/
-▸ fieldPlotters/
-▸ growthRates/
-▸ radialFlux/
-▸ skewnessKurtosis/
-
 
 #{{{PlotRadialFlux
 class PlotRadialFlux(PlotsSuperClass):
@@ -30,8 +19,7 @@ class PlotRadialFlux(PlotsSuperClass):
                  *args     ,\
                  radialFlux,\
                  mode      ,\
-                 **kwargs  ,\
-                 ):
+                 **kwargs):
         #{{{docstring
         r"""
         This constructor:
@@ -45,7 +33,7 @@ class PlotRadialFlux(PlotsSuperClass):
         radialFLux : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
-            {"pdfX":pdfX, "pdfY":"pdfY"}
+            {"RadialFluxX":RadialFluxX, "RadialFluxY":"RadialFluxY"}
         mode : ["normal"|"avg"|"fluct"]
             If mode is "normal" the output is on the form nu.
             If mode is "avg" the output is on the form <nu>.
@@ -62,19 +50,19 @@ class PlotRadialFlux(PlotsSuperClass):
         super().__init__(*args, **kwargs)
 
         # Set the member data
-        self._PDF    = PDF
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+        self._radialFlux    = radialFlux
+        self._colors = seqCMap3(np.linspace(0, 1, len(radialFlux.keys())))
 
         # Obtain the varname
-        ind  = PDF.keys()[0]
-        keys = PDF[ind].keys()
-        self._varName = [var[:-4] for var in keys if "PDF" in var][0]
+        ind  = radialFlux.keys()[0]
+        keys = radialFlux[ind].keys()
+        self._varName = [var[:-4] for var in keys if "RadialFlux" in var][0]
 
         # Set the labels
         # NOTE: The probability does not have any units, but in order to
         #       obtain the probability one has to integrate over
-        #       the PDF.
-        #       Thus will the PDF have the dimension of the inverse of
+        #       the RadialFlux.
+        #       Thus will the RadialFlux have the dimension of the inverse of
         #       what is on the x axis
         pltVarName   = self.ph.getVarPltName(self._varname)
 
@@ -82,41 +70,41 @@ class PlotRadialFlux(PlotsSuperClass):
         units = self.uc.conversionDict[self._varName]["units"]
 
         # Set the variable label
-        if probes.helper.convertToPhysical:
+        if self._convertToPhysical:
             if mode == "normal":
                 self._xLabel = r"${}$ $[{}]$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}$ $[{}]$"
-            self._xLabel = self._xLabel.format(pltVarName, Units)
-            self._yLabel = r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
-                    format(pltVarName))
+            self._xLabel = self._xLabel.format(pltVarName, units)
+            self._yLabel = r"$\mathrm{{RadialFlux}}(\tilde{{{}}})$".\
+                    format(pltVarName)
         else:
             if mode == "normal":
                 self._xLabel = r"${}{}$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}{}$"
             self._xLabel = self._xLabel.format(pltVarName, norm)
-            self._yLabel = r"$\mathrm{{PDF}}(\tilde{{{}}}{})$".\
+            self._yLabel = r"$\mathrm{{RadialFlux}}(\tilde{{{}}}{})$".\
                     format(pltVarName, norm)
     #}}}
 
-    #{{{plotPDFs
-    def plotPDFs(self):
-        """ Plots the time traces."""
+    #{{{plotRadialFluxes
+    def plotRadialFluxes(self):
+        """ Plots the radial fluxes."""
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sort(self._timeTraces.keys())
+        keys = sorted(self._timeTraces.keys())
 
         for key, color in keys, self._colors:
             # Make the label
-            rhoInd, thetaInd, zInd = key.split(",")
+            rho, theta, z = key.split(",")
             label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
 
-            ax.plot(self._PDF[key]["{}PDFX"].self._varName,\
-                    self._PDF[key]["{}PDFY"].self._varName,\
+            ax.plot(self._RadialFlux[key]["time"],\
+                    self._RadialFlux[key][self._varName],\
                     color=color,\
                     label=label)
 
@@ -132,7 +120,7 @@ class PlotRadialFlux(PlotsSuperClass):
 
         if self._savePlot:
             fileName = "{}.{}".\
-                format(os.path.join(self._savePath, "PDF"),\
+                format(os.path.join(self._savePath, "radialFlux"),\
                        self._extension)
             self.ph.savePlot(fig, fileName, (self._leg,))
 

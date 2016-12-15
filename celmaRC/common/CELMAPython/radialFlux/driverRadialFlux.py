@@ -1,16 +1,18 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for the PSD
+Contains drivers for the radial flux
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import collectEnergy, PlotEnergy
+from ..commonDrivers import CommonPostProcessingDriver
+from ..superClasses import PointsSuperClass
+from .plotRadialFlux import PlotRadialFlux
+from .calcRadialFlux import calcRadialFlux
 
-#{{{DriverPSD
-class DriverPSD(PointsSuperClass):
+#{{{DriverRadialFlux
+class DriverRadialFlux(PointsSuperClass, CommonPostProcessingDriver):
     """
-    Class which handles the PSD data.
+    Class which handles the radial flux data.
     """
 
     #{{{Constructor
@@ -40,14 +42,14 @@ class DriverPSD(PointsSuperClass):
         self._pltSize = (12, 9)
 
         # Placeholder for the timeTrace
-        self._PSD = None
+        self._RadialFlux = None
     #}}}
 
-    #{{{getPSD
-    def getPSD(self):
-        """Obtain the PSD"""
+    #{{{getRadialFlux
+    def getRadialFlux(self):
+        """Obtain the RadialFlux"""
         # Create the probes
-        self._PSD = calcPSD(self._paths,\
+        self._RadialFlux = calcRadialFlux(self._paths,\
                             self._varName,\
                             self._xInd,\
                             self._yInd,\
@@ -58,18 +60,18 @@ class DriverPSD(PointsSuperClass):
                             )
     #}}}
 
-    #{{{plotPSD
-    def plotPSD(self):
-        """Plots the PSD"""
+    #{{{plotRadialFlux
+    def plotRadialFlux(self):
+        """Plots the radial flux"""
 
         # Calculate the probes if not already done
         if self._timeTrace == None:
             self.getTimeTraces()
 
         # Create the energyPlotter
-        PSDPlotter = PlotPSD(\
+        RadialFluxPlotter = PlotRadialFlux(\
                 self._paths                                ,\
-                self._PSD                                  ,\
+                self._RadialFlux                           ,\
                 convertToPhysical = self._convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
@@ -78,6 +80,6 @@ class DriverPSD(PointsSuperClass):
                 pltSize           = self._pltSize          ,\
                                   )
 
-        PSDPlotter.plotPSD()
+        RadialFluxPlotter.plotRadialFlux()
     #}}}
 #}}}
