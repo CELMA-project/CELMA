@@ -32,7 +32,7 @@ def calcTimeTrace(*args, **kwargs):
     timeTraces = calcTimeTrace4d(*args, **kwargs)
 
     varName = args[1]
-    mode    = args[6]
+    mode    = kwargs["mode"]
 
     for key in timeTraces.keys():
         if mode == "fluct":
@@ -118,21 +118,20 @@ def calcTimeTrace4d(paths                      ,\
         # NOTE: The indices
         rho   = dh.rho  [x]
         theta = dh.theta[z]
-        z     = dh.z    [y]
+        par   = dh.z    [y]
 
         # Add key and dict to timeTraces
-        key = "{},{},{}".format(rho,theta,z)
+        key = "{},{},{}".format(rho,theta,par)
         timeTraces[key] = {}
 
         if tSlice is not None:
             tStart = tSlice[tCounter].start
             tEnd   = tSlice[tCounter].end
+            t = (tStart, tEnd)
         else:
-            tStart = None
-            tEnd   = None
+            t = None
 
         tCounter += 1
-        t = (tStart, tEnd)
 
         if mode == "normal":
             var, time = collectPointTime(paths, varName, x, y, z, tInd=t)

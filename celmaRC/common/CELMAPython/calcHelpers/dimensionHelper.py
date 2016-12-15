@@ -2,9 +2,8 @@
 
 """ Contains the DimensionsHelper class """
 
-from .improvedCollect import safeCollect
-from .gridSizes import getUniformSpacing, getMXG, getMYG
-from boututils.datafile import DataFile
+from .gridSizes import getUniformSpacing, getMYG, getMXG, getSizes
+import numpy as np
 
 #{{{DimensionsHelper
 class DimensionsHelper(object):
@@ -103,7 +102,7 @@ class DimensionsHelper(object):
                                xguards=self._xguards,\
                                yguards=self._yguards)
 
-        MXG = getMYG(self._path)
+        MYG = getMYG(self._path)
 
         nPoints  = dy.shape[1]
         dy = dy[0,0]
@@ -112,7 +111,7 @@ class DimensionsHelper(object):
             innerPoints = nPoints - 2*MYG
         else:
             innerPoints = nPoints
-
+            
         z = dy * np.array(np.arange(0.5, innerPoints))
 
         if self._yguards:
@@ -128,12 +127,9 @@ class DimensionsHelper(object):
         #{{{theta
         dz = getUniformSpacing(self._path, "z")
 
-        MZ = getSizes(self._path, "z")
+        innerPoints = getSizes(self._path, "z")
 
-        # Subtract the unused plane
-        innerPoints = MZ - 1
-
-        theta = self.dz * np.array(np.arange(0.0, innerPoints))
+        theta = dz * np.array(np.arange(0.0, innerPoints))
 
         # Convert to degrees
         theta * (180/np.pi)
