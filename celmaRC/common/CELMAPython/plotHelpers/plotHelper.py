@@ -3,11 +3,7 @@
 """ Contains the PlotHelper class """
 
 from .plotNumberFormatter import plotNumberFormatter
-from .improvedCollect import safeCollect
-from boututils.options import BOUTOptions
 from matplotlib.ticker import MaxNLocator, FuncFormatter
-import scipy.constants as cst
-import numpy as np
 import os
 
 #{{{PlotHelper
@@ -130,7 +126,7 @@ class PlotHelper(object):
             The plot name
         """
 
-        return self._varPltName[var]
+        return PlotHelper._varPltName[var]
     #}}}
 
     @staticmethod

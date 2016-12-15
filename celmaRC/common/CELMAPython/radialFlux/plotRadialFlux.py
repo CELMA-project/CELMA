@@ -22,18 +22,18 @@ THESE ARE FIXMES
 #{{{PlotRadialFlux
 class PlotRadialFlux(PlotsSuperClass):
     """
-    Class which contains the PDF data and the plotting configuration.
+    Class which contains the radial flux data, and the plotting configuration.
     """
 
     #{{{__init___
-    def __init__(self    ,\
-                 *args   ,\
-                 PDF     ,\
-                 mode    ,\
-                 **kwargs,\
+    def __init__(self      ,\
+                 *args     ,\
+                 radialFlux,\
+                 mode      ,\
+                 **kwargs  ,\
                  ):
         #{{{docstring
-        """
+        r"""
         This constructor:
 
         1. Calls the parent constructor
@@ -42,12 +42,19 @@ class PlotRadialFlux(PlotsSuperClass):
 
         Parameters
         ----------
-        PDF : dict
+        radialFLux : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {"pdfX":pdfX, "pdfY":"pdfY"}
-        mode : ["normal"|"fluct"]
-            What mode the input is given in.
+        mode : ["normal"|"avg"|"fluct"]
+            If mode is "normal" the output is on the form nu.
+            If mode is "avg" the output is on the form <nu>.
+            If mode is "fluct" the output is on the form \tilde{n}\tilde{u}.
+            Note that
+            <nu> = <(<n>+\tidle{n})(<u>+\tidle{u})>
+                 = <<n><u>> + <\tidle{n}\tidle{u})>
+                 = <n><u> + <\tidle{n}\tidle{u})>
+            So that <n><u> is given by the "avg" - "fluct"
         """
         #}}}
 
