@@ -4,11 +4,13 @@
 Contains drivers for the PDF
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import collectEnergy, PlotEnergy
+from ..commonDrivers import CommonPostProcessingDriver
+from ..superClasses import PointsSuperClass
+from .plotPDF import PlotPDF
+from .calcPDF import calcPDF
 
 #{{{DriverPDF
-class DriverPDF(PointsSuperClass):
+class DriverPDF(PointsSuperClass, CommonPostProcessingDriver):
     """
     Class which handles the PDF data.
     """

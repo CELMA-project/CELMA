@@ -38,7 +38,7 @@ def calcTimeTrace(*args, **kwargs):
         if mode == "fluct":
             # The fluctuations does not have a specified z
             z = timeTraces[key].pop("zInd")
-            timeTraces[key][varName][:,:,:,z:z]
+            timeTraces[key][varName] = timeTraces[key][varName][:,:,:,z:z+1]
 
         # Reshape
         timeTraces[key][varName] = timeTraces[key][varName].flatten()
