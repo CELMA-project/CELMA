@@ -38,7 +38,7 @@ def DDX(var, dx):
             for zInd in range(zLen):
                 # 2nd order scheme
                 out[tInd, :, yInd, zInd] =\
-                    np.gradient(out[tInd, :, yInd, zInd], dx, edge_order=2)
+                    np.gradient(var[tInd, :, yInd, zInd], dx, edge_order=2)
 
     return out
 #}}}
@@ -74,7 +74,7 @@ def DDY(var, dy):
             for zInd in range(zLen):
                 # 2nd order scheme
                 out[tInd, xInd, :, zInd] =\
-                    np.gradient(out[tInd, xInd, :, zInd], dy, edge_order=2)
+                    np.gradient(var[tInd, xInd, :, zInd], dy, edge_order=2)
 
     return out
 #}}}
@@ -119,6 +119,7 @@ def DDZ(var, J):
 
 #{{{findLargestRadialGrad
 def findLargestRadialGrad(var, dx, MXG = None):
+    #{{{docstring
     """
     Returns the value of the maximum gradient and the corresponding
     index
@@ -140,6 +141,7 @@ def findLargestRadialGrad(var, dx, MXG = None):
     maxGradInd : int
         The index at which the maximum gradient can be found at
     """
+    #}}}
 
     ddxVar = DDX(var, dx)
 
@@ -153,6 +155,84 @@ def findLargestRadialGrad(var, dx, MXG = None):
     if MXG is not None:
         # Subtract MXG as xguards are collected
         maxGradInd -= MXG
+
+    return maxGrad, maxGradInd
+#}}}
+
+#{{{findLargestParallelGrad
+def findLargestParallelGrad(var, dy, MYG = None):
+    #{{{docstring
+    """
+    Returns the value of the maximum gradient and the corresponding
+    index
+
+    Parameters
+    ----------
+    var : array
+        The variable to investigate.
+    dy : array
+        The grid spacing in y for the different evaluation points
+    MYG : [None|int]
+        If this is not None, the routine assumes that the variable contains
+        ghost points, and MYG will be subtracted from maxGradInd
+
+    Returns
+    -------
+    maxGrad : float
+        The value of the maximum gradient
+    maxGradInd : int
+        The index at which the maximum gradient can be found at
+    """
+    #}}}
+
+    ddyVar = DDY(var, dy)
+
+    # nanmax excludes the NaNs
+    maxGradInds = np.where(np.abs(ddyVar) == np.nanmax(np.abs(ddyVar)))
+
+    maxGrad = ddyVar[maxGradInds]
+
+    # Take the firs occurence of the y axis
+    maxGradInd = int(maxGradInds[2][0])
+    if MYG is not None:
+        # Subtract MYG as yguards are collected
+        maxGradInd -= MYG
+
+    return maxGrad, maxGradInd
+#}}}
+
+#{{{findLargestPoloidalGrad
+def findLargestPoloidalGrad(var, J):
+    #{{{docstring
+    """
+    Returns the value of the maximum gradient and the corresponding
+    index
+
+    Parameters
+    ----------
+    var : array
+        The variable to investigate.
+    J : array
+        The Jacobian
+
+    Returns
+    -------
+    maxGrad : float
+        The value of the maximum gradient
+    maxGradInd : int
+        The index at which the maximum gradient can be found at
+    """
+    #}}}
+
+    ddzVar = DDZ(var, J)
+
+    # nanmax excludes the NaNs
+    maxGradInds = np.where(np.abs(ddzVar) == np.nanmax(np.abs(ddzVar)))
+
+    maxGrad = ddzVar[maxGradInds]
+
+    # Take the firs occurence of the z axis
+    maxGradInd = int(maxGradInds[3][0])
 
     return maxGrad, maxGradInd
 #}}}

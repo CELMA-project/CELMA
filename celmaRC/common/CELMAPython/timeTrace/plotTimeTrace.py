@@ -2,11 +2,10 @@
 
 """Class for timeTrace plot"""
 
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.gridspec import GridSpec
+from ..superClasses import PlotsSuperClass
+from ..plotHelpers import seqCMap3
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 
 #{{{PlotTimeTrace
@@ -20,8 +19,7 @@ class PlotTimeTrace(PlotsSuperClass):
                  *args     ,\
                  timeTraces,\
                  mode      ,\
-                 **kwargs  ,\
-                 ):
+                 **kwargs  ):
         #{{{docstring
         """
         This constructor:
@@ -82,14 +80,15 @@ class PlotTimeTrace(PlotsSuperClass):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sort(self._timeTraces.keys())
+        keys = sorted(self._timeTraces.keys())
 
         for key, color in keys, self._colors:
             # Make the label
-            rhoInd, thetaInd, zInd = key.split(",")
-            label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
+            rho, theta, z = key.split(",")
+            label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta, z)
 
-            ax.plot(t, self._timeTraces[key][self._varName],\
+            ax.plot(self._timeTraces[key]["time"],\
+                    self._timeTraces[key][self._varName],\
                     color=color, label=label)
 
         # Set axis labels

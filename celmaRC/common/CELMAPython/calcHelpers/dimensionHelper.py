@@ -2,8 +2,9 @@
 
 """ Contains the DimensionsHelper class """
 
-from . import safeCollect
-import numpy as np
+from .improvedCollect import safeCollect
+from .gridSizes import getUniformSpacing, getMXG, getMYG
+from boututils.datafile import DataFile
 
 #{{{DimensionsHelper
 class DimensionsHelper(object):
@@ -69,16 +70,12 @@ class DimensionsHelper(object):
         #}}}
 
         #{{{rho
-        dx = safeCollect("dx"                   ,\
-                         path    = self._path   ,\
-                         xguards = self._xguards,\
-                         yguards = self._yguards,\
-                         info    = False)
-        MXG = safeCollect("MXG"                  ,\
-                          path    = self._path   ,\
-                          xguards = self._xguards,\
-                          yguards = self._yguards,\
-                          info    = False)
+        dx = getUniformSpacing(self._path           ,\
+                               "x"                  ,\
+                               xguards=self._xguards,\
+                               yguards=self._yguards)
+
+        MXG = getMYG(self._path)
 
         nPoints = dx.shape[0]
         dx      = dx[0,0]
@@ -101,16 +98,12 @@ class DimensionsHelper(object):
         #}}}
 
         #{{{z
-        dy  = safeCollect("dy"                   ,\
-                          path    = self._path   ,\
-                          xguards = self._xguards,\
-                          yguards = self._yguards,\
-                          info    = False)
-        MYG = safeCollect("MYG"                  ,\
-                          path    = self._path   ,\
-                          xguards = self._xguards,\
-                          yguards = self._yguards,\
-                          info    = False)
+        dy = getUniformSpacing(self._path           ,\
+                               "y"                  ,\
+                               xguards=self._xguards,\
+                               yguards=self._yguards)
+
+        MXG = getMYG(self._path)
 
         nPoints  = dy.shape[1]
         dy = dy[0,0]
@@ -133,16 +126,9 @@ class DimensionsHelper(object):
         #}}}
 
         #{{{theta
-        dz = safeCollect("dz"                   ,\
-                         path    = self._path   ,\
-                         xguards = self._xguards,\
-                         yguards = self._yguards,\
-                         info    = False)
-        MZ = safeCollect("MZ"                   ,\
-                         path    = self._path   ,\
-                         xguards = self._xguards,\
-                         yguards = self._yguards,\
-                         info    = False)
+        dz = getUniformSpacing(self._path, "z")
+
+        MZ = getSizes(self._path, "z")
 
         # Subtract the unused plane
         innerPoints = MZ - 1
