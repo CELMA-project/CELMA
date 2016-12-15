@@ -2,13 +2,8 @@
 
 """ Contains the DimensionsHelper class """
 
-from .plotNumberFormatter import plotNumberFormatter
-from .improvedCollect import safeCollect
-from boututils.options import BOUTOptions
-from matplotlib.ticker import MaxNLocator, FuncFormatter
-import scipy.constants as cst
+from . import safeCollect
 import numpy as np
-import os
 
 #{{{DimensionsHelper
 class DimensionsHelper(object):

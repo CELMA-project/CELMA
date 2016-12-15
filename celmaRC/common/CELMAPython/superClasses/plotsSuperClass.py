@@ -2,12 +2,8 @@
 
 """Contains parent class for plotter classes"""
 
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.gridspec import GridSpec
-import numpy as np
-import os
+from ..unitsConverter import UnitsConverter
+from ..plotHelper import PlotHelper
 
 #{{{PlotsSuperClass
 class PlotsSuperClass(object):
@@ -60,7 +56,7 @@ class PlotsSuperClass(object):
         # Make the UnitsConverter object
         self.uc = UnitsConverter(path, convertToPhysical)
         # Reset convertToPhysical from the results of the uc constructor
-        self.convertToPhysical = uc.convertToPhysical
+        self.convertToPhysical = self.uc.convertToPhysical
 
         # Make the PlotHelpers object
         self.ph = PlotHelper(self.convertToPhysical)
