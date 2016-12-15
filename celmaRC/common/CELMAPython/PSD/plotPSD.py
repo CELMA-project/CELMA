@@ -2,11 +2,10 @@
 
 """Class for PSD plot"""
 
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.gridspec import GridSpec
+from ..superClasses import PlotsSuperClass
+from ..plotHelpers import seqCMap3
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 
 #{{{PlotPSD
@@ -20,8 +19,7 @@ class PlotPSD(PlotsSuperClass):
                  *args   ,\
                  PSD     ,\
                  mode    ,\
-                 **kwargs,\
-                 ):
+                 **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -50,7 +48,7 @@ class PlotPSD(PlotsSuperClass):
 
         # Set the member data
         self._PSD    = PSD
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+        self._colors = seqCMap3(np.linspace(0, 1, len(PSD.keys())))
 
         # Obtain the varname
         ind  = PSD.keys()[0]
@@ -67,27 +65,25 @@ class PlotPSD(PlotsSuperClass):
         norm  = self.uc.conversionDict[self._varName]["normalization"]
         units = self.uc.conversionDict[self._varName]["units"]
 
-FIXME: DELETE THIS AND MAKE A LABEL FUNCTION FOR EACH PLOT
         # Set the variable label
-        if probes.helper.convertToPhysical:
+        if self.convertToPhysical:
             if mode == "normal":
                 self._xLabel = r"${}$ $[{}]$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}$ $[{}]$"
-            self._xLabel = self._xLabel.format(pltVarName, Units)
+            self._xLabel = self._xLabel.format(pltVarName, units)
             self._yLabel = r"$\mathrm{{PSD}}(\tilde{{{}}})$".\
-                    format(pltVarName))
+                    format(pltVarName)
         else:
             if mode == "normal":
                 self._xLabel = r"${}{}$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}{}$"
             self._xLabel = self._xLabel.format(pltVarName, norm)
             self._yLabel = r"$\mathrm{{PSD}}(\tilde{{{}}}{})$".\
                     format(pltVarName, norm)
     #}}}
 
-FIXME: THIS IS ONLY HALF DONE
     #{{{plotPSDs
     def plotPSDs(self, mode="normal"):
         """
@@ -104,15 +100,14 @@ FIXME: THIS IS ONLY HALF DONE
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sort(self._PSD.keys())
-
-        # Make the label
-        rhoInd, thetaInd, zInd = key.split(",")
-        label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
+        keys = sorted(self._PSD.keys())
 
         if mode == "normal":
             for key, color in keys, self._colors:
-
+                # Make the label
+                rho, theta, z = key.split(",")
+                label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
+                
                 # Clip the very first point as this is rediculously low
                 ax.plot(self._probes.results[key]["psdX"][1:],\
                         self._probes.results[key]["psdY"][1:],\
@@ -129,6 +124,10 @@ FIXME: THIS IS ONLY HALF DONE
 
             # Make the plots
             for key, color in keys, self._colors:
+                # Make the label
+                rho, theta, z = key.split(",")
+                label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
+                
                 # Clip the very first point as this is rediculously low
                 ax.plot(self._probes.results[key]["psdX"][1:],\
                         np.log10(\
@@ -137,7 +136,6 @@ FIXME: THIS IS ONLY HALF DONE
                         color=color,\
                         label=label,\
                         alpha=self._alpha)
-
 
         if mode == "normal":
             # Set logscale

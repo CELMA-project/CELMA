@@ -4,11 +4,13 @@
 Contains drivers for the PSD
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import collectEnergy, PlotEnergy
+from ..commonDrivers import CommonPostProcessingDriver
+from ..superClasses import PointsSuperClass
+from .plotPSD import PlotPSD
+from .calcPSD import calcPSD
 
 #{{{DriverPSD
-class DriverPSD(PointsSuperClass):
+class DriverPSD(PointsSuperClass, CommonPostProcessingDriver):
     """
     Class which handles the PSD data.
     """

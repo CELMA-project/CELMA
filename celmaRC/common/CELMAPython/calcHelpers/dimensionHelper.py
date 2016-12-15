@@ -74,7 +74,7 @@ class DimensionsHelper(object):
                                xguards=self._xguards,\
                                yguards=self._yguards)
 
-        MXG = getMYG(self._path)
+        MXG = getMXG(self._path)
 
         nPoints = dx.shape[0]
         dx      = dx[0,0]
