@@ -120,7 +120,7 @@ def calcRadialFlux(paths                      ,\
                        polAvg(varTimeTraces[key][varName])
 
             z = varTimeTraces[key]["zInd"].pop()
-            radialFlux[key][varRadialFlux] = (fluctExB*fluctVar)[:,:,:,z:z]
+            radialFlux[key][varRadialFlux] = (fluctExB*fluctVar)[:,:,:,z:z+1]
         else:
             raise NotImplementedError("'{}'-mode not implemented")
 

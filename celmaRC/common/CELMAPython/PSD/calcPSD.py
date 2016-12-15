@@ -4,14 +4,7 @@
 Contains the PSD calculation
 """
 
-from .averages import polAvg
-from ..plotHelpers import (PlotHelper,\
-                           collectiveCollect,\
-                           safeCollect,\
-                           DDZ,\
-                           findLargestRadialGrad)
-import numpy as np
-from scipy.stats import kurtosis, skew
+from ..timeTrace import calcTimeTrace
 from scipy.signal import periodogram
 
 #{{{calcPSD
@@ -102,7 +95,7 @@ def calcPSD(paths                      ,\
         # window = None => window = "boxcar"
         # scaling = density gives the correct units
         PSD[key][xKey], PSD[key][yKey] =\
-            periodogram(timeTraces[key],\
+            periodogram(timeTraces[key][varName],\
                         fs=fs, window=None, scaling="density")
 
     # NOTE: If timeTraces was converted to physical units, then PSD is

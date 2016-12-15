@@ -2,11 +2,10 @@
 
 """Class for PDF plot"""
 
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-from matplotlib.gridspec import GridSpec
+from ..superClasses import PlotsSuperClass
+from ..plotHelpers import seqCMap3
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 
 #{{{PlotPDF
@@ -20,8 +19,7 @@ class PlotPDF(PlotsSuperClass):
                  *args   ,\
                  PDF     ,\
                  mode    ,\
-                 **kwargs,\
-                 ):
+                 **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -50,7 +48,7 @@ class PlotPDF(PlotsSuperClass):
 
         # Set the member data
         self._PDF    = PDF
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+        self._colors = seqCMap3(np.linspace(0, 1, len(PDF.keys())))
 
         # Obtain the varname
         ind  = PDF.keys()[0]
@@ -69,18 +67,18 @@ class PlotPDF(PlotsSuperClass):
         units = self.uc.conversionDict[self._varName]["units"]
 
         # Set the variable label
-        if probes.helper.convertToPhysical:
+        if self.convertToPhysical:
             if mode == "normal":
                 self._xLabel = r"${}$ $[{}]$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}$ $[{}]$"
-            self._xLabel = self._xLabel.format(pltVarName, Units)
+            self._xLabel = self._xLabel.format(pltVarName, units)
             self._yLabel = r"$\mathrm{{PDF}}(\tilde{{{}}})$".\
-                    format(pltVarName))
+                    format(pltVarName)
         else:
             if mode == "normal":
                 self._xLabel = r"${}{}$"
-            elif mode == "fluct"
+            elif mode == "fluct":
                 self._xLabel = r"$\tilde{{{}}}{}$"
             self._xLabel = self._xLabel.format(pltVarName, norm)
             self._yLabel = r"$\mathrm{{PDF}}(\tilde{{{}}}{})$".\
@@ -95,11 +93,11 @@ class PlotPDF(PlotsSuperClass):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sort(self._PDF.keys())
+        keys = sorted(self._PDF.keys())
 
         for key, color in keys, self._colors:
             # Make the label
-            rhoInd, thetaInd, zInd = key.split(",")
+            rho, theta, z = key.split(",")
             label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
 
             ax.plot(self._PDF[key]["{}PDFX"].self._varName,\
