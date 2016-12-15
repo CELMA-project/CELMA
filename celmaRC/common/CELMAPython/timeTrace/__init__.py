@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Init-file for statistics
+Init-file for timeTrace
 """
 
-from .probes import PerpPlaneProbes, Probes
-from .probesPlotter import PlotProbes
-from .growthRates import calcGrowthRate, PlotGrowthRates
+from .calcTimeTrace import calcTimeTrace, calcTimeTrace4d
+from .driverTimeTrace import DriverTimeTrace
+from .plotTimeTrace import PlotTimeTrace

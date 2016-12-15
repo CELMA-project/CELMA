@@ -2,6 +2,9 @@
 Contains functions dealing with sizes of the grid
 """
 
+from boututils.datafile import DataFile
+import numpy as np
+
 #{{{getSizes
 def getSizes(path, coordinate, varName="lnN"):
     #{{{docstring

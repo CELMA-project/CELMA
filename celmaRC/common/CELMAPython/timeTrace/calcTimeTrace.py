@@ -4,15 +4,12 @@
 Contains the calcTimeTrace calculation
 """
 
-from .averages import polAvg
-from ..plotHelpers import (PlotHelper,\
-                           collectiveCollect,\
-                           safeCollect,\
-                           DDZ,\
-                           findLargestRadialGrad)
-import numpy as np
-from scipy.stats import kurtosis, skew
-from scipy.signal import periodogram
+from ..calcHelpers import (polAvg,\
+                           collectPointTime,\
+                           collectPoloidalProfileTime,\
+                           DimensionsHelper)
+from ..unitsConverter import UnitsConverter
+
 
 #{{{calcTimeTrace
 def calcTimeTrace(*args, **kwargs):
@@ -124,7 +121,7 @@ def calcTimeTrace4d(paths                      ,\
         z     = dh.z    [y]
 
         # Add key and dict to timeTraces
-        key = "{},{},{}".format(x,y,z)
+        key = "{},{},{}".format(rho,theta,z)
         timeTraces[key] = {}
 
         if tSlice is not None:
