@@ -4,8 +4,9 @@
 
 from .averages import polAvg, timeAvg
 from .derivatives import DDX, DDY, DDZ, findLargestRadialGrad
-from .dimensionsHelper import DimensionsHelper
-from .gridSizes import getSizes, getEvenlySpacedIndices
+from .dimensionHelper import DimensionsHelper
+from .gridSizes import (getSizes, getUniformSpacing, getEvenlySpacedIndices,\
+                        getMXG, getMYG)
 from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectPointTime, collectRadialProfileTime,\
                               collectPoloidalProfileTime)

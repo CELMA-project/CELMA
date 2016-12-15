@@ -4,9 +4,10 @@ Contains functions dealing with sizes of the grid
 
 from boututils.datafile import DataFile
 import numpy as np
+import os
 
 #{{{getSizes
-def getSizes(path, coordinate, varName="lnN"):
+def getSizes(path, coordinate, varName="lnN", includeGhost=False):
     #{{{docstring
     """
     Fastest way to obtain coordinate sizes excluding ghost points
@@ -19,6 +20,8 @@ def getSizes(path, coordinate, varName="lnN"):
         Coordinate to return size of
     varName : str
         Field to get the size of
+    includeGhost : bool
+        If the ghost points should be included
 
     Returns
     -------
@@ -26,15 +29,19 @@ def getSizes(path, coordinate, varName="lnN"):
         Size of the desired coordinate
     """
     #}}}
-    with DataFile("BOUT.dmp.0.nc") as f:
+    with DataFile(os.path.join(path, "BOUT.dmp.0.nc")) as f:
         if coordinate == "x":
             # nx
             coordinateSize =\
                     (f.size(varName)[1] - 2*int(f.read("MXG")))*f.read("NXPE")
+            if includeGhost:
+                coordinateSize += 2*int(f.read("MXG"))
         elif coordinate == "y":
             # ny
             coordinateSize =\
                     (f.size(varName)[2] - 2*int(f.read("MYG")))*f.read("NYPE")
+            if includeGhost:
+                coordinateSize += 2*int(f.read("MYG"))
         elif coordinate == "z":
             # nz
             coordinateSize = (f.size(varName)[3]) - 1
@@ -42,6 +49,68 @@ def getSizes(path, coordinate, varName="lnN"):
             raise ValueError("Unknown coordinate {}".format(coordinate))
 
     return coordinateSize
+#}}}
+
+#{{{getUniformSpacing
+def getUniformSpacing(path, coordinate, xguards=False, yguards=False):
+    #{{{docstring
+    """
+    Fastest way to obtain the grid spacing assuming equidistant grid
+
+    Parameters
+    ----------
+    path : str
+        Path to read from
+    coordinate : str
+        Coordinate to return size of
+    xguards : bool
+        If the ghost points in x should be included
+    yguards : bool
+        If the ghost points in y should be included
+
+    Returns
+    -------
+    spacing : array-like
+        The grid spacing
+    """
+    #}}}
+    with DataFile(os.path.join(path, "BOUT.dmp.0.nc")) as f:
+        if coordinate == "x" or coordinate == "y":
+            if coordinate == "x":
+                # dx
+                spacing = f.read("dx")
+            elif coordinate == "y":
+                # dy
+                spacing = f.read("dy")
+
+            shape = spacing.shape
+            xSize = shape[0] - 2*int(f.read("MXG"))
+            ySize = shape[1] - 2*int(f.read("MYG"))
+            if not(xguards) and not (yguards):
+                spacingEmpty = np.empty((xSize*int(f.read("NXPE")),\
+                                         ySize*int(f.read("NYPE"))))
+            elif xguards and not(yguards):
+                spacingEmpty = np.empty((xSize*int(f.read("NXPE"))+\
+                                             2*int(f.read("MXG")),\
+                                         ySize*int(f.read("NYPE"))))
+            elif not(xguards) and yguards:
+                spacingEmpty = np.empty((xSize*int(f.read("NXPE")),\
+                                         ySize*int(f.read("NYPE"))+\
+                                             2*int(f.read("MYG"))))
+            elif xguards and yguards:
+                spacingEmpty = np.empty((xSize*int(f.read("NXPE"))+\
+                                             2*int(f.read("MXG")),\
+                                         ySize*int(f.read("NYPE"))+\
+                                             2*int(f.read("MYG"))))
+            spacingEmpty.fill(spacing[0,0])
+            spacing = spacingEmpty
+        elif coordinate == "z":
+            # dz
+            spacing = f.read("dz")
+        else:
+            raise ValueError("Unknown coordinate {}".format(coordinate))
+
+    return spacing
 #}}}
 
 #{{{getEvenlySpacedIndices
@@ -105,4 +174,46 @@ def getEvenlySpacedIndices(path, coordinate, indexIn, nPoints = 5):
     indices = tuple(indices)
 
     return indices
+#}}}
+
+#{{{getMXG
+def getMXG(path):
+    #{{{docstring
+    """
+    Fastest way to obtain MXG
+
+    Parameters
+    ----------
+    path : str
+        Path to read from
+
+    Returns
+    -------
+    MXG : int
+        Number of ghost points in x
+    """
+    #}}}
+    with DataFile(os.path.join(path, "BOUT.dmp.0.nc")) as f:
+            return f.read("MXG")
+#}}}
+
+#{{{getMYG
+def getMYG(path):
+    #{{{docstring
+    """
+    Fastest way to obtain MYG
+
+    Parameters
+    ----------
+    path : str
+        Path to read from
+
+    Returns
+    -------
+    MYG : int
+        Number of ghost points in y
+    """
+    #}}}
+    with DataFile(os.path.join(path, "BOUT.dmp.0.nc")) as f:
+            return f.read("MYG")
 #}}}
