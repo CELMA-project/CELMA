@@ -32,12 +32,16 @@ class PlotPDF(PlotsSuperClass):
 
         Parameters
         ----------
+        *args : positional arguments
+            See the parent constructor for details.
         PDF : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {"pdfX":pdfX, "pdfY":"pdfY"}
         mode : ["normal"|"fluct"]
             What mode the input is given in.
+        **kwargs : keyword arguments
+            See the parent constructor for details.
         """
         #}}}
 
@@ -85,13 +89,13 @@ class PlotPDF(PlotsSuperClass):
 
     #{{{plotPDFs
     def plotPDFs(self):
-        """ Plots the time traces."""
+        """ Plots the probability density function."""
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sort(self._timeTraces.keys())
+        keys = sort(self._PDF.keys())
 
         for key, color in keys, self._colors:
             # Make the label

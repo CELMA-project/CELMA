@@ -2,13 +2,8 @@
 
 """ Contains the UnitsConverter class """
 
-from .plotNumberFormatter import plotNumberFormatter
-from .improvedCollect import safeCollect
-from boututils.options import BOUTOptions
-from matplotlib.ticker import MaxNLocator, FuncFormatter
+from ..calcHelpers import safeCollect
 import scipy.constants as cst
-import numpy as np
-import os
 
 #{{{UnitsConverter
 class UnitsConverter(object):
@@ -50,7 +45,7 @@ class UnitsConverter(object):
         self.convertToPhysical = convertToPhysical
 
         # Get the normalizer dict
-        self_normalizerDict = self._getNormalizerDict()
+        self._normalizerDict = self._getNormalizerDict()
 
         # Makes the conversion dict
         self._makeConversionDict()

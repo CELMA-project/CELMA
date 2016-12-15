@@ -4,10 +4,9 @@
 
 from .plotHelper import PlotHelper
 from .plotNumberFormatter import plotNumberFormatter
-from .improvedCollect import collectiveCollect, safeCollect
-from .derivatives import DDZ, DDX, findLargestRadialGrad
 import os
 import matplotlib as mpl
+
 # Set proper backend from display
 try:
     os.environ["DISPLAY"]

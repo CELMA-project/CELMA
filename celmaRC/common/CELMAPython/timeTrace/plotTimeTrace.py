@@ -32,12 +32,16 @@ class PlotTimeTrace(PlotsSuperClass):
 
         Parameters
         ----------
+        *args : positional arguments
+            See the parent constructor for details.
         timeTraces : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {varName:timeTrace, "time":time}
         mode : ["normal"|"fluct"]
             What mode the input is given in.
+        **kwargs : keyword arguments
+            See the parent constructor for details.
         """
         #}}}
 

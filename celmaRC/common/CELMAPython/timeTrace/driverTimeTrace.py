@@ -4,8 +4,8 @@
 Contains drivers for the time traces
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import collectEnergy, PlotEnergy
+from ..superClasses import PointsSuperClass
+from . import PlotTimeTrace, calcTimeTrace
 
 #{{{DriverTimeTrace
 class DriverTimeTrace(PointsSuperClass):
@@ -67,8 +67,8 @@ class DriverTimeTrace(PointsSuperClass):
         if self._timeTrace == None:
             self.getTimeTraces()
 
-        # Create the energyPlotter
-        timeTracePlotter = PlotEnergy(\
+        # Create the timeTracePlotter
+        timeTracePlotter = PlotTimeTrace(\
                 self._paths                                ,\
                 self._timeTrace                            ,\
                 convertToPhysical = self._convertToPhysical,\
