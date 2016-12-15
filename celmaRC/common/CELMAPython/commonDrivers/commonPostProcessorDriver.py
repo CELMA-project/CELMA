@@ -84,7 +84,7 @@ class CommonPostProcessingDriver(object):
             # FIXME: Check if it is possible to change the API here. Would
             # be nice if could send in a function instead
             if saveFolderFunc == 'scanWTagSaveFunc':
-                saveFolder = scanWTagSaveFunc(dmp_folder                       ,\
+                saveFolder = scanWTagSaveFunc(dmp_folder                 ,\
                                     convertToPhysical = convertToPhysical,\
                                     **kwargs)
             else:

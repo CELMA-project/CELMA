@@ -45,7 +45,7 @@ class UnitsConverter(object):
         self.convertToPhysical = convertToPhysical
 
         # Get the normalizer dict
-        self._normalizerDict = self._getNormalizerDict()
+        self._normDict = self._getNormalizerDict()
 
         # Makes the conversion dict
         self._makeConversionDict()
@@ -130,23 +130,23 @@ class UnitsConverter(object):
         # NOTE: n0 is input parameter, but n is from an evolving field
         "n"         :{"units"        :r"\mathrm{m}^{-3}",\
                       "normalization":r"/n_0",\
-                      "factor"       :self._convDict["n0"],\
+                      "factor"       :self._normDict["n0"],\
                      },\
         # NOTE: nn is an input parameter, and is thus already given in physcial
         #       units
         "nn"        :{"units"        :r"\mathrm{m}^{-3}",\
                       "normalization":r"/n_0",\
                       "factor"       :1,\
-                      "normFactor"   :1/self._convDict["n0"],\
+                      "normFactor"   :1/self._normDict["n0"],\
                      },\
         "vort"      :{"units"        :r"\mathrm{s}^{-1}",\
                       "normalization":r"/\omega_{{ci}}",\
-                      "factor"       :self._convDict["omCI"],\
+                      "factor"       :self._normDict["omCI"],\
                      },\
         "vortD"     :{"units"        :r"\mathrm{m}^{-3}\mathrm{s}^{-1}",\
                       "normalization":r"/\omega_{{ci}}n_0",\
-                      "factor"       :self._convDict["omCI"]*\
-                                      self._convDict["n0"],\
+                      "factor"       :self._normDict["omCI"]*\
+                                      self._normDict["n0"],\
                      },\
         # NOTE: B0 is an input parameter, and is thus already given in physcial
         #       units
@@ -156,47 +156,47 @@ class UnitsConverter(object):
                      },\
         "phi"       :{"units"        :r"\mathrm{J}\mathrm{C}^{-1}",\
                       "normalization":r" q/T_{{e,0}}",\
-                      "factor"       :self._convDict["Te0"]/cst.e,\
+                      "factor"       :self._normDict["Te0"]/cst.e,\
                      },\
         "jPar"      :{"units"        :r"\mathrm{C}\mathrm{s}^{-1}",\
                       "normalization":r"/n_0c_sq",\
                       "factor"       :cst.e*\
-                                      self._convDict["rhoS"]*\
-                                      self._convDict["omCI"]*\
-                                      self._convDict["n0"],\
+                                      self._normDict["rhoS"]*\
+                                      self._normDict["omCI"]*\
+                                      self._normDict["n0"],\
                      },\
         #NOTE: momDensPar is divided by mi, so we need to multiply by mi again
         #      here
         "momDensPar":{"units"        :r"\mathrm{kg\;m}^{-2}\mathrm{\;s}^{-1}",\
                       "normalization":r"/m_in_0c_s",\
-                      "factor"       :self._convDict["mi"]*\
-                                      self._convDict["rhoS"]*\
-                                      self._convDict["omCI"]*\
-                                      self._convDict["n0"],\
+                      "factor"       :self._normDict["mi"]*\
+                                      self._normDict["rhoS"]*\
+                                      self._normDict["omCI"]*\
+                                      self._normDict["n0"],\
                      },\
         "uIPar"     :{"units"        :r"\mathrm{ms}^{-1}",\
                       "normalization":r"/c_s",\
-                      "factor"       :self._convDict["rhoS"]*\
-                                      self._convDict["omCI"],\
+                      "factor"       :self._normDict["rhoS"]*\
+                                      self._normDict["omCI"],\
                      },\
         "uEPar"     :{"units"        :r"\mathrm{ms}^{-1}",\
                       "normalization":r"/c_s",\
-                      "factor"       :self._convDict["rhoS"]*\
-                                      self._convDict["omCI"],\
+                      "factor"       :self._normDict["rhoS"]*\
+                                      self._normDict["omCI"],\
                      },\
         "u"         :{"units"        :r"\mathrm{ms}^{-1}",\
                       "normalization":r"/c_s",\
-                      "factor"       :self._convDict["rhoS"]*\
-                                      self._convDict["omCI"],\
+                      "factor"       :self._normDict["rhoS"]*\
+                                      self._normDict["omCI"],\
                      },\
         "S"         :{"units"        :r"\mathrm{m}^{-3}\mathrm{s}^{-1}",\
                       "normalization":r"/\omega_{{ci}}n_0",\
-                      "factor"       :self._convDict["omCI"]*\
-                                      self._convDict["n0"],\
+                      "factor"       :self._normDict["omCI"]*\
+                                      self._normDict["n0"],\
                      },\
         "t"         :{"units"        :r"\mathrm{s}",\
                       "normalization":r"\omega_{{ci}}",\
-                      "factor"       :1/self._convDict["omCI"],\
+                      "factor"       :1/self._normDict["omCI"],\
                      },\
         # NOTE: The growth rates are in physical units if the time is in
         #       physical units.
@@ -207,35 +207,35 @@ class UnitsConverter(object):
                      },\
         "rho"       :{"units"        :r"\mathrm{m}",\
                       "normalization":r"/\rho_s",\
-                      "factor"       :self._convDict["rhoS"],\
+                      "factor"       :self._normDict["rhoS"],\
                      },\
         "z"         :{"units"        :r"\mathrm{m}",\
                       "normalization":r"/\rho_s",\
-                      "factor"       :self._convDict["rhoS"],\
+                      "factor"       :self._normDict["rhoS"],\
                      },\
         # NOTE: len is an input parameter (Ly), and is thus already given in
         #       physcial units
         "length"    :{"units"        :r"\mathrm{m}",\
                       "normalization":r"/\rho_s",\
                       "factor"       :1,\
-                      "normFactor"   :1/self._convDict["rhoS"],\
+                      "normFactor"   :1/self._normDict["rhoS"],\
                      },\
         # NOTE: The masses are not included in the integral from the simulations
         "eEnergy"   :{"units"        :r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}",\
                       "normalization":r"/n_0T_e\rho_s^3",\
-                      "factor"       :(cst.m_e/self._convDict["mi"])*\
-                                      self._convDict["n0"]*\
-                                      self._convDict["Te0"]*\
-                                      (self._convDict["rhoS"])**3,\
-                      "normFactor"   :cst.m_e/self._convDict["mi"],\
+                      "factor"       :(cst.m_e/self._normDict["mi"])*\
+                                      self._normDict["n0"]*\
+                                      self._normDict["Te0"]*\
+                                      (self._normDict["rhoS"])**3,\
+                      "normFactor"   :cst.m_e/self._normDict["mi"],\
                       },\
         # NOTE: The masses are not included in the integral from the simulations
         # NOTE: mi/mi = 1
         "iEnergy"   :{"units"        :r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}",\
                       "normalization":r"/n_0T_e\rho_s^3",\
-                      "factor"       :self._convDict["n0"]*\
-                                      self._convDict["Te0"]*\
-                                      (self._convDict["rhoS"])**3,\
+                      "factor"       :self._normDict["n0"]*\
+                                      self._normDict["Te0"]*\
+                                      (self._normDict["rhoS"])**3,\
                      },\
         }
     #}}}
@@ -262,7 +262,7 @@ class UnitsConverter(object):
             The variable after eventual processing.
         """
         #}}}
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             # Give temporarily write access
             if hasattr(var, "setflags"):
                 if var.flags.owndata:
@@ -272,7 +272,7 @@ class UnitsConverter(object):
                     var = var.copy()
                     var.setflags(write = True)
 
-            var *= self.conversionDict["factor"]
+            var *= self.conversionDict[key]["factor"]
 
             # Turn off write access
             if hasattr(var, "setflags"):
@@ -302,7 +302,7 @@ class UnitsConverter(object):
             The variable after eventual processing.
         """
         #}}}
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             # Give temporarily write access
             if hasattr(var, "setflags"):
                 if var.flags.owndata:
@@ -342,7 +342,7 @@ class UnitsConverter(object):
         """
         #}}}
 
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             return self.conversionDict[key]["units"]
         else:
             return ""
@@ -369,7 +369,7 @@ class UnitsConverter(object):
         """
         #}}}
 
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             return ""
         else:
             return self.conversionDict[key]["normalization"]

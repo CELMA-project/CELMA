@@ -65,35 +65,6 @@ pc = PointsSuperClass("."                 ,
                  steadyStatePath = steadyStatePath,
                  )
 
-
-
-
-
-
-
-
-
-
-
-
-COMMON CLASS ABOVE IS SUPERCLASS FOR THE POSTBOUT DRIVERS!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Get the time trace in the end
 from CELMAPython.timeTrace import calcTimeTrace, calcTimeTrace4d
 # 14 from max grad, 16 for fun, 0 standard
