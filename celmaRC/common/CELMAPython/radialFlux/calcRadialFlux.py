@@ -4,15 +4,13 @@
 Contains the radial flux calculation
 """
 
-from .averages import polAvg
-from ..plotHelpers import (PlotHelper,\
-                           collectiveCollect,\
-                           safeCollect,\
-                           DDZ,\
-                           findLargestRadialGrad)
+from ..calcHelpers import (DimensionsHelper,\
+                           collectPoloidalProfileTime,\
+                           polAvg,\
+                           DDZ)
+from ..unitsConverter import UnitsConverter
+from ..timeTrace import calcTimeTrace4d
 import numpy as np
-from scipy.stats import kurtosis, skew
-from scipy.signal import periodogram
 
 #{{{calcRadialFlux
 def calcRadialFlux(paths                      ,\
@@ -104,10 +102,10 @@ def calcRadialFlux(paths                      ,\
     radialFlux = {}
     varRadialFlux = "{}RadialFlux".format(varName)
 
-    keys = sort(radialExB.keys())
+    keys = sorted(radialExB.keys())
 
-    for key in keys():
-        raidalFlux[key] = {}
+    for key in keys:
+        radialFlux[key] = {}
         if mode == "normal":
             radialFlux[key][varRadialFlux] =\
                 radialExB[key]*varTimeTraces[key][varName]
@@ -119,13 +117,13 @@ def calcRadialFlux(paths                      ,\
             fluctVar = varTimeTraces[key][varName] -\
                        polAvg(varTimeTraces[key][varName])
 
-            z = varTimeTraces[key]["zInd"].pop()
+            z = varTimeTraces[key].pop("zInd")
             radialFlux[key][varRadialFlux] = (fluctExB*fluctVar)[:,:,:,z:z+1]
         else:
             raise NotImplementedError("'{}'-mode not implemented")
 
         # Flatten
-        radialFlux[key][varRadialFlux].flatten()
+        radialFlux[key][varRadialFlux] = radialFlux[key][varRadialFlux].flatten()
         radialFlux[key]["time"] = varTimeTraces[key]["time"]
 
     # NOTE: If varTimeTraces and radialExB was converted to physical units,
@@ -200,28 +198,30 @@ def calcTimeTraceRadialDerivative(paths                      ,\
         # NOTE: The indices
         rho   = dh.rho  [x]
         theta = dh.theta[z]
-        z     = dh.z    [y]
+        par   = dh.z    [y]
 
         # Add key and dict to timeTraces
-        key = "{},{},{}".format(x,y,z)
-        timeTraces[key] = {}
+        key = "{},{},{}".format(rho,theta,par)
+        DDZVars[key] = {}
 
         if tSlice is not None:
             tStart = tSlice[tCounter].start
             tEnd   = tSlice[tCounter].end
+            t = (tStart, tEnd)
         else:
-            tStart = None
-            tEnd   = None
+            t = None
 
         tCounter += 1
-        t = (tStart, tEnd)
+
+        # Create the Jacobian from J
+        J = np.array(((rho,),))
 
         if mode == "normal":
             var, _ = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
-            DDZVar = DDZ(var, dh.rho[x])
+            DDZVar = DDZ(var, J)
         elif mode == "fluct":
             var, _ = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
-            DDZVar = DDZ(var, dh.rho[x])
+            DDZVar = DDZ(var, J)
             DDZVar = (DDZVar - polAvg(DDZVar))
         else:
             raise NotImplementedError("'{}'-mode not implemented".format(mode))
@@ -242,6 +242,8 @@ def calcTimeTraceRadialDerivative(paths                      ,\
             DDZVar = uc.physicalConversion(DDZVar, varName)
             # To convert to 1/J, we use the normFactor of "length"
             DDZVars[key] = uc.normalizedConversion(DDZVar, "length")
+        else:
+            DDZVars[key] = DDZVar
 
     return DDZVars
 #}}}
