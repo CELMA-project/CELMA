@@ -103,6 +103,8 @@ def DDZ(var, J):
     """
     if len(var.shape) != 4:
        raise ValueError("Input variable must be 4-dimensional")
+    if len(J.shape) != 2:
+       raise ValueError("Input Jacobian must be 2-dimensional")
 
     tLen, xLen, yLen, _ = var.shape
 

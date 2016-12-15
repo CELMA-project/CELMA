@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Init-file for statistics
+Init-file for radialFlux
 """
 
-from .probes import PerpPlaneProbes, Probes
-from .probesPlotter import PlotProbes
-from .growthRates import calcGrowthRate, PlotGrowthRates
+from .calcRadialFlux import calcRadialFlux
+from .driverRadialFlux import DriverRadialFlux
+from .plotRadialFlux import PlotRadialFlux
