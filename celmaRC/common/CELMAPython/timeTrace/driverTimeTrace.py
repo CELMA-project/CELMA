@@ -9,7 +9,7 @@ from .plotTimeTrace import PlotTimeTrace
 from .calcTimeTrace import calcTimeTrace
 
 #{{{DriverTimeTrace
-class DriverTimeTrace(PointsSuperClass):
+class DriverTimeTrace(PointsSuperClass, CommonPostProcessingDriver):
     """
     Class which handles the time trace data.
     """
@@ -65,7 +65,7 @@ class DriverTimeTrace(PointsSuperClass):
         """Plots the timeTrace"""
 
         # Calculate the probes if not already done
-        if self._timeTrace == None:
+        if self._timeTrace is None:
             self.getTimeTraces()
 
         # Create the timeTracePlotter
