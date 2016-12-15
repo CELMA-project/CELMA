@@ -312,7 +312,7 @@ class UnitsConverter(object):
                     var = var.copy()
                     var.setflags(write = True)
 
-            var *= self.conversionDict["normFactor"]
+            var *= self.conversionDict[key]["normFactor"]
 
             # Turn off write access
             if hasattr(var, "setflags"):
