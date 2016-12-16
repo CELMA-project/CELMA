@@ -16,7 +16,7 @@ def getSizes(path, coordinate, varName="lnN", includeGhost=False):
     ----------
     path : str
         Path to read from
-    coordinate : str
+    coordinate : ["x"|"y"|"z"|"t"]
         Coordinate to return size of
     varName : str
         Field to get the size of
@@ -45,6 +45,8 @@ def getSizes(path, coordinate, varName="lnN", includeGhost=False):
         elif coordinate == "z":
             # nz
             coordinateSize = (f.size(varName)[3]) - 1
+        elif coordinate == "z":
+            coordinateSize = (f.size(varName)[0])
         else:
             raise ValueError("Unknown coordinate {}".format(coordinate))
 
