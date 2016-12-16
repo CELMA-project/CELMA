@@ -10,3 +10,5 @@ from .gridSizes import (getSizes, getUniformSpacing, getEvenlySpacedIndices,\
 from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectPointTime, collectRadialProfileTime,\
                               collectPoloidalProfileTime)
+from .meshHelper import addLastThetaSlice, get2DMesh
+from .slicesToIndices import slicesToIndices

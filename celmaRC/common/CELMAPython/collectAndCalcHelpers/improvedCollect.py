@@ -41,7 +41,7 @@ def collectiveCollect(paths               ,\
                       tInd         = None ,\
                       yInd         = None ,\
                       xInd         = None ,\
-                      zInd         = None):
+                      zInd         = None ):
     #{{{docstring
     """
     Collects variables from several paths
@@ -143,24 +143,16 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
     """
     #}}}
 
-    if varName == "n":
-        collectVarName = "lnN"
-    else:
-        collectVarName = varName
+    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
+                                    collectGhost = False,\
+                                    xInd = (xInd, xInd),\
+                                    yInd = (yInd, yInd),\
+                                    zInd = (zInd, zInd),\
+                                    tInd = tInd
+                                    )
 
-        varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
-                                        collectGhost = False,\
-                                        xInd = (xInd, xInd),\
-                                        yInd = (yInd, yInd),\
-                                        zInd = (zInd, zInd),\
-                                        tInd = tInd
-                                        )
-
-    var  = varTimeDict[collectVarName]
+    var  = varTimeDict[varName]
     time = varTimeDict["t_array"]
-
-    if varName == "n":
-        var = np.exp(var)
 
     return var, time
 #}}}
@@ -195,24 +187,16 @@ def collectRadialProfileTime(paths, varName, yInd, zInd, tInd = None):
     """
     #}}}
 
-    if varName == "n":
-        collectVarName = "lnN"
-    else:
-        collectVarName = varName
-
     # Collect the variable
-    varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
+    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
                                     collectGhost = False,\
                                     yInd = (yInd, yInd),\
                                     zInd = (zInd, zInd),\
                                     tInd = tInd        ,\
                                     )
 
-    var  = varTimeDict[collectVarName]
+    var  = varTimeDict[varName]
     time = varTimeDict["t_array"]
-
-    if varName == "n":
-        var = np.exp(var)
 
     return var, time
 #}}}
@@ -247,24 +231,16 @@ def collectPoloidalProfileTime(paths, varName, xInd, yInd, tInd=None):
     """
     #}}}
 
-    if varName == "n":
-        collectVarName = "lnN"
-    else:
-        collectVarName = varName
-
     # Collect the variable
-    varTimeDict = collectiveCollect(paths, [collectVarName, "t_array"],\
+    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
                                     collectGhost = False,\
                                     xInd = (xInd, xInd),\
                                     yInd = (yInd, yInd),\
                                     tInd = tInd        ,\
                                     )
 
-    var  = varTimeDict[collectVarName]
+    var  = varTimeDict[varName]
     time = varTimeDict["t_array"]
-
-    if varName == "n":
-        var = np.exp(var)
 
     return var, time
 #}}}
