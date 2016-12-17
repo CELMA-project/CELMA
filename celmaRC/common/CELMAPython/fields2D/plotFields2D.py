@@ -4,139 +4,193 @@
 Contains functions for plotting the 2D fields
 """
 
-#{{{plotPerpPlane
-def plotPerpPlane(X_RT, Y_RT, Z_RT, time, constZ, ph,\
-                  savePath = ".test", \
-                  cfKwargs={}, txtKwargs={}):
-    #{{{docstring
-    """
-    Performs the actual plotting of the perpendicular plane
+import matplotlib.pylab as plt
+from matplotlib.ticker import FuncFormatter
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from ..superClasses import Plot2DSuperClass
+from ..plotHelpers import plotNumberFormatter
 
-    Parameters
-    ----------
-    X_RT : array
-        A 2d mesh of the Cartesian x coordinates
-    Y_RT : array
-        A 2d mesh of the Cartesian y coordinates
-    Z_RT : array
-        A 3d array of yhe vaules for each point in x and y for each time
-    ph : PlotHelper
-        The plot helper
-    savePath : str
-        Path (excluding extension) to use if the plot or animation is
-        saved.
-    show : bool
-        Whether or not the plot is to be displayed.
-    save : bool
-        Whether or not to save the plot.
-    cfKwargs : dict
-        Extra keywords for the contourf plot
-    txtKwargs : dict
-        Extra keywords for setting the text on the title
+#{{{Plot2DPerp
+class Plot2DPerp(Plot2DSuperClass):
     """
+    Class for 2D perp plotting.
+
+    Handles plot figure, axes, plot data and decorations.
+    """
+
+    #{{{constructor
+    def __init__(self, *args, pltSize = (10,15), **kwargs):
+        #{{{docstring
+        """
+        Constructor for the Plot2DPerp
+
+        * Creates the figure and axes
+
+        Parameters
+        ----------
+        *args : positional arguments
+            See parent constructor for details
+        pltSize : tuple
+            The size of the plot
+        **kwargs : keyword arguments
+            See parent constructor for details
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
+        # Create figure and axes
+        pltSize = (20,15)
+        self._fig = plt.figure(figsize = pltSize)
+        self._perpAx = self._fig.add_subplot(111)
+        self._cBarAx = make_axes_locatable(self._perpAx).\
+                 append_axes('right', '5%', '5%')
+        self._perpAx.grid(True)
     #}}}
 
-    # Create figure and axes
-    pltSize = (20,15)
-    fig = plt.figure(figsize = pltSize)
-    perpAx = fig.add_subplot(111)
-    cBarAx = make_axes_locatable(perpAx).\
-             append_axes('right', '5%', '5%')
-    perpAx.grid(True)
+    #{{{setData
+    def setData(self, X_RT, Y_RT, Z_RT, time, constZ):
+        #{{{docstring
+        """
+        Sets the data to  be plotted
 
-    # Initial plot (needed if we would like to save the plot)
-    updatePerpPlane(0, perpAx, X_RT, Y_RT, Z_RT,\
-                    time, constZ, ph, cfKwargs, txtKwargs)
+        Parameters
+        ----------
+        X_RT : array
+            A 2d mesh of the Cartesian x coordinates.
+        Y_RT : array
+            A 2d mesh of the Cartesian y coordinates.
+        Z_RT : array
+            A 3d array of yhe vaules for each point in x and y for each time.
+        time : array
+            The time array.
+        constZ : float
+            The constant z value (i.e. not the index)
+        """
+        #}}}
 
-    # Call the save and show routine
-    fargs = (perpAx, X_RT, Y_RT, Z_RT, time, constZ, ph, cfKwargs, txtKwargs)
-    plotSaveAndShow(fig, updatePerpPlane, fargs, Z_RT.shape[0],\
-                    show = show, save = save, savepath = savepath)
-#}}}
-
-#{{{updatePerpPlanePlot
-def updatePerpPlanePlot(tInd, perpAx, X_RT, Y_RT, Z_RT,\
-                        time, constZ, ph, cfKwargs, txtKwargs):
-    #{{{docstring
-    """
-    Updates the perpPlane plot by updating the axis, the title and
-    formatting the axes
-
-    Parameters
-    ----------
-    tInd : int
-        The index to plot for
-    perpAx : Axis
-        The axis to update
-
-    See the docstring of plotPerpPlane for details.
-    """
+        self._X_RT   = X_RT
+        self._Y_RT   = Y_RT
+        self._Z_RT   = Z_RT
+        self._time   = time
+        self._constZ = constZ
     #}}}
 
-    perpPlane = updatePerpAx(perpAx, X_RT, Y_RT, Z_RT[tInd, :, :], ph, cfKwargs)
+    #{{{plotAndSavePerpPlane
+    def plotAndSavePerpPlane(self):
+        #{{{docstring
+        """
+        Performs the actual plotting of the perpendicular plane
+        """
+        #}}}
 
-    # Set title
-    ph.zTxtDict["value"] = plotNumberFormatter(constVal, None)
-    perpTitle = ph.zTxtDict["constZTxt"].format(ph.zTxtDict)
-    ph.tTxtDict["value"] = plotNumberFormatter(t[tInd], None, precision=4)
-    timeTitle = ph.tTxtDict["tTxt"].format(ph.tTxtDict)
-    perpTxt = perpAx.text(1.5, 1.05,\
+        # Initial plot (needed if we would like to save the plot)
+        self._updatePerpAxInTime(0)
+
+        # Call the save and show routine
+        self.plotSaveAndShow(self._fig,\
+                             self._updatePerpAxInTime,\
+                             len(self._time))
+    #}}}
+
+    #{{{_updatePerpAxInTime
+    def _updatePerpAxInTime(self, tInd):
+        #{{{docstring
+        """
+        Updates the perpendicular axis.
+
+        * Clears the axis
+        * Plot the contourf
+        * Set the labels
+        * Updates the text
+        * Updates the colorbar
+
+        Parameters
+        ----------
+        tInd : int
+            The current time index.
+        """
+        #}}}
+
+        # Clear previous axis
+        self._perpAx.cla()
+
+        if self.__iterableLevels:
+            self._cfKwargs.update({"vmax"   : self._vmax  [tInd],\
+                                   "vmin"   : self._vmin  [tInd],\
+                                   "levels" : self._levels[tInd],\
+                                  })
+
+        # Plot the perpoidal plane
+        perpPlane = self._perpAx.\
+            contourf(self._X_RT, self._Y_RT, self._Z_RT[tInd, :, :],\
+                     **self._cfKwargs)
+
+        # Set rasterization order
+        self._perpAx.set_rasterization_zorder(self._axRasterization)
+        # Draw the grids
+        self._perpAx.grid(b=True)
+        # Set x and y labels
+        self._perpAx.\
+            set_xlabel(self._ph.zTxtDict["rhoTxtLabel"],\
+                       fontsize = self._labelSize)
+        self._perpAx.\
+            set_ylabel(self._ph.zTxtDict["rhoTxtLabel"],\
+                       fontsize = self._labelSize)
+
+        # Update the text
+        self._updatePlotTxT(tInd)
+
+        # Update the colorbar
+        self._updateColorbar(self._fig, perpPlane, self._cBarAx)
+
+        # Set equal axis
+        self._perpAx.axis("equal")
+    #}}}
+
+    #{{{updatePlotTxt
+    def updatePlotTxt(self, tInd):
+        #{{{docstring
+        """
+        Updates the perpPlane plot by updating the axis, the title and
+        formatting the axes
+
+        Parameters
+        ----------
+        tInd : int
+            The index to plot for
+        perpAx : Axis
+            The axis to update
+
+        See the docstring of plotPerpPlane for details.
+        """
+        #}}}
+
+        # Set title
+        self._ph.zTxtDict["value"] = plotNumberFormatter(self._constVal, None)
+        perpTitle = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
+        self._ph.tTxtDict["value"] =\
+            plotNumberFormatter(self._t[tInd], None, precision=4)
+        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        self._perpAx.text(1.5, 1.05,\
                           "{}$,$ {}".format(perpTitle, timeTitle),\
                           transform = self._perpAx.transAxes,\
-                          **txtKwargs)
+                          **self._txtKwargs)
 
-    # Format axes
-    perpAx.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
-    perpAx.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
-    perpAx.axis("equal")
-
-    updateColorbar(fig, perpPlane, cBarAx, fluct)
-#}}}
-
-#{{{updatePerpAx
-def updatePerpAx(perpAx, X_RT, Y_RT, Z_RT, ph, cfKwargs, labelSize=35):
-    #{{{docstring
-    """
-    Updates the perpoidal axis by cleaning it, and reset the plot
-
-    This also sets the rasterization, the grid and the labels.
-
-    Parameters
-    ----------
-    perpAx : Axis
-        The axis to update
-    labelSize : int
-        Size of the labelfont
-
-    See the docstring of updatePerpPlanePlot for details.
-
-    Returns
-    -------
-    perpPlane : contour-like
-        The object which can be used to find a colorbar
-    """
+        # Format axes
+        self._perpAx.get_xaxis().\
+            set_major_formatter(FuncFormatter(plotNumberFormatter))
+        self._perpAx.get_yaxis().\
+            set_major_formatter(FuncFormatter(plotNumberFormatter))
     #}}}
-
-    # Clear previous axis
-    perpAx.cla()
-
-    # Plot the perpoidal plane
-    perpPlane = ax.\
-        contourf(self._cyl.X_RT, self._cyl.Y_RT, Z_RT, **cfKwargs)
-
-    # Set rasterization order
-    perpAx.set_rasterization_zorder(-10)
-    # Draw the grids
-    perpAx.grid(b=True)
-    # Set x and y labels
-    perpAx.set_xlabel(ph.zTxtDict["rhoTxtLabel"], fontsize = labelSize)
-    perpAx.set_ylabel(ph.zTxtDict["rhoTxtLabel"], fontsize = labelSize)
-
-    return perpPlane
 #}}}
 
+
+
+# FIXME: Fix this!
 #{{{updateParAx
-def updateParAx(parAx, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
+def updateParAx(parAx, ax, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
                 ph, cfKwargs={}, labelSize=35):
     #{{{docstring
     """
@@ -179,7 +233,7 @@ def updateParAx(parAx, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
         contourf(X_RZ, Y_RZ, Z_RZ, **cfKwargs)
 
     # Also plot the negative plane
-    contourf(-X_RZ, Y_RZ, Z_RZ_PPi, **cfKwargs)
+    ax.contourf(-X_RZ, Y_RZ, Z_RZ_PPi, **cfKwargs)
 
     # Set rasterization order
     parAx.set_rasterization_zorder(-10)
@@ -193,7 +247,7 @@ def updateParAx(parAx, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
 #}}}
 
 #{{{updatePolAx
-def updatePolAx(polAx, X_ZT, Y_ZT, Z_ZT, ph, cfKwargs={}, labelSize=35):
+def updatePolAx(polAx, ax, X_ZT, Y_ZT, Z_ZT, ph, cfKwargs={}, labelSize=35):
     #{{{docstring
     """
     Updates the poloidal axis by cleaning it, and reset the plot
@@ -229,7 +283,7 @@ def updatePolAx(polAx, X_ZT, Y_ZT, Z_ZT, ph, cfKwargs={}, labelSize=35):
 
     # Plot the poloidal plane
     polPlane = ax.\
-        contourf(self._cyl.X_ZT, self._cyl.Y_ZT, Z_ZT.transpose(), **cfKwargs)
+        contourf(X_ZT, Y_ZT, Z_ZT.transpose(), **cfKwargs)
 
     # Set rasterization order
     polAx.set_rasterization_zorder(-10)
@@ -240,127 +294,4 @@ def updatePolAx(polAx, X_ZT, Y_ZT, Z_ZT, ph, cfKwargs={}, labelSize=35):
     polAx.set_ylabel(ph.zTxtDict["zTxtLabel"], fontsize = labelSize)
 
     return polPlane
-#}}}
-
-#{{{updateColorbar
-def updateColorbar(fig, cBarPlane, cBarAx, fluct):
-    #{{{docstring
-    """
-    Updates the colorbar.
-
-    Parameters
-    ----------
-    fig : Figure
-        The figure where the colorbar belongs.
-    cBarPlane : contour-like
-        The axis where the colorbar reads the data from.
-    cBarAx : Axis
-        The axis where the colorbar belongs.
-    fluct: bool
-        Whether or not the fluctuations are being plotted.
-    """
-    #}}}
-
-    # Set the colorbar
-    # Clear the axis
-    # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
-    cBarAx.cla()
-    if fluct:
-        # Create the ticks (11 with 0 in the center)
-        nTicks = 11
-        ticks  = np.linspace(self._varMin, self._varMax, nTicks)
-        # Enforce the center one to be 0 (without round off)
-        ticks[int((nTicks - 1)/2)] = 0
-    else:
-        ticks = None
-    fig.colorbar(cbarPlane,\
-                 cax    = cBarAx,\
-                 ticks  = ticks,\
-                 format = FuncFormatter(plotNumberFormatter))
-#}}}
-
-#{{{
-def plotSaveAndShow(fig, func, fargs, frames,\
-                    bitrate = -1, fps = 10, codec = "h264",\
-                    show = False, save = True, savepath=".test",\
-                    extension = None):
-    #{{{docstring
-    """
-    Saves and closes the plot.
-
-    Parameters
-    ----------
-    fig : Figure
-        Figure to save.
-    func : function
-        The function to use for generating the animation.
-    fargs : tuple
-        Tuple of the arguments to use in the animation.
-    frames : int
-        Number of frames.
-        If this is less than one, a normal plot will be made.
-    bitrate : int
-        Sets the quality of the animation.
-        -1 gives automatic quality.
-    fps : int
-        Frames per second.
-        Sets the speed of the plot as indicated in
-        http://stackoverflow.com/questions/22010586/matplotlib-animation-duration
-    codec : str
-        Codec to use.
-        Default is h264.
-        For installation, see
-        https://github.com/loeiten/usingLinux/blob/master/installationProcedures/ffmpeg.md
-    show : bool
-        Whether or not the plot is to be displayed.
-    save : bool
-        Whether or not to save the plot.
-    savePath : str
-        Path (excluding extension) to use if the plot or animation is
-        saved.
-    extension : [None|str]
-        Overrides default extension if set.
-    """
-    #}}}
-
-    if frames > 1:
-
-        # Animate
-        anim = animation.FuncAnimation(fig            ,\
-                                       func           ,\
-                                       fargs  = fargs ,\
-                                       frames = frames,\
-                                       blit   = False ,\
-                                       )
-
-        if savePlot:
-            FFMpegWriter = animation.writers['ffmpeg']
-            writer = FFMpegWriter(bitrate = bitrate,\
-                                  fps     = fps    ,\
-                                  codec   = codec)
-
-            if extension is None:
-                extension = ".mp4"
-
-            # Save the animation
-            anim.save(savepath + extension, writer = writer)
-            print("Saved to {}{}".format(savepath, extension))
-    else:
-        if savePlot:
-
-            if extension is None:
-                extension = ".pdf"
-
-            # Save the figure
-            fig.savefig("{}.{}".format(savepath, extension),\
-                        transparent = True  ,\
-                        bbox_inches = "tight",\
-                        pad_inches  = 0      ,\
-                        )
-            print("Saved to {}.{}".format(savepath, extension))
-
-    if showPlot:
-        fig.show()
-
-    plt.close(fig)
 #}}}
