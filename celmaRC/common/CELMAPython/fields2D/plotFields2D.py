@@ -13,7 +13,6 @@ import matplotlib.pylab as plt
 import numpy as np
 import os
 
-
 # Reset the size
 plt.rc("xtick",  labelsize = 35)
 plt.rc("ytick",  labelsize = 35)
