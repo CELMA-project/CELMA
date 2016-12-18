@@ -136,7 +136,9 @@ class PlotHelper(object):
                        yprune   = None        ,\
                        rotation = "horizontal",\
                        loc      = "best"      ,\
+                       legend   = True        ,\
                        ):
+        #{{{docstring
         """
         Routine that fixes some beauty-mistakes in matplotlib
 
@@ -152,31 +154,39 @@ class PlotHelper(object):
             Rotation of the x axis.
         loc : str
             Location of the legend
+        legend : bool
+            Whether or not to make the legend pretty
         """
+        #}}}
 
         # Avoid silly top value (only for non-log axes)
         try:
             ax.get_yaxis().get_major_formatter().set_useOffset(False)
         except:
             pass
+
         # Format the tick labels
         ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
+
         # Plot the legend
-        try:
-            leg = ax.legend(loc       = loc ,\
-                            fancybox  = True,\
-                            numpoints = 1   ,\
-                            )
-            leg.get_frame().set_alpha(0.5)
-        except AttributeError as ae:
-            if "NoneType" in ae.args[0] and "get_frame" in ae.args[0]:
-                print("{0}{1}WARNING: Could not set legend{1}{0}".format("\n","!"*4))
-            else:
-                raise ae
+        if legend:
+            try:
+                leg = ax.legend(loc       = loc ,\
+                                fancybox  = True,\
+                                numpoints = 1   ,\
+                                )
+                leg.get_frame().set_alpha(0.5)
+            except AttributeError as ae:
+                if "NoneType" in ae.args[0] and "get_frame" in ae.args[0]:
+                    print("{0}{1}WARNING: Could not set legend{1}{0}".format("\n","!"*4))
+                else:
+                    raise ae
+
         # Plot the grid
-        ax.grid()
+        ax.grid(True)
+
         # Make sure no collision between the ticks
         if ax.get_xscale() != "log":
             ax.xaxis.set_major_locator(MaxNLocator(prune=xprune))
