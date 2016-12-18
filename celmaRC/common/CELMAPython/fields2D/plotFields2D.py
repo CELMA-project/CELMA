@@ -19,7 +19,7 @@ plt.rc("ytick",  labelsize = 35)
 #{{{Plot2DPerp
 class Plot2DPerp(Plot2DSuperClass):
     """
-    Class for 2D perp plotting.
+    Class for 2D perpendicular plotting.
 
     Handles plot figure, axes, plot data and decorations.
     """
@@ -71,7 +71,7 @@ class Plot2DPerp(Plot2DSuperClass):
         Y_RT : array
             A 2d mesh of the Cartesian y coordinates.
         Z_RT : array
-            A 3d array of yhe vaules for each point in x and y for each time.
+            A 3d array of the vaules for each point in x and y for each time.
         time : array
             The time array.
         constZ : float
@@ -144,7 +144,7 @@ class Plot2DPerp(Plot2DSuperClass):
                                    "levels" : self._levels[tInd],\
                                   })
 
-        # Plot the perpoidal plane
+        # Plot the perpendicular plane
         perpPlane = self._perpAx.\
             contourf(self._X_RT, self._Y_RT, self._Z_RT[tInd, :, :],\
                      **self._cfKwargs)
@@ -211,7 +211,206 @@ class Plot2DPerp(Plot2DSuperClass):
     #}}}
 #}}}
 
-# FIXME: YOU ARE CHECKING STUFF, SEE HISTORY ABOVE
+#{{{Plot2DPar
+class Plot2DPar(Plot2DSuperClass):
+    """
+    Class for 2D parallel plotting.
+
+    Handles plot figure, axes, plot data and decorations.
+    """
+
+    #{{{constructor
+    def __init__(self, *args, pltSize = (10,15), **kwargs):
+        #{{{docstring
+        """
+        Constructor for the Plot2DPar
+
+        * Creates the figure and axes
+
+        Parameters
+        ----------
+        *args : positional arguments
+            See parent constructor for details
+        pltSize : tuple
+            The size of the plot
+        **kwargs : keyword arguments
+            See parent constructor for details
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
+        # Create figure and axes
+        pltSize = (20,15)
+        # NOTE: tight_layout=True gives wobbly plot as the precision of
+        #       the colorbar changes during the animation
+        self._fig = plt.figure(figsize = pltSize)
+        self._fig.subplots_adjust(right=0.8)
+        self._parAx = self._fig.add_subplot(111)
+        self._cBarAx = make_axes_locatable(self._parAx).\
+                 append_axes('right', '5%', '5%')
+        self._parAx.grid(True)
+    #}}}
+
+    #{{{setData
+    def setData(self, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
+                time, constTheta, varName, savePath):
+        #{{{docstring
+        """
+        Sets the data to be plotted (including the fileName and plot name)
+
+        Parameters
+        ----------
+        X_RZ : array
+            A 2d mesh of the Cartesian x coordinates.
+        Y_RZ : array
+            A 2d mesh of the Cartesian y coordinates.
+        Z_RZ : array
+            A 3d array of the vaules for each point in x and y for each time.
+        Z_RZ_PPi : array
+            A 3d array of the vaules for each point in -x and y for each time.
+        time : array
+            The time array.
+        constTheta : float
+            The constant z value (i.e. not the index).
+        varName : str
+            The name of the variable given in Z_RZ.
+        savePath : str
+            Destination to save the plot in.
+        """
+        #}}}
+
+        self._X_RZ       = X_RZ
+        self._Y_RZ       = Y_RZ
+        self._Z_RZ       = Z_RZ
+        self._Z_RZ_PPi   = Z_RZ_PPi
+        self._time       = time
+        self._constTheta = int(constTheta)
+        self._varName    = varName
+        self._fileName   =\
+            os.path.join(savePath, "{}-{}-{}".format(varName, "par", "2D"))
+
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varName)
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self._uc.conversionDict[self._varName])
+    #}}}
+
+    #{{{plotAndSaveParPlane
+    def plotAndSaveParPlane(self):
+        #{{{docstring
+        """
+        Performs the actual plotting of the parallel plane
+        """
+        #}}}
+
+        # Initial plot (needed if we would like to save the plot)
+        self._updateParAxInTime(0)
+
+        # Call the save and show routine
+        self.plotSaveShow(self._fig,\
+                          self._fileName,\
+                          self._updateParAxInTime,\
+                          len(self._time))
+    #}}}
+
+    #{{{_updateParAxInTime
+    def _updateParAxInTime(self, tInd):
+        #{{{docstring
+        """
+        Updates the parallel axis.
+
+        * Clears the axis
+        * Plot the contourf
+        * Set the labels
+        * Updates the text
+        * Updates the colorbar
+
+        Parameters
+        ----------
+        tInd : int
+            The current time index.
+        """
+        #}}}
+
+        # Clear previous axis
+        self._parAx.cla()
+
+        if self._iterableLevels:
+            self._cfKwargs.update({"vmax"   : self._vmax  [tInd],\
+                                   "vmin"   : self._vmin  [tInd],\
+                                   "levels" : self._levels[tInd],\
+                                  })
+
+        # Plot the parallel plane
+        parPlane = self._parAx.\
+            contourf(self._X_RZ, self._Y_RZ, self._Z_RZ[tInd, :, :],\
+                     **self._cfKwargs)
+        # Plot the negative parallel plane
+        parPlane =\
+        self._parAx.\
+            contourf(-self._X_RZ, self._Y_RZ, self._Z_RZ_PPi[tInd, :, :],\
+                     **self._cfKwargs)
+
+        # Set rasterization order
+        self._parAx.set_rasterization_zorder(self._axRasterization)
+        # Draw the grids
+        self._parAx.grid(b=True)
+        # Set x and y labels
+        self._parAx.\
+            set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
+                       fontsize = self._labelSize)
+        self._parAx.\
+            set_ylabel(self._ph.zTxtDict["zTxtLabel"],\
+                       fontsize = self._labelSize)
+
+        # Update the text
+        self._updatePlotTxt(tInd)
+
+        # Update the colorbar
+        self._updateColorbar(self._fig, parPlane, self._cBarAx, tInd)
+
+        # Set title
+        self._cBar.set_label(self._varLabel, fontsize = self._labelSize)
+    #}}}
+
+    #{{{_updatePlotTxt
+    def _updatePlotTxt(self, tInd):
+        #{{{docstring
+        """
+        Updates the parPlane plot by updating the axis, the title and
+        formatting the axes
+
+        Parameters
+        ----------
+        tInd : int
+            The index to plot for
+        parAx : Axis
+            The axis to update
+
+        See the docstring of plotParPlane for details.
+        """
+        #}}}
+
+        # Set title
+        self._ph.thetaTxtDict["value"] = plotNumberFormatter(self._constTheta, None)
+        parTitle = self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
+        self._ph.tTxtDict["value"] =\
+            plotNumberFormatter(self._time[tInd], None, precision=4)
+        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        self._parAx.set_title("{}$,$ {}\n".format(parTitle, timeTitle),\
+                               fontsize = self._labelSize)
+
+        # Format axes
+        self._ph.makePlotPretty(self._parAx,\
+                                xprune   = "both",\
+                                yprune   = "both",\
+                                legend   = False,\
+                                rotation = 20,\
+                                )
+    #}}}
+#}}}
 
 # FIXME: Fix this!
 #{{{updateParAx
