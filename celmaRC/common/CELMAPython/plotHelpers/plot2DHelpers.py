@@ -4,8 +4,10 @@
 Contains helper functions for 2D plots
 """
 
+import numpy as np
+
 #{{{getMaxMinAnimation
-def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
+def getMaxMinAnimation(tupleOfArrays, fluct, varyMaxMin):
     #{{{docstring
     """
     Finds the max and min for each frame in the animation.
@@ -14,8 +16,6 @@ def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
     ----------
     tupleOfArrays : tuple of nd-arrays
         Tuple of the arrays to find the max and min of.
-    nFrames : int
-        Number of frames.
     fluct : bool
         Whether or not the max and min should be symmetric around 0.
     varyMaxMin : bool
@@ -24,24 +24,27 @@ def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
 
     Returns
     -------
-    varMax : tuple
+    vmax : tuple
         The maximum. One per frame
-    varMin : tuple
+    vmin : tuple
         The minimum. One per frame
     """
     #}}}
+
+    # Get the number of frames
+    nFrames = tupleOfArrays[0].shape[0]
 
     if not(fluct) and not(varyMaxMin):
         # Find the global max and min
         flatArrays = tuple(array.flatten() for array in tupleOfArrays)
         tupleOfArrays = np.concatenate(flatArrays)
-        varMax = (np.max(tupleOfArrays),)*nFrames
-        varMin = (np.min(tupleOfArrays),)*nFrames
+        vmax = (np.max(tupleOfArrays),)*nFrames
+        vmin = (np.min(tupleOfArrays),)*nFrames
     elif not(fluct) and varyMaxMin:
         # Find the max and min for each frame
         lenTuple = len(tupleOfArrays)
-        varMax = np.zeros(nFrames)
-        varMin = np.zeros(nFrames)
+        vmax = np.zeros(nFrames)
+        vmin = np.zeros(nFrames)
         tupleOfMax = np.zeros(lenTuple)
         tupleOfMin = np.zeros(lenTuple)
 
@@ -49,14 +52,16 @@ def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
             curFrameArrayMax = np.zeros(nFrames)
             curFrameArrayMin = np.zeros(nFrames)
             for arrayNr in range(lenTuple):
-                curFrameArrayMax[arrayNr] = np.max(tupleOfArrays[arrayNr])
-                curFrameArrayMin[arrayNr] = np.min(tupleOfArrays[arrayNr])
+                curFrameArrayMax[arrayNr] =\
+                    np.max(tupleOfArrays[arrayNr][frame,:,:])
+                curFrameArrayMin[arrayNr] =\
+                    np.min(tupleOfArrays[arrayNr][frame,:,:])
 
-            varMax[frame] = np.max(curFrameArrayMax)
-            varMin[frame] = np.min(curFrameArrayMin)
+            vmax[frame] = np.max(curFrameArrayMax)
+            vmin[frame] = np.min(curFrameArrayMin)
 
-        varMax = tuple(varMax)
-        varMin = tuple(varMin)
+        vmax = tuple(vmax)
+        vmin = tuple(vmin)
 
     elif fluct and not(varyMaxMin):
         # Max and min will be set symmetric
@@ -66,16 +71,16 @@ def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
         curMax = np.max(tupleOfArrays)
         curMin = np.min(tupleOfArrays)
 
-        absMax = np.max(np.abs(curMax, curMin))
+        absMax = np.max(np.abs((curMax, curMin)))
 
-        varMax = ( absMax,)*nFrames
-        varMin = (-absMax,)*nFrames
+        vmax = ( absMax,)*nFrames
+        vmin = (-absMax,)*nFrames
 
     elif fluct and varyMaxMin:
         # Find the max and min for each frame
         lenTuple = len(tupleOfArrays)
-        varMax = np.zeros(nFrames)
-        varMin = np.zeros(nFrames)
+        vmax = np.zeros(nFrames)
+        vmin = np.zeros(nFrames)
         tupleOfMax = np.zeros(lenTuple)
         tupleOfMin = np.zeros(lenTuple)
 
@@ -83,34 +88,36 @@ def getMaxMinAnimation(tupleOfArrays, nFrames, fluct, varyMaxMin):
             curFrameArrayMax = np.zeros(nFrames)
             curFrameArrayMin = np.zeros(nFrames)
             for arrayNr in range(lenTuple):
-                curFrameArrayMax[arrayNr] = np.max(tupleOfArrays[arrayNr])
-                curFrameArrayMin[arrayNr] = np.min(tupleOfArrays[arrayNr])
+                curFrameArrayMax[arrayNr] =\
+                    np.max(tupleOfArrays[arrayNr][frame,:,:])
+                curFrameArrayMin[arrayNr] =\
+                    np.min(tupleOfArrays[arrayNr][frame,:,:])
 
             curMax = np.max(curFrameArrayMax)
-            curMin = np.max(curFrameArrayMin)
+            curMin = np.min(curFrameArrayMin)
 
-            absMax = np.max(np.abs(curMax, curMin))
+            absMax = np.max(np.abs((curMax, curMin)))
 
-            varMax[frame] = absMax
-            varMin[frame] = -absMax
+            vmax[frame] = absMax
+            vmin[frame] = -absMax
 
-        varMax = tuple(varMax)
-        varMin = tuple(varMin)
+        vmax = tuple(vmax)
+        vmin = tuple(vmin)
 
-    return varMax, varMin
+    return vmax, vmin
 #}}}
 
 #{{{getLevelsAnimation
-def getLevelsAnimation(varMax, varMin, nCont):
+def getLevelsAnimation(vmax, vmin, nCont):
     #{{{docstring
     """
     Sets the contour levels from the tuple of max and min for an animation.
 
     Parameters
     ----------
-    varMax : tuple of nd-arrays
+    vmax : tuple of nd-arrays
         Tuple of the max. One for each frame.
-    varMin : tuple of nd-arrays
+    vmin : tuple of nd-arrays
         Tuple of the min. One for each frame.
     nCont : int
         Number of contours to use in the contour plot.
@@ -122,19 +129,19 @@ def getLevelsAnimation(varMax, varMin, nCont):
     """
     #}}}
 
-    nFrames = len(varMax)
-    levels = np.zeros(nFrames)
+    nFrames = len(vmax)
+    levels = []
 
     for frame in range(nFrames):
-        level = np.linspace(varMin  ,\
-                            varMax  ,\
-                            nCont   ,\
+        level = np.linspace(vmin[frame]  ,\
+                            vmax[frame]  ,\
+                            nCont        ,\
                             endpoint = True)
 
-        if np.amin(np.diff(levels)) > 0.0:
-            levels[frame] = None
+        if np.min(np.diff(level)) < 0.0:
+            levels.append(None)
         else:
-            levels[frame] = level
+            levels.append(level)
 
     return tuple(levels)
 #}}}

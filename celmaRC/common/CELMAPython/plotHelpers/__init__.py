@@ -4,15 +4,16 @@
 
 from .plotHelper import PlotHelper
 from .plotNumberFormatter import plotNumberFormatter
+from .plot2DHelpers import getMaxMinAnimation, getLevelsAnimation
 import os
-import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 # Set proper backend from display
 try:
     os.environ["DISPLAY"]
 except KeyError:
-    mpl.use("Agg")
-import matplotlib.pyplot as plt
+    plt.switch_backend("Agg")
+
 
 # Set the plot style for all plots
 titleSize = 30

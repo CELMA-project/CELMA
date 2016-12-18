@@ -2,7 +2,7 @@
 
 """ Contains the UnitsConverter class """
 
-from ..calcHelpers import safeCollect
+from ..collectAndCalcHelpers import safeCollect
 import scipy.constants as cst
 
 #{{{UnitsConverter
@@ -127,6 +127,11 @@ class UnitsConverter(object):
         #}}}
 
         self.conversionDict = {\
+        # NOTE: logarithm is without dimension
+        "lnN"       :{"units"        :r"{}",\
+                      "normalization":r"{}",\
+                      "factor"       :1,\
+                     },\
         # NOTE: n0 is input parameter, but n is from an evolving field
         "n"         :{"units"        :r"\mathrm{m}^{-3}",\
                       "normalization":r"/n_0",\
