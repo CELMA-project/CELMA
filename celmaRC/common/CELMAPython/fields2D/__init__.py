@@ -7,4 +7,6 @@ from .collectAndCalcFields2D import CollectAndCalcFields2D
 from .plotFields2D import (Plot2DPerp,\
                            Plot2DPar,\
                            Plot2DPol,\
-                           Plot2DPerpPar)
+                           Plot2DPerpPar,\
+                           Plot2DPerpPol,\
+                           )
