@@ -139,10 +139,10 @@ def collectAndCalcFields2D(paths                     ,\
             # Then theta index corresponding to pi
             piInd = round(var.shape[3]/2)
 
-            if zInd > piInd:
-                zNeg = zInd - piInd
+            if zSlice > piInd:
+                zPPi = zSlice - piInd
             else:
-                zNeg = zInd + piInd
+                zPPi = zSlice + piInd
 
             varPPi = collectiveCollect(\
                             paths                      ,\
@@ -151,7 +151,7 @@ def collectAndCalcFields2D(paths                     ,\
                             tInd         = tInd        ,\
                             yInd         = yInd        ,\
                             xInd         = xInd        ,\
-                            zInd         = zNeg        ,\
+                            zInd         = zPPi        ,\
                             )
             varPPi = varPPi[varName]
     else:
@@ -167,6 +167,16 @@ def collectAndCalcFields2D(paths                     ,\
         var  = varTime[varName]
         time = varTime["t_array"]
 
+        # Get index
+        if mode == "par":
+            # Then theta index corresponding to pi
+            piInd = round(var.shape[3]/2)
+
+            if zSlice > piInd:
+                zPPi = zSlice - piInd
+            else:
+                zPPi = zSlice + piInd
+
     if xguards:
         # Remove the inner ghost points from the variable
         var = np.delete(var, (0), axis=1)
@@ -178,11 +188,12 @@ def collectAndCalcFields2D(paths                     ,\
 
     if fluct:
         avg = polAvg(var)
-        var = var - avg
         if mode == "par":
             # The negative must have the same average, but not the same
             # fluctuations
-            varPPi = var - avg
+            varPPi = (var - avg)[:,:,:,zPPi:zPPi+1]
+
+        var = (var - avg)[:,:,:,zSlice:zSlice+1]
 
     if mode == "perp":
         # Add the last theta slice
@@ -191,6 +202,8 @@ def collectAndCalcFields2D(paths                     ,\
     if convertToPhysical:
         var  = uc.physicalConversion(var , varName)
         time = uc.physicalConversion(time, "t")
+        if mode == "par":
+            varPPi  = uc.physicalConversion(varPPi, varName)
 
     # Store the fields
     field2D["X"   ] = X
