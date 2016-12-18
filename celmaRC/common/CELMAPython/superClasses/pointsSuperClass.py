@@ -5,9 +5,9 @@ Contains parent class for drivers dealing with single points
 measurements
 """
 
-from ..calcHelpers import (getUniformSpacing,\
-                           getEvenlySpacedIndices,\
-                           findLargestRadialGrad)
+from ..collectAndCalcHelpers import (getUniformSpacing,\
+                                     getEvenlySpacedIndices,\
+                                     findLargestRadialGrad)
 from boututils.datafile import DataFile
 from boutdata import collect
 import numpy as np

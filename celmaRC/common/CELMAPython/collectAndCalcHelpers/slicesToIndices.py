@@ -4,7 +4,7 @@
 Contains function which converts a slice to indices used for BOUT++ collection.
 """
 
-import numpy as np
+from .gridSizes import getSizes
 
 #{{{slicesToIndices
 def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
@@ -40,7 +40,7 @@ def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
             elif dimension == "t":
                 dimLen = getSizes(path, dimension)
             else:
-                raise ValueError("Unknown coordinate {}".format(coordinate))
+                raise ValueError("Unknown dimension {}".format(dimension))
 
             # Subtract 1 in the end as indices counts from 0
             indices.append(dimLen - 1)
@@ -70,7 +70,7 @@ def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
                 elif dimension == "t":
                     dimLen = getSizes(path, dimension)
                 else:
-                    raise ValueError("Unknown coordinate {}".format(coordinate))
+                    raise ValueError("Unknown dimension {}".format(dimension))
 
                 # Subtract 1 in the end as indices counts from 0
                 realInd = dimLen + indices[ind] - 1
@@ -80,13 +80,16 @@ def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
                                 ", as {1} has only {2} elements").\
                         format(indices[ind], dimension, dimLen)
                     raise IndexError(message)
+            else:
+                realInd = indices[ind]
+
             if ind == 0:
                 start = realInd
             else:
                 end = realInd
 
         # Cast to tuple
-        indices = tuple(start, end)
+        indices = (start, end)
 
     return indices
 #}}}

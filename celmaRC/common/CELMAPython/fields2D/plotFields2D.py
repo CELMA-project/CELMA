@@ -9,6 +9,12 @@ from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from ..superClasses import Plot2DSuperClass
 from ..plotHelpers import plotNumberFormatter
+import os
+
+
+# Reset the size
+plt.rc("xtick",  labelsize = 35)
+plt.rc("ytick",  labelsize = 35)
 
 #{{{Plot2DPerp
 class Plot2DPerp(Plot2DSuperClass):
@@ -42,7 +48,10 @@ class Plot2DPerp(Plot2DSuperClass):
 
         # Create figure and axes
         pltSize = (20,15)
+        # NOTE: tight_layout=True gives wobbly plot as the precision of
+        #       the colorbar changes during the animation
         self._fig = plt.figure(figsize = pltSize)
+        self._fig.subplots_adjust(left=0.0)
         self._perpAx = self._fig.add_subplot(111)
         self._cBarAx = make_axes_locatable(self._perpAx).\
                  append_axes('right', '5%', '5%')
@@ -50,10 +59,10 @@ class Plot2DPerp(Plot2DSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, X_RT, Y_RT, Z_RT, time, constZ):
+    def setData(self, X_RT, Y_RT, Z_RT, time, constZ, varName, savePath):
         #{{{docstring
         """
-        Sets the data to  be plotted
+        Sets the data to be plotted (including the fileName and plot name)
 
         Parameters
         ----------
@@ -66,15 +75,27 @@ class Plot2DPerp(Plot2DSuperClass):
         time : array
             The time array.
         constZ : float
-            The constant z value (i.e. not the index)
+            The constant z value (i.e. not the index).
+        varName : str
+            The name of the variable given in Z_RT.
+        savePath : str
+            Destination to save the plot in.
         """
         #}}}
 
-        self._X_RT   = X_RT
-        self._Y_RT   = Y_RT
-        self._Z_RT   = Z_RT
-        self._time   = time
-        self._constZ = constZ
+        self._X_RT     = X_RT
+        self._Y_RT     = Y_RT
+        self._Z_RT     = Z_RT
+        self._time     = time
+        self._constZ   = constZ
+        self._varName  = varName
+        self._fileName =\
+            os.path.join(savePath, "{}-{}-{}".format(varName, "perp", "2D"))
+
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varName)
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self._uc.conversionDict[self._varName])
     #}}}
 
     #{{{plotAndSavePerpPlane
@@ -89,9 +110,10 @@ class Plot2DPerp(Plot2DSuperClass):
         self._updatePerpAxInTime(0)
 
         # Call the save and show routine
-        self.plotSaveAndShow(self._fig,\
-                             self._updatePerpAxInTime,\
-                             len(self._time))
+        self.plotSaveShow(self._fig,\
+                          self._fileName,\
+                          self._updatePerpAxInTime,\
+                          len(self._time))
     #}}}
 
     #{{{_updatePerpAxInTime
@@ -116,7 +138,7 @@ class Plot2DPerp(Plot2DSuperClass):
         # Clear previous axis
         self._perpAx.cla()
 
-        if self.__iterableLevels:
+        if self._iterableLevels:
             self._cfKwargs.update({"vmax"   : self._vmax  [tInd],\
                                    "vmin"   : self._vmin  [tInd],\
                                    "levels" : self._levels[tInd],\
@@ -133,24 +155,27 @@ class Plot2DPerp(Plot2DSuperClass):
         self._perpAx.grid(b=True)
         # Set x and y labels
         self._perpAx.\
-            set_xlabel(self._ph.zTxtDict["rhoTxtLabel"],\
+            set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
                        fontsize = self._labelSize)
         self._perpAx.\
-            set_ylabel(self._ph.zTxtDict["rhoTxtLabel"],\
+            set_ylabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
                        fontsize = self._labelSize)
 
         # Update the text
-        self._updatePlotTxT(tInd)
+        self._updatePlotTxt(tInd)
 
         # Update the colorbar
-        self._updateColorbar(self._fig, perpPlane, self._cBarAx)
+        self._updateColorbar(self._fig, perpPlane, self._cBarAx, tInd)
+
+        # Set title
+        self._cBar.set_label(self._varLabel, fontsize = self._labelSize)
 
         # Set equal axis
         self._perpAx.axis("equal")
     #}}}
 
-    #{{{updatePlotTxt
-    def updatePlotTxt(self, tInd):
+    #{{{_updatePlotTxt
+    def _updatePlotTxt(self, tInd):
         #{{{docstring
         """
         Updates the perpPlane plot by updating the axis, the title and
@@ -168,25 +193,25 @@ class Plot2DPerp(Plot2DSuperClass):
         #}}}
 
         # Set title
-        self._ph.zTxtDict["value"] = plotNumberFormatter(self._constVal, None)
+        self._ph.zTxtDict["value"] = plotNumberFormatter(self._constZ, None)
         perpTitle = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
         self._ph.tTxtDict["value"] =\
-            plotNumberFormatter(self._t[tInd], None, precision=4)
+            plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
-        self._perpAx.text(1.5, 1.05,\
-                          "{}$,$ {}".format(perpTitle, timeTitle),\
-                          transform = self._perpAx.transAxes,\
-                          **self._txtKwargs)
+        self._perpAx.set_title("{}$,$ {}\n".format(perpTitle, timeTitle),\
+                               fontsize = self._labelSize)
 
         # Format axes
-        self._perpAx.get_xaxis().\
-            set_major_formatter(FuncFormatter(plotNumberFormatter))
-        self._perpAx.get_yaxis().\
-            set_major_formatter(FuncFormatter(plotNumberFormatter))
+        self._ph.makePlotPretty(self._perpAx,\
+                                xprune   = "both",\
+                                yprune   = "both",\
+                                legend   = False,\
+                                rotation = 20,\
+                                )
     #}}}
 #}}}
 
-
+# FIXME: YOU ARE CHECKING STUFF, SEE HISTORY ABOVE
 
 # FIXME: Fix this!
 #{{{updateParAx
