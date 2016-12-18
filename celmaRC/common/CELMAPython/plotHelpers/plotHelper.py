@@ -81,7 +81,7 @@ class PlotHelper(object):
         self.zTxtDict["zTxt"] =\
                 r"$z{0[normalization]}$".format(self.zTxtDict)
         self.thetaTxtDict["constThetaTxt"] =\
-                r"$\theta={:d}^{{\circ}}$"
+                r"$\theta=${0[value]}$^{{\circ}}$"
         # Set label and title templates
         if self._convertToPhysical:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]} $[{0[units]}]$".\
