@@ -273,11 +273,13 @@ class CollectAndCalcFields2D(object):
             if self._mode == "par":
                 # The negative must have the same average, but not the same
                 # fluctuations
+                varTmp = (var - avg)[:,:,:,zInd:zInd+1]
                 varPPi = (var - avg)[:,:,:,zPPi:zPPi+1]
+                var    = varTmp
+            else:
+                var = (var - avg)
 
-            var = (var - avg)[:,:,:,zInd:zInd+1]
-
-        if self._mode == "perp":
+        if self._mode != "par":
             # Add the last theta slice
             var = addLastThetaSlice(var, var.shape[0])
 
