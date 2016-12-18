@@ -163,8 +163,8 @@ class CollectAndCalcFields2D(object):
         collectKwargs = {\
             "collectGhost" : collectGhost,\
             "tInd"         : tInd        ,\
-            "yInd"         : yInd        ,\
             "xInd"         : xInd        ,\
+            "yInd"         : yInd        ,\
             "zInd"         : zInd        ,\
                 }
 
