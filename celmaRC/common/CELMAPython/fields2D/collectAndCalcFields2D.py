@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains classes for collecting and calculating the 2D fields
+Contains function for collecting and calculating the 2D fields
 """
 
 from ..unitsConverter import UnitsConverter
@@ -13,8 +13,8 @@ from ..collectAndCalcHelpers import (DimensionsHelper,\
                                      polAvg)
 import numpy as np
 
-#{{{calcAndCollectFields2D
-def calcAndCollectFields2D(paths                     ,\
+#{{{collectAndCalcFields2D
+def collectAndCalcFields2D(paths                     ,\
                            varName                   ,\
                            xSlice                    ,\
                            ySlice                    ,\
@@ -122,7 +122,7 @@ def calcAndCollectFields2D(paths                     ,\
 
     # Collect
     if not(fluct):
-        var, time = collectiveCollect(\
+        varTime = collectiveCollect(\
                         paths                      ,\
                         (varName, "t_array")       ,\
                         collectGhost = collectGhost,\
@@ -131,6 +131,8 @@ def calcAndCollectFields2D(paths                     ,\
                         xInd         = xInd        ,\
                         zInd         = zInd        ,\
                         )
+        var  = varTime[varName]
+        time = varTime["t_array"]
 
         # Collect the negative
         if mode == "par":
@@ -151,8 +153,9 @@ def calcAndCollectFields2D(paths                     ,\
                             xInd         = xInd        ,\
                             zInd         = zNeg        ,\
                             )
+            varPPi = varPPi[varName]
     else:
-        var, time = collectiveCollect(\
+        varTime = collectiveCollect(\
                             paths                      ,\
                             (varName, "t_array")       ,\
                             collectGhost = collectGhost,\
@@ -161,6 +164,9 @@ def calcAndCollectFields2D(paths                     ,\
                             xInd         = xInd        ,\
                             zInd         = None        ,\
                             )
+        var  = varTime[varName]
+        time = varTime["t_array"]
+
     if xguards:
         # Remove the inner ghost points from the variable
         var = np.delete(var, (0), axis=1)
@@ -178,7 +184,7 @@ def calcAndCollectFields2D(paths                     ,\
             # fluctuations
             varPPi = var - avg
 
-    if "T" in mode:
+    if mode == "perp":
         # Add the last theta slice
         var = addLastThetaSlice(var, var.shape[0])
 
