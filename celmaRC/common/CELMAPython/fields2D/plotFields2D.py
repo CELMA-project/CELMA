@@ -469,8 +469,8 @@ class Plot2DPol(Plot2DSuperClass):
         self._axTitle = "{}$,$ {}\n"
     #}}}
 
-    #{{{setData
-    def setData(self, X_ZT, Y_ZT, Z_ZT, time, constRho, varName, savePath):
+    #{{{setPolData
+    def setPolData(self, X_ZT, Y_ZT, Z_ZT, time, constRho, varName, savePath):
         #{{{docstring
         """
         Sets the poloidal data and label to be plotted
@@ -643,11 +643,11 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
         Parameters
         ----------
         *args : positional arguments
-            See parent constructor for details
+            See parent constructors for details
         pltSize : tuple
             The size of the plot
         **kwargs : keyword arguments
-            See parent constructor for details
+            See parent constructors for details
         """
         #}}}
 
@@ -688,6 +688,9 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
             os.path.join(self._savePath,\
                          "{}-{}-{}".format(self._varName, "perpPar", "2D"))
 
+        # Set the lines to plot
+        self._setLines()
+
         # Initial plot (needed if we would like to save the plot)
         self._updatePerpAndPolAxInTime(0)
 
@@ -696,6 +699,45 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
                           self._fileName,\
                           self._updatePerpAndPolAxInTime,\
                           len(self._time))
+    #}}}
+
+    #{{{_setLines
+    def _setLines(self):
+        #{{{docstring
+        """
+        Sets the lines indicating slicing position.
+        """
+        #}}}
+
+        # The slice lines we are plotting
+        rhoStart = self._X_RT[ 0, 0]
+        rhoEnd   = self._X_RT[-1, 0]
+
+        # Calculate the numerical value of the theta angle and the z value
+        thetaRad = self._constTheta
+        thetaPPi = thetaRad + np.pi
+        zVal     = self._constZ
+
+        # Set coordinates for the lines which indicate how the data is
+        # sliced
+        # Organized in start and stop pairs
+        # We need two lines due to the center of the cylinder
+        self._RTLine1XVals =\
+                (rhoStart*np.cos(thetaRad), rhoEnd*np.cos(thetaRad))
+        self._RTLine1YVals =\
+                (rhoStart*np.sin(thetaRad), rhoEnd*np.sin(thetaRad))
+        self._RTLine2XVals =\
+                (rhoStart*np.cos(thetaPPi), rhoEnd*np.cos(thetaPPi))
+        self._RTLine2YVals =\
+                (rhoStart*np.sin(thetaPPi), rhoEnd*np.sin(thetaPPi))
+        self._RZLine1XVals =\
+                (-rhoEnd                  , -rhoStart              )
+        self._RZLine1YVals =\
+                (zVal                     , zVal                   )
+        self._RZLine2XVals =\
+                (rhoStart                 , rhoEnd                 )
+        self._RZLine2YVals =\
+                (zVal                     , zVal                   )
     #}}}
 
     #{{{_updatePerpAndPolAxInTime
@@ -714,8 +756,201 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
         self._updatePerpAxInTime(tInd)
         self._updateParAxInTime(tInd)
 
+        # Draw the lines
+        self._drawLines()
+
         timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}\n\n\n".\
                            format(timeTitle), fontsize = self._labelSize)
+    #}}}
+
+    #{{{_drawLines
+    def _drawLines(self):
+        #{{{docstring
+        """
+        Draws the lines indicating slicing position.
+        """
+        #}}}
+        # Plot
+        # Par line 1
+        self._parAx.plot(self._RZLine1XVals,\
+                       self._RZLine1YVals,\
+                       "--k"             ,\
+                       linewidth = 1     ,\
+                       zorder = -1       ,\
+                       )
+        # Par line 2
+        self._parAx.plot(self._RZLine2XVals,\
+                       self._RZLine2YVals,\
+                       "--k"             ,\
+                       linewidth = 1     ,\
+                       zorder = -1       ,\
+                       )
+        # Perp line 1
+        self._perpAx.plot(self._RTLine1XVals,\
+                       self._RTLine1YVals,\
+                       "--k"             ,\
+                       linewidth = 1     ,\
+                       zorder = -1       ,\
+                       )
+        # Perp line 2
+        self._perpAx.plot(self._RTLine2XVals,\
+                       self._RTLine2YVals,\
+                       "--k"             ,\
+                       linewidth = 1     ,\
+                       zorder = -1       ,\
+                       )
+    #}}}
+#}}}
+
+#{{{Plot2DPerpPol
+class Plot2DPerpPol(Plot2DPerp, Plot2DPol):
+    """
+    Class for 2D perpendicular-poloidal plotting.
+
+    Handles plot figure, axes, plot data and decorations.
+    """
+
+    #{{{constructor
+    def __init__(self, *args, pltSize = (35,15), **kwargs):
+        #{{{docstring
+        """
+        Constructor for the Plot2DPerp
+
+        * Creates the figure and axes
+
+        Parameters
+        ----------
+        *args : positional arguments
+            See parent constructors for details
+        pltSize : tuple
+            The size of the plot
+        **kwargs : keyword arguments
+            See parent constructors for details
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
+        # Re-open the figure
+        plt.close("all")
+        # NOTE: tight_layout=True gives wobbly plot as the precision of
+        #       the colorbar changes during the animation
+        self._fig = plt.figure(figsize = pltSize)
+
+        # Create figure and axes
+        # NOTE: tight_layout=True gives wobbly plot as the precision of
+        #       the colorbar changes during the animation
+        gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
+        self._perpAx = self._fig.add_subplot(gs[0])
+        self._polAx  = self._fig.add_subplot(gs[1])
+        self._cBarAx = self._fig.add_subplot(gs[2])
+        self._fig.subplots_adjust(wspace=0.25)
+        self._polAx.grid(True)
+        self._perpAx.grid(True)
+
+        # Set the axis title
+        self._axTitle = "{}\n"
+    #}}}
+
+    #{{{plotAndSavePerpPlane
+    def plotAndSavePerpPlane(self):
+        #{{{docstring
+        """
+        Performs the actual plotting of the perpendicular and poloidal
+        """
+        #}}}
+
+        # Set the file name
+        self._fileName =\
+            os.path.join(self._savePath,\
+                         "{}-{}-{}".format(self._varName, "perpPol", "2D"))
+
+        # Set the lines to plot
+        self._setLines()
+
+        # Initial plot (needed if we would like to save the plot)
+        self._updatePerpAndPolAxInTime(0)
+
+        # Call the save and show routine
+        self.plotSaveShow(self._fig,\
+                          self._fileName,\
+                          self._updatePerpAndPolAxInTime,\
+                          len(self._time))
+    #}}}
+
+    #{{{_setLines
+    def _setLines(self):
+        #{{{docstring
+        """
+        Sets the lines indicating slicing position.
+        """
+        #}}}
+
+        # Get the radius of the circle
+        rhoVal = self._constRho
+
+        # Create the circle
+        self._circle = plt.Circle((0, 0)         ,\
+                                  rhoVal         ,\
+                                  fill = False   ,\
+                                  linewidth = 1.0,\
+                                  linestyle= '--',\
+                                  color='k')
+
+        # Get the z value
+        zVal = self._constZ
+
+        # Set coordinates for the lines which indicate how the data is
+        # sliced
+        # Organized in start and stop pairs
+        # We only need one line to indicate the z value on the
+        # poloidal plot
+        self._ZTLineXVals=(0   , 2.0*np.pi)
+        self._ZTLineYVals=(zVal, zVal     )
+    #}}}
+
+    #{{{_updatePerpAndPolAxInTime
+    def _updatePerpAndPolAxInTime(self, tInd):
+        #{{{docstring
+        """
+        Updates the perpendicular and poloidal axis and sets the figure title.
+
+        Parameters
+        ----------
+        tInd : int
+            The current time index.
+        """
+        #}}}
+
+        self._updatePerpAxInTime(tInd)
+        self._updatePolAxInTime(tInd)
+
+        # Draw the lines
+        self._drawLines()
+
+        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        self._fig.suptitle("{}\n\n\n".\
+                           format(timeTitle), fontsize = self._labelSize)
+    #}}}
+
+    #{{{_drawLines
+    def _drawLines(self):
+        #{{{docstring
+        """
+        Draws the lines indicating slicing position.
+        """
+        #}}}
+
+        # Circle
+        self._perpAx.add_artist(self._circle)
+
+        # Pol line
+        self._polAx.plot(self._ZTLineXVals,\
+                         self._ZTLineYVals,\
+                         "--k"            ,\
+                         linewidth = 1    ,\
+                         )
     #}}}
 #}}}
