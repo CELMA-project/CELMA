@@ -4,6 +4,17 @@ import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
 from CELMAPython.fields1D import CollectAndCalcFields1D
+from CELMAPython.collectAndCalcHelpers import calcN, calcUIPar, calcUE
+
+mainFields  = ("lnN"       ,\
+               "vort"      ,\
+               "jPar"      ,\
+               "phi"       ,\
+               "vort"      ,\
+               "vortD"     ,\
+               "momDensPar",\
+               "S"         ,\
+              )
 
 paths = (".",)
 convertToPhysical = True
@@ -22,5 +33,27 @@ ccf1D.setSlice(xSlice,\
                ySlice,\
                zSlice,\
                tSlice)
-ccf1D.setVarName("lnN")
-par1D = ccf1D.executeCollectAndCalc()
+
+par1D = {}
+
+for field in mainFields:
+    ccf1D.setVarName(field)
+    par1D.update(ccf1D.executeCollectAndCalc())
+
+# Non-collects
+par1D.update({"n"    : calcN(par1D["lnN"])})
+par1D.update({"uIPar": calcUIPar(par1D["momDensPar"], par1D["n"])})
+par1D.update({"uEPar": calcUEPar(par1D["uIPar"], par1D["jPar"], par1D["n"], not(ccf1D.convertToPhysical))})
+
+# FIXME: Utested!
+plotOrder = ("lnN"  , "phi"       ,\
+             "n"    , "vortD"     ,\
+             "jPar" , "momDensPar",\
+             "uIPar", "uIPar"     ,\
+             "uEPar", "uEPar"     ,\
+             "S")
+
+p1DPar = Plot1DPar(".", ccf1D.convertToPhysical)
+p1DPar.setParData(par1D)
+p1DPar.setPlotOrder(plotOrder)
+p1DPar.plotAndSavePar(plotOrder)

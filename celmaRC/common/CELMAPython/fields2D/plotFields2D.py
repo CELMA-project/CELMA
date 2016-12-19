@@ -4,7 +4,7 @@
 Contains functions for plotting the 2D fields
 """
 
-from ..superClasses import Plot2DSuperClass
+from ..superClasses import PlotAnim2DSuperClass
 from ..plotHelpers import plotNumberFormatter
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
@@ -17,8 +17,8 @@ import os
 plt.rc("xtick",  labelsize = 35)
 plt.rc("ytick",  labelsize = 35)
 
-#{{{Plot2DPerp
-class Plot2DPerp(Plot2DSuperClass):
+#{{{PlotAnim2DPerp
+class PlotAnim2DPerp(PlotAnim2DSuperClass):
     """
     Class for 2D perpendicular plotting.
 
@@ -29,8 +29,9 @@ class Plot2DPerp(Plot2DSuperClass):
     def __init__(self, *args, pltSize = (20,15), **kwargs):
         #{{{docstring
         """
-        Constructor for the Plot2DPerp
+        Constructor for the PlotAnim2DPerp
 
+        * Calls the parent constructor
         * Creates the figure and axes
 
         Parameters
@@ -217,8 +218,8 @@ class Plot2DPerp(Plot2DSuperClass):
     #}}}
 #}}}
 
-#{{{Plot2DPar
-class Plot2DPar(Plot2DSuperClass):
+#{{{PlotAnim2DPar
+class PlotAnim2DPar(PlotAnim2DSuperClass):
     """
     Class for 2D parallel plotting.
 
@@ -229,8 +230,9 @@ class Plot2DPar(Plot2DSuperClass):
     def __init__(self, *args, pltSize = (20,15), **kwargs):
         #{{{docstring
         """
-        Constructor for the Plot2DPar
+        Constructor for the PlotAnim2DPar
 
+        * Calls the parent constructor
         * Creates the figure and axes
 
         Parameters
@@ -424,8 +426,8 @@ class Plot2DPar(Plot2DSuperClass):
     #}}}
 #}}}
 
-#{{{Plot2DPol
-class Plot2DPol(Plot2DSuperClass):
+#{{{PlotAnim2DPol
+class PlotAnim2DPol(PlotAnim2DSuperClass):
     """
     Class for 2D poloidal plotting.
 
@@ -436,8 +438,9 @@ class Plot2DPol(Plot2DSuperClass):
     def __init__(self, *args, pltSize = (20,15), **kwargs):
         #{{{docstring
         """
-        Constructor for the Plot2DPol
+        Constructor for the PlotAnim2DPol
 
+        * Calls the parent constructor
         * Creates the figure and axes
 
         Parameters
@@ -623,8 +626,8 @@ class Plot2DPol(Plot2DSuperClass):
     #}}}
 #}}}
 
-#{{{Plot2DPerpPar
-class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
+#{{{PlotAnim2DPerpPar
+class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
     """
     Class for 2D perpendicular-parallel plotting.
 
@@ -635,8 +638,9 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
     def __init__(self, *args, pltSize = (35,15), **kwargs):
         #{{{docstring
         """
-        Constructor for the Plot2DPerp
+        Constructor for the PlotAnim2DPerpPar
 
+        * Calls the parent class
         * Creates the figure and axes
 
         Parameters
@@ -802,8 +806,8 @@ class Plot2DPerpPar(Plot2DPerp, Plot2DPar):
     #}}}
 #}}}
 
-#{{{Plot2DPerpPol
-class Plot2DPerpPol(Plot2DPerp, Plot2DPol):
+#{{{PlotAnim2DPerpPol
+class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
     """
     Class for 2D perpendicular-poloidal plotting.
 
@@ -814,8 +818,9 @@ class Plot2DPerpPol(Plot2DPerp, Plot2DPol):
     def __init__(self, *args, pltSize = (35,15), **kwargs):
         #{{{docstring
         """
-        Constructor for the Plot2DPerp
+        Constructor for the PlotAnim2DPerpPol class
 
+        * Calls the parent class
         * Creates the figure and axes
 
         Parameters

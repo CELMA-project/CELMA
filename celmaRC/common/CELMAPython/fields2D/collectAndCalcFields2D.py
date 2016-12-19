@@ -129,7 +129,7 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         var, time, varPPi =\
             self._collectWrapper(collectKwargs)
 
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             var  = self._uc.physicalConversion(var , self._varName)
             time = self._uc.physicalConversion(time, "t")
             if self._mode == "par":
