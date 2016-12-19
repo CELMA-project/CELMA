@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains helper functions for 2D plots
+Contains helper functions for setting plot limits
 """
 
 import numpy as np
@@ -45,8 +45,6 @@ def getMaxMinAnimation(tupleOfArrays, fluct, varyMaxMin):
         lenTuple = len(tupleOfArrays)
         vmax = np.zeros(nFrames)
         vmin = np.zeros(nFrames)
-        tupleOfMax = np.zeros(lenTuple)
-        tupleOfMin = np.zeros(lenTuple)
 
         for frame in range(nFrames):
             curFrameArrayMax = np.zeros(nFrames)
@@ -81,8 +79,6 @@ def getMaxMinAnimation(tupleOfArrays, fluct, varyMaxMin):
         lenTuple = len(tupleOfArrays)
         vmax = np.zeros(nFrames)
         vmin = np.zeros(nFrames)
-        tupleOfMax = np.zeros(lenTuple)
-        tupleOfMin = np.zeros(lenTuple)
 
         for frame in range(nFrames):
             curFrameArrayMax = np.zeros(nFrames)

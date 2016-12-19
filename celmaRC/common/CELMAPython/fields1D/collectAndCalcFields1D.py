@@ -9,6 +9,7 @@ from ..collectAndCalcHelpers import (collectTime,\
                                      polAvg,\
                                      slicesToIndices,\
                                      timeAvg)
+import numpy as np
 
 #{{{CollectAndCalcFields1D
 class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
@@ -125,7 +126,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         # Collect
         var, time = self._collectWrapper(collectKwargs)
 
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             var  = self._uc.physicalConversion(var , self._varName)
             time = self._uc.physicalConversion(time, "t")
 
@@ -222,6 +223,15 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             if self._tSlice.step is not None:
                 var  = var [::self._tSlice.step]
                 time = time[::self._tSlice.step]
+
+        # Ensure 4D
+        if len(var.shape) == 3:
+            # Make it a 4d variable
+            tmp = np.zeros((len(time), *var.shape))
+            # Copy the field in to each time
+            tmp[:] = var
+            var = tmp
+
 
         return var, time
     #}}}
