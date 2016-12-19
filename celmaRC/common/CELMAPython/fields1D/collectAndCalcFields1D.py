@@ -170,9 +170,9 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         # Prepare the collectKwargs
         if self._mode == "parallel":
-            collectKwargs.pop("xInd")
-        elif self._mode == "radial":
             collectKwargs.pop("yInd")
+        elif self._mode == "radial":
+            collectKwargs.pop("xInd")
 
         if self._processing:
             if "pol" in self._processing:
@@ -181,23 +181,23 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         # Collect
         if self._mode == "parallel":
             if not(self._processing):
-                var = collectParallelProfile(self._paths,\
-                                             (self._varName,),\
+                var = collectParallelProfile(self._paths  ,\
+                                             self._varName,\
                                              **collectKwargs)
             else:
-                var = collectConstRho(self._paths,\
-                                      (self._varName,),\
+                var = collectConstRho(self._paths  ,\
+                                      self._varName,\
                                       **collectKwargs)
         elif self._mode == "radial":
             if not(self._processing):
-                var = collectRadialProfile(self._paths,\
-                                           (self._varName,),\
+                var = collectRadialProfile(self._paths  ,\
+                                           self._varName,\
                                            **collectKwargs)
             else:
-                var = collectConstZ(self._paths,\
-                                   (self._varName,),\
+                var = collectConstZ(self._paths  ,\
+                                    self._varName,\
                                     **collectKwargs)
-        
+
         time = collectTime(self._paths, collectKwargs["tInd"])
 
         # Process

@@ -123,8 +123,7 @@ def DDZ(var, J):
 def findLargestRadialGrad(var, dx, MXG = None):
     #{{{docstring
     """
-    Returns the value of the maximum gradient and the corresponding
-    index
+    Returns the index of the maximum absolute gradient along rho.
 
     Parameters
     ----------
@@ -138,8 +137,6 @@ def findLargestRadialGrad(var, dx, MXG = None):
 
     Returns
     -------
-    maxGrad : float
-        The value of the maximum gradient
     maxGradInd : int
         The index at which the maximum gradient can be found at
     """
@@ -158,15 +155,14 @@ def findLargestRadialGrad(var, dx, MXG = None):
         # Subtract MXG as xguards are collected
         maxGradInd -= MXG
 
-    return maxGrad, maxGradInd
+    return maxGradInd
 #}}}
 
 #{{{findLargestParallelGrad
 def findLargestParallelGrad(var, dy, MYG = None):
     #{{{docstring
     """
-    Returns the value of the maximum gradient and the corresponding
-    index
+    Returns the index of the maximum absolute gradient along z.
 
     Parameters
     ----------
@@ -180,8 +176,6 @@ def findLargestParallelGrad(var, dy, MYG = None):
 
     Returns
     -------
-    maxGrad : float
-        The value of the maximum gradient
     maxGradInd : int
         The index at which the maximum gradient can be found at
     """
@@ -200,15 +194,14 @@ def findLargestParallelGrad(var, dy, MYG = None):
         # Subtract MYG as yguards are collected
         maxGradInd -= MYG
 
-    return maxGrad, maxGradInd
+    return maxGradInd
 #}}}
 
 #{{{findLargestPoloidalGrad
 def findLargestPoloidalGrad(var, J):
     #{{{docstring
     """
-    Returns the value of the maximum gradient and the corresponding
-    index
+    Returns the index of the maximum absolute gradient along theta
 
     Parameters
     ----------
@@ -219,8 +212,6 @@ def findLargestPoloidalGrad(var, J):
 
     Returns
     -------
-    maxGrad : float
-        The value of the maximum gradient
     maxGradInd : int
         The index at which the maximum gradient can be found at
     """
@@ -236,5 +227,43 @@ def findLargestPoloidalGrad(var, J):
     # Take the firs occurence of the z axis
     maxGradInd = int(maxGradInds[3][0])
 
-    return maxGrad, maxGradInd
+    return maxGradInd
+#}}}
+
+#{{{findLargestRadialGradN
+def findLargestRadialGradN(steadyStatePath):
+    #{{{docstring
+    """
+    Find the largest gradient in n.
+
+    Parameters
+    ----------
+    steadyStatePath : str
+        Path to collect from
+
+    Returns
+    -------
+    xInd : int
+        Index of largest n
+    """
+    #}}}
+
+    dx = getUniformSpacing(steadyStatePath, "x")
+    # Check last t index
+    with DataFile(os.path.join(steadyStatePath, "BOUT.dmp.0.nc")) as f:
+        tLast = len(f.read("t_array")) - 1
+
+    # In the steady state, the max gradient in "n" is the same
+    # throughout in the domain, so we use yInd=0, zInd=0 in the
+    # collect
+    lnN = collect("lnN",\
+                  path=steadyStatePath,\
+                  xguards=False,\
+                  yguards=False,\
+                  tind   = [tLast, tLast],\
+                  info=False)
+    n = np.exp(lnN)
+    xInd  = findLargestRadialGrad(n, dx[0,0])
+
+    return xInd
 #}}}
