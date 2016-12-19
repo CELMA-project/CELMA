@@ -5,6 +5,9 @@
 from ..unitsConverter import UnitsConverter
 from ..plotHelpers import PlotHelper
 
+# FIXME: Needs revision!
+
+
 #{{{PlotsSuperClass
 class PlotsSuperClass(object):
     """

@@ -18,4 +18,5 @@ from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectConstRho, collectConstZ,\
                               )
 from .meshHelper import addLastThetaSlice, get2DMesh
+from .nonSolvedVariables import calcN, calcUIPar, calcUEPar
 from .slicesToIndices import slicesToIndices
