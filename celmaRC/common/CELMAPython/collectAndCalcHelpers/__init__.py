@@ -8,7 +8,9 @@ from .dimensionHelper import DimensionsHelper
 from .gridSizes import (getSizes, getUniformSpacing, getEvenlySpacedIndices,\
                         getMXG, getMYG)
 from .improvedCollect import (safeCollect, collectiveCollect,\
-                              collectPointTime, collectRadialProfileTime,\
-                              collectPoloidalProfileTime)
+                              collectPoint,\
+                              collectRadialProfile, collectPoloidalProfile,\
+                              collectConstRho, collectConstZ,\
+                              )
 from .meshHelper import addLastThetaSlice, get2DMesh
 from .slicesToIndices import slicesToIndices

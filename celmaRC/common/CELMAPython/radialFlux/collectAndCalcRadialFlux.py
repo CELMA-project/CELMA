@@ -5,7 +5,7 @@ Contains the radial flux calculation
 """
 
 from ..calcHelpers import (DimensionsHelper,\
-                           collectPoloidalProfileTime,\
+                           collectPoloidalProfile,\
                            polAvg,\
                            DDZ)
 from ..unitsConverter import UnitsConverter
@@ -217,10 +217,10 @@ def calcTimeTraceRadialDerivative(paths                      ,\
         J = np.array(((rho,),))
 
         if mode == "normal":
-            var, _ = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
+            var    = collectPoloidalProfile(paths, varName, x, y, tInd=t)
             DDZVar = DDZ(var, J)
         elif mode == "fluct":
-            var, _ = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
+            var   = collectPoloidalProfile(paths, varName, x, y, tInd=t)
             DDZVar = DDZ(var, J)
             DDZVar = (DDZVar - polAvg(DDZVar))
         else:
