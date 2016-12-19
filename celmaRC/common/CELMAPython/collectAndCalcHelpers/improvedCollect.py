@@ -6,6 +6,7 @@ Contains function which collects a variable over several output timesteps
 
 import numpy as np
 from boutdata import collect
+from boututils.datafile import DataFile
 
 #{{{safeCollect
 def safeCollect(*args, **kwargs):
@@ -55,16 +56,15 @@ def collectiveCollect(paths               ,\
         The variables to be collected
     collectGhost : bool
         If the ghost is to be collected
-    tind : [None|2d array]
-        Time index range to collect. The first index is the start, and
-        the second is the end of the range (inclusive)
-    xind : [None|2d array]
+    tInd : [None|tuple]
+        Start and end of the time if not None
+    xInd : [None|2d array]
         x index range to collect. The first index is the start, and the
         second is the end of the range (inclusive)
-    yind : [None|2d array]
+    yInd : [None|2d array]
         y index range to collect. The first index is the start, and the
         second is the end of the range (inclusive)
-    zind : [None|2d array]
+    zInd : [None|2d array]
         z index range to collect. The first index is the start, and the
         second is the end of the range (inclusive)
 
@@ -87,10 +87,10 @@ def collectiveCollect(paths               ,\
                 localVar =\
                     safeCollect(var,\
                             path     = path        ,\
-                            tind     = tInd        ,\
-                            xind     = xInd        ,\
-                            yind     = yInd        ,\
-                            zind     = zInd        ,\
+                            tInd     = tInd        ,\
+                            xInd     = xInd        ,\
+                            yInd     = yInd        ,\
+                            zInd     = zInd        ,\
                             xguards  = collectGhost,\
                             yguards  = collectGhost,\
                             info     = False        )
@@ -110,8 +110,46 @@ def collectiveCollect(paths               ,\
     return data
 #}}}
 
-#{{{collectPointTime
-def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
+#{{{collectTime
+def collectTime(paths, tInd = None):
+    #{{{docstring
+    """
+    Collects the time
+
+    Parameters
+    -----------
+    paths : iterable of strings
+        What path to use when collecting the variable. Must be in
+        ascending temporal order as the variable will be
+        concatenated.
+    tInd : [None|tuple]
+        Start and end of the time if not None
+
+    Returns
+    -------
+    time : 1d-array
+        Array of the time at the difference time indices
+    """
+    #}}}
+
+    # Initialize
+    time = None
+
+    for path in paths:
+        with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
+             if time is None:
+                time = f.read("t_array")
+            else:
+                time = np.concatenate(time, f.read("t_array")), axis=0)                                   )
+
+    if tInd is not None:
+        time = time[tInd[0], tInd[1]]
+
+    return time
+#}}}
+
+#{{{collectPoint
+def collectPoint(paths, varName, xInd, yInd, zInd, tInd = None):
     #{{{docstring
     """
     Collects the variable in one spatial point
@@ -122,8 +160,8 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : string
-        Name of the variable.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
     xInd : int
         xInd to collect from
     yInd : int
@@ -138,12 +176,12 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
     var : 4d-array
         The time trace of the variable in the position on with shape
         (nt,1,1,1)
-    time : 1d-array
-        Array of the time at the difference time indices
     """
     #}}}
 
-    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
+    # Cast to tuple
+    varName = tuple(varName)
+    varDict = collectiveCollect(paths, varName,\
                                     collectGhost = False,\
                                     xInd = (xInd, xInd),\
                                     yInd = (yInd, yInd),\
@@ -151,17 +189,16 @@ def collectPointTime(paths, varName, xInd, yInd, zInd, tInd = None):
                                     tInd = tInd
                                     )
 
-    var  = varTimeDict[varName]
-    time = varTimeDict["t_array"]
+    var  = varDict[varName]
 
-    return var, time
+    return var
 #}}}
 
-#{{{collectRadialProfileTime
-def collectRadialProfileTime(paths, varName, yInd, zInd, tInd = None):
+#{{{collectRadialProfile
+def collectRadialProfile(paths, varName, yInd, zInd, tInd = None):
     #{{{docstring
     """
-    Collects the variable in one spatial point
+    Collects the variable in along a radial line
 
     Parameters
     -----------
@@ -169,8 +206,8 @@ def collectRadialProfileTime(paths, varName, yInd, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : string
-        Name of the variable.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
     yInd : int
         yInd to collect from
     zInd : int
@@ -182,30 +219,29 @@ def collectRadialProfileTime(paths, varName, yInd, zInd, tInd = None):
     -------
     var : 4d-array
         The variable with the shape (nt,nx,1,1)
-    time : 1d-array
-        Array of the time at the difference time indices
     """
     #}}}
 
+    # Cast to tuple
+    varName = tuple(varName)
     # Collect the variable
-    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
+    varDict = collectiveCollect(paths, (varName, ),\
                                     collectGhost = False,\
                                     yInd = (yInd, yInd),\
                                     zInd = (zInd, zInd),\
                                     tInd = tInd        ,\
                                     )
 
-    var  = varTimeDict[varName]
-    time = varTimeDict["t_array"]
+    var  = varDict[varName]
 
-    return var, time
+    return var
 #}}}
 
-#{{{collectPoloidalProfileTime
-def collectPoloidalProfileTime(paths, varName, xInd, yInd, tInd=None):
+#{{{collectParallelProfile
+def collectParallelProfile(paths, varName, xInd, zInd, tInd = None):
     #{{{docstring
     """
-    Collects the variable in one spatial point
+    Collects the variable in along a parallel line
 
     Parameters
     -----------
@@ -213,8 +249,51 @@ def collectPoloidalProfileTime(paths, varName, xInd, yInd, tInd=None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : string
-        Name of the variable.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
+    xInd : int
+        xInd to collect from
+    yInd : int
+        yInd to collect from
+    tInd : [None|tuple]
+        Start and end of the time if not None
+
+    Returns
+    -------
+    var : 4d-array
+        The variable with the shape (nt,1,ny,1)
+    """
+    #}}}
+
+    # Cast to tuple
+    varName = tuple(varName)
+    # Collect the variable
+    varDict = collectiveCollect(paths, (varName, ),\
+                                    collectGhost = False,\
+                                    xInd = (xInd, xInd),\
+                                    zInd = (zInd, zInd),\
+                                    tInd = tInd        ,\
+                                    )
+
+    var  = varDict[varName]
+
+    return var
+#}}}
+
+#{{{collectPoloidalProfile
+def collectPoloidalProfile(paths, varName, xInd, yInd, tInd=None):
+    #{{{docstring
+    """
+    Collects the variable along a poloidal line
+
+    Parameters
+    -----------
+    paths : iterable of strings
+        What path to use when collecting the variable. Must be in
+        ascending temporal order as the variable will be
+        concatenated.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
     xInd : int
         xInd to collect from
     yInd : int
@@ -226,21 +305,140 @@ def collectPoloidalProfileTime(paths, varName, xInd, yInd, tInd=None):
     -------
     var : 4d-array
         The variable with the shape (nt,1,1,nz)
-    time : 1d-array
-        Array of the time at the difference time indices
     """
     #}}}
 
+    # Cast to tuple
+    varName = tuple(varName)
     # Collect the variable
-    varTimeDict = collectiveCollect(paths, (varName, "t_array"),\
+    varDict = collectiveCollect(paths, (varName, ),\
                                     collectGhost = False,\
                                     xInd = (xInd, xInd),\
                                     yInd = (yInd, yInd),\
                                     tInd = tInd        ,\
                                     )
 
-    var  = varTimeDict[varName]
-    time = varTimeDict["t_array"]
+    var  = varDict[varName]
 
-    return var, time
+    return var
+#}}}
+
+#{{{collectConstRho
+def collectConstRho(paths, varName, xInd, tInd = None):
+    #{{{docstring
+    """
+    Collects the variable with at specified rho
+
+    Parameters
+    -----------
+    paths : iterable of strings
+        What path to use when collecting the variable. Must be in
+        ascending temporal order as the variable will be
+        concatenated.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
+    xInd : int
+        xInd to collect from
+    tInd : [None|tuple]
+        Start and end of the time if not None
+
+    Returns
+    -------
+    var : 4d-array
+        The variable with the shape (nt,1,ny,nz)
+    """
+    #}}}
+
+    # Cast to tuple
+    varName = tuple(varName)
+    # Collect the variable
+    varDict = collectiveCollect(paths, (varName, ),\
+                                    collectGhost = False,\
+                                    xInd = (xInd, xInd),\
+                                    tInd = tInd        ,\
+                                    )
+
+    var  = varDict[varName]
+
+    return var
+#}}}
+
+#{{{collectConstZ
+def collectConstZ(paths, varName, yInd, tInd = None):
+    #{{{docstring
+    """
+    Collects the variable with at specified z
+
+    Parameters
+    -----------
+    paths : iterable of strings
+        What path to use when collecting the variable. Must be in
+        ascending temporal order as the variable will be
+        concatenated.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
+    zInd : int
+        zInd to collect from
+    tInd : [None|tuple]
+        Start and end of the time if not None
+
+    Returns
+    -------
+    var : 4d-array
+        The variable with the shape (nt,nx,1,nz)
+    """
+    #}}}
+
+    # Cast to tuple
+    varName = tuple(varName)
+    # Collect the variable
+    varDict = collectiveCollect(paths, (varName, ),\
+                                    collectGhost = False,\
+                                    xInd = (xInd, xInd),\
+                                    tInd = tInd        ,\
+                                    )
+
+    var  = varDict[varName]
+
+    return var
+#}}}
+
+#{{{collectConstTheta
+def collectConstTheta(paths, varName, zInd, tInd = None):
+    #{{{docstring
+    """
+    Collects the variable with at specified theta
+
+    Parameters
+    -----------
+    paths : iterable of strings
+        What path to use when collecting the variable. Must be in
+        ascending temporal order as the variable will be
+        concatenated.
+    varName : [string|sequence of strings]
+        Name(s) of the variable(s) to collect.
+    zInd : int
+        zInd to collect from
+    tInd : [None|tuple]
+        Start and end of the time if not None
+
+    Returns
+    -------
+    var : 4d-array
+        The variable with the shape (nt,nx,1,nz)
+    """
+    #}}}
+
+    # Cast to tuple
+    varName = tuple(varName)
+    # Collect the variable
+    varDict = collectiveCollect(paths, (varName, ),\
+                                    collectGhost = False,\
+                                    zInd = (zInd, zInd),\
+                                    tInd = tInd        ,\
+                                    )
+
+    var  = varDict[varName]
+
+    return var
 #}}}

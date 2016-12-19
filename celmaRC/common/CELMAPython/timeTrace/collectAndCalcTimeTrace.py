@@ -5,8 +5,9 @@ Contains the calcTimeTrace calculation
 """
 
 from ..calcHelpers import (polAvg,\
-                           collectPointTime,\
-                           collectPoloidalProfileTime,\
+                           collectPoint,\
+                           collectTime,\
+                           collectPoloidalProfile,\
                            DimensionsHelper)
 from ..unitsConverter import UnitsConverter
 
@@ -133,10 +134,12 @@ def calcTimeTrace4d(paths                      ,\
 
         tCounter += 1
 
+        time = collectTime(paths, tInd=t)
+
         if mode == "normal":
-            var, time = collectPointTime(paths, varName, x, y, z, tInd=t)
+            var = collectPoint(paths, varName, x, y, z, tInd=t)
         elif mode == "fluct":
-            var, time = collectPoloidalProfileTime(paths, varName, x, y, tInd=t)
+            var = collectPoloidalProfile(paths, varName, x, y, tInd=t)
             var = (var - polAvg(var))
             timeTraces[key]["zInd"] = z
         else:
