@@ -4,9 +4,10 @@
 Contains function which collects a variable over several output timesteps
 """
 
-import numpy as np
 from boutdata import collect
 from boututils.datafile import DataFile
+import numpy as np
+import os
 
 #{{{safeCollect
 def safeCollect(*args, **kwargs):
@@ -86,14 +87,14 @@ def collectiveCollect(paths               ,\
                 # then concatenate the dictionary
                 localVar =\
                     safeCollect(var,\
-                            path     = path        ,\
-                            tInd     = tInd        ,\
-                            xInd     = xInd        ,\
-                            yInd     = yInd        ,\
-                            zInd     = zInd        ,\
-                            xguards  = collectGhost,\
-                            yguards  = collectGhost,\
-                            info     = False        )
+                                path     = path        ,\
+                                tind     = tInd        ,\
+                                xind     = xInd        ,\
+                                yind     = yInd        ,\
+                                zind     = zInd        ,\
+                                xguards  = collectGhost,\
+                                yguards  = collectGhost,\
+                                info     = False        )
             except OSError:
                 # An OSError is thrown if the file is not found
                 raise ValueError("No collectable files found in {}".\
@@ -137,10 +138,10 @@ def collectTime(paths, tInd = None):
 
     for path in paths:
         with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
-             if time is None:
+            if time is None:
                 time = f.read("t_array")
             else:
-                time = np.concatenate(time, f.read("t_array")), axis=0)                                   )
+                time = np.concatenate(time, f.read("t_array"), axis=0)
 
     if tInd is not None:
         time = time[tInd[0], tInd[1]]
@@ -160,8 +161,8 @@ def collectPoint(paths, varName, xInd, yInd, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
+    varName : str
+        Name of the variable to collect.
     xInd : int
         xInd to collect from
     yInd : int
@@ -180,14 +181,13 @@ def collectPoint(paths, varName, xInd, yInd, zInd, tInd = None):
     #}}}
 
     # Cast to tuple
-    varName = tuple(varName)
-    varDict = collectiveCollect(paths, varName,\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    yInd = (yInd, yInd),\
-                                    zInd = (zInd, zInd),\
-                                    tInd = tInd
-                                    )
+    varDict = collectiveCollect(paths, (varName,)   ,\
+                                collectGhost = False,\
+                                xInd = (xInd, xInd) ,\
+                                yInd = (yInd, yInd) ,\
+                                zInd = (zInd, zInd) ,\
+                                tInd = tInd
+                               )
 
     var  = varDict[varName]
 
@@ -195,7 +195,8 @@ def collectPoint(paths, varName, xInd, yInd, zInd, tInd = None):
 #}}}
 
 #{{{collectRadialProfile
-def collectRadialProfile(paths, varName, yInd, zInd, tInd = None):
+def collectRadialProfile(paths, varName, yInd, zInd,\
+                         tInd = None, collectGhost = False):
     #{{{docstring
     """
     Collects the variable in along a radial line
@@ -206,14 +207,16 @@ def collectRadialProfile(paths, varName, yInd, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    yInd : int
-        yInd to collect from
-    zInd : int
-        zInd to collect from
+    varName : str
+        Name of the variable to collect.
+    yInd : tuple
+        yInd start and yInd end to collect from
+    zInd : tuple
+        zInd start and zInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
@@ -222,15 +225,13 @@ def collectRadialProfile(paths, varName, yInd, zInd, tInd = None):
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    yInd = (yInd, yInd),\
-                                    zInd = (zInd, zInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)           ,\
+                                 collectGhost = collectGhost,\
+                                 yInd = yInd                ,\
+                                 zInd = zInd                ,\
+                                 tInd = tInd                ,\
+                                )
 
     var  = varDict[varName]
 
@@ -238,7 +239,8 @@ def collectRadialProfile(paths, varName, yInd, zInd, tInd = None):
 #}}}
 
 #{{{collectParallelProfile
-def collectParallelProfile(paths, varName, xInd, zInd, tInd = None):
+def collectParallelProfile(paths, varName, xInd, zInd,\
+                           tInd = None, collectGhost = False):
     #{{{docstring
     """
     Collects the variable in along a parallel line
@@ -249,14 +251,16 @@ def collectParallelProfile(paths, varName, xInd, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    xInd : int
-        xInd to collect from
-    yInd : int
-        yInd to collect from
+    varName : str
+        Name of the variable to collect.
+    xInd : tuple
+        xInd start and xInd end to collect from
+    zInd : tuple
+        zInd start and zInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
@@ -265,15 +269,13 @@ def collectParallelProfile(paths, varName, xInd, zInd, tInd = None):
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    zInd = (zInd, zInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)          ,\
+                                collectGhost = collectGhost,\
+                                xInd = xInd                ,\
+                                zInd = zInd                ,\
+                                tInd = tInd                ,\
+                               )
 
     var  = varDict[varName]
 
@@ -281,7 +283,8 @@ def collectParallelProfile(paths, varName, xInd, zInd, tInd = None):
 #}}}
 
 #{{{collectPoloidalProfile
-def collectPoloidalProfile(paths, varName, xInd, yInd, tInd=None):
+def collectPoloidalProfile(paths, varName, xInd, yInd,\
+                           tInd = None, collectGhost = False):
     #{{{docstring
     """
     Collects the variable along a poloidal line
@@ -292,14 +295,16 @@ def collectPoloidalProfile(paths, varName, xInd, yInd, tInd=None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    xInd : int
-        xInd to collect from
-    yInd : int
-        yInd to collect from
+    varName : str
+        Name of the variable to collect.
+    xInd : tuple
+        xInd start and xInd end to collect from
+    yInd : tuple
+        yInd start and yInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
@@ -308,15 +313,13 @@ def collectPoloidalProfile(paths, varName, xInd, yInd, tInd=None):
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    yInd = (yInd, yInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)          ,\
+                                collectGhost = collectGhost,\
+                                xInd = xInd                ,\
+                                yInd = yInd                ,\
+                                tInd = tInd                ,\
+                               )
 
     var  = varDict[varName]
 
@@ -324,7 +327,8 @@ def collectPoloidalProfile(paths, varName, xInd, yInd, tInd=None):
 #}}}
 
 #{{{collectConstRho
-def collectConstRho(paths, varName, xInd, tInd = None):
+def collectConstRho(paths, varName, xInd,\
+                    tInd = None, collectGhost = False):
     #{{{docstring
     """
     Collects the variable with at specified rho
@@ -335,12 +339,14 @@ def collectConstRho(paths, varName, xInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    xInd : int
-        xInd to collect from
+    varName : str
+        Name of the variable to collect.
+    xInd : tuple
+        xInd start and xInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
@@ -349,14 +355,12 @@ def collectConstRho(paths, varName, xInd, tInd = None):
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)          ,\
+                                collectGhost = collectGhost,\
+                                xInd = xInd                ,\
+                                tInd = tInd                ,\
+                               )
 
     var  = varDict[varName]
 
@@ -364,7 +368,8 @@ def collectConstRho(paths, varName, xInd, tInd = None):
 #}}}
 
 #{{{collectConstZ
-def collectConstZ(paths, varName, yInd, tInd = None):
+def collectConstZ(paths, varName, yInd,\
+                  tInd = None, collectGhost = False):
     #{{{docstring
     """
     Collects the variable with at specified z
@@ -375,12 +380,14 @@ def collectConstZ(paths, varName, yInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    zInd : int
-        zInd to collect from
+    varName : str
+        Name of the variable to collect.
+    yInd : tuple
+        yInd start and yInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
@@ -389,14 +396,12 @@ def collectConstZ(paths, varName, yInd, tInd = None):
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    xInd = (xInd, xInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)          ,\
+                                collectGhost = collectGhost,\
+                                yInd = yInd                ,\
+                                tInd = tInd                ,\
+                               )
 
     var  = varDict[varName]
 
@@ -404,10 +409,11 @@ def collectConstZ(paths, varName, yInd, tInd = None):
 #}}}
 
 #{{{collectConstTheta
-def collectConstTheta(paths, varName, zInd, tInd = None):
+def collectConstTheta(paths, varName, zInd,\
+                      tInd = None, collectGhost = False):
     #{{{docstring
     """
-    Collects the variable with at specified theta
+    Collects the variable with at a specified theta
 
     Parameters
     -----------
@@ -415,28 +421,28 @@ def collectConstTheta(paths, varName, zInd, tInd = None):
         What path to use when collecting the variable. Must be in
         ascending temporal order as the variable will be
         concatenated.
-    varName : [string|sequence of strings]
-        Name(s) of the variable(s) to collect.
-    zInd : int
-        zInd to collect from
+    varName : str
+        Name of the variable to collect.
+    zInd : tuple
+        zInd start and zInd end to collect from
     tInd : [None|tuple]
         Start and end of the time if not None
+    collectGhost : bool
+        Whether or not the ghost should be collected
 
     Returns
     -------
     var : 4d-array
-        The variable with the shape (nt,nx,1,nz)
+        The variable with the shape (nt,nx,ny,1)
     """
     #}}}
 
-    # Cast to tuple
-    varName = tuple(varName)
     # Collect the variable
-    varDict = collectiveCollect(paths, (varName, ),\
-                                    collectGhost = False,\
-                                    zInd = (zInd, zInd),\
-                                    tInd = tInd        ,\
-                                    )
+    varDict = collectiveCollect(paths, (varName,)          ,\
+                                collectGhost = collectGhost,\
+                                zInd = zInd                ,\
+                                tInd = tInd                ,\
+                               )
 
     var  = varDict[varName]
 
