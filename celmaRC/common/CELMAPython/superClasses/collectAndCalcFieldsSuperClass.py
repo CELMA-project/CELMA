@@ -65,7 +65,7 @@ class CollectAndCalcFieldsSuperClass(object):
             # Create the units convertor object
             uc = UnitsConverter(paths[0], convertToPhysical)
         # Toggle convertToPhysical in case of errors
-        self._convertToPhysical = uc.convertToPhysical
+        self.convertToPhysical = uc.convertToPhysical
 
         if dh is None:
             # Create the dimensions helper object
@@ -89,7 +89,8 @@ class CollectAndCalcFieldsSuperClass(object):
             Variable to collect
         """
         #}}}
-        self._notCalled.remove("setVarName")
+        if "setVarName" in self._notCalled:
+            self._notCalled.remove("setVarName")
         self._varName = varName
     #}}}
 
@@ -114,7 +115,8 @@ class CollectAndCalcFieldsSuperClass(object):
             Whether or not to slice the time trace
         """
         #}}}
-        self._notCalled.remove("setSlices")
+        if "setSlices" in self._notCalled:
+            self._notCalled.remove("setSlices")
 
         self._xSlice = xSlice
         self._ySlice = ySlice

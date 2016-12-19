@@ -262,7 +262,7 @@ def findLargestRadialGradN(steadyStatePath):
                   yguards=False,\
                   tind   = [tLast, tLast],\
                   info=False)
-    n = np.exp(lnN)
+    n = calcN(lnN)
     xInd  = findLargestRadialGrad(n, dx[0,0])
 
     return xInd
