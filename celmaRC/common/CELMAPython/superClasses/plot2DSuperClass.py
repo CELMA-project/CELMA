@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains functions for plotting the 2D fields
+Contains super class for plotting the 2D fields
 """
 
 from ..plotHelpers import (PlotHelper,\
