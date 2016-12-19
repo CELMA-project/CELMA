@@ -4,6 +4,9 @@
 Contains class for collecting and calculating the 2D fields
 """
 
+from ..collectAndCalcHelpers import DimensionsHelper
+from ..unitsConverter import UnitsConverter
+
 #{{{CollectAndCalcFieldsSuperClass
 class CollectAndCalcFieldsSuperClass(object):
     """
@@ -86,7 +89,7 @@ class CollectAndCalcFieldsSuperClass(object):
             Variable to collect
         """
         #}}}
-        self._notCalled.pop("setVarName")
+        self._notCalled.remove("setVarName")
         self._varName = varName
     #}}}
 
@@ -111,7 +114,7 @@ class CollectAndCalcFieldsSuperClass(object):
             Whether or not to slice the time trace
         """
         #}}}
-        self._notCalled.pop("setSlices")
+        self._notCalled.remove("setSlices")
 
         self._xSlice = xSlice
         self._ySlice = ySlice
