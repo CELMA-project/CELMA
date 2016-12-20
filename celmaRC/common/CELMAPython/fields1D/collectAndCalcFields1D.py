@@ -127,8 +127,8 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         var, time = self._collectWrapper(collectKwargs)
 
         if self.convertToPhysical:
-            var  = self._uc.physicalConversion(var , self._varName)
-            time = self._uc.physicalConversion(time, "t")
+            var  = self.uc.physicalConversion(var , self._varName)
+            time = self.uc.physicalConversion(time, "t")
 
         # Store the fields
         field1D["X"   ] = X
