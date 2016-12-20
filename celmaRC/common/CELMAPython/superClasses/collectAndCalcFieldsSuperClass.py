@@ -71,7 +71,7 @@ class CollectAndCalcFieldsSuperClass(object):
             # Create the dimensions helper object
             dh = DimensionsHelper(paths[0], uc)
 
-        self._uc = uc
+        self.uc = uc
         self._dh = dh
 
         self._notCalled = ["setVarName", "setSlices"]

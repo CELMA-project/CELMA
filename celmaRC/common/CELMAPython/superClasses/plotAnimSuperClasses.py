@@ -373,6 +373,15 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         if self._ddtPresent:
             self._ddtLines = tuple(self._ddtLines)
     #}}}
+
+    #{{{_setColors
+    def _setColors(self):
+        """
+        Sets the colors to be used in the plotting
+        """
+        colorSpace = np.arange(len(self._vars))
+        self._colors = self._cmap(np.linspace(0, 1, len(colorSpace)))
+    #}}}
 #}}}
 
 #{{{PlotAnim2DSuperClass

@@ -130,10 +130,10 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             self._collectWrapper(collectKwargs)
 
         if self.convertToPhysical:
-            var  = self._uc.physicalConversion(var , self._varName)
-            time = self._uc.physicalConversion(time, "t")
+            var  = self.uc.physicalConversion(var , self._varName)
+            time = self.uc.physicalConversion(time, "t")
             if self._mode == "par":
-                varPPi  = self._uc.physicalConversion(varPPi, self._varName)
+                varPPi  = self.uc.physicalConversion(varPPi, self._varName)
 
         # Store the fields
         field2D["X"   ] = X
