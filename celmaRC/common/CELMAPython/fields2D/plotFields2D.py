@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains functions for plotting the 2D fields
+Contains functions for animating the 2D fields
 """
 
 from ..superClasses import PlotAnim2DSuperClass
