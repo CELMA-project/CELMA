@@ -15,7 +15,6 @@ class PlotHelper(object):
         # Main fields
         "lnN"       , r"\ln(n)"          ,\
         "n"         , r"n"               ,\
-        "vort"      , r"\Omega"          ,\
         "jPar"      , r"j_{\parallel}"   ,\
         "phi"       , r"\phi"            ,\
         "vort"      , r"\Omega"          ,\
@@ -24,6 +23,12 @@ class PlotHelper(object):
         "uIPar"     , r"u_{i,\parallel}" ,\
         "uEPar"     , r"u_{e,\parallel}" ,\
         "S"         , r"S"               ,\
+        # ddt fields
+        "ddtLnN"       , r"\partial_t \ln(n)"            ,\
+        "ddtJPar"      , r"\partial_t j_{\parallel}"     ,\
+        "ddtVortD"     , r"\partial_t \Omega^D"          ,\
+        "ddtVort"      , r"\partial_t \Omega"            ,\
+        "ddtMomDensPar", r"\partial_t (nu_{i,\parallel})",\
         # lnN fields
         "lnNAdv"        ,  r"-\frac{1}{JB}\{\phi,\ln(n)\}"                   ,\
         "lnNRes"        , (r"\frac{\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n)"  \
@@ -222,6 +227,8 @@ class PlotHelper(object):
                        rotation = "horizontal",\
                        loc      = "best"      ,\
                        legend   = True        ,\
+                       xbins    = None        ,\
+                       ybins    = None        ,\
                        ):
         #{{{docstring
         """
@@ -241,6 +248,10 @@ class PlotHelper(object):
             Location of the legend
         legend : bool
             Whether or not to make the legend pretty
+        xbins : [None|int]
+            Number of bins to use on the x-ticks
+        ybins : [None|int]
+            Number of bins to use on the y-ticks
         """
         #}}}
 
@@ -279,6 +290,12 @@ class PlotHelper(object):
         if ax.get_yscale() != "log":
             # This destroys the ticks on log plots
             ax.yaxis.set_major_locator(MaxNLocator(prune=yprune))
+
+        # Set number of bins
+        if xbins is not None:
+            ax.locator_params(axis="x", nbins=xbins)
+        if ybins is not None:
+            ax.locator_params(axis="y", nbins=ybins)
     #}}}
 
     @staticmethod
