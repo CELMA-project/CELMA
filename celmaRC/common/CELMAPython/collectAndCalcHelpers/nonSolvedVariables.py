@@ -8,7 +8,7 @@ import scipy.constants as cst
 import numpy as np
 
 #{{{calcN
-def calcN(lnN):
+def calcN(lnN, normalized, uc=None):
     #{{{docstring
     """
     Calculates n = exp(lnN)
@@ -17,6 +17,10 @@ def calcN(lnN):
     ----------
     lnN : [float|array]
        The logarithm of n
+    normalized : bool
+        Whether or not the output should be normalized
+    uc : [None|UnitsConverter]
+        The unitsconverter (only needed if normalized is False)
 
     Returns
     -------
@@ -24,7 +28,13 @@ def calcN(lnN):
         The density
     """
     #}}}
-    return np.exp(lnN)
+    n = np.exp(lnN)
+    if normalized:
+        return n
+    else:
+        if uc == None:
+            raise ValueError("uc must be set if normalized is False")
+        return uc.physicalConversion(n , "n")
 #}}}
 
 #{{{calcUIPar
