@@ -40,15 +40,17 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
+        # Set the member data
+        self._pltSize = pltSize
 
-        # Set the axis title
-        self._title = "{}$,$ {}$,$ {{}}\n"
+        # Set the spatial part of the title
+        self._spatTitle = "{}$,$ {}$,$"
         # Set the x-axis label
         self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
     #{{{setRadialData
-    def setRadialData(self, radialDict, savePath, plotOrder=None):
+    def setRadialData(self, radialDict, figName, savePath, plotOrder=None):
         #{{{docstring
         """
         Sets the radial and set up the plotting
@@ -58,7 +60,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
             * Create the figures and axes (through a function call)
             * Set the colors (through a function call)
             * Set the plot order
-            * Update the title
+            * Update the spatial title
 
         Parameters
         ----------
@@ -70,6 +72,8 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
                 * "time"     - The time trace
                 * "zPos"     - The z position
                 * "thetaPos" - The theta position
+        figName : str
+            Name of the figure
         savePath : str
             Destination to save the plot in.
         plotOrder : [None|sequence of str]
@@ -85,6 +89,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         zPos           = radialDict.pop("zPos")
         thetaPos       = radialDict.pop("thetaPos")
 
+        self._figName  = figName
         self._savePath = savePath
 
         # Make axes and colors
@@ -99,7 +104,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
 
         # Check for "ddt" in the variables
         self._ddtPresent = False
-        
+
         for var in self._vars:
             if "ddt" in var:
                 self._ddtVar = var
@@ -116,7 +121,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         self._ph.thetaTxtDict["value"] = plotNumberFormatter(thetaPos, None)
         thetaTxt =\
             self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
-        set._title = self._title.format(zTxt, thetaTxt)
+        self._spatTitle = self._spatTitle.format(zTxt, thetaTxt)
     #}}}
 
     #{{{_setColors
@@ -124,12 +129,12 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         """
         Sets the colors to be used in the plotting
         """
-        colorSpace = np.arange(len(self.lines))
+        colorSpace = np.arange(len(self._vars))
         self._colors = self._cmap(np.linspace(0, 1, len(colorSpace)))
     #}}}
 
-    #{{{plotAndSaveRadialPlane
-    def plotAndSaveRadialPlane(self):
+    #{{{plotAndSaveRadialProfile
+    def plotAndSaveRadialProfile(self):
         #{{{docstring
         """
         Performs the actual plotting of the radial plane
@@ -139,10 +144,10 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "radial", "1D"))
+                         "{}-{}-{}".format(self._figName, "radial", "1D"))
 
-        # Initial plot (needed if we would like to save the plot)
-        self._updateRadialAxInTime(0)
+        # Initial plot
+        self._initialRadialPlot()
 
         # Call the save and show routine
         self.plotSaveShow(self._fig,\
@@ -170,9 +175,9 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
 
         # Set the title
         self._ph.tTxtDict["value"] =\
-            plotNumberFormatter(self.helper.t[0], None)
+            plotNumberFormatter(self._time[0], None)
         curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
-        self._fig.suptitle("{}{}".format(self._title, curTimeTxt))
+        self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 
     #{{{_updateRadialAxInTime
@@ -200,8 +205,9 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
             self._ddtLines[-1].set_data(self._X, self._ddtVar[key][tInd,:])
 
         # Update the title
-        curTimeTxt = self.helper.tTxtDict["tTxt"].format(self.helper.tTxtDict)
-        self._fig.suptitle("{}{}".format(self._title, curTimeTxt))
+        self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
+        curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 #}}}
 

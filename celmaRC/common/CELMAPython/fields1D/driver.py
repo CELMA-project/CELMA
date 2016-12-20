@@ -3,11 +3,10 @@
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields1D import CollectAndCalcFields1D
-from CELMAPython.collectAndCalcHelpers import calcN, calcUIPar, calcUE
+from CELMAPython.fields1D import CollectAndCalcFields1D, PlotAnim1DRadial
+from CELMAPython.collectAndCalcHelpers import calcN, calcUIPar, calcUEPar
 
 mainFields  = ("lnN"       ,\
-               "vort"      ,\
                "jPar"      ,\
                "phi"       ,\
                "vort"      ,\
@@ -18,15 +17,15 @@ mainFields  = ("lnN"       ,\
 
 paths = (".",)
 convertToPhysical = True
-mode = "parallel"
+mode = "radial"
 processing = None
 ccf1D = CollectAndCalcFields1D(paths,\
                                mode = mode,\
                                processing = processing,\
                                convertToPhysical = convertToPhysical)
 
-xSlice = 16
-ySlice = None
+xSlice = None
+ySlice = 16
 zSlice = 0
 tSlice = None
 ccf1D.setSlice(xSlice,\
@@ -34,26 +33,25 @@ ccf1D.setSlice(xSlice,\
                zSlice,\
                tSlice)
 
-par1D = {}
+radial1D = {}
 
 for field in mainFields:
     ccf1D.setVarName(field)
-    par1D.update(ccf1D.executeCollectAndCalc())
+    radial1D.update(ccf1D.executeCollectAndCalc())
 
 # Non-collects
-par1D.update({"n"    : calcN(par1D["lnN"])})
-par1D.update({"uIPar": calcUIPar(par1D["momDensPar"], par1D["n"])})
-par1D.update({"uEPar": calcUEPar(par1D["uIPar"], par1D["jPar"], par1D["n"], not(ccf1D.convertToPhysical))})
+radial1D.update({"n"    : calcN(radial1D["lnN"])})
+radial1D.update({"uIPar": calcUIPar(radial1D["momDensPar"], radial1D["n"])})
+radial1D.update({"uEPar": calcUEPar(radial1D["uIPar"], radial1D["jPar"], radial1D["n"], not(ccf1D.convertToPhysical))})
 
 # FIXME: Utested!
 plotOrder = ("lnN"  , "phi"       ,\
              "n"    , "vortD"     ,\
-             "jPar" , "momDensPar",\
-             "uIPar", "uIPar"     ,\
-             "uEPar", "uEPar"     ,\
-             "S")
+             "jPar" , "vort"      ,\
+             "uIPar", "momDensPar",\
+             "uEPar", "S"         ,\
+            )
 
-p1DPar = Plot1DPar(".", ccf1D.convertToPhysical)
-p1DPar.setParData(par1D)
-p1DPar.setPlotOrder(plotOrder)
-p1DPar.plotAndSavePar(plotOrder)
+p1DRadial = Plot1DRadial(".", ccf1D.convertToPhysical)
+p1DRadial.setRadialData(radial1D, "mainFields", ".", plotOrder=plotOrder)
+p1DRadial.plotAndSaveRadialProfile()

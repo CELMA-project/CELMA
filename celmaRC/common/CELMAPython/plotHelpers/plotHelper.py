@@ -13,103 +13,103 @@ class PlotHelper(object):
     #{{{Static members
     _varPltName = {\
         # Main fields
-        "lnN"       , r"\ln(n)"          ,\
-        "n"         , r"n"               ,\
-        "jPar"      , r"j_{\parallel}"   ,\
-        "phi"       , r"\phi"            ,\
-        "vort"      , r"\Omega"          ,\
-        "vortD"     , r"\Omega^D"        ,\
-        "momDensPar", r"nu_{i,\parallel}",\
-        "uIPar"     , r"u_{i,\parallel}" ,\
-        "uEPar"     , r"u_{e,\parallel}" ,\
-        "S"         , r"S"               ,\
+        "lnN"       : r"\ln(n)"          ,\
+        "n"         : r"n"               ,\
+        "jPar"      : r"j_{\parallel}"   ,\
+        "phi"       : r"\phi"            ,\
+        "vort"      : r"\Omega"          ,\
+        "vortD"     : r"\Omega^D"        ,\
+        "momDensPar": r"nu_{i,\parallel}",\
+        "uIPar"     : r"u_{i,\parallel}" ,\
+        "uEPar"     : r"u_{e,\parallel}" ,\
+        "S"         : r"S"               ,\
         # ddt fields
-        "ddtLnN"       , r"\partial_t \ln(n)"            ,\
-        "ddtJPar"      , r"\partial_t j_{\parallel}"     ,\
-        "ddtVortD"     , r"\partial_t \Omega^D"          ,\
-        "ddtVort"      , r"\partial_t \Omega"            ,\
-        "ddtMomDensPar", r"\partial_t (nu_{i,\parallel})",\
+        "ddtLnN"       : r"\partial_t \ln(n)"            ,\
+        "ddtJPar"      : r"\partial_t j_{\parallel}"     ,\
+        "ddtVortD"     : r"\partial_t \Omega^D"          ,\
+        "ddtVort"      : r"\partial_t \Omega"            ,\
+        "ddtMomDensPar": r"\partial_t (nu_{i,\parallel})",\
         # lnN fields
-        "lnNAdv"        ,  r"-\frac{1}{JB}\{\phi,\ln(n)\}"                   ,\
-        "lnNRes"        , (r"\frac{\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n)"  \
+        "lnNAdv"        :  r"-\frac{1}{JB}\{\phi,\ln(n)\}"                   ,\
+        "lnNRes"        : (r"\frac{\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n)"  \
                            r" + \left[\nabla_\perp\ln(n)\right]^2\right)")   ,\
-        "gradUEPar"     ,  r"-\partial_{\parallel}u_{e,\parallel}"           ,\
-        "lnNUeAdv"      ,  r"-u_{e,\parallel}\partial_\parallel\ln(n)"       ,\
-        "srcN"          ,  r"\frac{S}{n}"                                    ,\
-        "lnNPerpArtVisc",  r"D_{n,\perp} \partial^2_{\perp}\ln(n)"           ,\
-        "lnNParArtVisc" ,  r"D_{n,\parallel} \partial^2_{\parallel}\ln(n)"   ,\
+        "gradUEPar"     :  r"-\partial_{\parallel}u_{e,\parallel}"           ,\
+        "lnNUeAdv"      :  r"-u_{e,\parallel}\partial_\parallel\ln(n)"       ,\
+        "srcN"          :  r"\frac{S}{n}"                                    ,\
+        "lnNPerpArtVisc":  r"D_{n,\perp} \partial^2_{\perp}\ln(n)"           ,\
+        "lnNParArtVisc" :  r"D_{n,\parallel} \partial^2_{\parallel}\ln(n)"   ,\
         # jPar fields
-        "jParAdv"        ,  r"-\frac{1}{JB}\{\phi,j_{\parallel}\}"   ,\
-        "uIParAdvSum"    , (r"- u_{e,\parallel}\partial_{\parallel}" ,\
+        "jParAdv"        :  r"-\frac{1}{JB}\{\phi,j_{\parallel}\}"   ,\
+        "uIParAdvSum"    : (r"- u_{e,\parallel}\partial_{\parallel}" ,\
                             r"\left(n\left[u_{i,\parallel}+"          \
                             r"u_{e,\parallel}\right]\right)")        ,\
-        "uEParDoubleAdv" , (r"2u_{e,\parallel}\partial_{\parallel}"   \
+        "uEParDoubleAdv" : (r"2u_{e,\parallel}\partial_{\parallel}"   \
                             r"\left(nu_{e,\parallel}\right)")        ,\
-        "jParRes"        ,  r"-0.51\nu_{ei}j_\parallel"              ,\
-        "muElPressure"   ,  r"\mu T_e\partial_{\parallel}n"          ,\
-        "elField"        ,  r"-\mu n \partial_{\parallel}\phi"       ,\
-        "gradPhiLnN"     , (r"\mu n\partial_{\parallel}"              \
+        "jParRes"        :  r"-0.51\nu_{ei}j_\parallel"              ,\
+        "muElPressure"   :  r"\mu T_e\partial_{\parallel}n"          ,\
+        "elField"        :  r"-\mu n \partial_{\parallel}\phi"       ,\
+        "gradPhiLnN"     : (r"\mu n\partial_{\parallel}"              \
                             r"\left(T_e \ln(n) - \phi \right)")      ,\
-        "neutralERes"    ,  r"n\nu_{en}u_{e,\parallel}"              ,\
-        "neutralIRes"    ,  r"-n\nu_{in}u_{i,\parallel}"             ,\
-        "jParVisc"       , (r"-\frac{4}{3}\mu\eta_{e,0}"              \
+        "neutralERes"    :  r"n\nu_{en}u_{e,\parallel}"              ,\
+        "neutralIRes"    :  r"-n\nu_{in}u_{i,\parallel}"             ,\
+        "jParVisc"       : (r"-\frac{4}{3}\mu\eta_{e,0}"              \
                             r"\partial^2_{\parallel}u_{e,\parallel}"),\
-        "jParPerpArtVisc", (r"D_{j_{\parallel}, \perp}\nabla^2_\perp" \
+        "jParPerpArtVisc": (r"D_{j_{\parallel}, \perp}\nabla^2_\perp" \
                             r" j_{\parallel}")                       ,\
-        "jParParArtVisc" , (r"D_{j_{\parallel}, \parallel}"           \
+        "jParParArtVisc" : (r"D_{j_{\parallel}, \parallel}"           \
                             r"\partial^2_{\parallel}j_{\parallel}")  ,\
-        "jParHyperVisc"  , (r"D^H_{j_{\parallel}, \parallel}"         \
+        "jParHyperVisc"  : (r"D^H_{j_{\parallel}, \parallel}"         \
                             r"\partial^4_{\parallel}j_{\parallel}")  ,\
         # momDensPar fields
-        "momDensAdv"        ,  r"-\frac{1}{JB}\{\phi, nu_{i,\parallel}\}",\
-        "uIParAdvSum"       , (r"- u_{e,\parallel}\partial_{\parallel}"   \
+        "momDensAdv"        :  r"-\frac{1}{JB}\{\phi, nu_{i,\parallel}\}",\
+        "uIParAdvSum"       : (r"- u_{e,\parallel}\partial_{\parallel}"   \
                                r"\left(n\left[u_{i,\parallel}+"           \
                                r"u_{e,\parallel}\right]\right)")         ,\
-        "elPressure"        ,  r"-T_e\partial_{\parallel}n"              ,\
-        "neutralIRes"       ,  r"-n\nu_{in}u_{i,\parallel}"              ,\
-        "densDiffusion"     , (r"\frac{\nu_{ei}}{\mu}u_{i,\parallel}"     \
+        "elPressure"        :  r"-T_e\partial_{\parallel}n"              ,\
+        "neutralIRes"       :  r"-n\nu_{in}u_{i,\parallel}"              ,\
+        "densDiffusion"     : (r"\frac{\nu_{ei}}{\mu}u_{i,\parallel}"     \
                                r"\nabla_\perp^2n")                       ,\
-        "momDensVisc"       , (r"\frac{4}{3}\left("                       \
+        "momDensVisc"       : (r"\frac{4}{3}\left("                       \
                                r"\eta_{i,0} \partial^2_{\parallel}"       \
                                r"u_{i,\parallel}"                         \
                                r"+\eta_{e,0} \partial^2_{\parallel}"      \
                                r"u_{e,\parallel}\right)")                ,\
-        "momDensPerpArtVisc", (r"D_{nu_i,\perp}"                          \
+        "momDensPerpArtVisc": (r"D_{nu_i,\perp}"                          \
                                r"\nabla^2_{\perp}"                        \
                                r"\left(nu_{i,\parallel}\right)")         ,\
-        "momDensParArtVisc" , (r"D_{nu_i,\parallel}"                      \
+        "momDensParArtVisc" : (r"D_{nu_i,\parallel}"                      \
                                r"\partial^2_{\parallel}nu_{i,\parallel}"),\
         # vort and vortD fields
-        "vortNeutral"               ,  r"-\nu_{in}n\Omega"                    ,\
-        "potNeutral"                , (r"-\nu_{in}\nabla_\perp \phi \cdot"     \
+        "vortNeutral"               :  r"-\nu_{in}n\Omega"                    ,\
+        "potNeutral"                : (r"-\nu_{in}\nabla_\perp \phi \cdot"     \
                                        r" \nabla_\perp n")                    ,\
-        "vortDAdv"                  ,  r"-\frac{1}{JB}\{\phi, \Omega^D\}"     ,\
-        "vortAdv"                   ,  r"-\frac{1}{JB}\{\phi, \Omega\}"       ,\
-        "kinEnAdvN"                 , (r"-\frac{1}{2J}\{\mathbf{u}_E \cdot"    \
+        "vortDAdv"                  :  r"-\frac{1}{JB}\{\phi, \Omega^D\}"     ,\
+        "vortAdv"                   :  r"-\frac{1}{JB}\{\phi, \Omega\}"       ,\
+        "kinEnAdvN"                 : (r"-\frac{1}{2J}\{\mathbf{u}_E \cdot"    \
                                        r"\mathbf{u}_E, n\}")                  ,\
-        "parDerDivUIParNGradPerpPhi", (r"-\partial_\parallel \nabla\cdot"      \
+        "parDerDivUIParNGradPerpPhi": (r"-\partial_\parallel \nabla\cdot"      \
                                        r"\left(u_{i,\parallel}"                \
-                                       r"n \nabla_\perp \phi \right)"          \
-        "divParCur"                 ,  r"\partial_{\parallel}j_{\parallel}")  ,\
-        "vortDParArtVisc"           , (r"D_{\Omega^D} \partial^2_{\parallel}"  \
+                                       r"n \nabla_\perp \phi \right)")        ,\
+        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"   ,\
+        "vortDParArtVisc"           : (r"D_{\Omega^D} \partial^2_{\parallel}"  \
                                        r"\Omega^D")                           ,\
-        "vortDPerpArtVisc"          , (r"D_{\Omega^D, \perp} \nabla_\perp^2"   \
+        "vortDPerpArtVisc"          : (r"D_{\Omega^D, \perp} \nabla_\perp^2"   \
                                        r"\Omega^D")                           ,\
-        "vortDHyperVisc"            , (r"D^H_{\Omega^D, \theta}"               \
+        "vortDHyperVisc"            : (r"D^H_{\Omega^D, \theta}"               \
                                        r" \partial_\theta^4\Omega^D")         ,\
-        "vortParAdv"                , (r"-u_{i,\parallel}"                     \
+        "vortParAdv"                : (r"-u_{i,\parallel}"                     \
                                        r"\partial_\parallel\Omega")           ,\
-        "DDYGradPerpPhiGradPerpUI"  , (r"-\partial_\parallel"                  \
+        "DDYGradPerpPhiGradPerpUI"  : (r"-\partial_\parallel"                  \
                                        r" \left( \nabla_\perp \phi\right)"     \
                                        r"\cdot \nabla_\perp u_{i,\parallel}") ,\
-        "divSourcePhi"              , (r"-\nabla\cdot"                         \
-                                       r"\left(S\nabla_\perp\phi\right)"       \
-        "divParCur"                 ,  r"\partial_{\parallel}j_{\parallel}")  ,\
-        "vortParArtVisc"            , (r"D_{\Omega} \partial^2_{\parallel}"    \
+        "divSourcePhi"              : (r"-\nabla\cdot"                         \
+                                       r"\left(S\nabla_\perp\phi\right)")     ,\
+        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"   ,\
+        "vortParArtVisc"            : (r"D_{\Omega} \partial^2_{\parallel}"    \
                                        r"\Omega")                             ,\
-        "vortPerpArtVisc"           , (r"D_{\Omega, \perp} \nabla_\perp^2"     \
+        "vortPerpArtVisc"           : (r"D_{\Omega, \perp} \nabla_\perp^2"     \
                                        r"\Omega")                             ,\
-        "vortHyperVisc"             , (r"D^H_{\Omega, \theta}"                 \
+        "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                 \
                                        r"\partial_\theta^4\Omega")            ,\
         }
     #}}}

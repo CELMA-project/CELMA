@@ -7,6 +7,7 @@ Contains super classes for animations plots
 from ..plotHelpers import (PlotHelper,\
                            plotNumberFormatter,\
                            seqCMap,\
+                           seqCMap3,\
                            divCMap)
 from ..unitsConverter import UnitsConverter
 from ..plotHelpers import getMaxMinAnimation
@@ -210,7 +211,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
 
         * Calls the parent constructor
 
-        * Sets the var label template
+        * Sets the var legend template
 
         Parameters
         ----------
@@ -225,7 +226,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         super().__init__(*args, **kwargs)
 
         # Set the colormap
-        self._cmap = seqCMap
+        self._cmap = seqCMap3
 
         # Magic numbers
         self._cols     = 2
@@ -238,7 +239,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         else:
             unitsOrNormalization = "${normalization}$"
 
-        self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+        self._varLegendTemplate = r"${{}}${}".format(unitsOrNormalization)
     #}}}
 
     #{{{_createFiguresAndAxes
@@ -248,10 +249,10 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         """
 
         # Calculate the number of rows
-        rows = int(np.ceil(len(self.lines)/self._cols))
+        rows = int(np.ceil(len(self._vars)/self._cols))
 
         # Create the figure
-        self._fig = plt.figure(figsize=self._pltSize, tight_layout=True)
+        self._fig = plt.figure(figsize=self._pltSize)
 
         # Create the axes
         gs = GridSpec(rows, self._cols)
@@ -264,19 +265,20 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         for nr in range(1, len(self._vars)):
             ax = self._fig.add_subplot(gs[nr])
             ax.grid(True)
-            self._axes.append(self._fig.add_subplot(gs[nr]), shareax=firstAx)
+            self._axes.append(ax)
 
         # Cast to tuple
         self._axes = tuple(self._axes)
 
         # Set the x-labels
-        for ax in range(len(self._vars[:-self._rows])):
-            ax.tick_params(labelbottom="off")
-        for ax in range(len(self._vars[:-self._rows])):
-            ax.set_xlabel(self._xlabel)
+        totalAx = len(tuple(self._vars.keys()))
+        for nr in range(totalAx-self._cols):
+            self._axes[nr].tick_params(labelbottom="off")
+        for nr in range(totalAx-self._cols, totalAx):
+            self._axes[nr].set_xlabel(self._xlabel)
 
         # Adjust the subplots
-        self._fig.subplots_adjust(hspace=0, wspace=0.35)
+        self._fig.subplots_adjust(hspace=0.1, wspace=0.35)
     #}}}
 
     #{{{_initialPlot
@@ -299,8 +301,10 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
 
         # Plot and obtain the level
         for ax, key, color in zip(self._axes, self._plotOrder, self._colors):
-            # Obtain the label
-            label = "${}$".format(self._ph.getVarPltName(key))
+            # Obtain the legend
+            pltVarName = self._ph.getVarPltName(key)
+            legend = self._varLegendTemplate.\
+                format(pltVarName, **self._uc.conversionDict[key])
             # Do the plot
             self._lines.append(\
                         ax.plot(self._X,\
@@ -309,8 +313,8 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                 color           = color       ,\
                                 markeredgecolor = color       ,\
                                 markerfacecolor = color       ,\
-                                label           = label       ,\
-                                )\
+                                label           = legend      ,\
+                                )[0]\
                               )
 
             # FIXME: varyMaxMin currently not implemented
@@ -318,7 +322,12 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             ax.set_ylim(vMin[0], vMax[0])
 
             # Make the ax pretty
-            self._ph.makePlotPretty(ax, yprune="both",loc="upper right")
+            self._ph.makePlotPretty(ax,\
+                                    yprune="both",\
+                                    loc="upper right",\
+                                    rotation = 45,\
+                                    ybins = 6
+                                    )
 
         # If ddt is present
         if self._ddtPresent:
@@ -332,10 +341,11 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                             color           = color       ,\
                                             markeredgecolor = color       ,\
                                             markerfacecolor = color       ,\
-                                            )\
+                                            )[0]\
                                   )
-
-            label = "${}$".format(self._ph.getVarPltName(self._ddtVar))
+            pltVarName = self._ph.getVarPltName(key)
+            legend = self._varLegendTemplate.\
+                format(pltVarName, **self._uc.conversionDict[key])
 
             # Plot the ddt
             self._ddtLines.append(\
@@ -345,8 +355,8 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                         color           = self._ddtColor,\
                                         markeredgecolor = self._ddtColor,\
                                         markerfacecolor = self._ddtColor,\
-                                        label           = label         ,\
-                                        )\
+                                        label           = legend        ,\
+                                        )[0]\
                                 )
 
             # Make an array tuple in order to check for max/min
