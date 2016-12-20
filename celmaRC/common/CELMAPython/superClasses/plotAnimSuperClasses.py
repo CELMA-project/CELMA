@@ -9,11 +9,12 @@ from ..plotHelpers import (PlotHelper,\
                            seqCMap,\
                            divCMap)
 from ..unitsConverter import UnitsConverter
+from ..plotHelpers import getMaxMinAnimation
+from matplotlib.gridspec import GridSpec
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import matplotlib.animation as animation
 import matplotlib.pylab as plt
-from matplotlib.ticker import FuncFormatter
-import os
 
 #{{{PlotAnimSuperClass
 class PlotAnimSuperClass(object):
@@ -201,7 +202,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
 
     #{{{constructor
     def __init__(self,\
-                 *args
+                 *args,\
                  **kwargs):
         #{{{docstring
         """
@@ -227,7 +228,9 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         self._cmap = seqCMap
 
         # Magic numbers
-        self._cols = 2
+        self._cols     = 2
+        self._marker   = "o"
+        self._ddtColor = "k"
 
         # Set var label template
         if self._convertToPhysical:
@@ -236,6 +239,129 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             unitsOrNormalization = "${normalization}$"
 
         self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+    #}}}
+
+    #{{{_createFiguresAndAxes
+    def _createFiguresAndAxes(self):
+        """
+        Creates the figures and axes and organizes the plot
+        """
+
+        # Calculate the number of rows
+        rows = int(np.ceil(len(self.lines)/self._cols))
+
+        # Create the figure
+        self._fig = plt.figure(figsize=self._pltSize, tight_layout=True)
+
+        # Create the axes
+        gs = GridSpec(rows, self._cols)
+        self._axes = []
+        # Make first ax
+        firstAx = self._fig.add_subplot(gs[0])
+        firstAx.grid(True)
+        self._axes.append(firstAx)
+        # Make the rest of the axes
+        for nr in range(1, len(self._vars)):
+            ax = self._fig.add_subplot(gs[nr])
+            ax.grid(True)
+            self._axes.append(self._fig.add_subplot(gs[nr]), shareax=firstAx)
+
+        # Cast to tuple
+        self._axes = tuple(self._axes)
+
+        # Set the x-labels
+        for ax in range(len(self._vars[:-self._rows])):
+            ax.tick_params(labelbottom="off")
+        for ax in range(len(self._vars[:-self._rows])):
+            ax.set_xlabel(self._xlabel)
+
+        # Adjust the subplots
+        self._fig.subplots_adjust(hspace=0, wspace=0.35)
+    #}}}
+
+    #{{{_initialPlot
+    def _initialPlot(self):
+        #{{{docstring
+        """
+        Initial plot.
+
+        The initial plot:
+            * Fetches the labels
+            * Finds the max/min of all lines
+            * Plots normal lines and makes the axes pretty
+            * Plots ddt (if present)
+            * Populates self._lines and self._ddtLines with the lines
+        """
+        #}}}
+
+        # Placeholder for the lines
+        self._lines = []
+
+        # Plot and obtain the level
+        for ax, key, color in zip(self._axes, self._plotOrder, self._colors):
+            # Obtain the label
+            label = "${}$".format(self._ph.getVarPltName(key))
+            # Do the plot
+            self._lines.append(\
+                        ax.plot(self._X,\
+                                self._vars[key][0,:],\
+                                marker          = self._marker,\
+                                color           = color       ,\
+                                markeredgecolor = color       ,\
+                                markerfacecolor = color       ,\
+                                label           = label       ,\
+                                )\
+                              )
+
+            # FIXME: varyMaxMin currently not implemented
+            vMax, vMin = getMaxMinAnimation((self._vars[key],), False, False)
+            ax.set_ylim(vMin[0], vMax[0])
+
+            # Make the ax pretty
+            self._ph.makePlotPretty(ax, yprune="both",loc="upper right")
+
+        # If ddt is present
+        if self._ddtPresent:
+            self._ddtLines = []
+            for key, color in zip(self._plotOrder, self._colors):
+                # Redo the plots
+                self._ddtLines.append(\
+                        self._axes[-1].plot(self._X                       ,\
+                                            self._vars[key][0,:]          ,\
+                                            marker          = self._marker,\
+                                            color           = color       ,\
+                                            markeredgecolor = color       ,\
+                                            markerfacecolor = color       ,\
+                                            )\
+                                  )
+
+            label = "${}$".format(self._ph.getVarPltName(self._ddtVar))
+
+            # Plot the ddt
+            self._ddtLines.append(\
+                    self._axes[-1].plot(self._X                         ,\
+                                        self._vars[self._ddtVar][0,:]   ,\
+                                        marker          = self._marker  ,\
+                                        color           = self._ddtColor,\
+                                        markeredgecolor = self._ddtColor,\
+                                        markerfacecolor = self._ddtColor,\
+                                        label           = label         ,\
+                                        )\
+                                )
+
+            # Make an array tuple in order to check for max/min
+            arrayTuple = tuple(self._vars[key] for key in self._plotOrder)
+            # FIXME: varyMaxMin currently not implemented
+            vMax, vMin = getMaxMinAnimation(arrayTuple, False, False)
+            self._axes[-1].set_ylim(vMin[0], vMax[0])
+
+            # Make the ax pretty
+            self._ph.makePlotPretty(ax, yprune="both",loc="upper right")
+
+        # Cast to tuples
+        self._lines = tuple(self._lines)
+        if self._ddtPresent:
+            self._ddtLines = tuple(self._ddtLines)
     #}}}
 #}}}
 
@@ -249,7 +375,7 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
 
     #{{{constructor
     def __init__(self,\
-                 *args
+                 *args,\
                  fluct = None,\
                  **kwargs):
         #{{{docstring
