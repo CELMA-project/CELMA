@@ -26,13 +26,14 @@ class PlotAnimSuperClass(object):
     """
 
     #{{{constructor
-    def __init__(self,\
-                 path,\
+    def __init__(self             ,\
+                 collectPaths     ,\
+                 savePath         ,\
                  convertToPhysical,\
-                 show = False,\
-                 save = True,\
-                 extension = None,\
-                 uc = None,\
+                 show = False     ,\
+                 save = True      ,\
+                 extension = None ,\
+                 uc = None        ,\
                  ):
         #{{{docstring
         """
@@ -45,7 +46,10 @@ class PlotAnimSuperClass(object):
 
         Parameters
         ----------
-        path : str
+        collectPaths : tuple
+            Paths to collect from.
+            The corresponind 't_array' of the paths must be in ascending order.
+        savePath : str
             Destination of save
         convertToPhysical : bool
             Whether or not to convert to physical units.
@@ -61,12 +65,13 @@ class PlotAnimSuperClass(object):
         #}}}
 
         # Set memberdata
+        self._savePath  = savePath
         self._show      = show
         self._save      = save
         self._extension = extension
 
-        # Set the path, units converter and plot helper
-        self.setCollectPath(path, convertToPhysical, uc)
+        # Set the collect path, units converter and plot helper
+        self.setCollectPaths(collectPaths, convertToPhysical, uc)
 
         # Set animation and text options
         self.setAnimationOptions()
@@ -103,26 +108,28 @@ class PlotAnimSuperClass(object):
         self._codec   = codec
     #}}}
 
-    #{{{setCollectPath
-    def setCollectPath(self, path, convertToPhysical=True, uc=None):
+    #{{{setCollectPaths
+    def setCollectPaths(self, collectPaths, convertToPhysical=True, uc=None):
         #{{{docstring
         """
         Sets the collect path, makes the units converter and plot helper
 
         Parameters
         ----------
-        path : str
-            Destination of save
+        collectPaths : str
+            Destination to collect from
         convertToPhysical : bool
             Whether or not to convert to physical units.
         uc : [None|UnitsConverter]
-            The UnitsConverter will be set from the path if not given.
+            The UnitsConverter will be set from the first element in
+            collectPaths if not given.
         """
         #}}}
-        self.collectPath = path
+
+        self._collectPaths = collectPaths
 
         if uc is None:
-            self._uc = UnitsConverter(path, convertToPhysical)
+            self._uc = UnitsConverter(collectPaths[0], convertToPhysical)
 
         # Make the plot helper
         self._ph = PlotHelper(convertToPhysical)
