@@ -29,6 +29,7 @@ def singleParallelTest():
     zSlice = 0
     tSlice = None
     mode   = "parallel"
+    hyperIncluded = False
 
     print("\n\nTesting parallel 1D field")
     driver1DFieldSingle(collectPaths     ,\
@@ -40,6 +41,7 @@ def singleParallelTest():
                         zSlice           ,\
                         tSlice           ,\
                         mode             ,\
+                        hyperIncluded    ,\
                         xguards  = False ,\
                         yguards  = False ,\
                         showPlot = False ,\
@@ -67,6 +69,7 @@ def singleRadialTest():
     zSlice = 0
     tSlice = None
     mode   = "radial"
+    hyperIncluded = False
 
     print("\n\nTesting perpendicular 1D")
     driver1DFieldSingle(collectPaths     ,\
@@ -78,6 +81,7 @@ def singleRadialTest():
                         zSlice           ,\
                         tSlice           ,\
                         mode             ,\
+                        hyperIncluded    ,\
                         xguards  = False ,\
                         yguards  = False ,\
                         showPlot = False ,\
@@ -109,15 +113,20 @@ def driverTest():
     xInd = 0
     yInd = 16
     zInd = 0
-    mode   = "radial"
     useSubProcess = True
     convertToPhysical = True
     saveFolderFunc = "scanWTagSaveFunc"
+    hyperIncluded = False
 
-    print("\n\nTesting field 1D driver")
+    print("\n\nTesting 1D driver")
     d1DF = Driver1DFields(\
                    # DriverPostProcessingSuperClass
-                   dmp_folders                          ,\
+                   dmp_folders                    ,\
+                   # Driver1DFields
+                   timeStampFolder = True         ,\
+                   boussinesq      = False        ,\
+                   hyperIncluded   = hyperIncluded,\
+                   # DriverPostProcessingSuperClass
                    collectPaths      = collectPaths     ,\
                    convertToPhysical = convertToPhysical,\
                    showPlot          = False            ,\

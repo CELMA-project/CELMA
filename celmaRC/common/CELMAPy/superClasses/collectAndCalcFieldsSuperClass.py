@@ -37,10 +37,12 @@ class CollectAndCalcFieldsSuperClass(object):
         ----------
         collectPaths : tuple of strings
             The paths to collect from
-        varName : str
-            Variable to collect
         convertToPhysical : bool
             Whether or not to convert to physical units.
+        xguards : bool
+            If the ghost points in x should be collected.
+        xguards : bool
+            If the ghost points in y should be collected.
         uc : [None|UnitsConverter]
             If not given, the function will create the instance itself.
             However, there is a possibility to supply this in order to
@@ -49,10 +51,6 @@ class CollectAndCalcFieldsSuperClass(object):
             If not given, the function will create the instance itself.
             However, there is a possibility to supply this in order to
             reduce overhead.
-        xguards : bool
-            If the ghost points in x should be collected
-        xguards : bool
-            If the ghost points in y should be collected
         """
         #}}}
 
@@ -81,12 +79,12 @@ class CollectAndCalcFieldsSuperClass(object):
     def setVarName(self, varName):
         #{{{docstring
         """
-        Sets the varName
+        Sets the varName.
 
         Parameters
         ----------
         varName : str
-            Variable to collect
+            Variable to collect.
         """
         #}}}
         if "setVarName" in self._notCalled:
