@@ -24,11 +24,11 @@ class PlotHelper(object):
         "uEPar"     : r"u_{e,\parallel}" ,\
         "S"         : r"S"               ,\
         # ddt fields
-        "ddtLnN"       : r"\partial_t \ln(n)"            ,\
-        "ddtJPar"      : r"\partial_t j_{\parallel}"     ,\
-        "ddtVortD"     : r"\partial_t \Omega^D"          ,\
-        "ddtVort"      : r"\partial_t \Omega"            ,\
-        "ddtMomDensPar": r"\partial_t (nu_{i,\parallel})",\
+        "ddt(lnN)"       : r"\partial_t \ln(n)"            ,\
+        "ddt(jPar)"      : r"\partial_t j_{\parallel}"     ,\
+        "ddt(vortD)"     : r"\partial_t \Omega^D"          ,\
+        "ddt(vort)"      : r"\partial_t \Omega"            ,\
+        "ddt(momDensPar)": r"\partial_t (nu_{i,\parallel})",\
         # lnN fields
         "lnNAdv"        :  r"-\frac{1}{JB}\{\phi,\ln(n)\}"                   ,\
         "lnNRes"        : (r"\frac{\nu_{ei}}{\mu}\left(\nabla^2_\perp\ln(n)"  \

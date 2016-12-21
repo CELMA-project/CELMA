@@ -37,12 +37,11 @@ class PlotAnimSuperClass(object):
                  ):
         #{{{docstring
         """
-        Constructor for Plot2DSuperClass.
+        Constructor for PlotAnimSuperClass.
 
-        * Stores common plotting options:
-            * Animation
-        * Makes the unitsConverter if not given as input
-        * Makes the plot helper object
+        * Sets the member data
+        * Sets the collection path
+        * Sets the animation options
 
         Parameters
         ----------
@@ -217,8 +216,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         Constructor for PlotAnim1DSuperClass.
 
         * Calls the parent constructor
-
-        * Sets the var legend template
+        * Sets the variable legend template
 
         Parameters
         ----------
@@ -252,7 +250,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
     #{{{_createFiguresAndAxes
     def _createFiguresAndAxes(self):
         """
-        Creates the figures and axes and organizes the plot
+        Creates the figures and axes and organizes the plot.
         """
 
         # Calculate the number of rows
@@ -310,8 +308,11 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         for ax, key, color in zip(self._axes, self._plotOrder, self._colors):
             # Obtain the legend
             pltVarName = self._ph.getVarPltName(key)
-            legend = self._varLegendTemplate.\
-                format(pltVarName, **self._uc.conversionDict[key])
+            if self._convertToPhysical:
+                legend = self._varLegendTemplate.\
+                    format(pltVarName, **self._uc.conversionDict[key])
+            else:
+                legend = "${}$".format(pltVarName)
             # Do the plot
             self._lines.append(\
                         ax.plot(self._X,\
@@ -350,9 +351,12 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                             markerfacecolor = color       ,\
                                             )[0]\
                                   )
-            pltVarName = self._ph.getVarPltName(key)
-            legend = self._varLegendTemplate.\
-                format(pltVarName, **self._uc.conversionDict[key])
+            pltVarName = self._ph.getVarPltName(self._ddtVar)
+            if self._convertToPhysical:
+                legend = self._varLegendTemplate.\
+                    format(pltVarName, **self._uc.conversionDict[key])
+            else:
+                legend = "${}$".format(pltVarName)
 
             # Plot the ddt
             self._ddtLines.append(\
@@ -373,7 +377,11 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             self._axes[-1].set_ylim(vMin[0], vMax[0])
 
             # Make the ax pretty
-            self._ph.makePlotPretty(ax, yprune="both",loc="upper right")
+            self._ph.makePlotPretty(self._axes[-1],\
+                                    yprune="both",\
+                                    loc="upper right",\
+                                    rotation = 45,\
+                                    ybins = 6)
 
         # Cast to tuples
         self._lines = tuple(self._lines)

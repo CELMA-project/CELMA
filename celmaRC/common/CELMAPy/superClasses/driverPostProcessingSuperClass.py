@@ -111,10 +111,6 @@ class DriverPostProcessingSuperClass(object):
         for saveDir in saveDirs:
             self._savePath = os.path.join(self._savePath, saveDir)
 
-        # Make dir if not exists
-        if not os.path.exists(self._savePath):
-            os.makedirs(self._savePath)
-
         if self._useSubProcess:
             #{{{ The multiprocess currently only works with the Agg backend
             # Qt4Agg currently throws
