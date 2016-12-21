@@ -77,7 +77,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
     def executeCollectAndCalc(self):
         #{{{docstring
         """
-        Function which collects and calculates 2D fields.
+        Function which collects and calculates 1D fields.
 
         Returns
         -------
@@ -166,9 +166,6 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             The collected array.
         time : array
             The time array.
-        varPPi : [None|array]
-            If mode == "par":
-            The collected array pi from var.
         """
         #}}}
 

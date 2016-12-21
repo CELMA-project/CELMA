@@ -13,7 +13,7 @@ from CELMAPy.fields1D import Driver1DFields, driver1DFieldSingle
 #{{{singleParallelTest
 def singleParallelTest():
     """
-    Runs the single test for field1D
+    Runs the single parallel test for field1D
     """
     collectPaths =\
         (\
@@ -53,7 +53,7 @@ def singleParallelTest():
 #{{{singleRadialTest
 def singleRadialTest():
     """
-    Runs the single test for field1D
+    Runs the single radial test for field1D
     """
     collectPaths =\
         (\
