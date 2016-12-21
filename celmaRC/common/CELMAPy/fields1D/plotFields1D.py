@@ -6,7 +6,6 @@ Contains functions for animating the 1D fields
 
 from ..superClasses import PlotAnim1DSuperClass
 from ..plotHelpers import plotNumberFormatter
-import numpy as np
 import os
 
 #{{{PlotAnim1DRadial
@@ -24,7 +23,8 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         Constructor for the Plot1DRadial
 
         * Calls the parent class
-        * Creates the figure and axes
+        * Sets the spatial title
+        * Sets the xlabel
 
         Parameters
         ----------
@@ -112,6 +112,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
                 # Remove ddt from the plotOrder
                 self._plotOrder = list(self._plotOrder)
                 self._plotOrder.remove(var)
+                self._plotOrder = tuple(self._plotOrder)
                 break
 
         # Update the title
@@ -151,7 +152,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
     def _initialRadialPlot(self):
         #{{{docstring
         """
-        Initial radi lplot.
+        Initial radial plot.
 
         The initial radial plot:
             * Calls the generic initial plot routine
@@ -193,7 +194,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
             for line, key in zip(self._ddtLines, self._plotOrder):
                 line.set_data(self._X, self._vars[key][tInd,:])
 
-            self._ddtLines[-1].set_data(self._X, self._ddtVar[key][tInd,:])
+            self._ddtLines[-1].set_data(self._X, self._vars[self._ddtVar][tInd,:])
 
         # Update the title
         self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
@@ -217,7 +218,8 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         Constructor for the Plot1DParallel
 
         * Calls the parent class
-        * Creates the figure and axes
+        * Sets the spatial title
+        * Sets the xlabel
 
         Parameters
         ----------
@@ -305,6 +307,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
                 # Remove ddt from the plotOrder
                 self._plotOrder = list(self._plotOrder)
                 self._plotOrder.remove(var)
+                self._plotOrder = tuple(self._plotOrder)
                 break
 
         # Update the title
@@ -344,7 +347,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
     def _initialParallelPlot(self):
         #{{{docstring
         """
-        Initial radi lplot.
+        Initial parallel plot.
 
         The initial parallel plot:
             * Calls the generic initial plot routine
@@ -386,7 +389,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
             for line, key in zip(self._ddtLines, self._plotOrder):
                 line.set_data(self._X, self._vars[key][tInd,:])
 
-            self._ddtLines[-1].set_data(self._X, self._ddtVar[key][tInd,:])
+            self._ddtLines[-1].set_data(self._X, self._vars[self._ddtVar][tInd,:])
 
         # Update the title
         self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)

@@ -13,7 +13,6 @@ from ..collectAndCalcHelpers import (collectTime,\
                                      polAvg,\
                                      slicesToIndices,\
                                      timeAvg)
-import numpy as np
 
 #{{{CollectAndCalcFields1D
 class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
@@ -78,7 +77,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
     def executeCollectAndCalc(self):
         #{{{docstring
         """
-        Function which collects and calculates 2D fields
+        Function which collects and calculates 2D fields.
 
         Returns
         -------
@@ -166,10 +165,10 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         var : array-4d
             The collected array.
         time : array
-            The time array
+            The time array.
         varPPi : [None|array]
             If mode == "par":
-            The collected array pi from var
+            The collected array pi from var.
         """
         #}}}
 

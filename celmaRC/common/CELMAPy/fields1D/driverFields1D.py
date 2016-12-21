@@ -21,6 +21,7 @@ def driver1DFieldSingle(collectPaths     ,\
                         zSlice           ,\
                         tSlice           ,\
                         mode             ,\
+                        hyperIncluded    ,\
                         xguards  = False ,\
                         yguards  = False ,\
                         showPlot = False ,\
@@ -53,12 +54,14 @@ def driver1DFieldSingle(collectPaths     ,\
     tSlice : [None|slice]
         How the data will be sliced in t.
     mode : ["radial"|"parallel"]
-        * "radial"    - Radial profiles will be used
-        * "parallel"  - Parallel profiles will be used
+        * "radial"    - Radial profiles will be used.
+        * "parallel"  - Parallel profiles will be used.
+    hyperIncluded : bool
+        If hyper viscosities are used.
     xguards : bool
-        Whether or not to collect the ghost points in x
+        Whether or not to collect the ghost points in x.
     yguards : bool
-        Whether or not to collect the ghost points in y
+        Whether or not to collect the ghost points in y.
     showPlot : bool
         Whether or not the plot should be displayed.
     savePlot : bool
@@ -74,7 +77,8 @@ def driver1DFieldSingle(collectPaths     ,\
     elif mode == "parallel":
         PlotClass = PlotAnim1DParallel
 
-    collectFields, plotOrder = getCollectFieldsAndPlotOrder(fieldPlotType)
+    collectFields, plotOrder =\
+            getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded)
 
     if fieldPlotType != "mainFields" and convertToPhysical:
         # NOTE: Normalization for each term not implemented
@@ -120,7 +124,7 @@ def driver1DFieldSingle(collectPaths     ,\
 #}}}
 
 #{{{getCollectFieldsAndPlotOrder
-def getCollectFieldsAndPlotOrder(fieldPlotType):
+def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
     #{{{doctring
     """
     Returns a tuple of the fields to collect and how to organize them
@@ -128,7 +132,9 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
     Parameters
     ----------
     fieldPlotType : str
-        What predefined fieldPlotType to plot
+        What predefined fieldPlotType to plot.
+    hyperIncluded : bool
+        If hyper viscosities are used.
 
     Returns
     -------
@@ -139,6 +145,7 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
     """
     #}}}
 
+    plotOrder = None
     if fieldPlotType == "mainFields":
         collectFields  = ("lnN"       ,\
                           "jPar"      ,\
@@ -154,6 +161,67 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
                      "uIPar", "momDensPar",\
                      "uEPar", "S"         ,\
                     )
+    elif fieldPlotType == "lnN":
+        collectFields  = ("ddt(lnN)"      ,\
+                          "lnNAdv"        ,\
+                          "gradUEPar"     ,\
+                          "lnNUeAdv"      ,\
+                          "srcN"          ,\
+                          "lnNRes"        ,\
+                          "lnNPerpArtVisc",\
+                          "lnNParArtVisc" ,\
+                         )
+    elif fieldPlotType == "jPar":
+        collectFields  = ("ddt(jPar)"      ,\
+                          "jParAdv"        ,\
+                          "uIParAdvSum"    ,\
+                          "uEParDoubleAdv" ,\
+                          "jParRes"        ,\
+                          "gradPhiLnN"     ,\
+                          "neutralERes"    ,\
+                          "neutralIRes"    ,\
+                          "jParPerpArtVisc",\
+                          "jParParArtVisc" ,\
+                         )
+    elif fieldPlotType == "momDensPar":
+        collectFields  = ("ddt(momDensPar)"   ,\
+                          "momDensAdv"        ,\
+                          "uIParAdvSum"       ,\
+                          "elPressure"        ,\
+                          "neutralIRes"       ,\
+                          "densDiffusion"     ,\
+                          "momDensPerpArtVisc",\
+                          "momDensParArtVisc" ,\
+                         )
+    elif fieldPlotType == "vortD":
+        collectFields  = ["ddt(vortD)"                ,\
+                          "vortNeutral"               ,\
+                          "potNeutral"                ,\
+                          "parDerDivUIParNGradPerpPhi",\
+                          "vortDAdv"                  ,\
+                          "kinEnAdvN"                 ,\
+                          "divParCur"                 ,\
+                          "vortDParArtVisc"           ,\
+                          "vortDPerpArtVisc"          ,\
+                         ]
+        if hyperIncluded:
+            collectFields.append("vortDHyperVisc")
+        collectFields = tuple(collectFields)
+    elif fieldPlotType == "vort":
+        collectFields  = ["ddt(vort)"               ,\
+                          "vortNeutral"             ,\
+                          "potNeutral"              ,\
+                          "DDYGradPerpPhiGradPerpUI",\
+                          "vortAdv"                 ,\
+                          "vortParAdv"              ,\
+                          "divParCur"               ,\
+                          "divSourcePhi"            ,\
+                          "vortParArtVisc"          ,\
+                          "vortPerpArtVisc"         ,\
+                        ]
+        if hyperIncluded:
+            collectFields.append("vortHyperVisc")
+        collectFields = tuple(collectFields)
     else:
         raise NotImplementedError("{} is not implemented".format(fieldPlotType))
 
@@ -163,26 +231,33 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
 #{{{Driver1DFields
 class Driver1DFields(DriverPlotFieldsSuperClass):
     """
-    Class for plotting of the 1D fields
+    Class for plotting of the 1D fields.
     """
 
     #{{{static members
     _fieldPlotTypes = (\
-                   "mainFields",\
-                  )
+                       "mainFields",\
+                       "momDensPar",\
+                       "lnN"       ,\
+                       "jPar"      ,\
+                       "momDensPar",\
+                      )
     #}}}
 
     #{{{constructor
-    def __init__(self                  ,\
-                 *args                 ,\
-                 timeStampFolder = True,\
+    def __init__(self                   ,\
+                 *args                  ,\
+                 timeStampFolder = True ,\
+                 boussinesq      = False,\
+                 hyperIncluded   = False,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
             * Calls the parent class
-            * Updates the savePath
-            * Sets the common member data
+            * Updates the fieldPlotTypes
+            * Updates the savePath and makes the folder
+            * Sets the member data
 
         Parameters
         ----------
@@ -190,6 +265,10 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
             See parent class for details.
         timeStampFolder : bool
             Whether or not to timestamp the folder
+        boussinesq : bool
+            Whether or not the boussinesq approximation is used
+        hyperIncluded : bool
+            If hyper viscosities are used
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -197,6 +276,20 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
+
+        # Update fieldPlotTypes
+        if not(boussinesq):
+            Driver1DFields._fieldPlotTypes =\
+                    list(Driver1DFields._fieldPlotTypes)
+            Driver1DFields._fieldPlotTypes.append("vortD")
+        else:
+            Driver1DFields._fieldPlotTypes =\
+                    list(Driver1DFields._fieldPlotTypes)
+            Driver1DFields._fieldPlotTypes.append("vort")
+
+        # Recast to tuple
+        Driver1DFields._fieldPlotTypes =\
+                tuple(set(Driver1DFields._fieldPlotTypes))
 
         # Update the savePath
         firstPathPart = os.path.dirname(self._savePath)
@@ -209,6 +302,9 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         # Make dir if not exists
         if not os.path.exists(self._savePath):
             os.makedirs(self._savePath)
+
+        # Set member data
+        self._hyperIncluded = hyperIncluded
     #}}}
 
     #{{{driver1DFieldsAll
@@ -252,17 +348,34 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         "parallel" mode using the member data.
         """
         #}}}
-        for fieldPlotType in Driver1DFields._fieldPlotTypes:
-            driver1DFieldSingle(\
+        argTemplate =  [\
                         self._collectPaths     ,\
                         self._savePath         ,\
-                        fieldPlotType          ,\
                         self._convertToPhysical,\
                         self._xInd             ,\
                         self._ySlice           ,\
                         self._zInd             ,\
                         self._tSlice           ,\
-                        "parallel")
+                        "parallel"             ,\
+                        self._hyperIncluded    ,\
+                       ]
+        if self._useSubProcess:
+            processes = {}
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                args = argTemplate.copy()
+                args.insert(2, fieldPlotType)
+                processes[fieldPlotType] =\
+                    Process(target = driver1DFieldSingle,\
+                            args = args                 ,\
+                            )
+                processes[fieldPlotType].start()
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                processes[fieldPlotType].join()
+        else:
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                args = argTemplate.copy()
+                args.insert(2, fieldPlotType)
+                driver1DFieldSingle(*args)
     #}}}
 
     #{{{driver1DFieldsRadial
@@ -275,16 +388,33 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         "radial" mode using the member data.
         """
         #}}}
-        for fieldPlotType in Driver1DFields._fieldPlotTypes:
-            driver1DFieldSingle(\
+        argTemplate =  [
                         self._collectPaths     ,\
                         self._savePath         ,\
-                        fieldPlotType          ,\
                         self._convertToPhysical,\
                         self._xSlice           ,\
                         self._yInd             ,\
                         self._zInd             ,\
                         self._tSlice           ,\
-                        "radial")
+                        "radial"               ,\
+                        self._hyperIncluded    ,\
+                       ]
+        if self._useSubProcess:
+            processes = {}
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                args = argTemplate.copy()
+                args.insert(2, fieldPlotType)
+                processes[fieldPlotType] =\
+                    Process(target = driver1DFieldSingle,\
+                            args = args                 ,\
+                            )
+                processes[fieldPlotType].start()
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                processes[fieldPlotType].join()
+        else:
+            for fieldPlotType in Driver1DFields._fieldPlotTypes:
+                args = argTemplate.copy()
+                args.insert(2, fieldPlotType)
+                driver1DFieldSingle(*args)
     #}}}
 #}}}
