@@ -109,12 +109,12 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             X = self._dh.rho
 
         # Convert to indices
-        xInd = slicesToIndices(self._paths[0], self._xSlice, "x",\
+        xInd = slicesToIndices(self._collectPaths[0], self._xSlice, "x",\
                                xguards=self._xguards)
-        yInd = slicesToIndices(self._paths[0], self._ySlice, "y",\
+        yInd = slicesToIndices(self._collectPaths[0], self._ySlice, "y",\
                                yguards=self._yguards)
-        zInd = slicesToIndices(self._paths[0], self._zSlice, "z")
-        tInd = slicesToIndices(self._paths[0], self._tSlice, "t")
+        zInd = slicesToIndices(self._collectPaths[0], self._zSlice, "z")
+        tInd = slicesToIndices(self._collectPaths[0], self._tSlice, "t")
 
         collectGhost = True if (self._xguards or self._yguards) else False
 
@@ -186,24 +186,24 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         # Collect
         if self._mode == "parallel":
             if not(self._processing):
-                var = collectParallelProfile(self._paths  ,\
-                                             self._varName,\
+                var = collectParallelProfile(self._collectPaths,\
+                                             self._varName     ,\
                                              **collectKwargs)
             else:
-                var = collectConstRho(self._paths  ,\
-                                      self._varName,\
+                var = collectConstRho(self._collectPaths,\
+                                      self._varName     ,\
                                       **collectKwargs)
         elif self._mode == "radial":
             if not(self._processing):
-                var = collectRadialProfile(self._paths  ,\
-                                           self._varName,\
+                var = collectRadialProfile(self._collectPaths,\
+                                           self._varName     ,\
                                            **collectKwargs)
             else:
-                var = collectConstZ(self._paths  ,\
-                                    self._varName,\
+                var = collectConstZ(self._collectPaths,\
+                                    self._varName     ,\
                                     **collectKwargs)
 
-        time = collectTime(self._paths, collectKwargs["tInd"])
+        time = collectTime(self._collectPaths, collectKwargs["tInd"])
 
         # Process
         if self._processing is not None:
@@ -224,18 +224,10 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         # Slice
         if self._tSlice is not None:
-            if self._tSlice.step is not None:
-                var  = var [::self._tSlice.step]
-                time = time[::self._tSlice.step]
-
-        # Ensure 4D
-        if len(var.shape) == 3:
-            # Make it a 4d variable
-            tmp = np.zeros((len(time), *var.shape))
-            # Copy the field in to each time
-            tmp[:] = var
-            var = tmp
-
+            if type(self._tSlice) == slice:
+                if self._tSlice.step is not None:
+                    var  = var [::self._tSlice.step]
+                    time = time[::self._tSlice.step]
 
         return var, time
     #}}}
