@@ -17,7 +17,7 @@ class CollectAndCalcFieldsSuperClass(object):
 
     #{{{constructor
     def __init__(self                      ,\
-                 paths                     ,\
+                 collectPaths              ,\
                  convertToPhysical = True  ,\
                  xguards           = False ,\
                  yguards           = False ,\
@@ -35,7 +35,7 @@ class CollectAndCalcFieldsSuperClass(object):
 
         Parameters
         ----------
-        paths : tuple of strings
+        collectPaths : tuple of strings
             The paths to collect from
         varName : str
             Variable to collect
@@ -56,20 +56,20 @@ class CollectAndCalcFieldsSuperClass(object):
         """
         #}}}
 
-        self._paths = paths
+        self._collectPaths = collectPaths
 
         self._xguards = xguards
         self._yguards = yguards
 
         if uc is None:
             # Create the units convertor object
-            uc = UnitsConverter(paths[0], convertToPhysical)
+            uc = UnitsConverter(collectPaths[0], convertToPhysical)
         # Toggle convertToPhysical in case of errors
         self.convertToPhysical = uc.convertToPhysical
 
         if dh is None:
             # Create the dimensions helper object
-            dh = DimensionsHelper(paths[0], uc)
+            dh = DimensionsHelper(collectPaths[0], uc)
 
         self.uc = uc
         self._dh = dh

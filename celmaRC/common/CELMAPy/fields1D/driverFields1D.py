@@ -7,19 +7,25 @@ Contains single driver and driver class for 1D fields
 from .collectAndCalcFields1D import CollectAndCalcFields1D
 from .plotFields1D import PlotAnim1DRadial, PlotAnim1DParallel
 from ..collectAndCalcHelpers import calcN, calcUIPar, calcUEPar
-from ..superClasses import DriverFieldsSuperClass
+from ..superClasses import DriverPlotFieldsSuperClass
+from multiprocessing import Process
 import os
 
 #{{{driver1DFieldSingle
-def driver1DFieldSingle(collectPaths,\
-                        fieldPlotType,\
-                        savePath,\
+def driver1DFieldSingle(collectPaths     ,\
+                        savePath         ,\
+                        fieldPlotType    ,\
                         convertToPhysical,\
-                        xSlice,\
-                        ySlice,\
-                        zSlice,\
-                        tSlice,\
-                        mode):
+                        xSlice           ,\
+                        ySlice           ,\
+                        zSlice           ,\
+                        tSlice           ,\
+                        mode             ,\
+                        xguards  = False ,\
+                        yguards  = False ,\
+                        showPlot = False ,\
+                        savePlot = True  ,\
+                        ):
     #{{{doctring
     """
     Driver for plotting a single predefined fieldPlotType plot
@@ -29,8 +35,11 @@ def driver1DFieldSingle(collectPaths,\
     collectPaths : tuple
         Paths to collect from.
         The corresponind 't_array' of the paths must be in ascending order.
+    savePath : str
+        Save destination
     fieldPlotType : str
         What predefined fieldPlotType to plot.
+        See getCollectFieldsAndPlotOrder for details.
     convertToPhysical : bool
         Whether or not to convert to physical units.
     xSlice : [int|slice]
@@ -46,6 +55,14 @@ def driver1DFieldSingle(collectPaths,\
     mode : ["radial"|"parallel"]
         * "radial"    - Radial profiles will be used
         * "parallel"  - Parallel profiles will be used
+    xguards : bool
+        Whether or not to collect the ghost points in x
+    yguards : bool
+        Whether or not to collect the ghost points in y
+    showPlot : bool
+        Whether or not the plot should be displayed.
+    savePlot : bool
+        Whether or no the plot should be saved.
     """
     #}}}
 
@@ -59,10 +76,10 @@ def driver1DFieldSingle(collectPaths,\
 
     collectFields, plotOrder = getCollectFieldsAndPlotOrder(fieldPlotType)
 
-    if fieldPlotType != "mainField" and convertToPhysical:
+    if fieldPlotType != "mainFields" and convertToPhysical:
         # NOTE: Normalization for each term not implemented
         convertToPhysical = False
-        print("fieldPlotType is not 'mainField', "\
+        print("fieldPlotType is not 'mainFields', "\
               "setting 'convertToPhysical' to False")
 
     ccf1D = CollectAndCalcFields1D(collectPaths,\
@@ -81,7 +98,7 @@ def driver1DFieldSingle(collectPaths,\
         ccf1D.setVarName(field)
         dict1D.update(ccf1D.executeCollectAndCalc())
 
-    if fieldPlotType == "mainField":
+    if fieldPlotType == "mainFields":
         # Non-collects
         dict1D.update({"n"    : calcN(dict1D["lnN"],\
                                       not(ccf1D.convertToPhysical),\
@@ -92,9 +109,14 @@ def driver1DFieldSingle(collectPaths,\
                                           dict1D["n"],\
                                           not(ccf1D.convertToPhysical))})
 
-    p1D = PlotClass(savePath, ccf1D.convertToPhysical)
-    p1D.setRadialData(dict1D, fieldPlotType, savePath, plotOrder=plotOrder)
-    p1D.plotAndSaveRadialProfile()
+    p1D = PlotClass(collectPaths           ,\
+                    savePath               ,\
+                    ccf1D.convertToPhysical,\
+                    show = showPlot        ,\
+                    save = savePlot)
+
+    p1D.setData(dict1D, fieldPlotType, savePath, plotOrder=plotOrder)
+    p1D.plotAndSaveProfile()
 #}}}
 
 #{{{getCollectFieldsAndPlotOrder
@@ -117,7 +139,7 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
     """
     #}}}
 
-    if fieldPlotType == "mainField":
+    if fieldPlotType == "mainFields":
         collectFields  = ("lnN"       ,\
                           "jPar"      ,\
                           "phi"       ,\
@@ -132,27 +154,28 @@ def getCollectFieldsAndPlotOrder(fieldPlotType):
                      "uIPar", "momDensPar",\
                      "uEPar", "S"         ,\
                     )
+    else:
+        raise NotImplementedError("{} is not implemented".format(fieldPlotType))
 
     return collectFields, plotOrder
 #}}}
 
 #{{{Driver1DFields
-class Driver1DFields(DriverFieldsSuperClass):
+class Driver1DFields(DriverPlotFieldsSuperClass):
     """
     Class for plotting of the 1D fields
     """
 
     #{{{static members
     _fieldPlotTypes = (\
-                   "mainField",\
+                   "mainFields",\
                   )
     #}}}
 
     #{{{constructor
-    def __init__(self,
-                 *args      ,\
-                 xInd = None,\
-                 yInd = None,\
+    def __init__(self                  ,\
+                 *args                 ,\
+                 timeStampFolder = True,\
                  **kwargs):
         #{{{docstring
         """
@@ -165,10 +188,8 @@ class Driver1DFields(DriverFieldsSuperClass):
         ----------
         *args : str
             See parent class for details.
-        xInd : int
-            Fixed rho index for parallel plotting.
-        yInd : int
-            Fixed z index for radial plotting.
+        timeStampFolder : bool
+            Whether or not to timestamp the folder
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -178,11 +199,16 @@ class Driver1DFields(DriverFieldsSuperClass):
         super().__init__(*args, **kwargs)
 
         # Update the savePath
-        self._savePath = os.path.join(self._savePath, "field1D")
+        firstPathPart = os.path.dirname(self._savePath)
+        if timeStampFolder:
+            timePath = os.path.basename(self._savePath)
+        else:
+            timePath = ""
+        self._savePath = os.path.join(firstPathPart, "field1D", timePath)
 
-        # Set the member data
-        self._xInd = xInd
-        self._yInd = yInd
+        # Make dir if not exists
+        if not os.path.exists(self._savePath):
+            os.makedirs(self._savePath)
     #}}}
 
     #{{{driver1DFieldsAll
@@ -195,8 +221,25 @@ class Driver1DFields(DriverFieldsSuperClass):
         member data.
         """
         #}}}
-        self.driver1DFieldParallel()
-        self.driver1DFieldRadial()
+        if self._useSubProcess:
+            parallelProcess = Process(\
+                                 target = self.driver1DFieldsParallel,\
+                                 args   = ()                         ,\
+                                 kwargs = {}                         ,\
+                                )
+
+            radialProcess = Process(\
+                                 target = self.driver1DFieldsRadial,\
+                                 args   = ()                       ,\
+                                 kwargs = {}                       ,\
+                                )
+            parallelProcess.start()
+            radialProcess  .start()
+            parallelProcess.join()
+            radialProcess  .join()
+        else:
+            self.driver1DFieldsParallel()
+            self.driver1DFieldsRadial()
     #}}}
 
     #{{{driver1DFieldsParallel
@@ -212,8 +255,8 @@ class Driver1DFields(DriverFieldsSuperClass):
         for fieldPlotType in Driver1DFields._fieldPlotTypes:
             driver1DFieldSingle(\
                         self._collectPaths     ,\
-                        fieldPlotType          ,\
                         self._savePath         ,\
+                        fieldPlotType          ,\
                         self._convertToPhysical,\
                         self._xInd             ,\
                         self._ySlice           ,\
@@ -235,13 +278,13 @@ class Driver1DFields(DriverFieldsSuperClass):
         for fieldPlotType in Driver1DFields._fieldPlotTypes:
             driver1DFieldSingle(\
                         self._collectPaths     ,\
-                        fieldPlotType          ,\
                         self._savePath         ,\
+                        fieldPlotType          ,\
                         self._convertToPhysical,\
                         self._xSlice           ,\
                         self._yInd             ,\
                         self._zInd             ,\
                         self._tSlice           ,\
-                        "parallel")
+                        "radial")
     #}}}
 #}}}
