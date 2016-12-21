@@ -49,8 +49,8 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
-    #{{{setRadialData
-    def setRadialData(self, radialDict, figName, savePath, plotOrder=None):
+    #{{{setData
+    def setData(self, radialDict, figName, savePath, plotOrder=None):
         #{{{docstring
         """
         Sets the radial data and set up the plotting
@@ -124,8 +124,8 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         self._spatTitle = self._spatTitle.format(zTxt, thetaTxt)
     #}}}
 
-    #{{{plotAndSaveRadialProfile
-    def plotAndSaveRadialProfile(self):
+    #{{{plotAndSaveProfile
+    def plotAndSaveProfile(self):
         #{{{docstring
         """
         Performs the actual plotting of the radial plane
@@ -242,8 +242,8 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
-    #{{{setParallelData
-    def setParallelData(self, parallelDict, figName, savePath, plotOrder=None):
+    #{{{setData
+    def setData(self, parallelDict, figName, savePath, plotOrder=None):
         #{{{docstring
         """
         Sets the parallel data and set up the plotting
@@ -317,8 +317,8 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         self._spatTitle = self._spatTitle.format(rhoTxt, thetaTxt)
     #}}}
 
-    #{{{plotAndSaveParallelProfile
-    def plotAndSaveParallelProfile(self):
+    #{{{plotAndSaveProfile
+    def plotAndSaveProfile(self):
         #{{{docstring
         """
         Performs the actual plotting of the parallel plane

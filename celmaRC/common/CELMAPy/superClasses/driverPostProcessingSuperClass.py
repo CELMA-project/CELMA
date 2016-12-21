@@ -4,7 +4,7 @@
 Contains the common post processing driver class
 """
 
-from ..driversHelpers import scanWTagSaveFunc
+from ..driverHelpers import scanWTagSaveFunc
 import matplotlib.pyplot as plt
 import datetime
 import os
@@ -21,6 +21,7 @@ class DriverPostProcessingSuperClass(object):
     #{{{Constructor
     def __init__(self                     ,\
                  dmp_folders              ,\
+                 collectPaths      = None ,\
                  convertToPhysical = False,\
                  showPlot          = False,\
                  savePlot          = True ,\
@@ -38,6 +39,9 @@ class DriverPostProcessingSuperClass(object):
         dmp_folders: tuple
             This is the output dmp_folder from bout_runners.
             Typically, these are the folders in a given scan
+        collectPaths : [None|tuple]
+            Paths to collect from.
+            If None dmp_folders will be set to collectPaths
         convertToPhysical : bool
             If the physical or normalized units should be plotted.
         showPlot : bool
@@ -64,7 +68,10 @@ class DriverPostProcessingSuperClass(object):
         #}}}
 
         # Set the member data
-        self._dmp_folders       = dmp_folders
+        if collectPaths is None:
+            self._collectPaths  = tuple(dmp_folders)
+        else:
+            self._collectPaths = collectPaths
         self._convertToPhysical = convertToPhysical
         self._showPlot          = showPlot
         self._savePlot          = savePlot
@@ -77,20 +84,18 @@ class DriverPostProcessingSuperClass(object):
 
         # Set the saveFolder
         if saveFolderFunc is not None:
-            # FIXME: Check if it is possible to change the API here. Would
-            # be nice if could send in a function instead
-            if saveFolderFunc == 'scanWTagSaveFunc':
-                saveFolder = scanWTagSaveFunc(dmp_folder                 ,\
-                                    convertToPhysical = convertToPhysical,\
-                                    **kwargs)
+            # FIXME: Check if it is possible to change the API here.
+            #        Would be nice if could send in a function instead.
+            if saveFolderFunc == "scanWTagSaveFunc":
+                saveFolder = scanWTagSaveFunc(dmp_folder, **kwargs)
             else:
                 message  = "{0}Warning: saveFolderFunc '{1}' not found, "
                 message += "falling back to standard implementation{0}"
                 print(message.format("\n"*3, saveFolderFunc))
-                saveFolder = "-".join(dmp_folder.split('/')[::-1])
+                saveFolder = "-".join(dmp_folder.split("/")[::-1])
         else:
             if saveFolder is None:
-                saveFolder = "-".join(dmp_folder.split('/')[::-1])
+                saveFolder = "-".join(dmp_folder.split("/")[::-1])
 
         # Get the timefolder
         self._timeFolder = self._getTime()
@@ -119,17 +124,17 @@ class DriverPostProcessingSuperClass(object):
             # python: ../../src/xcb_io.c:274: poll_for_event: Assertion
             # `!xcb_xlib_threads_sequence_lost' failed.
             #}}}
-            plt.switch_backend('Agg')
+            plt.switch_backend("Agg")
     #}}}
 
     #{{{_getTime
-    def _getTime(self, depth = 'second'):
+    def _getTime(self, depth = "second"):
         """
         Gets the current time, and returns it as a string
 
         Parameters
         ----------
-        depth : ['hour' | 'minute' | 'second']
+        depth : ["hour" | "minute" | "second"]
             String giving the temporal accuracy of the output string.
 
         Returns
@@ -140,11 +145,11 @@ class DriverPostProcessingSuperClass(object):
         now = datetime.datetime.now()
         nowStr = "{}-{:02d}-{:02d}".format(now.year, now.month, now.day)
 
-        if depth == 'hour' or depth == 'minute' or depth == 'second':
+        if depth == "hour" or depth == "minute" or depth == "second":
             nowStr += "-{:02d}".format(now.hour)
-        if depth == 'minute' or depth == 'second':
+        if depth == "minute" or depth == "second":
             nowStr += "-{:02d}".format(now.minute)
-        if depth == 'second':
+        if depth == "second":
             nowStr += "-{:02d}".format(now.second)
 
         return nowStr

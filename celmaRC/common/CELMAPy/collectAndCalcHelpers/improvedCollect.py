@@ -85,7 +85,7 @@ def collectiveCollect(paths               ,\
             try:
                 # Make a local var which is reused for every interation,
                 # then concatenate the dictionary
-                localVar =\
+                curVar =\
                     safeCollect(var,\
                                 path     = path        ,\
                                 tind     = tInd        ,\
@@ -100,13 +100,23 @@ def collectiveCollect(paths               ,\
                 raise ValueError("No collectable files found in {}".\
                                  format(path))
 
+            # Ensure 4D
+            if len(curVar.shape) == 3:
+                # Make it a 4d variable
+                time = collectTime(paths, tInd)
+                tmp = np.zeros((len(time), *curVar.shape))
+                # Copy the field in to each time
+                tmp[:] = curVar
+                curVar = tmp
 
-            # Set data[var] to localVar the first time in order to get the
+            # Set data[var] to curVar the first time in order to get the
             # correct dimensions
             if data[var] is None:
-                data[var] = localVar
+                data[var] = curVar
             else:
-                data[var] = np.concatenate((data[var], localVar), axis=0)
+                # Remove first point in time in the current time as this
+                # is the same as the last of the previous
+                data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
 
     return data
 #}}}
@@ -141,10 +151,13 @@ def collectTime(paths, tInd = None):
             if time is None:
                 time = f.read("t_array")
             else:
-                time = np.concatenate(time, f.read("t_array"), axis=0)
+                # Remove first point in time in the current time as this
+                # is the same as the last of the previous
+                time = np.concatenate((time, f.read("t_array")[1:]), axis=0)
 
     if tInd is not None:
-        time = time[tInd[0], tInd[1]]
+        # +1 as the last point is excluded from a slice
+        time = time[tInd[0]:tInd[1]+1]
 
     return time
 #}}}
