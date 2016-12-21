@@ -2,13 +2,33 @@
 
 # FIXME: Name changes
 # FIXME: ConvertToPhysical
+
+
+
+
+# # FIXME: Move maxGradRho to field2D class, and make it a ghost there
+#         # Get the current scan
+#         if maxGradRhoFolder:
+#             if self._scanParameters:
+#                 self._maxGradRhoFolder = maxGradRhoFolder
+#             else:
+#                 self._maxGradRhoFolder =\
+#                     convertToCurrentScanParameters(dmpFolder, maxGradRhoFolder, scanParameters)
+#         else:
+#             self._maxGradRhoFolder = None
+
+
+
+
+
+
 %load_ext autoreload
 %autoreload 2
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields2D import CollectAndCalcFields2D, Plot2DPerpPol
-from CELMAPython.plotHelpers import getMaxMinAnimation, getLevelsAnimation
+from CELMAPy.fields2D import CollectAndCalcFields2D, PlotAnim2DPerpPol
+from CELMAPy.plotHelpers import getMaxMinAnimation, getLevelsAnimation
 
 fluct = True
 convertToPhysical = True
@@ -21,7 +41,7 @@ pol2D = ccF2D.executeCollectAndCalc()
 vmax, vmin = getMaxMinAnimation((perp2D["lnN"], pol2D["lnN"]), True, True)
 levels = getLevelsAnimation(vmax, vmin, 100)
 
-p2DPerpPol = Plot2DPerpPol(".", fluct, convertToPhysical)
+p2DPerpPol = PlotAnim2DPerpPol(".", fluct, convertToPhysical)
 p2DPerpPol.setContourfArguments(vmax, vmin, levels)
 p2DPerpPol.setPerpData(perp2D["X"], perp2D["Y"], perp2D["lnN"], perp2D["time"], perp2D["zPos"], "lnN", ".")
 p2DPerpPol.setPolData(pol2D["X"], pol2D["Y"], pol2D["lnN"], pol2D["time"], pol2D["rhoPos"], "lnN", ".")
@@ -36,7 +56,7 @@ p2DPerpPol.plotAndSavePerpPlane()
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields2D import CollectAndCalcFields2D, Plot2DPerpPar
+from CELMAPython.fields2D import CollectAndCalcFields2D, PlotAnim2DPerpPar
 from CELMAPython.plotHelpers import getMaxMinAnimation, getLevelsAnimation
 
 fluct = True
@@ -50,7 +70,7 @@ par2D = ccF2D.executeCollectAndCalc()
 vmax, vmin = getMaxMinAnimation((perp2D["lnN"], par2D["lnN"], par2D["lnNPPi"]), True, True)
 levels = getLevelsAnimation(vmax, vmin, 100)
 
-p2DPerpPar = Plot2DPerpPar(".", fluct, convertToPhysical)
+p2DPerpPar = PlotAnim2DPerpPar(".", fluct, convertToPhysical)
 p2DPerpPar.setContourfArguments(vmax, vmin, levels)
 p2DPerpPar.setPerpData(perp2D["X"], perp2D["Y"], perp2D["lnN"], perp2D["time"], perp2D["zPos"], "lnN", ".")
 p2DPerpPar.setParData(par2D["X"], par2D["Y"], par2D["lnN"], par2D["lnNPPi"], par2D["time"], par2D["thetaPos"], "lnN", ".")
@@ -65,7 +85,7 @@ p2DPerpPar.plotAndSavePerpPlane()
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields2D import CollectAndCalcFields2D, Plot2DPol
+from CELMAPython.fields2D import CollectAndCalcFields2D, PlotAnim2DPol
 from CELMAPython.plotHelpers import getMaxMinAnimation, getLevelsAnimation
 
 fluct = True
@@ -74,7 +94,7 @@ ccF2D = CollectAndCalcFields2D(".", "lnN", mode="pol", xSlice=16, zSlice=None, y
 pol2D = ccF2D.executeCollectAndCalc()
 vmax, vmin = getMaxMinAnimation((pol2D["lnN"],), True, True)
 levels = getLevelsAnimation(vmax, vmin, 100)
-p2DPol = Plot2DPol(".", fluct, convertToPhysical)
+p2DPol = PlotAnim2DPol(".", fluct, convertToPhysical)
 p2DPol.setContourfArguments(vmax, vmin, levels)
 p2DPol.setPolData(pol2D["X"], pol2D["Y"], pol2D["lnN"], pol2D["time"], pol2D["rhoPos"], "lnN", ".")
 p2DPol.plotAndSavePolPlane()
@@ -88,7 +108,7 @@ p2DPol.plotAndSavePolPlane()
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields2D import CollectAndCalcFields2D, Plot2DPar
+from CELMAPython.fields2D import CollectAndCalcFields2D, PlotAnim2DPar
 from CELMAPython.plotHelpers import getMaxMinAnimation, getLevelsAnimation
 
 fluct = True
@@ -97,7 +117,7 @@ ccF2D = CollectAndCalcFields2D(".", "lnN", mode="par", xSlice=None, zSlice=0, yS
 par2D = ccF2D.executeCollectAndCalc()
 vmax, vmin = getMaxMinAnimation((par2D["lnN"], par2D["lnNPPi"]), True, True)
 levels = getLevelsAnimation(vmax, vmin, 100)
-p2DPar = Plot2DPar(".", fluct, convertToPhysical)
+p2DPar = PlotAnim2DPar(".", fluct, convertToPhysical)
 p2DPar.setContourfArguments(vmax, vmin, levels)
 p2DPar.setParData(par2D["X"], par2D["Y"], par2D["lnN"], par2D["lnNPPi"], par2D["time"], par2D["thetaPos"], "lnN", ".")
 p2DPar.plotAndSaveParPlane()
@@ -111,7 +131,7 @@ p2DPar.plotAndSaveParPlane()
 import sys
 commonDir = "/home/mmag/CELMA-dev/celmaRC/common/"
 sys.path.append(commonDir)
-from CELMAPython.fields2D import CollectAndCalcFields2D, Plot2DPerp
+from CELMAPython.fields2D import CollectAndCalcFields2D, PlotAnim2DPerp
 from CELMAPython.plotHelpers import getMaxMinAnimation, getLevelsAnimation
 
 fluct = True
@@ -120,7 +140,7 @@ ccF2D = CollectAndCalcFields2D(".", "lnN", mode="perp", xSlice=None, zSlice=None
 perp2D = ccF2D.executeCollectAndCalc()
 vmax, vmin = getMaxMinAnimation((perp2D["lnN"],), True, True)
 levels = getLevelsAnimation(vmax, vmin, 100)
-p2DPerp = Plot2DPerp(".", fluct, convertToPhysical)
+p2DPerp = PlotAnim2DPerp(".", fluct, convertToPhysical)
 p2DPerp.setContourfArguments(vmax, vmin, levels)
 p2DPerp.setPerpData(perp2D["X"], perp2D["Y"], perp2D["lnN"], perp2D["time"], perp2D["zPos"], "lnN", ".")
 p2DPerp.plotAndSavePerpPlane()

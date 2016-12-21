@@ -10,7 +10,10 @@ from ..collectAndCalcHelpers import (addLastThetaSlice,\
                                      collectTime,\
                                      get2DMesh,\
                                      polAvg,\
-                                     slicesToIndices)
+                                     slicesToIndices,\
+                                     calcN,\
+                                     calcUIPar,\
+                                     calcUEPar)
 import numpy as np
 
 #{{{CollectAndCalcFields2D
@@ -160,6 +163,9 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         """
         Collects the variable and the time.
 
+        If the varName is n, uIPar or uEPar, calculation will be done
+        through _calcNonSolvedVars
+
         Parameters
         ----------
         collectKwargs : dict
@@ -176,18 +182,18 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             The collected array pi from var
         """
         #}}}
-        if not(self._fluct):
+        if fluct:
+            collectKwargs.update({"zInd":None})
+
+        if not(self._varName == "n" or\
+               self._varName == "uIPar" or\
+               self._varName == "uEPar"):
             var = collectiveCollect(\
                         self._paths      ,\
                         (self._varName, ),\
                         **collectKwargs)
-
         else:
-            collectKwargs.update({"zInd":None})
-            var = collectiveCollect(\
-                            self._paths      ,\
-                            (self._varName, ),\
-                            **collectKwargs)
+            var = _calcNonSolvedVars(collectKwargs, not(self.convertToPhysical))
 
         var  = var[self._varName]
         time = collectTime(self._paths, collectKwargs["tInd"])
@@ -242,5 +248,50 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             var = addLastThetaSlice(var, var.shape[0])
 
         return var, time, varPPi
+    #}}}
+
+    #{{{_calcNonSolvedVars
+    def _calcNonSolvedVars(self, collectKwargs, normalized):
+        #{{{docstring
+        """
+        Calculates variables wich are not solved in the simulation
+
+        Parameters
+        ----------
+        collectKwargs : dict
+            Keyword arguments for collectiveCollect
+        normalized : bool
+            Whether or not the variables are normalized
+
+        Returns
+        -------
+        varDict : dict
+            Dictionary where the varName variable have been calculated
+        """
+        #}}}
+
+        lnN = collectiveCollect(self._paths   ,\
+                                ("lnN", )     ,\
+                                **collectKwargs)
+        n = calcN(lnN, normalized)
+        if self._varName == "n":
+            return n
+        else:
+            momDensPar = collectiveCollect(self._paths     ,\
+                                           ("momDensPar", ),\
+                                           **collectKwargs)
+            # Calculating uIPar
+            uIPar = calcUIPar(momDensPar, n)
+            if self._varName == "uIPar":
+                return uIPar
+            else:
+                jPar = collectiveCollect(self._paths   ,\
+                                         ("jPar", )    ,\
+                                         **collectKwargs)
+                uEPar = calcUEPar(uIPar,\
+                                  jPar ,\
+                                  n    ,\
+                                  normalized)
+                return uEPar
     #}}}
 #}}}
