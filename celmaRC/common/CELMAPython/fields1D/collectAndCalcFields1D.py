@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Contains class for collecting and calculating the 1D fields
+"""
+
 from ..superClasses import CollectAndCalcFieldsSuperClass
 from ..collectAndCalcHelpers import (collectTime,\
                                      collectConstRho,\

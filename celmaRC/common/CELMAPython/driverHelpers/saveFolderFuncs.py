@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Clollection of saveFolderFuncs for driversCombined.py
+Clollection of saveFolderFuncs
 """
 
 #{{{scanWTagSaveFunc
