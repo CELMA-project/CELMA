@@ -23,10 +23,10 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
     """
 
     #{{{constructor
-    def __init__(self           ,\
-                 *args          ,\
-                 fluct  = False ,\
-                 mode   = "perp",\
+    def __init__(self          ,\
+                 *args         ,\
+                 fluct = False ,\
+                 mode  = "perp",\
                  **kwargs):
         #{{{docstring
         """

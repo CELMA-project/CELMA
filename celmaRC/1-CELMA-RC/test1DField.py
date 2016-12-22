@@ -95,7 +95,7 @@ def driverTest():
     """
     Runs the single test for field1D
     """
-    dmp_folders  = ("CSDXMagFieldScanAr/nout_2_timestep_2000.0/nz_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-0-initialize_0/",)
+    dmp_folders  = ("CSDXMagFieldScanAr/nout_2_timestep_2000.0/nz_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-0-initialize_0",)
     collectPaths =\
         (\
           "CSDXMagFieldScanAr/nout_2_timestep_2000.0/nz_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-0-initialize_0/",\
@@ -114,7 +114,6 @@ def driverTest():
     yInd = 16
     zInd = 0
     useSubProcess = True
-    convertToPhysical = True
     saveFolderFunc = "scanWTagSaveFunc"
     hyperIncluded = False
 
