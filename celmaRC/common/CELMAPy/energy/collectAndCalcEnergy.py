@@ -10,10 +10,10 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 import os
 
-#{{{calcEnergy
-def calcEnergy(paths                   ,\
-               convertToPhysical = True,\
-               tSlice            = None):
+#{{{collectAndCalcEnergy
+def collectAndCalcEnergy(paths                   ,\
+                         convertToPhysical = True,\
+                         tSlice            = None):
     #{{{docstring
     """
     Collects and concatenate the energies
@@ -58,6 +58,8 @@ FIXME: No longer support for Helmholtz like energy
     """
     #}}}
 
+# FIXME: t_array can be collected differently
+"t_array"        ,\
     varStrings= (\
                  "polAvgPerpKinEE",\
                  "polAvgParKinEE" ,\
@@ -133,3 +135,53 @@ FIXME: No longer support for Helmholtz like energy
 
     return energies
 #}}}
+
+def calcEnergiesWPy():
+    # Collect
+    varStrings = ("lnN",)
+
+    variables  = collectiveCollect(paths, varStrings)
+    lnN        = variables["lnN"]
+    n          = calcN(lnN)
+    # Delete objects not needed to avoid unnecessary memory consumption
+    del variables, lnN
+
+    polAvgPerpKinEE, polAvgPerpKinEI, fluctPerpKinEE, fluctPerpKinEI = calcPerpEnergiesWPy(n)
+
+YOU ARE HERE
+def calcPerpEnergiesWPy(n):
+    # Collect
+    varStrings = ("phi",)
+    variables  = collectiveCollect(paths, varStrings)
+    phi        = variables["phi"]
+
+
+                 "polAvgPerpKinEE",\
+                 "polAvgPerpKinEI",\
+                 "fluctPerpKinEE" ,\
+                 "fluctPerpKinEI" ,\
+
+
+
+
+
+
+    momDensPar = variables["momDensPar"]
+    jPar       = variables["jPar"]
+
+    # Delete the dictionary to avoid unnecessary memory consumption
+                  ,\
+                  "jPar",\
+
+    varStrings = (\
+                  "lnN",\
+                  "phi",\
+                  "momDensPar",\
+                  "jPar",\
+                 )
+    variables  = collectiveCollect(paths, varStrings)
+    phi        = variables["phi"]
+    # Fluct
+
+                 "t_array"        ,\
+    clean with del big arrays
