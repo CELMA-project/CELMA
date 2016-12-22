@@ -117,9 +117,9 @@ def calcTimeTrace4d(paths                      ,\
     tCounter = 0
     for x, y, z in zip(xInd, yInd, zInd):
         # NOTE: The indices
-        rho   = dh.rho      [x]
+        rho   = dh.rho     [x]
         theta = dh.thetaDeg[z]
-        par   = dh.z        [y]
+        par   = dh.z       [y]
 
         # Add key and dict to timeTraces
         key = "{},{},{}".format(rho,theta,par)
