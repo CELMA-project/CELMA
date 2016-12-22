@@ -4,8 +4,13 @@
 Contains derivative functions
 """
 
+from .gridSizes import getUniformSpacing
+from .nonSolvedVariables import calcN
+from boututils.datafile import DataFile
+from boutdata import collect
 import numpy as np
 from scipy.fftpack import diff
+import os
 
 #{{{DDX
 def DDX(var, dx):
@@ -262,7 +267,7 @@ def findLargestRadialGradN(steadyStatePath):
                   yguards=False,\
                   tind   = [tLast, tLast],\
                   info=False)
-    n = calcN(lnN)
+    n = calcN(lnN, normalized = True)
     xInd  = findLargestRadialGrad(n, dx[0,0])
 
     return xInd

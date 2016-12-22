@@ -79,9 +79,17 @@ def collectiveCollect(paths               ,\
     # Initialize the data
     data = {var: None for var in varStrings}
 
+    if tInd is not None and len(paths) > 1:
+        # Check if it necessary to use all paths
+        paths = removePathsOutsideRange(paths, tInd)
+        if len(paths) != 1:
+            postCollectTInd = tInd
+            tInd = None
+        else:
+            postCollectTInd = None
+
     for path in paths:
         for var in varStrings:
-
             try:
                 # Make a local var which is reused for every interation,
                 # then concatenate the dictionary
@@ -109,6 +117,11 @@ def collectiveCollect(paths               ,\
                 tmp[:] = curVar
                 curVar = tmp
 
+            if tInd is not None and len(paths) > 1:
+                # Do slicing post collection if necessary
+                if postCollectTInd is not None:
+                    curVar = curVar[tInd[0]:tInd[1]]
+
             # Set data[var] to curVar the first time in order to get the
             # correct dimensions
             if data[var] is None:
@@ -119,6 +132,62 @@ def collectiveCollect(paths               ,\
                 data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
 
     return data
+#}}}
+
+#{{{removePathsOutsideRange
+def removePathsOutsideRange(paths, tInd):
+    #{{{docstring
+    """
+    Removes paths which are outside of the time range.
+
+    Parameters
+    ----------
+    paths : tuple
+        The paths to collect from
+    tInd : tuple
+        The time indices
+
+
+    Returns
+    -------
+    paths : tuple
+        The filtered paths
+    """
+    #}}}
+    # Check if it necessary to use all paths
+    lenT = 0
+    # Cast to list
+    paths = list(paths)
+    removePaths = []
+    # Check if the paths are needed from the rigth
+    for ind in range(len(paths)):
+        with DataFile(os.path.join(paths[ind],"BOUT.dmp.0.nc")) as f:
+            t = f.read("t_array")
+            lenT += len(t)
+            if tInd[1] < lenT:
+                lastInd = ind
+            else:
+                break
+    # Remove from the rigth
+    paths = paths[:lastInd+1]
+    # Check if the paths are needed from the left
+    lenT = 0
+    for path in paths:
+        with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
+            t = f.read("t_array")
+            lenT += len(t)
+            if tInd[0] > lenT:
+                removePaths.append(removePaths)
+            else:
+                break
+
+    for remove in removePaths:
+        paths.remove(remove)
+
+    # Cast to tuple
+    paths = tuple(path)
+
+    return paths
 #}}}
 
 #{{{collectTime
