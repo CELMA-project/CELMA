@@ -190,19 +190,15 @@ class UnitsConverter(object):
                                       self._normDict["omCI"]*\
                                       self._normDict["n0"],\
                      },\
-        #NOTE: momDensPar is divided by mi, so we need to multiply by mi again
-        #      here
         "momDensPar":{"units"        :r"\mathrm{kg\;m}^{-2}\mathrm{\;s}^{-1}",\
                       "normalization":r"/m_in_0c_s",\
-                      "factor"       :self._normDict["mi"]*\
-                                      self._normDict["rhoS"]*\
+                      "factor"       :self._normDict["rhoS"]*\
                                       self._normDict["omCI"]*\
                                       self._normDict["n0"],\
                      },\
         "ddtMomDensPar":{"units"        :r"\mathrm{kg\;m}^{-2}\mathrm{\;s}^{-2}",\
                          "normalization":r"/m_in_0c_s\omega_{{ci}}",\
-                         "factor"       :self._normDict["mi"]*\
-                                         self._normDict["rhoS"]*\
+                         "factor"       :self._normDict["rhoS"]*\
                                          (self._normDict["omCI"]**2)*\
                                          self._normDict["n0"],\
                         },\

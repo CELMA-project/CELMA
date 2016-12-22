@@ -4,29 +4,34 @@
 Contains single driver and driver class for 2D fields
 """
 
+from ..plotHelpers import getMaxMinAnimation, getLevelsAnimation
 from .collectAndCalcFields2D import CollectAndCalcFields2D
-from ..collectAndCalcHelpers import getMaxMinAnimation, getLevelsAnimation
-from .plotFields2D import PlotAnim2DPerp
+from .plotFields2D import (PlotAnim2DPerp,\
+                           PlotAnim2DPar,\
+                           PlotAnim2DPol,\
+                           PlotAnim2DPerpPar,\
+                           PlotAnim2DPerpPol,\
+                           )
 
-#{{{driver2DFieldSingle
-def driver2DFieldSingle(collectPaths     ,\
-                        savePath         ,\
-                        varName          ,\
-                        convertToPhysical,\
-                        xSlice           ,\
-                        ySlice           ,\
-                        zSlice           ,\
-                        tSlice           ,\
-                        fluct            ,\
-                        mode             ,\
-                        xguards  = False ,\
-                        yguards  = False ,\
-                        showPlot = False ,\
-                        savePlot = True  ,\
-                                        ):
+#{{{driver2DFieldPerpSingle
+def driver2DFieldPerpSingle(collectPaths     ,\
+                            savePath         ,\
+                            varName          ,\
+                            convertToPhysical,\
+                            xSlice           ,\
+                            yInd             ,\
+                            zSlice           ,\
+                            tSlice           ,\
+                            fluct            ,\
+                            varyMaxMin       ,\
+                            xguards  = False ,\
+                            yguards  = False ,\
+                            showPlot = False ,\
+                            savePlot = True  ,\
+                                            ):
     #{{{doctring
     """
-    Driver for plotting a single predefined fieldPlotType plot
+    Driver for plotting a single perpendicular 2D plot
 
     Parameters
     ----------
@@ -39,25 +44,20 @@ def driver2DFieldSingle(collectPaths     ,\
         The variable to plot
     convertToPhysical : bool
         Whether or not to convert to physical units.
-    xSlice : [int|slice]
+    xSlice : slice
         How the data will be sliced in x.
-        If "mode" is "pol" this must be an int.
-    ySlice : [int|slice]
+    yInd : int
         How the data will be sliced in y.
-        If "mode" is "perp" this must be an int.
-    zSlice : [int|slice]
+    zSlice : slice
         How the data will be sliced in z.
-        If "mode" is "pol" this must be an int.
     tSlice : [None|slice]
         How the data will be sliced in t.
     fluct : bool
         Whether or not fluctuations are shown
-    mode : ["perp"|"par"|"pol"|"perpPar"|"perpPol"]
-        * "perp"    - Only perpendicular plane will be plotted
-        * "par"     - Only parallel plane will be plotted
-        * "pol"     - Only poloidal plane will be plotted
-        * "perpPar" - The prependicular and parallel plan will be plotted
-        * "perpPol" - The prependicular and poloidal plan will be plotted
+    varyMaxMin : bool
+        If the colorbar should be adjusted to the max and min of the
+        current timestep.
+        If False, the global max and min is used.
     xguards : bool
         Whether or not to collect the ghost points in x.
     yguards : bool
@@ -69,41 +69,364 @@ def driver2DFieldSingle(collectPaths     ,\
     """
     #}}}
 
-    if mode == "perp":
-        # Create collect object
-        ccf2D = CollectAndCalcFields2D(collectPaths,\
-                                       fluct=fluct,\
-                                       mode="perp",\
-                                       convertToPhysical=convertToPhysical)
+    # Declare mode
+    mode = "perp"
 
-        # Set the slice
-        ccf2D.setSlice(xSlice, ySlice, zSlice, tSlice)
-        # Set name and execute
-        ccf2D.setVarName(varName)
-        # Execute the collection
-        perp2D = ccf2D.executeCollectAndCalc()
+    # Create collect object
+    ccf2D = CollectAndCalcFields2D(collectPaths             ,\
+                                   fluct             = fluct,\
+                                   mode              = mode ,\
+                                   convertToPhysical = convertToPhysical)
 
-        # Set the plot limits
-        vmax, vmin = getMaxMinAnimation((perp2D[varName],), True, True)
-        levels = getLevelsAnimation(vmax, vmin, 100)
+    # Set the slice
+    ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
+    # Set name and execute
+    ccf2D.setVarName(varName)
+    # Execute the collection
+    perp2D = ccf2D.executeCollectAndCalc()
 
-        # Create the plotting object
-        p2DPerp = PlotAnim2DPerp(".", fluct, convertToPhysical)
-        p2DPerp.setContourfArguments(vmax, vmin, levels)
-        p2DPerp.setPerpData(perp2D["X"], perp2D["Y"], perp2D[varName], perp2D["time"], perp2D["zPos"], varName, ".")
-        p2DPerp.plotAndSavePerpPlane()
+    # Set the plot limits
+    vmax, vmin = getMaxMinAnimation((perp2D[varName],),\
+                                     fluct,
+                                     varyMaxMin)
+    levels = getLevelsAnimation(vmax, vmin, 100)
 
-    if mode == "par":
-        pass
-    if mode == "perpPar":
-        pass
-    elif mode == "perpPol":
-        pass
+    # Create the plotting object
+    p2DPerp = PlotAnim2DPerp(collectPaths           ,\
+                             savePath               ,\
+                             ccf2D.convertToPhysical,\
+                             fluct = fluct          ,\
+                             show  = showPlot       ,\
+                             save  = savePlot)
+    p2DPerp.setContourfArguments(vmax, vmin, levels)
+    p2DPerp.setPerpData(perp2D["X"],\
+                        perp2D["Y"],\
+                        perp2D[varName],\
+                        perp2D["time"],\
+                        perp2D["zPos"],\
+                        varName)
+    p2DPerp.plotAndSavePerpPlane()
+#}}}
+
+#{{{driver2DFieldParSingle
+def driver2DFieldParSingle(collectPaths     ,\
+                           savePath         ,\
+                           varName          ,\
+                           convertToPhysical,\
+                           xSlice           ,\
+                           ySlice           ,\
+                           zInd             ,\
+                           tSlice           ,\
+                           fluct            ,\
+                           varyMaxMin       ,\
+                           xguards  = False ,\
+                           yguards  = False ,\
+                           showPlot = False ,\
+                           savePlot = True  ,\
+                                            ):
+    #{{{doctring
+    """
+    Driver for plotting a single parallel 2D plot
+
+    Parameters
+    ----------
+    collectPaths : tuple
+        Paths to collect from.
+        The corresponind 't_array' of the paths must be in ascending order.
+    savePath : str
+        Save destination
+    varName : str
+        The variable to plot
+    convertToPhysical : bool
+        Whether or not to convert to physical units.
+    xSlice : slice
+        How the data will be sliced in x.
+    ySlice : int
+        How the data will be sliced in y.
+    zInd : int
+        How the data will be sliced in z.
+    tSlice : [None|slice]
+        How the data will be sliced in t.
+    fluct : bool
+        Whether or not fluctuations are shown
+    varyMaxMin : bool
+        If the colorbar should be adjusted to the max and min of the
+        current timestep.
+        If False, the global max and min is used.
+    xguards : bool
+        Whether or not to collect the ghost points in x.
+    yguards : bool
+        Whether or not to collect the ghost points in y.
+    showPlot : bool
+        Whether or not the plot should be displayed.
+    savePlot : bool
+        Whether or no the plot should be saved.
+    """
+    #}}}
+
+    mode = "par"
+
+    # Create collect object
+    ccf2D = CollectAndCalcFields2D(collectPaths             ,\
+                                   fluct             = fluct,\
+                                   mode              = mode ,\
+                                   convertToPhysical = convertToPhysical)
+
+    # Set the slice
+    ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
+    # Set name and execute
+    ccf2D.setVarName(varName)
+    # Execute the collection
+    par2D = ccf2D.executeCollectAndCalc()
+
+    # Set the plot limits
+    vmax, vmin = getMaxMinAnimation((par2D[varName],),\
+                                     fluct,
+                                     varyMaxMin)
+    levels = getLevelsAnimation(vmax, vmin, 100)
+
+    # Create the plotting object
+    p2DPar = PlotAnim2DPar(collectPaths           ,\
+                           savePath               ,\
+                           ccf2D.convertToPhysical,\
+                           fluct = fluct          ,\
+                           show  = showPlot       ,\
+                           save  = savePlot)
+    p2DPar.setContourfArguments(vmax, vmin, levels)
+    p2DPar.setParData(par2D["X"]          ,\
+                      par2D["Y"]          ,\
+                      par2D[varName]      ,\
+                      par2D[varName+"PPi"],\
+                      par2D["time"]       ,\
+                      par2D["thetaPos"]   ,\
+                      varName)
+    p2DPar.plotAndSaveParPlane()
+#}}}
+
+#{{{driver2DFieldPolSingle
+def driver2DFieldPolSingle(collectPaths     ,\
+                           savePath         ,\
+                           varName          ,\
+                           convertToPhysical,\
+                           xInd             ,\
+                           ySlice           ,\
+                           zSlice           ,\
+                           tSlice           ,\
+                           fluct            ,\
+                           varyMaxMin       ,\
+                           xguards  = False ,\
+                           yguards  = False ,\
+                           showPlot = False ,\
+                           savePlot = True  ,\
+                                            ):
+    #{{{doctring
+    """
+    Driver for plotting a single poloidal 2D plot
+
+    Parameters
+    ----------
+    collectPaths : tuple
+        Paths to collect from.
+        The corresponind 't_array' of the paths must be in ascending order.
+    savePath : str
+        Save destination
+    varName : str
+        The variable to plot
+    convertToPhysical : bool
+        Whether or not to convert to physical units.
+    xSlice : slice
+        How the data will be sliced in x.
+    ySlice : slice
+        How the data will be sliced in y.
+    zInd : int
+        How the data will be sliced in z.
+    tSlice : [None|slice]
+        How the data will be sliced in t.
+    fluct : bool
+        Whether or not fluctuations are shown
+    varyMaxMin : bool
+        If the colorbar should be adjusted to the max and min of the
+        current timestep.
+        If False, the global max and min is used.
+    xguards : bool
+        Whether or not to collect the ghost points in x.
+    yguards : bool
+        Whether or not to collect the ghost points in y.
+    showPlot : bool
+        Whether or not the plot should be displayed.
+    savePlot : bool
+        Whether or no the plot should be saved.
+    """
+    #}}}
+
+    mode = "pol"
+
+    # Create collect object
+    ccf2D = CollectAndCalcFields2D(collectPaths             ,\
+                                   fluct             = fluct,\
+                                   mode              = mode ,\
+                                   convertToPhysical = convertToPhysical)
+
+    # Set the slice
+    ccf2D.setSlice(xInd, ySlice, zSlice, tSlice)
+    # Set name and execute
+    ccf2D.setVarName(varName)
+    # Execute the collection
+    pol2D = ccf2D.executeCollectAndCalc()
+
+    # Set the plot limits
+    vmax, vmin = getMaxMinAnimation((pol2D[varName],),\
+                                     fluct,
+                                     varyMaxMin)
+    levels = getLevelsAnimation(vmax, vmin, 100)
+
+    # Create the plotting object
+    p2DPol = PlotAnim2DPol(collectPaths           ,\
+                           savePath               ,\
+                           ccf2D.convertToPhysical,\
+                           fluct = fluct          ,\
+                           show  = showPlot       ,\
+                           save  = savePlot)
+    p2DPol.setContourfArguments(vmax, vmin, levels)
+    p2DPol.setPolData(pol2D["X"]     ,\
+                      pol2D["Y"]     ,\
+                      pol2D[varName] ,\
+                      pol2D["time"]  ,\
+                      pol2D["rhoPos"],\
+                      varName)
+    p2DPol.plotAndSavePolPlane()
+#}}}
+
+#{{{driver2DFieldPerpParSingle
+def driver2DFieldPerpParSingle(collectPaths ,\
+                           savePath         ,\
+                           varName          ,\
+                           convertToPhysical,\
+                           xSlice           ,\
+                           ySlice           ,\
+                           zSlice           ,\
+                           yInd             ,\
+                           zInd             ,\
+                           tSlice           ,\
+                           fluct            ,\
+                           varyMaxMin       ,\
+                           xguards  = False ,\
+                           yguards  = False ,\
+                           showPlot = False ,\
+                           savePlot = True  ,\
+                                            ):
+    #{{{doctring
+    """
+    Driver for plotting a single perpendicular and parallel 2D plot
+
+    Parameters
+    ----------
+    collectPaths : tuple
+        Paths to collect from.
+        The corresponind 't_array' of the paths must be in ascending order.
+    savePath : str
+        Save destination
+    varName : str
+        The variable to plot
+    convertToPhysical : bool
+        Whether or not to convert to physical units.
+    xSlice : slice
+        How the data will be sliced in x.
+    ySlice : slice
+        How the data will be sliced in y.
+    zSlice : slice
+        How the data will be sliced in z.
+    yInd : int
+        Constant y index for perpendicular plot.
+    zInd : int
+        Constant z index for parallel plot.
+    tSlice : [None|slice]
+        How the data will be sliced in t.
+    fluct : bool
+        Whether or not fluctuations are shown
+    varyMaxMin : bool
+        If the colorbar should be adjusted to the max and min of the
+        current timestep.
+        If False, the global max and min is used.
+    xguards : bool
+        Whether or not to collect the ghost points in x.
+    yguards : bool
+        Whether or not to collect the ghost points in y.
+    showPlot : bool
+        Whether or not the plot should be displayed.
+    savePlot : bool
+        Whether or no the plot should be saved.
+    """
+    #}}}
+
+    mode = "perpPar"
+
+    # Pependicular collection
+    ccf2D = CollectAndCalcFields2D(collectPaths              ,\
+                                   fluct             = fluct ,\
+                                   mode              = "perp",\
+                                   convertToPhysical = convertToPhysical)
+    ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
+    ccf2D.setVarName(varName)
+    perp2D = ccf2D.executeCollectAndCalc()
+
+    # Parallel collection
+    ccf2D = CollectAndCalcFields2D(collectPaths             ,\
+                                   fluct             = fluct,\
+                                   mode              = "par",\
+                                   convertToPhysical = convertToPhysical)
+    ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
+    ccf2D.setVarName(varName)
+    par2D = ccf2D.executeCollectAndCalc()
+
+    # Set the plot limits
+    vmax, vmin = getMaxMinAnimation((perp2D[varName],\
+                                     par2D[varName]),\
+                                     fluct,
+                                     varyMaxMin)
+    levels = getLevelsAnimation(vmax, vmin, 100)
+
+    # Create the plotting object
+    p2DPerpPar = PlotAnim2DPerpPar(collectPaths           ,\
+                                   savePath               ,\
+                                   ccf2D.convertToPhysical,\
+                                   fluct = fluct          ,\
+                                   show  = showPlot       ,\
+                                   save  = savePlot)
+    p2DPerpPar.setContourfArguments(vmax, vmin, levels)
+    p2DPerpPar.setPerpData(perp2D["X"]    ,\
+                           perp2D["Y"]    ,\
+                           perp2D[varName],\
+                           perp2D["time"] ,\
+                           perp2D["zPos"] ,\
+                           varName)
+    p2DPerpPar.setParData(par2D["X"]          ,\
+                          par2D["Y"]          ,\
+                          par2D[varName]      ,\
+                          par2D[varName+"PPi"],\
+                          par2D["time"]       ,\
+                          par2D["thetaPos"]   ,\
+                          varName)
+    p2DPerpPar.plotAndSavePerpParPlane()
 #}}}
 
 
+#    mode : ["perp"|"par"|"pol"|"perpPar"|"perpPol"]
+#        * "perp"    - Only perpendicular plane will be plotted
+#        * "par"     - Only parallel plane will be plotted
+#        * "pol"     - Only poloidal plane will be plotted
+#        * "perpPar" - The prependicular and parallel plan will be plotted
+#        * "perpPol" - The prependicular and poloidal plan will be plotted
 
-
+#    xSlice : [int|slice]
+#        How the data will be sliced in x.
+#        If "mode" is "pol" this must be an int.
+#    ySlice : [int|slice]
+#        How the data will be sliced in y.
+#        If "mode" is "perp" this must be an int.
+#    zSlice : [int|slice]
+#        How the data will be sliced in z.
+#        If "mode" is "pol" this must be an int.
 
 
 #           #CollectAndCalcFields2D

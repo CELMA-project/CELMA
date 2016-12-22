@@ -41,7 +41,7 @@ def addLastThetaSlice(field, nFrames):
 #}}}
 
 #{{{get2DMesh
-def get2DMesh(rho=None, theta=None, z=None, mode="RT", xguards=False):
+def get2DMesh(rho=None, thetaRad=None, z=None, mode="RT", xguards=False):
     #{{{docstring
     """
     Provides rho-theta, rho-z and theta-z meshes from provided input.
@@ -93,11 +93,11 @@ def get2DMesh(rho=None, theta=None, z=None, mode="RT", xguards=False):
 
     if "T" in mode:
         # Add the last slice to theta
-        theta = np.append(theta, 2.0*np.pi)
+        thetaRad = np.append(thetaRad, 2.0*np.pi)
 
     if mode == "RT":
         # For the rho, theta plane
-        THETA_RT, RHO_RT = np.meshgrid(theta, rho)
+        THETA_RT, RHO_RT = np.meshgrid(thetaRad, rho)
 
         # Convert RHO and THETA to X_RT and Y_RT
         X_RT = RHO_RT*np.cos(THETA_RT)
@@ -117,7 +117,7 @@ def get2DMesh(rho=None, theta=None, z=None, mode="RT", xguards=False):
 
     if mode == "ZT":
         # For the theta, z plane
-        Z_ZT, THETA_ZT = np.meshgrid(z, theta)
+        Z_ZT, THETA_ZT = np.meshgrid(z, thetaRad)
 
         # Set Z and THETA to X_ZT and Y_ZT
         X_ZT = THETA_ZT
