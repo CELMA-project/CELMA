@@ -135,7 +135,7 @@ class DimensionsHelper(object):
         self.thetaRad = theta
         theta = theta * (180/np.pi)
 
-        self.thetaGrad = theta
+        self.thetaDeg = theta
         self.dz        = dz
         #}}}
     #}}}
