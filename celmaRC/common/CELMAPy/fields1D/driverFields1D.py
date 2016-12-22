@@ -231,7 +231,7 @@ def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
 #{{{Driver1DFields
 class Driver1DFields(DriverPlotFieldsSuperClass):
     """
-    Class for plotting of the 1D fields.
+    Class for the driving of the plotting of the 1D fields.
     """
 
     #{{{static members

@@ -16,6 +16,7 @@ from matplotlib.ticker import FuncFormatter
 import numpy as np
 import matplotlib.animation as animation
 import matplotlib.pylab as plt
+import os
 
 #{{{PlotAnimSuperClass
 class PlotAnimSuperClass(object):
@@ -567,5 +568,27 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
                                    "vmin"   : None,\
                                    "levels" : None,\
                                   })
+    #}}}
+
+    #{{{_setFileName
+    def _setFileName(self, plotTypeName):
+        #{{{docstring
+        """
+        Sets self._fileName
+
+        Parameters
+        ----------
+        plotTypeName : str
+            The plot type name
+        """
+        #}}}
+        if self._fluct:
+
+            fileName = "{}-{}-{}-fluct"\
+                    .format(self._varName, plotTypeName, "2D")
+        else:
+            fileName = "{}-{}-{}".format(self._varName, plotTypeName, "2D")
+
+        self._fileName = os.path.join(self._savePath, fileName)
     #}}}
 #}}}
