@@ -6,6 +6,7 @@ Contains single driver and driver class for 2D fields
 
 from ..plotHelpers import getMaxMinAnimation, getLevelsAnimation
 from ..superClasses import DriverPlotFieldsSuperClass
+from ..collectAndCalcHelpers import findLargestRadialGradN
 from .collectAndCalcFields2D import CollectAndCalcFields2D
 from .plotFields2D import (PlotAnim2DPerp,\
                            PlotAnim2DPar,\
@@ -362,8 +363,6 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
     """
     #}}}
 
-    mode = "perpPar"
-
     # Pependicular collection
     ccf2D = CollectAndCalcFields2D(collectPaths              ,\
                                    fluct             = fluct ,\
@@ -475,8 +474,6 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
     """
     #}}}
 
-    mode = "perpPol"
-
     # Pependicular collection
     ccf2D = CollectAndCalcFields2D(collectPaths              ,\
                                    fluct             = fluct ,\
@@ -531,12 +528,12 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
     Class for driving of the plotting of the 2D fields.
     """
     #{{{constructor
-    def __init__(self                   ,\
-                 *args                  ,\
-                 varName         = "n"  ,\
-                 fluct           = False,\
-                 varyMaxMin      = False,\
-                 timeStampFolder = True ,\
+    def __init__(self                     ,\
+                 *args                    ,\
+                 varName           = "n"  ,\
+                 fluct             = False,\
+                 varyMaxMin        = False,\
+                 timeStampFolder   = True ,\
                  **kwargs):
         #{{{docstring
         """
@@ -584,6 +581,22 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         self._varName    = varName
         self._fluct      = fluct
         self._varyMaxMin = varyMaxMin
+    #}}}
+
+    #{{{setXIndToMaxGradInN
+    def setXIndToMaxGradInN(self, steadyStatePath):
+        #{{{docstring
+        """
+        Sets the xInd to the maximum radial gradient in n
+
+        Parameters
+        ----------
+        steadyStatePath : str
+            The steady state path to find the maximum gradient from.
+        """
+        #}}}
+
+        self._xInd = findLargestRadialGradN(steadyStatePath)
     #}}}
 
     #{{{driver2DFieldsPerp
