@@ -11,7 +11,6 @@ from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pylab as plt
 import numpy as np
-import os
 
 # Reset the size
 plt.rc("xtick",  labelsize = 35)
@@ -106,9 +105,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         #}}}
 
         # Set the fileName
-        self._fileName =\
-            os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "perp", "2D"))
+        self._setFileName("perp")
 
         # Initial plot (needed if we would like to save the plot)
         self._updatePerpAxInTime(0)
@@ -309,9 +306,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         #}}}
 
         # Set the file name
-        self._fileName   =\
-            os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "par", "2D"))
+        self._setFileName("par")
 
         # Initial plot (needed if we would like to save the plot)
         self._updateParAxInTime(0)
@@ -510,9 +505,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         #}}}
 
         # Set the file name
-        self._fileName =\
-            os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "pol", "2D"))
+        self._setFileName("pol")
 
         # Initial plot (needed if we would like to save the plot)
         self._updatePolAxInTime(0)
@@ -679,9 +672,7 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         #}}}
 
         # Set the file name
-        self._fileName =\
-            os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "perpPar", "2D"))
+        self._setFileName("perpPar")
 
         # Set the lines to plot
         self._setLines()
@@ -860,9 +851,7 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
         #}}}
 
         # Set the file name
-        self._fileName =\
-            os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._varName, "perpPol", "2D"))
+        self._setFileName("perpPol")
 
         # Set the lines to plot
         self._setLines()
