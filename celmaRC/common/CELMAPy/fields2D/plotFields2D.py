@@ -7,7 +7,6 @@ Contains functions for animating the 2D fields
 from ..superClasses import PlotAnim2DSuperClass
 from ..plotHelpers import plotNumberFormatter
 from matplotlib.gridspec import GridSpec
-from matplotlib.ticker import FuncFormatter
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pylab as plt
 import numpy as np

@@ -240,14 +240,16 @@ def driverTest():
     xSlice            = None
     ySlice            = None
     zSlice            = None
-    xInd              = 16
+    xInd              = 30
     yInd              = 16
     zInd              = 16
     tSlice            = None
     fluct             = False
     varyMaxMin        = False
-    useSubProcess     = True
+    useSubProcess     = False
     saveFolderFunc    = "scanWTagSaveFunc"
+
+    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
     print("\n\nTesting driver 2D")
     d2DF = Driver2DFields(
@@ -280,10 +282,13 @@ def driverTest():
                    yInd    = yInd  ,\
                    zInd    = zInd  ,\
                   )
+
     d2DF.driver2DFieldsPerp()
     d2DF.driver2DFieldsPar()
     d2DF.driver2DFieldsPol()
     d2DF.driver2DFieldsPerpPar()
+    # Set xInd
+    d2DF.setXIndToMaxGradInN(steadyStatePath)
     d2DF.driver2DFieldsPerpPol()
     print("Success!\n\n")
 #}}}
