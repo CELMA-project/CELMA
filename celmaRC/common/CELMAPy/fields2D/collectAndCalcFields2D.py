@@ -152,7 +152,7 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         if "par" in self._mode:
             field2D[self._varName      ] = var   [:, :, :, 0]
             field2D[self._varName+"PPi"] = varPPi[:, :, :, 0]
-            field2D["thetaPos"   ]       = self._dh.thetaGrad[zInd[0]]
+            field2D["thetaPos"   ]       = self._dh.thetaDeg[zInd[0]]
 
         return field2D
     #}}}
