@@ -62,7 +62,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
     #}}}
 
     #{{{setPerpData
-    def setPerpData(self, X_RT, Y_RT, Z_RT, time, constZ, varName, savePath):
+    def setPerpData(self, X_RT, Y_RT, Z_RT, time, constZ, varName):
         #{{{docstring
         """
         Sets the perpendicular data and label to be plotted
@@ -81,8 +81,6 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
             The constant z value (i.e. not the index).
         varName : str
             The name of the variable given in Z_RT.
-        savePath : str
-            Destination to save the plot in.
         """
         #}}}
 
@@ -92,7 +90,6 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         self._time     = time
         self._constZ   = constZ
         self._varName  = varName
-        self._savePath = savePath
 
         # Set the var label
         pltVarName = self._ph.getVarPltName(self._varName)
@@ -265,7 +262,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
 
     #{{{setParData
     def setParData(self, X_RZ, Y_RZ, Z_RZ, Z_RZ_PPi,\
-                time, constTheta, varName, savePath):
+                   time, constTheta, varName):
         #{{{docstring
         """
         Sets the parallel data and label to be plotted
@@ -286,8 +283,6 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
             The constant z value (i.e. not the index).
         varName : str
             The name of the variable given in Z_RZ.
-        savePath : str
-            Destination to save the plot in.
         """
         #}}}
 
@@ -298,7 +293,6 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         self._time       = time
         self._constTheta = int(constTheta)
         self._varName    = varName
-        self._savePath   = savePath
 
         # Set the var label
         pltVarName = self._ph.getVarPltName(self._varName)
@@ -472,7 +466,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
     #}}}
 
     #{{{setPolData
-    def setPolData(self, X_ZT, Y_ZT, Z_ZT, time, constRho, varName, savePath):
+    def setPolData(self, X_ZT, Y_ZT, Z_ZT, time, constRho, varName):
         #{{{docstring
         """
         Sets the poloidal data and label to be plotted
@@ -491,8 +485,6 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
             The constant z value (i.e. not the index).
         varName : str
             The name of the variable given in Z_ZT.
-        savePath : str
-            Destination to save the plot in.
         """
         #}}}
 
@@ -678,8 +670,8 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         self._axTitle = "{}\n"
     #}}}
 
-    #{{{plotAndSavePerpPlane
-    def plotAndSavePerpPlane(self):
+    #{{{plotAndSavePerpParPlane
+    def plotAndSavePerpParPlane(self):
         #{{{docstring
         """
         Performs the actual plotting of the perpendicular and parallel
@@ -695,12 +687,12 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         self._setLines()
 
         # Initial plot (needed if we would like to save the plot)
-        self._updatePerpAndPolAxInTime(0)
+        self._updatePerpAndParAxInTime(0)
 
         # Call the save and show routine
         self.plotSaveShow(self._fig,\
                           self._fileName,\
-                          self._updatePerpAndPolAxInTime,\
+                          self._updatePerpAndParAxInTime,\
                           len(self._time))
     #}}}
 
@@ -717,7 +709,8 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         rhoEnd   = self._X_RT[-1, 0]
 
         # Calculate the numerical value of the theta angle and the z value
-        thetaRad = self._constTheta
+        # NOTE: Const theta is in degrees, we need to convert to radians
+        thetaRad = self._constTheta*(np.pi/180)
         thetaPPi = thetaRad + np.pi
         zVal     = self._constZ
 
@@ -743,8 +736,8 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
                 (zVal                     , zVal                   )
     #}}}
 
-    #{{{_updatePerpAndPolAxInTime
-    def _updatePerpAndPolAxInTime(self, tInd):
+    #{{{_updatePerpAndParAxInTime
+    def _updatePerpAndParAxInTime(self, tInd):
         #{{{docstring
         """
         Updates the perpendicular and parallel axis and sets the figure title.
@@ -858,8 +851,8 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
         self._axTitle = "{}\n"
     #}}}
 
-    #{{{plotAndSavePerpPlane
-    def plotAndSavePerpPlane(self):
+    #{{{plotAndSavePerpPolPlane
+    def plotAndSavePerpPolPlane(self):
         #{{{docstring
         """
         Performs the actual plotting of the perpendicular and poloidal

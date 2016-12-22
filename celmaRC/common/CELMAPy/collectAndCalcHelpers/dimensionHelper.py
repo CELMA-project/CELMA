@@ -111,7 +111,7 @@ class DimensionsHelper(object):
             innerPoints = nPoints - 2*MYG
         else:
             innerPoints = nPoints
-            
+
         z = dy * np.array(np.arange(0.5, innerPoints))
 
         if self._yguards:
@@ -132,10 +132,11 @@ class DimensionsHelper(object):
         theta = dz * np.array(np.arange(0.0, innerPoints))
 
         # Convert to degrees
-        theta * (180/np.pi)
+        self.thetaRad = theta
+        theta = theta * (180/np.pi)
 
-        self.theta = theta
-        self.dz    = dz
+        self.thetaGrad = theta
+        self.dz        = dz
         #}}}
     #}}}
 

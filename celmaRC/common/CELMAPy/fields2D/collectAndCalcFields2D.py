@@ -95,9 +95,9 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         # Obtain the mesh
         if self._mode == "perp":
             # X_RT, Y_RT
-            X, Y = get2DMesh(rho    = self._dh.rho  ,\
-                             theta  = self._dh.theta,\
-                             mode   = "RT")
+            X, Y = get2DMesh(rho      = self._dh.rho     ,\
+                             thetaRad = self._dh.thetaRad,\
+                             mode     = "RT")
         elif self._mode == "par":
             # X_RZ, Y_RZ
             X, Y = get2DMesh(rho  = self._dh.rho,\
@@ -105,17 +105,17 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
                              mode = "RZ")
         elif self._mode == "pol":
             # X_ZT, Y_ZT
-            X, Y = get2DMesh(theta = self._dh.theta,\
-                             z     = self._dh.z,\
-                             mode  = "ZT")
+            X, Y = get2DMesh(thetaRad = self._dh.thetaRad,\
+                             z        = self._dh.z,\
+                             mode     = "ZT")
 
         # Convert to indices
-        xInd = slicesToIndices(self._paths[0], self._xSlice, "x",\
+        xInd = slicesToIndices(self._collectPaths[0], self._xSlice, "x",\
                                xguards=self._xguards)
-        yInd = slicesToIndices(self._paths[0], self._ySlice, "y",\
+        yInd = slicesToIndices(self._collectPaths[0], self._ySlice, "y",\
                                yguards=self._yguards)
-        zInd = slicesToIndices(self._paths[0], self._zSlice, "z")
-        tInd = slicesToIndices(self._paths[0], self._tSlice, "t")
+        zInd = slicesToIndices(self._collectPaths[0], self._zSlice, "z")
+        tInd = slicesToIndices(self._collectPaths[0], self._tSlice, "t")
 
         collectGhost = True if (self._xguards or self._yguards) else False
 
@@ -152,7 +152,7 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         if "par" in self._mode:
             field2D[self._varName      ] = var   [:, :, :, 0]
             field2D[self._varName+"PPi"] = varPPi[:, :, :, 0]
-            field2D["thetaPos"   ] = self._dh.theta[zInd[0]]
+            field2D["thetaPos"   ]       = self._dh.thetaGrad[zInd[0]]
 
         return field2D
     #}}}
@@ -182,21 +182,25 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             The collected array pi from var
         """
         #}}}
-        if fluct:
+        if self._fluct:
             collectKwargs.update({"zInd":None})
 
         if not(self._varName == "n" or\
                self._varName == "uIPar" or\
                self._varName == "uEPar"):
             var = collectiveCollect(\
-                        self._paths      ,\
-                        (self._varName, ),\
+                        self._collectPaths,\
+                        (self._varName, ) ,\
                         **collectKwargs)
         else:
-            var = _calcNonSolvedVars(collectKwargs, not(self.convertToPhysical))
+            # NOTE: We set normalized True here as the collected
+            #       variables are normalized.
+            #       Conversion to physical happens later in
+            #       executeCollectAndCalc.
+            var = self._calcNonSolvedVars(collectKwargs, normalized = True)
 
         var  = var[self._varName]
-        time = collectTime(self._paths, collectKwargs["tInd"])
+        time = collectTime(self._collectPaths, collectKwargs["tInd"])
 
         # Get index
         if self._mode == "par":
@@ -214,8 +218,8 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         if not(self._fluct) and self._mode == "par":
             collectKwargs.update({"zInd":zPPi})
             varPPi = collectiveCollect(\
-                            self._paths      ,\
-                            (self._varName, ),\
+                            self._collectPaths,\
+                            (self._varName, ) ,\
                             **collectKwargs)
 
             varPPi = varPPi[self._varName]
@@ -270,28 +274,30 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         """
         #}}}
 
-        lnN = collectiveCollect(self._paths   ,\
-                                ("lnN", )     ,\
+        var = collectiveCollect(self._collectPaths,\
+                                ("lnN", )         ,\
                                 **collectKwargs)
-        n = calcN(lnN, normalized)
+        lnN = var["lnN"]
+        n = calcN(lnN, normalized, uc = self.uc)
         if self._varName == "n":
-            return n
+            return {"n":n}
         else:
-            momDensPar = collectiveCollect(self._paths     ,\
-                                           ("momDensPar", ),\
-                                           **collectKwargs)
-            # Calculating uIPar
+            var = collectiveCollect(self._collectPaths,\
+                                    ("momDensPar", )  ,\
+                                    **collectKwargs)
+            momDensPar = var["momDensPar"]
             uIPar = calcUIPar(momDensPar, n)
             if self._varName == "uIPar":
-                return uIPar
+                return {"uIPar":uIPar}
             else:
-                jPar = collectiveCollect(self._paths   ,\
-                                         ("jPar", )    ,\
-                                         **collectKwargs)
-                uEPar = calcUEPar(uIPar,\
-                                  jPar ,\
-                                  n    ,\
+                var = collectiveCollect(self._collectPaths,\
+                                        ("jPar", )        ,\
+                                        **collectKwargs)
+                jPar = var["jPar"]
+                uEPar = calcUEPar(uIPar     ,\
+                                  jPar      ,\
+                                  n         ,\
                                   normalized)
-                return uEPar
+                return {"uEPar":uEPar}
     #}}}
 #}}}
