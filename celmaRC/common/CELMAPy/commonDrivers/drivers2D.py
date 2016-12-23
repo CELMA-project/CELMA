@@ -123,7 +123,7 @@ class Drivers2D(FieldPlottersDriver):
                          "tSlice"            : self._tSlice           ,\
                          "maxGradRhoFolder"  : self._maxGradRhoFolder ,\
                          "fluctuation"         : self._fluctuation        ,\
-                         "convertToPhysical" : self._convertToPhysical,\
+                         "convertToPhysical" : self.convertToPhysical,\
                          "showPlot"          : self._showPlot         ,\
                          "savePlot"          : self._savePlot         ,\
                          "saveFolder"        : self._saveFolder       ,\

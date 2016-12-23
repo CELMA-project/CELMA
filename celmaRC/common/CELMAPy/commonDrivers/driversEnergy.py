@@ -58,7 +58,7 @@ class DriversEnergy(StatsAndSignalsDrivers):
         energyPlotter = PlotEnergy(\
                 self._paths                                ,\
                 self._energy                               ,\
-                convertToPhysical = self._convertToPhysical,\
+                convertToPhysical = self.convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
                 extension         = self._extension        ,\

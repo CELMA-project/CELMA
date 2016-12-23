@@ -71,7 +71,7 @@ class DriverTimeTrace(CollectAndCalcPointsSuperClass):
                 self._xInd                                 ,\
                 self._yInd                                 ,\
                 self._zInd                                 ,\
-                convertToPhysical = self._convertToPhysical,\
+                convertToPhysical = self.convertToPhysical,\
                 mode              = self._mode             ,\
                 tSlice            = self._tSlice           ,\
                 )
@@ -89,7 +89,7 @@ class DriverTimeTrace(CollectAndCalcPointsSuperClass):
         timeTracePlotter = PlotTimeTrace(\
                 self._paths                                ,\
                 self._timeTrace                            ,\
-                convertToPhysical = self._convertToPhysical,\
+                convertToPhysical = self.convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
                 extension         = self._extension        ,\
