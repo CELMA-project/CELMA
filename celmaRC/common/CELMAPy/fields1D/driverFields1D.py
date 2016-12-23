@@ -13,7 +13,6 @@ import os
 
 #{{{driver1DFieldSingle
 def driver1DFieldSingle(collectPaths     ,\
-                        savePath         ,\
                         fieldPlotType    ,\
                         convertToPhysical,\
                         xSlice           ,\
@@ -22,10 +21,7 @@ def driver1DFieldSingle(collectPaths     ,\
                         tSlice           ,\
                         mode             ,\
                         hyperIncluded    ,\
-                        xguards  = False ,\
-                        yguards  = False ,\
-                        showPlot = False ,\
-                        savePlot = True  ,\
+                        plotSuperKwargs  ,\
                         ):
     #{{{doctring
     """
@@ -36,8 +32,6 @@ def driver1DFieldSingle(collectPaths     ,\
     collectPaths : tuple
         Paths to collect from.
         The corresponind 't_array' of the paths must be in ascending order.
-    savePath : str
-        Save destination
     fieldPlotType : str
         What predefined fieldPlotType to plot.
         See getCollectFieldsAndPlotOrder for details.
@@ -58,14 +52,6 @@ def driver1DFieldSingle(collectPaths     ,\
         * "parallel"  - Parallel profiles will be used.
     hyperIncluded : bool
         If hyper viscosities are used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
-    savePlot : bool
-        Whether or no the plot should be saved.
     """
     #}}}
 
@@ -113,13 +99,10 @@ def driver1DFieldSingle(collectPaths     ,\
                                           dict1D["n"],\
                                           not(ccf1D.convertToPhysical))})
 
-    p1D = PlotClass(collectPaths           ,\
-                    savePath               ,\
-                    ccf1D.convertToPhysical,\
-                    show = showPlot        ,\
-                    save = savePlot)
+    p1D = PlotClass(ccf1D.uc        ,\
+                    **plotSuperKwargs)
 
-    p1D.setData(dict1D, fieldPlotType, savePath, plotOrder=plotOrder)
+    p1D.setData(dict1D, fieldPlotType, plotOrder=plotOrder)
     p1D.plotAndSaveProfile()
 #}}}
 
@@ -245,24 +228,28 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
     #}}}
 
     #{{{constructor
-    def __init__(self                   ,\
-                 *args                  ,\
-                 timeStampFolder = True ,\
-                 boussinesq      = False,\
-                 hyperIncluded   = False,\
+    def __init__(self                       ,\
+                 dmp_folders                ,\
+                 plotSuperKwargs            ,\
+                 guardSlicesAndIndicesKwargs,\
+                 timeStampFolder = True     ,\
+                 boussinesq      = False    ,\
+                 hyperIncluded   = False    ,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
             * Calls the parent class
             * Updates the fieldPlotTypes
-            * Updates the savePath and makes the folder
             * Sets the member data
+            * Updates the plotSuperKwargs
 
         Parameters
         ----------
-        *args : str
-            See parent class for details.
+        dmp_folders : tuple
+            Tuple of the dmp_folder (output from bout_runners).
+        plotSuperKwargs : dict
+            Keyword arguments for the plot super class.
         timeStampFolder : bool
             Whether or not to timestamp the folder
         boussinesq : bool
@@ -275,7 +262,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         #}}}
 
         # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
+        super().__init__(dmp_folders, **kwargs)
 
         # Update fieldPlotTypes
         if not(boussinesq):
@@ -291,20 +278,16 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         Driver1DFields._fieldPlotTypes =\
                 tuple(set(Driver1DFields._fieldPlotTypes))
 
-        # Update the savePath
-        firstPathPart = os.path.dirname(self._savePath)
-        if timeStampFolder:
-            timePath = os.path.basename(self._savePath)
-        else:
-            timePath = ""
-        self._savePath = os.path.join(firstPathPart, "field1D", timePath)
-
-        # Make dir if not exists
-        if not os.path.exists(self._savePath):
-            os.makedirs(self._savePath)
-
         # Set member data
         self._hyperIncluded = hyperIncluded
+
+        # Update the plotSuperKwargs dict
+        plotSuperKwargs.update({"plotType":"field1D"})
+        plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        self._plotSuperKwargs = plotSuperKwargs
+
+        # Set the guards, slices and indices
+        self.setGuardSlicesAndIndices(**guardSlicesAndIndicesKwargs)
     #}}}
 
     #{{{driver1DFieldsAll
@@ -349,21 +332,21 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         argTemplate =  [\
-                        self._collectPaths     ,\
-                        self._savePath         ,\
+                        self._collectPaths    ,\
                         self.convertToPhysical,\
-                        self._xInd             ,\
-                        self._ySlice           ,\
-                        self._zInd             ,\
-                        self._tSlice           ,\
-                        "parallel"             ,\
-                        self._hyperIncluded    ,\
+                        self._xInd            ,\
+                        self._ySlice          ,\
+                        self._zInd            ,\
+                        self._tSlice          ,\
+                        "parallel"            ,\
+                        self._hyperIncluded   ,\
+                        self._plotSuperKwargs ,\
                        ]
         if self._useSubProcess:
             processes = {}
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()
-                args.insert(2, fieldPlotType)
+                args.insert(1, fieldPlotType)
                 processes[fieldPlotType] =\
                     Process(target = driver1DFieldSingle,\
                             args = args                 ,\
@@ -374,7 +357,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         else:
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()
-                args.insert(2, fieldPlotType)
+                args.insert(1, fieldPlotType)
                 driver1DFieldSingle(*args)
     #}}}
 
@@ -389,21 +372,21 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         argTemplate =  [
-                        self._collectPaths     ,\
-                        self._savePath         ,\
+                        self._collectPaths    ,\
                         self.convertToPhysical,\
-                        self._xSlice           ,\
-                        self._yInd             ,\
-                        self._zInd             ,\
-                        self._tSlice           ,\
-                        "radial"               ,\
-                        self._hyperIncluded    ,\
+                        self._xSlice          ,\
+                        self._yInd            ,\
+                        self._zInd            ,\
+                        self._tSlice          ,\
+                        "radial"              ,\
+                        self._hyperIncluded   ,\
+                        self._plotSuperKwargs ,\
                        ]
         if self._useSubProcess:
             processes = {}
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()
-                args.insert(2, fieldPlotType)
+                args.insert(1, fieldPlotType)
                 processes[fieldPlotType] =\
                     Process(target = driver1DFieldSingle,\
                             args = args                 ,\
@@ -414,7 +397,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         else:
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()
-                args.insert(2, fieldPlotType)
+                args.insert(1, fieldPlotType)
                 driver1DFieldSingle(*args)
     #}}}
 #}}}
