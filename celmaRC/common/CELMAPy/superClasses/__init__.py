@@ -11,4 +11,3 @@ from .driverPostProcessingSuperClass import DriverPostProcessingSuperClass
 from .plotAnimSuperClasses import (PlotAnimSuperClass,\
                                    PlotAnim1DSuperClass,\
                                    PlotAnim2DSuperClass)
-from .plotsSuperClass import PlotsSuperClass

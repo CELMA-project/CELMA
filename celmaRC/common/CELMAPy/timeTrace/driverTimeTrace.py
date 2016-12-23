@@ -4,32 +4,36 @@
 Contains drivers for the time traces
 """
 
-from ..commonDrivers import CommonPostProcessingDriver
-from ..superClasses import PointsSuperClass
+from ..superClasses import CollectAndCalcPointsSuperClass
+from .collectAndCalcTimeTrace import collectAndCalcTimeTrace
 from .plotTimeTrace import PlotTimeTrace
-from .calcTimeTrace import calcTimeTrace
+import os
 
 #{{{DriverTimeTrace
-class DriverTimeTrace(PointsSuperClass, CommonPostProcessingDriver):
+class DriverTimeTrace(CollectAndCalcPointsSuperClass):
     """
     Class which handles the time trace data.
     """
 
     #{{{Constructor
-    def __init__(self,\
-                 *args,\
+    def __init__(self                  ,\
+                 *args                 ,\
+                 timeStampFolder = True,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
 
-        1. Calls the parent constructor
-        2. Sets the member data
+        * Calls the parent constructor
+        * Sets the member data
+        * Updates the savePath and makes the folder
 
         Parameters
         ----------
         *args : positional arguments
             See the parent constructor for details.
+        timeStampFolder : bool
+            Whether or not to timestamp the folder
         **kwargs : keyword arguments
             See the parent constructor for details.
         """
@@ -43,21 +47,33 @@ class DriverTimeTrace(PointsSuperClass, CommonPostProcessingDriver):
 
         # Placeholder for the timeTrace
         self._timeTrace = None
+
+        # Update the savePath
+        firstPathPart = os.path.dirname(self._savePath)
+        if timeStampFolder:
+            timePath = os.path.basename(self._savePath)
+        else:
+            timePath = ""
+        self._savePath = os.path.join(firstPathPart, "timeTraces", timePath)
+
+        # Make dir if not exists
+        if not os.path.exists(self._savePath):
+            os.makedirs(self._savePath)
     #}}}
 
     #{{{getTimeTraces
     def getTimeTraces(self):
         """Obtain the timeTrace"""
         # Create the probes
-        self._timeTrace = calcTimeTrace(\
-                self._paths,\
-                self._varName,\
-                self._xInd,\
-                self._yInd,\
-                self._zInd,\
+        self._timeTrace = collectAndCalcTimeTrace(\
+                self._collectPaths                         ,\
+                self._varName                              ,\
+                self._xInd                                 ,\
+                self._yInd                                 ,\
+                self._zInd                                 ,\
                 convertToPhysical = self._convertToPhysical,\
-                mode              = self._mode,\
-                tSlice            = self._tSlice,\
+                mode              = self._mode             ,\
+                tSlice            = self._tSlice           ,\
                 )
     #}}}
 

@@ -72,6 +72,7 @@ class DriverPostProcessingSuperClass(object):
             self._collectPaths  = tuple(dmp_folders)
         else:
             self._collectPaths = collectPaths
+
         self._convertToPhysical = convertToPhysical
         self._showPlot          = showPlot
         self._savePlot          = savePlot
