@@ -129,7 +129,7 @@ def driverTest():
                    convertToPhysical = convertToPhysical,\
                    showPlot          = False            ,\
                    savePlot          = True             ,\
-                   saveFolder        = None             ,\
+                   savePath          = None             ,\
                    savePathFunc      = savePathFunc     ,\
                    useSubProcess     = useSubProcess    ,\
                    extension         = "png"            ,\

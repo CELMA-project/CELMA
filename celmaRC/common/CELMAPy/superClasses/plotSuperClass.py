@@ -65,11 +65,11 @@ class PlotSuperClass(object):
         #}}}
 
         # Set the member data
-        self._showPlot          = showPlot
-        self._savePlot          = savePlot
-        self._savePath        = savePath
-        self._useSubProcess     = useSubProcess
-        self._extension         = extension
+        self._showPlot      = showPlot
+        self._savePlot      = savePlot
+        self._savePath      = savePath
+        self._useSubProcess = useSubProcess
+        self._extension     = extension
 
         if dmp_folders is not None:
             # Get the firs dmp_folder (will be used to create the savepath)
