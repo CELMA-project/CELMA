@@ -113,7 +113,7 @@ def driverTest():
     yInd = 16
     zInd = 0
     useSubProcess = True
-    saveFolderFunc = "scanWTagSaveFunc"
+    savePathFunc = "scanWTagSaveFunc"
     hyperIncluded = False
 
     print("\n\nTesting 1D driver")
@@ -130,7 +130,7 @@ def driverTest():
                    showPlot          = False            ,\
                    savePlot          = True             ,\
                    saveFolder        = None             ,\
-                   saveFolderFunc    = saveFolderFunc   ,\
+                   savePathFunc      = savePathFunc     ,\
                    useSubProcess     = useSubProcess    ,\
                    extension         = "png"            ,\
                    # scanWTagSaveFunc

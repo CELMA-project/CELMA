@@ -27,7 +27,7 @@ def driverTest():
 # FIXME: Try n
     varName           = "lnN"
     convertToPhysical = True
-    saveFolderFunc    = "scanWTagSaveFunc"
+    savePathFunc    = "scanWTagSaveFunc"
     useSubProcess     = False
     theRunName        = "test"
     mode              = "fluct"
@@ -49,7 +49,7 @@ def driverTest():
                 showPlot          = False            ,\
                 savePlot          = True             ,\
                 saveFolder        = None             ,\
-                saveFolderFunc    = saveFolderFunc   ,\
+                savePathFunc      = savePathFunc     ,\
                 useSubProcess     = useSubProcess    ,\
                 extension         = "png"            ,\
                 # scanWTagSaveFunc
