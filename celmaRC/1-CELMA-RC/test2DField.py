@@ -234,7 +234,6 @@ def driverTest():
         )
     theRunName = "test"
 
-    savePath          = "."
     varName           = "vortD"
     convertToPhysical = True
     xSlice            = None

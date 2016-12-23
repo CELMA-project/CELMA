@@ -4,16 +4,16 @@
 Contains the calcTimeTrace calculation
 """
 
-from ..calcHelpers import (polAvg,\
-                           collectPoint,\
-                           collectTime,\
-                           collectPoloidalProfile,\
-                           DimensionsHelper)
+from ..collectAndCalcHelpers import (polAvg,\
+                                     collectPoint,\
+                                     collectTime,\
+                                     collectPoloidalProfile,\
+                                     DimensionsHelper)
 from ..unitsConverter import UnitsConverter
 
 
-#{{{calcTimeTrace
-def calcTimeTrace(*args, **kwargs):
+#{{{collectAndCalcTimeTrace
+def collectAndCalcTimeTrace(*args, **kwargs):
     #{{{docstring
     """
     Wrapper function for calcTimeTrace4d.
@@ -30,7 +30,7 @@ def calcTimeTrace(*args, **kwargs):
     """
     #}}}
 
-    timeTraces = calcTimeTrace4d(*args, **kwargs)
+    timeTraces = collectAndCalcTimeTrace4d(*args, **kwargs)
 
     varName = args[1]
     mode    = kwargs["mode"]
@@ -47,25 +47,25 @@ def calcTimeTrace(*args, **kwargs):
     return timeTraces
 #}}}
 
-#{{{calcTimeTrace4d
-def calcTimeTrace4d(paths                      ,\
-                    varName                    ,\
-                    xInd                       ,\
-                    yInd                       ,\
-                    zInd                       ,\
-                    convertToPhysical = True   ,\
-                    mode              = "fluct",\
-                    tSlice            = None   ,\
-                    uc                = None   ,\
-                    dh                = None   ,\
-                    ):
+#{{{collectAndCalcTimeTrace4d
+def collectAndCalcTimeTrace4d(collectPaths               ,\
+                              varName                    ,\
+                              xInd                       ,\
+                              yInd                       ,\
+                              zInd                       ,\
+                              convertToPhysical = True   ,\
+                              mode              = "fluct",\
+                              tSlice            = None   ,\
+                              uc                = None   ,\
+                              dh                = None   ,\
+                              ):
     #{{{docstring
     """
     Function which calculates the time traces, and gives a 4d output
 
     Parameters
     ----------
-    paths : tuple of strings
+    collectPaths : tuple of strings
         The paths to collect from
     varName : str
         Variable to collect
@@ -105,13 +105,13 @@ def calcTimeTrace4d(paths                      ,\
 
     if uc is None:
         # Create the units convertor object
-        uc = UnitsConverter(paths[0], convertToPhysical)
+        uc = UnitsConverter(collectPaths[0], convertToPhysical)
     # Toggle convertToPhysical in case of errors
     convertToPhysical = uc.convertToPhysical
 
     if dh is None:
         # Create the dimensions helper object
-        dh = DimensionsHelper(paths[0], uc)
+        dh = DimensionsHelper(collectPaths[0], uc)
 
     timeTraces = {}
     tCounter = 0
@@ -134,12 +134,12 @@ def calcTimeTrace4d(paths                      ,\
 
         tCounter += 1
 
-        time = collectTime(paths, tInd=t)
+        time = collectTime(collectPaths, tInd=t)
 
         if mode == "normal":
-            var = collectPoint(paths, varName, x, y, z, tInd=t)
+            var = collectPoint(collectPaths, varName, x, y, z, tInd=t)
         elif mode == "fluct":
-            var = collectPoloidalProfile(paths, varName, x, y, tInd=t)
+            var = collectPoloidalProfile(collectPaths, varName, x, y, tInd=t)
             var = (var - polAvg(var))
             timeTraces[key]["zInd"] = z
         else:

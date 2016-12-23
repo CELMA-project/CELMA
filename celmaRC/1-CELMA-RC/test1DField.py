@@ -103,7 +103,6 @@ def driverTest():
         )
     theRunName = "test"
 
-    savePath = "."
     fieldPlotType = "mainFields"
     convertToPhysical = True
     xSlice = None
