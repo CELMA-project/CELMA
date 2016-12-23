@@ -246,7 +246,7 @@ def driverTest():
     fluct             = False
     varyMaxMin        = False
     useSubProcess     = False
-    saveFolderFunc    = "scanWTagSaveFunc"
+    savePathFunc      = "scanWTagSaveFunc"
 
     steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
@@ -265,7 +265,7 @@ def driverTest():
                    showPlot          = False            ,\
                    savePlot          = True             ,\
                    saveFolder        = None             ,\
-                   saveFolderFunc    = saveFolderFunc   ,\
+                   savePathFunc    = savePathFunc       ,\
                    useSubProcess     = useSubProcess    ,\
                    extension         = "png"            ,\
                    # scanWTagSaveFunc

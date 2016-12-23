@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Clollection of saveFolderFuncs
+Clollection of savePathFuncs
 """
 
 #{{{scanWTagSaveFunc

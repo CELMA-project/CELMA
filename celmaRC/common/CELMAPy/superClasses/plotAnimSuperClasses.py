@@ -4,13 +4,12 @@
 Contains super classes for animations plots
 """
 
-from ..plotHelpers import (PlotHelper,\
-                           plotNumberFormatter,\
+from ..plotHelpers import (plotNumberFormatter,\
                            seqCMap,\
                            seqCMap3,\
                            divCMap)
-from ..unitsConverter import UnitsConverter
 from ..plotHelpers import getMaxMinAnimation
+from .plotSuperClass import PlotSuperClass
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
 import numpy as np
@@ -27,9 +26,9 @@ class PlotAnimSuperClass(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self   ,\
-                 *args  ,\
-                 *kwargs):
+    def __init__(self    ,\
+                 *args   ,\
+                 **kwargs):
         #{{{docstring
         """
         Constructor for PlotAnimSuperClass.

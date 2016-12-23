@@ -5,4 +5,4 @@ Init-file for driverHelpers
 """
 
 from .convertToCurrentScanParameters import convertToCurrentScanParameters
-from .saveFolderFuncs import scanWTagSaveFunc
+from .savePathFuncs import scanWTagSaveFunc
