@@ -89,7 +89,7 @@ class DriversProbes(StatsAndSignalsDrivers):
                          paths               = self._paths            ,\
                          yInd                = self._yInd             ,\
                          nProbes             = self._nProbes          ,\
-                         convertToPhysical   = self._convertToPhysical,\
+                         convertToPhysical   = self.convertToPhysical,\
                          steadyStatePath     = self._steadyStatePath  ,\
                          tIndSaturatedTurb   = self._tIndSaturatedTurb,\
                          radialProbesIndices = None                   ,\

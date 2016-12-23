@@ -54,7 +54,7 @@ class DriverPDF(PointsSuperClass, CommonPostProcessingDriver):
                             self._xInd,\
                             self._yInd,\
                             self._zInd,\
-                            converToPhysical = self._convertToPhysical,\
+                            converToPhysical = self.convertToPhysical,\
                             mode             = self._mode,\
                             tSlice           = self._tSlice,\
                             )
@@ -72,7 +72,7 @@ class DriverPDF(PointsSuperClass, CommonPostProcessingDriver):
         PDFPlotter = PlotPDF(\
                 self._paths                                ,\
                 self._PDF                                  ,\
-                convertToPhysical = self._convertToPhysical,\
+                convertToPhysical = self.convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
                 extension         = self._extension        ,\

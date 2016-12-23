@@ -40,7 +40,7 @@ class DimensionsHelper(object):
         self._unitsConverter    = unitsConverter
         self._xguards           = xguards
         self._yguards           = yguards
-        self._convertToPhysical = unitsConverter.convertToPhysical
+        self.convertToPhysical = unitsConverter.convertToPhysical
 
         # Get the coordinates
         self._getCoordinates()
@@ -154,7 +154,7 @@ class DimensionsHelper(object):
         """
         #}}}
 
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             self.rho = self._unitsConverter.physicalConversion(self.rho, "rho")
             self.dx  = self._unitsConverter.physicalConversion(self.dx , "rho")
             self.z   = self._unitsConverter.physicalConversion(self.z  , "z"  )

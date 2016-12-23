@@ -131,7 +131,7 @@ class PlotHelper(object):
         #}}}
 
         # Set the member data
-        self._convertToPhysical = convertToPhysical
+        self.convertToPhysical = convertToPhysical
     #}}}
 
     #{{{makeDimensionStringsDicts
@@ -173,7 +173,7 @@ class PlotHelper(object):
         self.thetaTxtDict["constThetaTxt"] =\
                 r"$\theta=${0[value]}$^{{\circ}}$"
         # Set label and title templates
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]} $[{0[units]}]$".\
                         format(self.rhoTxtDict)
             self.rhoTxtDict["constRhoTxt"] =\
