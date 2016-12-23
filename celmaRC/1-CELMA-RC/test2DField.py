@@ -264,8 +264,8 @@ def driverTest():
                    convertToPhysical = convertToPhysical,\
                    showPlot          = False            ,\
                    savePlot          = True             ,\
-                   saveFolder        = None             ,\
-                   savePathFunc    = savePathFunc       ,\
+                   savePath          = None             ,\
+                   savePathFunc      = savePathFunc     ,\
                    useSubProcess     = useSubProcess    ,\
                    extension         = "png"            ,\
                    # scanWTagSaveFunc
@@ -282,6 +282,7 @@ def driverTest():
                    zInd    = zInd  ,\
                   )
 
+    import pdb; pdb.set_trace()
     d2DF.driver2DFieldsPerp()
     d2DF.driver2DFieldsPar()
     d2DF.driver2DFieldsPol()
