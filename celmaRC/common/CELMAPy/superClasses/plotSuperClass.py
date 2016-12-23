@@ -19,19 +19,27 @@ class PlotSuperClass(object):
     * Sets the save path.
     """
 
+    #{{{Static member
+    _time = None
+    #}}}
+
     #{{{Constructor
-    def __init__(self                ,\
-                 uc                  ,\
-                 showPlot     = False,\
-                 savePlot     = True ,\
-                 savePath     = None ,\
-                 savePathFunc = None ,\
-                 extension    = None ,\
-                 dmp_folders  = None ,\
+    def __init__(self                   ,\
+                 uc                     ,\
+                 showPlot        = False,\
+                 savePlot        = True ,\
+                 savePath        = None ,\
+                 savePathFunc    = None ,\
+                 extension       = None ,\
+                 dmp_folders     = None ,\
+                 timeStampFolder = True ,\
+                 plotType        = ""   ,\
                  **kwargs):
         #{{{docstring
         """
-        This constructor sets the memberdata, and sets the savePath.
+        This constructor sets the memberdata, and sets the savePath and
+        creates the folders.
+
         Parameters
         ----------
         uc : UnitsConverter
@@ -53,6 +61,11 @@ class PlotSuperClass(object):
             the child classes.
         dmp_folders: [None|tuple]
             Needed if savePaths should be made automatically
+        plotType : str
+            Name of folder containing the plot type.
+            No folder will be made if empty.
+        timeStampFolder : bool
+            Whether or not to timestamp the folder
         **kwargs : keyword arguments
             Additional keyword arguments given as input to savePathFunc.
         """
@@ -83,8 +96,11 @@ class PlotSuperClass(object):
                 if savePath is None:
                     savePath = "-".join(dmp_folder.split("/")[::-1])
 
-            # Get the timefolder
-            self._timeFolder = self._getTime()
+            if timeStampFolder:
+                # Get the timefolder
+                self._timeFolder = self._getTime()
+            else:
+                self._timeFolder = ""
 
             # Create the savepath (based on the first dmp_folder string)
             visualizationType =\
@@ -92,6 +108,7 @@ class PlotSuperClass(object):
             saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
                         "visualization{}".format(visualizationType),\
                         savePath,\
+                        plotType,\
                         self._timeFolder)
 
             self._savePath = ""
@@ -105,6 +122,10 @@ class PlotSuperClass(object):
 
             self._savePath = savePath
 
+        # Make dir if not exists
+        if not os.path.exists(self._savePath):
+            os.makedirs(self._savePath)
+
         # Make the plot helper
         self._ph = PlotHelper(uc.convertToPhysical)
         self._ph.makeDimensionStringsDicts(uc)
@@ -112,6 +133,7 @@ class PlotSuperClass(object):
 
     #{{{_getTime
     def _getTime(self, depth = "second"):
+        #{{{docstring
         """
         Gets the current time, and returns it as a string
         Parameters
@@ -123,16 +145,21 @@ class PlotSuperClass(object):
         nowStr : str
             The string containing the current time
         """
-        now = datetime.datetime.now()
-        nowStr = "{}-{:02d}-{:02d}".format(now.year, now.month, now.day)
+        #}}}
+        if PlotSuperClass._time is None:
+            now = datetime.datetime.now()
+            nowStr = "{}-{:02d}-{:02d}".format(now.year, now.month, now.day)
 
-        if depth == "hour" or depth == "minute" or depth == "second":
-            nowStr += "-{:02d}".format(now.hour)
-        if depth == "minute" or depth == "second":
-            nowStr += "-{:02d}".format(now.minute)
-        if depth == "second":
-            nowStr += "-{:02d}".format(now.second)
+            if depth == "hour" or depth == "minute" or depth == "second":
+                nowStr += "-{:02d}".format(now.hour)
+            if depth == "minute" or depth == "second":
+                nowStr += "-{:02d}".format(now.minute)
+            if depth == "second":
+                nowStr += "-{:02d}".format(now.second)
 
-        return nowStr
+            PlotSuperClass._time = nowStr
+            return nowStr
+        else:
+            return PlotSuperClass._time
     #}}}
 #}}}
