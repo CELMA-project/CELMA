@@ -7,14 +7,15 @@ measurements
 
 from ..collectAndCalcHelpers import (getUniformSpacing,\
                                      getEvenlySpacedIndices,\
-                                     findLargestRadialGrad)
+                                     findLargestRadialGradN)
+from .driverPostProcessingSuperClass import DriverPostProcessingSuperClass
 from boututils.datafile import DataFile
 from boutdata import collect
 import numpy as np
 import os
 
 #{{{CollectAndCalcPointsSuperClass
-class CollectAndCalcPointsSuperClass(object):
+class CollectAndCalcPointsSuperClass(DriverPostProcessingSuperClass):
     """
     Provides a common constructor interface for driver classes which are
     obtaining temporal information in one point.
@@ -22,38 +23,39 @@ class CollectAndCalcPointsSuperClass(object):
 
     #{{{Constructor
     def __init__(self                     ,\
-                 paths                    ,\
+                 *args                    ,\
                  mode            = "fluct",\
                  nPoints         = None   ,\
-                 steadyStatePath = None   ,\
-                 ):
+                 **kwargs                 ):
         #{{{docstring
         """
         This constructor:
 
-        Set up and stores the xInd, yInd, zInd, tInd and mode
+        * Calls the parent constructor
+        * Sets the member data
 
         Parameters
         ----------
-        paths  : tuple of strings
-            The paths to collect from
+        *args : positional arguments
+            See the parent constructor for details.
         mode : str
             Mode to use when collecting the points,
         nPoints : int
             Size of the sequence. Ignored if xInd, yInd and zInd are all
             sequences.
             See xInd for details.
-        steadyStatePath: str
-            Path to find the gradient in "n"
+        **kwargs : keyword arguments
+            See the parent constructor for details.
         """
         #}}}
 
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
         # Set member data
-        self._paths           = paths
-        self._varName         = varName
-        self._mode            = mode
-        self._steadyStatePath = steadyStatePath
-        self._notCalled       = ["setInd", "setVarName"]
+        self._mode      = mode
+        self._nPoints   = nPoints
+        self._notCalled = ["setInd", "setVarName"]
     #}}}
 
     #{{{setVarName
@@ -72,11 +74,12 @@ class CollectAndCalcPointsSuperClass(object):
         self._varName = varName
     #}}}
 
-    #{{{setInd
-    def setInd(self, xInd, yInd, zInd, equallySpace = "x", tSlice=None):
+    #{{{setIndices
+    def setIndices(self, xInd, yInd, zInd, tSlice=None,\
+                   equallySpace = "x", steadyStatePath = None):
         #{{{docstring
         """
-        Sets the slices
+        Sets the indices
 
         Parameters
         ----------
@@ -85,11 +88,11 @@ class CollectAndCalcPointsSuperClass(object):
                 * If None: This constructor will use the index of the
                            largest gradient in "n" from the steady state
                            path. This value will be the center-index of
-                           nPoints with equidistant spacing
+                           self._nPoints with equidistant spacing
                 * If int: If yInd and zInd are given as sequences:
                           The same as None, but the center index will be
                           given by the input int.
-                          Else: The value will be copied nPoints times
+                          Else: The value will be copied self._nPoints times
                 * If sequence: All the indices are given
             In all cases, the resulting length of the tuple must match
             the other physical dimensions.
@@ -105,6 +108,8 @@ class CollectAndCalcPointsSuperClass(object):
             If given this is the  slice of t to use when collecting.
             The length of the sequence must match the other input
             dimensions.
+        steadyStatePath: str
+            Path to find the gradient in "n". Only used if xInd is None
         """
         #}}}
 
@@ -126,25 +131,28 @@ class CollectAndCalcPointsSuperClass(object):
 
         # Guard
         if (type(xInd) == int) or (type(yInd) == int) or (type(zInd) == int):
-            if type(nPoints) != int:
-                message="nPoints will be used, but is specified with a {} type"
-                raise ValueError(message.format(type(nPoints)))
+            if type(self._nPoints) != int:
+                message="self._nPoints will be used, but is specified with a {} type"
+                raise ValueError(message.format(type(self._nPoints)))
 
         if type(xInd) == int:
             if equallySpace == "x":
-                xInd = getEvenlySpacedIndices(paths[0], "x", xInd, nPoints)
+                xInd = getEvenlySpacedIndices(self._collectPaths[0],\
+                                              "x", xInd, self._nPoints)
             else:
-                xInd = (xInd,)*nPoints
+                xInd = (xInd,)*self._nPoints
         if type(yInd) == int:
             if equallySpace == "y":
-                yInd = getEvenlySpacedIndices(paths[0], "y", yInd, nPoints)
+                yInd = getEvenlySpacedIndices(self._collectPaths[0],\
+                                              "y", yInd, self._nPoints)
             else:
-                yInd = (yInd,)*nPoints
+                yInd = (yInd,)*self._nPoints
         if type(zInd) == int:
             if equallySpace == "z":
-                zInd = getEvenlySpacedIndices(paths[0], "z", zInd, nPoints)
+                zInd = getEvenlySpacedIndices(self._collectPaths[0],\
+                                              "z", zInd, self._nPoints)
             else:
-                zInd = (zInd,)*nPoints
+                zInd = (zInd,)*self._nPoints
 
         # Guard
         if (len(xInd) != len(yInd)) or\
@@ -154,14 +162,20 @@ class CollectAndCalcPointsSuperClass(object):
 
         if tSlice is not None:
             if type(tSlice) == int:
-                if type(nPoints) != int:
-                    message=("nPoints has the wrong type and is needed "
+                if type(self._nPoints) != int:
+                    message=("self._nPoints has the wrong type and is needed "
                              "for tSlice multiplication")
                 raise ValueError(message)
 
-                tSlice = (tSlice,)*nPoints
+                tSlice = (tSlice,)*self._nPoints
             else:
                 if len(xInd) != len(tSlice):
                     raise ValueError("Mismatch in dimension of tInd and xInd, yInd and zInd")
+
+        # Set the member data
+        self._xInd   = xInd
+        self._yInd   = yInd
+        self._zInd   = zInd
+        self._tSlice = tSlice
     #}}}
 #}}}
