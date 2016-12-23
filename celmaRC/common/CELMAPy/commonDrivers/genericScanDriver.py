@@ -359,7 +359,7 @@ class GenericScanDriver(object):
 
     #{{{setCommonPlotterOptions
     def setCommonPlotterOptions(self                                 ,\
-                               saveFolderFunc    = "scanWTagSaveFunc",\
+                               savePathFunc    = "scanWTagSaveFunc",\
                                convertToPhysical = False             ,\
                                showPlot          = False             ,\
                                savePlot          = True              ,\
@@ -372,7 +372,7 @@ class GenericScanDriver(object):
 
         Parameters
         ----------
-        saveFolderFunc : str
+        savePathFunc : str
            What svae folder function to use
         convertToPhysical : bool
             Whether or not to convert to physical units
@@ -391,7 +391,7 @@ class GenericScanDriver(object):
 
         self._commonPlotterOptions =\
                 {\
-                 "saveFolderFunc"   : saveFolderFunc   ,\
+                 "savePathFunc"   : savePathFunc   ,\
                  "convertToPhysical": convertToPhysical,\
                  "showPlot"         : showPlot         ,\
                  "savePlot"         : savePlot         ,\

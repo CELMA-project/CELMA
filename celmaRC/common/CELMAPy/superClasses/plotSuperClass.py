@@ -5,6 +5,7 @@ Contains the super class for the plotting
 """
 
 from ..driverHelpers import scanWTagSaveFunc
+from ..plotHelpers import PlotHelper
 import matplotlib.pyplot as plt
 import datetime
 import os
@@ -25,8 +26,8 @@ class PlotSuperClass(object):
                  convertToPhysical = False,\
                  showPlot          = False,\
                  savePlot          = True ,\
-                 saveFolder        = None ,\
-                 saveFolderFunc    = None ,\
+                 savePath          = None ,\
+                 savePathFunc      = None ,\
                  useSubProcess     = True ,\
                  extension         = "png",\
                  dmp_folders       = None ,\
@@ -42,9 +43,9 @@ class PlotSuperClass(object):
             If the plot should be displayed.
         savePlot : bool
             If plot should be saved.
-        saveFolder : str
+        savePath : str
             Name of the folder to save the plots in.
-        saveFolderFunc : str
+        savePathFunc : str
             Name of an implemented function which returns the name of
             the folder to save plots.
         useSubProcess : bool
@@ -59,14 +60,14 @@ class PlotSuperClass(object):
         dmp_folders: [None|tuple]
             Needed if savePaths should be made automatically
         **kwargs : keyword arguments
-            Additional keyword arguments given as input to saveFolderFunc.
+            Additional keyword arguments given as input to savePathFunc.
         """
         #}}}
 
         # Set the member data
         self._showPlot          = showPlot
         self._savePlot          = savePlot
-        self._saveFolder        = saveFolder
+        self._savePath        = savePath
         self._useSubProcess     = useSubProcess
         self._extension         = extension
 
@@ -74,20 +75,20 @@ class PlotSuperClass(object):
             # Get the firs dmp_folder (will be used to create the savepath)
             dmp_folder = dmp_folders[0]
 
-            # Set the saveFolder
-            if saveFolderFunc is not None:
+            # Set the savePath
+            if savePathFunc is not None:
                 # FIXME: Check if it is possible to change the API here.
                 #        Would be nice if could send in a function instead.
-                if saveFolderFunc == "scanWTagSaveFunc":
-                    saveFolder = scanWTagSaveFunc(dmp_folder, **kwargs)
+                if savePathFunc == "scanWTagSaveFunc":
+                    savePath = scanWTagSaveFunc(dmp_folder, **kwargs)
                 else:
-                    message  = "{0}Warning: saveFolderFunc '{1}' not found, "
+                    message  = "{0}Warning: savePathFunc '{1}' not found, "
                     message += "falling back to standard implementation{0}"
-                    print(message.format("\n"*3, saveFolderFunc))
-                    saveFolder = "-".join(dmp_folder.split("/")[::-1])
+                    print(message.format("\n"*3, savePathFunc))
+                    savePath = "-".join(dmp_folder.split("/")[::-1])
             else:
-                if saveFolder is None:
-                    saveFolder = "-".join(dmp_folder.split("/")[::-1])
+                if savePath is None:
+                    savePath = "-".join(dmp_folder.split("/")[::-1])
 
             # Get the timefolder
             self._timeFolder = self._getTime()
@@ -96,7 +97,7 @@ class PlotSuperClass(object):
             visualizationType = "Physical" if convertToPhysical else "Normalized"
             saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
                         "visualization{}".format(visualizationType),\
-                        saveFolder,\
+                        savePath,\
                         self._timeFolder)
 
             self._savePath = ""
