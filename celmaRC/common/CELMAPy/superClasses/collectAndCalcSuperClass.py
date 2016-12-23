@@ -10,9 +10,6 @@ from ..unitsConverter import UnitsConverter
 class CollectAndCalcSuperClass(object):
     """
     The parent collect and calc class
-
-    * Sets common member data.
-    * Sets the save path.
     """
 
     #{{{Constructor
@@ -26,7 +23,7 @@ class CollectAndCalcSuperClass(object):
         """
         This constructor
 
-        * Sets the member data
+        * Sets the dmp_folders, collectPaths and convertToPhysical
         * Creates a UnitsConverter if none is given
 
         Parameters

@@ -92,7 +92,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         # Set the var label
         pltVarName = self._ph.getVarPltName(self._varName)
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self._uc.conversionDict[self._varName])
+            format(pltVarName, **self.uc.conversionDict[self._varName])
     #}}}
 
     #{{{plotAndSavePerpPlane
@@ -293,7 +293,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         # Set the var label
         pltVarName = self._ph.getVarPltName(self._varName)
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self._uc.conversionDict[self._varName])
+            format(pltVarName, **self.uc.conversionDict[self._varName])
     #}}}
 
     #{{{plotAndSaveParPlane
@@ -492,7 +492,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         # Set the var label
         pltVarName = self._ph.getVarPltName(self._varName)
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self._uc.conversionDict[self._varName])
+            format(pltVarName, **self.uc.conversionDict[self._varName])
     #}}}
 
     #{{{plotAndSavePolPlane
