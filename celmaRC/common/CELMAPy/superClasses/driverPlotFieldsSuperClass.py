@@ -4,10 +4,10 @@
 Contains the super class driver for fields 1D and fields 2D
 """
 
-from .driverPostProcessingSuperClass import DriverPostProcessingSuperClass
+from .collectAndCalcSuperClass import CollectAndCalcSuperClass
 
 #{{{DriverPlotFieldsSuperClass
-class DriverPlotFieldsSuperClass(DriverPostProcessingSuperClass):
+class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass):
     """
     The parent driver of 1D and 2D field plotting
     """
