@@ -275,57 +275,48 @@ def driverTest():
     xInd   = 30
     yInd   = 16
     zInd   = 16
-
-# FIXME: Unfinished
-    driverPlotFieldsKwargs = {\
-                              "xguards" : False ,\
-                              "yguards" : False ,\
-                              "xSlice"  : xSlice,\
-                              "ySlice"  : ySlice,\
-                              "zSlice"  : zSlice,\
-                              "tSlice"  : tSlice,\
-                              "xInd"    : xInd  ,\
-                              "yInd"    : yInd  ,\
-                              "zInd"    : zInd  ,\
-                             }
+    guardSlicesAndIndicesKwargs = {\
+                                   "xguards" : False ,\
+                                   "yguards" : False ,\
+                                   "xSlice"  : xSlice,\
+                                   "ySlice"  : ySlice,\
+                                   "zSlice"  : zSlice,\
+                                   "tSlice"  : tSlice,\
+                                   "xInd"    : xInd  ,\
+                                   "yInd"    : yInd  ,\
+                                   "zInd"    : zInd  ,\
+                                  }
 
     # Plot super kwargs
     theRunName   = "test"
     savePathFunc = "scanWTagSaveFunc"
-
     plotSuperKwargs = {\
-                        "showPlot"     : False,\
-                        "savePlot"     : True,\
-                        "savePath"     : None,\
-                        "savePathFunc" : savePathFunc,\
-                        "extension"    : None,\
-                        "dmp_folders"  : dmp_folders,\
-                        "theRunName"   : theRunName,\
+                        "showPlot"        : False       ,\
+                        "savePlot"        : True        ,\
+                        "savePath"        : None        ,\
+                        "savePathFunc"    : savePathFunc,\
+                        "extension"       : None        ,\
+                        "dmp_folders"     : dmp_folders ,\
+                        "timeStampFolder" : True        ,\
+                        "theRunName"      : theRunName  ,\
                        }
 
     steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
     print("\n\nTesting driver 2D")
     d2DF = Driver2DFields(
-                   # DriverPostProcessingSuperClass
-                   dmp_folders                 ,\
                    # Driver2DFields
-                   varName         = varName   ,\
-                   fluct           = fluct     ,\
-                   varyMaxMin      = varyMaxMin,\
-                   timeStampFolder = True      ,\
-                   # DriverPostProcessingSuperClass
-                   collectPaths      = collectPaths     ,\
+                   dmp_folders                   ,\
+                   plotSuperKwargs               ,\
+                   guardSlicesAndIndicesKwargs   ,\
+                   varName         = varName     ,\
+                   fluct           = fluct       ,\
+                   varyMaxMin      = varyMaxMin  ,\
+                   # DriverPlotFieldsSuperClass
                    convertToPhysical = convertToPhysical,\
-                   savePathFunc      = savePathFunc     ,\
-                   useSubProcess     = useSubProcess    ,\
-                   extension         = "png"            ,\
-                   # scanWTagSaveFunc
-                   theRunName = theRunName,\
-                   # DriverFieldsSuperClass
-                   driverPlotFieldsKwargs = driverPlotFieldsKwargs,\
-                   # PlotSuperClass
-                   plotKwargs = plotKwargs,\
+                   # DriverSuperClass
+                   collectPaths  = collectPaths ,\
+                   useSubProcess = useSubProcess,\
                   )
 
     d2DF.driver2DFieldsPerp()
