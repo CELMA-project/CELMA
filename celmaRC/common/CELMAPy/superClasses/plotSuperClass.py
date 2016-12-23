@@ -20,17 +20,14 @@ class PlotSuperClass(object):
     """
 
     #{{{Constructor
-    def __init__(self                     ,\
-                 uc                       ,\
-                 collectPaths      = None ,\
-                 convertToPhysical = False,\
-                 showPlot          = False,\
-                 savePlot          = True ,\
-                 savePath          = None ,\
-                 savePathFunc      = None ,\
-                 useSubProcess     = True ,\
-                 extension         = "png",\
-                 dmp_folders       = None ,\
+    def __init__(self                ,\
+                 uc                  ,\
+                 showPlot     = False,\
+                 savePlot     = True ,\
+                 savePath     = None ,\
+                 savePathFunc = None ,\
+                 extension    = None ,\
+                 dmp_folders  = None ,\
                  **kwargs):
         #{{{docstring
         """
@@ -48,11 +45,8 @@ class PlotSuperClass(object):
         savePathFunc : str
             Name of an implemented function which returns the name of
             the folder to save plots.
-        useSubProcess : bool
-            Whether each plot will be made by a new sub process, or the
-            plots should be made in series.
-        extension : str
-            The extension to use when saving non-animated plots
+        extension : [None|str]
+            Overrides default extension if set. Excludes the "."
         scanParameters : [None|sequence (not string)]
             Sequence of parameters changed in the scan. If this is not None,
             calls to convertToCurrentScanParameters will be triggered in
@@ -63,13 +57,12 @@ class PlotSuperClass(object):
             Additional keyword arguments given as input to savePathFunc.
         """
         #}}}
-
         # Set the member data
-        self._showPlot      = showPlot
-        self._savePlot      = savePlot
-        self._savePath      = savePath
-        self._useSubProcess = useSubProcess
-        self._extension     = extension
+        self._showPlot  = showPlot
+        self._savePlot  = savePlot
+        self._savePath  = savePath
+        self._extension = extension
+        self.uc         = uc
 
         if dmp_folders is not None:
             # Get the firs dmp_folder (will be used to create the savepath)
@@ -94,7 +87,8 @@ class PlotSuperClass(object):
             self._timeFolder = self._getTime()
 
             # Create the savepath (based on the first dmp_folder string)
-            visualizationType = "Physical" if convertToPhysical else "Normalized"
+            visualizationType =\
+                    "Physical" if uc.convertToPhysical else "Normalized"
             saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
                         "visualization{}".format(visualizationType),\
                         savePath,\
@@ -110,17 +104,6 @@ class PlotSuperClass(object):
                 raise ValueError(message)
 
             self._savePath = savePath
-
-        if self._useSubProcess:
-            #{{{ The multiprocess currently only works with the Agg backend
-            # Qt4Agg currently throws
-            # [xcb] Unknown sequence number while processing queue
-            # [xcb] Most likely this is a multi-threaded client and XInitThreads has not been called
-            # [xcb] Aborting, sorry about that.
-            # python: ../../src/xcb_io.c:274: poll_for_event: Assertion
-            # `!xcb_xlib_threads_sequence_lost' failed.
-            #}}}
-            plt.switch_backend("Agg")
 
         # Make the plot helper
         self._ph = PlotHelper(uc.convertToPhysical)

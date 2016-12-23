@@ -19,7 +19,6 @@ import os
 
 #{{{driver2DFieldPerpSingle
 def driver2DFieldPerpSingle(collectPaths     ,\
-                            savePath         ,\
                             varName          ,\
                             convertToPhysical,\
                             xSlice           ,\
@@ -28,10 +27,7 @@ def driver2DFieldPerpSingle(collectPaths     ,\
                             tSlice           ,\
                             fluct            ,\
                             varyMaxMin       ,\
-                            xguards  = False ,\
-                            yguards  = False ,\
-                            showPlot = False ,\
-                            savePlot = True  ,\
+                            plotSuperKwargs  ,\
                                             ):
     #{{{doctring
     """
@@ -42,8 +38,6 @@ def driver2DFieldPerpSingle(collectPaths     ,\
     collectPaths : tuple
         Paths to collect from.
         The corresponind 't_array' of the paths must be in ascending order.
-    savePath : str
-        Save destination
     varName : str
         The variable to plot
     convertToPhysical : bool
@@ -62,14 +56,8 @@ def driver2DFieldPerpSingle(collectPaths     ,\
         If the colorbar should be adjusted to the max and min of the
         current timestep.
         If False, the global max and min is used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
-    savePlot : bool
-        Whether or no the plot should be saved.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -96,12 +84,9 @@ def driver2DFieldPerpSingle(collectPaths     ,\
     levels = getLevelsAnimation(vmax, vmin, 100)
 
     # Create the plotting object
-    p2DPerp = PlotAnim2DPerp(collectPaths           ,\
-                             savePath               ,\
-                             ccf2D.convertToPhysical,\
-                             fluct = fluct          ,\
-                             show  = showPlot       ,\
-                             save  = savePlot)
+    p2DPerp = PlotAnim2DPerp(ccf2D.uc        ,\
+                             fluct    = fluct,\
+                             **plotSuperKwargs)
     p2DPerp.setContourfArguments(vmax, vmin, levels)
     p2DPerp.setPerpData(perp2D["X"],\
                         perp2D["Y"],\
@@ -114,7 +99,6 @@ def driver2DFieldPerpSingle(collectPaths     ,\
 
 #{{{driver2DFieldParSingle
 def driver2DFieldParSingle(collectPaths     ,\
-                           savePath         ,\
                            varName          ,\
                            convertToPhysical,\
                            xSlice           ,\
@@ -123,10 +107,7 @@ def driver2DFieldParSingle(collectPaths     ,\
                            tSlice           ,\
                            fluct            ,\
                            varyMaxMin       ,\
-                           xguards  = False ,\
-                           yguards  = False ,\
-                           showPlot = False ,\
-                           savePlot = True  ,\
+                           plotSuperKwargs  ,\
                                             ):
     #{{{doctring
     """
@@ -157,14 +138,8 @@ def driver2DFieldParSingle(collectPaths     ,\
         If the colorbar should be adjusted to the max and min of the
         current timestep.
         If False, the global max and min is used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
-    savePlot : bool
-        Whether or no the plot should be saved.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -190,12 +165,9 @@ def driver2DFieldParSingle(collectPaths     ,\
     levels = getLevelsAnimation(vmax, vmin, 100)
 
     # Create the plotting object
-    p2DPar = PlotAnim2DPar(collectPaths           ,\
-                           savePath               ,\
-                           ccf2D.convertToPhysical,\
-                           fluct = fluct          ,\
-                           show  = showPlot       ,\
-                           save  = savePlot)
+    p2DPar = PlotAnim2DPar(ccf2D.uc        ,\
+                           fluct    = fluct,\
+                           **plotSuperKwargs)
     p2DPar.setContourfArguments(vmax, vmin, levels)
     p2DPar.setParData(par2D["X"]          ,\
                       par2D["Y"]          ,\
@@ -209,7 +181,6 @@ def driver2DFieldParSingle(collectPaths     ,\
 
 #{{{driver2DFieldPolSingle
 def driver2DFieldPolSingle(collectPaths     ,\
-                           savePath         ,\
                            varName          ,\
                            convertToPhysical,\
                            xInd             ,\
@@ -218,10 +189,7 @@ def driver2DFieldPolSingle(collectPaths     ,\
                            tSlice           ,\
                            fluct            ,\
                            varyMaxMin       ,\
-                           xguards  = False ,\
-                           yguards  = False ,\
-                           showPlot = False ,\
-                           savePlot = True  ,\
+                           plotSuperKwargs  ,\
                                             ):
     #{{{doctring
     """
@@ -252,14 +220,8 @@ def driver2DFieldPolSingle(collectPaths     ,\
         If the colorbar should be adjusted to the max and min of the
         current timestep.
         If False, the global max and min is used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
-    savePlot : bool
-        Whether or no the plot should be saved.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -285,12 +247,9 @@ def driver2DFieldPolSingle(collectPaths     ,\
     levels = getLevelsAnimation(vmax, vmin, 100)
 
     # Create the plotting object
-    p2DPol = PlotAnim2DPol(collectPaths           ,\
-                           savePath               ,\
-                           ccf2D.convertToPhysical,\
-                           fluct = fluct          ,\
-                           show  = showPlot       ,\
-                           save  = savePlot)
+    p2DPol = PlotAnim2DPol(ccf2D.uc        ,\
+                           fluct    = fluct,\
+                           **plotSuperKwargs)
     p2DPol.setContourfArguments(vmax, vmin, levels)
     p2DPol.setPolData(pol2D["X"]     ,\
                       pol2D["Y"]     ,\
@@ -303,7 +262,6 @@ def driver2DFieldPolSingle(collectPaths     ,\
 
 #{{{driver2DFieldPerpParSingle
 def driver2DFieldPerpParSingle(collectPaths     ,\
-                               savePath         ,\
                                varName          ,\
                                convertToPhysical,\
                                xSlice           ,\
@@ -314,10 +272,7 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
                                tSlice           ,\
                                fluct            ,\
                                varyMaxMin       ,\
-                               xguards  = False ,\
-                               yguards  = False ,\
-                               showPlot = False ,\
-                               savePlot = True  ,\
+                               plotSuperKwargs  ,\
                                                 ):
     #{{{doctring
     """
@@ -352,14 +307,8 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
         If the colorbar should be adjusted to the max and min of the
         current timestep.
         If False, the global max and min is used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
-    savePlot : bool
-        Whether or no the plot should be saved.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -389,12 +338,9 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
     levels = getLevelsAnimation(vmax, vmin, 100)
 
     # Create the plotting object
-    p2DPerpPar = PlotAnim2DPerpPar(collectPaths           ,\
-                                   savePath               ,\
-                                   ccf2D.convertToPhysical,\
-                                   fluct = fluct          ,\
-                                   show  = showPlot       ,\
-                                   save  = savePlot)
+    p2DPerpPar = PlotAnim2DPerpPar(ccf2D.uc        ,\
+                                   fluct    = fluct,\
+                                   **plotSuperKwargs)
     p2DPerpPar.setContourfArguments(vmax, vmin, levels)
     p2DPerpPar.setPerpData(perp2D["X"]    ,\
                            perp2D["Y"]    ,\
@@ -414,7 +360,6 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
 
 #{{{driver2DFieldPerpPolSingle
 def driver2DFieldPerpPolSingle(collectPaths     ,\
-                               savePath         ,\
                                varName          ,\
                                convertToPhysical,\
                                xSlice           ,\
@@ -425,10 +370,7 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
                                tSlice           ,\
                                fluct            ,\
                                varyMaxMin       ,\
-                               xguards  = False ,\
-                               yguards  = False ,\
-                               showPlot = False ,\
-                               savePlot = True  ,\
+                               plotSuperKwargs  ,\
                                                 ):
     #{{{doctring
     """
@@ -463,14 +405,10 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
         If the colorbar should be adjusted to the max and min of the
         current timestep.
         If False, the global max and min is used.
-    xguards : bool
-        Whether or not to collect the ghost points in x.
-    yguards : bool
-        Whether or not to collect the ghost points in y.
-    showPlot : bool
-        Whether or not the plot should be displayed.
     savePlot : bool
         Whether or no the plot should be saved.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -500,12 +438,9 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
     levels = getLevelsAnimation(vmax, vmin, 100)
 
     # Create the plotting object
-    p2DPerpPol = PlotAnim2DPerpPol(collectPaths           ,\
-                                   savePath               ,\
-                                   ccf2D.convertToPhysical,\
-                                   fluct = fluct          ,\
-                                   show  = showPlot       ,\
-                                   save  = savePlot)
+    p2DPerpPol = PlotAnim2DPerpPol(ccf2D.uc        ,\
+                                   fluct    = fluct,\
+                                   **plotSuperKwargs)
     p2DPerpPol.setContourfArguments(vmax, vmin, levels)
     p2DPerpPol.setPerpData(perp2D["X"]    ,\
                            perp2D["Y"]    ,\
@@ -530,6 +465,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
     #{{{constructor
     def __init__(self                     ,\
                  *args                    ,\
+                 plotSuperKwargs          ,\
                  varName           = "n"  ,\
                  fluct             = False,\
                  varyMaxMin        = False,\
@@ -546,6 +482,8 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         ----------
         *args : str
             See parent class for details.
+        plotKwargs : dict
+            Keyword arguments for the plot super class.
         varName : str
             Name of variable to collect and plot
         fluct : bool
@@ -562,6 +500,23 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
 
+#FIXME:
+        useSubProcess : bool
+            Whether each job will be made by a new sub process, if not,
+            the jobs will be done in series.
+                 useSubProcess = True ,\
+
+        if self._useSubProcess:
+            #{{{ The multiprocess currently only works with the Agg backend
+            # Qt4Agg currently throws
+            # [xcb] Unknown sequence number while processing queue
+            # [xcb] Most likely this is a multi-threaded client and XInitThreads has not been called
+            # [xcb] Aborting, sorry about that.
+            # python: ../../src/xcb_io.c:274: poll_for_event: Assertion
+            # `!xcb_xlib_threads_sequence_lost' failed.
+            #}}}
+            plt.switch_backend("Agg")
+# FIXME: Need super classes?
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
@@ -578,9 +533,22 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
             os.makedirs(self._savePath)
 
         # Set the member data
-        self._varName    = varName
-        self._fluct      = fluct
-        self._varyMaxMin = varyMaxMin
+        self._varName         = varName
+        self._fluct           = fluct
+        self._varyMaxMin      = varyMaxMin
+        self._plotSuperKwargs = plotSuperKwargs
+
+# FIXME: dmp_folder must into plotSuperKwargs
+# Collect and dmp_folders: From CollectAndCalcSuperClass
+
+# FIXME: Missing
+
+                               xSlice           ,\
+                               ySlice           ,\
+                               zSlice           ,\
+                               tSlice           ,\
+                               xInd             ,\
+                               yInd             ,\
     #}}}
 
     #{{{setXIndToMaxGradInN
@@ -607,16 +575,16 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths     ,\
-                 self._savePath         ,\
-                 self._varName          ,\
+                 self._collectPaths    ,\
+                 self._varName         ,\
                  self.convertToPhysical,\
-                 self._xSlice           ,\
-                 self._yInd             ,\
-                 self._zSlice           ,\
-                 self._tSlice           ,\
-                 self._fluct            ,\
-                 self._varyMaxMin       ,\
+                 self._xSlice          ,\
+                 self._yInd            ,\
+                 self._zSlice          ,\
+                 self._tSlice          ,\
+                 self._fluct           ,\
+                 self._varyMaxMin      ,\
+                 self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driver2DFieldPerpSingle, args = args)
@@ -633,16 +601,17 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths     ,\
-                 self._savePath         ,\
-                 self._varName          ,\
+                 self._collectPaths    ,\
+                 self._savePath        ,\
+                 self._varName         ,\
                  self.convertToPhysical,\
-                 self._xSlice           ,\
-                 self._ySlice           ,\
-                 self._zInd             ,\
-                 self._tSlice           ,\
-                 self._fluct            ,\
-                 self._varyMaxMin       ,\
+                 self._xSlice          ,\
+                 self._ySlice          ,\
+                 self._zInd            ,\
+                 self._tSlice          ,\
+                 self._fluct           ,\
+                 self._varyMaxMin      ,\
+                 self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driver2DFieldParSingle, args = args)
@@ -659,16 +628,17 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths     ,\
-                 self._savePath         ,\
-                 self._varName          ,\
+                 self._collectPaths    ,\
+                 self._savePath        ,\
+                 self._varName         ,\
                  self.convertToPhysical,\
-                 self._xInd             ,\
-                 self._ySlice           ,\
-                 self._zSlice           ,\
-                 self._tSlice           ,\
-                 self._fluct            ,\
-                 self._varyMaxMin       ,\
+                 self._xInd            ,\
+                 self._ySlice          ,\
+                 self._zSlice          ,\
+                 self._tSlice          ,\
+                 self._fluct           ,\
+                 self._varyMaxMin      ,\
+                 self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driver2DFieldPolSingle, args = args)
@@ -685,18 +655,19 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths     ,\
-                 self._savePath         ,\
-                 self._varName          ,\
+                 self._collectPaths    ,\
+                 self._savePath        ,\
+                 self._varName         ,\
                  self.convertToPhysical,\
-                 self._xSlice           ,\
-                 self._ySlice           ,\
-                 self._zSlice           ,\
-                 self._yInd             ,\
-                 self._zInd             ,\
-                 self._tSlice           ,\
-                 self._fluct            ,\
-                 self._varyMaxMin       ,\
+                 self._xSlice          ,\
+                 self._ySlice          ,\
+                 self._zSlice          ,\
+                 self._yInd            ,\
+                 self._zInd            ,\
+                 self._tSlice          ,\
+                 self._fluct           ,\
+                 self._varyMaxMin      ,\
+                 self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driver2DFieldPerpParSingle, args = args)
@@ -713,18 +684,19 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths     ,\
-                 self._savePath         ,\
-                 self._varName          ,\
+                 self._collectPaths    ,\
+                 self._savePath        ,\
+                 self._varName         ,\
                  self.convertToPhysical,\
-                 self._xSlice           ,\
-                 self._ySlice           ,\
-                 self._zSlice           ,\
-                 self._xInd             ,\
-                 self._yInd             ,\
-                 self._tSlice           ,\
-                 self._fluct            ,\
-                 self._varyMaxMin       ,\
+                 self._xSlice          ,\
+                 self._ySlice          ,\
+                 self._zSlice          ,\
+                 self._xInd            ,\
+                 self._yInd            ,\
+                 self._tSlice          ,\
+                 self._fluct           ,\
+                 self._varyMaxMin      ,\
+                 self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driver2DFieldPerpPolSingle, args = args)
