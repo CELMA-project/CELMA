@@ -8,35 +8,34 @@ from .collectAndCalcSuperClass import CollectAndCalcSuperClass
 from .plotSuperClass import PlotSuperClass
 
 #{{{DriverPlotFieldsSuperClass
-class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass, PlotSuperClass):
+class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass):
     """
     The parent driver of 1D and 2D field plotting
     """
 
     #{{{Constructor
-    def __init__(self           ,\
-                 dmp_folders    ,\
-                 xguards = False,\
-                 yguards = False,\
-                 xSlice  = None ,\
-                 ySlice  = None ,\
-                 zSlice  = None ,\
-                 tSlice  = None ,\
-                 xInd    = None ,\
-                 yInd    = None ,\
-                 zInd    = None ,\
+    def __init__(self                 ,\
+                 *args                ,\
+                 xguards       = False,\
+                 yguards       = False,\
+                 xSlice        = None ,\
+                 ySlice        = None ,\
+                 zSlice        = None ,\
+                 tSlice        = None ,\
+                 xInd          = None ,\
+                 yInd          = None ,\
+                 zInd          = None ,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
-            * Calls the parent classes
+            * Calls the parent class
             * Sets the common memberdata
 
         Parameters
         ----------
-        dmp_folders: tuple
-            This is the output dmp_folder from bout_runners.
-            Typically, these are the folders in a given scan
+        **args : positional arguments
+            See parent class for details.
         xguards : bool
             If xguards should be included when collecting.
         yguards : bool
@@ -60,26 +59,18 @@ class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass, PlotSuperClass):
         """
         #}}}
 
-        # Call the constructors of the parent classes
-        # Preparing collect and plot kwargs
-        collectKwargs = {}
-        popKeys = ("collectPaths", "convertToPhysical")
-        for key in popKeys:
-            collectKwargs[key] = kwargs.pop(key)
-        plotKwargs = kwargs
-        plotKwargs["dmp_folders"] = dmp_folders
-        CollectAndCalcSuperClass.__init__(self, dmp_folders, **collectKwargs)
-        PlotSuperClass.__init__(self, self.uc, **plotKwargs)
+        # Call the constructors of the parent class
+        super().__init__(*args, **kwargs)
 
         # Set the member data
-        self._xguards = xguards
-        self._yguards = yguards
-        self._xSlice  = xSlice
-        self._ySlice  = ySlice
-        self._zSlice  = zSlice
-        self._tSlice  = tSlice
-        self._xInd    = xInd
-        self._yInd    = yInd
-        self._zInd    = zInd
+        self._xguards       = xguards
+        self._yguards       = yguards
+        self._xInd          = xInd
+        self._yInd          = yInd
+        self._zInd          = zInd
+        self._useSubProcess = useSubProcess
+
+        # Set the slices
+        setSlice(xSlice, ySlice, zSlice, tSlice)
     #}}}
 #}}}

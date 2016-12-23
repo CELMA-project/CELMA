@@ -37,9 +37,17 @@ def singlePerpTest():
     fluct             = False
     varyMaxMin        = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting perp 2D field")
     driver2DFieldPerpSingle(collectPaths     ,\
-                            savePath         ,\
                             varName          ,\
                             convertToPhysical,\
                             xSlice           ,\
@@ -48,10 +56,7 @@ def singlePerpTest():
                             tSlice           ,\
                             fluct            ,\
                             varyMaxMin       ,\
-                            xguards  = False ,\
-                            yguards  = False ,\
-                            showPlot = False ,\
-                            savePlot = True  ,\
+                            plotSuperKwargs  ,\
                                             )
     print("Success!\n\n")
 #}}}
@@ -77,22 +82,28 @@ def singleParTest():
     fluct             = True
     varyMaxMin        = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting par 2D field")
     driver2DFieldParSingle(collectPaths     ,\
-                            savePath         ,\
-                            varName          ,\
-                            convertToPhysical,\
-                            xSlice           ,\
-                            ySlice           ,\
-                            zSlice           ,\
-                            tSlice           ,\
-                            fluct            ,\
-                            varyMaxMin       ,\
-                            xguards  = False ,\
-                            yguards  = False ,\
-                            showPlot = False ,\
-                            savePlot = True  ,\
-                                            )
+                           savePath         ,\
+                           varName          ,\
+                           convertToPhysical,\
+                           xSlice           ,\
+                           ySlice           ,\
+                           zSlice           ,\
+                           tSlice           ,\
+                           fluct            ,\
+                           varyMaxMin       ,\
+                           plotSuperKwargs  ,\
+                                           )
     print("Success!\n\n")
 #}}}
 
@@ -117,21 +128,26 @@ def singlePolTest():
     fluct             = False
     varyMaxMin        = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting pol 2D field")
-    driver2DFieldPolSingle(collectPaths      ,\
-                            savePath         ,\
-                            varName          ,\
-                            convertToPhysical,\
-                            xSlice           ,\
-                            ySlice           ,\
-                            zSlice           ,\
-                            tSlice           ,\
-                            fluct            ,\
-                            varyMaxMin       ,\
-                            xguards  = False ,\
-                            yguards  = False ,\
-                            showPlot = False ,\
-                            savePlot = True  ,\
+    driver2DFieldPolSingle(collectPaths     ,\
+                           varName          ,\
+                           convertToPhysical,\
+                           xSlice           ,\
+                           ySlice           ,\
+                           zSlice           ,\
+                           tSlice           ,\
+                           fluct            ,\
+                           varyMaxMin       ,\
+                           plotSuperKwargs  ,\
                                              )
     print("Success!\n\n")
 #}}}
@@ -158,9 +174,17 @@ def singlePerpParTest():
     fluct             = False
     varyMaxMin        = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting perpPar 2D field")
     driver2DFieldPerpParSingle(collectPaths     ,\
-                               savePath         ,\
                                varName          ,\
                                convertToPhysical,\
                                xSlice           ,\
@@ -171,10 +195,7 @@ def singlePerpParTest():
                                tSlice           ,\
                                fluct            ,\
                                varyMaxMin       ,\
-                               xguards  = False ,\
-                               yguards  = False ,\
-                               showPlot = False ,\
-                               savePlot = True  ,\
+                               plotSuperKwargs  ,\
                                             )
     print("Success!\n\n")
 #}}}
@@ -201,9 +222,17 @@ def singlePerpPolTest():
     fluct             = False
     varyMaxMin        = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting perpPol 2D field")
     driver2DFieldPerpPolSingle(collectPaths     ,\
-                               savePath         ,\
                                varName          ,\
                                convertToPhysical,\
                                xSlice           ,\
@@ -214,11 +243,8 @@ def singlePerpPolTest():
                                tSlice           ,\
                                fluct            ,\
                                varyMaxMin       ,\
-                               xguards  = False ,\
-                               yguards  = False ,\
-                               showPlot = False ,\
-                               savePlot = True  ,\
-                                            )
+                               plotSuperKwargs  ,\
+                              )
     print("Success!\n\n")
 #}}}
 
@@ -232,21 +258,50 @@ def driverTest():
         (\
         "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
         )
-    theRunName = "test"
+
+    useSubProcess = False
 
     varName           = "vortD"
     convertToPhysical = True
-    xSlice            = None
-    ySlice            = None
-    zSlice            = None
-    xInd              = 30
-    yInd              = 16
-    zInd              = 16
     tSlice            = None
     fluct             = False
     varyMaxMin        = False
-    useSubProcess     = False
-    savePathFunc      = "scanWTagSaveFunc"
+
+    # DriverPlotFieldsSuperClass
+    xSlice = None
+    ySlice = None
+    zSlice = None
+    tSlice = None
+    xInd   = 30
+    yInd   = 16
+    zInd   = 16
+
+# FIXME: Unfinished
+    driverPlotFieldsKwargs = {\
+                              "xguards" : False ,\
+                              "yguards" : False ,\
+                              "xSlice"  : xSlice,\
+                              "ySlice"  : ySlice,\
+                              "zSlice"  : zSlice,\
+                              "tSlice"  : tSlice,\
+                              "xInd"    : xInd  ,\
+                              "yInd"    : yInd  ,\
+                              "zInd"    : zInd  ,\
+                             }
+
+    # Plot super kwargs
+    theRunName   = "test"
+    savePathFunc = "scanWTagSaveFunc"
+
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : None,\
+                        "savePathFunc" : savePathFunc,\
+                        "extension"    : None,\
+                        "dmp_folders"  : dmp_folders,\
+                        "theRunName"   : theRunName,\
+                       }
 
     steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
@@ -262,27 +317,17 @@ def driverTest():
                    # DriverPostProcessingSuperClass
                    collectPaths      = collectPaths     ,\
                    convertToPhysical = convertToPhysical,\
-                   showPlot          = False            ,\
-                   savePlot          = True             ,\
-                   savePath          = None             ,\
                    savePathFunc      = savePathFunc     ,\
                    useSubProcess     = useSubProcess    ,\
                    extension         = "png"            ,\
                    # scanWTagSaveFunc
                    theRunName = theRunName,\
                    # DriverFieldsSuperClass
-                   xguards = False ,\
-                   yguards = False ,\
-                   xSlice  = xSlice,\
-                   ySlice  = ySlice,\
-                   zSlice  = zSlice,\
-                   tSlice  = tSlice,\
-                   xInd    = xInd  ,\
-                   yInd    = yInd  ,\
-                   zInd    = zInd  ,\
+                   driverPlotFieldsKwargs = driverPlotFieldsKwargs,\
+                   # PlotSuperClass
+                   plotKwargs = plotKwargs,\
                   )
 
-    import pdb; pdb.set_trace()
     d2DF.driver2DFieldsPerp()
     d2DF.driver2DFieldsPar()
     d2DF.driver2DFieldsPol()
