@@ -351,7 +351,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         argTemplate =  [\
                         self._collectPaths     ,\
                         self._savePath         ,\
-                        self._convertToPhysical,\
+                        self.convertToPhysical,\
                         self._xInd             ,\
                         self._ySlice           ,\
                         self._zInd             ,\
@@ -391,7 +391,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         argTemplate =  [
                         self._collectPaths     ,\
                         self._savePath         ,\
-                        self._convertToPhysical,\
+                        self.convertToPhysical,\
                         self._xSlice           ,\
                         self._yInd             ,\
                         self._zInd             ,\

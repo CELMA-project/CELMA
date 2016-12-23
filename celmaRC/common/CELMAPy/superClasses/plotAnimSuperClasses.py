@@ -186,7 +186,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         self._ddtColor = "k"
 
         # Set var label template
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             unitsOrNormalization = " $[{units}]$"
         else:
             unitsOrNormalization = "${normalization}$"
@@ -255,7 +255,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         for ax, key, color in zip(self._axes, self._plotOrder, self._colors):
             # Obtain the legend
             pltVarName = self._ph.getVarPltName(key)
-            if self._convertToPhysical:
+            if self.convertToPhysical:
                 legend = self._varLegendTemplate.\
                     format(pltVarName, **self._uc.conversionDict[key])
             else:
@@ -299,7 +299,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                             )[0]\
                                   )
             pltVarName = self._ph.getVarPltName(self._ddtVar)
-            if self._convertToPhysical:
+            if self.convertToPhysical:
                 legend = self._varLegendTemplate.\
                     format(pltVarName, **self._uc.conversionDict[key])
             else:
@@ -403,7 +403,7 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
         self._cfKwargs.update({"cmap" : cmap, "zorder" : -20})
 
         # Set var label template
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             unitsOrNormalization = " $[{units}]$"
         else:
             unitsOrNormalization = "${normalization}$"
