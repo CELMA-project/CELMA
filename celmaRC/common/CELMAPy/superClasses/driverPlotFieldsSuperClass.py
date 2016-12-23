@@ -5,16 +5,17 @@ Contains the super class driver for fields 1D and fields 2D
 """
 
 from .collectAndCalcSuperClass import CollectAndCalcSuperClass
+from .plotSuperClass import PlotSuperClass
 
 #{{{DriverPlotFieldsSuperClass
-class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass):
+class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass, PlotSuperClass):
     """
     The parent driver of 1D and 2D field plotting
     """
 
     #{{{Constructor
     def __init__(self           ,\
-                 *args          ,\
+                 dmp_folders    ,\
                  xguards = False,\
                  yguards = False,\
                  xSlice  = None ,\
@@ -28,13 +29,14 @@ class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass):
         #{{{docstring
         """
         This constructor:
-            * Calls the parent class
+            * Calls the parent classes
             * Sets the common memberdata
 
         Parameters
         ----------
-        *args : str
-            See parent class for details.
+        dmp_folders: tuple
+            This is the output dmp_folder from bout_runners.
+            Typically, these are the folders in a given scan
         xguards : bool
             If xguards should be included when collecting.
         yguards : bool
@@ -58,8 +60,16 @@ class DriverPlotFieldsSuperClass(CollectAndCalcSuperClass):
         """
         #}}}
 
-        # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
+        # Call the constructors of the parent classes
+        # Preparing collect and plot kwargs
+        collectKwargs = {}
+        popKeys = ("collectPaths", "convertToPhysical")
+        for key in popKeys:
+            collectKwargs[key] = kwargs.pop(key)
+        plotKwargs = kwargs
+        plotKwargs["dmp_folders"] = dmp_folders
+        CollectAndCalcSuperClass.__init__(self, dmp_folders, **collectKwargs)
+        PlotSuperClass.__init__(self, self.uc, **plotKwargs)
 
         # Set the member data
         self._xguards = xguards
