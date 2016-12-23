@@ -2,7 +2,7 @@
 
 """Class for timeTrace plot"""
 
-from ..superClasses import DriverPostProcessingSuperClass
+from ..superClasses import CollectAndCalcSuperClass
 from ..plotHelpers import seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt

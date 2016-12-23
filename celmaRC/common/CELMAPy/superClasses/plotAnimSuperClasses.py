@@ -19,7 +19,7 @@ import matplotlib.pylab as plt
 import os
 
 #{{{PlotAnimSuperClass
-class PlotAnimSuperClass(object):
+class PlotAnimSuperClass(PlotSuperClass):
     """
     Super class for animation plots.
 
@@ -27,51 +27,27 @@ class PlotAnimSuperClass(object):
     """
 
     #{{{constructor
-    def __init__(self             ,\
-                 collectPaths     ,\
-                 savePath         ,\
-                 convertToPhysical,\
-                 show = False     ,\
-                 save = True      ,\
-                 extension = None ,\
-                 uc = None        ,\
-                 ):
+    def __init__(self   ,\
+                 *args  ,\
+                 *kwargs):
         #{{{docstring
         """
         Constructor for PlotAnimSuperClass.
 
-        * Sets the member data
-        * Sets the collection path
+        * Calls the parent constructor
         * Sets the animation options
 
         Parameters
         ----------
-        collectPaths : tuple
-            Paths to collect from.
-            The corresponind 't_array' of the paths must be in ascending order.
-        savePath : str
-            Destination of save
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
-        show : bool
-            Whether or not the plot is to be displayed.
-        save : bool
-            Whether or not to save the plot.
-        extension : [None|str]
-            Overrides default extension if set. Excludes the "."
-        uc : [None|UnitsConverter]
-            The UnitsConverter. Will be made if set to None.
+        *args : positional arguments
+            See parent constructor for details
+        **kwargs : keyword arguments
+            See parent constructor for details
         """
         #}}}
 
-        # Set memberdata
-        self._savePath  = savePath
-        self._show      = show
-        self._save      = save
-        self._extension = extension
-
-        # Set the collect path, units converter and plot helper
-        self.setCollectPaths(collectPaths, convertToPhysical, uc)
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
 
         # Set animation and text options
         self.setAnimationOptions()
@@ -108,35 +84,6 @@ class PlotAnimSuperClass(object):
         self._codec   = codec
     #}}}
 
-    #{{{setCollectPaths
-    def setCollectPaths(self, collectPaths, convertToPhysical=True, uc=None):
-        #{{{docstring
-        """
-        Sets the collect path, makes the units converter and plot helper
-
-        Parameters
-        ----------
-        collectPaths : str
-            Destination to collect from
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
-        uc : [None|UnitsConverter]
-            The UnitsConverter will be set from the first element in
-            collectPaths if not given.
-        """
-        #}}}
-
-        self._collectPaths = collectPaths
-
-        if uc is None:
-            self._uc = UnitsConverter(collectPaths[0], convertToPhysical)
-
-        # Make the plot helper
-        self._ph = PlotHelper(convertToPhysical)
-        self._ph.makeDimensionStringsDicts(self._uc)
-        self._convertToPhysical = self._uc.convertToPhysical
-    #}}}
-
     #{{{plotSaveShow
     def plotSaveShow(self, fig, fileName, func, frames):
         #{{{docstring
@@ -166,7 +113,7 @@ class PlotAnimSuperClass(object):
                                            blit   = False ,\
                                            )
 
-            if self._save:
+            if self._savePlot:
                 FFMpegWriter = animation.writers['ffmpeg']
                 writer = FFMpegWriter(bitrate = self._bitrate,\
                                       fps     = self._fps    ,\
@@ -180,7 +127,7 @@ class PlotAnimSuperClass(object):
                 anim.save(fileName, writer = writer)
                 print("Saved to {}".format(fileName))
         else:
-            if self._save:
+            if self._savePlot:
                 if self._extension is None:
                     self._extension = "png"
 
@@ -193,7 +140,7 @@ class PlotAnimSuperClass(object):
                             )
                 print("Saved to {}".format(fileName))
 
-        if self._show:
+        if self._showPlot:
             fig.show()
 
         plt.close(fig)
