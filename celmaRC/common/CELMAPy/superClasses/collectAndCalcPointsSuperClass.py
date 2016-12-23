@@ -8,14 +8,14 @@ measurements
 from ..collectAndCalcHelpers import (getUniformSpacing,\
                                      getEvenlySpacedIndices,\
                                      findLargestRadialGradN)
-from .driverPostProcessingSuperClass import DriverPostProcessingSuperClass
+from .collectAndCalcSuperClass import CollectAndCalcSuperClass
 from boututils.datafile import DataFile
 from boutdata import collect
 import numpy as np
 import os
 
 #{{{CollectAndCalcPointsSuperClass
-class CollectAndCalcPointsSuperClass(DriverPostProcessingSuperClass):
+class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
     """
     Provides a common constructor interface for driver classes which are
     obtaining temporal information in one point.
