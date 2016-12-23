@@ -463,27 +463,29 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
     Class for driving of the plotting of the 2D fields.
     """
     #{{{constructor
-    def __init__(self                     ,\
-                 *args                    ,\
-                 plotSuperKwargs          ,\
-                 varName           = "n"  ,\
-                 fluct             = False,\
-                 varyMaxMin        = False,\
-                 timeStampFolder   = True ,\
+    def __init__(self                       ,\
+                 dmp_folders                ,\
+                 plotSuperKwargs            ,\
+                 guardSlicesAndIndicesKwargs,\
+                 varName           = "n"    ,\
+                 fluct             = False  ,\
+                 varyMaxMin        = False  ,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
             * Calls the parent class
-            * Updates the savePath and makes the folder
             * Set the member data
+            * Updates the plotSuperKwargs
 
         Parameters
         ----------
-        *args : str
-            See parent class for details.
-        plotKwargs : dict
+        dmp_folders : tuple
+            Tuple of the dmp_folder (output from bout_runners).
+        plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        guardSlicesAndIndicesKwargs : dict
+            Keyword arguments for the slices, guards and indices.
         varName : str
             Name of variable to collect and plot
         fluct : bool
@@ -493,62 +495,26 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
             If the colorbar should be adjusted to the max and min of the
             current timestep.
             If False, the global max and min is used.
-        timeStampFolder : bool
-            Whether or not to timestamp the folder
         **kwargs : keyword arguments
             See parent class for details.
         """
         #}}}
 
-#FIXME:
-        useSubProcess : bool
-            Whether each job will be made by a new sub process, if not,
-            the jobs will be done in series.
-                 useSubProcess = True ,\
-
-        if self._useSubProcess:
-            #{{{ The multiprocess currently only works with the Agg backend
-            # Qt4Agg currently throws
-            # [xcb] Unknown sequence number while processing queue
-            # [xcb] Most likely this is a multi-threaded client and XInitThreads has not been called
-            # [xcb] Aborting, sorry about that.
-            # python: ../../src/xcb_io.c:274: poll_for_event: Assertion
-            # `!xcb_xlib_threads_sequence_lost' failed.
-            #}}}
-            plt.switch_backend("Agg")
-# FIXME: Need super classes?
         # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
-
-        # Update the savePath
-        firstPathPart = os.path.dirname(self._savePath)
-        if timeStampFolder:
-            timePath = os.path.basename(self._savePath)
-        else:
-            timePath = ""
-        self._savePath = os.path.join(firstPathPart, "field2D", timePath)
-
-        # Make dir if not exists
-        if not os.path.exists(self._savePath):
-            os.makedirs(self._savePath)
+        super().__init__(dmp_folders, **kwargs)
 
         # Set the member data
-        self._varName         = varName
-        self._fluct           = fluct
-        self._varyMaxMin      = varyMaxMin
+        self._varName    = varName
+        self._fluct      = fluct
+        self._varyMaxMin = varyMaxMin
+
+        # Update the plotSuperKwargs dict
+        plotSuperKwargs.update({"plotType":"field2D"})
+        plotSuperKwargs.update({"dmp_folders":dmp_folders})
         self._plotSuperKwargs = plotSuperKwargs
 
-# FIXME: dmp_folder must into plotSuperKwargs
-# Collect and dmp_folders: From CollectAndCalcSuperClass
-
-# FIXME: Missing
-
-                               xSlice           ,\
-                               ySlice           ,\
-                               zSlice           ,\
-                               tSlice           ,\
-                               xInd             ,\
-                               yInd             ,\
+        # Set the guards, slices and indices
+        self.setGuardSlicesAndIndices(**guardSlicesAndIndicesKwargs)
     #}}}
 
     #{{{setXIndToMaxGradInN
@@ -600,9 +566,9 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         Wrapper to driver2DFieldsPar
         """
         #}}}
+
         args =  (\
                  self._collectPaths    ,\
-                 self._savePath        ,\
                  self._varName         ,\
                  self.convertToPhysical,\
                  self._xSlice          ,\
@@ -629,7 +595,6 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         #}}}
         args =  (\
                  self._collectPaths    ,\
-                 self._savePath        ,\
                  self._varName         ,\
                  self.convertToPhysical,\
                  self._xInd            ,\
@@ -656,7 +621,6 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         #}}}
         args =  (\
                  self._collectPaths    ,\
-                 self._savePath        ,\
                  self._varName         ,\
                  self.convertToPhysical,\
                  self._xSlice          ,\
@@ -685,7 +649,6 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
         #}}}
         args =  (\
                  self._collectPaths    ,\
-                 self._savePath        ,\
                  self._varName         ,\
                  self.convertToPhysical,\
                  self._xSlice          ,\
