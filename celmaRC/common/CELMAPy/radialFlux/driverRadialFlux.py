@@ -54,7 +54,7 @@ class DriverRadialFlux(PointsSuperClass, CommonPostProcessingDriver):
                             self._xInd,\
                             self._yInd,\
                             self._zInd,\
-                            converToPhysical = self._convertToPhysical,\
+                            converToPhysical = self.convertToPhysical,\
                             mode             = self._mode,\
                             tSlice           = self._tSlice,\
                             )
@@ -72,7 +72,7 @@ class DriverRadialFlux(PointsSuperClass, CommonPostProcessingDriver):
         RadialFluxPlotter = PlotRadialFlux(\
                 self._paths                                ,\
                 self._RadialFlux                           ,\
-                convertToPhysical = self._convertToPhysical,\
+                convertToPhysical = self.convertToPhysical,\
                 showPlot          = self._showPlot         ,\
                 savePlot          = self._savePlot         ,\
                 extension         = self._extension        ,\

@@ -133,7 +133,7 @@ FIXME:
                       self._var                                    ,\
                       paths               = path                   ,\
                       yInd                = self._yInd             ,\
-                      convertToPhysical   = self._convertToPhysical,\
+                      convertToPhysical   = self.convertToPhysical,\
                       steadyStatePath     = steadyStatePath        ,\
                       nProbes             = 1                      ,\
                       radialProbesIndices = None                   ,\
@@ -266,7 +266,7 @@ FIXME:
             gRPlotterScan = PlotGrowthRates(\
                                 self._paths                                ,\
                                 growthRates       = df                     ,\
-                                convertToPhysical = self._convertToPhysical,\
+                                convertToPhysical = self.convertToPhysical,\
                                 showPlot          = self._showPlot         ,\
                                 savePlot          = self._savePlot         ,\
                                 extension         = self._extension        ,\
@@ -286,7 +286,7 @@ FIXME:
             gRPlotterMNr = PlotGrowthRates(\
                                 self._paths                                ,\
                                 growthRates       = df                     ,\
-                                convertToPhysical = self._convertToPhysical,\
+                                convertToPhysical = self.convertToPhysical,\
                                 showPlot          = self._showPlot         ,\
                                 savePlot          = self._savePlot         ,\
                                 extension         = self._extension        ,\
@@ -321,7 +321,7 @@ FIXME:
             gRPlotter = PlotGrowthRates(\
                             self._paths                                ,\
                             growthRates       = df                     ,\
-                            convertToPhysical = self._convertToPhysical,\
+                            convertToPhysical = self.convertToPhysical,\
                             showPlot          = self._showPlot         ,\
                             savePlot          = self._savePlot         ,\
                             extension         = self._extension        ,\
@@ -343,7 +343,7 @@ FIXME:
             gRPlotter = PlotGrowthRates(\
                             self._paths                                ,\
                             growthRates       = df                     ,\
-                            convertToPhysical = self._convertToPhysical,\
+                            convertToPhysical = self.convertToPhysical,\
                             showPlot          = self._showPlot         ,\
                             savePlot          = self._savePlot         ,\
                             extension         = self._extension        ,\

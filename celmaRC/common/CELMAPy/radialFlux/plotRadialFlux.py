@@ -70,7 +70,7 @@ class PlotRadialFlux(PlotsSuperClass):
         units = self.uc.conversionDict[self._varName]["units"]
 
         # Set the variable label
-        if self._convertToPhysical:
+        if self.convertToPhysical:
             if mode == "normal":
                 self._xLabel = r"${}$ $[{}]$"
             elif mode == "fluct":

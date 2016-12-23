@@ -610,7 +610,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._collectPaths     ,\
                  self._savePath         ,\
                  self._varName          ,\
-                 self._convertToPhysical,\
+                 self.convertToPhysical,\
                  self._xSlice           ,\
                  self._yInd             ,\
                  self._zSlice           ,\
@@ -636,7 +636,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._collectPaths     ,\
                  self._savePath         ,\
                  self._varName          ,\
-                 self._convertToPhysical,\
+                 self.convertToPhysical,\
                  self._xSlice           ,\
                  self._ySlice           ,\
                  self._zInd             ,\
@@ -662,7 +662,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._collectPaths     ,\
                  self._savePath         ,\
                  self._varName          ,\
-                 self._convertToPhysical,\
+                 self.convertToPhysical,\
                  self._xInd             ,\
                  self._ySlice           ,\
                  self._zSlice           ,\
@@ -688,7 +688,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._collectPaths     ,\
                  self._savePath         ,\
                  self._varName          ,\
-                 self._convertToPhysical,\
+                 self.convertToPhysical,\
                  self._xSlice           ,\
                  self._ySlice           ,\
                  self._zSlice           ,\
@@ -716,7 +716,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._collectPaths     ,\
                  self._savePath         ,\
                  self._varName          ,\
-                 self._convertToPhysical,\
+                 self.convertToPhysical,\
                  self._xSlice           ,\
                  self._ySlice           ,\
                  self._zSlice           ,\
