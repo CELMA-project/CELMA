@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains the common post processing driver class
+Contains the super class for the plotting
 """
 
 from ..driverHelpers import scanWTagSaveFunc
@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 
-#{{{DriverPostProcessingSuperClass
-class DriverPostProcessingSuperClass(object):
+#{{{PlotSuperClass
+class PlotSuperClass(object):
     """
-    The parent driver of all BOUT++ post processing functions
+    The parent plotting class
 
     * Sets common member data.
     * Sets the save path.
@@ -20,7 +20,7 @@ class DriverPostProcessingSuperClass(object):
 
     #{{{Constructor
     def __init__(self                     ,\
-                 dmp_folders              ,\
+                 uc                       ,\
                  collectPaths      = None ,\
                  convertToPhysical = False,\
                  showPlot          = False,\
@@ -29,21 +29,15 @@ class DriverPostProcessingSuperClass(object):
                  saveFolderFunc    = None ,\
                  useSubProcess     = True ,\
                  extension         = "png",\
+                 dmp_folders       = None ,\
                  **kwargs):
         #{{{docstring
         """
         This constructor sets the memberdata, and sets the savePath.
-
         Parameters
         ----------
-        dmp_folders: tuple
-            This is the output dmp_folder from bout_runners.
-            Typically, these are the folders in a given scan
-        collectPaths : [None|tuple]
-            Paths to collect from.
-            If None dmp_folders will be set to collectPaths
-        convertToPhysical : bool
-            If the physical or normalized units should be plotted.
+        uc : UnitsConverter
+            The units converter which makes the plot helper.
         showPlot : bool
             If the plot should be displayed.
         savePlot : bool
@@ -62,55 +56,59 @@ class DriverPostProcessingSuperClass(object):
             Sequence of parameters changed in the scan. If this is not None,
             calls to convertToCurrentScanParameters will be triggered in
             the child classes.
+        dmp_folders: [None|tuple]
+            Needed if savePaths should be made automatically
         **kwargs : keyword arguments
             Additional keyword arguments given as input to saveFolderFunc.
         """
         #}}}
 
         # Set the member data
-        if collectPaths is None:
-            self._collectPaths  = tuple(dmp_folders)
-        else:
-            self._collectPaths = collectPaths
-
-        self._convertToPhysical = convertToPhysical
         self._showPlot          = showPlot
         self._savePlot          = savePlot
         self._saveFolder        = saveFolder
         self._useSubProcess     = useSubProcess
         self._extension         = extension
 
-        # Get the firs dmp_folder (will be used to create the savepath)
-        dmp_folder = dmp_folders[0]
+        if dmp_folders is not None:
+            # Get the firs dmp_folder (will be used to create the savepath)
+            dmp_folder = dmp_folders[0]
 
-        # Set the saveFolder
-        if saveFolderFunc is not None:
-            # FIXME: Check if it is possible to change the API here.
-            #        Would be nice if could send in a function instead.
-            if saveFolderFunc == "scanWTagSaveFunc":
-                saveFolder = scanWTagSaveFunc(dmp_folder, **kwargs)
+            # Set the saveFolder
+            if saveFolderFunc is not None:
+                # FIXME: Check if it is possible to change the API here.
+                #        Would be nice if could send in a function instead.
+                if saveFolderFunc == "scanWTagSaveFunc":
+                    saveFolder = scanWTagSaveFunc(dmp_folder, **kwargs)
+                else:
+                    message  = "{0}Warning: saveFolderFunc '{1}' not found, "
+                    message += "falling back to standard implementation{0}"
+                    print(message.format("\n"*3, saveFolderFunc))
+                    saveFolder = "-".join(dmp_folder.split("/")[::-1])
             else:
-                message  = "{0}Warning: saveFolderFunc '{1}' not found, "
-                message += "falling back to standard implementation{0}"
-                print(message.format("\n"*3, saveFolderFunc))
-                saveFolder = "-".join(dmp_folder.split("/")[::-1])
+                if saveFolder is None:
+                    saveFolder = "-".join(dmp_folder.split("/")[::-1])
+
+            # Get the timefolder
+            self._timeFolder = self._getTime()
+
+            # Create the savepath (based on the first dmp_folder string)
+            visualizationType = "Physical" if convertToPhysical else "Normalized"
+            saveDirs = (os.path.normpath(dmp_folder).split(os.sep)[0],\
+                        "visualization{}".format(visualizationType),\
+                        saveFolder,\
+                        self._timeFolder)
+
+            self._savePath = ""
+            for saveDir in saveDirs:
+                self._savePath = os.path.join(self._savePath, saveDir)
         else:
-            if saveFolder is None:
-                saveFolder = "-".join(dmp_folder.split("/")[::-1])
+            if savePath is None:
+                message = ("Don't know what to set self._savePath to as "
+                           "both savePath and dmp_folders ar None")
+                raise ValueError(message)
 
-        # Get the timefolder
-        self._timeFolder = self._getTime()
-
-        # Create the savepath (based on the first dmp_folder string)
-        visualizationType = "Physical" if convertToPhysical else "Normalized"
-        saveDirs = [os.path.normpath(dmp_folder).split(os.sep)[0],\
-                    "visualization{}".format(visualizationType),\
-                    saveFolder,\
-                    self._timeFolder]
-
-        self._savePath = ""
-        for saveDir in saveDirs:
-            self._savePath = os.path.join(self._savePath, saveDir)
+            self._savePath = savePath
 
         if self._useSubProcess:
             #{{{ The multiprocess currently only works with the Agg backend
@@ -122,18 +120,20 @@ class DriverPostProcessingSuperClass(object):
             # `!xcb_xlib_threads_sequence_lost' failed.
             #}}}
             plt.switch_backend("Agg")
+
+        # Make the plot helper
+        self._ph = PlotHelper(uc.convertToPhysical)
+        self._ph.makeDimensionStringsDicts(uc)
     #}}}
 
     #{{{_getTime
     def _getTime(self, depth = "second"):
         """
         Gets the current time, and returns it as a string
-
         Parameters
         ----------
         depth : ["hour" | "minute" | "second"]
             String giving the temporal accuracy of the output string.
-
         Returns
         -------
         nowStr : str
