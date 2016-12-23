@@ -31,9 +31,18 @@ def singleParallelTest():
     mode   = "parallel"
     hyperIncluded = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
+
     print("\n\nTesting parallel 1D field")
     driver1DFieldSingle(collectPaths     ,\
-                        savePath         ,\
                         fieldPlotType    ,\
                         convertToPhysical,\
                         xSlice           ,\
@@ -42,10 +51,7 @@ def singleParallelTest():
                         tSlice           ,\
                         mode             ,\
                         hyperIncluded    ,\
-                        xguards  = False ,\
-                        yguards  = False ,\
-                        showPlot = False ,\
-                        savePlot = True  ,\
+                        plotSuperKwargs  ,\
                         )
     print("Success!\n\n")
 #}}}
@@ -71,9 +77,17 @@ def singleRadialTest():
     mode   = "radial"
     hyperIncluded = False
 
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting perpendicular 1D")
     driver1DFieldSingle(collectPaths     ,\
-                        savePath         ,\
                         fieldPlotType    ,\
                         convertToPhysical,\
                         xSlice           ,\
@@ -82,10 +96,7 @@ def singleRadialTest():
                         tSlice           ,\
                         mode             ,\
                         hyperIncluded    ,\
-                        xguards  = False ,\
-                        yguards  = False ,\
-                        showPlot = False ,\
-                        savePlot = True  ,\
+                        plotSuperKwargs  ,\
                         )
     print("Success!\n\n")
 #}}}
@@ -101,10 +112,12 @@ def driverTest():
           "CSDXMagFieldScanAr/nout_2_timestep_2000.0/nz_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-0-initialize_0/",\
           "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"\
         )
-    theRunName = "test"
 
-    fieldPlotType = "mainFields"
+    useSubProcess = False
+
     convertToPhysical = True
+    hyperIncluded = False
+
     xSlice = None
     ySlice = None
     zSlice = None
@@ -112,39 +125,44 @@ def driverTest():
     xInd = 0
     yInd = 16
     zInd = 0
-    useSubProcess = True
+    guardSlicesAndIndicesKwargs = {\
+                                   "xguards" : False ,\
+                                   "yguards" : False ,\
+                                   "xSlice"  : xSlice,\
+                                   "ySlice"  : ySlice,\
+                                   "zSlice"  : zSlice,\
+                                   "tSlice"  : tSlice,\
+                                   "xInd"    : xInd  ,\
+                                   "yInd"    : yInd  ,\
+                                   "zInd"    : zInd  ,\
+                                  }
+    # Plot super kwargs
+    theRunName = "test"
     savePathFunc = "scanWTagSaveFunc"
-    hyperIncluded = False
+    plotSuperKwargs = {\
+                        "showPlot"       : False       ,\
+                        "savePlot"       : True        ,\
+                        "savePath"       : None        ,\
+                        "savePathFunc"   : savePathFunc,\
+                        "extension"      : None        ,\
+                        "dmp_folders"    : None        ,\
+                        "timeStampFolder": True        ,\
+                        "theRunName"     : theRunName  ,\
+                       }
 
     print("\n\nTesting 1D driver")
     d1DF = Driver1DFields(\
-                   # DriverPostProcessingSuperClass
-                   dmp_folders                    ,\
                    # Driver1DFields
-                   timeStampFolder = True         ,\
+                   dmp_folders                    ,\
+                   plotSuperKwargs                ,\
+                   guardSlicesAndIndicesKwargs    ,\
                    boussinesq      = False        ,\
                    hyperIncluded   = hyperIncluded,\
-                   # DriverPostProcessingSuperClass
-                   collectPaths      = collectPaths     ,\
+                   # DriverPlotFieldsSuperClass
                    convertToPhysical = convertToPhysical,\
-                   showPlot          = False            ,\
-                   savePlot          = True             ,\
-                   savePath          = None             ,\
-                   savePathFunc      = savePathFunc     ,\
-                   useSubProcess     = useSubProcess    ,\
-                   extension         = "png"            ,\
-                   # scanWTagSaveFunc
-                   theRunName = theRunName,\
-                   # DriverFieldsSuperClass
-                   xguards = False ,\
-                   yguards = False ,\
-                   xSlice  = xSlice,\
-                   ySlice  = ySlice,\
-                   zSlice  = zSlice,\
-                   tSlice  = tSlice,\
-                   xInd    = xInd  ,\
-                   yInd    = yInd  ,\
-                   zInd    = zInd  ,\
+                   # DriverSuperClass
+                   collectPaths  = collectPaths ,\
+                   useSubProcess = useSubProcess,\
                   )
 
     d1DF.driver1DFieldsAll()

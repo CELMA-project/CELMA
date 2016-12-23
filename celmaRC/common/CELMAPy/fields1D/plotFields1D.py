@@ -50,7 +50,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, radialDict, figName, savePath, plotOrder=None):
+    def setData(self, radialDict, figName, plotOrder=None):
         #{{{docstring
         """
         Sets the radial data and set up the plotting
@@ -74,8 +74,6 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
                 * "thetaPos" - The theta position
         figName : str
             Name of the figure
-        savePath : str
-            Destination to save the plot in.
         plotOrder : [None|sequence of str]
             If given: A sequence of the variable names in the order to
             plot them
@@ -90,7 +88,6 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         thetaPos       = radialDict.pop("thetaPos")
 
         self._figName  = figName
-        self._savePath = savePath
 
         # Make axes and colors
         self._createFiguresAndAxes()
@@ -245,7 +242,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, parallelDict, figName, savePath, plotOrder=None):
+    def setData(self, parallelDict, figName, plotOrder=None):
         #{{{docstring
         """
         Sets the parallel data and set up the plotting
@@ -269,8 +266,6 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
                 * "thetaPos" - The theta position
         figName : str
             Name of the figure
-        savePath : str
-            Destination to save the plot in.
         plotOrder : [None|sequence of str]
             If given: A sequence of the variable names in the order to
             plot them
@@ -285,7 +280,6 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         thetaPos       = parallelDict.pop("thetaPos")
 
         self._figName  = figName
-        self._savePath = savePath
 
         # Make axes and colors
         self._createFiguresAndAxes()
