@@ -257,7 +257,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             pltVarName = self._ph.getVarPltName(key)
             if self.uc.convertToPhysical:
                 legend = self._varLegendTemplate.\
-                    format(pltVarName, **self._uc.conversionDict[key])
+                    format(pltVarName, **self.uc.conversionDict[key])
             else:
                 legend = "${}$".format(pltVarName)
             # Do the plot
@@ -301,7 +301,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             pltVarName = self._ph.getVarPltName(self._ddtVar)
             if self.uc.convertToPhysical:
                 legend = self._varLegendTemplate.\
-                    format(pltVarName, **self._uc.conversionDict[key])
+                    format(pltVarName, **selfuc.conversionDict[key])
             else:
                 legend = "${}$".format(pltVarName)
 
