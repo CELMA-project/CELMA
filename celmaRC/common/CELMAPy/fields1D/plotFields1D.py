@@ -124,11 +124,9 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
 
     #{{{plotAndSaveProfile
     def plotAndSaveProfile(self):
-        #{{{docstring
         """
         Performs the actual plotting of the radial plane
         """
-        #}}}
 
         # Set the fileName
         self._fileName =\

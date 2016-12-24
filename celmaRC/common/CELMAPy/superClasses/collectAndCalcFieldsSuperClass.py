@@ -1,95 +1,41 @@
 #!/usr/bin/env python
 
 """
-Contains class for collecting and calculating the 2D fields
+Contains super class for setting data for 1D and 2D fields collection.
 """
 
-from ..collectAndCalcHelpers import DimensionsHelper
-from ..unitsConverter import UnitsConverter
+from .collectAndCalcSuperClass import CollectAndCalcSuperClass
 
 #{{{CollectAndCalcFieldsSuperClass
-class CollectAndCalcFieldsSuperClass(object):
+class CollectAndCalcFieldsSuperClass(CollectAndCalcSuperClass):
     """
     Super class for field collection.
 
-    Handles common plot options and saving.
+    Handles setting of data for field collection.
     """
 
     #{{{constructor
-    def __init__(self                      ,\
-                 collectPaths              ,\
-                 convertToPhysical = True  ,\
-                 xguards           = False ,\
-                 yguards           = False ,\
-                 uc                = None  ,\
-                 dh                = None  ,\
-                ):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Super constructor for collection and calculation of fields.
 
         This constructor will:
-            * Set the member data
-            * Create the UnitsConverter
-            * Create the DimensionsHelper.
+            * Call the parent class
 
         Parameters
         ----------
-        collectPaths : tuple of strings
-            The paths to collect from
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
-        xguards : bool
-            If the ghost points in x should be collected.
-        xguards : bool
-            If the ghost points in y should be collected.
-        uc : [None|UnitsConverter]
-            If not given, the function will create the instance itself.
-            However, there is a possibility to supply this in order to
-            reduce overhead.
-        dh : [None|DimensionsHelper]
-            If not given, the function will create the instance itself.
-            However, there is a possibility to supply this in order to
-            reduce overhead.
+        *args : positional arguments
+            See the parent constructor for details.
+        **kwargs : keyword arguments
+            See the parent constructor for details.
         """
         #}}}
 
-        self._collectPaths = collectPaths
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
 
-        self._xguards = xguards
-        self._yguards = yguards
-
-        if uc is None:
-            # Create the units convertor object
-            uc = UnitsConverter(collectPaths[0], convertToPhysical)
-        # Toggle convertToPhysical in case of errors
-        self.convertToPhysical = uc.convertToPhysical
-
-        if dh is None:
-            # Create the dimensions helper object
-            dh = DimensionsHelper(collectPaths[0], uc)
-
-        self.uc = uc
-        self._dh = dh
-
-        self._notCalled = ["setVarName", "setSlices"]
-    #}}}
-
-    #{{{setVarName
-    def setVarName(self, varName):
-        #{{{docstring
-        """
-        Sets the varName.
-
-        Parameters
-        ----------
-        varName : str
-            Variable to collect.
-        """
-        #}}}
-        if "setVarName" in self._notCalled:
-            self._notCalled.remove("setVarName")
-        self._varName = varName
+        self._notCalled.append("setSlices")
     #}}}
 
     #{{{setSlice
