@@ -29,7 +29,7 @@ def driver2DFieldPerpSingle(collectPaths     ,\
                             varyMaxMin       ,\
                             plotSuperKwargs  ,\
                                             ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single perpendicular 2D plot
 
@@ -72,7 +72,7 @@ def driver2DFieldPerpSingle(collectPaths     ,\
 
     # Set the slice
     ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
-    # Set name and execute
+    # Set name
     ccf2D.setVarName(varName)
     # Execute the collection
     perp2D = ccf2D.executeCollectAndCalc()
@@ -109,7 +109,7 @@ def driver2DFieldParSingle(collectPaths     ,\
                            varyMaxMin       ,\
                            plotSuperKwargs  ,\
                                             ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single parallel 2D plot
 
@@ -153,7 +153,7 @@ def driver2DFieldParSingle(collectPaths     ,\
 
     # Set the slice
     ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
-    # Set name and execute
+    # Set name and
     ccf2D.setVarName(varName)
     # Execute the collection
     par2D = ccf2D.executeCollectAndCalc()
@@ -191,7 +191,7 @@ def driver2DFieldPolSingle(collectPaths     ,\
                            varyMaxMin       ,\
                            plotSuperKwargs  ,\
                                             ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single poloidal 2D plot
 
@@ -235,7 +235,7 @@ def driver2DFieldPolSingle(collectPaths     ,\
 
     # Set the slice
     ccf2D.setSlice(xInd, ySlice, zSlice, tSlice)
-    # Set name and execute
+    # Set name
     ccf2D.setVarName(varName)
     # Execute the collection
     pol2D = ccf2D.executeCollectAndCalc()
@@ -274,7 +274,7 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
                                varyMaxMin       ,\
                                plotSuperKwargs  ,\
                                                 ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single perpendicular and parallel 2D plot
 
@@ -372,7 +372,7 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
                                varyMaxMin       ,\
                                plotSuperKwargs  ,\
                                                 ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single perpendicular and parallel 2D plot
 

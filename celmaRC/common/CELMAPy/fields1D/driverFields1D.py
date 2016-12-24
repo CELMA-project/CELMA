@@ -23,7 +23,7 @@ def driver1DFieldSingle(collectPaths     ,\
                         hyperIncluded    ,\
                         plotSuperKwargs  ,\
                         ):
-    #{{{doctring
+    #{{{docstring
     """
     Driver for plotting a single predefined fieldPlotType plot
 
@@ -52,6 +52,8 @@ def driver1DFieldSingle(collectPaths     ,\
         * "parallel"  - Parallel profiles will be used.
     hyperIncluded : bool
         If hyper viscosities are used.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
     """
     #}}}
 
@@ -108,7 +110,7 @@ def driver1DFieldSingle(collectPaths     ,\
 
 #{{{getCollectFieldsAndPlotOrder
 def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
-    #{{{doctring
+    #{{{docstring
     """
     Returns a tuple of the fields to collect and how to organize them
 

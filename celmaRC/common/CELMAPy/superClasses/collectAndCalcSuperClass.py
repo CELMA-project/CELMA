@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 """
-Contains the super class for the collect and calc
+Contains super class for setting data for collection.
 """
 
+from ..collectAndCalcHelpers import DimensionsHelper
 from ..unitsConverter import UnitsConverter
 
 #{{{CollectAndCalcSuperClass
@@ -12,50 +13,80 @@ class CollectAndCalcSuperClass(object):
     The parent collect and calc class
     """
 
-    #{{{Constructor
-    def __init__(self                     ,\
-                 dmp_folders              ,\
-                 collectPaths      = None ,\
-                 convertToPhysical = False,\
-                 uc                = None ,\
-                 ):
+    #{{{constructor
+    def __init__(self                      ,\
+                 collectPaths              ,\
+                 convertToPhysical = True  ,\
+                 xguards           = False ,\
+                 yguards           = False ,\
+                 uc                = None  ,\
+                 dh                = None  ,\
+                ):
         #{{{docstring
         """
-        This constructor
+        Super constructor for collection and calculatio.
 
-        * Sets the dmp_folders, collectPaths and convertToPhysical
-        * Creates a UnitsConverter if none is given
+        This constructor will:
+            * Set the member data
+            * Create the UnitsConverter
+            * Create the DimensionsHelper.
 
         Parameters
         ----------
-        dmp_folders: tuple
-            This is the output dmp_folder from bout_runners.
-            Typically, these are the folders in a given scan
-        collectPaths : [None|tuple]
-            Paths to collect from.
-            If None dmp_folders will be set to collectPaths
+        collectPaths : tuple of strings
+            The paths to collect from
         convertToPhysical : bool
-            If the physical or normalized units should be plotted.
+            Whether or not to convert to physical units.
+        xguards : bool
+            If the ghost points in x should be collected.
+        xguards : bool
+            If the ghost points in y should be collected.
         uc : [None|UnitsConverter]
-            The UnitsConverter will be set from the first element in
-            collectPaths if not given.
+            If not given, the function will create the instance itself.
+            However, there is a possibility to supply this in order to
+            reduce overhead.
+        dh : [None|DimensionsHelper]
+            If not given, the function will create the instance itself.
+            However, there is a possibility to supply this in order to
+            reduce overhead.
         """
         #}}}
 
-        # Set the member data
-        self.dmp_folders = dmp_folders
-
-        # Set the collection paths
-        if collectPaths is None:
-            collectPaths  = tuple(dmp_folders)
-        else:
-            collectPaths = collectPaths
-
         self._collectPaths = collectPaths
 
-        # Make the unitsConverter
-        if uc is None:
-            self.uc = UnitsConverter(collectPaths[0], convertToPhysical)
+        self._xguards = xguards
+        self._yguards = yguards
 
-        self.convertToPhysical = self.uc.convertToPhysical
+        if uc is None:
+            # Create the units convertor object
+            uc = UnitsConverter(collectPaths[0], convertToPhysical)
+        # Toggle convertToPhysical in case of errors
+        self.convertToPhysical = uc.convertToPhysical
+
+        if dh is None:
+            # Create the dimensions helper object
+            dh = DimensionsHelper(collectPaths[0], uc)
+
+        self.uc = uc
+        self._dh = dh
+
+        self._notCalled = ["setVarName"]
+    #}}}
+
+    #{{{setVarName
+    def setVarName(self, varName):
+        #{{{docstring
+        """
+        Sets the varName.
+
+        Parameters
+        ----------
+        varName : str
+            Variable to collect.
+        """
+        #}}}
+        if "setVarName" in self._notCalled:
+            self._notCalled.remove("setVarName")
+        self._varName = varName
+    #}}}
 #}}}
