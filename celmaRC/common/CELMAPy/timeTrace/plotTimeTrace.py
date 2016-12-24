@@ -2,39 +2,52 @@
 
 """Class for timeTrace plot"""
 
-from ..superClasses import CollectAndCalcSuperClass
+from ..superClasses import plotSuperClass
 from ..plotHelpers import seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-
-#        # Make the UnitsConverter object
-#        self.uc = UnitsConverter(path, convertToPhysical)
-#        # Reset convertToPhysical from the results of the uc constructor
-#        self.convertToPhysical = self.uc.convertToPhysical
-#
-#        # Make the PlotHelpers object
-#        self.ph = PlotHelper(self.convertToPhysical)
-#        self.ph.makeDimensionStringsDicts(self.uc)
 #{{{PlotTimeTrace
-class PlotTimeTrace():
+class PlotTimeTrace(PlotSuperClass):
     """
     Class which contains the time trace data and the plotting configuration.
     """
 
-    #{{{__init___
-    def __init__(self      ,\
-                 timeTraces,\
-                 mode      ):
+    #{{{constructor
+    def __init__(self, *args, pltSize = (20,15), **kwargs):
         #{{{docstring
         """
         This constructor:
 
         * Calls the parent constructor
-        * Sets the member data
-        * Prepares the labels
-        * Sets the file name
+        * Sets the color
+        * Sets the time label
+
+        Parameters
+        ----------
+        pltSize : tuple
+            The size of the plot
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
+        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+
+        # Set the time label
+        self._timeLabel = self._ph.tTxtDict["tTxtLabel"].\
+                          format(self.uc.conversionDict["t"])
+    #}}}
+
+    #{{{setData
+    def setData(self, timeTraces, mode):
+        #{{{docstring
+        """
+        Sets the time traces to be plotted.
+
+        This function also sets the variable labels and the save name.
 
         Parameters
         ----------
@@ -49,42 +62,39 @@ class PlotTimeTrace():
 
         # Set the member data
         self._timeTraces = timeTraces
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+        self._mode = mode
 
         # Obtain the varname
         ind  = timeTraces.keys()[0]
         keys = timeTraces[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
 
-        # Set the collect path, units converter and plot helper
-        self.setCollectPaths(collectPaths, convertToPhysical, uc)
-
-# FIXME: convert?
-# FIXME: field1d etc
-        # Set the labels
-        self._timeLabel = self.ph.tTxtDict["tTxtLabel"].\
-                          format(self.uc.conversionDict["t"])
-
-        pltVarName = self.ph.getVarPltName(self._varname)
-        if mode == "normal":
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varname)
+        if self._mode == "normal":
             self._varLabel = r"${}$ $[{}]$".\
                     format(pltVarName,\
                            self.uc.conversionDict[self._varName])
-        elif mode == "fluct":
+            fluctName = ""
+        elif self._mode == "fluct":
             self._varLabel = r"$\tilde{{{}}}$ $[{}]$".\
                     format(pltVarName,\
                            self.uc.conversionDict[self._varName])
+            fluctName = "fluct"
         else:
             raise NotImplementedError("'{}'-mode not implemented.")
 
-        self._fileName = "{}.{}".\
-            format(os.path.join(self._savePath, "timeTraces"),\
-                   self._extension)
+        # Set the fileName
+        self._fileName =\
+            os.path.join(self._savePath,\
+                "{}-{}-{}".format(self._varName, "timeTraces", fluctName))
     #}}}
 
-    #{{{plotTimeTrace
-    def plotTimeTrace(self):
-        """ Plots the time traces."""
+    #{{{plotSaveShowTimeTrace
+    def plotSaveShowTimeTrace(self):
+        """
+        Performs the actual plotting.
+        """
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
@@ -106,13 +116,13 @@ class PlotTimeTrace():
         ax.set_ylabel(self._varLabel)
 
         # Make the plot look nice
-        self.ph.makePlotPretty(ax, rotation = 45)
+        self._ph.makePlotPretty(ax, rotation = 45)
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            self.ph.savePlot(fig, self._fileName, (self._leg,))
+            self._ph.savePlot(fig, self._fileName, (self._leg,))
 
         plt.close(fig)
     #}}}
