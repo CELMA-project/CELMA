@@ -33,7 +33,6 @@ class PlotTimeTrace(PlotSuperClass):
         super().__init__(*args, **kwargs)
 
         # Set the plot size
-        import pdb; pdb.set_trace()
         self._pltSize = pltSize
     #}}}
 
@@ -65,8 +64,9 @@ class PlotTimeTrace(PlotSuperClass):
         keys = timeTraces[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
 
-        # Obtain the color
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+        # Obtain the color (pad away brigthest colors)
+        pad = 3
+        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())+pad))
 
         self._prepareLabels()
 
@@ -107,21 +107,8 @@ class PlotTimeTrace(PlotSuperClass):
         else:
             raise NotImplementedError("'{}'-mode not implemented.")
 
-# FIXME: !!! In the collect routine, may have normalized...check field2D
-#        constRho = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
-#        constZ   = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
-#        thetaDeg
-#
-#        self._ph.tTxtDict["value"] =\
-#            plotNumberFormatter(self._time[tInd], None, precision=4)
-#        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
-
-# FIXME: ??? Bad
-
         # Set the time label
-        import pdb; pdb.set_trace()
-        self._timeLabel = self._ph.tTxtDict["tTxtLabel"].\
-                          format(self.uc.conversionDict["t"])
+        self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
     #}}}
 
     #{{{plotSaveShowTimeTrace

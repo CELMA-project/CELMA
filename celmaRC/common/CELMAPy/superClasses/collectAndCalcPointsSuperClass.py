@@ -141,7 +141,7 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
                 tSlice = (tSlice,)*nPoints
             else:
                 if len(xInd) != len(tSlice):
-                    message = ("Mismatch in dimension of tInd and " 
+                    message = ("Mismatch in dimension of tInd and "
                                "xInd, yInd and zInd")
                     raise ValueError(message)
 

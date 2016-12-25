@@ -193,11 +193,7 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
                         (self._varName, ) ,\
                         **collectKwargs)
         else:
-            # NOTE: We set normalized True here as the collected
-            #       variables are normalized.
-            #       Conversion to physical happens later in
-            #       executeCollectAndCalc.
-            var = self._calcNonSolvedVars(collectKwargs, normalized = True)
+            var = self._calcNonSolvedVars(collectKwargs)
 
         var  = var[self._varName]
         time = collectTime(self._collectPaths, collectKwargs["tInd"])
@@ -255,17 +251,20 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
     #}}}
 
     #{{{_calcNonSolvedVars
-    def _calcNonSolvedVars(self, collectKwargs, normalized):
+    def _calcNonSolvedVars(self, collectKwargs):
         #{{{docstring
         """
         Calculates variables wich are not solved in the simulation
+
+        NOTE: We set normalized True here as the collected
+              variables are normalized.
+              Conversion to physical happens later in
+              executeCollectAndCalc.
 
         Parameters
         ----------
         collectKwargs : dict
             Keyword arguments for collectiveCollect
-        normalized : bool
-            Whether or not the variables are normalized
 
         Returns
         -------
@@ -273,6 +272,8 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             Dictionary where the varName variable have been calculated
         """
         #}}}
+
+        normalized = True
 
         var = collectiveCollect(self._collectPaths,\
                                 ("lnN", )         ,\
