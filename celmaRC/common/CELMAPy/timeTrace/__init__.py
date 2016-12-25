@@ -5,5 +5,5 @@ Init-file for timeTrace
 """
 
 from .collectAndCalcTimeTrace import CollectAndCalcTimeTrace
-from .driverTimeTrace import driverTimeTrace
+from .driverTimeTrace import DriverTimeTrace, driverTimeTrace
 from .plotTimeTrace import PlotTimeTrace
