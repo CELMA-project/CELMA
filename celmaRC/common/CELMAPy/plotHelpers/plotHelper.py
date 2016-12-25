@@ -172,6 +172,8 @@ class PlotHelper(object):
                 r"$z{0[normalization]}$".format(self.zTxtDict)
         self.thetaTxtDict["constThetaTxt"] =\
                 r"$\theta=${0[value]}$^{{\circ}}$"
+        self.tTxtDict["tTxt"] =\
+                r"$t{0[normalization]}$".format(self.tTxtDict)
         # Set label and title templates
         if self.convertToPhysical:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]} $[{0[units]}]$".\
@@ -182,11 +184,10 @@ class PlotHelper(object):
                         format(self.zTxtDict)
             self.zTxtDict["constZTxt"] =\
                     r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
-# FIXME: time is werid
-            self.tTxtDict["tTxt"] =\
-                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
-            self.tTxtDict["tTxtLabel"] =\
-                r"$\mathrm{{t}}{0[normalization]}$ $[{0[units]}]$"
+            self.tTxtDict["tTxtLabel"] = r"{0[tTxt]} $[{0[units]}]$".\
+                        format(self.tTxtDict)
+            self.tTxtDict["consTTxt"] =\
+                        r"{0[tTxt]} $=$ {0[value]} ${0[units]}$"
         else:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]}".\
                                              format(self.rhoTxtDict)
@@ -194,9 +195,9 @@ class PlotHelper(object):
             self.zTxtDict  ["zTxtLabel"] = "{0[zTxt]}".\
                                            format(self.zTxtDict)
             self.zTxtDict  ["constZTxt"] = r"{0[zTxt]} $=$ {0[value]}"
-            self.tTxtDict["tTxt"] =\
-                r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]}"
-            self.tTxtDict  ["tTxtLabel"] = r"$t{0[normalization]}$"
+            self.tTxtDict  ["tTxtLabel"] = r"{0[tTxt]}".\
+                                         format(self.tTxtDict)
+            self.tTxtDict  ["consTTxt"] = r"{0[tTxt]} $=$ {0[value]}"
     #}}}
 
     @staticmethod

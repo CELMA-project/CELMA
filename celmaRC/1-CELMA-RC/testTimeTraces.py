@@ -22,7 +22,7 @@ def timeTraceTest():
         "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
        )
 
-    varName           = "lnN"
+    varName           = "n"
     convertToPhysical = True
     mode              = "fluct"
 
@@ -31,7 +31,7 @@ def timeTraceTest():
     zInd              = 128
     tSlice            = None
     nPoints           = 3
-    equallySpace      = None
+    equallySpace      = "x"
     steadyStatePath   = None
 
     indicesArgs   = (xInd, yInd, zInd)
@@ -52,7 +52,7 @@ def timeTraceTest():
                         "dmp_folders"  : None,\
                        }
 
-    print("\n\nTesting single time trace")
+    print("\n\nTesting time trace")
     driverTimeTrace(collectPaths     ,\
                     varName          ,\
                     convertToPhysical,\
