@@ -186,7 +186,7 @@ class PlotHelper(object):
                     r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
             self.tTxtDict["tTxtLabel"] = r"{0[tTxt]} $[{0[units]}]$".\
                         format(self.tTxtDict)
-            self.tTxtDict["consTTxt"] =\
+            self.tTxtDict["constTTxt"] =\
                         r"{0[tTxt]} $=$ {0[value]} ${0[units]}$"
         else:
             self.rhoTxtDict["rhoTxtLabel"] = "{0[rhoTxt]}".\
@@ -197,7 +197,7 @@ class PlotHelper(object):
             self.zTxtDict  ["constZTxt"] = r"{0[zTxt]} $=$ {0[value]}"
             self.tTxtDict  ["tTxtLabel"] = r"{0[tTxt]}".\
                                          format(self.tTxtDict)
-            self.tTxtDict  ["consTTxt"] = r"{0[tTxt]} $=$ {0[value]}"
+            self.tTxtDict  ["constTTxt"] = r"{0[tTxt]} $=$ {0[value]}"
     #}}}
 
     @staticmethod
