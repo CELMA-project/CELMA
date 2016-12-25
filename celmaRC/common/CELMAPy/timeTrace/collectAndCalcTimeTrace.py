@@ -8,7 +8,10 @@ from ..superClasses import CollectAndCalcPointsSuperClass
 from ..collectAndCalcHelpers import (polAvg,\
                                      collectPoint,\
                                      collectTime,\
-                                     collectPoloidalProfile)
+                                     collectPoloidalProfile,\
+                                     calcN,\
+                                     calcUIPar,\
+                                     calcUEPar)
 
 #{{{CollectAndCalcTimeTrace
 class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
@@ -149,6 +152,9 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
         """
         Collects the variable and the time.
 
+        If the varName is n, uIPar or uEPar, calculation will be done
+        through _calcNonSolvedVars
+
         Parameters
         ----------
         timeTraces : dict
@@ -176,13 +182,21 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
         time = collectTime(self._collectPaths, tInd=t)
 
         if self._mode == "normal":
-            var = collectPoint(self._collectPaths,\
-                               self._varName,\
-                               x, y, z, tInd=t)
+            collector = collectPoint
+            indArgs = (x, y, z)
         elif self._mode == "fluct":
-            var = collectPoloidalProfile(self._collectPaths,\
-                                         self._varName,\
-                                         x, y, tInd=t)
+            collector = collectPoloidalProfile
+            indArgs = (x, y)
+        if not(self._varName == "n" or\
+               self._varName == "uIPar" or\
+               self._varName == "uEPar"):
+            var = collector(self._collectPaths,\
+                            self._varName,\
+                            *indArgs, tInd=t)
+        else:
+            var = self._calcNonSolvedVars(collector,indArgs,t)
+
+        if self._mode == "fluct":
             var = (var - polAvg(var))
             timeTraces[key]["zInd"] = z
 
@@ -196,5 +210,57 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
             time = time[newSlice]
 
         return var, time
+    #}}}
+
+    #{{{_calcNonSolvedVars
+    def _calcNonSolvedVars(self,collector,indArgs,t):
+        #{{{docstring
+        """
+        Calculates variables wich are not solved in the simulation
+
+        NOTE: We set normalized True here as the collected
+              variables are normalized.
+              Conversion to physical happens later in
+              executeCollectAndCalc.
+
+        Parameters
+        ----------
+        collector : func
+            Function to use for collection
+        indArgs : tuple
+            Tuple of index arguments.
+            Either x,y and z, or x and y.
+
+        Returns
+        -------
+        var : 4d-array
+            The time trace of the calculated variable.
+        """
+        #}}}
+
+        normalized = True
+
+        lnN = collector(self._collectPaths,\
+                        "lnN"             ,\
+                        *indArgs, tInd=t)
+        n = calcN(lnN, normalized, uc = self.uc)
+        if self._varName == "n":
+            return n
+        else:
+            momDensPar = collector(self._collectPaths,\
+                                   "momDensPar"      ,\
+                                   *indArgs, tInd=t)
+            uIPar = calcUIPar(momDensPar, n)
+            if self._varName == "uIPar":
+                return uIPar
+            else:
+                jPar = collector(self._collectPaths,\
+                                "jPar"            ,\
+                                *indArgs, tInd=t)
+                uEPar = calcUEPar(uIPar     ,\
+                                  jPar      ,\
+                                  n         ,\
+                                  normalized)
+                return uEPar
     #}}}
 #}}}
