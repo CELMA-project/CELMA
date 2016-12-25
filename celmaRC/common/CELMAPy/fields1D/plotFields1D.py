@@ -163,7 +163,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         # Set the title
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[0], None)
-        curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 
@@ -193,7 +193,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
 
         # Update the title
         self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
-        curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 #}}}
@@ -355,7 +355,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         # Set the title
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[0], None)
-        curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 
@@ -385,7 +385,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
 
         # Update the title
         self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
-        curTimeTxt = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
 #}}}
