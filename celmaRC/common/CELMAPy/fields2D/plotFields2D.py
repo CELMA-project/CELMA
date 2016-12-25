@@ -197,7 +197,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         perpTitle = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
-        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._perpAx.set_title(self._axTitle.format(perpTitle, timeTitle),\
                                fontsize = self._labelSize)
 
@@ -400,7 +400,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         parTitle = self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
-        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._parAx.set_title(self._axTitle.format(parTitle, timeTitle),\
                                fontsize = self._labelSize)
 
@@ -597,7 +597,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         polTitle = self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
-        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._polAx.set_title(self._axTitle.format(polTitle, timeTitle),\
                                fontsize = self._labelSize)
 
@@ -745,7 +745,7 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         # Draw the lines
         self._drawLines()
 
-        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}\n\n\n".\
                            format(timeTitle), fontsize = self._labelSize)
     #}}}
@@ -915,7 +915,7 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
         # Draw the lines
         self._drawLines()
 
-        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+        timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}\n\n\n".\
                            format(timeTitle), fontsize = self._labelSize)
     #}}}
