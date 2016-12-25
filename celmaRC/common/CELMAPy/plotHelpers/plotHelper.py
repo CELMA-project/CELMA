@@ -182,6 +182,7 @@ class PlotHelper(object):
                         format(self.zTxtDict)
             self.zTxtDict["constZTxt"] =\
                     r"{0[zTxt]} $=$ {0[value]} ${0[units]}$"
+# FIXME: time is werid
             self.tTxtDict["tTxt"] =\
                 r"$\mathrm{{t}}{0[normalization]}$ $=$ {0[value]} ${0[units]}$"
             self.tTxtDict["tTxtLabel"] =\

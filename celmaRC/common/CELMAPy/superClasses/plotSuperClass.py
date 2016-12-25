@@ -6,7 +6,6 @@ Contains the super class for the plotting
 
 from ..driverHelpers import scanWTagSaveFunc
 from ..plotHelpers import PlotHelper
-import matplotlib.pyplot as plt
 import datetime
 import os
 

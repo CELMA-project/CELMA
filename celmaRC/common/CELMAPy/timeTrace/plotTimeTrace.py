@@ -2,8 +2,8 @@
 
 """Class for timeTrace plot"""
 
-from ..superClasses import plotSuperClass
-from ..plotHelpers import seqCMap3
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -15,14 +15,12 @@ class PlotTimeTrace(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, pltSize = (15,10), **kwargs):
         #{{{docstring
         """
         This constructor:
 
         * Calls the parent constructor
-        * Sets the color
-        * Sets the time label
 
         Parameters
         ----------
@@ -34,11 +32,9 @@ class PlotTimeTrace(PlotSuperClass):
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
-        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
-
-        # Set the time label
-        self._timeLabel = self._ph.tTxtDict["tTxtLabel"].\
-                          format(self.uc.conversionDict["t"])
+        # Set the plot size
+        import pdb; pdb.set_trace()
+        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -47,7 +43,7 @@ class PlotTimeTrace(PlotSuperClass):
         """
         Sets the time traces to be plotted.
 
-        This function also sets the variable labels and the save name.
+        This function also sets the variable labels, colors and the save name.
 
         Parameters
         ----------
@@ -65,29 +61,67 @@ class PlotTimeTrace(PlotSuperClass):
         self._mode = mode
 
         # Obtain the varname
-        ind  = timeTraces.keys()[0]
+        ind  = tuple(timeTraces.keys())[0]
         keys = timeTraces[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
 
+        # Obtain the color
+        self._colors = seqCMap3(np.linspace(0, 1, len(timeTraces.keys())))
+
+        self._prepareLabels()
+
         # Set the var label
-        pltVarName = self._ph.getVarPltName(self._varname)
-        if self._mode == "normal":
-            self._varLabel = r"${}$ $[{}]$".\
-                    format(pltVarName,\
-                           self.uc.conversionDict[self._varName])
-            fluctName = ""
-        elif self._mode == "fluct":
-            self._varLabel = r"$\tilde{{{}}}$ $[{}]$".\
-                    format(pltVarName,\
-                           self.uc.conversionDict[self._varName])
-            fluctName = "fluct"
-        else:
-            raise NotImplementedError("'{}'-mode not implemented.")
+        pltVarName = self._ph.getVarPltName(self._varName)
+
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}-{}".format(self._varName, "timeTraces", fluctName))
+                "{}-{}-{}".format(self._varName, "timeTraces", self._fluctName))
+
+        if self._extension is None:
+            self._extension = "png"
+            self._fileName = "{}.{}".format(self._fileName, self._extension)
+    #}}}
+
+    #{{{_prepareLabels
+    def _prepareLabels(self):
+        """
+        Prepares the labels for plotting.
+        """
+
+        # Set var label template
+        if self.uc.convertToPhysical:
+            unitsOrNormalization = " $[{units}]$"
+        else:
+            unitsOrNormalization = "${normalization}$"
+        if self._mode == "normal":
+            self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+            self._fluctName = ""
+        elif self._mode == "fluct":
+            self._varLabelTemplate = r"$\widetilde{{{{{{}}}}}}${}".\
+                    format(unitsOrNormalization)
+            self._fluctName = "fluct"
+        else:
+            raise NotImplementedError("'{}'-mode not implemented.")
+
+# FIXME: !!! In the collect routine, may have normalized...check field2D
+#        constRho = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
+#        constZ   = self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
+#        thetaDeg
+#
+#        self._ph.tTxtDict["value"] =\
+#            plotNumberFormatter(self._time[tInd], None, precision=4)
+#        timeTitle = self._ph.tTxtDict["tTxt"].format(self._ph.tTxtDict)
+
+# FIXME: ??? Bad
+
+        # Set the time label
+        import pdb; pdb.set_trace()
+        self._timeLabel = self._ph.tTxtDict["tTxtLabel"].\
+                          format(self.uc.conversionDict["t"])
     #}}}
 
     #{{{plotSaveShowTimeTrace
@@ -102,10 +136,28 @@ class PlotTimeTrace(PlotSuperClass):
 
         keys = sorted(self._timeTraces.keys())
 
-        for key, color in keys, self._colors:
+        for key, color in zip(keys, self._colors):
             # Make the label
             rho, theta, z = key.split(",")
-            label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta, z)
+
+            # Set values
+            self._ph.rhoTxtDict  ["value"] =\
+                    plotNumberFormatter(float(rho), None)
+            self._ph.zTxtDict    ["value"] =\
+                    plotNumberFormatter(float(z), None)
+            self._ph.thetaTxtDict["value"] =\
+                    plotNumberFormatter(float(theta), None)
+
+            # Make the const values
+            label = (r"{}$,$ {}$,$ {}").\
+                    format(\
+                        self._ph.rhoTxtDict  ["constRhoTxt"].\
+                            format(self._ph.rhoTxtDict),\
+                        self._ph.thetaTxtDict["constThetaTxt"].\
+                            format(self._ph.thetaTxtDict),\
+                        self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict),\
+                          )
 
             ax.plot(self._timeTraces[key]["time"],\
                     self._timeTraces[key][self._varName],\
@@ -122,7 +174,7 @@ class PlotTimeTrace(PlotSuperClass):
             plt.show()
 
         if self._savePlot:
-            self._ph.savePlot(fig, self._fileName, (self._leg,))
+            self._ph.savePlot(fig, self._fileName)
 
         plt.close(fig)
     #}}}
