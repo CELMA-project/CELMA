@@ -4,7 +4,7 @@
 Contains single driver and driver class for the time traces
 """
 
-from ..superClasses import CollectAndCalcPointsSuperClass
+from ..superClasses import DriverPointsSuperClass
 from .collectAndCalcTimeTrace import CollectAndCalcTimeTrace
 from .plotTimeTrace import PlotTimeTrace
 import os
@@ -37,7 +37,7 @@ def driverTimeTrace(collectPaths     ,\
     indicesArgs : tuple
         Contains xInd, yInd and zInd.
         See CollectAndCalcPointsSuperClass.setIndices for details.
-    indicesArgs : dict
+    indicesKwargs : dict
         Contains tslice, nPoints, equallySpace and steadyStatePath.
         See CollectAndCalcPointsSuperClass.setIndices for details.
     plotSuperKwargs : dict
@@ -69,95 +69,84 @@ def driverTimeTrace(collectPaths     ,\
     ptt.plotSaveShowTimeTrace()
 #}}}
 
-# FIXME: YOU ARE HERE
 #{{{DriverTimeTrace
-class DriverTimeTrace(CollectAndCalcPointsSuperClass):
+class DriverTimeTrace(DriverPointsSuperClass):
     """
-    Class which handles the time trace data.
+    Class for driving of the plotting of the time traces.
     """
 
     #{{{Constructor
-    def __init__(self                  ,\
-                 *args                 ,\
-                 timeStampFolder = True,\
+    def __init__(self                       ,\
+                 dmp_folders                ,\
+                 indicesArgs                ,\
+                 indicesKwargs              ,\
+                 plotSuperKwargs            ,\
+                 varName           = "n"    ,\
+                 mode              = "fluct",\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
-
-        * Calls the parent constructor
-        * Sets the member data
-        * Updates the savePath and makes the folder
+            * Calls the parent class
+            * Set the member data
+            * Updates the plotSuperKwargs
 
         Parameters
         ----------
-        *args : positional arguments
-            See the parent constructor for details.
-        timeStampFolder : bool
-            Whether or not to timestamp the folder
+        dmp_folders : tuple
+            Tuple of the dmp_folder (output from bout_runners).
+        indicesArgs : tuple
+            Contains xInd, yInd and zInd.
+            See CollectAndCalcPointsSuperClass.setIndices for details.
+        indicesKwargs : dict
+            Contains tslice, nPoints, equallySpace and steadyStatePath.
+            See CollectAndCalcPointsSuperClass.setIndices for details.
+        plotSuperKwargs : dict
+            Keyword arguments for the plot super class.
+        varName : str
+            Name of variable to collect and plot
+        mode : ["normal"|"fluct"]
+            If mode is "normal" the raw data is given as an output.
+            If mode is "fluct" the fluctuations are given as an output.
         **kwargs : keyword arguments
-            See the parent constructor for details.
+            See parent class for details.
         """
         #}}}
 
         # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
+        super().__init__(dmp_folders, **kwargs)
 
-        # Set member data
-        self._pltSize = (12, 9)
+        # Set the member data
+        self._varName       = varName
+        self._mode          = mode
+        self._indicesArgs   = indicesArgs
+        self._indicesKwargs = indicesKwargs
 
-        # Placeholder for the timeTrace
-        self._timeTrace = None
-
-        # Update the savePath
-        firstPathPart = os.path.dirname(self._savePath)
-        if timeStampFolder:
-            timePath = os.path.basename(self._savePath)
-        else:
-            timePath = ""
-        self._savePath = os.path.join(firstPathPart, "timeTraces", timePath)
-
-        # Make dir if not exists
-        if not os.path.exists(self._savePath):
-            os.makedirs(self._savePath)
+        # Update the plotSuperKwargs dict
+        plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{getTimeTraces
-    def getTimeTraces(self):
-        """Obtain the timeTrace"""
-        # Create the probes
-        self._timeTrace = CollectAndCalcTimeTrace(\
-                self._collectPaths                         ,\
-                self._varName                              ,\
-                self._xInd                                 ,\
-                self._yInd                                 ,\
-                self._zInd                                 ,\
-                convertToPhysical = self.convertToPhysical,\
-                mode              = self._mode             ,\
-                tSlice            = self._tSlice           ,\
+    #{{{driverTimeTrace
+    def driverTimeTrace(self):
+        #{{{docstring
+        """
+        Wrapper to driverTimeTrace
+        """
+        #}}}
+        args =  (\
+                 self._collectPaths    ,\
+                 self._varName         ,\
+                 self.convertToPhysical,\
+                 self._mode            ,\
+                 self._indicesArgs     ,\
+                 self._indicesKwargs   ,\
+                 self._plotSuperKwargs ,\
                 )
-    #}}}
-
-    #{{{plotTimeTrace
-    def plotTimeTrace(self):
-        """Plots the timeTrace"""
-
-        # Calculate the probes if not already done
-        if self._timeTrace is None:
-            self.getTimeTraces()
-
-        # Create the timeTracePlotter
-        timeTracePlotter = PlotTimeTrace(\
-                self._paths                                ,\
-                self._timeTrace                            ,\
-                convertToPhysical = self.convertToPhysical,\
-                showPlot          = self._showPlot         ,\
-                savePlot          = self._savePlot         ,\
-                extension         = self._extension        ,\
-                savePath          = self._savePath         ,\
-                pltSize           = self._pltSize          ,\
-                                  )
-
-        timeTracePlotter.plotTimeTrace()
+        if self._useSubProcess:
+            processes = Process(target = driverTimeTrace, args = args)
+            processes.start()
+        else:
+            driverTimeTrace(*args)
     #}}}
 #}}}
