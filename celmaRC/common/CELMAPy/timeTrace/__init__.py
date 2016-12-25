@@ -4,7 +4,6 @@
 Init-file for timeTrace
 """
 
-from .collectAndCalcTimeTrace import (collectAndCalcTimeTrace,\
-                                      collectAndCalcTimeTrace4d)
-from .driverTimeTrace import DriverTimeTrace
+from .collectAndCalcTimeTrace import CollectAndCalcTimeTrace
+from .driverTimeTrace import driverTimeTrace
 from .plotTimeTrace import PlotTimeTrace

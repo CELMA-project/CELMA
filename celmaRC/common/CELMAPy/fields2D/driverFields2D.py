@@ -15,7 +15,6 @@ from .plotFields2D import (PlotAnim2DPerp,\
                            PlotAnim2DPerpPol,\
                            )
 from multiprocessing import Process
-import os
 
 #{{{driver2DFieldPerpSingle
 def driver2DFieldPerpSingle(collectPaths     ,\

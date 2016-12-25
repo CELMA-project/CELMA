@@ -4,6 +4,8 @@
 Contains class for collecting and calculating points
 """
 
+from ..collectAndCalcHelpers import (findLargestRadialGradN,\
+                                     getEvenlySpacedIndices)
 from .collectAndCalcSuperClass import CollectAndCalcSuperClass
 
 #{{{CollectAndCalcPointsSuperClass
@@ -62,9 +64,9 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
             In all cases, the resulting length of the tuple must match
             the other physical dimensions.
         yInd : [int|sequence of ints]
-            The same as xInd (except the None possibility), but for the y-index.
+            The same as xInd (except the None possibility) for the y-index.
         zInd : [int|sequence of ints]
-            The same as xInd (except the None possibility), but for the z-index.
+            The same as xInd (except the None possibility) for the z-index.
         tSlice : [None|sequence of slices]
             If given this is the  slice of t to use when collecting.
             The length of the sequence must match the other input
@@ -139,7 +141,9 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
                 tSlice = (tSlice,)*nPoints
             else:
                 if len(xInd) != len(tSlice):
-                    raise ValueError("Mismatch in dimension of tInd and xInd, yInd and zInd")
+                    message = ("Mismatch in dimension of tInd and " 
+                               "xInd, yInd and zInd")
+                    raise ValueError(message)
 
         # Set the member data
         self._xInd   = xInd

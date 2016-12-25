@@ -8,8 +8,7 @@ from ..superClasses import CollectAndCalcPointsSuperClass
 from ..collectAndCalcHelpers import (polAvg,\
                                      collectPoint,\
                                      collectTime,\
-                                     collectPoloidalProfile,\
-                                     DimensionsHelper)
+                                     collectPoloidalProfile)
 
 #{{{CollectAndCalcTimeTrace
 class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
@@ -81,39 +80,39 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
         tCounter = 0
         for x, y, z in zip(self._xInd, self._yInd, self._zInd):
             # NOTE: The indices
-            rho   = dh.rho     [x]
-            theta = dh.thetaDeg[z]
-            par   = dh.z       [y]
+            rho   = self._dh.rho     [x]
+            theta = self._dh.thetaDeg[z]
+            par   = self._dh.z       [y]
 
             # Add key and dict to timeTraces
             key = "{},{},{}".format(rho,theta,par)
             timeTraces[key] = {}
 
             if self._tSlice is not None:
-                tStart = tSlice[tCounter].start
-                tEnd   = tSlice[tCounter].end
+                tStart = self._tSlice[tCounter].start
+                tEnd   = self._tSlice[tCounter].end
                 t = (tStart, tEnd)
             else:
                 t = None
 
             tCounter += 1
 
-            var, time self._collectWrapper(x,y,z,t)
+            var, time = self._collectWrapper(timeTraces,key,x,y,z,t)
 
             if self.uc.convertToPhysical:
-                timeTraces[key][varName] =\
-                        self.uc.physicalConversion(var , varName)
+                timeTraces[key][self._varName] =\
+                        self.uc.physicalConversion(var , self._varName)
                 timeTraces[key]["time"]  =\
                         self.uc.physicalConversion(time, "t")
             else:
-                timeTraces[key][varName] = var
-                timeTraces[key]["time"]  = time
+                timeTraces[key][self._varName] = var
+                timeTraces[key]["time"]        = time
 
         return timeTraces
     #}}}
 
     #{{{convertTo1D
-    def convertTo1D(timeTraces):
+    def convertTo1D(self, timeTraces):
         #{{{docstring
         """
         Converts the 4d array to a 1d array and pops any eventual zInd.
@@ -145,13 +144,17 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
     #}}}
 
     #{{{_collectWrapper
-    def _collectWrapper(self,x,y,z,t):
+    def _collectWrapper(self,timeTraces,key,x,y,z,t):
         #{{{docstring
         """
         Collects the variable and the time.
 
         Parameters
         ----------
+        timeTraces : dict
+            Dict containing the time traces
+        key : str
+            Key with the point position
         x : int
             The x index to collect from
         y : int
@@ -170,7 +173,7 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
         """
         #}}}
 
-        time = collectTime(collectPaths, tInd=t)
+        time = collectTime(self._collectPaths, tInd=t)
 
         if self._mode == "normal":
             var = collectPoint(self._collectPaths,\
