@@ -42,7 +42,7 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
     #}}}
 
     #{{{setIndices
-    def setIndices(self, xInd, yInd, zInd, tSlice=None,\
+    def setIndices(self, xInd, yInd, zInd=None, tSlice=None,\
                    nPoints = None, equallySpace = "x", steadyStatePath = None):
         #{{{docstring
         """
@@ -64,9 +64,11 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
             In all cases, the resulting length of the tuple must match
             the other physical dimensions.
         yInd : [int|sequence of ints]
-            The same as xInd (except the None possibility) for the y-index.
-        zInd : [int|sequence of ints]
-            The same as xInd (except the None possibility) for the z-index.
+            The same as xInd (except the None possibility for the y-index).
+        zInd : [None|int|sequence of ints]
+            The same as xInd, except that the None possibility will set
+            zInd to None. This is used for example when collecting and
+            calculating the fourier modes.
         tSlice : [None|sequence of slices]
             If given this is the  slice of t to use when collecting.
             The length of the sequence must match the other input
