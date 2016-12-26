@@ -69,11 +69,11 @@ class PlotFourierModes(PlotSuperClass):
         keys = fourierModes[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
         # Strip the variable name if the
-        self._varName.replace("Magnitude","")
-        self._varName.replace("AngularVelocity","")
+        self._varName = self._varName.replace("Magnitude","")
+        self._varName = self._varName.replace("AngularVelocity","")
 
         # Obtain the color
-        self._colors = seqCMap2(np.linspace(0, 1, len(fourierModes.keys())))
+        self._colors = seqCMap2(np.linspace(0, 1, self._nModes))
 
         self._prepareLabels()
 
@@ -95,7 +95,7 @@ class PlotFourierModes(PlotSuperClass):
     #{{{_prepareLabels
     def _prepareLabels(self):
         #{{{docstring
-        """
+        r"""
         Prepares the labels for plotting.
 
         NOTE: As we are taking the fourier transform in the
@@ -123,13 +123,13 @@ class PlotFourierModes(PlotSuperClass):
         Performs the actual plotting.
         """
 
-        # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
-
         keys = sorted(self._fourierModes.keys())
 
         for key in keys:
+            # Create the plot
+            fig = plt.figure(figsize = self._pltSize)
+            ax  = fig.add_subplot(111)
+
             # Make the label
             rho, z = key.split(",")
 
@@ -139,25 +139,31 @@ class PlotFourierModes(PlotSuperClass):
             self._ph.zTxtDict    ["value"] =\
                     plotNumberFormatter(float(z), None)
 
-            rho   = self._ph.rhoTxtDict  ["constRhoTxt"].\
+            rhoVal   = self._ph.rhoTxtDict["value"].replace("$","")
+            rhoTitle = self._ph.rhoTxtDict  ["constRhoTxt"].\
                             format(self._ph.rhoTxtDict)
-            theta = self._ph.zTxtDict["constZTxt"].\
-                            format(self._ph.zTxtDict),\
+            zVal     = self._ph.zTxtDict["value"].replace("$","")
+            zTitle   = self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict)
 
             # Make the const values
-            title = (r"{}$,$ {}").format(rho, theta)
+            title = (r"{}$,$ {}").format(rhoTitle, zTitle)
 
             # Range starts from one, as we excludes the offset mode
-            for modeNr, color in zip(range(1, self._nModes), self._colors)
+            for modeNr, color in zip(range(1, self._nModes), self._colors):
                 label=r"$m_\theta={}$".format(modeNr)
 
-                ax.plot(self._fourierModes[key]["time"],\
-                        self._fourierModes[key][self._varName+"Magnitude"],\
-                        color=color, label=label)
+                ax.plot(\
+                    self._fourierModes[key]["time"],\
+                    self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                    color=color, label=label)
 
             # Set axis labels
             ax.set_xlabel(self._timeLabel)
             ax.set_ylabel(self._varLabel)
+
+            # Set logarithmic scale
+            ax.set_yscale("log")
 
             # Set the title
             ax.set_title(title)
@@ -170,9 +176,9 @@ class PlotFourierModes(PlotSuperClass):
 
             if self._savePlot:
                 # Sets the save name
-                self._fileName = "{}-rho{}-z{}.{}".\
-                        format(self._fileName, rho, z, self._extension)
-                self._ph.savePlot(fig, self._fileName)
+                fileName = "{}-rho-{}-z-{}.{}".\
+                    format(self._fileName, rhoVal, zVal, self._extension)
+                self._ph.savePlot(fig, fileName)
 
             plt.close(fig)
     #}}}
