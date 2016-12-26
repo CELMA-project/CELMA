@@ -5,19 +5,19 @@ Contains single driver and driver class for the fourier modes
 """
 
 from ..superClasses import DriverPointsSuperClass
-from .collectAndCalcFourierMode import CollectAndCalcFourierMode
-from .plotFourierMode import PlotFourierMode
-import os
+from .collectAndCalcFourierModes import CollectAndCalcFourierModes
+from .plotFourierModes import PlotFourierModes
+from multiprocessing import Process
 
-#{{{driverFourierMode
-def driverFourierMode(collectPaths     ,\
-                      varName          ,\
-                      convertToPhysical,\
-                      nModes           ,\
-                      indicesArgs      ,\
-                      indicesKwargs    ,\
-                      plotSuperKwargs  ,\
-                      ):
+#{{{driverFourierModes
+def driverFourierModes(collectPaths     ,\
+                       varName          ,\
+                       convertToPhysical,\
+                       nModes           ,\
+                       indicesArgs      ,\
+                       indicesKwargs    ,\
+                       plotSuperKwargs  ,\
+                       ):
     #{{{docstring
     """
     Driver for plotting fourier modes.
@@ -44,11 +44,10 @@ def driverFourierMode(collectPaths     ,\
     """
     #}}}
 
-
     # Create collect object
-    ccfm = CollectAndCalcFourierMode(collectPaths                         ,\
-                                     convertToPhysical = convertToPhysical,\
-                                    )
+    ccfm = CollectAndCalcFourierModes(collectPaths                         ,\
+                                      convertToPhysical = convertToPhysical,\
+                                     )
 
     # Set the slice
     ccfm.setIndices(*indicesArgs, **indicesKwargs)
@@ -62,26 +61,26 @@ def driverFourierMode(collectPaths     ,\
     fm = ccfm.calcMagnitude(fm)
 
     # Plot
-    pfm = PlotFourierMode(ccfm.uc         ,\
-                          **plotSuperKwargs)
+    pfm = PlotFourierModes(ccfm.uc         ,\
+                           **plotSuperKwargs)
     pfm.setData(fm, nModes)
-    pfm.plotSaveShowFourierMode()
+    pfm.plotSaveShowFourierModes()
 #}}}
 
-#{{{DriverFourierMode
-class DriverFourierMode(DriverPointsSuperClass):
+#{{{DriverFourierModes
+class DriverFourierModes(DriverPointsSuperClass):
     """
     Class for driving of the plotting of the fourier modes.
     """
 
     #{{{Constructor
-    def __init__(self                       ,\
-                 dmp_folders                ,\
-                 indicesArgs                ,\
-                 indicesKwargs              ,\
-                 plotSuperKwargs            ,\
-                 varName           = "n"    ,\
-                 mode              = "fluct",\
+    def __init__(self                   ,\
+                 dmp_folders            ,\
+                 indicesArgs            ,\
+                 indicesKwargs          ,\
+                 plotSuperKwargs        ,\
+                 varName           = "n",\
+                 nModes            = 7  ,\
                  **kwargs):
         #{{{docstring
         """
@@ -104,9 +103,8 @@ class DriverFourierMode(DriverPointsSuperClass):
             Keyword arguments for the plot super class.
         varName : str
             Name of variable to collect and plot
-        mode : ["normal"|"fluct"]
-            If mode is "normal" the raw data is given as an output.
-            If mode is "fluct" the fluctuations are given as an output.
+        nModes : int
+            Number of modes to plot.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -117,12 +115,13 @@ class DriverFourierMode(DriverPointsSuperClass):
 
         # Set the member data
         self._varName       = varName
-        self._mode          = mode
+        self._nModes        = nModes
         self._indicesArgs   = indicesArgs
         self._indicesKwargs = indicesKwargs
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        plotSuperKwargs.update({"plotType"   :"fourierModes"})
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
@@ -137,15 +136,15 @@ class DriverFourierMode(DriverPointsSuperClass):
                  self._collectPaths    ,\
                  self._varName         ,\
                  self.convertToPhysical,\
-                 self._mode            ,\
+                 self._nModes          ,\
                  self._indicesArgs     ,\
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
-            processes = Process(target = driverFourierMode, args = args)
+            processes = Process(target = driverFourierModes, args = args)
             processes.start()
         else:
-            driverFourierMode(*args)
+            driverFourierModes(*args)
     #}}}
 #}}}

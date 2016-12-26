@@ -5,9 +5,7 @@ Contains class for collecting and calculating the fourier modes
 """
 
 from ..superClasses import CollectAndCalcPointsSuperClass
-from ..collectAndCalcHelpers import (polAvg,\
-                                     collectPoint,\
-                                     collectTime,\
+from ..collectAndCalcHelpers import (collectTime,\
                                      collectPoloidalProfile,\
                                      calcN,\
                                      calcUIPar,\
@@ -101,8 +99,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         return fourierModes
     #}}}
 
-    #{{{_convertTo2D
-    def _convertTo2D(self, fourierModes):
+    #{{{convertTo2D
+    def convertTo2D(self, fourierModes):
         #{{{docstring
         """
         Converts the 4d array to a 2d array.
@@ -258,9 +256,9 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         #}}}
 
         for key in fourierModes2d.keys():
-            modes = fourierModes2d[keys][self._varName]
-            _, N  = modes.shape
-            nyquistMode = N/2 + 1
+            modes = fourierModes2d[key][self._varName]
+            tSize, N  = modes.shape
+            nyquistMode = int(N/2) + 1
             magnitude = np.zeros((tSize, nyquistMode))
             #{{{ NOTE: We are dealing with a real signal:
             #          As the fourier transform breaks the signal up in
@@ -275,17 +273,19 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             # Magnitude of the signal
             # https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
             # The offset mode and the Nyquist mode
-            magnitude[:,0]           = np.abs(modes[:,0])/N
-            magnitude[:,nyquistMode] = np.abs(modes[:,nyquistMode])/N
+            magnitude[:,0]             = np.abs(modes[:,0])/N
+            # Minus 1 as indices count from 0
+            magnitude[:,nyquistMode-1] = np.abs(modes[:,nyquistMode])/N
             # Loop over all the modes
             # NOTE: Range exludes the last point
-            for modeNr in range(1, nyquistMode):
+            # Minus 1 as indices count from 0
+            for modeNr in range(1, nyquistMode-1):
                 posFreq              = np.abs(modes[:,  modeNr])
                 negFreq              = np.abs(modes[:, -modeNr])
                 magnitude[:, modeNr] = (posFreq + negFreq)/N
 
             # Insert into the dict
-            fourierModes2d[key][self._varName+"Magnitude"] = magnitudes
+            fourierModes2d[key][self._varName+"Magnitude"] = magnitude
         return fourierModes2d
     #}}}
 
@@ -309,11 +309,11 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         #}}}
 
         for key in fourierModes2d.keys():
-            modes    = fourierModes2d[keys][self._varName]
-            time     = fourierModes2d[keys]["time"]
+            modes    = fourierModes2d[key][self._varName]
+            time     = fourierModes2d[key]["time"]
             tSize, N = modes.shape
-            nyquistMode = N/2 + 1
-            phaseShift = np.zeros((tSize, nyquistMode))
+            nyquistMode = int(N/2) + 1
+            angularFreq = np.zeros((tSize-1, nyquistMode))
             #{{{ NOTE: We are dealing with a real signal:
             #          As the signal is real only one of the phase sifts
             #          are needed. Notice that for a real signal the
@@ -324,8 +324,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             # The phase shift is found from atan2
             # http://dsp.stackexchange.com/questions/23994/meaning-of-real-and-imaginary-part-of-fourier-transform-of-a-signal
             # atan2 in [-pi, pi]
-
-            for modeNr in range(1, nyquistMode):
+            # Minus 1 as indices counts from 0
+            for modeNr in range(1, nyquistMode-1):
                 for tInd in range(1, tSize):
                     deltaT = time[tInd] - time[tInd-1]
                     prevPhaseShift = np.arctan2(modes[tInd-1, modeNr].imag,\
@@ -358,7 +358,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                     # The angular speed (angular frequency) has units rad/s.
                     # Remember that if angularFreq*t = 2*pi the perturbation has
                     # revolved one time
-                    angularFreq[nr] = phaseShiftDiff/deltaT
+                    angularFreq[tInd-1] = phaseShiftDiff/deltaT
 
             # Insert into the dict
             fourierModes2d[key][self._varName+"AngularVelocity"] = angularFreq

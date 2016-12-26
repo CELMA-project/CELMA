@@ -4,6 +4,8 @@
 Contains the super class for the drivers
 """
 
+import matplotlib.pylab as plt
+
 #{{{DriverSuperClass
 class DriverSuperClass(object):
     """
