@@ -83,7 +83,8 @@ class PlotTimeTrace(PlotSuperClass):
 
         if self._extension is None:
             self._extension = "png"
-            self._fileName = "{}.{}".format(self._fileName, self._extension)
+
+        self._fileName = "{}.{}".format(self._fileName, self._extension)
     #}}}
 
     #{{{_prepareLabels
