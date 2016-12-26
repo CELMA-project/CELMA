@@ -7,7 +7,7 @@ Contains single driver and driver class for the time traces
 from ..superClasses import DriverPointsSuperClass
 from .collectAndCalcTimeTrace import CollectAndCalcTimeTrace
 from .plotTimeTrace import PlotTimeTrace
-import os
+from multiprocessing import Process
 
 #{{{driverTimeTrace
 def driverTimeTrace(collectPaths     ,\
@@ -124,6 +124,7 @@ class DriverTimeTrace(DriverPointsSuperClass):
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        plotSuperKwargs.update({"plotType"   :"timeTraces"})
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 

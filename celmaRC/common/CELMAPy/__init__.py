@@ -1,3 +1,3 @@
 #!/usr/bin/env python
 
-""" Init for the CELMAPython package"""
+""" Init for the CELMAPy package"""

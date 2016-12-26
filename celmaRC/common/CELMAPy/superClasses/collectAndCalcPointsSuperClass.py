@@ -120,12 +120,12 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
                                               "y", yInd, nPoints)
             else:
                 yInd = (yInd,)*nPoints
-        if type(zInd) == int:
-            if equallySpace == "z":
-                zInd = getEvenlySpacedIndices(self._collectPaths[0],\
-                                              "z", zInd, nPoints)
-            else:
-                zInd = (zInd,)*nPoints
+        if type(zInd) == int or zInd is None:
+            if zInd is not None:
+                if equallySpace == "z":
+                    zInd = getEvenlySpacedIndices(self._collectPaths[0],\
+                                                  "z", zInd, nPoints)
+            zInd = (zInd,)*nPoints
 
         # Guard
         if (len(xInd) != len(yInd)) or\
