@@ -10,89 +10,242 @@ import matplotlib.pylab as plt
 from matplotlib.gridspec import GridSpec
 import os
 
+
+
+
+
+
+
+
+
+
+
+YOU ARE HERE
+import pandas as pd
+B0s=[0.01,0.02]
+modes=[100,200,300]
+multiTuples = []
+fullDict = {"gr":[], "grStd":[], "aV":[], "aVStd":[]}
+for B0 in B0s:
+    for mode in modes:
+        for key in fullDict.keys():
+            fullDict[key].append(mode*B0)
+        multiTuples.append((B0, mode))
+df = pd.DataFrame(fullDict, index=pd.MultiIndex.from_tuples(multiTuples, names=["B0","modes"]))
+print(df)
+print("Outer level name")
+print(df.index.names[0])
+print("Get outer level indices")
+print(df.index.levels[0])
+# Loop through indices
+# One of the indices is 0.01
+import matplotlib.pyplot as plt
+plt.errorbar(df.loc[0.01]["gr"].index, df.loc[0.01]["gr"].values, yerr=df.loc[0.01]["grStd"].values)
+ax = plt.gca()
+ax.set_ylabel("gr")
+ax.set_xlabel(df.loc[0.01]["gr"].index.name)
+#plt.show()
+# Swap levels
+df2 = df.swaplevel()
+print("Get outer level name")
+print(df2.index.names[0])
+
+
+
+
 #{{{PlotGrowthRates
-class PlotGrowthRates(object):
+class PlotGrowthRates(PlotSuperClass):
     """Class which contains the growth rates and the plotting configuration."""
 
-    #{{{__init___
-    def __init__(self                      ,\
-                 paths                     ,\
-                 growthRates               ,\
-                 convertToPhysical = False ,\
-                 showPlot          = False ,\
-                 savePlot          = False ,\
-                 extension         = "png" ,\
-                 savePath          = "."   ,\
-                 pltSize           = (9,12),\
-                 ):
+    #{{{Static members
+    _mapToPltText = {"modeNr":"$\mathrm{Mode\quad number}$",\
+                     "B0"    :"$B_0$"                      ,\
+                     "Te0"   :"$T_e$"                      ,\
+                     "nn"    :"$n_n$"                      ,\
+                     "length":"$z$"                        ,\
+                    }
+
+    _errorbarOptions = {"color"     :"k",\
+                        "fmt"       :"o",\
+                        "fmt"       :"o",\
+                        "markersize":10 ,\
+                        "ecolor"    :"k",\
+                        "capsize"   :7  ,\
+                        "elinewidth":3  ,\
+                        }
+
+    _markeredgewidth = 3
+
+    _all = slice(None)
+    #}}}
+
+    #{{{constructor
+    def __init__(self, *args, pltSize = (15,10), **kwargs):
         #{{{docstring
         """
-        The constructor for the PlotGrowthRates object.
+        This constructor:
 
-        Sets the member data.
+        * Calls the parent constructor
 
         Parameters
         ----------
-        paths : str
-            Paths to collect from (used to make the PlotHelper object)
-        growthRates : DataFrame
-            The data frame to be plotted. The data frame must be
-            orgnized such that:
-            1. The x axis will be given by splitting growthRates.columns
-               by "=" and take the value right og the "="
-            2. The index only has two levels
-            3. The plot name is given at the first level of
-               growthRates.index
-            4. The growth rate, angular frequency and their standar
-               deviation is given in the innermost level of growthRates
-        showPlot : bool
-            If the plots should be displayed.
-        savePlot : bool
-            If the plots should be saved.
-        extension : str
-            Extension to use on the plots
-        savePath : str
-            Path to save destination. Must exist.
         pltSize : tuple
-            Size of the plots given as (x, y)
+            The size of the plot
         """
         #}}}
 
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
+
         # Set the member data
-        self._df        = growthRates
-        self._showPlot  = showPlot
-        self._savePlot  = savePlot
-        self._extension = extension
-        self._savePath  = savePath
-
-        # Make the PlotHelper object
-        self._helper = PlotHelper(paths[0][0]                          ,\
-                                  useSpatial        = False            ,\
-                                  convertToPhysical = convertToPhysical,\
-                                 )
-
-        # Set the plot size
         self._pltSize = pltSize
+    #}}}
 
-        # Dict used as an equivalent to C++ maps
-        self._mapToPltText = {"modeNr":"$\mathrm{Mode\quad number}$",\
-                              "B0"    :"$B_0$"                      ,\
-                              "Te0"   :"$T_e$"                      ,\
-                              "nn"    :"$n_n$"                      ,\
-                              "length":"$z$"                        ,\
-                             }
+    #{{{setData
+    def setData(self, fourierModes, nModes = 7):
+        #{{{docstring
+        """
+        Sets the fourier modes to be plotted.
 
-        self._errorbarOptions = {"color"     :"k",\
-                                 "fmt"       :"o",\
-                                 "fmt"       :"o",\
-                                 "markersize":10 ,\
-                                 "ecolor"    :"k",\
-                                 "capsize"   :7  ,\
-                                 "elinewidth":3  ,\
-                                 }
+        This function:
+            * Sets the variable labels
+            * Set the colors
+            * Prepares the save name.
 
-        self._markeredgewidth = 3
-        self._all = slice(None)
+        Parameters
+        ----------
+        fourierModes : dict
+            Dictionary where the keys are on the form "rho,z".
+            The value is a dict containing of
+            {varName:fourierModes, "time":time}
+        nModes : int
+            Number of modes to use
+        """
+        #}}}
+
+        # Plus one as the offset mode will be excluded
+        self._nModes  = nModes + 1
+
+        # Set the member data
+        self._fourierModes = fourierModes
+
+        # Obtain the varname
+        ind  = tuple(fourierModes.keys())[0]
+        keys = fourierModes[ind].keys()
+        self._varName = tuple(var for var in keys if var != "time")[0]
+        # Strip the variable name if the
+        self._varName = self._varName.replace("Magnitude","")
+        self._varName = self._varName.replace("AngularVelocity","")
+
+        # Obtain the color
+        self._colors = seqCMap2(np.linspace(0, 1, self._nModes))
+
+        self._prepareLabels()
+
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varName)
+
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        # Set the fileName
+        self._fileName =\
+            os.path.join(self._savePath,\
+                "{}-{}".format(self._varName, "fourierModes"))
+
+        if self._extension is None:
+            self._extension = "png"
+    #}}}
+
+    #{{{_prepareLabels
+    def _prepareLabels(self):
+        #{{{docstring
+        r"""
+        Prepares the labels for plotting.
+
+        NOTE: As we are taking the fourier transform in the
+              dimensionless theta direction, that means that the units
+              will remain the same as
+
+              \hat{f}(x) = \int_\infty^\infty f(x) \exp(-i2\pi x\xi) d\xi
+        """
+        #}}}
+
+        # Set var label template
+        if self.uc.convertToPhysical:
+            unitsOrNormalization = " $[{units}]$"
+        else:
+            unitsOrNormalization = "${normalization}$"
+        self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+
+        # Set the time label
+        self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+    #}}}
+
+    #{{{plotSaveGrowthRates
+    def plotSaveGrowthRates(self):
+        """
+        Performs the actual plotting.
+        """
+
+        keys = sorted(self._fourierModes.keys())
+
+        for key in keys:
+            # Create the plot
+            fig = plt.figure(figsize = self._pltSize)
+            ax  = fig.add_subplot(111)
+
+            # Make the label
+            rho, z = key.split(",")
+
+            # Set values
+            self._ph.rhoTxtDict  ["value"] =\
+                    plotNumberFormatter(float(rho), None)
+            self._ph.zTxtDict    ["value"] =\
+                    plotNumberFormatter(float(z), None)
+
+            rhoVal   = self._ph.rhoTxtDict["value"].replace("$","")
+            rhoTitle = self._ph.rhoTxtDict  ["constRhoTxt"].\
+                            format(self._ph.rhoTxtDict)
+            zVal     = self._ph.zTxtDict["value"].replace("$","")
+            zTitle   = self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict)
+
+            # Make the const values
+            title = (r"{}$,$ {}").format(rhoTitle, zTitle)
+
+            # Range starts from one, as we excludes the offset mode
+            for modeNr, color in zip(range(1, self._nModes), self._colors):
+                label=r"$m_\theta={}$".format(modeNr)
+
+                ax.plot(\
+                    self._fourierModes[key]["time"],\
+                    self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                    color=color, label=label)
+
+            # Set axis labels
+            ax.set_xlabel(self._timeLabel)
+            ax.set_ylabel(self._varLabel)
+
+            # Set logarithmic scale
+            ax.set_yscale("log")
+
+            # Set the title
+            ax.set_title(title)
+
+            # Make the plot look nice
+            self._ph.makePlotPretty(ax, rotation = 45)
+
+            if self._showPlot:
+                plt.show()
+
+            if self._savePlot:
+                # Sets the save name
+                fileName = "{}-rho-{}-z-{}.{}".\
+                    format(self._fileName, rhoVal, zVal, self._extension)
+                self._ph.savePlot(fig, fileName)
+
+            plt.close(fig)
     #}}}
 
     #{{{plotGrowthRates

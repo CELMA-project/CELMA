@@ -5,11 +5,9 @@ Contains class to calculate the and the growth rate and angular velocity
 of a time trace of a spatial FFT.
 """
 
-from ..plotHelpers import PlotHelper
-import numpy as np
-import matplotlib.pylab as plt
-from matplotlib.gridspec import GridSpec
-import os
+from ..collectAndCalcHelpers import linRegOfExp, getScanValue
+from ..fourierModes import CollectAndCalcFourierModes
+import pandas as pd
 
 #{{{CollectAndCalcGrowthRates
 class CollectAndCalcGrowthRates(object):
@@ -60,7 +58,6 @@ class CollectAndCalcGrowthRates(object):
         #}}}
 
         # Set the member data
-        self._varName          = varName
         self._scanCollectPaths = scanCollectPaths
         self._steadyStatePaths = steadyStatePaths
         self._startInds        = startInds
@@ -168,7 +165,13 @@ class CollectAndCalcGrowthRates(object):
     #}}}
 
     #{{{makeDataFrame
-    def makeDataFrame(self):
+    def makeDataFrame(self             ,\
+                      varName          ,\
+                      convertToPhysical,\
+                      indicesArgs      ,\
+                      indicesKwargs    ,\
+                      nModes = 7       ,\
+                      ):
         #{{{docstring
         """
         Makes a DataFrame of the growth rates and angular velocities.
@@ -179,8 +182,6 @@ class CollectAndCalcGrowthRates(object):
             Name of variable to find the growth rates of.
         convertToPhysical : bool
             Whether or not to convert to physical units.
-        nModes : int
-            Number of modes.
         indicesArgs : tuple
             Tuple of indices to use when collecting.
             NOTE: Only one spatial point should be used.
@@ -188,6 +189,8 @@ class CollectAndCalcGrowthRates(object):
             Keyword arguments to use when setting the indices for
             collecting.
             NOTE: Only one spatial point should be used.
+        nModes : int
+            Number of modes.
 
         Returns
         -------
@@ -225,8 +228,9 @@ class CollectAndCalcGrowthRates(object):
             scanValue = getScanValue(scanPaths, self._scanParameter)
 
             # Obtain the magnitudes and angular velocities
-            ccfm = CollectAndCalcFourierModes(collectPaths                         ,\
-                                              convertToPhysical = convertToPhysical,\
+            ccfm = CollectAndCalcFourierModes(\
+                                scanPaths                         ,\
+                                convertToPhysical = convertToPhysical,\
                                              )
             # Set the slice
             indicesKwargs.update({"steadyStatePath" : steadyStatePath})
@@ -256,14 +260,14 @@ class CollectAndCalcGrowthRates(object):
             angularVelocity = fm[firstKey][varName+"AngularVelocity"]
 
             slope, slopeStd =\
-                calcSlopeAndSpread(magnitudes[modeStart:modeEnd],\
-                                   time                         ,\
-                                   startInd = startInd          ,\
-                                   endInd   = endInd            ,\
-                                   )
+                self.calcSlopeAndSpread(magnitudes[modeStart:modeEnd],\
+                                        time                         ,\
+                                        startInd = startInd          ,\
+                                        endInd   = endInd            ,\
+                                       )
 
             avgAngVel, avgAngVelStd =\
-                calcAvgAngularVelocityAndSpread(\
+                self.calcAvgAngularVelocityAndSpread(\
                                         angularVelocity[modeStart:modeEnd],\
                                         startInd=startInd                 ,\
                                         endInd=endInd                     ,\
@@ -283,7 +287,7 @@ class CollectAndCalcGrowthRates(object):
         growthRateDataFrame =\
             pd.DataFrame(fullDict,\
                          index=pd.MultiIndex.from_tuples(\
-                            multiTuples, names=(scanName,"modes")))
+                            multiTuples, names=(self._scanParameter,"modes")))
 
         return growthRateDataFrame
     #}}}
