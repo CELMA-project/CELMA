@@ -33,7 +33,7 @@ def getScanValue(path, scanParameter):
         scanValStr = path.split("_")
 
     # +1 as the value is immediately after the scan parameter
-    scanValue = scanValStr[scanValStr.index(scanParam)+1]
+    scanValue = scanValStr[scanValStr.index(scanParameter)+1]
 
     import pdb; pdb.set_trace()
     return float(scanValue)

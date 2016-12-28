@@ -4,11 +4,7 @@
 Contains a function for calculation of the linear regression of the exponential
 """
 
-from ..plotHelpers import PlotHelper
 import numpy as np
-import matplotlib.pylab as plt
-from matplotlib.gridspec import GridSpec
-import os
 
 #{{{linRegOfExp
 def linRegOfExp(x,y):
@@ -20,7 +16,7 @@ def linRegOfExp(x,y):
     NOTE: There seem to be a lot of confusion of how to estimate
           uncertainties. To be consise, we will here follow
           "An introduction to error analysis" by Tylor, J.R, and
-          not use what is used in polyfit or stats.linregress.
+          not what is used in polyfit or stats.linregress.
 
     NOTE: We are fitting an exponential function. The uncertainties in the
           gradient is strictly speaking NOT given in (8.17).
