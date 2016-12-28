@@ -17,6 +17,8 @@ from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectRadialProfile,\
                               collectConstRho, collectConstZ,\
                               )
+from .linRegOfExp import linRegOfExp
 from .meshHelper import addLastThetaSlice, get2DMesh
 from .nonSolvedVariables import calcN, calcUIPar, calcUEPar
+from .scanHelpers import getScanValue
 from .slicesToIndices import slicesToIndices
