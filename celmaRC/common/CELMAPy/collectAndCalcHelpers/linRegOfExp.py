@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains helper function for the growth rates
+Contains a function for calculation of the linear regression of the exponential
 """
 
 from ..plotHelpers import PlotHelper

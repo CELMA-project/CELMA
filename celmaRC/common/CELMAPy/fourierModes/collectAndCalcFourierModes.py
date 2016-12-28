@@ -305,6 +305,9 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         fourierModes2d : dict
             As the input, but contains the key varNameAngularVelocity
             with values on the form (t, (nz/2) + 1) for each position.
+            NOTE: A negative angular velocity means that the
+                  perturbations are moving in the negative theta
+                  direction.
         """
         #}}}
 
@@ -324,8 +327,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             # The phase shift is found from atan2
             # http://dsp.stackexchange.com/questions/23994/meaning-of-real-and-imaginary-part-of-fourier-transform-of-a-signal
             # atan2 in [-pi, pi]
-            # Minus 1 as indices counts from 0
-            for modeNr in range(1, nyquistMode-1):
+            for modeNr in range(0, nyquistMode):
                 for tInd in range(1, tSize):
                     deltaT = time[tInd] - time[tInd-1]
                     prevPhaseShift = np.arctan2(modes[tInd-1, modeNr].imag,\
