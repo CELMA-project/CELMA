@@ -10,61 +10,11 @@ import matplotlib.pylab as plt
 from matplotlib.gridspec import GridSpec
 import os
 
-
-
-
-
-
-
-
-
-
-
-YOU ARE HERE
-import pandas as pd
-B0s=[0.01,0.02]
-modes=[100,200,300]
-multiTuples = []
-fullDict = {"gr":[], "grStd":[], "aV":[], "aVStd":[]}
-for B0 in B0s:
-    for mode in modes:
-        for key in fullDict.keys():
-            fullDict[key].append(mode*B0)
-        multiTuples.append((B0, mode))
-df = pd.DataFrame(fullDict, index=pd.MultiIndex.from_tuples(multiTuples, names=["B0","modes"]))
-print(df)
-print("Outer level name")
-print(df.index.names[0])
-print("Get outer level indices")
-print(df.index.levels[0])
-# Loop through indices
-# One of the indices is 0.01
-import matplotlib.pyplot as plt
-plt.errorbar(df.loc[0.01]["gr"].index, df.loc[0.01]["gr"].values, yerr=df.loc[0.01]["grStd"].values)
-ax = plt.gca()
-ax.set_ylabel("gr")
-ax.set_xlabel(df.loc[0.01]["gr"].index.name)
-#plt.show()
-# Swap levels
-df2 = df.swaplevel()
-print("Get outer level name")
-print(df2.index.names[0])
-
-
-
-
 #{{{PlotGrowthRates
 class PlotGrowthRates(PlotSuperClass):
     """Class which contains the growth rates and the plotting configuration."""
 
     #{{{Static members
-    _mapToPltText = {"modeNr":"$\mathrm{Mode\quad number}$",\
-                     "B0"    :"$B_0$"                      ,\
-                     "Te0"   :"$T_e$"                      ,\
-                     "nn"    :"$n_n$"                      ,\
-                     "length":"$z$"                        ,\
-                    }
-
     _errorbarOptions = {"color"     :"k",\
                         "fmt"       :"o",\
                         "fmt"       :"o",\
@@ -75,8 +25,6 @@ class PlotGrowthRates(PlotSuperClass):
                         }
 
     _markeredgewidth = 3
-
-    _all = slice(None)
     #}}}
 
     #{{{constructor
@@ -102,7 +50,7 @@ class PlotGrowthRates(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, fourierModes, nModes = 7):
+    def setData(self, growthRateDataFrame):
         #{{{docstring
         """
         Sets the fourier modes to be plotted.
@@ -110,48 +58,41 @@ class PlotGrowthRates(PlotSuperClass):
         This function:
             * Sets the variable labels
             * Set the colors
-            * Prepares the save name.
+            * Prepares the save name
 
         Parameters
         ----------
-        fourierModes : dict
-            Dictionary where the keys are on the form "rho,z".
-            The value is a dict containing of
-            {varName:fourierModes, "time":time}
-        nModes : int
-            Number of modes to use
+        growthRateDataFrame : DataFrame
+            DataFrame consisting of the variables (measured properties):
+                * "growthRate"
+                * "growthRateStd"
+                * "averageAngularVelocity"
+                * "averageAngularVelocityStd"
+            over the observation "modeNr" over the observation "Scan"
         """
         #}}}
 
-        # Plus one as the offset mode will be excluded
-        self._nModes  = nModes + 1
+# FIXME: Positions as an input here, and as an output from previous
+        # Set the growth rate
+        self._gRDF = growthRateDataFrame
 
-        # Set the member data
-        self._fourierModes = fourierModes
+        # The variable name is stored in the outermost level of the data
+        # frame observations
+        self._varName = growthRateDataFrame.index.names[0]
 
-        # Obtain the varname
-        ind  = tuple(fourierModes.keys())[0]
-        keys = fourierModes[ind].keys()
-        self._varName = tuple(var for var in keys if var != "time")[0]
-        # Strip the variable name if the
-        self._varName = self._varName.replace("Magnitude","")
-        self._varName = self._varName.replace("AngularVelocity","")
-
-        # Obtain the color
-        self._colors = seqCMap2(np.linspace(0, 1, self._nModes))
+        # Set the plot name
+        self._pltVarName = self._ph.getVarPltName(self._varName)
 
         self._prepareLabels()
 
         # Set the var label
-        pltVarName = self._ph.getVarPltName(self._varName)
-
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self.uc.conversionDict[self._varName])
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}".format(self._varName, "fourierModes"))
+                "{}-{}".format(self._varName, "growthRates"))
 
         if self._extension is None:
             self._extension = "png"
@@ -171,233 +112,181 @@ class PlotGrowthRates(PlotSuperClass):
         """
         #}}}
 
-        # Set var label template
+        # Set var label and legend templates
         if self.uc.convertToPhysical:
             unitsOrNormalization = " $[{units}]$"
+            legendTemplate = r"${{scanOrMode}} = {{{{val}}}}{units}$"
         else:
             unitsOrNormalization = "${normalization}$"
+            legendTemplate = r"${{scanOrMode}}{normalization} = {{{{val}}}}$"
         self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
 
-        # Set the time label
-        self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        # Set the y-axes
+        imag = r"$\Im(\omega_{{}})$".format(self._pltVarName.replace("$",""))
+        real = r"$\Re(\omega_{{}})$".format(self._pltVarName.replace("$",""))
+        self._imLabel =\
+            self._varLabelTemplate.\
+                format(imag, **self.uc.conversionDict["growthRate"])
+        self._reLabel =\
+            self._varLabelTemplate.\
+                format(real, **self.uc.conversionDict["growthRate"])
+
+        # Get the plot decoration for the scan
+        scan            = self._gRDF.index.names[0]
+        scanPltName     = self._ph.getVarPltName(scan)
+        scanPltNameDict = {"scanOrMode":scanPltName}
+        self._scanLegendTemplate = legendTemplate.\
+            format(**self.uc.conversionDict[scan]).format(**scanPltNameDict)
+
+        # Get the plot decoration for the modes
+        mode            = self._gRDF.index.names[1]
+        modePltName     = self._ph.getVarPltName(mode)
+        scanPltNameDict = {"scanOrMode":modePltName}
+        self._modeLegendTemplate = legendTemplate.\
+            format(**self.uc.conversionDict[mode]).format(**modePltNameDict)
+
+        # Get the x labels
+        self._scanXLabel = self._varLabelTemplate.\
+                format(modePltName, **self.uc.conversionDict[mode])
+        self._modeXLabel = self._varLabelTemplate.\
+                format(scanPltName, **self.uc.conversionDict[scan])
     #}}}
 
     #{{{plotSaveGrowthRates
     def plotSaveGrowthRates(self):
         """
-        Performs the actual plotting.
+        Performs the plotting by calling the workers.
         """
 
-        keys = sorted(self._fourierModes.keys())
 
-        for key in keys:
-            # Create the plot
-            fig = plt.figure(figsize = self._pltSize)
-            ax  = fig.add_subplot(111)
+YOU ARE HERE
+# NOTE: Theta remains unspecified as we have done a fourier transform
+# Int the plotter
+rho, z = positionTuple
+# Set values
+self._ph.rhoTxtDict  ["value"] = plotNumberFormatter(float(rho), None)
+self._ph.zTxtDict    ["value"] = plotNumberFormatter(float(z), None)
 
-            # Make the label
-            rho, z = key.split(",")
+# Get the values and the titles
+# This goes into the save
+rhoVal   = self._ph.rhoTxtDict  ["value"].replace("$","")
+zVal     = self._ph.zTxtDict    ["value"].replace("$","")
 
-            # Set values
-            self._ph.rhoTxtDict  ["value"] =\
-                    plotNumberFormatter(float(rho), None)
-            self._ph.zTxtDict    ["value"] =\
-                    plotNumberFormatter(float(z), None)
+# This goes into the title
+rhoTitle   = self._ph.rhoTxtDict["constRhoTxt"  ].format(self._ph.rhoTxtDict)
+zTitle     = self._ph.zTxtDict  ["constZTxt"]    .format(self._ph.zTxtDict)
 
-            rhoVal   = self._ph.rhoTxtDict["value"].replace("$","")
-            rhoTitle = self._ph.rhoTxtDict  ["constRhoTxt"].\
-                            format(self._ph.rhoTxtDict)
-            zVal     = self._ph.zTxtDict["value"].replace("$","")
-            zTitle   = self._ph.zTxtDict["constZTxt"].\
-                            format(self._ph.zTxtDict)
+self._title(r"{}$,$ {}".format(rhoTitle, ztitle))
 
-            # Make the const values
-            title = (r"{}$,$ {}").format(rhoTitle, zTitle)
 
-            # Range starts from one, as we excludes the offset mode
-            for modeNr, color in zip(range(1, self._nModes), self._colors):
-                label=r"$m_\theta={}$".format(modeNr)
+    # Make the scan plot
+    scanColors = seqCMap3(np.linspace(0, 1, len(self._gRDF.index.levels)))
+    self._plotWorker(self._gRDF              ,\
+                     self._scanLegendTemplate,\
+                     self._scanXLabel        ,\
+                     scanColors              ,\
+                    )
 
-                ax.plot(\
-                    self._fourierModes[key]["time"],\
-                    self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
-                    color=color, label=label)
-
-            # Set axis labels
-            ax.set_xlabel(self._timeLabel)
-            ax.set_ylabel(self._varLabel)
-
-            # Set logarithmic scale
-            ax.set_yscale("log")
-
-            # Set the title
-            ax.set_title(title)
-
-            # Make the plot look nice
-            self._ph.makePlotPretty(ax, rotation = 45)
-
-            if self._showPlot:
-                plt.show()
-
-            if self._savePlot:
-                # Sets the save name
-                fileName = "{}-rho-{}-z-{}.{}".\
-                    format(self._fileName, rhoVal, zVal, self._extension)
-                self._ph.savePlot(fig, fileName)
-
-            plt.close(fig)
+    # Make the mode plot
+    gRDFSwap = gRDF.swaplevel()
+    modeColors = seqCMap2(np.linspace(0, 1, len(gRDFSwap.index.levels)))
+    self._plotWorker(gRDFSwap                ,\
+                     self._modeLegendTemplate,\
+                     self._modeXLabel        ,\
+                     modeColors              ,\
+                    )
     #}}}
 
-    #{{{plotGrowthRates
-    def plotGrowthRates(self):
+    #{{{_plotWorker
+    def _plotWorker(self          ,\
+                    gRDF          ,\
+                    legendTemplate,\
+                    xlabel        ,\
+                    colors        ,\
+                    ):
         #{{{docstring
         """
-        Plots the growth rates.
+        The worker which works for plotSaveGrowthRates.
+
+        Parameters
+        ----------
+        gRDF : DataFrame
+            The growth rates data frame.
+        legendTemplate : str
+            String missing the keyword "val".
+        xlabel : str
+            String to use on the x-axis label.
+        colors : array 2d
+            Array describing the colors.
         """
         #}}}
 
-        # Loop through the figures
-        for plotLabel in self._df.index.levels[0]:
-            fig = plt.figure(figsize = self._pltSize)
-            gs  = GridSpec(nrows=2, ncols=1)
+        # Create the axes
+        fig, (imAx, reAx) = plt.subplots(nrows=2, sharex=True)
 
-            imAx   = fig.add_subplot(gs[0])
-            realAx = fig.add_subplot(gs[1], sharex=imAx)
+        for outerInd, color in zip(gRDF.index.levels, color):
+            # Get the value for the legend
+            pltOuterIndDict = {"val":plotNumberFormatter(outerInd, None)}
 
-            plotLabelSplit = plotLabel.split("=")
+            # Update the colors legend
+            self._errorbarOptions.update({"color":color, "ecolor":color})
 
-            # We can now access unsing the loc method
-            # The syntax is
-            # self._df.loc[("indexLevel1", "indexLevel2", ...),\
-            #              ("columnsLevel1", "columnsLevel2", ...)]
-            # http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook-selection
-            try:
-                xAxis = tuple(float(txt.split("=")[1])\
-                        for txt in\
-                        self._df.loc[(plotLabel, "growthRate"), self._all].\
-                        index)
-            except KeyError as ke:
-                message="{0}{1}WARNING: Only NaNs found in {2}. Skipping{1}{0}"
-                print(message.format("\n", "!"*4, ke.args[0]))
-                continue
+            (_, caps, _) = imAx.errorbar(\
+                    gRDF.loc[outerInd]["growthRate"].index            ,\
+                    gRDF.loc[outerInd]["growthRate"].values           ,\
+                    yerr  = gRDF.loc[outerInd]["growthRateStd"].values,\
+                    label = legendTemplate.format(**pltOuterIndDict)  ,\
+                    **self._errorbarOptions)
 
-            yAxisIm=self._df.loc[(plotLabel,"growthRate"), self._all].values
-            yErrIm =self._df.loc[(plotLabel,"growthRateStd"), self._all].values
-            yAxisRe=self._df.loc[(plotLabel,"angFreq"), self._all].values
-            yErrRe =self._df.loc[(plotLabel,"angFreqStd"), self._all].values
-
-            indexTxt =\
-                self._df.loc[(plotLabel, "growthRate"), self._all].index[0].\
-                                                                split("=")[0]
-
-            # Convert units
-            plotLabelSplit[-1], plotLabelNorm, plotLabelUnits =\
-                self._helper.physicalUnitsConverter(plotLabelSplit[-1],\
-                                                    plotLabelSplit[0])
-            # NOTE: The whole dataframe can be multiplied using
-            #       df.multiply, but we here only multiply the array for
-            #       cleaner "helper" code
-            xAxis, xAxisNorm, xAxisUnits =\
-                self._helper.physicalUnitsConverter(xAxis  , indexTxt)
-            yAxisIm, yAxisNorm, yAxisUnits =\
-                self._helper.physicalUnitsConverter(yAxisIm, "growthRate")
-            yErrIm, _, _  =\
-                self._helper.physicalUnitsConverter(yErrIm , "growthRate")
-            yAxisRe, _, _ =\
-                self._helper.physicalUnitsConverter(yAxisRe, "growthRate")
-            yErrRe, _, _  =\
-                self._helper.physicalUnitsConverter(yErrRe , "growthRate")
-
-            # Plot the growth rates
-            (_, caps, _) = imAx.errorbar(xAxis,\
-                                         yAxisIm,\
-                                         yerr=yErrIm,\
-                                         **self._errorbarOptions)
-
-            # Set capsize
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
 
-            # Angular frequencies
-            (_, caps, _) = realAx.errorbar(xAxis,\
-                                           yAxisRe,\
-                                           yerr=yErrRe,\
-                                           **self._errorbarOptions)
+            (_, caps, _) = reAx.errorbar(\
+                    gRDF.loc[outerInd]["averageAngularVelocity"].index        ,\
+                    gRDF.loc[outerInd]["averageAngularVelocity"].values       ,\
+                    yerr  =\
+                        gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
+                    **self._errorbarOptions)
 
-            # Set capsize
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
 
-            # Add 10% margins for readability
-            imAx  .margins(x=0.1, y=0.1)
-            realAx.margins(x=0.1, y=0.1)
+        # Set labels
+        imAx.set_ylabel(self._imLabel)
+        reAx.set_ylabel(self._reLabel)
 
-            rot = None if indexTxt == "modeNr" else 45
-            PlotHelper.makePlotPretty(imAx,   yprune = "both", rotation = rot)
-            PlotHelper.makePlotPretty(realAx, yprune = "both", rotation = rot)
+        # Set scan label
+        reAx.set_xlabel(xlabel)
 
-            # Set the text
-            if self._helper.convertToPhysical:
-                if plotLabelSplit[0] == "modeNr":
-                    suptitle = "{}$={}$".\
-                        format(self._mapToPltText[plotLabelSplit[0]],\
-                               plotLabelSplit[1])
-                else:
-                    suptitle = "{}$={}$ $[{}]$".\
-                        format(self._mapToPltText[plotLabelSplit[0]],\
-                               plotLabelSplit[1],\
-                               plotLabelUnits)
-                imLabel = r"$\omega_I$ $[{}]$".format(yAxisUnits)
-                reLabel = r"$\omega_R$ $[{}]$".format(yAxisUnits)
-            else:
-                suptitle = "{}$={}{}$".\
-                    format(self._mapToPltText[plotLabelSplit[0]],\
-                           plotLabelSplit[1],\
-                           plotLabelNorm)
-                imLabel = r"$\omega_I{}$".format(yAxisNorm)
-                reLabel = r"$\omega_R{}$".format(yAxisNorm)
+        # Set the title
+        fig.suptitle(self._title)
 
-            fig.suptitle(suptitle)
-            imAx  .set_ylabel(imLabel)
-            realAx.set_ylabel(reLabel)
+        # Tweak the ticks
+        # Add 10% margins for readability
+        imAx.margins(x=0.1, y=0.1)
+        reAx.margins(x=0.1, y=0.1)
 
-            imAx.tick_params(labelbottom="off")
+        reAx.tick_params(labelbottom="off")
+        ticks = tuple(gRDF.loc[outerInd]["growthRate"].index)
 
-            # Set xlabel
-            if indexTxt == "modeNr":
-                xlabel = self._mapToPltText[indexTxt]
-            else:
-                if self._helper.convertToPhysical:
-                    xlabel = "{} $[{}]$".\
-                            format(self._mapToPltText[indexTxt], xAxisUnits)
-                else:
-                    xlabel = "{}{}".\
-                            format(self._mapToPltText[indexTxt], xAxisNorm)
+        # Set the ticks
+        realAx.xaxis.set_ticks(ticks)
+        imAx  .xaxis.set_ticks(ticks)
 
-            realAx.set_xlabel(xlabel)
+        # Make the plot look nice
+        self._ph.makePlotPretty(imAx)
+        self._ph.makePlotPretty(reAx, rotation = 45)
 
-            # Adjust the subplots
-            fig.subplots_adjust(hspace=0)
+        if self._showPlot:
+            plt.show()
 
-            # Sort the xAxis and yAxis, remove NaN's, and use them as ticks
-            xAxis, yAxisIm = zip(*sorted(zip(xAxis, yAxisIm)))
-            nonNan = np.where(np.isfinite(yAxisIm))[0]
-            # Cut the NaN values from the xAxis (plus 1 as slice
-            # excludes the last)
-            ticks = tuple(xAxis[nonNan[0]:nonNan[-1]+1])
+        if self._savePlot:
+            # Sets the save name
+            fileName = "{}-{}.{}".\
+                format(self._fileName, gRDF.index.names[0], self._extension)
 
-            # Set the ticks
-            realAx.xaxis.set_ticks(ticks)
-            imAx  .xaxis.set_ticks(ticks)
+            self._ph.savePlot(fig, fileName)
 
-            if self._savePlot:
-                fileName = "{}.{}".\
-                    format(os.path.join(self._savePath,\
-                           "growthrate_{}_{}".format(plotLabel, indexTxt)),\
-                           self._extension)
-                self._helper.savePlot(fig, fileName)
-
-            if self._showPlot:
-                plt.show()
+        plt.close(fig)
     #}}}
 #}}}

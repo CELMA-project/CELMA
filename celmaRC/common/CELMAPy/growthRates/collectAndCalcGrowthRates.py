@@ -65,8 +65,8 @@ class CollectAndCalcGrowthRates(object):
         self._scanParameter    = scanParameter
     #}}}
 
-    #{{{calcSlopeAndSpread
     @staticmethod
+    #{{{calcSlopeAndSpread
     def calcSlopeAndSpread(magnitudes, time, startInd=None, endInd=None):
         #{{{docstring
         """
@@ -116,8 +116,8 @@ class CollectAndCalcGrowthRates(object):
         return tuple(slopes), tuple(spreads)
     #}}}
 
-    #{{{calcAvgAngularVelocityAndSpread
     @staticmethod
+    #{{{calcAvgAngularVelocityAndSpread
     def calcAvgAngularVelocityAndSpread(angularVelocity,\
                                         startInd=None,\
                                         endInd=None):
@@ -164,14 +164,14 @@ class CollectAndCalcGrowthRates(object):
         return tuple(avgAngVels), tuple(spreads)
     #}}}
 
-    #{{{makeDataFrame
-    def makeDataFrame(self             ,\
-                      varName          ,\
-                      convertToPhysical,\
-                      indicesArgs      ,\
-                      indicesKwargs    ,\
-                      nModes = 7       ,\
-                      ):
+    #{{{getData
+    def getData(self             ,\
+                varName          ,\
+                convertToPhysical,\
+                indicesArgs      ,\
+                indicesKwargs    ,\
+                nModes = 7       ,\
+               ):
         #{{{docstring
         """
         Makes a DataFrame of the growth rates and angular velocities.
@@ -200,17 +200,15 @@ class CollectAndCalcGrowthRates(object):
                 * "growthRateStd"
                 * "averageAngularVelocity"
                 * "averageAngularVelocityStd"
-            over the observation "Mode number" over the observation
-            "Scan"
+            over the observation "modeNr" over the observation "Scan"
+        positionTuple : tuple
+            The tuple containing (rho, z).
         """
         #}}}
 
-        # SEE:
+        # For ideas on how to append a DataFrame, see:
         # https://github.com/pandas-dev/pandas/blob/master/doc/cheatsheet/Pandas_Cheat_Sheet.pdf
         # http://stackoverflow.com/questions/10715965/add-one-row-in-a-pandas-dataframe
-
-        # Something like this
-        # How to know number of modes apriori?
 
         multiTuples = []
         fullDict = {"growthRate":[], "growthRateStd":[],\
@@ -227,23 +225,13 @@ class CollectAndCalcGrowthRates(object):
             # Obtain the scan value
             scanValue = getScanValue(scanPaths, self._scanParameter)
 
-            # Obtain the magnitudes and angular velocities
-            ccfm = CollectAndCalcFourierModes(\
-                                scanPaths                         ,\
-                                convertToPhysical = convertToPhysical,\
-                                             )
-            # Set the slice
-            indicesKwargs.update({"steadyStatePath" : steadyStatePath})
-            ccfm.setIndices(*indicesArgs, **indicesKwargs)
-
-            # Set name
-            ccfm.setVarName(varName)
-
-            # Execute the collection
-            fm = ccfm.executeCollectAndCalc()
-            fm = ccfm.convertTo2D(fm)
-            fm = ccfm.calcMagnitude(fm)
-            fm = ccfm.calcAngularVelocity(fm)
+            fm, positionTuple = \
+                self._collectAndCalcFourierModes(scanPaths        ,\
+                                                 convertToPhysical,\
+                                                 steadyStatePath  ,\
+                                                 indicesArgs      ,\
+                                                 indicesKwargs    ,\
+                                                )
 
             # NOTE: We skip the offset mode.
             #       Thus, we add 1 in the range in order to look at
@@ -287,8 +275,71 @@ class CollectAndCalcGrowthRates(object):
         growthRateDataFrame =\
             pd.DataFrame(fullDict,\
                          index=pd.MultiIndex.from_tuples(\
-                            multiTuples, names=(self._scanParameter,"modes")))
+                            multiTuples,
+                            names=(self._scanParameter,"modeNr")))
 
-        return growthRateDataFrame
+        return growthRateDataFrame, positionTuple
+    #}}}
+
+    #{{{_collectAndCalcFourierModes
+    def _collectAndCalcFourierModes(self             ,\
+                                    scanPaths        ,\
+                                    convertToPhysical,\
+                                    steadyStatePath  ,\
+                                    indicesArgs      ,\
+                                    indicesKwargs    ,\
+                                   ):
+        #{{{docstring
+        """
+        Collects and calculates the fourier modes.
+
+        Parameters
+        ----------
+        scanPaths : tuple
+            Tuple of the scan paths.
+        convertToPhysical : bool
+            Whether or not to convert to physical units.
+        steadyStatePath : str
+            String containing the steady state path
+        indicesArgs : tuple
+            Tuple containing the indices.
+        indicesKwargs : dict
+            Keyword arguments to use when setting the indices for
+            collecting.
+
+        Returns
+        -------
+        fm : dict
+            The dictionary containing the fourier modes.
+        positionTuple : tuple
+            The tuple containing (rho, z).
+        """
+        #}}}
+
+            # Obtain the magnitudes and angular velocities
+            ccfm = CollectAndCalcFourierModes(\
+                                scanPaths                            ,\
+                                convertToPhysical = convertToPhysical,\
+                                             )
+            # Set the slice
+            indicesKwargs.update({"steadyStatePath" : steadyStatePath})
+            ccfm.setIndices(*indicesArgs, **indicesKwargs)
+
+            # Set name
+            ccfm.setVarName(varName)
+
+            # Execute the collection
+            fm = ccfm.executeCollectAndCalc()
+            fm = ccfm.convertTo2D(fm)
+            fm = ccfm.calcMagnitude(fm)
+            fm = ccfm.calcAngularVelocity(fm)
+
+            # NOTE: Theta remains unspecified as we have done a fourier transform
+            firstKey = tuple(fm.keys())[0]
+            rho, z   = firstKey.split(",")
+
+            positionTuple = (rho, z)
+
+            return fm, positionTuple
     #}}}
 #}}}
