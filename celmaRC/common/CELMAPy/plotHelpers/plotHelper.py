@@ -111,6 +111,12 @@ class PlotHelper(object):
                                        r"\Omega")                             ,\
         "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                 \
                                        r"\partial_\theta^4\Omega")            ,\
+        # Miscellaneous
+        "modeNr"    :"$\mathrm{Mode\quad number}$",\
+        "B0"        :"$B_0$"                      ,\
+        "Te0"       :"$T_e$"                      ,\
+        "nn"        :"$n_n$"                      ,\
+        "length"    :"$z$"                        ,\
         }
     #}}}
 
@@ -203,6 +209,7 @@ class PlotHelper(object):
     @staticmethod
     #{{{getVarPltName
     def getVarPltName(var):
+        #{{{docstring
         """
         Routine that returns the variable plot name.
         The return value does not include the $
@@ -217,6 +224,7 @@ class PlotHelper(object):
         varPltName : str
             The plot name
         """
+        #}}}
 
         return PlotHelper._varPltName[var]
     #}}}
