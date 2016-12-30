@@ -4,13 +4,12 @@
 Contains the restartFromFunc and GenericScanDriver
 """
 
-Must manually check for extra turbulence stuff
-
-from .postBoutRunner import postBoutRunner
 from bout_runners import basic_runner, PBS_runner
 import re
 import inspect
 import os
+
+# NOTE: Smells of code duplication in the "call" functions
 
 #{{{restartFromFunc
 def restartFromFunc(dmp_folder     = None,\
@@ -121,21 +120,13 @@ class GenericScanDriver(object):
         #}}}
         # Set warning flags
         self._calledFunctions = {
-                    "mainOptions"          : False,\
-                    "runOptions"           : False,\
-                    "postProcessingFlag"   : False,\
-                    "commonRunnerOptions"  : False,\
-                    "commonPlotterOptions" : False,\
-                    "fieldPlotterOptions"  : None ,\
-                    "probePlotterOptions"  : None ,\
-                    "initOptions"          : False,\
-                    "initPostOptions"      : False,\
-                    "expandOptions"        : False,\
-                    "expandPostOptions"    : False,\
-                    "linearOptions"        : False,\
-                    "linearPostOptions"    : False,\
-                    "turbulenceOptions"    : False,\
-                    "turbulencePostOptions": False,\
+                    "mainOptions"         : False,\
+                    "runTypeOptions"      : False,\
+                    "commonRunnerOptions" : False,\
+                    "initOptions"         : False,\
+                    "expandOptions"       : False,\
+                    "linearOptions"       : False,\
+                    "turbulenceOptions"   : False,\
                 }
 
         self._runner = runner
@@ -197,12 +188,12 @@ class GenericScanDriver(object):
         self._restartFrom           = restartFrom
     #}}}
 
-    #{{{setRunOptions
-    def setRunOptions(self            ,\
-                      runInit   = True,\
-                      runExpand = True,\
-                      runLin    = True,\
-                      runTurb   = True,\
+    #{{{setRunTypeOptions
+    def setRunTypeOptions(self            ,\
+                          runInit   = True,\
+                          runExpand = True,\
+                          runLin    = True,\
+                          runTurb   = True,\
             ):
         #{{{docstring
         """
@@ -224,7 +215,7 @@ class GenericScanDriver(object):
         curframe = inspect.currentframe()
         calframe = inspect.getouterframes(curframe, 2)
         if calframe[1][3] != "__init__":
-            self._calledFunctions["runOptions"] = True
+            self._calledFunctions["runTypeOptions"] = True
 
         self._runOptions =\
                 {\
@@ -235,82 +226,14 @@ class GenericScanDriver(object):
                 }
     #}}}
 
-    #{{{setPostProcessingFlags
-    def setPostProcessingFlags(self                              ,\
-                               justPostProcess            = False,\
-                               postProcessInit            = False,\
-                               postProcessExp             = False,\
-                               postProcessLin             = False,\
-                               postProcessTurb            = False,\
-                               postProcessLinProfiles     = False,\
-                               postProcessTurbProfiles    = False,\
-                               postProcessProbesAndEnergy = False,\
-                               postProcessGrowthRates     = False,\
-                               tIndSaturatedTurb          = None ,\
-            ):
-        #{{{docstring
-        """
-        Sets the postProcessing flags.
-
-        Parameters
-        ----------
-        justPostProcess : bool
-            If the driver should only do the post-processing.
-            NOTE: justPostProcess sets the restart parameter. Do **NOT**
-            set this to True the first run, as this will prevent proper
-            restarting.
-        postProcessInit : bool
-            If plots for the initialization should be run
-        postProcessExp : bool
-            If plots for the expand should be run
-        postProcessLin : bool
-            If plots for the linear phase should be run
-        postProcessTurb : bool
-            If plots for the turbulent phase should be run
-        postProcessLinProfiles : bool
-            If plots for all fields should be plotted after the linear phase
-        postProcessTurbProfiles : bool
-            If plots for all fields should be plotted after the turbulent phase
-        postProcessProbesAndEnergy : bool
-            If the probe data and the energy should be plotted
-        postProcessGrowthRates : bool
-            If the growth rates should be plotted
-        tIndSaturatedTurb : int
-            The index in the turbulence run where the turbulence is
-            saturated (usually taken to be after the overshoot in the
-            kinetic energy)
-        """
-        #}}}
-
-        self._calledFunctions["postProcessingFlag"] = True
-
-        self._postProcessingFlags = {\
-                "justPostProcess"            : justPostProcess           ,\
-                "postProcessInit"            : postProcessInit           ,\
-                "postProcessExp"             : postProcessExp            ,\
-                "postProcessLin"             : postProcessLin            ,\
-                "postProcessTurb"            : postProcessTurb           ,\
-                "postProcessLinProfiles"     : postProcessLinProfiles    ,\
-                "postProcessTurbProfiles"    : postProcessTurbProfiles   ,\
-                "postProcessProbesAndEnergy" : postProcessProbesAndEnergy,\
-                "postProcessGrowthRates"     : postProcessGrowthRates    ,\
-                "tIndSaturatedTurb"          : tIndSaturatedTurb         ,\
-                }
-    #}}}
-
     #{{{setCommonRunnerOptions
-    def setCommonRunnerOptions(self                       ,\
-                               nproc                = 48  ,\
-                               cpy_source           = True,\
-                               BOUT_nodes           = 3   ,\
-                               BOUT_ppn             = 16  ,\
-                               BOUT_queue           = None,\
-                               BOUT_account         = None,\
-                               post_process_nproc   = 1   ,\
-                               post_process_nodes   = 1   ,\
-                               post_process_ppn     = 20  ,\
-                               post_process_queue   = None,\
-                               post_process_account = None,\
+    def setCommonRunnerOptions(self               ,\
+                               nproc        = 48  ,\
+                               cpy_source   = True,\
+                               BOUT_nodes   = 3   ,\
+                               BOUT_ppn     = 16  ,\
+                               BOUT_queue   = None,\
+                               BOUT_account = None,\
             ):
         #{{{docstring
         """
@@ -328,14 +251,6 @@ class GenericScanDriver(object):
             How many processors per node
         BOUT_account : [None|str]
             Account number to use for the runs
-        post_process_nproc : int
-            How many processors for post processor
-        post_process_nodes : int
-            How many nodes for post processor
-        post_process_ppn : int
-            How many processors per node for post processor
-        post_prcess_account : [None|str]
-            Account number to use for post processor
         """
         #}}}
 
@@ -343,153 +258,12 @@ class GenericScanDriver(object):
 
         self._commonRunnerOptions =\
                 {\
-                 "nproc"               : nproc               ,\
-                 "cpy_source"          : cpy_source          ,\
-                 "BOUT_nodes"          : BOUT_nodes          ,\
-                 "BOUT_ppn"            : BOUT_ppn            ,\
-                 "BOUT_queue"          : BOUT_queue          ,\
-                 "BOUT_account"        : BOUT_account        ,\
-                 "post_process_nproc"  : post_process_nproc  ,\
-                 "post_process_nodes"  : post_process_nodes  ,\
-                 "post_process_ppn"    : post_process_ppn    ,\
-                 "post_process_queue"  : post_process_queue  ,\
-                 "post_process_account": post_process_account,\
-                }
-    #}}}
-
-    #{{{setCommonPlotterOptions
-    def setCommonPlotterOptions(self                                 ,\
-                               savePathFunc    = "scanWTagSaveFunc",\
-                               convertToPhysical = False             ,\
-                               showPlot          = False             ,\
-                               savePlot          = True              ,\
-                               extension         = "png"             ,\
-                               useSubProcess     = True              ,\
-            ):
-        #{{{docstring
-        """
-        Sets the kwargs for common plots.
-
-        Parameters
-        ----------
-        savePathFunc : str
-           What svae folder function to use
-        convertToPhysical : bool
-            Whether or not to convert to physical units
-        showPlot : bool
-            If the plot should be displayed
-        savePlot : bool
-            If the plot should be saved
-        extension : str
-            Extension of the file when not animating
-        useSubProcess : bool
-            If sub process should be used for the plotting
-        """
-        #}}}
-
-        self._calledFunctions["commonPlotterOptions"] = True
-
-        self._commonPlotterOptions =\
-                {\
-                 "savePathFunc"   : savePathFunc   ,\
-                 "convertToPhysical": convertToPhysical,\
-                 "showPlot"         : showPlot         ,\
-                 "savePlot"         : savePlot         ,\
-                 "extension"        : extension        ,\
-                 "useSubProcess"    : useSubProcess    ,\
-                }
-        #}}}
-
-    #{{{setFieldPlottersOptions
-    def setFieldPlottersOptions(self                    ,\
-                               xguards           = False,\
-                               yguards           = False,\
-                               xSlice            = 0    ,\
-                               ySlice            = 16   ,\
-                               zSlice            = 0    ,\
-                               axisEqualParallel = False,\
-            ):
-        #{{{docstring
-        """
-        Sets the kwargs for field plotters.
-
-        Parameters
-        ----------
-        xguards : bool
-            Should the xguards be collected and plotted?
-        yguards : bool
-            Should the xguards be collected and plotted?
-        xSlice : int
-            Constant of x when slicing is not taking place
-        ySlice : int
-            Constant of y when slicing is not taking place
-        zSlice : int
-            Constant of z when slicing is not taking place
-        axisEqualParallel : bool
-            If axis equal should be used on the parallel plots
-        """
-        #}}}
-
-        self._calledFunctions["fieldPlotterOptions"] = True
-
-        self._fieldPlotterOptions =\
-                {\
-                 "xguards"          : xguards          ,\
-                 "yguards"          : yguards          ,\
-                 "xSlice"           : xSlice           ,\
-                 "ySlice"           : ySlice           ,\
-                 "zSlice"           : zSlice           ,\
-                 "axisEqualParallel": axisEqualParallel,\
-                }
-
-        # Update the post options
-        if hasattr(self, "_initPostOptions"):
-            if self._initUsesFieldPlotter:
-                self._initPostOptions.update(self._fieldPlotterOptions)
-        if hasattr(self, "_expandPostOptions"):
-            if self._expandUsesFieldPlotter:
-                self._expandPostOptions.update(self._fieldPlotterOptions)
-        if hasattr(self, "_linearPostOptions"):
-            if self._linearUsesFieldPlotter:
-                self._linearPostOptions.update(self._fieldPlotterOptions)
-        if hasattr(self, "_turbulencePostOptions"):
-            if self._turbulenceUsesFieldPlotter:
-                self._turbulencePostOptions.update(self._fieldPlotterOptions)
-
-    #}}}
-
-    #{{{setProbePlottersOptions
-    def setProbePlottersOptions(self        ,\
-                               nProbes = 5  ,\
-                               maxMode = 10 ,\
-                               yInd    = 16 ,\
-                               var     = "n",\
-            ):
-        #{{{docstring
-        """
-        Sets the kwargs for probe plots.
-
-        Parameters
-        ----------
-        nProbes : int
-            Number of probes to be used
-        maxMode : int
-            Maximum mode number to investigate
-        yInd : int
-            y index to investigate
-        var : str
-            The variable to investigate
-        """
-        #}}}
-
-        self._calledFunctions["probePlotterOptions"] = True
-
-        self._probesPlotterOptions =\
-                {\
-                 "nProbes" : nProbes,\
-                 "maxMode" : maxMode,\
-                 "yInd"    : yInd   ,\
-                 "var"     : var    ,\
+                 "nproc"               : nproc       ,\
+                 "cpy_source"          : cpy_source  ,\
+                 "BOUT_nodes"          : BOUT_nodes  ,\
+                 "BOUT_ppn"            : BOUT_ppn    ,\
+                 "BOUT_queue"          : BOUT_queue  ,\
+                 "BOUT_account"        : BOUT_account,\
                 }
     #}}}
 
@@ -497,10 +271,7 @@ class GenericScanDriver(object):
     def setInitOptions(self                              ,\
                        timestep              = 2e3       ,\
                        nout                  = 2         ,\
-                       BOUT_walltime         = "24:00:00",\
-                       post_process_walltime = "0:29:00" ,\
-                       post_process_queue    = "xpresq"  ,\
-            ):
+                       BOUT_walltime         = "24:00:00"):
         #{{{docstring
         """
         Sets the kwargs for the init run.
@@ -530,79 +301,9 @@ class GenericScanDriver(object):
 
         self._initPBSOptions =\
                 {\
-                 "BOUT_walltime"         : BOUT_walltime        ,\
-                 "post_process_walltime" : post_process_walltime,\
-                 "post_process_queue"    : post_process_queue   ,\
+                 "BOUT_walltime" : BOUT_walltime,\
                 }
 
-    #}}}
-
-    #{{{setInitPostOptions
-    def setInitPostOptions(self                         ,\
-                           useDefault             = True,\
-                           useFieldPlotterOptions = True,\
-                           **kwargs):
-        #{{{docstring
-        """
-        Sets the kwargs for the post processing of the init runs.
-
-        Parameters
-        ----------
-        useDefault : bool
-        useFieldPlotterOptions : bool
-            Whether or not the fieldPlotterOptions should be used.
-        kwargs : keyword arguments
-            Do not use keyword arguments if useDefault is True.
-            keywords to the post processors.
-            Must include "driverName" if useDefault is False.
-            For details more details, see the info about each post
-            processing driver in common/CELMAPython/drivers
-        """
-        #}}}
-        # Check where this function is called from
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        if calframe[1][3] != "__init__":
-            self._calledFunctions["initPostOptions"] = True
-
-        if useDefault and len(kwargs) !=0:
-            message = ("No extra keywords should be given when "
-                       "useDefault is set.\n"
-                       "These keywords were found {}".format(kwargs))
-            raise ValueError(message)
-
-        if useDefault:
-            # Make the field plotter
-            self._initUsesFieldPlotter = True
-
-            if self._calledFunctions["fieldPlotterOptions"] == None:
-                self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOptions"] == False
-
-            self._initPostOptions =\
-                    {"driverName" : "plot1DAnd2DDriver",\
-                     "tSlice"     : None      ,\
-                     **self._fieldPlotterOptions
-                    }
-
-        else:
-            if not("driverName" in kwargs.keys()):
-                message = "'driverName' missing from keyword arguments"
-                raise ValueError(message)
-
-            # Check that field plotter is called first (if set)
-            if useFieldPlotterOptions:
-                self._initUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOptions"] == None:
-                    self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOptions"] == False
-            else:
-                self._initUsesFieldPlotter = False
-
-            self._initPostOptions = {**kwargs}
-
-            if useFieldPlotterOptions:
-                self._initPostOptions.update(self._fieldPlotterOptions)
     #}}}
 
     #{{{setExpandOptions
@@ -611,8 +312,6 @@ class GenericScanDriver(object):
                          timestep              = 50        ,\
                          nout                  = 2         ,\
                          BOUT_walltime         = "24:00:00",\
-                         post_process_walltime = "0:29:00" ,\
-                         post_process_queue    = "xpresq"  ,\
             ):
         #{{{docstring
         """
@@ -644,79 +343,9 @@ class GenericScanDriver(object):
 
         self._expandPBSOptions =\
                 {\
-                 "BOUT_walltime"         : BOUT_walltime        ,\
-                 "post_process_walltime" : post_process_walltime,\
-                 "post_process_queue"    : post_process_queue   ,\
+                 "BOUT_walltime" : BOUT_walltime,\
                 }
 
-    #}}}
-
-    #{{{setExpandPostOptions
-    def setExpandPostOptions(self,
-                             useDefault             = True,\
-                             useFieldPlotterOptions = True,\
-                             **kwargs):
-        #{{{docstring
-        """
-        Sets the kwargs for the post processing of the expand runs.
-
-        Parameters
-        ----------
-        useDefault : bool
-        useFieldPlotterOptions : bool
-            Whether or not the fieldPlotterOptions should be used.
-        kwargs : keyword arguments
-            Do not use keyword arguments if useDefault is True.
-            keywords to the post processors.
-            Must include "driverName" if useDefault is False.
-            For details more details, see the info about each post
-            processing driver in common/CELMAPython/drivers
-        """
-        #}}}
-        # Check where this function is called from
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        if calframe[1][3] != "__init__":
-            self._calledFunctions["expandPostOptions"] = True
-
-        if useDefault and len(kwargs) !=0:
-            message = ("No extra keywords should be given when "
-                       "useDefault is set.\n"
-                       "These keywords were found {}".format(kwargs))
-            raise ValueError(message)
-
-        if useDefault:
-            # Make the field plotter
-            self._expandUsesFieldPlotter = True
-
-            if self._calledFunctions["fieldPlotterOptions"] == None:
-                self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOptions"] == False
-
-            self._expandPostOptions =\
-                    {"driverName" : "plot1DAnd2DDriver",\
-                     "tSlice"     : None      ,\
-                     **self._fieldPlotterOptions
-                    }
-
-        else:
-            if not("driverName" in kwargs.keys()):
-                message = "'driverName' missing from keyword arguments"
-                raise ValueError(message)
-
-            # Check that field plotter is called first (if set)
-            if useFieldPlotterOptions:
-                self._expandUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOptions"] == None:
-                    self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOptions"] == False
-            else:
-                self._expandUsesFieldPlotter = False
-
-            self._expandPostOptions = {**kwargs}
-
-            if useFieldPlotterOptions:
-                self._expandPostOptions.update(self._fieldPlotterOptions)
     #}}}
 
     #{{{setLinearOptions
@@ -724,8 +353,6 @@ class GenericScanDriver(object):
                          timestep              = 1         ,\
                          nout                  = 1000      ,\
                          BOUT_walltime         = "72:00:00",\
-                         post_process_walltime = "03:00:00",\
-                         post_process_queue    = "workq"   ,\
                         ):
         #{{{docstring
         """
@@ -756,101 +383,15 @@ class GenericScanDriver(object):
 
         self._linearPBSOptions =\
                 {\
-                 "BOUT_walltime"         : BOUT_walltime        ,\
-                 "post_process_walltime" : post_process_walltime,\
-                 "post_process_queue"    : post_process_queue   ,\
+                 "BOUT_walltime" : BOUT_walltime ,\
                 }
     #}}}
 
-    #{{{setLinearPostOptions
-    def setLinearPostOptions(self,
-                             useDefault             = True,\
-                             useFieldPlotterOptions = True,\
-                             useMaxGrad             = True,\
-                             **kwargs):
-        #{{{docstring
-        """
-        Sets the kwargs for the post processing of the linear runs.
-
-        Parameters
-        ----------
-        useDefault : bool
-        useFieldPlotterOptions : bool
-            Whether or not the fieldPlotterOptions should be used.
-        useMaxGrad : bool
-            Whether or not to use the max gradient calculated from the
-            expand runs.
-        kwargs : keyword arguments
-            Do not use keyword arguments if useDefault is True.
-            keywords to the post processors.
-            Must include "driverName" if useDefault is False.
-            For details more details, see the info about each post
-            processing driver in common/CELMAPython/drivers
-        """
-        #}}}
-
-        # Check where this function is called from
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        if calframe[1][3] != "__init__":
-            self._calledFunctions["linearPostOptions"] = True
-
-        # Check that field plotter is called first (if set)
-        if useDefault and len(kwargs) !=0:
-            message = ("No extra keywords should be given when "
-                       "useDefault is set.\n"
-                       "These keywords were found {}".format(kwargs))
-            raise ValueError(message)
-
-        if useDefault:
-            self._linearUsesFieldPlotter       = True
-            self._linearPostOptionsUsesMaxGrad = True
-
-            # Make the field plotter
-            if self._calledFunctions["fieldPlotterOptions"] == None:
-                self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOptions"] == False
-
-            self._linearPostOptions =\
-                    {"driverName" : "single2DDriver" ,\
-                     "varName"    : "n"              ,\
-                     "pltName"    : "n"              ,\
-                     "tSlice"     : slice(0, None, 2),\
-                     "varyMaxMin" : True             ,\
-                     "fluctuation"  : True             ,\
-                     "mode"       : "perpAndPol"     ,\
-                     **self._fieldPlotterOptions     ,\
-                    }
-
-        else:
-            if not("driverName" in kwargs.keys()):
-                message = "'driverName' missing from keyword arguments"
-                raise ValueError(message)
-
-            # Check that field plotter is called first (if set)
-            if useFieldPlotterOptions:
-                self._linearUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOptions"] == None:
-                    self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOptions"] == False
-            else:
-                self._linearUsesFieldPlotter = False
-
-            self._linearPostOptionsUsesMaxGrad = True if useMaxGrad else False
-
-            self._linearPostOptions = {**kwargs}
-
-            if useFieldPlotterOptions:
-                self._linearPostOptions.update(self._fieldPlotterOptions)
-    #}}}
-
     #{{{setTurbulenceOptions
-    def setTurbulenceOptions(self                              ,\
-                             timestep              = 1         ,\
-                             nout                  = 5000      ,\
-                             BOUT_walltime         = "72:00:00",\
-                             post_process_walltime = "03:00:00",\
-                             post_process_queue    = "workq"   ,\
+    def setTurbulenceOptions(self                      ,\
+                             timestep      = 1         ,\
+                             nout          = 5000      ,\
+                             BOUT_walltime = "72:00:00",\
             ):
         #{{{docstring
         """
@@ -881,88 +422,8 @@ class GenericScanDriver(object):
 
         self._turbulencePBSOptions =\
                 {\
-                 "BOUT_walltime"         : BOUT_walltime        ,\
-                 "post_process_walltime" : post_process_walltime,\
-                 "post_process_queue"    : post_process_queue   ,\
+                 "BOUT_walltime" : BOUT_walltime,\
                 }
-    #}}}
-
-    #{{{setTurbulencePostOptions
-    def setTurbulencePostOptions(self,
-                                 useDefault             = True,\
-                                 useFieldPlotterOptions = True,\
-                                 useMaxGrad             = False,\
-                                 **kwargs):
-        #{{{docstring
-        """
-        Sets the kwargs for the post processing of the turbulence runs.
-
-        Parameters
-        ----------
-        useDefault : bool
-        useFieldPlotterOptions : bool
-            Whether or not the fieldPlotterOptions should be used.
-        useMaxGrad : bool
-            Whether or not to use the max gradient calculated from the
-            expand runs.
-        kwargs : keyword arguments
-            Do not use keyword arguments if useDefault is True.
-            keywords to the post processors.
-            Must include "driverName" if useDefault is False.
-            For details more details, see the info about each post
-            processing driver in common/CELMAPython/drivers
-        """
-        #}}}
-
-        # Check where this function is called from
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        if calframe[1][3] != "__init__":
-            self._calledFunctions["turbulencePostOptions"] = True
-
-        if useDefault and len(kwargs) !=0:
-            message = ("No extra keywords should be given when "
-                       "useDefault is set.\n"
-                       "These keywords were found {}".format(kwargs))
-            raise ValueError(message)
-
-        if useDefault:
-            # Make the field plotter
-            self._turbulenceUsesFieldPlotter = True
-            self._turbulencePostOptionsUsesMaxGrad = True
-
-            if self._calledFunctions["fieldPlotterOptions"] == None:
-                self.setFieldPlottersOptions()
-                self._calledFunctions["fieldPlotterOptions"] == False
-
-            self._turbulencePostOptions =\
-                    {"driverName" : "single2DDriver"  ,\
-                     "tSlice"     : slice(0, None, 10),\
-                     "varName"    : "n"               ,\
-                     "pltName"    : "n"               ,\
-                     **self._fieldPlotterOptions
-                    }
-
-        else:
-            if not("driverName" in kwargs.keys()):
-                message = "'driverName' missing from keyword arguments"
-                raise ValueError(message)
-
-            # Check that field plotter is called first (if set)
-            if useFieldPlotterOptions:
-                self._turbulenceUsesFieldPlotter = True
-                if self._calledFunctions["fieldPlotterOptions"] == None:
-                    self.setFieldPlottersOptions()
-                    self._calledFunctions["fieldPlotterOptions"] == False
-            else:
-                self._turbulenceUsesFieldPlotter = False
-
-            self._turbulencePostOptionsUsesMaxGrad =\
-                    True if useMaxGrad else False
-            self._turbulencePostOptions = {**kwargs}
-
-            if useFieldPlotterOptions:
-                self._turbulencePostOptions.update(self._fieldPlotterOptions)
     #}}}
 
     #{{{runScan
@@ -1008,34 +469,18 @@ class GenericScanDriver(object):
                 setattr(self, member, {})
             self._commonRunnerOptions.pop("BOUT_nodes")
             self._commonRunnerOptions.pop("BOUT_ppn")
-            self._commonRunnerOptions.pop("post_process_nproc")
-            self._commonRunnerOptions.pop("post_process_nodes")
-            self._commonRunnerOptions.pop("post_process_ppn")
 
         # Make dictionary to variables
-        for (flag, value) in self._postProcessingFlags.items():
-            setattr(self, flag, value)
         for (flag, value) in self._runOptions.items():
             setattr(self, flag, value)
 
         # Update dicts
-        self._fieldPlotterOptions  .update(self._commonPlotterOptions)
-        self._initPostOptions      .update(self._commonPlotterOptions)
-        self._expandPostOptions    .update(self._commonPlotterOptions)
-        self._linearPostOptions    .update(self._commonPlotterOptions)
-        self._turbulencePostOptions.update(self._commonPlotterOptions)
         self._commonRunnerOptions["directory"] = self._directory
 
         # Check that no troubles running with restart from
         if self._restartFrom is not None:
             messageTemplate = "Cannot run {} when restart from is set\n"
-            tests = {"runInit"                    : self.runInit,\
-                     "justPostProcess"            : self.justPostProcess,\
-                     "postProcessGrowthRates"     : self.postProcessGrowthRates,\
-                     "postProcessProbesAndEnergy" : self.postProcessProbesAndEnergy,\
-                     "postProcessLinProfiles"     : self.postProcessLinProfiles,\
-                     "postProcessTurbProfiles"    : self.postProcessTurbProfiles,\
-                    }
+            tests = {"runInit" : self.runInit}
             problem = False
             message = ""
             for key in tests.keys():
@@ -1046,16 +491,20 @@ class GenericScanDriver(object):
             if problem:
                 raise ValueError(message)
 
-        self._commonPostProcessorQueue = None
-
+# FIXME: After test
+# # Check if pickle exsits
+# # Else
+# dmpFolersDict = {\
+#                 "init":None,\
+#                 "expand":None,\
+#                 "linear":None,\
+#                 "turbulence":None,\
+#                 }
         # Call the runners
         if self.runInit:
             self._callInitRunner()
 
-        if self.justPostProcess:
-            self._restart = None
-        else:
-            self._restart = "overwrite"
+        self._restart = "overwrite"
 
         if self.runExpand:
             self._callExpandRunner()
@@ -1066,59 +515,19 @@ class GenericScanDriver(object):
         if self.runTurb:
             self._callTurboRunner()
 
-        if self.postProcessGrowthRates:
-            self._callPostProcessGrowthRates()
-
-        if self.postProcessProbesAndEnergy:
-            self._callPostProcessProbesAndEnergy()
-
-        #{{{ If profiles are to be plotted
-        # FIXME: Consider making this into a function
-        if self.postProcessLinProfiles or self.postProcessTurbProfiles:
-            noutProfile      = 3
-            timestepProfile  = 10*self._timeStepMultiplicator
-            restartProfile   = "overwrite"
-            saveTermsProfile = True
-            if not(self._boussinesq):
-                hyper = ("switch", "useHyperViscAzVortD",True)
-            else:
-                hyper = ("switch", "useHyperViscAzVort",True)
-
-            # Create the options for the runners
-            # Notice that we would like to save all the fields here
-            self._profileRunOptions = {\
-                # Set temporal domain
-                "nout"         : noutProfile    ,\
-                "timestep"     : timestepProfile,\
-                # Set restart options
-                "restart"      : restartProfile ,\
-                "restart_from" : restartFromFunc,\
-                # Set additional options
-                "additional" : (
-                 ("switch", "saveTerms", saveTermsProfile),\
-                 hyper,\
-                             ),\
-                "series_add" : self._series_add,\
-                # Common options
-                **self._commonRunnerOptions    ,\
-                                }
-        #}}}
-
-        if self.postProcessLinProfiles:
-            self._callpostProcessLinProfiles()
-
-        if self.postProcessTurbProfiles:
-            self._callPostProcessTurbProfiles()
+# FIXME: After test
+# # Save the dmp_folders for post-processing
+# import pickle
+#
+# with open(dmpFolders, "w"):
+# # FIXME: spit out paths
+#     self._extra_turbo_folders
     #}}}
 
     #{{{_callInitRunner
     def _callInitRunner(self):
-        """Executes the init run and the post processing"""
+        """Executes the init run"""
 
-        if self.postProcessInit:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
         #{{{Init options
         # Name
         theRunName = self._theRunName + "-0-initialize"
@@ -1134,65 +543,36 @@ class GenericScanDriver(object):
             hyper = ("switch", "useHyperViscAzVort",False)
         # PBS options
         if self._runner == PBS_runner:
-            self._initPBSOptions.update(\
-                    {"post_process_run_name":"post" + theRunName.capitalize(),
-                     "BOUT_run_name"        : theRunName
-                    })
-
-            # This self._commonRunnerOptions.pop("post_process_queue")
-            # As runs is called consecutively
-            if self._commonRunnerOptions["post_process_queue"] is not None:
-                self._commonPostProcessorQueue =\
-                    self._commonRunnerOptions.pop("post_process_queue")
-                self._initPBSOptions["post_process_queue"] =\
-                    self._commonPostProcessorQueue
-            else:
-                self._commonRunnerOptions.pop("post_process_queue")
+            self._initPBSOptions.update({"BOUT_run_name": theRunName })
         #}}}
-        #{{{Run and post processing
+        #{{{Run
         initRunner = self._runner(\
-            # Shall we make
-            make       = self._make,\
-            # Set spatial domain
-            nz         = nz        ,\
-            # Set the restart option
+            make       = self._make   ,\
+            nz         = nz           ,\
             restart    = self._restart,\
-            # Init options
             **self._initOptions       ,\
             # Set additional option
             additional = (
-                ("tag",theRunName,0),\
-                ("ownFilters"  , "type", ownFilterType),\
-                hyper,\
-                         ),\
+                ("tag",        theRunName, 0            ),\
+                ("ownFilters", "type"    , ownFilterType),\
+                hyper                                    ,\
+                         )               ,\
             series_add = self._series_add,\
             # PBS options
-            **self._initPBSOptions                       ,\
+            **self._initPBSOptions,\
             # Common options
-            **self._commonRunnerOptions                  ,\
+            **self._commonRunnerOptions,\
                         )
 
-        self._init_dmp_folders, self._init_PBS_ids = initRunner.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            theRunName  = theRunName,\
-            **self._initPostOptions ,\
-            )
+        self._init_dmp_folders, self._init_PBS_ids =\
+            initRunner.execute_runs()
         #}}}
     #}}}
 
     #{{{_callExpandRunner
     def _callExpandRunner(self):
-        """Executes the expand run and the post processing"""
+        """Executes the expand run"""
 
-        if self.postProcessExp:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
         #{{{Expand runner options
         # Set the spatial domain
         # Filter
@@ -1206,12 +586,7 @@ class GenericScanDriver(object):
             self._initAScanPath = self._init_dmp_folders[0]
         except AttributeError as er:
             if "has no attribute" in er.args[0]:
-                message =("{0}WARNING Init was not run, post processor will "
-                          "be set set to None{0}")
-                print(message.format("!"*3))
-                curPostProcessor    = None
-                self._init_PBS_ids  = None
-                self._initAScanPath = None
+                raise RuntimeError("Init must be run prior to expand")
             else:
                 raise er
 
@@ -1219,49 +594,33 @@ class GenericScanDriver(object):
         theRunName = self._theRunName + "-1-expand"
         # PBS options
         if self._runner == PBS_runner:
-            self._expandPBSOptions.update(\
-                    {"post_process_run_name":"post" + theRunName.capitalize(),
-                     "BOUT_run_name"        : theRunName
-                    })
-            if self._commonPostProcessorQueue is not None:
-                self._expandPBSOptions["post_process_queue"] =\
-                    self._commonPostProcessorQueue
+            self._expandPBSOptions.update({"BOUT_run_name" : theRunName})
 
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
-        #{{{Run and post processing
+        #{{{Run
         expandRunner = self._runner(\
-            # Expand options
-            **self._expandOptions       ,\
-            # Set restart options
             restart      = self._restart,\
             restart_from = restart_from ,\
+            **self._expandOptions       ,\
             # Set additional options
             additional = (
-                ("tag",theRunName,0),\
-                ("ownFilters"  , "type", ownFilterType),\
+                ("tag"       ,theRunName, 0            ),\
+                ("ownFilters", "type"   , ownFilterType),\
                 hyper,\
-                         ),\
-            series_add = self._series_add                ,\
+                         )               ,\
+            series_add = self._series_add,\
             # PBS options
-            **self._expandPBSOptions                     ,\
+            **self._expandPBSOptions   ,\
             # Common options
-            **self._commonRunnerOptions                  ,\
+            **self._commonRunnerOptions,\
                         )
 
         self._expand_dmp_folders, self._expand_PBS_ids =\
         expandRunner.execute_runs(\
-            post_processing_function = curPostProcessor,\
             # Declare dependencies
-            job_dependencies = self._init_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            theRunName        = theRunName        ,\
-            **self._expandPostOptions             ,\
+            job_dependencies = self._expand_PBS_ids,\
             # Below are the kwargs given to the
             # restartFromFunc
             aScanPath      = self._initAScanPath  ,\
@@ -1272,14 +631,11 @@ class GenericScanDriver(object):
 
     #{{{_callLinearRunner
     def _callLinearRunner(self):
-        """Executes the linear run and the post processing"""
-        if self.postProcessLin:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
+        """Executes the linear run"""
+
         #{{{ Linear options
         #Switches
-        saveTerms           = False
+        saveTerms = False
         if not(self._boussinesq):
             hyper = ("switch", "useHyperViscAzVortD",True)
         else:
@@ -1292,75 +648,50 @@ class GenericScanDriver(object):
             includeNoise  = False
             forceAddNoise = False
             add_noise     = self._boutRunnersNoise
-        if self._linearPostOptionsUsesMaxGrad:
-            # As this is scan dependent, the driver finds the correct folder
-            try:
-                maxGradRhoFolder = self._expand_dmp_folders[0]
-                # From previous outputs
-                self._expandAScanPath = self._expand_dmp_folders[0]
-                self._linearPostOptions["maxGradRhoFolder"] =\
-                                                maxGradRhoFolder
-            except AttributeError as er:
-                if "has no attribute" in er.args[0]:
-                    message =("{0}WARNING Expand was not run, post processor will "
-                              "be set set to None{0}")
-                    print(message.format("!"*3))
-                    curPostProcessor      = None
-                    self._expand_PBS_ids  = None
-                    self._expandAScanPath = None
-                else:
-                    raise er
+        try:
+            # From previous outputs
+            self._expandAScanPath = self._expand_dmp_folders[0]
+        except AttributeError as er:
+            if "has no attribute" in er.args[0]:
+                raise RuntimeError("Expand must be run prior to linear")
+            else:
+                raise er
+
         # Name
         theRunName = self._theRunName + "-2-linearPhase1"
         # PBS options
         if self._runner == PBS_runner:
-            self._linearPBSOptions.update(\
-                    {"post_process_run_name":"post" + theRunName.capitalize(),
-                     "BOUT_run_name"        : theRunName
-                    })
-            if self._commonPostProcessorQueue is not None:
-                self._linearPBSOptions["post_process_queue"] =\
-                    self._commonPostProcessorQueue
+            self._linearPBSOptions.update({"BOUT_run_name" : theRunName})
 
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
-        #{{{Run and post processing
+        #{{{Run
         self._linearRun = self._runner(\
-            # Linear options
-            **self._linearOptions         ,\
-            # Set restart options
-            restart      = self._restart  ,\
-            restart_from = restart_from   ,\
+            restart      = self._restart,\
+            restart_from = restart_from ,\
+            **self._linearOptions       ,\
             # Set additional options
             additional = (
-                ("tag"   , theRunName           ,0),\
-                ("switch", "includeNoise"       , includeNoise ),\
-                ("switch", "forceAddNoise"      ,forceAddNoise),\
-                ("switch", "saveTerms"          ,saveTerms),\
+                ("tag"   , theRunName      ,0),\
+                ("switch", "includeNoise"  , includeNoise ),\
+                ("switch", "forceAddNoise" ,forceAddNoise) ,\
+                ("switch", "saveTerms"     ,saveTerms)     ,\
                 hyper,\
-                         ),\
-            series_add = self._series_add                ,\
-            # Set eventual noise
-            add_noise             = add_noise            ,\
+                         )               ,\
+            series_add = self._series_add,\
+            # Set noise
+            add_noise = add_noise,\
             # PBS options
-            **self._linearPBSOptions                     ,\
+            **self._linearPBSOptions,\
             # Common options
-            **self._commonRunnerOptions                  ,\
+            **self._commonRunnerOptions,\
                     )
 
         self._linear_dmp_folders, self._linear_PBS_ids = \
         self._linearRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
             # Declare dependencies
             job_dependencies = self._expand_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            theRunName        = theRunName        ,\
-            **self._linearPostOptions             ,\
             # Below are the kwargs given to the
             # restartFromFunc
             aScanPath      = self._expandAScanPath,\
@@ -1379,10 +710,8 @@ class GenericScanDriver(object):
 
     #{{{_callTurboRunner
     def _callTurboRunner(self):
-        if self.postProcessTurb:
-            curPostProcessor = postBoutRunner
-        else:
-            curPostProcessor = None
+        """Executes the turbulence run"""
+
         #{{{Turbulence options
         # Switches
         saveTerms           = False
@@ -1391,54 +720,22 @@ class GenericScanDriver(object):
         else:
             hyper = ("switch", "useHyperViscAzVort",True)
 
-        if self._turbulencePostOptionsUsesMaxGrad:
-            # As this is scan dependent, the driver finds the correct folder
-            try:
-                maxGradRhoFolder = self._expand_dmp_folders[0]
-                # From previous outputs
-                self._expandAScanPath = self._expand_dmp_folders[0]
-                self._turbulencePostOptions["maxGradRhoFolder"] =\
-                                                maxGradRhoFolder
-            except AttributeError as er:
-                if "has no attribute" in er.args[0]:
-                    message =("{0}WARNING Expand was not run, post processor will "
-                              "be set set to None{0}")
-                    print(message.format("!"*3))
-                    curPostProcessor      = None
-                    self._expand_PBS_ids  = None
-                    self._expandAScanPath = None
-                else:
-                    raise er
         # Name
         theRunName = self._theRunName + "-3-turbulentPhase1"
         # PBS options
         if self._runner == PBS_runner:
-            self._turbulencePBSOptions.update(\
-                    {"post_process_run_name":"post" + theRunName.capitalize(),
-                     "BOUT_run_name"        : theRunName
-                    })
-            if self._commonPostProcessorQueue is not None:
-                self._turbulencePBSOptions["post_process_queue"] =\
-                    self._commonPostProcessorQueue
+            self._turbulencePBSOptions.update({"BOUT_run_name" : theRunName })
 
         # Set aScanPath
         try:
             self._linearAScanPath  = self._linear_dmp_folders[0]
         except AttributeError as er:
-            if "has no attribute" in er.args[0]:
-                message =("{0}WARNING Expand was not run, post processor will "
-                          "be set set to None{0}")
-                print(message.format("!"*3))
-                curPostProcessor      = None
-                self._linear_PBS_ids  = None
-                self._linearAScanPath = None
-            else:
-                raise er
+            raise RuntimeError("Linear must be run prior to turbulence")
 
         restart_from =\
                 self._restartFrom if self._restartFrom else restartFromFunc
         #}}}
-        #{{{Run and post processing
+        #{{{Run
         self._turboRun = self._runner(\
             # Set turbulence options
             **self._turbulenceOptions   ,\
@@ -1446,35 +743,31 @@ class GenericScanDriver(object):
             restart      = self._restart,\
             restart_from = restart_from ,\
             additional = (
-                ("tag",theRunName,0),\
-                ("switch"      , "saveTerms"          ,saveTerms),\
+                ("tag"   , theRunName , 0        ),\
+                ("switch", "saveTerms", saveTerms),\
                 hyper,\
-                         ),\
-            series_add = self._series_add                ,\
+                         )               ,\
+            series_add = self._series_add,\
             # PBS options
-            **self._turbulencePBSOptions                 ,\
+            **self._turbulencePBSOptions,\
             # Common options
-            **self._commonRunnerOptions                  ,\
+            **self._commonRunnerOptions ,\
                         )
 
         self._turbo_dmp_folders, self._turbo_PBS_ids =\
         self._turboRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
             # Declare dependencies
             job_dependencies = self._linear_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            theRunName        = theRunName        ,\
-            **self._turbulencePostOptions         ,\
             # Below are the kwargs given to the
             # restartFromFunc
             aScanPath      = self._linearAScanPath ,\
             scanParameters = self._scanParameters ,\
                                         )
 
+        # FIXME: This part is fragile and does not give the same output
+        #        time after time.
+        #        Should have something which gives the same dmp_folder
+        #        time after time
         if self._restartTurb is not None:
             # Make extra turbulence folder
             self._extra_turbo_folders = []
@@ -1501,16 +794,8 @@ class GenericScanDriver(object):
             for _ in range(self._restartTurb):
                 turbo_dmp_folders, self._turbo_PBS_ids =\
                     self._turboRun.execute_runs(\
-                        post_processing_function = curPostProcessor,\
                         # Declare dependencies
                         job_dependencies = self._turbo_PBS_ids,\
-                        # This function will be called every time after
-                        # performing a run
-                        post_process_after_every_run = True,\
-                        # Below are the kwargs arguments being passed to
-                        # the post processing function
-                        theRunName        = theRunName        ,\
-                        **self._turbulencePostOptions         ,\
                         # Below are the kwargs given to the
                         # restartFromFunc
                         aScanPath      = self._linearAScanPath ,\
@@ -1523,183 +808,4 @@ class GenericScanDriver(object):
             self._extra_turbo_folders = tuple(self._extra_turbo_folders)
         #}}}
      #}}}
-
-    #{{{_callPostProcessGrowthRates
-    def _callPostProcessGrowthRates(self):
-        """Calls the post processor for the growth rates"""
-
-        scanParam  = self._scanParameters[0]
-        theRunName = self._theRunName + "-growthRates"
-        curPostProcessor = postBoutRunner
-
-        # Make a tuple of tuples, where each subtuple will be used as the
-        # paths in collectiveCollect
-        if self._restartTurb is not None:
-            collectionFolders =\
-                tuple(zip( self._linear_dmp_folders ,\
-                           self._turbo_dmp_folders  ,\
-                          *self._extra_turbo_folders,\
-                          ))
-        else:
-            collectionFolders =\
-                tuple(zip(self._linear_dmp_folders, self._turbo_dmp_folders))
-
-        _, _ = self._linearRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = False,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            # Switches
-            driverName       = "plotGrowthRates"  ,\
-            # PostProcessDriver input
-            **self._commonPlotterOptions          ,\
-            theRunName       = theRunName         ,\
-            # StatsAndSignalsDrivers input
-            paths            = collectionFolders  ,\
-            # DriversProbes input
-            scanParam        = scanParam               ,\
-            steadyStatePaths = self._expand_dmp_folders,\
-            **self._probesPlotterOptions               ,\
-            # Below are the kwargs given to the
-            # restartFromFunc
-            aScanPath      = self._linearAScanPath ,\
-            scanParameters = self._scanParameters  ,\
-                                    )
-    #}}}
-
-    #{{{_callPostProcessProbesAndEnergy
-    def _callPostProcessProbesAndEnergy(self):
-        """Calls the post processor for the growth rates"""
-
-        if self._restartTurb is not None:
-            collectionFolders = [self._linear_dmp_folders[0],\
-                                 self._turbo_dmp_folders[0]]
-            for folder in self._expand_dmp_folders:
-                collectionFolders.append(folder)
-            collectionFolders = tuple(collectionFolders)
-        else:
-            collectionFolders = (self._linear_dmp_folders[0],\
-                                 self._turbo_dmp_folders[0])
-
-
-        theRunName = self._theRunName + "-energyProbesPlot"
-        curPostProcessor = postBoutRunner
-
-        _, _ = self._turboRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # Declare dependencies
-            job_dependencies = self._turbo_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            # postBoutRunner option
-            driverName = "plotEnergyAndProbes"         ,\
-            # PostProcessDriver input
-            **self._commonPlotterOptions               ,\
-            theRunName        = theRunName             ,\
-            # StatsAndSignalsDrivers input
-            paths             = collectionFolders      ,\
-            # DriversProbes input
-            **self._probesPlotterOptions               ,\
-            tIndSaturatedTurb = self.tIndSaturatedTurb ,\
-            # The steady state path will be
-            # converted using convertToCurrentScanParameters
-            steadyStatePath = self._expand_dmp_folders[0],\
-            # Below are the kwargs given to the
-            # restartFromFunc and convertToCurrentScanParameters
-            aScanPath      = self._tuboAScanPath         ,\
-            scanParameters = self._scanParameters)
-    #}}}
-
-    #{{{_callpostProcessLinProfiles
-    def _callpostProcessLinProfiles(self):
-        """Calls the postProcessor for linear profiles"""
-
-        curPostProcessor = postBoutRunner
-        theRunName = self._theRunName + "-2-linearPhaseParProfiles"
-        tSlice = None
-
-        # Add the tag and the run name
-        self._profileRunOptions["additional"] =\
-                list(self._profileRunOptions["additional"])
-        self._profileRunOptions["additional"].append(("tag",theRunName,0))
-        self._profileRunOptions["additional"] =\
-                tuple(self._profileRunOptions["additional"])
-        if self._runner == PBS_runner:
-            self._profileRunOptions["BOUT_run_name"] = theRunName
-
-        # Create the runner
-        profileRun = self._runner(**self._profileRunOptions)
-        # Execute
-        _, _ = profileRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # Declare dependencies
-            job_dependencies = self._linear_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            # Switches
-            driverName     = "parDriver"   ,\
-            tSlice         = tSlice        ,\
-            theRunName     = theRunName    ,\
-            # Below are the kwargs given to the
-            # restartFromFunc
-            aScanPath      = self._linearAScanPath,\
-            scanParameters = self._scanParameters ,\
-            # Common kwargs
-            **self._fieldPlotterOptions)
-    #}}}
-
-    #{{{_callPostProcessTurbProfiles
-    def _callPostProcessTurbProfiles(self):
-        curPostProcessor = postBoutRunner
-        theRunName = self._theRunName + "-3-turbulentPhase1ParProfiles"
-        tSlice = None
-
-        # Add the tag and the run name
-        if self.postProcessLinProfiles:
-            # Tag is already present in the dict:
-            self._profileRunOptions["additional"] =\
-                    list(self._profileRunOptions["additional"])
-            _ = self._profileRunOptions["additional"].pop()
-            self._profileRunOptions["additional"] =\
-                    tuple(self._profileRunOptions["additional"])
-
-        self._profileRunOptions["additional"] =\
-             list(self._profileRunOptions["additional"])
-        self._profileRunOptions["additional"].append(("tag",theRunName,0))
-        self._profileRunOptions["additional"] =\
-             tuple(self._profileRunOptions["additional"])
-        if self._runner == PBS_runner:
-            self._profileRunOptions["BOUT_run_name"] = theRunName
-        # Create the runner
-        profileRun = self._runner(**self._profileRunOptions)
-        # Execute
-        _, _ = profileRun.execute_runs(\
-            post_processing_function = curPostProcessor,\
-            # Declare dependencies
-            job_dependencies = self._turbo_PBS_ids,\
-            # This function will be called every time after
-            # performing a run
-            post_process_after_every_run = True,\
-            # Below are the kwargs arguments being passed to
-            # the post processing function
-            # Switches
-            driverName     = "parDriver"   ,\
-            tSlice         = tSlice        ,\
-            theRunName     = theRunName    ,\
-            # Below are the kwargs given to the
-            # restartFromFunc
-            aScanPath      = self._linearAScanPath,\
-            scanParameters = self._scanParameters ,\
-            # Common kwargs
-            **self._fieldPlotterOptions           ,\
-                                    )
-    #}}}
 #}}}
