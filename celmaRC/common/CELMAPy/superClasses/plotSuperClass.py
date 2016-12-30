@@ -4,7 +4,7 @@
 Contains the super class for the plotting
 """
 
-from ..driverHelpers import scanWTagSaveFunc
+from ..driverHelpers import scanWTagSaveFunc, getTime
 from ..plotHelpers import PlotHelper
 import datetime
 import os
@@ -96,8 +96,9 @@ class PlotSuperClass(object):
                     savePath = "-".join(dmp_folder.split("/")[::-1])
 
             if timeStampFolder:
-                # Get the timefolder
-                self._timeFolder = self._getTime()
+                if PlotSuperClass._time is None:
+                    # Get the timefolder
+                    PlotSuperClass._time = getTime()
             else:
                 self._timeFolder = ""
 
@@ -130,35 +131,4 @@ class PlotSuperClass(object):
         self._ph.makeDimensionStringsDicts(uc)
     #}}}
 
-    #{{{_getTime
-    def _getTime(self, depth = "second"):
-        #{{{docstring
-        """
-        Gets the current time, and returns it as a string
-        Parameters
-        ----------
-        depth : ["hour" | "minute" | "second"]
-            String giving the temporal accuracy of the output string.
-        Returns
-        -------
-        nowStr : str
-            The string containing the current time
-        """
-        #}}}
-        if PlotSuperClass._time is None:
-            now = datetime.datetime.now()
-            nowStr = "{}-{:02d}-{:02d}".format(now.year, now.month, now.day)
-
-            if depth == "hour" or depth == "minute" or depth == "second":
-                nowStr += "-{:02d}".format(now.hour)
-            if depth == "minute" or depth == "second":
-                nowStr += "-{:02d}".format(now.minute)
-            if depth == "second":
-                nowStr += "-{:02d}".format(now.second)
-
-            PlotSuperClass._time = nowStr
-            return nowStr
-        else:
-            return PlotSuperClass._time
-    #}}}
 #}}}
