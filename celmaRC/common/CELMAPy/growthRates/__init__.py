@@ -4,4 +4,6 @@
 Init-file for growth rates
 """
 
-from .growthRates import calcGrowthRate, PlotGrowthRates
+from .collectAndCalcGrowthRates import CollectAndCalcGrowthRates
+from .driverGrowthRates import DriverGrowthRates, driverGrowthRates
+from .plotGrowthRates import PlotGrowthRates
