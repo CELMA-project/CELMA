@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 """
-Contains the restartFromFunc and GenericScanDriver
+Contains the restartFromFunc and ScanDriver
 """
 
 from bout_runners import basic_runner, PBS_runner
-import re
 import inspect
 import os
+import pickle
+import re
 
 # NOTE: Smells of code duplication in the "call" functions
 
@@ -95,8 +96,8 @@ def restartFromFunc(dmp_folder     = None,\
     return restartFrom
 #}}}
 
-#{{{GenericScanDriver
-class GenericScanDriver(object):
+#{{{ScanDriver
+class ScanDriver(object):
     #{{{docstring
     """
     Generic scan driver class.
@@ -107,13 +108,15 @@ class GenericScanDriver(object):
     #}}}
 
     #{{{Constructor
-    def __init__(self, runner = PBS_runner):
+    def __init__(self, directory, runner = PBS_runner):
         #{{{docstring
         """
         Sets the default options and selects the runner.
 
         Parameters
         ----------
+        directory : str
+            Path to BOUT.inp
         runner : [basic_runner | PBS_runner]
             The runner to use
         """
@@ -129,17 +132,16 @@ class GenericScanDriver(object):
                     "turbulenceOptions"   : False,\
                 }
 
-        self._runner = runner
+        self._directory = directory
+        self._runner    = runner
         #}}}
 
     #{{{setMainOptions
     def setMainOptions(self                         ,\
-                       directory                    ,\
                        scanParameters               ,\
                        series_add                   ,\
                        theRunName                   ,\
                        make                  = False,\
-                       timeStepMultiplicator = 1    ,\
                        boutRunnersNoise      = None ,\
                        restartFrom           = None ,\
                       ):
@@ -149,8 +151,6 @@ class GenericScanDriver(object):
 
         Parameters
         ----------
-        directory : str
-            Path to BOUT.inp
         scanParameters : sequence of strings
             Sequence of all quantities that will change during a scan
         series_add : sequence of sequence which is not string
@@ -159,8 +159,6 @@ class GenericScanDriver(object):
             Name of the run
         make : bool
             Shall the program be made or not
-        timeStepMultiplicator : int
-            How much the default time step should be multiplied with
         boutRunnersNoise : [None|dict]
             If this is None, the noise will be generated
             from the noise generator in noiseGenerator.cxx
@@ -178,12 +176,10 @@ class GenericScanDriver(object):
 
         self._calledFunctions["mainOptions"] = True
 
-        self._directory             = directory
         self._scanParameters        = scanParameters
         self._series_add            = series_add
         self._theRunName            = theRunName
         self._make                  = make
-        self._timeStepMultiplicator = timeStepMultiplicator
         self._boutRunnersNoise      = boutRunnersNoise
         self._restartFrom           = restartFrom
     #}}}
@@ -246,11 +242,17 @@ class GenericScanDriver(object):
         cpy_source : bool
             If the source should be copied
         BOUT_nodes : int
-            How many nodes to run on
+            How many nodes to run on (only used when the
+            runner is PBS_runner)
         BOUT_ppn : int
-            How many processors per node
+            How many processors per node (only used when the
+            runner is PBS_runner)
+        BOUT_queue : [None|str]
+            What queue to submit the jobs to (only used when the
+            runner is PBS_runner)
         BOUT_account : [None|str]
-            Account number to use for the runs
+            Account number to use for the runs (only used when the
+            runner is PBS_runner)
         """
         #}}}
 
@@ -260,11 +262,13 @@ class GenericScanDriver(object):
                 {\
                  "nproc"               : nproc       ,\
                  "cpy_source"          : cpy_source  ,\
-                 "BOUT_nodes"          : BOUT_nodes  ,\
-                 "BOUT_ppn"            : BOUT_ppn    ,\
-                 "BOUT_queue"          : BOUT_queue  ,\
-                 "BOUT_account"        : BOUT_account,\
                 }
+
+        if self._runner == PBS_runner:
+            self._commonRunnerOptions["BOUT_nodes"]   = BOUT_nodes
+            self._commonRunnerOptions["BOUT_ppn"  ]   = BOUT_ppn
+            self._commonRunnerOptions["BOUT_queue"]   = BOUT_queue
+            self._commonRunnerOptions["BOUT_account"] = BOUT_account
     #}}}
 
     #{{{setInitOptions
@@ -295,7 +299,7 @@ class GenericScanDriver(object):
 
         self._initOptions =\
                 {\
-                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "timestep" : (timestep,),\
                  "nout"     : (nout,),\
                 }
 
@@ -337,7 +341,7 @@ class GenericScanDriver(object):
         self._expandOptions =\
                 {\
                  "nz"       : nz,\
-                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "timestep" : (timestep,),\
                  "nout"     : (nout,),\
                 }
 
@@ -377,7 +381,7 @@ class GenericScanDriver(object):
 
         self._linearOptions =\
                 {\
-                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "timestep" : (timestep,),\
                  "nout"     : (nout,),\
                 }
 
@@ -416,7 +420,7 @@ class GenericScanDriver(object):
 
         self._turbulenceOptions =\
                 {\
-                 "timestep" : (timestep*self._timeStepMultiplicator,),\
+                 "timestep" : (timestep,),\
                  "nout"     : (nout,),\
                 }
 
@@ -467,8 +471,6 @@ class GenericScanDriver(object):
             members = tuple(member for member in dir(self) if "PBS" in member)
             for member in members:
                 setattr(self, member, {})
-            self._commonRunnerOptions.pop("BOUT_nodes")
-            self._commonRunnerOptions.pop("BOUT_ppn")
 
         # Make dictionary to variables
         for (flag, value) in self._runOptions.items():
@@ -491,37 +493,81 @@ class GenericScanDriver(object):
             if problem:
                 raise ValueError(message)
 
-# FIXME: After test
-# # Check if pickle exsits
-# # Else
-# dmpFolersDict = {\
-#                 "init":None,\
-#                 "expand":None,\
-#                 "linear":None,\
-#                 "turbulence":None,\
-#                 }
+        # Set the path to the dmp folders
+        self._dmpFoldersDictPath =\
+                os.path.join(self._directory, "dmpFoldersDict.pickle")
+
         # Call the runners
         if self.runInit:
             self._callInitRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["init"] = self._init_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
 
         self._restart = "overwrite"
 
         if self.runExpand:
             self._callExpandRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["expand"] = self._expand_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
 
         if self.runLin:
             self._callLinearRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["linear"] = self._linear_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
 
         if self.runTurb:
             self._callTurboRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
 
-# FIXME: After test
-# # Save the dmp_folders for post-processing
-# import pickle
-#
-# with open(dmpFolders, "w"):
-# # FIXME: spit out paths
-#     self._extra_turbo_folders
+
+        if self._restartTurb is not None:
+            self._callExtraTurboRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["extraTurbulence"] = list(dmpFoldersDict["extraTurbulence"])
+            dmpFoldersDict["extraTurbulence"].append(self._extra_turbo_folders)
+            dmpFoldersDict["extraTurbulence"] = tuple(dmpFoldersDict["extraTurbulence"])
+            self._pickleDmpFoldersDict(dmpFoldersDict)
+    #}}}
+
+    #{{{_getDmpFolderDict
+    def _getDmpFolderDict(self):
+        """
+        Returns the dmpFolderDict
+        """
+
+        if os.path.exists(self._dmpFoldersDictPath):
+            with open(self._dmpFoldersDictPath, "rb") as f:
+                dmpFoldersDict = pickle.load(f)
+        else:
+            dmpFoldersDict = {\
+                              "init"            : None,\
+                              "expand"          : None,\
+                              "linear"          : None,\
+                              "turbulence"      : None,\
+                              "extraTurbulence" : ()  ,\
+                             }
+
+        return dmpFoldersDict
+    #}}}
+
+    #{{{_pickleDmpFoldersDict
+    def _pickleDmpFoldersDict(self, dmpFoldersDict):
+        """
+        Pickles the dmpFolderDict
+        """
+
+        with open(self._dmpFoldersDictPath, "wb") as f:
+            pickle.dump(dmpFoldersDict, f)
     #}}}
 
     #{{{_callInitRunner
@@ -620,7 +666,7 @@ class GenericScanDriver(object):
         self._expand_dmp_folders, self._expand_PBS_ids =\
         expandRunner.execute_runs(\
             # Declare dependencies
-            job_dependencies = self._expand_PBS_ids,\
+            job_dependencies = self._init_PBS_ids,\
             # Below are the kwargs given to the
             # restartFromFunc
             aScanPath      = self._initAScanPath  ,\
@@ -763,49 +809,57 @@ class GenericScanDriver(object):
             aScanPath      = self._linearAScanPath ,\
             scanParameters = self._scanParameters ,\
                                         )
+        #}}}
+    #}}}
 
-        # FIXME: This part is fragile and does not give the same output
-        #        time after time.
-        #        Should have something which gives the same dmp_folder
-        #        time after time
-        if self._restartTurb is not None:
-            # Make extra turbulence folder
-            self._extra_turbo_folders = []
-            # Make a list of the turbo_dmp_folders
-            self._turbo_dmp_folders = list(self._turbo_dmp_folders)
-            # Create new runner
-            self._turboRun = self._runner(\
-                # Set turbulence options
-                **self._turbulenceOptions   ,\
-                # Set restart options
-                restart    = "overwrite"    ,\
-                additional = (
-                    ("tag",theRunName,0),\
-                    ("switch"      , "saveTerms"          ,saveTerms),\
-                    hyper,\
-                             ),\
-                series_add = self._series_add                ,\
-                # PBS options
-                **self._turbulencePBSOptions                 ,\
-                # Common options
-                **self._commonRunnerOptions                  ,\
-                            )
+    #{{{_callExtraTurboRunner
+    def _callExtraTurboRunner(self):
+        """
+        Calls the turbulence runner in a loop, so that it can be restarted.
+        """
 
-            for _ in range(self._restartTurb):
-                turbo_dmp_folders, self._turbo_PBS_ids =\
-                    self._turboRun.execute_runs(\
-                        # Declare dependencies
-                        job_dependencies = self._turbo_PBS_ids,\
-                        # Below are the kwargs given to the
-                        # restartFromFunc
-                        aScanPath      = self._linearAScanPath ,\
-                        scanParameters = self._scanParameters ,\
-                                                    )
+        saveTerms   = False
+
+        # Name
+        theRunName = self._theRunName + "-3-turbulentPhase1"
+
+        # Switches
+        if not(self._boussinesq):
+            hyper = ("switch", "useHyperViscAzVortD",True)
+        else:
+            hyper = ("switch", "useHyperViscAzVort",True)
+        # Make extra turbulence folder
+        self._extra_turbo_folders = []
+        # Create new runner
+        self._turboRun = self._runner(\
+            **self._turbulenceOptions,\
+            restart    = "overwrite" ,\
+            additional = (
+                ("tag"   , theRunName , 0        ),\
+                ("switch", "saveTerms", saveTerms),\
+                hyper,\
+                         )               ,\
+            series_add = self._series_add,\
+            # PBS options
+            **self._turbulencePBSOptions ,\
+            # Common options
+            **self._commonRunnerOptions  ,\
+                        )
+
+        for nr in range(self._restartTurb):
+            turbo_dmp_folders, self._turbo_PBS_ids =\
+                self._turboRun.execute_runs(\
+                    # Declare dependencies
+                    job_dependencies = self._turbo_PBS_ids,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc
+                    aScanPath      = self._linearAScanPath,\
+                    scanParameters = self._scanParameters ,\
+                                                )
             # Update the list
             self._extra_turbo_folders.append(turbo_dmp_folders)
 
-            # Recast to tuple
-            self._extra_turbo_folders = tuple(self._extra_turbo_folders)
-        #}}}
-     #}}}
+        # Recast to tuple
+        self._extra_turbo_folders = tuple(self._extra_turbo_folders)
+    #}}}
 #}}}
