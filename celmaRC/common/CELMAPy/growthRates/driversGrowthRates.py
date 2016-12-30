@@ -1,356 +1,236 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for calculation of the growth rates
+Contains single driver and driver class for the growth rates
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import PerpPlaneProbes, calcGrowthRate, PlotGrowthRates
-from multiprocessing import Process, Pool
-from collections import ChainMap
-import pandas as pd
-import numpy as np
+from ..superClasses import DriverPointsSuperClass
+from .collectAndCalcGrowthRates import CollectAndCalcGrowthRates
+from .plotGrowthRates import PlotGrowthRates
+from multiprocessing import Process
 
-#{{{DriversGrowthRates
-class DriversGrowthRates(StatsAndSignalsDrivers):
+#{{{driverGrowthRates
+def driverGrowthRates(collectArgs    ,\
+                      getDataArgs    ,\
+                      plotSuperKwargs,\
+                     ):
+    #{{{docstring
     """
-    Class which handles calculation and plotting of the growth rates
+    Driver for plotting growth rates.
+
+    Parameters
+    ----------
+    collectArgs : tuple
+        Tuple containing arguments used in the collect function.
+        See the constructor of CollectAndCalcGrowthRates for details.
+    getDataArgs : tuple
+        Tuple containing arguments used in
+        CollectAndCalcGrowthRates.getData (including the keyword
+        argument nModes).
+        See the constructor of CollectAndCalcGrowthRates.getData for
+        details.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
+    """
+    #}}}
+
+    # Create collect object
+    ccgr = CollectAndCalcGrowthRates(*collectArgs)
+
+    # Obtain the data
+    growthRateDataFrame, positionTuple, uc =\
+        ccgr.getData(*getDataArgs)
+
+    # Plot
+    pgr = PlotGrowthRates(uc         ,\
+                          **plotSuperKwargs)
+    pgr.setData(growthRateDataFrame, positionTuple)
+    pgr.plotSaveShowGrowthRates()
+#}}}
+
+#{{{DriverGrowthRates
+class DriverGrowthRates(DriverPointsSuperClass):
+    """
+    Class for driving of the plotting of the growth rates.
     """
 
     #{{{Constructor
-    def __init__(self                   ,\
-                 *args                  ,\
-                 var              = None,\
-                 scanParam        = None,\
-                 yInd             = None,\
-                 steadyStatePaths = None,\
-                 maxMode          = 7   ,\
+    def __init__(self             ,\
+                 dmp_folders      ,\
+                 scanCollectPaths ,\
+                 steadyStatePaths ,\
+                 startInds        ,\
+                 endInds          ,\
+                 scanParameter    ,\
+                 varName          ,\
+                 convertToPhysical,\
+                 indicesArgs      ,\
+                 indicesKwargs    ,\
+                 nModes           ,\
+                 plotSuperKwargs  ,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
-
-        1. Calls the parent constructor
-        2. Sets additional member data.
-
-        NOTE: The order of steadyStatePaths must agree with the order of
-              self._paths
+            * Calls the parent class
+            * Set the member data
+            * Updates the plotSuperKwargs
 
         Parameters
         ----------
-        *args : positional arguments
-            See the constructor of StatsAndSignalsDrivers for details.
-        var : str
-            Variable to collect
-        scanParam : str
-            Parameter which is scanned
-        yInd : int
-            yInd of the simulation data to use
-        steadyStatePaths : iterable
-            Path to the steady states.
-            NOTE! The order of steadyStatePaths must agree with the
-                  order of self._paths.
-        maxMode : int
-            Maximum modes to make a dispersion relation diagram from
+        dmp_folders : tuple
+            Tuple of the dmp_folder (output from bout_runners).
+        scanCollectPaths : tuple of tuple of strings
+            One tuple of strings for each value of the scan which will
+            be used in collective collect.
+        steadyStatePaths : tuple
+            Path to the steady state simulation.
+            The tuple must be ordered according to the scan order in
+            scanCollectPaths.
+        startInds : tuple
+            Index indicating what time index to start the calculations
+            from.
+            The zeroth index is the first index of the first path being
+            used in the tuple which will be used in the collective
+            collect.
+            The tuple must be ordered according to the scan order in
+            scanCollectPaths.
+        endInds : tuple
+            Index indicating what time index to end the calculations
+            at.
+            The zeroth index is the first index of the first path being
+            used in the tuple which will be used in the collective
+            collect.
+            The tuple must be ordered according to the scan order in
+            scanCollectPaths.
+        scanParameter : str
+            String segment representing the scan
+        varName : str
+            Name of variable to find the growth rates of.
+        convertToPhysical : bool
+            Whether or not to convert to physical units.
+        indicesArgs : tuple
+            Tuple of indices to use when collecting.
+            NOTE: Only one spatial point should be used.
+        indicesKwargs : dict
+            Keyword arguments to use when setting the indices for
+            collecting.
+            NOTE: Only one spatial point should be used.
+        nModes : int
+            Number of modes.
+        plotSuperKwargs : dict
+            Keyword arguments for the plot super class.
         **kwargs : keyword arguments
-            See the constructor of StatsAndSignalsDrivers and
-FIXME:
-            PlotGrowthRates for details.
+            See parent class for details.
         """
         #}}}
 
         # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
+        super().__init__(dmp_folders, **kwargs)
 
-        # Set member data
-        self._var              = var
-        self._scanParam        = scanParam
-        self._yInd             = yInd
-        self._maxMode          = maxMode
-        self._steadyStatePaths = steadyStatePaths
+        # Set the member data
+        self._collectArgs = self._getCollectArgs(scanCollectPaths,\
+                                                 steadyStatePaths,\
+                                                 startInds       ,\
+                                                 endInds         ,\
+                                                 scanParameter)
+        self._getDataArgs = self._setGetDataArgs(varName          ,\
+                                                 convertToPhysical,\
+                                                 indicesArgs      ,\
+                                                 indicesKwargs    ,\
+                                                 nModes)
 
-        # Placeholder for the growthRates
-        self._growthRatesDict = None
+        # Update the plotSuperKwargs dict
+        plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        plotSuperKwargs.update({"plotType"   :"growthRates"})
+        self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{calcProbes
-    def calcProbes(self):
-        """ Calculates the statistics of the probes """
-
-        # Make the growthRatesDict a dictionary
-        self._growthRatesDict = {}
-
-        # Create the probes (one for each scan point)
-        # Sort the folders (ensures that they come in the right order)
-        self._dmp_folders       = list(self._dmp_folders)
-        self._steadyStatePaths = list(self._steadyStatePaths)
-        self._dmp_folders.sort()
-        self._steadyStatePaths.sort()
-        self._dmp_folders       = tuple(self._dmp_folders)
-        self._steadyStatePaths = tuple(self._steadyStatePaths)
-
-        # Obtain the growth rates dictionary
-        pathsAndSteadyStatePathsTuple =\
-                tuple(zip(self._paths, self._steadyStatePaths))
-        # Appendable list
-        listOfDicts = []
-        if self._useSubProcess:
-            with Pool(len(pathsAndSteadyStatePathsTuple)) as p:
-                listOfDicts =\
-                    p.map(self._getGrowthRatesDict,\
-                          pathsAndSteadyStatePathsTuple)
-        else:
-            for curTuple in pathsAndSteadyStatePathsTuple:
-                listOfDicts.append(\
-                        self._getGrowthRatesDict(curTuple))
-
-        # Combine the dictionaries to one
-        self._growthRatesDict = dict(ChainMap(*listOfDicts))
-    #}}}
-
-    #{{{_getGrowthRatesDict
-    def _getGrowthRatesDict(self, pathsAndSteadyStatePathsTuple):
+    @staticmethod
+    #{{{getCollectArgs
+    def getCollectArgs(scanCollectPaths,\
+                       steadyStatePaths,\
+                       startInds       ,\
+                       endInds         ,\
+                       scanParameter):
+        #{{{docstring
         """
-        Obtain the growth rates
+        Sets the arguments to be used in the constructor of
+        CollectAndCalcGrowthRates
 
         Parameters
         ----------
-        pathsAndSteadyStatePathsTuple : tuple
-            Tuple of paths and steady state paths
+        See the constructor of DriverGrowthRates for details.
 
         Returns
         -------
-        growthRatesDict : dict
-            Dictionary of the growth rates, where the scan parameter is
-            the outermost dict, and the modenumber is at the next level
+        collectArgs : tuple
+            Tuple containing arguments used in the collect function.
+            See the constructor of CollectAndCalcGrowthRates for details.
         """
-
-        # Unpack
-        path, steadyStatePath = pathsAndSteadyStatePathsTuple
-        # We only find the growth rates at position of highest gradient,
-        # as we from theory expect the highest growth rates to be there
-        curProbe = PerpPlaneProbes(\
-                      self._var                                    ,\
-                      paths               = path                   ,\
-                      yInd                = self._yInd             ,\
-                      convertToPhysical   = self.convertToPhysical,\
-                      steadyStatePath     = steadyStatePath        ,\
-                      nProbes             = 1                      ,\
-                      radialProbesIndices = None                   ,\
-                     )
-
-        # Initialize the probes in order to calculate
-        curProbe.initializeInputOutput(curProbe.radialProbesIndices,\
-                                       [curProbe.yInd],\
-                                       [0])
-
-        # Calculate the FFT
-        curProbe.calcFFTs()
-
-        # Get the positionKey of the probe
-        positionKey = tuple(curProbe.results.keys())[0]
-
-        # Obtain the current scan value
-        if hasattr(path, "__iter__") and type(path) != str:
-            # The path is a sequence
-            scanValue = path[0].split("_")
-        else:
-            # The path is a string
-            scanValue = path.split("_")
-        # +1 as the value is immediately after the scan parameter
-        scanValue = scanValue[scanValue.index(self._scanParam)+1]
-        # The time and the time is clipped with three to clip away
-        # where initial modes decay
-        initClip = 3
-        # We will also clip so that approximately only the linear
-        # mode is present (less data to process)
-        linClip = curProbe.results[positionKey]["zFFTLinearIndex"]
-        if linClip <= initClip:
-            message = ("{0}{1}WARNING: "\
-                       "Could not find a proper startpoint for the "
-                       "linear stage{1}{0}")
-            linClip = None
-            print(message.format("\n"*2, "!"*5))
-        # Clipping modes and time
-        modes = curProbe.results[positionKey]["zFFT"][initClip:linClip, :]
-        time  = curProbe.time[initClip:linClip]
-
-        # Find the growth rates
-        growthRatesDict =\
-            {"{}={}".format(self._scanParam, scanValue) :\
-                calcGrowthRate(modes   = modes,\
-                               time    = time ,\
-                               maxMode = self._maxMode)\
-            }
-
-        return growthRatesDict
-    #}}}
-
-    #{{{plotGrowthRates
-    def plotGrowthRates(self):
-        """Plot the growth rates"""
-
-        # Calculate the probes if not already done
-        if self._growthRatesDict == None:
-            self.calcProbes()
-
-        #{{{ Cast to dataframe in order to plot more easily
-        # We start by cleaning up the dict by removing "allGrowthRates"
-        # and replace "None" with NaN
-        # Loop over the scan
-        for scan in self._growthRatesDict.keys():
-            # Loop over the mode numbers
-            for mNr in self._growthRatesDict[scan].keys():
-                # Replace None with NaN
-                if self._growthRatesDict[scan][mNr] is None:
-                    message = ("{0}{1}WARNING: No hits in mode nr {2} in {3}. "
-                               "Setting to NaN{1}{0}")
-                    print(message.format("\n", "!"*4, mNr, scan))
-                    self._growthRatesDict[scan][mNr] =\
-                        {"growthRate"   :np.nan,\
-                         "growthRateStd":np.nan,\
-                         "angFreq"      :np.nan,\
-                         "angFreqStd"   :np.nan}
-                else:
-                    # Remove "allGrowthRates" by pop (pop returns the
-                    # key)
-                    # The second argument specifies what should be
-                    # returned if the key is not found. If unspecified
-                    # as keyError will be thrown
-                    self._growthRatesDict[scan][mNr].pop("allGrowthRates",None)
-
-        # We would now like to write the mode numbers as modeNr=mNr,
-        # rather than just mNr
-        # In order to avoid memory problems, it will be done in the
-        # following way
-        firstDict = tuple(self._growthRatesDict.keys())
-        secondDict = tuple(self._growthRatesDict[firstDict[0]].keys())
-        for f in firstDict:
-            for s in secondDict:
-                self._growthRatesDict[f]["modeNr={}".format(s)] =\
-                    self._growthRatesDict[f].pop(s)
-
-        # Reform a dict of dict of dict so that we get a dict with tuple keys
-        # http://stackoverflow.com/questions/24988131/nested-dictionary-to-multiindex-dataframe-where-dictionary-keys-are-column-label
-        reform = {(outerKey, innerKey): values\
-                  for outerKey, innerDict in self._growthRatesDict.items()\
-                  for innerKey, values in innerDict.items()}
-
-        # This can now be made to a data frame
-        growthRatesDF = pd.DataFrame.from_dict(reform)
-
-        # NOTE: The format is now
-        #       cols = ("Scan", "Mode") and the indices are the
-        #       different angFreq, growthRates etc (hereby refered to as
-        #       the "Data")
-        # NOTE: We would rather like
-        #       Columns to be either "Scan" or "mNr" (depending on what
-        #       we would like to plot) and make the rest indices When
-        #       this is done we can easily slice the data.
-        # We start by transposing the indices and columns
-        growthRatesDF=growthRatesDF.T
-        # Then we add names to the frame (easier unstack and stack)
-        growthRatesDF.index.names = ("Scan", "Mode")
-        growthRatesDF.columns.name="Data"
         #}}}
 
-        # Finally we make either "Mode" or "Scan" the column and the "Data"
-        # the index
-        # http://nikgrozev.com/2015/07/01/reshaping-in-pandas-pivot-pivot-table-stack-and-unstack-explained-with-pictures/
-        # This can be done by stack: Rotating column index to row index
-        # And unstack              : Rotating row index to column index
+        collectArgs = (scanCollectPaths,\
+                       steadyStatePaths,\
+                       startInds       ,\
+                       endInds         ,\
+                       scanParameter)
+
+        return collectArgs
+    #}}}
+
+    @staticmethod
+    #{{{setGetDatatArgs
+    def setGetDataArgs(varName          ,\
+                       convertToPhysical,\
+                       indicesArgs      ,\
+                       indicesKwargs    ,\
+                       nModes):
+        #{{{docstring
+        """
+        Sets the arguments to be used in
+        CollectAndCalcGrowthRates.getData
+
+        Parameters
+        ----------
+        See the constructor of DriverGrowthRates for details.
+
+        Returns
+        -------
+        getDataArgs : tuple
+            Tuple containing arguments used in
+            CollectAndCalcGrowthRates.getData (including the keyword
+            argument nModes).
+            See the constructor of CollectAndCalcGrowthRates.getData for
+            details.
+        """
+        #}}}
+
+        getDataArgs = (varName          ,\
+                       convertToPhysical,\
+                       indicesArgs      ,\
+                       indicesKwargs    ,\
+                       nModes)
+
+        return getDataArgs
+    #}}}
+
+    #{{{driverGrowthRates
+    def driverGrowthRates(self):
+        #{{{docstring
+        """
+        Wrapper to driverFourierMode
+        """
+        #}}}
+        args =  (\
+                 self._collectArgs    ,\
+                 self._getDataArgs    ,\
+                 self._plotSuperKwargs,\
+                )
         if self._useSubProcess:
-            #{{{ Function call through subprocess
-            # We would like to have "Scan" on the x axis
-            df = growthRatesDF.unstack("Scan").stack("Data")
-            gRPlotterScan = PlotGrowthRates(\
-                                self._paths                                ,\
-                                growthRates       = df                     ,\
-                                convertToPhysical = self.convertToPhysical,\
-                                showPlot          = self._showPlot         ,\
-                                savePlot          = self._savePlot         ,\
-                                extension         = self._extension        ,\
-                                savePath          = self._savePath         ,\
-                                pltSize           = self._pltSize          ,\
-                                )
-            # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
-            #       and would've liked to swap "Mode" and "Scan" with the
-            #       current dataframe, we would have to
-            #
-            #       growthRatesDF =
-            #       growthRatesDF.unstack("Mode").stack("Scan").swaplevel()
-            #
-            #       The swap needed to make the "Data" the innermost level
-            # We would like to thave "Mode" on the x axis
-            df = growthRatesDF.unstack("Mode").stack("Data")
-            gRPlotterMNr = PlotGrowthRates(\
-                                self._paths                                ,\
-                                growthRates       = df                     ,\
-                                convertToPhysical = self.convertToPhysical,\
-                                showPlot          = self._showPlot         ,\
-                                savePlot          = self._savePlot         ,\
-                                extension         = self._extension        ,\
-                                savePath          = self._savePath         ,\
-                                pltSize           = self._pltSize          ,\
-                                )
-
-            proc = {}
-            # Create process
-            proc["scanOnXAxis"] =\
-                Process(\
-                    target = gRPlotterScan.plotGrowthRates(),\
-                    args   = ()                             ,\
-                    kwargs = {})
-            proc["modeOnXAxis"] =\
-                Process(\
-                    target = gRPlotterMNr.plotGrowthRates(),\
-                    args   = ()                            ,\
-                    kwargs = {})
-
-            # Start processes
-            for key in proc.keys():
-                proc[key].start()
-            # Wait for process to finish
-            for key in proc.keys():
-                proc[key].join()
-            #}}}
+            processes = Process(target = driverGrowthRates, args = args)
+            processes.start()
         else:
-            #{{{Normal function call
-            # We would like to have "Scan" on the x axis
-            df = growthRatesDF.unstack("Scan").stack("Data")
-            gRPlotter = PlotGrowthRates(\
-                            self._paths                                ,\
-                            growthRates       = df                     ,\
-                            convertToPhysical = self.convertToPhysical,\
-                            showPlot          = self._showPlot         ,\
-                            savePlot          = self._savePlot         ,\
-                            extension         = self._extension        ,\
-                            savePath          = self._savePath         ,\
-                            pltSize           = self._pltSize          ,\
-                            )
-
-            gRPlotter.plotGrowthRates()
-            # NOTE: If we had growthRatesDF.unstack("Scan").stack("Data")
-            #       and would've liked to swap "Mode" and "Scan" with the
-            #       current dataframe, we would have to
-            #
-            #       growthRatesDF =
-            #       growthRatesDF.unstack("Mode").stack("Scan").swaplevel()
-            #
-            #       The swap needed to make the "Data" the innermost level
-            # We would like to thave "Mode" on the x axis
-            df = growthRatesDF.unstack("Mode").stack("Data")
-            gRPlotter = PlotGrowthRates(\
-                            self._paths                                ,\
-                            growthRates       = df                     ,\
-                            convertToPhysical = self.convertToPhysical,\
-                            showPlot          = self._showPlot         ,\
-                            savePlot          = self._savePlot         ,\
-                            extension         = self._extension        ,\
-                            savePath          = self._savePath         ,\
-                            pltSize           = self._pltSize          ,\
-                            )
-            gRPlotter.plotGrowthRates()
-            #}}}
+            driverGrowthRates(*args)
     #}}}
 #}}}

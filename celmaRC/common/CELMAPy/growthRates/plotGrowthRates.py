@@ -4,10 +4,10 @@
 Contains class to plot the growth rates
 """
 
-from ..plotHelpers import PlotHelper
+from ..superClasses import PlotSuperClass, seqCMap2, seqCMap3
+from ..plotHelpers import plotNumberFormatter
 import numpy as np
 import matplotlib.pylab as plt
-from matplotlib.gridspec import GridSpec
 import os
 
 #{{{PlotGrowthRates
@@ -50,14 +50,14 @@ class PlotGrowthRates(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, growthRateDataFrame):
+    def setData(self, growthRateDataFrame, positionTuple):
         #{{{docstring
         """
-        Sets the fourier modes to be plotted.
+        Sets the data to be plotted.
 
         This function:
+            * Sets the data frame
             * Sets the variable labels
-            * Set the colors
             * Prepares the save name
 
         Parameters
@@ -69,10 +69,24 @@ class PlotGrowthRates(PlotSuperClass):
                 * "averageAngularVelocity"
                 * "averageAngularVelocityStd"
             over the observation "modeNr" over the observation "Scan"
+        positionTuple : tuple
+            The tuple containing (rho, z).
         """
         #}}}
 
-# FIXME: Positions as an input here, and as an output from previous
+        # NOTE: Theta remains unspecified as we have done a fourier transform
+        rho, z = positionTuple
+        # Set values
+        self._ph.rhoTxtDict["value"] = plotNumberFormatter(float(rho), None)
+        self._ph.zTxtDict  ["value"] = plotNumberFormatter(float(z)  , None)
+        # Get the values
+        rhoVal= self._ph.rhoTxtDict["value"].replace("$","")
+        zVal  = self._ph.zTxtDict  ["value"].replace("$","")
+        # Get the titles
+        rhoTitle=self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
+        zTitle  =self._ph.zTxtDict  ["constZTxt"]  .format(self._ph.zTxtDict)
+        self._title(r"{}$,$ {}".format(rhoTitle, zTitle))
+
         # Set the growth rate
         self._gRDF = growthRateDataFrame
 
@@ -92,7 +106,8 @@ class PlotGrowthRates(PlotSuperClass):
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}".format(self._varName, "growthRates"))
+                "{}-{}-rho-{}-z-{}".\
+                format(self._varName, "growthRates", rhoVal, zVal))
 
         if self._extension is None:
             self._extension = "png"
@@ -141,7 +156,7 @@ class PlotGrowthRates(PlotSuperClass):
         # Get the plot decoration for the modes
         mode            = self._gRDF.index.names[1]
         modePltName     = self._ph.getVarPltName(mode)
-        scanPltNameDict = {"scanOrMode":modePltName}
+        modePltNameDict = {"scanOrMode":modePltName}
         self._modeLegendTemplate = legendTemplate.\
             format(**self.uc.conversionDict[mode]).format(**modePltNameDict)
 
@@ -158,43 +173,22 @@ class PlotGrowthRates(PlotSuperClass):
         Performs the plotting by calling the workers.
         """
 
+        # Make the scan plot
+        scanColors = seqCMap3(np.linspace(0, 1, len(self._gRDF.index.levels)))
+        self._plotWorker(self._gRDF              ,\
+                         self._scanLegendTemplate,\
+                         self._scanXLabel        ,\
+                         scanColors              ,\
+                        )
 
-YOU ARE HERE
-# NOTE: Theta remains unspecified as we have done a fourier transform
-# Int the plotter
-rho, z = positionTuple
-# Set values
-self._ph.rhoTxtDict  ["value"] = plotNumberFormatter(float(rho), None)
-self._ph.zTxtDict    ["value"] = plotNumberFormatter(float(z), None)
-
-# Get the values and the titles
-# This goes into the save
-rhoVal   = self._ph.rhoTxtDict  ["value"].replace("$","")
-zVal     = self._ph.zTxtDict    ["value"].replace("$","")
-
-# This goes into the title
-rhoTitle   = self._ph.rhoTxtDict["constRhoTxt"  ].format(self._ph.rhoTxtDict)
-zTitle     = self._ph.zTxtDict  ["constZTxt"]    .format(self._ph.zTxtDict)
-
-self._title(r"{}$,$ {}".format(rhoTitle, ztitle))
-
-
-    # Make the scan plot
-    scanColors = seqCMap3(np.linspace(0, 1, len(self._gRDF.index.levels)))
-    self._plotWorker(self._gRDF              ,\
-                     self._scanLegendTemplate,\
-                     self._scanXLabel        ,\
-                     scanColors              ,\
-                    )
-
-    # Make the mode plot
-    gRDFSwap = gRDF.swaplevel()
-    modeColors = seqCMap2(np.linspace(0, 1, len(gRDFSwap.index.levels)))
-    self._plotWorker(gRDFSwap                ,\
-                     self._modeLegendTemplate,\
-                     self._modeXLabel        ,\
-                     modeColors              ,\
-                    )
+        # Make the mode plot
+        gRDFSwap = self._gRDF.swaplevel()
+        modeColors = seqCMap2(np.linspace(0, 1, len(gRDFSwap.index.levels)))
+        self._plotWorker(gRDFSwap                ,\
+                         self._modeLegendTemplate,\
+                         self._modeXLabel        ,\
+                         modeColors              ,\
+                        )
     #}}}
 
     #{{{_plotWorker
@@ -224,7 +218,7 @@ self._title(r"{}$,$ {}".format(rhoTitle, ztitle))
         # Create the axes
         fig, (imAx, reAx) = plt.subplots(nrows=2, sharex=True)
 
-        for outerInd, color in zip(gRDF.index.levels, color):
+        for outerInd, color in zip(gRDF.index.levels, colors):
             # Get the value for the legend
             pltOuterIndDict = {"val":plotNumberFormatter(outerInd, None)}
 
@@ -242,10 +236,10 @@ self._title(r"{}$,$ {}".format(rhoTitle, ztitle))
                 cap.set_markeredgewidth(self._markeredgewidth)
 
             (_, caps, _) = reAx.errorbar(\
-                    gRDF.loc[outerInd]["averageAngularVelocity"].index        ,\
-                    gRDF.loc[outerInd]["averageAngularVelocity"].values       ,\
+                    gRDF.loc[outerInd]["averageAngularVelocity"].index       ,\
+                    gRDF.loc[outerInd]["averageAngularVelocity"].values      ,\
                     yerr  =\
-                        gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
+                       gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
                     **self._errorbarOptions)
 
             for cap in caps:
@@ -270,8 +264,8 @@ self._title(r"{}$,$ {}".format(rhoTitle, ztitle))
         ticks = tuple(gRDF.loc[outerInd]["growthRate"].index)
 
         # Set the ticks
-        realAx.xaxis.set_ticks(ticks)
-        imAx  .xaxis.set_ticks(ticks)
+        reAx.xaxis.set_ticks(ticks)
+        imAx.xaxis.set_ticks(ticks)
 
         # Make the plot look nice
         self._ph.makePlotPretty(imAx)
