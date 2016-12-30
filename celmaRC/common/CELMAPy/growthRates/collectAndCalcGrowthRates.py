@@ -203,6 +203,10 @@ class CollectAndCalcGrowthRates(object):
             over the observation "modeNr" over the observation "Scan"
         positionTuple : tuple
             The tuple containing (rho, z).
+            Needed in the plotting routine.
+        uc : Units Converter
+            The units converter used when obtaining the fourier modes.
+            Needed in the plotting routine.
         """
         #}}}
 
@@ -211,8 +215,9 @@ class CollectAndCalcGrowthRates(object):
         # http://stackoverflow.com/questions/10715965/add-one-row-in-a-pandas-dataframe
 
         multiTuples = []
-        fullDict = {"growthRate":[], "growthRateStd":[],\
-                    "averageAngularVelocity":[], "averageAngularVelocityStd":[]}
+        fullDict =\
+            {"growthRate":[], "growthRateStd":[],\
+             "averageAngularVelocity":[], "averageAngularVelocityStd":[]}
 
         loopOver = zip(self._scanCollectPaths,\
                        self._steadyStatePaths,\
@@ -225,8 +230,9 @@ class CollectAndCalcGrowthRates(object):
             # Obtain the scan value
             scanValue = getScanValue(scanPaths, self._scanParameter)
 
-            fm, positionTuple = \
+            fm, positionTuple, uc = \
                 self._collectAndCalcFourierModes(scanPaths        ,\
+                                                 varName          ,\
                                                  convertToPhysical,\
                                                  steadyStatePath  ,\
                                                  indicesArgs      ,\
@@ -278,12 +284,13 @@ class CollectAndCalcGrowthRates(object):
                             multiTuples,
                             names=(self._scanParameter,"modeNr")))
 
-        return growthRateDataFrame, positionTuple
+        return growthRateDataFrame, positionTuple, uc
     #}}}
 
     #{{{_collectAndCalcFourierModes
     def _collectAndCalcFourierModes(self             ,\
                                     scanPaths        ,\
+                                    varName          ,\
                                     convertToPhysical,\
                                     steadyStatePath  ,\
                                     indicesArgs      ,\
@@ -297,6 +304,8 @@ class CollectAndCalcGrowthRates(object):
         ----------
         scanPaths : tuple
             Tuple of the scan paths.
+        varName : str
+            Name of variable to find the growth rates of.
         convertToPhysical : bool
             Whether or not to convert to physical units.
         steadyStatePath : str
@@ -313,33 +322,39 @@ class CollectAndCalcGrowthRates(object):
             The dictionary containing the fourier modes.
         positionTuple : tuple
             The tuple containing (rho, z).
+            Needed in the plotting routine.
+        uc : Units Converter
+            The units converter used when obtaining the fourier modes.
+            Needed in the plotting routine.
         """
         #}}}
 
-            # Obtain the magnitudes and angular velocities
-            ccfm = CollectAndCalcFourierModes(\
-                                scanPaths                            ,\
-                                convertToPhysical = convertToPhysical,\
-                                             )
-            # Set the slice
-            indicesKwargs.update({"steadyStatePath" : steadyStatePath})
-            ccfm.setIndices(*indicesArgs, **indicesKwargs)
+        # Obtain the magnitudes and angular velocities
+        ccfm = CollectAndCalcFourierModes(\
+                            scanPaths                            ,\
+                            convertToPhysical = convertToPhysical,\
+                                         )
+        # Set the slice
+        indicesKwargs.update({"steadyStatePath" : steadyStatePath})
+        ccfm.setIndices(*indicesArgs, **indicesKwargs)
 
-            # Set name
-            ccfm.setVarName(varName)
+        # Set name
+        ccfm.setVarName(varName)
 
-            # Execute the collection
-            fm = ccfm.executeCollectAndCalc()
-            fm = ccfm.convertTo2D(fm)
-            fm = ccfm.calcMagnitude(fm)
-            fm = ccfm.calcAngularVelocity(fm)
+        # Execute the collection
+        fm = ccfm.executeCollectAndCalc()
+        fm = ccfm.convertTo2D(fm)
+        fm = ccfm.calcMagnitude(fm)
+        fm = ccfm.calcAngularVelocity(fm)
 
-            # NOTE: Theta remains unspecified as we have done a fourier transform
-            firstKey = tuple(fm.keys())[0]
-            rho, z   = firstKey.split(",")
+        # NOTE: Theta remains unspecified as we have done a fourier transform
+        firstKey = tuple(fm.keys())[0]
+        rho, z   = firstKey.split(",")
 
-            positionTuple = (rho, z)
+        positionTuple = (rho, z)
 
-            return fm, positionTuple
+        uc = ccfm.uc
+
+        return fm, positionTuple, uc
     #}}}
 #}}}
