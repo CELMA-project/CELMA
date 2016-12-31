@@ -37,7 +37,7 @@ class PlotFourierModes(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, fourierModes, nModes = 7):
+    def setData(self, fourierModes, nModes = 7, timeAx = True):
         #{{{docstring
         """
         Sets the fourier modes to be plotted.
@@ -55,8 +55,12 @@ class PlotFourierModes(PlotSuperClass):
             {varName:fourierModes, "time":time}
         nModes : int
             Number of modes to use
+        timeAx : bool
+            Whether or not the time should be on the x axis
         """
         #}}}
+
+        self._timeAx = timeAx
 
         # Plus one as the offset mode will be excluded
         self._nModes  = nModes + 1
@@ -87,6 +91,8 @@ class PlotFourierModes(PlotSuperClass):
         self._fileName =\
             os.path.join(self._savePath,\
                 "{}-{}".format(self._varName, "fourierModes"))
+        if not(timeAx):
+            self._fileName += "Indices"
 
         if self._extension is None:
             self._extension = "png"
@@ -114,7 +120,10 @@ class PlotFourierModes(PlotSuperClass):
         self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
 
         # Set the time label
-        self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        if self._timeAx:
+            self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        else:
+            self._timeLabel = "$\mathrm{Time}$ $\mathrm{index}$"
     #}}}
 
     #{{{plotSaveShowFourierModes
@@ -153,10 +162,15 @@ class PlotFourierModes(PlotSuperClass):
             for modeNr, color in zip(range(1, self._nModes), self._colors):
                 label=r"$m_\theta={}$".format(modeNr)
 
-                ax.plot(\
-                    self._fourierModes[key]["time"],\
-                    self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
-                    color=color, label=label)
+                if self._timeAx:
+                    ax.plot(\
+                        self._fourierModes[key]["time"],\
+                        self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                        color=color, label=label)
+                else:
+                    ax.plot(\
+                        self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                        color=color, label=label)
 
             # Set axis labels
             ax.set_xlabel(self._timeLabel)

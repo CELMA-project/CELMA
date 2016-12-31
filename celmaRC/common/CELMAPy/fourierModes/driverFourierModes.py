@@ -63,7 +63,9 @@ def driverFourierModes(collectPaths     ,\
     # Plot
     pfm = PlotFourierModes(ccfm.uc         ,\
                            **plotSuperKwargs)
-    pfm.setData(fm, nModes)
+    pfm.setData(fm, nModes, timeAx = True)
+    pfm.plotSaveShowFourierModes()
+    pfm.setData(fm, nModes, timeAx = False)
     pfm.plotSaveShowFourierModes()
 #}}}
 

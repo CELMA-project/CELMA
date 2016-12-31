@@ -4,6 +4,8 @@
 Contains the getTime function
 """
 
+import datetime
+
 #{{{getTime
 def getTime(depth = "second"):
     #{{{docstring
@@ -30,6 +32,5 @@ def getTime(depth = "second"):
     if depth == "second":
         nowStr += "-{:02d}".format(now.second)
 
-    PlotSuperClass._time = nowStr
     return nowStr
 #}}}

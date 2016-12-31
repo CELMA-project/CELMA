@@ -6,7 +6,6 @@ Contains the super class for the plotting
 
 from ..driverHelpers import scanWTagSaveFunc, getTime
 from ..plotHelpers import PlotHelper
-import datetime
 import os
 
 #{{{PlotSuperClass
@@ -99,8 +98,6 @@ class PlotSuperClass(object):
                 if PlotSuperClass._time is None:
                     # Get the timefolder
                     PlotSuperClass._time = getTime()
-            else:
-                self._timeFolder = ""
 
             # Create the savepath (based on the first dmp_folder string)
             visualizationType =\
@@ -109,7 +106,7 @@ class PlotSuperClass(object):
                         "visualization{}".format(visualizationType),\
                         savePath,\
                         plotType,\
-                        self._timeFolder)
+                        PlotSuperClass._time)
 
             self._savePath = ""
             for saveDir in saveDirs:
