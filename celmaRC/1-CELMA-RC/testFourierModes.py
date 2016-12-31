@@ -76,7 +76,7 @@ def driverTest():
         "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
        )
 
-    useSubProcess = True
+    useSubProcess = False
 
     varName           = "n"
     convertToPhysical = True
