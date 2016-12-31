@@ -528,15 +528,9 @@ class ScanDriver(object):
             dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
             self._pickleDmpFoldersDict(dmpFoldersDict)
 
-
         if self._restartTurb is not None:
+            # NOTE: dmpFolders are treated internally in this function
             self._callExtraTurboRunner()
-            # Load the dmpFolders pickle, update it and save it
-            dmpFoldersDict = self._getDmpFolderDict()
-            dmpFoldersDict["extraTurbulence"] = list(dmpFoldersDict["extraTurbulence"])
-            dmpFoldersDict["extraTurbulence"].append(self._extra_turbo_folders)
-            dmpFoldersDict["extraTurbulence"] = tuple(dmpFoldersDict["extraTurbulence"])
-            self._pickleDmpFoldersDict(dmpFoldersDict)
     #}}}
 
     #{{{_getDmpFolderDict
@@ -828,8 +822,6 @@ class ScanDriver(object):
             hyper = ("switch", "useHyperViscAzVortD",True)
         else:
             hyper = ("switch", "useHyperViscAzVort",True)
-        # Make extra turbulence folder
-        self._extra_turbo_folders = []
         # Create new runner
         self._turboRun = self._runner(\
             **self._turbulenceOptions,\
@@ -846,6 +838,40 @@ class ScanDriver(object):
             **self._commonRunnerOptions  ,\
                         )
 
+        # Check if runs has already been performed
+        # Number of restart folders = nrf
+        nrf = []
+        # Placeholder for the dmp folders
+        extraTrubulenceRuns = []
+        for turboDmp in self._turbo_dmp_folders:
+            # Find the folders
+            folders = tuple(folder for folder in os.listdir(turboDmp) if
+                            os.path.isdir(os.path.join(turboDmp, folder)))
+            # NOTE: bout_runners are making a restart 0 folder for
+            #       copied restart files, as a hack, the 0th restart
+            #       folder is excluded
+            folders = tuple(folder for folder in folders if\
+                            ("restart" in folder) and (folder != "restart_0"))
+
+            extraTrubulenceRuns.append(\
+                    tuple(os.path.join(turboDmp, folder) for folder in folders))
+
+            nrf.append(len(folders))
+
+        # Load the dmpFolders pickle, update it and save it
+        dmpFoldersDict = self._getDmpFolderDict()
+        dmpFoldersDict["extraTurbulence"] = tuple(extraTrubulenceRuns)
+        self._pickleDmpFoldersDict(dmpFoldersDict)
+
+        if nrf.count(nrf[0]) != len(nrf):
+            message = ("The dmp folders did not have an equal number of "
+                       "restarts. The restart counter remains ambigous. "
+                       "Fix by manually restarting missing restart simulations.")
+            raise RuntimeError(message)
+
+        # Update the restart number
+        self._restartTurb -= nrf[0]
+
         for nr in range(self._restartTurb):
             turbo_dmp_folders, self._turbo_PBS_ids =\
                 self._turboRun.execute_runs(\
@@ -855,11 +881,17 @@ class ScanDriver(object):
                     # restartFromFunc
                     aScanPath      = self._linearAScanPath,\
                     scanParameters = self._scanParameters ,\
-                                                )
-            # Update the list
-            self._extra_turbo_folders.append(turbo_dmp_folders)
+                                            )
 
-        # Recast to tuple
-        self._extra_turbo_folders = tuple(self._extra_turbo_folders)
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["extraTurbulence"] = list(dmpFoldersDict["extraTurbulence"])
+            for dmpNr in range(len(turbo_dmp_folders)):
+                dmpFoldersDict["extraTurbulence"][dmpNr] = list(dmpFoldersDict["extraTurbulence"][dmpNr])
+                dmpFoldersDict["extraTurbulence"][dmpNr].append(turbo_dmp_folders[dmpNr])
+                dmpFoldersDict["extraTurbulence"][dmpNr] = tuple(dmpFoldersDict["extraTurbulence"][dmpNr])
+
+            dmpFoldersDict["extraTurbulence"] = tuple(dmpFoldersDict["extraTurbulence"])
+            self._pickleDmpFoldersDict(dmpFoldersDict)
     #}}}
 #}}}
