@@ -80,7 +80,7 @@ FIXME: No longer support for Helmholtz like energy
 
         if tSlice is not None:
             tStart = tSlice[tCounter].start
-            tEnd   = tSlice[tCounter].end
+            tEnd   = tSlice[tCounter].stop
             tCounter += 1
         else:
             tStart = None

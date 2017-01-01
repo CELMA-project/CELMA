@@ -93,6 +93,8 @@ class PlotFourierModes(PlotSuperClass):
                 "{}-{}".format(self._varName, "fourierModes"))
         if not(timeAx):
             self._fileName += "Indices"
+        if (self._sliced):
+            self._fileName += "Sliced"
 
         if self._extension is None:
             self._extension = "png"

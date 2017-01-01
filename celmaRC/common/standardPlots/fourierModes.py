@@ -10,8 +10,9 @@ sys.path.append(commonDir)
 
 from CELMAPy.fourierModes import DriverFourierModes
 
-#{{{standardFourierModesPlot
-def standardFourierModesPlot(dmp_folders, collectPaths, tSlice = None):
+#{{{fourierModesPlot
+def fourierModesPlot(dmp_folders, collectPaths, tSlice = None):
+    #{{{docstring
     """
     Runs the standard fourier modes plot
 
@@ -24,8 +25,9 @@ def standardFourierModesPlot(dmp_folders, collectPaths, tSlice = None):
     tSlice : [None|Slice]
         How to slice the time.
     """
+    #}}}
 
-    useSubProcess = True
+    useSubProcess = False
 
     varName           = "n"
     convertToPhysical = True
@@ -37,6 +39,11 @@ def standardFourierModesPlot(dmp_folders, collectPaths, tSlice = None):
     nPoints           = 1
     equallySpace      = "x"
 
+    if tSlice is not None:
+        sliced = True
+    else:
+        sliced = False
+
     steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
     indicesArgs   = (xInd, yInd, zInd)
@@ -47,15 +54,16 @@ def standardFourierModesPlot(dmp_folders, collectPaths, tSlice = None):
                      }
 
     plotSuperKwargs = {\
-                        "showPlot"     : False,\
-                        "savePlot"     : True,\
-                        "savePath"     : None,\
-                        "savePathFunc" : None,\
-                        "extension"    : None,\
-                        "dmp_folders"  : None,\
+                        "showPlot"        : False ,\
+                        "savePlot"        : True  ,\
+                        "savePath"        : None  ,\
+                        "savePathFunc"    : None  ,\
+                        "extension"       : None  ,\
+                        "dmp_folders"     : None  ,\
+                        "timeStampFolder" : False ,\
+                        "sliced"          : sliced,\
                        }
 
-    print("\n\nTesting fourier mode driver")
     dFM = DriverFourierModes(
                      # DriverFourierModes
                      dmp_folders                ,\
@@ -71,5 +79,4 @@ def standardFourierModesPlot(dmp_folders, collectPaths, tSlice = None):
                      useSubProcess = useSubProcess,\
                           )
     dFM.driverFourierMode()
-    print("Success!\n\n")
 #}}}

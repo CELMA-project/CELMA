@@ -44,16 +44,18 @@ def pathMerger(dmpFoldersDict, mergeThese):
             mergedDicts["param{}".format(nr)].\
                     append(dmpFoldersDict["linear"][nr])
 
-    if "turbulence" in mergeThese:
-        for nr in range(numberOfParameters):
-            mergedDicts["param{}".format(nr)].\
-                    append(dmpFoldersDict["turbulence"][nr])
-
+    # NOTE: The lastest simulation is in the current folder, whilst
+    #       previous runs are in restart_1 ... folders
     if "extraTurbulence" in mergeThese:
         for nr in range(numberOfParameters):
             for restartNr in range(len(dmpFoldersDict["extraTurbulence"][nr])):
                 mergedDicts["param{}".format(nr)].\
                     append(dmpFoldersDict["extraTurbulence"][nr][restartNr])
+
+    if "turbulence" in mergeThese:
+        for nr in range(numberOfParameters):
+            mergedDicts["param{}".format(nr)].\
+                    append(dmpFoldersDict["turbulence"][nr])
 
     for key in mergedDicts.keys():
         mergedDicts[key] = tuple(mergedDicts[key])
