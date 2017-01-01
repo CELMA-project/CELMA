@@ -79,12 +79,17 @@ def collectiveCollect(paths               ,\
     # Initialize the data
     data = {var: None for var in varStrings}
 
-    if tInd is not None and len(paths) > 1:
-        # Check if it necessary to use all paths
-        paths = removePathsOutsideRange(paths, tInd)
-        if len(paths) != 1:
-            postCollectTInd = tInd
-            tInd = None
+    if len(paths) > 1:
+        if tInd is not None:
+            # Check if it necessary to use all paths
+            paths, tInd = removePathsOutsideRange(paths, tInd)
+            # If more than one path, we will slice in time after
+            # collection
+            if len(paths) != 1:
+                postCollectTInd = tInd
+                tInd = None
+            else:
+                postCollectTInd = None
         else:
             postCollectTInd = None
 
@@ -117,11 +122,6 @@ def collectiveCollect(paths               ,\
                 tmp[:] = curVar
                 curVar = tmp
 
-            if tInd is not None and len(paths) > 1:
-                # Do slicing post collection if necessary
-                if postCollectTInd is not None:
-                    curVar = curVar[tInd[0]:tInd[1]]
-
             # Set data[var] to curVar the first time in order to get the
             # correct dimensions
             if data[var] is None:
@@ -130,6 +130,12 @@ def collectiveCollect(paths               ,\
                 # Remove first point in time in the current time as this
                 # is the same as the last of the previous
                 data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
+
+            # Do slicing post collection if necessary
+            if len(paths) > 1:
+                if postCollectTInd is not None:
+                    # +1 to include the last point
+                    data[var] = data[var][postCollectTInd[0]:postCollectTInd[1]+1]
 
     return data
 #}}}
@@ -152,42 +158,57 @@ def removePathsOutsideRange(paths, tInd):
     -------
     paths : tuple
         The filtered paths
+    tInd : tuple
+        Updated time indices
     """
     #}}}
+
     # Check if it necessary to use all paths
     lenT = 0
     # Cast to list
     paths = list(paths)
-    removePaths = []
+
     # Check if the paths are needed from the rigth
+    lastInd = None
     for ind in range(len(paths)):
         with DataFile(os.path.join(paths[ind],"BOUT.dmp.0.nc")) as f:
             t = f.read("t_array")
             lenT += len(t)
             if tInd[1] < lenT:
-                lastInd = ind
-            else:
+                lastInd = ind+1
                 break
+
     # Remove from the rigth
-    paths = paths[:lastInd+1]
+    paths = paths[:lastInd]
+
     # Check if the paths are needed from the left
-    lenT = 0
+    lenT  = 0
+    # If folders are removed, subtract tInd with number of removed indices
+    # lenTs is a placeholder for this
+    removePaths = []
+    lenTs       = []
     for path in paths:
         with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
             t = f.read("t_array")
-            lenT += len(t)
+            curLenT = len(t)
+            lenTs.append(curLenT)
+            lenT += curLenT
             if tInd[0] > lenT:
-                removePaths.append(removePaths)
+                removePaths.append(path)
             else:
                 break
 
-    for remove in removePaths:
+    tInd = list(tInd)
+    for remove, lenT in zip(removePaths, lenTs):
+        tInd[0] -= lenT
+        tInd[1] -= lenT
         paths.remove(remove)
+    tInd = tuple(tInd)
 
     # Cast to tuple
-    paths = tuple(path)
+    paths = tuple(paths)
 
-    return paths
+    return paths, tInd
 #}}}
 
 #{{{collectTime

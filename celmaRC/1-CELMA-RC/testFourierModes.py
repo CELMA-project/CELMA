@@ -26,12 +26,12 @@ def fourierModesTest():
     convertToPhysical = True
     nModes            = 7
 
-    xInd              = 16
-    yInd              = 16
-    tSlice            = None
-    nPoints           = 3
-    equallySpace      = "x"
-    steadyStatePath   = None
+    xInd            = 16
+    yInd            = 16
+    tSlice          = slice(200,400)
+    nPoints         = 3
+    equallySpace    = "x"
+    steadyStatePath = None
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
@@ -127,4 +127,4 @@ def driverTest():
 #}}}
 
 if __name__ == "__main__":
-    driverTest()
+    fourierModesTest()

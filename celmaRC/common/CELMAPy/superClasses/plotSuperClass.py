@@ -18,7 +18,7 @@ class PlotSuperClass(object):
     """
 
     #{{{Static member
-    _time = None
+    _time = ""
     #}}}
 
     #{{{Constructor
@@ -32,6 +32,7 @@ class PlotSuperClass(object):
                  dmp_folders     = None ,\
                  timeStampFolder = True ,\
                  plotType        = ""   ,\
+                 sliced          = False,\
                  **kwargs):
         #{{{docstring
         """
@@ -64,6 +65,8 @@ class PlotSuperClass(object):
             No folder will be made if empty.
         timeStampFolder : bool
             Whether or not to timestamp the folder
+        sliced : bool
+            Whether or not the data is sliced
         **kwargs : keyword arguments
             Additional keyword arguments given as input to savePathFunc.
         """
@@ -73,6 +76,7 @@ class PlotSuperClass(object):
         self._savePlot  = savePlot
         self._savePath  = savePath
         self._extension = extension
+        self._sliced    = sliced
         self.uc         = uc
 
         if dmp_folders is not None:
@@ -95,7 +99,7 @@ class PlotSuperClass(object):
                     savePath = "-".join(dmp_folder.split("/")[::-1])
 
             if timeStampFolder:
-                if PlotSuperClass._time is None:
+                if PlotSuperClass._time == "":
                     # Get the timefolder
                     PlotSuperClass._time = getTime()
 

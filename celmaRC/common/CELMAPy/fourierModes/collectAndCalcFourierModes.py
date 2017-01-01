@@ -78,14 +78,16 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
 
             if self._tSlice is not None:
                 tStart = self._tSlice[tCounter].start
-                tEnd   = self._tSlice[tCounter].end
-                t = (tStart, tEnd)
+                tEnd   = self._tSlice[tCounter].stop
+                t      = (tStart, tEnd)
+                tStep  = self._tSlice[tCounter].step
             else:
-                t = None
+                t     = None
+                tStep = None
 
             tCounter += 1
 
-            var, time = self._collectWrapper(fourierModes,key,x,y,t)
+            var, time = self._collectWrapper(fourierModes,key,x,y,t,tStep)
 
             if self.uc.convertToPhysical:
                 fourierModes[key][self._varName] =\
@@ -125,7 +127,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
     #}}}
 
     #{{{_collectWrapper
-    def _collectWrapper(self,fourierModes,key,x,y,t):
+    def _collectWrapper(self,fourierModes,key,x,y,t,tStep):
         #{{{docstring
         """
         Collects the variable and the time.
@@ -147,6 +149,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             The z index to collect from
         t : [None|tuple]
             The collect-like slice in t
+        tStep : [None|int]
+            The step to chop the time variable in
 
         Returns
         -------
@@ -172,11 +176,11 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         # Fourier transform
         var = np.fft.fft(var)
 
-        if self._tSlice is not None:
+        if tStep is not None:
             # Slice the variables with the step
             # Make a new slice as the collect dealt with the start and
             # the stop of the slice
-            newSlice = slice(None, None, self._tSlice.step)
+            newSlice = slice(None, None, tStep)
 
             var  = var [newSlice]
             time = time[newSlice]
