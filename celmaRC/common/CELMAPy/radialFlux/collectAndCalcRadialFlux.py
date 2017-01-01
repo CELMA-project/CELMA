@@ -206,7 +206,7 @@ def calcTimeTraceRadialDerivative(paths                      ,\
 
         if tSlice is not None:
             tStart = tSlice[tCounter].start
-            tEnd   = tSlice[tCounter].end
+            tEnd   = tSlice[tCounter].stop
             t = (tStart, tEnd)
         else:
             t = None

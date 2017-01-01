@@ -6,6 +6,7 @@ Class for submitting functions using PBS
 
 from ..driverHelpers import getTime
 from subprocess import run, PIPE
+import inspect
 import os
 
 #{{{PBSSubmitter
@@ -28,7 +29,7 @@ class PBSSubmitter(object):
                             "setJobName" ,\
                             "setNodes"   ,\
                             "setQueue"   ,\
-                            "setWallTime",\
+                            "setWalltime",\
                           ]
     #}}}
 
@@ -80,7 +81,8 @@ class PBSSubmitter(object):
         self._jobName = jobName
         self._time    = getTime()
 
-        self._notCalled.remove("setJobName")
+        if "setJobName" in self._notCalled:
+            self._notCalled.remove("setJobName")
     #}}}
 
     #{{{setNodes
@@ -101,7 +103,8 @@ class PBSSubmitter(object):
         self._nodes = nodes
         self._ppn   = ppn
 
-        self._notCalled.remove("setJobName")
+        if "setNodes" in self._notCalled:
+            self._notCalled.remove("setNodes")
     #}}}
 
     #{{{setQueue
@@ -119,7 +122,8 @@ class PBSSubmitter(object):
 
         self._queue = queue
 
-        self._notCalled.remove("setQueue")
+        if "setQueue" in self._notCalled:
+            self._notCalled.remove("setQueue")
     #}}}
 
     #{{{setWalltime
@@ -137,14 +141,15 @@ class PBSSubmitter(object):
 
         self._walltime = walltime
 
-        self._notCalled.remove("setWalltime")
+        if "setWalltime" in self._notCalled:
+            self._notCalled.remove("setWalltime")
     #}}}
 
     #{{{submitFunction
     def submitFunction(self               ,\
                        function           ,\
-                       args         = None,\
-                       kwargs       = None,\
+                       args         = ()  ,\
+                       kwargs       = {}  ,\
                        dependencies = None):
         #{{{docstring
         """
@@ -175,24 +180,18 @@ class PBSSubmitter(object):
         fileName = "tmp_{}_{}.py".format(function.__name__, self._time)
 
         # Make the script
-        functionPath = function.__file__
-
+        functionPath = inspect.getmodule(function).__file__
         with open(functionPath, "r") as f:
             tmpFile = f.read()
 
-        # Add function call in the end of the script
-        if args is not None:
-            tmpFile += "\nargs={}\n".format(args)
-        else:
-            args = ""
-        if kwargs is not None:
-            tmpFile += "kwargs={}\n".format(kwargs)
-        else:
-            kwargs = ""
+        # Add arguments
+        tmpFile += "args={}\nkwargs={}\n".format(args, kwargs)
 
-        tmpFile += "{}({}{})\n".format(function.__name__, args, kwargs)
+        # Add function call in the end of the script
+        tmpFile += "{}({},{})\n".format(function.__name__, "*args", "**kwargs")
 
         # When the script has run, it will delete itself
+        tmpFile += "\n #Added by PBSSubmitter\n"
         tmpFile += "import os\nos.remove('{}')\n".format(fileName)
 
         # Write the python script
@@ -200,16 +199,18 @@ class PBSSubmitter(object):
             f.write(tmpFile)
 
         # Get core of the job string
-        jobString = self.createPBSCoreString()
+        jobString = self._createPBSCoreString()
 
         # Call the python script in the submission
         jobString += "python {}\n".format(fileName)
         jobString += "exit"
 
         # Create the dependencies
-        dependencies = ":".join(dependencies)
+        if dependencies is not None:
+            dependencies = ":".join(dependencies)
+
         # Submit the job
-        print("\nSubmitting '{}'\n".format(function.__name__))
+        print("\nSubmitting '{}'\n".format(self._jobName))
 
         self._submit(jobString, dependentJob = dependencies)
     #}}}
@@ -266,8 +267,7 @@ class PBSSubmitter(object):
 
         # Submit the jobs
         if dependentJob is None:
-            # Without dependencies
-            command = "qsub ./"+scriptName
+            command = "qsub ./{0}".format(scriptName).split(" ")
             completedProcess = run(command, stdout=PIPE, stderr=PIPE)
         else:
             # If the length of the depend job is 0, then all the jobs

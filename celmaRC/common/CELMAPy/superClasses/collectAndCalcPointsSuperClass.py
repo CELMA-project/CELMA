@@ -69,8 +69,8 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
             The same as xInd, except that the None possibility will set
             zInd to None. This is used for example when collecting and
             calculating the fourier modes.
-        tSlice : [None|sequence of slices]
-            If given this is the  slice of t to use when collecting.
+        tSlice : [None|slice|sequence of slices]
+            If given this is the slice of t to use when collecting.
             The length of the sequence must match the other input
             dimensions.
         nPoints : [None|int]
@@ -134,11 +134,11 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
             raise ValueError("Mismatch in dimension of xInd, yInd and zInd")
 
         if tSlice is not None:
-            if type(tSlice) == int:
+            if type(tSlice) == slice:
                 if type(nPoints) != int:
                     message=("nPoints has the wrong type and is needed "
                              "for tSlice multiplication")
-                raise ValueError(message)
+                    raise ValueError(message)
 
                 tSlice = (tSlice,)*nPoints
             else:
