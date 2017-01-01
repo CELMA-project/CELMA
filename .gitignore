@@ -97,6 +97,7 @@ parameters/c++/data/input_*
 # Miscellaneous
 *delme*
 *tmp*
+*postLogs*
 nout*/
 *.pickle
 *.avi
