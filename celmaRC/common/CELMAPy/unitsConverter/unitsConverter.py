@@ -265,6 +265,10 @@ class UnitsConverter(object):
                                       self._normDict["Te0"]*\
                                       (self._normDict["rhoS"])**3,\
                      },\
+        "modeNr"   :{"units"        :r"{}",\
+                     "normalization":r"{}",\
+                     "factor"       :1 ,\
+                     },\
         }
     #}}}
 

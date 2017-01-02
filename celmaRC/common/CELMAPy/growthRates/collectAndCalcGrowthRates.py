@@ -111,7 +111,7 @@ class CollectAndCalcGrowthRates(object):
             # Calculate the slope and the spread
             curSlope, curSpread = linRegOfExp(time, magnitudes[:,modeNr])
             slopes .append(curSlope)
-            spreads.append(curSlope)
+            spreads.append(curSpread)
 
         return tuple(slopes), tuple(spreads)
     #}}}
@@ -158,8 +158,8 @@ class CollectAndCalcGrowthRates(object):
 
         for modeNr in modeIndices:
             # Calculate the average and the spread
-            avgAngVels.append(angularVelocity.mean())
-            spreads   .append(angularVelocity.std())
+            avgAngVels.append(angularVelocity[:,modeNr].mean())
+            spreads   .append(angularVelocity[:,modeNr].std() )
 
         return tuple(avgAngVels), tuple(spreads)
     #}}}
@@ -253,29 +253,32 @@ class CollectAndCalcGrowthRates(object):
             magnitudes      = fm[firstKey][varName+"Magnitude"]
             angularVelocity = fm[firstKey][varName+"AngularVelocity"]
 
-            slope, slopeStd =\
-                self.calcSlopeAndSpread(magnitudes[modeStart:modeEnd],\
-                                        time                         ,\
-                                        startInd = startInd          ,\
-                                        endInd   = endInd            ,\
+            slopes, slopesStd =\
+                self.calcSlopeAndSpread(magnitudes[:, modeStart:modeEnd],\
+                                        time                            ,\
+                                        startInd = startInd             ,\
+                                        endInd   = endInd               ,\
                                        )
 
-            avgAngVel, avgAngVelStd =\
+            avgAngVels, avgAngVelsStd =\
                 self.calcAvgAngularVelocityAndSpread(\
-                                        angularVelocity[modeStart:modeEnd],\
-                                        startInd=startInd                 ,\
-                                        endInd=endInd                     ,\
+                                        angularVelocity[:, modeStart:modeEnd],\
+                                        startInd=startInd                    ,\
+                                        endInd=endInd                        ,\
                                         )
 
-            for modeInd in range(len(slope)):
+            for modeInd in range(len(slopes)):
                 # Fill the multiIndexTuple and the dict
                 multiTuples.append((scanValue, modeInd + 1))
 
-                fullDict["growthRate"               ] = slope       [modeInd]
-                fullDict["growthRateStd"            ] = slopeStd    [modeInd]
-                fullDict["averageAngularVelocity"   ] = avgAngVel   [modeInd]
-                fullDict["averageAngularVelocityStd"] = avgAngVelStd[modeInd]
-
+                fullDict["growthRate"               ].\
+                        append(slopes[modeInd])
+                fullDict["growthRateStd"            ].\
+                        append(slopesStd[modeInd])
+                fullDict["averageAngularVelocity"   ].\
+                        append(avgAngVels[modeInd])
+                fullDict["averageAngularVelocityStd"].\
+                        append(avgAngVelsStd[modeInd])
 
         # Make the data frame
         growthRateDataFrame =\
