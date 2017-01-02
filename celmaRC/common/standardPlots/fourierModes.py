@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.fourierModes import DriverFourierModes
 
 #{{{fourierModesPlot
-def fourierModesPlot(dmp_folders, collectPaths, tSlice = None):
+def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     #{{{docstring
     """
     Runs the standard fourier modes plot
@@ -22,6 +22,8 @@ def fourierModesPlot(dmp_folders, collectPaths, tSlice = None):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    steadyStatePath : str
+        The corresponding steady state path
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -43,8 +45,6 @@ def fourierModesPlot(dmp_folders, collectPaths, tSlice = None):
         sliced = True
     else:
         sliced = False
-
-    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
     indicesArgs   = (xInd, yInd, zInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
