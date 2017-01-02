@@ -183,4 +183,4 @@ def driverTest():
 #}}}
 
 if __name__ == "__main__":
-    growthRatesTest()
+    driverTest()
