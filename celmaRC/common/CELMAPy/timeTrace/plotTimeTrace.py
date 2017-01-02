@@ -37,7 +37,7 @@ class PlotTimeTrace(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, timeTraces, mode):
+    def setData(self, timeTraces, mode, timeAx=True):
         #{{{docstring
         """
         Sets the time traces to be plotted.
@@ -52,8 +52,12 @@ class PlotTimeTrace(PlotSuperClass):
             {varName:timeTrace, "time":time}
         mode : ["normal"|"fluct"]
             What mode the input is given in.
+        timeAx : bool
+            Whether or not the time should be on the x axis
         """
         #}}}
+
+        self._timeAx = timeAx
 
         # Set the member data
         self._timeTraces = timeTraces
@@ -80,6 +84,11 @@ class PlotTimeTrace(PlotSuperClass):
         self._fileName =\
             os.path.join(self._savePath,\
                 "{}-{}-{}".format(self._varName, "timeTraces", self._fluctName))
+
+        if not(timeAx):
+            self._fileName += "Indices"
+        if (self._sliced):
+            self._fileName += "Sliced"
 
         if self._extension is None:
             self._extension = "png"
@@ -109,7 +118,10 @@ class PlotTimeTrace(PlotSuperClass):
             raise NotImplementedError("'{}'-mode not implemented.")
 
         # Set the time label
-        self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        if self._timeAx:
+            self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        else:
+            self._timeLabel = "$\mathrm{Time}$ $\mathrm{index}$"
     #}}}
 
     #{{{plotSaveShowTimeTrace
@@ -147,9 +159,14 @@ class PlotTimeTrace(PlotSuperClass):
                             format(self._ph.zTxtDict),\
                           )
 
-            ax.plot(self._timeTraces[key]["time"],\
-                    self._timeTraces[key][self._varName],\
-                    color=color, label=label)
+            if self._timeAx:
+                ax.plot(self._timeTraces[key]["time"],\
+                        self._timeTraces[key][self._varName],\
+                        color=color, label=label)
+            else:
+                ax.plot(\
+                        self._timeTraces[key][self._varName],\
+                        color=color, label=label)
 
         # Set axis labels
         ax.set_xlabel(self._timeLabel)
