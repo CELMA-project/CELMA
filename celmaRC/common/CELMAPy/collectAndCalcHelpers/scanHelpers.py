@@ -35,6 +35,5 @@ def getScanValue(path, scanParameter):
     # +1 as the value is immediately after the scan parameter
     scanValue = scanValStr[scanValStr.index(scanParameter)+1]
 
-    import pdb; pdb.set_trace()
     return float(scanValue)
 #}}}

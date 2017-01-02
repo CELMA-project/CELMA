@@ -4,8 +4,8 @@
 Contains class to plot the growth rates
 """
 
-from ..superClasses import PlotSuperClass, seqCMap2, seqCMap3
-from ..plotHelpers import plotNumberFormatter
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
 import numpy as np
 import matplotlib.pylab as plt
 import os
@@ -50,7 +50,7 @@ class PlotGrowthRates(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, growthRateDataFrame, positionTuple):
+    def setData(self, varName, growthRateDataFrame, positionTuple):
         #{{{docstring
         """
         Sets the data to be plotted.
@@ -62,6 +62,8 @@ class PlotGrowthRates(PlotSuperClass):
 
         Parameters
         ----------
+        varName : str
+            Name of the variable
         growthRateDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
                 * "growthRate"
@@ -85,23 +87,19 @@ class PlotGrowthRates(PlotSuperClass):
         # Get the titles
         rhoTitle=self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
         zTitle  =self._ph.zTxtDict  ["constZTxt"]  .format(self._ph.zTxtDict)
-        self._title(r"{}$,$ {}".format(rhoTitle, zTitle))
+        self._title = r"{}$,$ {}".format(rhoTitle, zTitle)
 
         # Set the growth rate
         self._gRDF = growthRateDataFrame
 
         # The variable name is stored in the outermost level of the data
         # frame observations
-        self._varName = growthRateDataFrame.index.names[0]
+        self._varName = varName
 
         # Set the plot name
         self._pltVarName = self._ph.getVarPltName(self._varName)
 
         self._prepareLabels()
-
-        # Set the var label
-        self._varLabel = self._varLabelTemplate.\
-            format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         # Set the fileName
         self._fileName =\
@@ -130,15 +128,15 @@ class PlotGrowthRates(PlotSuperClass):
         # Set var label and legend templates
         if self.uc.convertToPhysical:
             unitsOrNormalization = " $[{units}]$"
-            legendTemplate = r"${{scanOrMode}} = {{{{val}}}}{units}$"
+            self._legendTemplate = r"{0[scanOrMode]} = {2[val]}${1[units]}$"
         else:
             unitsOrNormalization = "${normalization}$"
-            legendTemplate = r"${{scanOrMode}}{normalization} = {{{{val}}}}$"
-        self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+            self._legendTemplate = r"{0[scanOrMode]}{1[normalization]} = ${2[val]}$"
+        self._varLabelTemplate = r"{{}}{}".format(unitsOrNormalization)
 
         # Set the y-axes
-        imag = r"$\Im(\omega_{{}})$".format(self._pltVarName.replace("$",""))
-        real = r"$\Re(\omega_{{}})$".format(self._pltVarName.replace("$",""))
+        imag = r"$\Im(\omega_{})$".format(self._pltVarName.replace("$",""))
+        real = r"$\Re(\omega_{})$".format(self._pltVarName.replace("$",""))
         self._imLabel =\
             self._varLabelTemplate.\
                 format(imag, **self.uc.conversionDict["growthRate"])
@@ -147,56 +145,59 @@ class PlotGrowthRates(PlotSuperClass):
                 format(real, **self.uc.conversionDict["growthRate"])
 
         # Get the plot decoration for the scan
-        scan            = self._gRDF.index.names[0]
-        scanPltName     = self._ph.getVarPltName(scan)
-        scanPltNameDict = {"scanOrMode":scanPltName}
-        self._scanLegendTemplate = legendTemplate.\
-            format(**self.uc.conversionDict[scan]).format(**scanPltNameDict)
+        self._scan         = self._gRDF.index.names[0]
+        scanName           = self._ph.getVarPltName(self._scan)
+        self._scanNameDict = {"scanOrMode":scanName}
+        self._scanNormalizationOrUnitsDict = self.uc.conversionDict[self._scan]
 
         # Get the plot decoration for the modes
-        mode            = self._gRDF.index.names[1]
-        modePltName     = self._ph.getVarPltName(mode)
-        modePltNameDict = {"scanOrMode":modePltName}
-        self._modeLegendTemplate = legendTemplate.\
-            format(**self.uc.conversionDict[mode]).format(**modePltNameDict)
+        self._mode         = self._gRDF.index.names[1]
+        modeName           = self._ph.getVarPltName(self._mode)
+        self._modeNameDict = {"scanOrMode":modeName}
+        self._modeNormalizationOrUnitsDict = self.uc.conversionDict[self._mode]
 
         # Get the x labels
         self._scanXLabel = self._varLabelTemplate.\
-                format(modePltName, **self.uc.conversionDict[mode])
+                format(modeName, **self.uc.conversionDict[self._mode])
         self._modeXLabel = self._varLabelTemplate.\
-                format(scanPltName, **self.uc.conversionDict[scan])
+                format(scanName, **self.uc.conversionDict[self._scan])
     #}}}
 
-    #{{{plotSaveGrowthRates
-    def plotSaveGrowthRates(self):
+    #{{{plotSaveShowGrowthRates
+    def plotSaveShowGrowthRates(self):
         """
         Performs the plotting by calling the workers.
         """
 
         # Make the scan plot
-        scanColors = seqCMap3(np.linspace(0, 1, len(self._gRDF.index.levels)))
-        self._plotWorker(self._gRDF              ,\
-                         self._scanLegendTemplate,\
-                         self._scanXLabel        ,\
-                         scanColors              ,\
+        scanColors =\
+            seqCMap3(np.linspace(0, 1, len(self._gRDF.index.levels[0].values)))
+        self._plotWorker(self._gRDF                        ,\
+                         self._scanNameDict                ,\
+                         self._scanNormalizationOrUnitsDict,\
+                         self._scanXLabel                  ,\
+                         scanColors                        ,\
                         )
 
         # Make the mode plot
         gRDFSwap = self._gRDF.swaplevel()
-        modeColors = seqCMap2(np.linspace(0, 1, len(gRDFSwap.index.levels)))
-        self._plotWorker(gRDFSwap                ,\
-                         self._modeLegendTemplate,\
-                         self._modeXLabel        ,\
-                         modeColors              ,\
+        modeColors =\
+            seqCMap2(np.linspace(0, 1, len(gRDFSwap.index.levels[0].values)))
+        self._plotWorker(gRDFSwap                          ,\
+                         self._modeNameDict                ,\
+                         self._modeNormalizationOrUnitsDict,\
+                         self._modeXLabel                  ,\
+                         modeColors                        ,\
                         )
     #}}}
 
     #{{{_plotWorker
-    def _plotWorker(self          ,\
-                    gRDF          ,\
-                    legendTemplate,\
-                    xlabel        ,\
-                    colors        ,\
+    def _plotWorker(self                    ,\
+                    gRDF                    ,\
+                    scanOrModeNameDict      ,\
+                    normalizationOrUnitsDict,\
+                    xlabel                  ,\
+                    colors                  ,\
                     ):
         #{{{docstring
         """
@@ -206,8 +207,10 @@ class PlotGrowthRates(PlotSuperClass):
         ----------
         gRDF : DataFrame
             The growth rates data frame.
-        legendTemplate : str
-            String missing the keyword "val".
+        scanOrModeNameDict : dict
+            Dictionary containing the plot name
+        normalizationOrUnitsDict : dict
+            Dictionary containing the normalization or the units
         xlabel : str
             String to use on the x-axis label.
         colors : array 2d
@@ -216,31 +219,36 @@ class PlotGrowthRates(PlotSuperClass):
         #}}}
 
         # Create the axes
-        fig, (imAx, reAx) = plt.subplots(nrows=2, sharex=True)
+        fig, (imAx, reAx) =\
+            plt.subplots(nrows=2, sharex=True, figsize=self._pltSize)
 
-        for outerInd, color in zip(gRDF.index.levels, colors):
+        for outerInd, color in zip(gRDF.index.levels[0].values, colors):
             # Get the value for the legend
-            pltOuterIndDict = {"val":plotNumberFormatter(outerInd, None)}
+            pltOuterIndDict =\
+                    {"val":plotNumberFormatter(outerInd, None)}
+            label = self._legendTemplate.format(scanOrModeNameDict      ,\
+                                                normalizationOrUnitsDict,\
+                                                pltOuterIndDict)
 
             # Update the colors legend
             self._errorbarOptions.update({"color":color, "ecolor":color})
 
             (_, caps, _) = imAx.errorbar(\
-                    gRDF.loc[outerInd]["growthRate"].index            ,\
-                    gRDF.loc[outerInd]["growthRate"].values           ,\
-                    yerr  = gRDF.loc[outerInd]["growthRateStd"].values,\
-                    label = legendTemplate.format(**pltOuterIndDict)  ,\
-                    **self._errorbarOptions)
+                gRDF.loc[outerInd]["growthRate"].index.values     ,\
+                gRDF.loc[outerInd]["growthRate"].values           ,\
+                yerr  = gRDF.loc[outerInd]["growthRateStd"].values,\
+                label = label                                     ,\
+                **self._errorbarOptions)
 
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
 
             (_, caps, _) = reAx.errorbar(\
-                    gRDF.loc[outerInd]["averageAngularVelocity"].index       ,\
-                    gRDF.loc[outerInd]["averageAngularVelocity"].values      ,\
-                    yerr  =\
-                       gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
-                    **self._errorbarOptions)
+                gRDF.loc[outerInd]["averageAngularVelocity"].index.values,\
+                gRDF.loc[outerInd]["averageAngularVelocity"].values      ,\
+                yerr  =\
+                   gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
+                **self._errorbarOptions)
 
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
@@ -260,16 +268,15 @@ class PlotGrowthRates(PlotSuperClass):
         imAx.margins(x=0.1, y=0.1)
         reAx.margins(x=0.1, y=0.1)
 
-        reAx.tick_params(labelbottom="off")
-        ticks = tuple(gRDF.loc[outerInd]["growthRate"].index)
-
-        # Set the ticks
-        reAx.xaxis.set_ticks(ticks)
-        imAx.xaxis.set_ticks(ticks)
-
         # Make the plot look nice
         self._ph.makePlotPretty(imAx)
         self._ph.makePlotPretty(reAx, rotation = 45)
+
+        # Set the ticks
+        # reAx.tick_params(labelbottom="off")
+        ticks = tuple(gRDF.loc[outerInd]["growthRate"].index.values)
+        reAx.xaxis.set_ticks(ticks)
+        imAx.xaxis.set_ticks(ticks)
 
         if self._showPlot:
             plt.show()
