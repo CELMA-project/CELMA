@@ -260,7 +260,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         #}}}
 
         for key in fourierModes2d.keys():
-            modes = fourierModes2d[key][self._varName]
+            modes = fourierModes2d[key][self._varName].copy()
             tSize, N  = modes.shape
             nyquistMode = int(N/2) + 1
             magnitude = np.zeros((tSize, nyquistMode))
@@ -316,7 +316,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         #}}}
 
         for key in fourierModes2d.keys():
-            modes    = fourierModes2d[key][self._varName]
+            modes    = fourierModes2d[key][self._varName].copy()
             time     = fourierModes2d[key]["time"]
             tSize, N = modes.shape
             nyquistMode = int(N/2) + 1
@@ -364,7 +364,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                     # The angular speed (angular frequency) has units rad/s.
                     # Remember that if angularFreq*t = 2*pi the perturbation has
                     # revolved one time
-                    angularFreq[tInd-1] = phaseShiftDiff/deltaT
+                    angularFreq[tInd-1, modeNr] = phaseShiftDiff/deltaT
 
             # Insert into the dict
             fourierModes2d[key][self._varName+"AngularVelocity"] = angularFreq
