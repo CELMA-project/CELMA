@@ -44,7 +44,7 @@ def driverGrowthRates(collectArgs    ,\
     # Plot
     pgr = PlotGrowthRates(uc         ,\
                           **plotSuperKwargs)
-    pgr.setData(growthRateDataFrame, positionTuple)
+    pgr.setData(getDataArgs[0], growthRateDataFrame, positionTuple)
     pgr.plotSaveShowGrowthRates()
 #}}}
 
@@ -147,12 +147,12 @@ class DriverGrowthRates(DriverPointsSuperClass):
     #}}}
 
     @staticmethod
-    #{{{getCollectArgs
-    def getCollectArgs(scanCollectPaths,\
-                       steadyStatePaths,\
-                       startInds       ,\
-                       endInds         ,\
-                       scanParameter):
+    #{{{makeCollectArgs
+    def makeCollectArgs(scanCollectPaths,\
+                        steadyStatePaths,\
+                        startInds       ,\
+                        endInds         ,\
+                        scanParameter):
         #{{{docstring
         """
         Sets the arguments to be used in the constructor of
@@ -180,12 +180,12 @@ class DriverGrowthRates(DriverPointsSuperClass):
     #}}}
 
     @staticmethod
-    #{{{setGetDatatArgs
-    def setGetDataArgs(varName          ,\
-                       convertToPhysical,\
-                       indicesArgs      ,\
-                       indicesKwargs    ,\
-                       nModes):
+    #{{{makeGetDatatArgs
+    def makeGetDataArgs(varName          ,\
+                        convertToPhysical,\
+                        indicesArgs      ,\
+                        indicesKwargs    ,\
+                        nModes):
         #{{{docstring
         """
         Sets the arguments to be used in

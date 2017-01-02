@@ -112,11 +112,11 @@ class PlotHelper(object):
         "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                 \
                                        r"\partial_\theta^4\Omega")            ,\
         # Miscellaneous
-        "modeNr"    :"$\mathrm{Mode\quad number}$",\
-        "B0"        :"$B_0$"                      ,\
-        "Te0"       :"$T_e$"                      ,\
-        "nn"        :"$n_n$"                      ,\
-        "length"    :"$z$"                        ,\
+        "modeNr"    :r"$m_\theta$",\
+        "B0"        :r"$B_0$"     ,\
+        "Te0"       :r"$T_e$"     ,\
+        "nn"        :r"$n_n$"     ,\
+        "length"    :r"$z$"       ,\
         }
     #}}}
 
