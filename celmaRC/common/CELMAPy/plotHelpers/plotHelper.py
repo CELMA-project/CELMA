@@ -62,9 +62,6 @@ class PlotHelper(object):
                             r"\partial^4_{\parallel}j_{\parallel}")  ,\
         # momDensPar fields
         "momDensAdv"        :  r"-\frac{1}{JB}\{\phi, nu_{i,\parallel}\}",\
-        "uIParAdvSum"       : (r"- u_{e,\parallel}\partial_{\parallel}"   \
-                               r"\left(n\left[u_{i,\parallel}+"           \
-                               r"u_{e,\parallel}\right]\right)")         ,\
         "elPressure"        :  r"-T_e\partial_{\parallel}n"              ,\
         "neutralIRes"       :  r"-n\nu_{in}u_{i,\parallel}"              ,\
         "densDiffusion"     : (r"\frac{\nu_{ei}}{\mu}u_{i,\parallel}"     \

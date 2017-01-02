@@ -4,6 +4,6 @@
 Init-file for PDF
 """
 
-from .calcPDF import calcPDF
-from .driverPDF import DriverPDF
+from .collectAndCalcPDF import CollectAndCalcPDF
+from .driverPDF import DriverPDF, driverPDF
 from .plotPDF import PlotPDF
