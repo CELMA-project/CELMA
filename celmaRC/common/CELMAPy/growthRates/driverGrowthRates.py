@@ -55,19 +55,19 @@ class DriverGrowthRates(DriverPointsSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self             ,\
-                 dmp_folders      ,\
-                 scanCollectPaths ,\
-                 steadyStatePaths ,\
-                 startInds        ,\
-                 endInds          ,\
-                 scanParameter    ,\
-                 varName          ,\
-                 convertToPhysical,\
-                 indicesArgs      ,\
-                 indicesKwargs    ,\
-                 nModes           ,\
-                 plotSuperKwargs  ,\
+    def __init__(self                    ,\
+                 dmp_folders             ,\
+                 scanCollectPaths        ,\
+                 steadyStatePaths        ,\
+                 startInds               ,\
+                 endInds                 ,\
+                 scanParameter           ,\
+                 indicesArgs             ,\
+                 indicesKwargs           ,\
+                 plotSuperKwargs         ,\
+                 varName           = "n" ,\
+                 nModes            = 7   ,\
+                 convertToPhysical = True,\
                  **kwargs):
         #{{{docstring
         """
@@ -105,10 +105,6 @@ class DriverGrowthRates(DriverPointsSuperClass):
             scanCollectPaths.
         scanParameter : str
             String segment representing the scan
-        varName : str
-            Name of variable to find the growth rates of.
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
         indicesArgs : tuple
             Tuple of indices to use when collecting.
             NOTE: Only one spatial point should be used.
@@ -116,10 +112,14 @@ class DriverGrowthRates(DriverPointsSuperClass):
             Keyword arguments to use when setting the indices for
             collecting.
             NOTE: Only one spatial point should be used.
+        varName : str
+            Name of variable to find the growth rates of.
         nModes : int
             Number of modes.
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        convertToPhysical : bool
+            Whether or not to convert to physical units.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -129,12 +129,12 @@ class DriverGrowthRates(DriverPointsSuperClass):
         super().__init__(dmp_folders, **kwargs)
 
         # Set the member data
-        self._collectArgs = self._getCollectArgs(scanCollectPaths,\
+        self._collectArgs = self.makeCollectArgs(scanCollectPaths,\
                                                  steadyStatePaths,\
                                                  startInds       ,\
                                                  endInds         ,\
                                                  scanParameter)
-        self._getDataArgs = self._setGetDataArgs(varName          ,\
+        self._getDataArgs = self.makeGetDataArgs(varName          ,\
                                                  convertToPhysical,\
                                                  indicesArgs      ,\
                                                  indicesKwargs    ,\
