@@ -1,99 +1,108 @@
 #!/usr/bin/env python
 
 """
-Contains the PDF calculation
+Contains class for collecting and calculating the probability density
+function of time traces.
 """
 
-from ..timeTrace import calcTimeTrace
+from ..timeTrace import CollectAndCalcTimeTrace
 import numpy as np
 
-#{{{calcPDF
-def calcPDF(paths                      ,\
-            varName                    ,\
-            xInd                       ,\
-            yInd                       ,\
-            zInd                       ,\
-            convertToPhysical = True   ,\
-            mode              = "fluct",\
-            tSlice            = None):
-    #{{{docstring
+#{{{CollectAndCalcPDF
+class CollectAndCalcPDF(CollectAndCalcTimeTrace):
     """
-    Function which calculates the probability distribution function.
+    Class for collecting and calcuating PDF of the time traces
 
-    Probability distribution function
-    ---------------------------------
+    Probability density function
+    ----------------------------
     Probability that the measurement falls within an infinite small
     interval.
-
-    Parameters
-    ----------
-    paths : tuple of strings
-        The paths to collect from
-    varName : str
-        Variable to collect
-    xInd : tuple of ints
-        A tuple of the xInds to collect use when collecting.
-    yInd : tuple of ints
-        The same as xInd, but for the y-index.
-    zInd : tuple of ints
-        The same as xInd, but for the z-index.
-    convertToPhysical : bool
-        Whether or not to convert to physical units.
-    mode : ["normal"|"fluct"]
-        If mode is "normal" the raw data is used.
-        If mode is "fluct" the fluctuations are used.
-    tSlice : [None|Slice}
-        Whether or not to slice the time trace
-
-    Returns
-    -------
-    PDF : dict
-        Dictionary where the keys are on the form "rho,theta,z".
-        The value is a dict containing of
-        {varPDFX:pdfX, varPDFY:"pdfY"}
     """
+
+    #{{{constructor
+    def __init__(self            ,\
+                 *args           ,\
+                 **kwargs):
+        #{{{docstring
+        """
+        This constructor will:
+            * Call the parent constructor
+
+        Parameters
+        ----------
+        *args : positional arguments
+            See parent constructor for details.
+        *kwargs : keyword arguments
+            See parent constructor for details.
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
     #}}}
 
-    # Call the time calcTimeTrace function in order to get a time trace
-    timeTraces =\
-        calcTimeTrace(paths                                ,\
-                      varName                              ,\
-                      xInd                                 ,\
-                      yInd                                 ,\
-                      zInd                                 ,\
-                      convertToPhysical = convertToPhysical,\
-                      mode              = mode             ,\
-                      tSlice            = tSlice           ,\
-                      )
+    @staticmethod
+    #{{{calcPDF
+    def calcPDF(timeTraces):
+        #{{{docstring
+        """
+        Function which calculates the probability density function.
 
-    # Initialize the output
-    PDF = {}
+        Parameters
+        ----------
+        timeTraces : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varName:timeTrace, "time":time}.
+            And additional key "zInd" will be given in addition to varName
+            and "time" if mode is set to "fluct".
+            The timeTrace is a 1d array.
 
-    # Make the keys
-    xKey = "{}PDFX".format(varName)
-    yKey = "{}PDFY".format(varName)
+        Returns
+        -------
+        PDF : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varPDFX:pdfX, varPDFY:pdfY}
+        """
+        #}}}
 
-    # Histogram counts the occurences of values within a specific interval
-    # Density normalizes so that the integral (of the continuous variable)
-    # equals one, note that the sum of histograms is not necessarily 1)
-    # http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
-    # http://stackoverflow.com/questions/36150257/probability-distribution-function-python/36248810
-    for key in timeTraces.keys():
-        # Initialize the PDF
-        PDF[key] = {}
+        # Initialize the output
+        PDF = {}
 
-        # Calculate pdfY
-        PDF[key][yKey], bins =\
-            np.histogram(timeTraces[key][varName], bins="auto", density=True)
+        # Obtain the varName
+        ind  = tuple(timeTraces.keys())[0]
+        keys = timeTraces[ind].keys()
+        varName = tuple(var for var in keys if var != "time")[0]
 
-        # Initialize x
-        PDF[key][xKey] = np.zeros(PDF[key][yKey].size)
+        # Make the keys
+        xKey = "{}PDFX".format(varName)
+        yKey = "{}PDFY".format(varName)
 
-        # Only the bin edges are saved. Interpolate to the center of the bin
-        for k in range(PDF[key][yKey].size):
-            PDF[key][xKey][k] = 0.5*(bins[k]+bins[k+1])
+        # Histogram counts the occurences of values within a specific interval
+        # Density normalizes so that the integral (of the continuous variable)
+        # equals one, note that the sum of histograms is not necessarily 1)
+        # http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
+        # http://stackoverflow.com/questions/36150257/probability-distribution-function-python/36248810
+        for key in timeTraces.keys():
+            # Initialize the PDF
+            PDF[key] = {}
 
-    # NOTE: If timeTraces was converted to physical units, then PDF is
-    #       in physical units as well
-    return PDF
+            # Calculate pdfY
+            PDF[key][yKey], bins =\
+                np.histogram(timeTraces[key][varName],\
+                             bins="auto",\
+                             density=True)
+
+            # Initialize x
+            PDF[key][xKey] = np.zeros(PDF[key][yKey].size)
+
+            # Only the bin edges are saved. Interpolate to bin center
+            for k in range(PDF[key][yKey].size):
+                PDF[key][xKey][k] = 0.5*(bins[k]+bins[k+1])
+
+        # NOTE: If timeTraces was converted to physical units, then PDF is
+        #       in physical units as well
+        return PDF
+    #}}}
 #}}}
