@@ -93,7 +93,7 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
 
             if self._tSlice is not None:
                 tStart = self._tSlice[tCounter].start
-                tEnd   = self._tSlice[tCounter].end
+                tEnd   = self._tSlice[tCounter].stop
                 t = (tStart, tEnd)
             else:
                 t = None
