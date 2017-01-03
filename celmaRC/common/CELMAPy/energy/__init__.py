@@ -4,4 +4,6 @@
 Init-file for energy
 """
 
-from .energy import collectEnergy, PlotEnergy
+from .collectAndCalcEnergy import CollectAndCalcEnergy
+from .driverEnergy import DriverEnergy, driverEnergy
+from .plotEnergy import PlotEnergy

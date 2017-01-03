@@ -328,7 +328,6 @@ class PlotHelper(object):
                     os.makedirs(directory)
                     print("{} created".format(directory))
 
-
         fig.savefig(fileName,\
                     transparent = True             ,\
                     bbox_inches = "tight"          ,\
