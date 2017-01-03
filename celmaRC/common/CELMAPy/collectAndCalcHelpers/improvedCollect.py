@@ -85,16 +85,13 @@ def collectiveCollect(paths               ,\
             paths, tInd = removePathsOutsideRange(paths, tInd)
             # If more than one path, we will slice in time after
             # collection
-            if len(paths) != 1:
-                postCollectTInd = tInd
-                tInd = None
-            else:
-                postCollectTInd = None
+            postCollectTInd = tInd
+            tInd = None
         else:
             postCollectTInd = None
 
-    for path in paths:
-        for var in varStrings:
+    for var in varStrings:
+        for path in paths:
             try:
                 # Make a local var which is reused for every interation,
                 # then concatenate the dictionary
@@ -121,6 +118,12 @@ def collectiveCollect(paths               ,\
                 # Copy the field in to each time
                 tmp[:] = curVar
                 curVar = tmp
+            elif len(curVar.shape) == 1:
+                # Make it a 4d variable
+                tmp = np.zeros((len(curVar), 1, 1, 1))
+                # Copy the field in to each time
+                tmp[:,0,0,0] = curVar
+                curVar = tmp
 
             # Set data[var] to curVar the first time in order to get the
             # correct dimensions
@@ -131,11 +134,14 @@ def collectiveCollect(paths               ,\
                 # is the same as the last of the previous
                 data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
 
-            # Do slicing post collection if necessary
-            if len(paths) > 1:
-                if postCollectTInd is not None:
-                    # +1 to include the last point
-                    data[var] = data[var][postCollectTInd[0]:postCollectTInd[1]+1]
+        # Do slicing post collection if necessary
+        if len(paths) > 1:
+            if postCollectTInd is not None:
+                # +1 to include the last point
+                lastPost = postCollectTInd[1]+1 if postCollectTInd[1] is not None\
+                           else None
+
+                data[var] = data[var][postCollectTInd[0]:lastPost]
 
     return data
 #}}}
@@ -153,7 +159,6 @@ def removePathsOutsideRange(paths, tInd):
     tInd : tuple
         The time indices
 
-
     Returns
     -------
     paths : tuple
@@ -163,47 +168,50 @@ def removePathsOutsideRange(paths, tInd):
     """
     #}}}
 
-    # Check if it necessary to use all paths
-    lenT = 0
     # Cast to list
     paths = list(paths)
 
     # Check if the paths are needed from the rigth
-    lastInd = None
-    for ind in range(len(paths)):
-        with DataFile(os.path.join(paths[ind],"BOUT.dmp.0.nc")) as f:
-            t = f.read("t_array")
-            lenT += len(t)
-            if tInd[1] < lenT:
-                lastInd = ind+1
-                break
+    if tInd[1] is not None:
+        lenT = 0
 
-    # Remove from the rigth
-    paths = paths[:lastInd]
+        lastInd = None
+        for ind in range(len(paths)):
+            with DataFile(os.path.join(paths[ind],"BOUT.dmp.0.nc")) as f:
+                t = f.read("t_array")
+                lenT += len(t)
+                if tInd[1] < lenT:
+                    lastInd = ind+1
+                    break
+
+        # Remove from the rigth
+        paths = paths[:lastInd]
 
     # Check if the paths are needed from the left
-    lenT  = 0
-    # If folders are removed, subtract tInd with number of removed indices
-    # lenTs is a placeholder for this
-    removePaths = []
-    lenTs       = []
-    for path in paths:
-        with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
-            t = f.read("t_array")
-            curLenT = len(t)
-            lenTs.append(curLenT)
-            lenT += curLenT
-            if tInd[0] > lenT:
-                removePaths.append(path)
-            else:
-                break
+    if tInd[0] is not None:
+        lenT  = 0
+        # If folders are removed, subtract tInd with number of removed indices
+        # lenTs is a placeholder for this
+        removePaths = []
+        lenTs       = []
+        for path in paths:
+            with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
+                t = f.read("t_array")
+                curLenT = len(t)
+                lenTs.append(curLenT)
+                lenT += curLenT
+                if tInd[0] > lenT:
+                    removePaths.append(path)
+                else:
+                    break
 
-    tInd = list(tInd)
-    for remove, lenT in zip(removePaths, lenTs):
-        tInd[0] -= lenT
-        tInd[1] -= lenT
-        paths.remove(remove)
-    tInd = tuple(tInd)
+        tInd = list(tInd)
+        for remove, lenT in zip(removePaths, lenTs):
+            # +1 removes the duplicate which is present in both files
+            tInd[0] = (tInd[0] - lenT) + 1
+            tInd[1]  = tInd[1] - lenT if tInd[1] is not None else None
+            paths.remove(remove)
+        tInd = tuple(tInd)
 
     # Cast to tuple
     paths = tuple(paths)
@@ -247,7 +255,8 @@ def collectTime(paths, tInd = None):
 
     if tInd is not None:
         # +1 as the last point is excluded from a slice
-        time = time[tInd[0]:tInd[1]+1]
+        lastT = tInd[1]+1 if tInd[1] is not None else None
+        time  = time[tInd[0]:lastT]
 
     return time
 #}}}
