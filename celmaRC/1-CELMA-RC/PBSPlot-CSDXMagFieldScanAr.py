@@ -12,7 +12,7 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
-from standardPlots import fourierModesPlot
+from standardPlots import fourierModesPlot, growthRatesPlot
 
 #{{{runFourierModes
 def runFourierModes():
@@ -69,30 +69,29 @@ def runGrowthRates():
     Runs the growth rates
     """
 
-    # Find tSlice
-    found = False
-    for tkey in tSlices.keys():
-        if tkey in dmp_folders:
-            tSlice = tSlices[tkey]
-            found = True
-            break
-    if not(found):
-        raise ValueError("Could not find correct slice")
+    # NOTE: The ordering of param is in descending order (because of the
+    #       organization in PBSScan)
+    dmp_folders = (mergeFromLinear["param0"][-1],)
+    keys = tuple(sorted(list(mergeFromLinear.keys())))
+    scanCollectPaths = tuple(mergeFromLinear[key] for key in keys)
 
-    collectPaths = mergeFromLinear[key]
-    dmp_folders   = (dmp_folders,)
-    args = (dmp_folders, collectPaths, steadyStatePath)
-    kwargs = {"tSlice":(tSlice,)}
-    sub.setJobName("fourierModesSliced{}".format(nr))
-    sub.submitFunction(fourierModesPlot, args=args, kwargs=kwargs)
-    # Sleep 1.5 seconds to ensure that tmp files will have different names
-    sleep(1.5)
+    # NOTE: The ordering is of the keys are in descending order (because
+    #       of the organization in PBSScan)
+    steadyStatePaths = dmpFolders["expand"]
 
-growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, startInds, endInds)
+    # Set the indices
+    tKeys     = tuple(sorted(list(tSlices.keys()), reverse=True))
+    startInds = tuple(tSlices[key].start for key in tKeys)
+    endInds   = tuple(tSlices[key].stop for key in tKeys)
+
+    args = (dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, startInds, endInds)
+    sub.setJobName("growthRates")
+    sub.submitFunction(growthRatesPlot, args=args)
 #}}}
 
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
+scanParameter = "B0"
 
 with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
         dmpFolders = pickle.load(f)
@@ -113,7 +112,7 @@ sub.setWalltime("00:05:00")
 if __name__ == "__main__":
 
     # Run the fourier modes
-#    runFourierModes()
+    runFourierModes()
     # Set linear slices and plot the sliced fourier modes
     tSlices = {\
                "B0_0.02":slice(80,240)  ,\
@@ -122,6 +121,6 @@ if __name__ == "__main__":
                "B0_0.08":slice(100,225) ,\
                "B0_0.1" :slice(80,210)  ,\
                }
-#    runFourierModesSliced()
-YOU ARE HERE, NOT COMPLETED
+    runFourierModesSliced()
+    sub.setWalltime("00:10:00")
     runGrowthRates()
