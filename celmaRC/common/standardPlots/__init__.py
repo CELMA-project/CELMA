@@ -3,3 +3,4 @@
 """ Init for standardPlots"""
 
 from .fourierModes import fourierModesPlot
+from .growthRates import growthRatesPlot
