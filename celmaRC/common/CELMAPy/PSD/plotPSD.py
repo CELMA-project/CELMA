@@ -2,98 +2,141 @@
 
 """Class for PSD plot"""
 
-from ..superClasses import PlotsSuperClass
-from ..plotHelpers import seqCMap3
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
 #{{{PlotPSD
-class PlotPSD(PlotsSuperClass):
+class PlotPSD(PlotSuperClass):
     """
     Class which contains the PSD data and the plotting configuration.
     """
 
-    #{{{__init___
-    def __init__(self    ,\
-                 *args   ,\
-                 PSD     ,\
-                 mode    ,\
-                 **kwargs):
+    #{{{constructor
+    def __init__(self, *args, pltSize = (15,10), **kwargs):
         #{{{docstring
         """
         This constructor:
 
-        1. Calls the parent constructor
-        2. Sets the member data
-        3. Prepares the labels
+        * Calls the parent constructor
 
         Parameters
         ----------
-        *args : positional arguments
-            See the parent constructor for details.
-        PSD : dict
-            Dictionary where the keys are on the form "rho,theta,z".
-            The value is a dict containing of
-            {varPSDX:psdX, varPSDY:psdY}
-        mode : ["normal"|"fluct"]
-            What mode the input is given in.
-        **kwargs : keyword arguments
-            See the parent constructor for details.
+        pltSize : tuple
+            The size of the plot
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
+        # Set the plot size
+        self._pltSize = pltSize
+    #}}}
+
+    #{{{setData
+    def setData(self, PSD, mode):
+        #{{{docstring
+        """
+        Sets the time traces to be plotted.
+
+        This function also sets the variable labels, colors and the save name.
+
+        Parameters
+        ----------
+        PSD : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {"pdfX":pdfX, "pdfY":"pdfY"}
+        mode : ["normal"|"fluct"]
+            What mode the input is given in.
+        """
+        #}}}
+
         # Set the member data
-        self._PSD    = PSD
-        self._colors = seqCMap3(np.linspace(0, 1, len(PSD.keys())))
+        self._PSD = PSD
+        self._mode = mode
 
         # Obtain the varname
-        ind  = PSD.keys()[0]
+        ind  = list(PSD.keys())[0]
         keys = PSD[ind].keys()
         self._varName = [var[:-4] for var in keys if "PSD" in var][0]
 
+        # Obtain the color (pad away brigthest colors)
+        pad = 3
+        self._colors = seqCMap3(np.linspace(0, 1, len(PSD.keys())+pad))
+
+        self._prepareLabels()
+
         # Set the labels
+        pltVarName = self._ph.getVarPltName(self._varName)
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        # Set the fileName
+        self._fileName =\
+            os.path.join(self._savePath,\
+                "{}-{}-{}".format(self._varName, "PSD", self._fluctName))
+
+        if self._extension is None:
+            self._extension = "png"
+
+        self._fileName = "{}.{}".format(self._fileName, self._extension)
+    #}}}
+
+    #{{{_prepareLabels
+    def _prepareLabels(self):
+        """
+        Prepares the labels for plotting.
+        """
+        # Set var label templates
         # NOTE: The units will be in variableUnits**2/Hz for
         #       non-normalized variables.
         #       The normalization would be
         #       variableNormalization**2/(tOmegaCI)
-        pltVarName   = self.ph.getVarPltName(self._varname)
+        #       However, we will use a dB approach, so all units cancel
+        psdStr = r"\mathrm{{PSD}}("
 
-        norm  = self.uc.conversionDict[self._varName]["normalization"]
-        units = self.uc.conversionDict[self._varName]["units"]
-
-        # Set the variable label
-        if self.convertToPhysical:
-            if mode == "normal":
-                self._xLabel = r"${}$ $[{}]$"
-            elif mode == "fluct":
-                self._xLabel = r"$\tilde{{{}}}$ $[{}]$"
-            self._xLabel = self._xLabel.format(pltVarName, units)
-            self._yLabel = r"$\mathrm{{PSD}}(\tilde{{{}}})$".\
-                    format(pltVarName)
+        # Get normalOrFluct
+        if self._mode == "normal":
+            normalOrFluct = r"{{}}"
+            self._fluctName = ""
+        elif self._mode == "fluct":
+            normalOrFluct = r"\widetilde{{{}}}"
+            self._fluctName = "fluct"
         else:
-            if mode == "normal":
-                self._xLabel = r"${}{}$"
-            elif mode == "fluct":
-                self._xLabel = r"$\tilde{{{}}}{}$"
-            self._xLabel = self._xLabel.format(pltVarName, norm)
-            self._yLabel = r"$\mathrm{{PSD}}(\tilde{{{}}}{})$".\
-                    format(pltVarName, norm)
+            message = "'{}'-mode not implemented.".format(self._mode)
+            raise NotImplementedError(message)
+
+        #  Normalized and non-normalized labels are treated differently
+        #  due to the paranthesis and the normalization
+        units = "[\mathrm{{dB}}]"
+        if self.uc.convertToPhysical:
+            self._varLabelTemplate = r"$"+\
+                                     psdStr +\
+                                     normalOrFluct +\
+                                     r")$" +\
+                                     r" $" + units + r"$"
+            self._xLabel         = r"$1/t$ $[Hz]$"
+        else:
+            self._varLabelTemplate = r"$"+\
+                                     psdStr +\
+                                     normalOrFluct +\
+                                     "{normalization}" +\
+                                     r")$" +\
+                                     r" $" + units + r"$"
+            self._xLabel         = r"$1/t \omega_{ci}$"
     #}}}
 
-    #{{{plotPSDs
-    def plotPSDs(self, mode="normal"):
+    #{{{plotSaveShowPSD
+    def plotSaveShowPSD(self):
         """
-        Plots the time power spectral density.
+        Plots the probability density function.
 
-        Parameters
-        -----------
-        mode : ["normal"|"dB"]
-            The y-axis will be on logarithmic scale when mode is
-            "normal", and on a log-log scale when the mode is "dB"
+        NOTE: The desibel use here is dividing by its own max, but not
+              the global max.
         """
 
         # Create the plot
@@ -102,86 +145,56 @@ class PlotPSD(PlotsSuperClass):
 
         keys = sorted(self._PSD.keys())
 
-        if mode == "normal":
-            for key, color in keys, self._colors:
-                # Make the label
-                rho, theta, z = key.split(",")
-                label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
-                
-                # Clip the very first point as this is rediculously low
-                ax.plot(self._probes.results[key]["psdX"][1:],\
-                        self._probes.results[key]["psdY"][1:],\
-                        color=color,\
-                        label=label,\
-                        alpha=self._alpha)
+        for key, color in zip(keys, self._colors):
+            # Make the label
+            rho, theta, z = key.split(",")
 
-        elif mode == "dB":
-            # Find max:
-            curMax = 0
-            for key, color in keys, self._colors:
-                if np.max(self._probes.results[key]["psdY"][1:]) > curMax:
-                    curMax = np.max(self._probes.results[key]["psdY"][1:])
+            # Set values
+            self._ph.rhoTxtDict  ["value"] =\
+                    plotNumberFormatter(float(rho), None)
+            self._ph.zTxtDict    ["value"] =\
+                    plotNumberFormatter(float(z), None)
+            self._ph.thetaTxtDict["value"] =\
+                    plotNumberFormatter(float(theta), None)
 
-            # Make the plots
-            for key, color in keys, self._colors:
-                # Make the label
-                rho, theta, z = key.split(",")
-                label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
-                
-                # Clip the very first point as this is rediculously low
-                ax.plot(self._probes.results[key]["psdX"][1:],\
-                        np.log10(\
-                            self._probes.results[key]["psdY"][1:]/\
-                            curMax),\
-                        color=color,\
-                        label=label,\
-                        alpha=self._alpha)
+            # Make the const values
+            label = (r"{}$,$ {}$,$ {}").\
+                    format(\
+                        self._ph.rhoTxtDict  ["constRhoTxt"].\
+                            format(self._ph.rhoTxtDict),\
+                        self._ph.thetaTxtDict["constThetaTxt"].\
+                            format(self._ph.thetaTxtDict),\
+                        self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict),\
+                          )
 
-        if mode == "normal":
-            # Set logscale
-            ax.set_yscale("log")
-        else:
-            ax.set_xscale("log")
+            # Clip the very first point as this is very low
+            xVals = self._PSD[key]["{}PSDX".format(self._varName)][1:]
+            yVals = np.log10(       self._PSD[key]["{}PSDY".format(self._varName)][1:]/\
+                             np.max(self._PSD[key]["{}PSDY".format(self._varName)][1:]))
 
-        # Set axis label
-        if self._probes.helper.convertToPhysical:
-            inverse = "$/\mathrm{Hz}]$"
-            xlabel = "$\mathrm{f}$ $\mathrm{[Hz]}$"
-            if mode == "normal":
-                ax.set_ylabel(r"$\mathrm{{PSD}}$ $[({})^2${}".\
-                        format(self._probes.varUnits, inverse))
-            elif mode == "dB":
-                ax.set_ylabel(r"$\mathrm{dB}$")
-        else:
-            inverse = "{}".format(self._timeLabel)
-            xlabel = "$(1/${}$)$".format(self._timeLabel)
-            if mode == "normal":
-                ax.set_ylabel(r"${}{}^2${}".\
-                        format(self._probes.varName,\
-                               self._probes.varNormalization,\
-                               inverse))
-            elif mode == "dB":
-                ax.set_ylabel(r"$\mathrm{PSD}$ $\mathrm{dB}$")
+            #Plot
+            ax.plot(xVals, yVals, color=color, label=label)
 
-        ax.set_xlabel(xlabel)
+        # Use logarithmic scale
+        ax.set_xscale("log")
 
-        ax.set_title(self._defaultTitle)
+        # Set axis labels
+        ax.set_xlabel(self._xLabel)
+        ax.set_ylabel(self._varLabel)
 
         # Make the plot look nice
-        self._probes.helper.makePlotPretty(ax, rotation = 45)
-        fig.tight_layout()
+        self._ph.makePlotPretty(ax, rotation = 45)
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            name = os.path.join(self._savePath, "PSDs")
-            if mode == "dB":
-                name += "dB"
-            fileName = "{}.{}".format(name, self._extension)
-            self._probes.helper.savePlot(fig, fileName)
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "PSD"),\
+                       self._extension)
+            self._ph.savePlot(fig, fileName)
 
         plt.close(fig)
-        #}}}
     #}}}
 #}}}

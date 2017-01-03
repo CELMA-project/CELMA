@@ -73,30 +73,10 @@ class PlotPDF(PlotSuperClass):
         # Set the labels
         pltVarName = self._ph.getVarPltName(self._varName)
 
-        # Make a unitsOrNormDict which can be altered
-        # If not(self.uc.convertToPhysical) we need to manually modify
-        # the normalization argument
-        unitsOrNormDict = self.uc.conversionDict[self._varName]
-#        if not(self.uc.convertToPhysical):
-#            if r"/" in unitsOrNormDict["normalization"]:
-#                if unitsOrNormDict["normalization"][0] == r"/":
-#                    unitsOrNormDict["normalization"] =\
-#                        unitsOrNormDict["normalization"][1:]
-#                else:
-#                    # Swap the nominator and denominator
-#                    tmp = unitsOrNormDict["normalization"].split(r"/")
-#                    unitsOrNormDict["normalization"] =\
-#                            r"/".join((tmp[1],tmp[0]))
-#            else:
-#                # Add division sign
-#                unitsOrNormDict["normalization"] =\
-#                        r"/"+unitsOrNormDict["normalization"]
-
         self._varLabel = self._varLabelTemplate.\
             format(pltVarName, **self.uc.conversionDict[self._varName])
-
         self._xLabel = self._xLabelTemplate.\
-            format(pltVarName, **unitsOrNormDict)
+            format(pltVarName, **self.uc.conversionDict[self._varName])
 
         # Set the fileName
         self._fileName =\
@@ -133,7 +113,8 @@ class PlotPDF(PlotSuperClass):
             message = "'{}'-mode not implemented.".format(self._mode)
             raise NotImplementedError(message)
 
-        # Distinc between normalized and non-normalized
+        #  Normalized and non-normalized labels are treated differently
+        #  due to the paranthesis and the normalization
         if self.uc.convertToPhysical:
             unitsOrNormalization       = "[1/{units}]"
             xLabelunitsOrNormalization = "[{units}]"
@@ -144,7 +125,6 @@ class PlotPDF(PlotSuperClass):
                                      r" $" + unitsOrNormalization + r"$"
         else:
             unitsOrNormalization       = "{normalization}"
-#            # NOTE: this will be treated at a later stage
             xLabelunitsOrNormalization = "{normalization}"
             self._varLabelTemplate = r"$"+\
                                      pdfStr +\

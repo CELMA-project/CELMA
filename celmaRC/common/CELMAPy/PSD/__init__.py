@@ -4,6 +4,6 @@
 Init-file for PSD
 """
 
-from .calcPSD import calcPSD
-from .driverPSD import DriverPSD
+from .collectAndCalcPSD import CollectAndCalcPSD
+from .driverPSD import DriverPSD, driverPSD
 from .plotPSD import PlotPSD
