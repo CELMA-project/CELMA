@@ -2,14 +2,14 @@
 
 """Class for PDF plot"""
 
-from ..superClasses import PlotsSuperClass
-from ..plotHelpers import seqCMap3
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
 #{{{PlotPDF
-class PlotPDF(PlotsSuperClass):
+class PlotPDF(PlotSuperClass):
     """
     Class which contains the PDF data and the plotting configuration.
     """
@@ -60,7 +60,7 @@ class PlotPDF(PlotsSuperClass):
         self._mode = mode
 
         # Obtain the varname
-        ind  = PDF.keys()[0]
+        ind  = list(PDF.keys())[0]
         keys = PDF[ind].keys()
         self._varName = [var[:-4] for var in keys if "PDF" in var][0]
 
@@ -93,10 +93,10 @@ class PlotPDF(PlotsSuperClass):
                         r"/"+unitsOrNormDict["normalization"]
 
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **unitsOrNormDict)
-
-        self._xLabel = self._varLabelTemplate.\
             format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        self._xLabel = self._xLabelTemplate.\
+            format(pltVarName, **unitsOrNormDict)
 
         # Set the fileName
         self._fileName =\
@@ -121,26 +121,27 @@ class PlotPDF(PlotsSuperClass):
         #       Thus will the PDF have the dimension of the inverse of
         #       what is on the x axis
         if self.uc.convertToPhysical:
-            unitsOrNormalization       = " $[{units}]$"
-            xLabelunitsOrNormalization = " $[1/{units}]$"
+            unitsOrNormalization       = " $[1/{units}]$"
+            xLabelunitsOrNormalization = " $[{units}]$"
         else:
             unitsOrNormalization       = "${normalization}$"
             # NOTE: this will be treated at a later stage
             xLabelunitsOrNormalization = "${normalization}$"
         if self._mode == "normal":
             self._varLabelTemplate =\
-                r"$\mathrm{{{PDF}}}({{}})${}".format(unitsOrNormalization)
-            self._xLabel = r"${{}}${}".format(unitsOrNormalization)
+                r"$\mathrm{{{{PDF}}}}({{}})${}".format(unitsOrNormalization)
+            self._xLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
             self._fluctName = ""
         elif self._mode == "fluct":
             self._varLabelTemplate =\
-                r"$\mathrm{{{{{{{PDF}}}}}}}(\widetilde{{{{{{}}}}}})${}".\
+                r"$\mathrm{{{{PDF}}}}(\widetilde{{{{{{}}}}}})${}".\
                 format(unitsOrNormalization)
-            self._xLabel = r"$\widetilde{{{{{{}}}}}}${}".\
+            self._xLabelTemplate = r"$\widetilde{{{{{{}}}}}}${}".\
                                format(xLabelunitsOrNormalization)
             self._fluctName = "fluct"
         else:
-            raise NotImplementedError("'{}'-mode not implemented.")
+            message = "'{}'-mode not implemented.".format(mode)
+            raise NotImplementedError(message)
     #}}}
 
     #{{{plotSaveShowPDF
@@ -153,22 +154,40 @@ class PlotPDF(PlotsSuperClass):
 
         keys = sorted(self._PDF.keys())
 
-        for key, color in keys, self._colors:
+        for key, color in zip(keys, self._colors):
             # Make the label
             rho, theta, z = key.split(",")
-            label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
 
-            ax.plot(self._PDF[key]["{}PDFX"].self._varName,\
-                    self._PDF[key]["{}PDFY"].self._varName,\
+            # Set values
+            self._ph.rhoTxtDict  ["value"] =\
+                    plotNumberFormatter(float(rho), None)
+            self._ph.zTxtDict    ["value"] =\
+                    plotNumberFormatter(float(z), None)
+            self._ph.thetaTxtDict["value"] =\
+                    plotNumberFormatter(float(theta), None)
+
+            # Make the const values
+            label = (r"{}$,$ {}$,$ {}").\
+                    format(\
+                        self._ph.rhoTxtDict  ["constRhoTxt"].\
+                            format(self._ph.rhoTxtDict),\
+                        self._ph.thetaTxtDict["constThetaTxt"].\
+                            format(self._ph.thetaTxtDict),\
+                        self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict),\
+                          )
+
+            ax.plot(self._PDF[key]["{}PDFX".format(self._varName)],\
+                    self._PDF[key]["{}PDFY".format(self._varName)],\
                     color=color,\
                     label=label)
 
         # Set axis labels
         ax.set_xlabel(self._xLabel)
-        ax.set_ylabel(self._yLabel)
+        ax.set_ylabel(self._varLabel)
 
         # Make the plot look nice
-        self.ph.makePlotPretty(ax, rotation = 45)
+        self._ph.makePlotPretty(ax, rotation = 45)
 
         if self._showPlot:
             plt.show()
@@ -177,7 +196,7 @@ class PlotPDF(PlotsSuperClass):
             fileName = "{}.{}".\
                 format(os.path.join(self._savePath, "PDF"),\
                        self._extension)
-            self.ph.savePlot(fig, fileName, (self._leg,))
+            self._ph.savePlot(fig, fileName)
 
         plt.close(fig)
     #}}}
