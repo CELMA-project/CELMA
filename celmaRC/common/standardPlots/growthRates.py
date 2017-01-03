@@ -58,12 +58,13 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
                      }
 
     plotSuperKwargs = {\
-                        "showPlot"     : False,\
-                        "savePlot"     : True,\
-                        "savePath"     : None,\
-                        "savePathFunc" : None,\
-                        "extension"    : None,\
-                        "dmp_folders"  : None,\
+                        "showPlot"        : False,\
+                        "savePlot"        : True ,\
+                        "savePath"        : None ,\
+                        "savePathFunc"    : None ,\
+                        "extension"       : None ,\
+                        "timeStampFolder" : False,\
+                        "dmp_folders"     : None ,\
                        }
 
     dGR = DriverGrowthRates(
