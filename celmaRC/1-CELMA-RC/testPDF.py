@@ -110,7 +110,7 @@ def driverTest():
                        }
 
     print("\n\nTesting probability density function driver")
-    dTT = DriverPDF(
+    dPDF = DriverPDF(
                      # DriverPDFs
                      dmp_folders                ,\
                      indicesArgs                ,\
@@ -124,7 +124,7 @@ def driverTest():
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dTT.driverPDF()
+    dPDF.driverPDF()
     print("Success!\n\n")
 #}}}
 

@@ -59,7 +59,7 @@ def driverPDF(collectPaths     ,\
 
     # Execute the collection
     tt = ccPDF.executeCollectAndCalc()
-    tt = ccPDF.convertTo1D(PDF)
+    tt = ccPDF.convertTo1D(tt)
 
     # Calculate the PDF
     PDF = ccPDF.calcPDF(tt)
