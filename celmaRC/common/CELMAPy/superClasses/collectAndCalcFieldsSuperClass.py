@@ -46,13 +46,13 @@ class CollectAndCalcFieldsSuperClass(CollectAndCalcSuperClass):
 
         Parameters
         ----------
-        xSlice : [Slice|int]
+        xSlice : [None|slice|int]
             The slice of the rho if the data is to be sliced.
             If int, a constant slice will be used.
-        ySlice : [Slice|int]
+        ySlice : [None|slice|int]
             The slice of the z if the data is to be sliced.
             If int, a constant slice will be used.
-        zSlice : [Slice|int]
+        zSlice : [None|slice|int]
             The slice of the z if the data is to be sliced.
             If int, a constant slice will be used.
         tSlice : [None|Slice]
