@@ -12,29 +12,39 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
-from standardPlots import fourierModesPlot, growthRatesPlot
+from standardPlots import fourierModesPlot, growthRatesPlot, energyPlot
 
-#{{{runFourierModes
-def runFourierModes():
+#{{{findSlices
+def findSlices(dmp_folders):
     """
-    Runs the fourier modes
-    """
-    loopOver = zip(dmpFolders["turbulence"], dmpFolders["expand"], paramKeys, rJobs)
-    for dmp_folders, steadyStatePath, key, nr in loopOver:
+    Finds the slices
 
-        collectPaths = mergeFromLinear[key]
-        dmp_folders  = (dmp_folders,)
-        args = (dmp_folders, steadyStatePath, collectPaths)
-        sub.setJobName("fourierModes{}".format(nr))
-        sub.submitFunction(fourierModesPlot, args=args)
-        # Sleep 1.5 seconds to ensure that tmp files will have different names
-        sleep(1.5)
+    Parameters
+    ----------
+    dmp_folders : str
+        Dump folder under investigation
+    """
+    found = False
+    for tkey in tSlices.keys():
+        if tkey in dmp_folders:
+            tSlice = tSlices[tkey]
+            found = True
+            break
+    if not(found):
+        raise ValueError("Could not find correct slice")
+
+    return tSlice
 #}}}
 
-#{{{runFourierModesSliced
-def runFourierModesSliced():
+#{{{runFourierModes
+def runFourierModes(sliced = False):
     """
-    Runs the sliced fourier modes
+    Runs the fourier modes
+
+    Parameters
+    ----------
+    sliced : bool
+        Whether or not to slice the time
     """
 
     loopOver = zip(dmpFolders["turbulence"],\
@@ -43,21 +53,20 @@ def runFourierModesSliced():
                    rJobs)
     for dmp_folders, steadyStatePath, key, nr in loopOver:
 
-        # Find tSlice
-        found = False
-        for tkey in tSlices.keys():
-            if tkey in dmp_folders:
-                tSlice = tSlices[tkey]
-                found = True
-                break
-        if not(found):
-            raise ValueError("Could not find correct slice")
+        if sliced:
+            tSlice = findSlices(dmp_folders)
+            if tSlice is None:
+                continue
 
         collectPaths = mergeFromLinear[key]
         dmp_folders   = (dmp_folders,)
         args = (dmp_folders, collectPaths, steadyStatePath)
-        kwargs = {"tSlice":(tSlice,)}
-        sub.setJobName("fourierModesSliced{}".format(nr))
+        if sliced:
+            kwargs = {"tSlice":(tSlice,)}
+            sub.setJobName("fourierModesSliced{}".format(nr))
+        else:
+            kwargs = {}
+            sub.setJobName("fourierModes{}".format(nr))
         sub.submitFunction(fourierModesPlot, args=args, kwargs=kwargs)
         # Sleep 1.5 seconds to ensure that tmp files will have different names
         sleep(1.5)
@@ -89,6 +98,41 @@ def runGrowthRates():
     sub.submitFunction(growthRatesPlot, args=args)
 #}}}
 
+#{{{runEnergy
+def runEnergy(sliced=False):
+    """
+    Runs the energies
+
+    Parameters
+    ----------
+    sliced : bool
+        Whether or not to slice the time
+    """
+    loopOver = zip(dmpFolders["turbulence"], paramKeys, rJobs)
+    for dmp_folders, key, nr in loopOver:
+
+        if sliced:
+            # Find tSlice
+            tSlice = findSlices(dmp_folders)
+            if tSlice is None:
+                continue
+
+        collectPaths = mergeFromLinear[key]
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths)
+        if sliced:
+            kwargs = {"tSlice":tSlice}
+            sub.setJobName("energySliced{}".format(nr))
+        else:
+            kwargs = {}
+            sub.setJobName("energy{}".format(nr))
+# FIXME
+#        energyPlot(*args, **kwargs)
+        sub.submitFunction(energyPlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
@@ -112,7 +156,7 @@ sub.setWalltime("00:05:00")
 if __name__ == "__main__":
 
     # Run the fourier modes
-    runFourierModes()
+    # runFourierModes(sliced=False)
     # Set linear slices and plot the sliced fourier modes
     tSlices = {\
                "B0_0.02":slice(80,240)  ,\
@@ -121,6 +165,16 @@ if __name__ == "__main__":
                "B0_0.08":slice(100,225) ,\
                "B0_0.1" :slice(80,210)  ,\
                }
-    runFourierModesSliced()
+    # runFourierModesSliced(sliced=True)
     sub.setWalltime("00:10:00")
-    runGrowthRates()
+    # runGrowthRates()
+    sub.setWalltime("00:05:00")
+    # runEnergy(sliced=False)
+    tSlices = {\
+               "B0_0.02":None,\
+               "B0_0.04":None,\
+               "B0_0.06":slice(1200,None),\
+               "B0_0.08":slice(1000,None),\
+               "B0_0.1" :None,\
+               }
+    runEnergy(sliced=True)

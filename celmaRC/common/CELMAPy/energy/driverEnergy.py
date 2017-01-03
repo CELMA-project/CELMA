@@ -1,82 +1,122 @@
 #!/usr/bin/env python
 
 """
-Contains drivers for the probes
+Contains single driver and driver class for the energies
 """
 
-from .statsAndSignalsDriver import StatsAndSignalsDrivers
-from ..statsAndSignals import collectEnergy, PlotEnergy
+from ..superClasses import DriverSuperClass
+from .collectAndCalcEnergy import CollectAndCalcEnergy
+from .plotEnergy import PlotEnergy
 
-FIXME: normFactor for eEnergy
-#{{{DriverEnergy
-class DriverEnergy(CommonPostProcessingDriver):
+#{{{driverEnergy
+def driverEnergy(collectPaths     ,\
+                 convertToPhysical,\
+                 tSlice           ,\
+                 plotSuperKwargs  ,\
+                ):
+    #{{{docstring
     """
-    Class which handles the stats and signal data.
+    Driver for plotting energies.
+
+    Parameters
+    ----------
+    collectPaths : tuple
+        Paths to collect from.
+        The corresponind 't_array' of the paths must be in ascending order.
+    convertToPhysical : bool
+        Whether or not to convert to physical units.
+    tSlice : slice
+        How to slice the time.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
+    """
+    #}}}
+
+    # Create collect object
+    cce = CollectAndCalcEnergy(collectPaths                         ,\
+                               convertToPhysical = convertToPhysical,\
+                               )
+
+    # Set the slice
+    cce.setTSlice(tSlice)
+
+    # Execute the collection
+    e = cce.executeCollectAndCalc()
+
+    # Plot
+    pe = PlotEnergy(cce.uc          ,\
+                    **plotSuperKwargs)
+    pe.setData(e, timeAx = True)
+    pe.plotSaveShowEnergy()
+    pe.setData(e, timeAx = False)
+    pe.plotSaveShowEnergy()
+#}}}
+
+#{{{DriverEnergy
+class DriverEnergy(DriverSuperClass):
+    """
+    Class for driving of the plotting of the time traces.
     """
 
     #{{{Constructor
-    def __init__(self,\
-                 *args,\
-                 paths,\
+    def __init__(self                    ,\
+                 dmp_folders             ,\
+                 tSlice                  ,\
+                 plotSuperKwargs         ,\
+                 convertToPhysical = True,\
                  **kwargs):
         #{{{docstring
         """
         This constructor:
-
-        1. Calls the parent constructor
-        2. Sets path and pltSize
+            * Calls the parent class
+            * Set the member data
+            * Updates the plotSuperKwargs
 
         Parameters
         ----------
-        *args : positional arguments
-            See the parent constructor for details.
-        paths  : tuple of strings
-            The paths to collect from
+        dmp_folders : tuple
+            Tuple of the dmp_folder (output from bout_runners).
+        plotSuperKwargs : dict
+            Keyword arguments for the plot super class.
+        tSlice : slice
+            How to slice the time.
+        convertToPhysical : bool
+            Whether or not to convert to physical units.
         **kwargs : keyword arguments
-            See the parent constructor for details.
+            See parent class for details.
         """
         #}}}
 
         # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
+        super().__init__(dmp_folders, **kwargs)
 
-        # Set member data
-        self._paths   = paths
-        self._pltSize = (12, 9)
+        # Set the member data
+        self.convertToPhysical = convertToPhysical
+        self._tSlice = tSlice
 
-        # Placeholder for the energy
-        self._energy = None
+        # Update the plotSuperKwargs dict
+        plotSuperKwargs.update({"dmp_folders":dmp_folders})
+        plotSuperKwargs.update({"plotType"   :"energies"})
+        self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{getEnergies
-    def getEnergies(self):
-        """Obtain the energies"""
-        # Create the probes
-        self._energy = calcEnergy(self._paths)
-    #}}}
-
-    #{{{plotEnergy
-    def plotEnergy(self):
-        """ Plot the energy """
-
-        # Calculate the probes if not already done
-        if self._energy == None:
-            self.getEnergies()
-
-        # Create the energyPlotter
-        energyPlotter = PlotEnergy(\
-                self._paths                                ,\
-                self._energy                               ,\
-                convertToPhysical = self.convertToPhysical,\
-                showPlot          = self._showPlot         ,\
-                savePlot          = self._savePlot         ,\
-                extension         = self._extension        ,\
-                savePath          = self._savePath         ,\
-                pltSize           = self._pltSize          ,\
-                                  )
-
-        energyPlotter.plotKinEnergy("ions")
-        energyPlotter.plotKinEnergy("electrons")
-        energyPlotter.plotPotEnergy()
+    #{{{driverEnergy
+    def driverEnergy(self):
+        #{{{docstring
+        """
+        Wrapper to driverEnergy
+        """
+        #}}}
+        args =  (\
+                 self._collectPaths    ,\
+                 self.convertToPhysical,\
+                 self._tSlice          ,\
+                 self._plotSuperKwargs ,\
+                )
+        if self._useSubProcess:
+            processes = Process(target = driverEnergy, args = args)
+            processes.start()
+        else:
+            driverEnergy(*args)
     #}}}
 #}}}
