@@ -62,6 +62,7 @@ def driverTimeTrace(collectPaths     ,\
     tt = cctt.executeCollectAndCalc()
     tt = cctt.convertTo1D(tt)
 
+    import pdb; pdb.set_trace()
     # Plot
     ptt = PlotTimeTrace(cctt.uc         ,\
                         **plotSuperKwargs)
