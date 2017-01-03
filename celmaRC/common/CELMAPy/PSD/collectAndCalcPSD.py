@@ -1,24 +1,17 @@
 #!/usr/bin/env python
 
 """
-Contains the PSD calculation
+Contains class for collecting and calculating the power spectral density
+function of time traces.
 """
 
-from ..timeTrace import calcTimeTrace
+from ..timeTrace import CollectAndCalcTimeTrace
 from scipy.signal import periodogram
 
-#{{{calcPSD
-def calcPSD(paths                      ,\
-            varName                    ,\
-            xInd                       ,\
-            yInd                       ,\
-            zInd                       ,\
-            convertToPhysical = True   ,\
-            mode              = "fluct",\
-            tSlice            = None):
-    #{{{docstring
+#{{{CollectAndCalcPSD
+class CollectAndCalcPSD(CollectAndCalcTimeTrace):
     """
-    Function which calculates the power spectral density.
+    Class for collecting and calcuating PSD of the time traces
 
     Power spectral density
     ----------------------
@@ -35,70 +28,84 @@ def calcPSD(paths                      ,\
           transformed of the cross correlation function
         * The periodogram estimate is the same as autocorrelation with a
           triangular window
-
-    Parameters
-    ----------
-    paths : tuple of strings
-        The paths to collect from
-    varName : str
-        Variable to collect
-    xInd : tuple of ints
-        A tuple of the xInds to collect use when collecting.
-    yInd : tuple of ints
-        The same as xInd, but for the y-index.
-    zInd : tuple of ints
-        The same as xInd, but for the z-index.
-    convertToPhysical : bool
-        Whether or not to convert to physical units.
-    mode : ["normal"|"fluct"]
-        If mode is "normal" the raw data is used.
-        If mode is "fluct" the fluctuations are used.
-    tSlice : [None|Slice}
-        Whether or not to slice the time trace
-
-    Returns
-    -------
-    PSD : dict
-        Dictionary where the keys are on the form "rho,theta,z".
-        The value is a dict containing of
-        {varPSDX:psdX, varPSDY:psdY}
     """
+
+    #{{{constructor
+    def __init__(self            ,\
+                 *args           ,\
+                 **kwargs):
+        #{{{docstring
+        """
+        This constructor will:
+            * Call the parent constructor
+
+        Parameters
+        ----------
+        *args : positional arguments
+            See parent constructor for details.
+        *kwargs : keyword arguments
+            See parent constructor for details.
+        """
+        #}}}
+
+        # Call the constructor of the parent class
+        super().__init__(*args, **kwargs)
     #}}}
 
-    # Call the time calcTimeTrace function in order to get a time trace
-    timeTraces =\
-        calcTimeTrace(paths                                ,\
-                      varName                              ,\
-                      xInd                                 ,\
-                      yInd                                 ,\
-                      zInd                                 ,\
-                      convertToPhysical = convertToPhysical,\
-                      mode              = mode             ,\
-                      tSlice            = tSlice           ,\
-                      )
+    @staticmethod
+    #{{{calcPSD
+    def calcPSD(timeTraces):
+        #{{{docstring
+        """
+        Function which calculates the probability density function.
 
-    # Initialize the output
-    PSD = {}
+        Parameters
+        ----------
+        timeTraces : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varName:timeTrace, "time":time}.
+            And additional key "zInd" will be given in addition to varName
+            and "time" if mode is set to "fluct".
+            The timeTrace is a 1d array.
 
-    # Make the keys
-    xKey = "{}PSDX".format(varName)
-    yKey = "{}PSDY".format(varName)
+        Returns
+        -------
+        PSD : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varPSDX:pdfX, varPSDY:pdfY}
+        """
+        #}}}
 
-    # Obtain the PSD
-    for key in timeTraces.keys():
-        # Initialize the PSD
-        PSD[key] = {}
+        # Initialize the output
+        PSD = {}
 
-        # Sampling frequency
-        fs = 1/(timeTraces[key]["time"][1] - timeTraces[key]["time"][0])
+        # Obtain the varName
+        ind  = tuple(timeTraces.keys())[0]
+        keys = timeTraces[ind].keys()
+        varName = tuple(var for var in keys if var != "time")[0]
 
-        # window = None => window = "boxcar"
-        # scaling = density gives the correct units
-        PSD[key][xKey], PSD[key][yKey] =\
-            periodogram(timeTraces[key][varName],\
-                        fs=fs, window=None, scaling="density")
+        # Make the keys
+        xKey = "{}PSDX".format(varName)
+        yKey = "{}PSDY".format(varName)
 
-    # NOTE: If timeTraces was converted to physical units, then PSD is
-    #       in physical units as well
-    return PSD
+        # Obtain the PSD
+        for key in timeTraces.keys():
+            # Initialize the PSD
+            PSD[key] = {}
+
+            # Sampling frequency
+            fs = 1/(timeTraces[key]["time"][1] - timeTraces[key]["time"][0])
+
+            # window = None => window = "boxcar"
+            # scaling = density gives the correct units
+            PSD[key][xKey], PSD[key][yKey] =\
+                periodogram(timeTraces[key][varName],\
+                            fs=fs, window=None, scaling="density")
+
+        # NOTE: If timeTraces was converted to physical units, then PSD is
+        #       in physical units as well
+        return PSD
+    #}}}
 #}}}
