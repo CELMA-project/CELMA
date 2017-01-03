@@ -23,7 +23,7 @@ def PDFTest():
        )
 
     varName           = "n"
-    convertToPhysical = True
+    convertToPhysical = False
     mode              = "fluct"
 
     xInd              = 16
