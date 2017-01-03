@@ -40,11 +40,11 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             * "radial"    - Radial profiles will be used
             * "parallel"  - Parallel profiles will be used
         processing : [None|str]
-            * None                 - Raw data will be used
-            * "polAvg"             - <var>_theta will be used
-            * "polAndTimeAvg"      - <<var>_theta>_t will be used
-            * "polAvgFluct"        - var - <var>_theta will be used
-            * "polAndTimeAvgFluct" - var - <<var>_theta>_t will be used
+            * None                  - Raw data will be used
+            * "polAvg"              - <var>_theta will be used
+            * "polAndTimeAvg"       - <<var>_theta>_t will be used
+            * "polAvgFluct"         - var - <var>_theta will be used
+            * "polAndTimeAvgFluct"  - var - <<var>_theta>_t will be used
         *kwargs : keyword arguments
             See parent constructor for details.
         """
@@ -143,7 +143,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
         if "radial" in self._mode:
             field1D[self._varName] = var[:, :, 0, 0]
-            field1D["zPos"]     = self._dh.z       [yInd[0]]
+            field1D["zPos"]     = self._dh.z        [yInd[0]]
             field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
 
         return field1D
@@ -205,7 +205,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         if self._processing is not None:
             if "pol" in self._processing:
                 polAvgVar = polAvg(var)
-                if "time" in self._processing.lower():
+                if "time" in self._processing:
                     polAvgTimeAvgVar, timeAvgTime = timeAvg(polAvgVar, t=time)
             if self._processing == "polAvg":
                 var = polAvg
