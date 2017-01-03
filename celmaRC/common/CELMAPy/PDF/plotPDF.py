@@ -77,20 +77,20 @@ class PlotPDF(PlotSuperClass):
         # If not(self.uc.convertToPhysical) we need to manually modify
         # the normalization argument
         unitsOrNormDict = self.uc.conversionDict[self._varName]
-        if not(self.uc.convertToPhysical):
-            if r"/" in unitsOrNormDict["normalization"]:
-                if unitsOrNormDict["normalization"][0] == r"/":
-                    unitsOrNormDict["normalization"] =\
-                        unitsOrNormDict["normalization"][1:]
-                else:
-                    # Swap the nominator and denominator
-                    tmp = unitsOrNormDict["normalization"].split(r"/")
-                    unitsOrNormDict["normalization"] =\
-                            r"/".join((tmp[1],tmp[0]))
-            else:
-                # Add division sign
-                unitsOrNormDict["normalization"] =\
-                        r"/"+unitsOrNormDict["normalization"]
+#        if not(self.uc.convertToPhysical):
+#            if r"/" in unitsOrNormDict["normalization"]:
+#                if unitsOrNormDict["normalization"][0] == r"/":
+#                    unitsOrNormDict["normalization"] =\
+#                        unitsOrNormDict["normalization"][1:]
+#                else:
+#                    # Swap the nominator and denominator
+#                    tmp = unitsOrNormDict["normalization"].split(r"/")
+#                    unitsOrNormDict["normalization"] =\
+#                            r"/".join((tmp[1],tmp[0]))
+#            else:
+#                # Add division sign
+#                unitsOrNormDict["normalization"] =\
+#                        r"/"+unitsOrNormDict["normalization"]
 
         self._varLabel = self._varLabelTemplate.\
             format(pltVarName, **self.uc.conversionDict[self._varName])
@@ -120,30 +120,42 @@ class PlotPDF(PlotSuperClass):
         #       the PDF.
         #       Thus will the PDF have the dimension of the inverse of
         #       what is on the x axis
-        if self.uc.convertToPhysical:
-            unitsOrNormalization       = " $[1/{units}]$"
-            xLabelunitsOrNormalization = " $[{units}]$"
-        else:
-            unitsOrNormalization       = "${normalization}$"
-            # NOTE: this will be treated at a later stage
-            xLabelunitsOrNormalization = "${normalization}$"
+        pdfStr = r"\mathrm{{PDF}}("
+
+        # Get normalOrFluct
         if self._mode == "normal":
-            self._varLabelTemplate =\
-                r"$\mathrm{{{{PDF}}}}({{}})${}".format(unitsOrNormalization)
-            self._xLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
+            normalOrFluct = r"{{}}"
             self._fluctName = ""
         elif self._mode == "fluct":
-            self._varLabelTemplate =\
-                r"$\mathrm{{{{PDF}}}}(\widetilde{{{{{{}}}}}})${}".\
-                format(unitsOrNormalization)
-            self._xLabelTemplate = r"$\widetilde{{{{{{}}}}}}${}".\
-                               format(xLabelunitsOrNormalization)
+            normalOrFluct = r"\widetilde{{{}}}"
             self._fluctName = "fluct"
         else:
-            message = "'{}'-mode not implemented.".format(mode)
+            message = "'{}'-mode not implemented.".format(self._mode)
             raise NotImplementedError(message)
-    #}}}
 
+        # Distinc between normalized and non-normalized
+        if self.uc.convertToPhysical:
+            unitsOrNormalization       = "[1/{units}]"
+            xLabelunitsOrNormalization = "[{units}]"
+            self._varLabelTemplate = r"$"+\
+                                     pdfStr +\
+                                     normalOrFluct +\
+                                     r")$" +\
+                                     r" $" + unitsOrNormalization + r"$"
+        else:
+            unitsOrNormalization       = "{normalization}"
+#            # NOTE: this will be treated at a later stage
+            xLabelunitsOrNormalization = "{normalization}"
+            self._varLabelTemplate = r"$"+\
+                                     pdfStr +\
+                                     normalOrFluct +\
+                                     unitsOrNormalization +\
+                                     r")$"
+
+        # Set the x-label
+        self._xLabelTemplate = r"$" + normalOrFluct + r"$" +\
+               r" $" + xLabelunitsOrNormalization + r"$"
+    #}}}
     #{{{plotSaveShowPDF
     def plotSaveShowPDF(self):
         """ Plots the probability density function."""
@@ -181,6 +193,9 @@ class PlotPDF(PlotSuperClass):
                     self._PDF[key]["{}PDFY".format(self._varName)],\
                     color=color,\
                     label=label)
+
+        # Use logarithmic scale
+        ax.set_yscale("log")
 
         # Set axis labels
         ax.set_xlabel(self._xLabel)
