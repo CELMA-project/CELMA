@@ -3,7 +3,7 @@
 """Class for PSD plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap3
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 import matplotlib.pyplot as plt
@@ -175,24 +175,22 @@ class PlotPSD(PlotSuperClass):
 
         # Set the z limits
         if self._plotLimits["zlim"] is None:
-            theMin = np.min(self._PSD["freqPosMatrix"])
-            theMax = np.max(self._PSD["freqPosMatrix"])
+            vMin = np.min(self._PSD["freqPosMatrix"])
+            vMax = np.max(self._PSD["freqPosMatrix"])
         else:
-            theMin = self._plotLimits["zlim"][0]
-            theMax = self._plotLimits["zlim"][1]
+            vMin = self._plotLimits["zlim"][0]
+            vMax = self._plotLimits["zlim"][1]
 
-        levels = np.linspace(theMin        ,\
-                             theMax        ,\
-                             nCont         ,\
-                             endpoint = True)
+        levels = np.linspace(vMin, vMax, nCont, endpoint = True)
 
         # Make the contourf keyword arguments
         self._cfKwargs = {\
-                          "vmax"   : theMin  ,\
-                          "vmin"   : theMax  ,\
-                          "levels" : levels  ,\
-                          "cmap"   : seqCMap3,\
-                          "zorder" : -20     ,\
+                          "vmax"   : vMax   ,\
+                          "vmin"   : vMin   ,\
+                          "levels" : levels ,\
+                          "cmap"   : seqCMap,\
+                          "extend" : "min"  ,\
+                          "zorder" : -20    ,\
                          }
 
         self._prepareLabels()
@@ -312,24 +310,30 @@ class PlotPSD(PlotSuperClass):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-# FIXME: Check if this is needed
-#        # Clip the very first point as this is very low
-#        xVals = self._PSD[key]["{}PSDX".format(self._varName)][1:]
-#        yVals = np.log10(       self._PSD[key]["{}PSDY".format(self._varName)][1:]/\
-#                         np.max(self._PSD[key]["{}PSDY".format(self._varName)][1:]))
-
-# FIXME: Set limits
         #Plot
         CP = ax.contourf(\
             self._PSD["RHO"], self._PSD["FREQ"], self._PSD["freqPosMatrix"],\
             **self._cfKwargs)
 
+        if self._plotLimits["xlim"] is not None:
+            ax.set_xlim(self._plotLimits["xlim"])
+        if self._plotLimits["ylim"] is not None:
+            ax.set_ylim(self._plotLimits["ylim"])
+
         cbar = fig.colorbar(CP, format = FuncFormatter(plotNumberFormatter))
-        cbar.set_ylabel(self._varLabel)
+        cbar.set_label(self._varLabel)
+        # Out of range
+        CP.set_clim(*self._plotLimits["zlim"])
+        CP.cmap.set_under("k")
+
+        # Set rasterization order
+        ax.set_rasterization_zorder(-10)
 
         # Set axis labels
         ax.set_xlabel(self._rhoLabel)
         ax.set_ylabel(self._freqLabel)
+
+        ax.set_title(self._title)
 
         # Make the plot look nice
         self._ph.makePlotPretty(ax,\
@@ -343,7 +347,7 @@ class PlotPSD(PlotSuperClass):
 
         if self._savePlot:
             fileName = "{}.{}".\
-                format(os.path.join(self._savePath, "PSD"),\
+                format(os.path.join(self._savePath, "PSD2D"),\
                        self._extension)
             self._ph.savePlot(fig, fileName)
 

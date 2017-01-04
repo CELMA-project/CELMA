@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for the position of the fluctuation"""
+"""Post-processor for the position of the radial profile"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -14,7 +14,7 @@ from CELMAPy.radialProfile import DriverRadialProfile
 def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     #{{{docstring
     """
-    Runs the standard energy plot
+    Runs the standard position of the radial profile plot
 
     Parameters
     ----------
