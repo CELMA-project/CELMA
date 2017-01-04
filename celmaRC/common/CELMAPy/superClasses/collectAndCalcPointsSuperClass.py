@@ -102,6 +102,14 @@ class CollectAndCalcPointsSuperClass(CollectAndCalcSuperClass):
 
             equallySpace = "x"
 
+        # Set xInd if an iterable exists
+        if hasattr(xInd, "__iter__"):
+            nPoints = len(xInd)
+        elif hasattr(yInd, "__iter__"):
+            nPoints = len(yInd)
+        elif hasattr(zInd, "__iter__"):
+            nPoints = len(zInd)
+
         # Guard
         if (type(xInd) == int) or (type(yInd) == int) or (type(zInd) == int):
             if type(nPoints) != int:

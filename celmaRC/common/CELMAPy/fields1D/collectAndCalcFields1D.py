@@ -48,7 +48,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             * "polAndTimeAvgFluct" - var - <<var>_theta>_t will be used
         return2d : bool
             Whether or not the variable should be returned as a
-            2d-array (if True) or 4d-array (if False)
+            2d-array (if True) or 4d-array (if False).
         *kwargs : keyword arguments
             See parent constructor for details.
         """
@@ -144,15 +144,20 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         field1D["X"   ] = X
         field1D["time"] = time
 
-        if self._return2d:
-            if "parallel" in self._mode:
+        if "parallel" in self._mode:
+            if self._return2d:
                 field1D[self._varName] = var[:, 0, :, 0]
-                field1D["rhoPos"]   = self._dh.rho      [xInd[0]]
-                field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
-            if "radial" in self._mode:
+            else:
+                field1D[self._varName] = var
+            field1D["rhoPos"]   = self._dh.rho      [xInd[0]]
+            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+        if "radial" in self._mode:
+            if self._return2d:
                 field1D[self._varName] = var[:, :, 0, 0]
-                field1D["zPos"]     = self._dh.z       [yInd[0]]
-                field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+            else:
+                field1D[self._varName] = var
+            field1D["zPos"]     = self._dh.z       [yInd[0]]
+            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
 
         return field1D
     #}}}
@@ -187,13 +192,13 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             if "pol" in self._processing:
                 collectKwargs.pop("zInd")
 
-         if not(self._return2d):
+        if not(self._return2d):
              if "zInd" in collectKwargs.keys():
                 collectKwargs.pop("zInd")
 
         # Collect
         if self._mode == "parallel":
-            if not(self._processing):
+            if not(self._processing) and self._return2d:
                 var = collectParallelProfile(self._collectPaths,\
                                              self._varName     ,\
                                              **collectKwargs)
@@ -202,7 +207,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
                                       self._varName     ,\
                                       **collectKwargs)
         elif self._mode == "radial":
-            if not(self._processing):
+            if not(self._processing) and self._return2d:
                 var = collectRadialProfile(self._collectPaths,\
                                            self._varName     ,\
                                            **collectKwargs)

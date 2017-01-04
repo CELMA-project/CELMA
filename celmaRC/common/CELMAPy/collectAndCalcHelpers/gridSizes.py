@@ -10,7 +10,7 @@ import os
 def getSizes(path, coordinate, varName="lnN", includeGhost=False):
     #{{{docstring
     """
-    Fastest way to obtain coordinate sizes excluding ghost points
+    Fastest way to obtain coordinate sizes.
 
     Parameters
     ----------
