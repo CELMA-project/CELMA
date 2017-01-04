@@ -12,7 +12,10 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
-from standardPlots import fourierModesPlot, growthRatesPlot, energyPlot
+from standardPlots import (fourierModesPlot,\
+                           growthRatesPlot,\
+                           energyPlot,\
+                           posOfFluctPlot)
 
 #{{{findSlices
 def findSlices(dmp_folders):
@@ -126,9 +129,34 @@ def runEnergy(sliced=False):
         else:
             kwargs = {}
             sub.setJobName("energy{}".format(nr))
-# FIXME
-#        energyPlot(*args, **kwargs)
         sub.submitFunction(energyPlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
+#{{{runPosOfFluct
+def runPosOfFluct():
+    """
+    Runs the position of fluct
+    """
+
+    loopOver = zip(dmpFolders["turbulence"],\
+                   dmpFolders["expand"],\
+                   paramKeys,\
+                   rJobs)
+    for dmp_folders, steadyStatePath, key, nr in loopOver:
+
+        # Find tSlice
+        tSlice = findSlices(dmp_folders)
+        if tSlice is None:
+            continue
+
+        collectPaths = mergeFromLinear[key]
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths, steadyStatePath)
+        kwargs = {"tSlice":tSlice}
+        sub.setJobName("posOfFluctSliced{}".format(nr))
+        sub.submitFunction(posOfFluctPlot, args=args, kwargs=kwargs)
         # Sleep 1.5 seconds to ensure that tmp files will have different names
         sleep(1.5)
 #}}}
@@ -177,4 +205,6 @@ if __name__ == "__main__":
                "B0_0.08":slice(1000,None),\
                "B0_0.1" :None,\
                }
-    runEnergy(sliced=True)
+    # runEnergy(sliced=True)
+    sub.setWalltime("00:10:00")
+    runPosOfFluct()
