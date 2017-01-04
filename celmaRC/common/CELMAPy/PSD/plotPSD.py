@@ -4,6 +4,7 @@
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap3
+from matplotlib.ticker import FuncFormatter
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -40,7 +41,7 @@ class PlotPSD(PlotSuperClass):
     def setData(self, PSD, mode):
         #{{{docstring
         """
-        Sets the time traces to be plotted.
+        Sets the PSD to be plotted.
 
         This function also sets the variable labels, colors and the save name.
 
@@ -119,7 +120,7 @@ class PlotPSD(PlotSuperClass):
                                      normalOrFluct +\
                                      r")$" +\
                                      r" $" + units + r"$"
-            self._xLabel         = r"$1/t$ $[Hz]$"
+            self._freqLabel         = r"$1/t$ $[Hz]$"
         else:
             self._varLabelTemplate = r"$"+\
                                      psdStr +\
@@ -127,7 +128,110 @@ class PlotPSD(PlotSuperClass):
                                      "{normalization}" +\
                                      r")$" +\
                                      r" $" + units + r"$"
-            self._xLabel         = r"$1/t \omega_{ci}$"
+            self._freqLabel         = r"$1/t \omega_{ci}$"
+    #}}}
+
+    #{{{setData2D
+    def setData2D(self, PSD, mode, plotLimits):
+        #{{{docstring
+        """
+        Sets the PSD to be plotted.
+
+        This function also sets:
+            * The variable labels
+            * The colors
+            * The contourplot keyword arguments
+            * The save name
+
+        Parameters
+        ----------
+        PSD : dict
+            Dictionary with the keys
+                * freqPosMatrix - array-2d on with dimension (rho, freq)
+                * thetaPos      - integer with the fixed theta position
+                * zPos          - integer with the fixed z position
+                * FREQ          - meshgrid with the frequencies
+                * RHO           - meshgrid with the rho coordinate
+                * varName       - the variabel name
+        mode : ["normal"|"fluct"]
+            What mode the input is given in.
+        plotLimits : dict
+            Dictionary on the form
+            {"xlim":(min,max), "ylim":(min,max), "zlim":(min,max)}
+            The dictionary values may be None rather than a tuple.
+        """
+        #}}}
+
+        # Magic number
+        nCont = 100
+
+        # Set the member data
+        self._PSD        = PSD
+        self._mode       = mode
+        self._plotLimits = plotLimits
+
+        # Obtain the varname
+        self._varName = self._PSD.pop("varName")
+
+        # Set the z limits
+        if self._plotLimits["zlim"] is None:
+            theMin = np.min(self._PSD["freqPosMatrix"])
+            theMax = np.max(self._PSD["freqPosMatrix"])
+        else:
+            theMin = self._plotLimits["zlim"][0]
+            theMax = self._plotLimits["zlim"][1]
+
+        levels = np.linspace(theMin        ,\
+                             theMax        ,\
+                             nCont         ,\
+                             endpoint = True)
+
+        # Make the contourf keyword arguments
+        self._cfKwargs = {\
+                          "vmax"   : theMin  ,\
+                          "vmin"   : theMax  ,\
+                          "levels" : levels  ,\
+                          "cmap"   : seqCMap3,\
+                          "zorder" : -20     ,\
+                         }
+
+        self._prepareLabels()
+
+        # Set the labels
+        pltVarName = self._ph.getVarPltName(self._varName)
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        # Set the x-axis label
+        self._rhoLabel = self._ph.rhoTxtDict["rhoTxtLabel"]
+
+        # Set the title
+        # Set values
+        z     = self._PSD.pop("zPos")
+        theta = self._PSD.pop("thetaPos")
+        self._ph.zTxtDict    ["value"] =\
+                plotNumberFormatter(float(z), None)
+        self._ph.thetaTxtDict["value"] =\
+                plotNumberFormatter(float(theta), None)
+
+        # Make the const values
+        self._title = (r"{}$,$ {}").\
+                        format(\
+                            self._ph.thetaTxtDict["constThetaTxt"].\
+                                format(self._ph.thetaTxtDict),\
+                            self._ph.zTxtDict["constZTxt"].\
+                                format(self._ph.zTxtDict),\
+                              )
+
+        # Set the fileName
+        self._fileName =\
+            os.path.join(self._savePath,\
+                "{}-{}-{}".format(self._varName, "PSD2D", self._fluctName))
+
+        if self._extension is None:
+            self._extension = "png"
+
+        self._fileName = "{}.{}".format(self._fileName, self._extension)
     #}}}
 
     #{{{plotSaveShowPSD
@@ -180,11 +284,59 @@ class PlotPSD(PlotSuperClass):
         ax.set_xscale("log")
 
         # Set axis labels
-        ax.set_xlabel(self._xLabel)
+        ax.set_xlabel(self._freqLabel)
         ax.set_ylabel(self._varLabel)
 
         # Make the plot look nice
         self._ph.makePlotPretty(ax, rotation = 45)
+
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            fileName = "{}.{}".\
+                format(os.path.join(self._savePath, "PSD"),\
+                       self._extension)
+            self._ph.savePlot(fig, fileName)
+
+        plt.close(fig)
+    #}}}
+
+    #{{{plotSaveShowPSD2D
+    def plotSaveShowPSD2D(self):
+        """
+        Plots the probability density function as a countourplot.
+        """
+
+        # Create the plot
+        fig = plt.figure(figsize = self._pltSize)
+        ax  = fig.add_subplot(111)
+
+# FIXME: Check if this is needed
+#        # Clip the very first point as this is very low
+#        xVals = self._PSD[key]["{}PSDX".format(self._varName)][1:]
+#        yVals = np.log10(       self._PSD[key]["{}PSDY".format(self._varName)][1:]/\
+#                         np.max(self._PSD[key]["{}PSDY".format(self._varName)][1:]))
+
+# FIXME: Set limits
+        #Plot
+        CP = ax.contourf(\
+            self._PSD["RHO"], self._PSD["FREQ"], self._PSD["freqPosMatrix"],\
+            **self._cfKwargs)
+
+        cbar = fig.colorbar(CP, format = FuncFormatter(plotNumberFormatter))
+        cbar.set_ylabel(self._varLabel)
+
+        # Set axis labels
+        ax.set_xlabel(self._rhoLabel)
+        ax.set_ylabel(self._freqLabel)
+
+        # Make the plot look nice
+        self._ph.makePlotPretty(ax,\
+                                xprune   = "both",\
+                                yprune   = "both",\
+                                legend   = False ,\
+                                rotation = 45)
 
         if self._showPlot:
             plt.show()
