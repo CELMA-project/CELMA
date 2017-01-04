@@ -5,3 +5,4 @@
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
+from .posOfFluct import posOfFluctPlot
