@@ -152,16 +152,18 @@ def driverPSD2D(collectPaths     ,\
         rho[nr] = float(keys[nr].split(",")[0])
 
     # Make the frequency axis
-    freq = PSD[keys[0]]["{}PSDX".format(varName)]
+    # Throw away first index (this usually causes trouble)
+    freq = PSD[keys[0]]["{}PSDX".format(varName)][1:]
 
-    RHO, FREQ = np.meshgrid(rho, freq)
+    FREQ, RHO = np.meshgrid(freq, rho)
     # Make the 2D PSD matrix
     PSDMat = np.zeros((len(PSD[keys[0]]["{}PSDY".format(varName)]) ,len(keys)))
     for xInd in range(len(rho)):
         PSDMat[:, xInd] = PSD[keys[xInd]]["{}PSDY".format(varName)]
 
     # Transpose matrix in order to get it on (rho, freq)
-    PSDMat = PSDMat.transpose()
+    # Throw away first freq (this usually causes trouble)
+    PSDMat = PSDMat.transpose()[:, 1:]
 
     # Convert to dB
     PSDMat = np.log10(PSDMat/np.max(PSDMat))
@@ -241,6 +243,7 @@ class DriverPSD(DriverPointsSuperClass):
         self._mode          = mode
         self._indicesArgs   = indicesArgs
         self._indicesKwargs = indicesKwargs
+        self._plotLimits    = plotLimits
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -269,5 +272,29 @@ class DriverPSD(DriverPointsSuperClass):
             processes.start()
         else:
             driverPSD(*args)
+    #}}}
+
+    #{{{driverPSD2D
+    def driverPSD2D(self):
+        #{{{docstring
+        """
+        Wrapper to driverPSD2D
+        """
+        #}}}
+        args =  (\
+                 self._collectPaths    ,\
+                 self._varName         ,\
+                 self.convertToPhysical,\
+                 self._mode            ,\
+                 self._indicesArgs     ,\
+                 self._indicesKwargs   ,\
+                 self._plotLimits      ,\
+                 self._plotSuperKwargs ,\
+                )
+        if self._useSubProcess:
+            processes = Process(target = driverPSD2D, args = args)
+            processes.start()
+        else:
+            driverPSD2D(*args)
     #}}}
 #}}}

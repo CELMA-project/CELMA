@@ -13,13 +13,12 @@ from CELMAPy.PSD import DriverPSD, driverPSD2D
 #{{{PSD2DTest
 def PSD2DTest():
     """
-    Runs the test for the power spectral density
+    Runs the test for the 2D power spectral density
     """
 
     collectPaths =\
        (\
-        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
-        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
        )
 
     varName           = "n"
@@ -33,7 +32,11 @@ def PSD2DTest():
     indicesArgs   = (None, yInd, zInd)
     indicesKwargs = {"tSlice" : tSlice}
 
-    savePath          = "."
+    savePath = "."
+
+    plotLimits = {"xlim":None,\
+                  "ylim":None,\
+                  "zlim":None}
 
     plotSuperKwargs = {\
                         "showPlot"     : False,\
@@ -51,23 +54,22 @@ def PSD2DTest():
                 mode             ,\
                 indicesArgs      ,\
                 indicesKwargs    ,\
+                plotLimits       ,\
                 plotSuperKwargs  ,\
                )
-
     print("Success!\n\n")
 #}}}
 
 #{{{driverTest
 def driverTest():
     """
-    Runs the test for the power spectral density
+    Runs the test for the 2D power spectral density
     """
 
-    dmp_folders  = ("CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1",)
+    dmp_folders  = ("CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1",)
     collectPaths =\
        (\
-        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
-        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
        )
 
     useSubProcess = False
@@ -76,21 +78,16 @@ def driverTest():
     convertToPhysical = True
     mode              = "fluct"
 
-    xInd              = None
     yInd              = 16
-    zInd              = 128
+    zInd              = 0
     tSlice            = None
-    nPoints           = 3
-    equallySpace      = "x"
 
-    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
+    indicesArgs   = (None, yInd, zInd)
+    indicesKwargs = {"tSlice" : tSlice}
 
-    indicesArgs   = (xInd, yInd, zInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
-                     "nPoints"         : nPoints        ,\
-                     "equallySpace"    : equallySpace   ,\
-                     "steadyStatePath" : steadyStatePath,\
-                     }
+    plotLimits = {"xlim":None      ,\
+                  "ylim":(100, 3e4),\
+                  "zlim":(-7,0)}
 
     plotSuperKwargs = {\
                         "showPlot"     : False,\
@@ -104,19 +101,20 @@ def driverTest():
     print("\n\nTesting probability density function driver")
     dPSD = DriverPSD(
                      # DriverPSDs
-                     dmp_folders                ,\
-                     indicesArgs                ,\
-                     indicesKwargs              ,\
-                     plotSuperKwargs            ,\
-                     varName           = varName,\
-                     mode              = mode   ,\
+                     dmp_folders                   ,\
+                     indicesArgs                   ,\
+                     indicesKwargs                 ,\
+                     plotSuperKwargs               ,\
+                     varName           = varName   ,\
+                     mode              = mode      ,\
+                     plotLimits        = plotLimits,\
                      # DriverPointsSuperClass
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dPSD.driverPSD()
+    dPSD.driverPSD2D()
     print("Success!\n\n")
 #}}}
 
