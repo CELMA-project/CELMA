@@ -2,5 +2,8 @@
 
 """ Init-file for radialProfile """
 
-from .driverRadialProfile import driverProfAndGradCompare
 from .collectAndCalcRadialProfile import CollectAndCalcRadialProfile
+from .driverRadialProfile import (DriverRadialProfile,\
+                                  driverProfAndGradCompare,\
+                                  driverPosOfFluct)
+from .plotRadialProfile import PlotProfAndGradCompare

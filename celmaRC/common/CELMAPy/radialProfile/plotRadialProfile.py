@@ -4,8 +4,10 @@
 Contains functions for animating the 1D fields
 """
 
-from ..superClasses import PlotAnim1DSuperClass
-from ..plotHelpers import plotNumberFormatter
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap3
+import matplotlib.pylab as plt
+import numpy as np
 import os
 
 #{{{PlotProfAndGradCompare
@@ -16,7 +18,7 @@ class PlotProfAndGradCompare(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, pltSize = (10,16), **kwargs):
         #{{{docstring
         """
         Constructor for PlotProfAndGradCompare
@@ -58,12 +60,12 @@ class PlotProfAndGradCompare(PlotSuperClass):
                 * varName      - Name of the variable under investigation
                 * steadyVar    - The profile in the last steady state
                                  time point
-                * avgVar       - The averaged profile
-                * avgVarStd    - The standard deviation of the average
+                * varAvg       - The averaged profile
+                * varAvgStd    - The standard deviation of the average
                 * DDXSteadyVar - The radial derivative of the steady
                                  state path
-                * DDXAvgVar    - The radial derivative of the average
-                * DDXAvgVarStd - The standard deviation of the radial
+                * DDXVarAvg    - The radial derivative of the average
+                * DDXVarAvgStd - The standard deviation of the radial
                                  derivative of the average
                 * X            - The radial coordinate
                 * zPos         - The fixed z position
@@ -76,38 +78,44 @@ class PlotProfAndGradCompare(PlotSuperClass):
         self._zPos     = profGrad.pop("zPos")
         self._profGrad = profGrad
 
-# FIXME: Better colors
         # Obtain the color (pad away brigthest colors)
-        pad = 3
+        pad = 1
         self._colors = seqCMap3(np.linspace(0, 1, 2+pad))
+        self._lines  = ("-", "-.")
 
         # Prepare the labels
         self._prepareLabels()
 
+        # Set the labels
+        pltVarName    = self._ph.getVarPltName(self._varName)
+        DDXPltVarName = r"\partial_\rho " + pltVarName
 
+        self._profileLabel =\
+                self._profileLabelTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._gradLabel =\
+                self._gradLabelTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._gradAvgLabel =\
+                self._avgLabelTemplate.\
+                format(DDXPltVarName, **self.uc.conversionDict[self._varName])
 
-
-
-
-        # Set the var label
-        pltVarName = self._ph.getVarPltName(self._varName)
-
-
-
-
-
-        self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self.uc.conversionDict[self._varName])
+        # Set the legends
+        self._varAvgLegend =\
+                self._avgLabelTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._varGradLegend =\
+                self._varGradLegendTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._steadyStateLegend =\
+                self._steadyStateLegendTemplate.format(pltVarName)
+        self._steadyStateGradLegend =\
+                self._steadyStateLegendTemplate.format(DDXPltVarName)
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}-{}".format(self._varName, "timeTraces", self._fluctName))
-
-        if not(timeAx):
-            self._fileName += "Indices"
-        if (self._sliced):
-            self._fileName += "Sliced"
+                "{}-{}".format(self._varName, "profAndGradCompare"))
 
         if self._extension is None:
             self._extension = "png"
@@ -138,276 +146,259 @@ class PlotProfAndGradCompare(PlotSuperClass):
         self._profileLabelTemplate = r"${}$" + unitsOrNormalization
         self._gradLabelTemplate    = r"$\partial_\rho {}$" + gradUnitsOrNorm
 
-# FIXME: Not correct here, see drawing
-        self._steadyStateLabel = r"$\mathrm{Steady \quad state}$"
-        self._avgLabelTemplate = r"$\lange\langle({0}"+norm+\
-                                 r"-\lange\langle {0}"+norm+\
-                                 r"\rangle_\theta\rangle_t)^2"+\
-                                 r"\rangle_\theta\rangle_t$"
+        self._steadyStateLegendTemplate = r"${}_{{\mathrm{{Steady \quad state}}}}$"
+        self._avgLabelTemplate =\
+                r"$\langle\langle {0}"+norm+r"\rangle_\theta\rangle_t$"
+        self._varGradLegendTemplate = r"$\partial_\rho $"+self._avgLabelTemplate
 
-        # Set the spatial part of the title
-        self._spatTitle = "{}$,$ {}$,$"
+        # Set the title
+        self._ph.zTxtDict    ["value"] =\
+                plotNumberFormatter(float(self._zPos), None)
+        self._title = "{}".format(self._ph.zTxtDict["constZTxt"].\
+                                  format(self._ph.zTxtDict))
+
         # Set the x-axis label
-# FIXME: Check me
-        self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
+        self._xLabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
-
-
-
-    #{{{setData
-    def setData(self, radialDict, figName):
+    #{{{setDataForSecondVar
+    def setDataForSecondVar(self, profGrad):
         #{{{docstring
         """
-        Sets the radial data and set up the plotting
+        Sets the additional fluctuation profile to be plotted.
 
-        Specifically this function will:
-            * Set the data
-            * Create the figures and axes (through a function call)
-            * Set the colors (through a function call)
-            * Set the plot order
-            * Update the spatial title
+        This function calls setData, and also alters the variable
+        labels, colors and the save name.
 
         Parameters
         ----------
-        radialDict : dict
-            Dictionary of the data containing the following keys
-                * var        - The collected variables.
-                               A 2d array for each variable
-                * "X"        - The abscissa of the variable
-                * "time"     - The time trace
-                * "zPos"     - The z position
-                * "thetaPos" - The theta position
-        figName : str
-            Name of the figure
-        plotOrder : [None|sequence of str]
-            If given: A sequence of the variable names in the order to
-            plot them
+        profGrad : dict
+            Dictionary where the keys are (in addition to those listed
+            in setData:
+                * varName2   - Name of the second variable under investigation
+                * var2AvgStd - The standard deviation of the average of
+                               the second variable
         """
         #}}}
 
-        self._X        = radialDict.pop("X")
-        self._time     = radialDict.pop("time")
-        self._vars     = radialDict
+        # Set the member data
+        self._var2Name   = profGrad.pop("var2Name")
+        self._var2AvgStd = profGrad["var2AvgStd"]
 
-        zPos           = radialDict.pop("zPos")
-        thetaPos       = radialDict.pop("thetaPos")
+        # Obtain the color (pad away brigthest colors)
+        pad = 1
+        self._colors = seqCMap3(np.linspace(0, 1, 3+pad))
+        self._lines  = ("--", "-", "-")
 
-        self._figName  = figName
+        # Prepare the labels
+        self._prepareLabelsForSecondVar()
 
-        # Make axes and colors
-        self._createFiguresAndAxes()
-        self._setColors()
+        # Set the labels
+        pltVarName  = self._ph.getVarPltName(self._varName)
+        pltVar2Name = self._ph.getVarPltName(self._var2Name)
+        self._stdLabel1 =\
+                self._stdLabelTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._stdLabel2 =\
+                self._stdLabelTemplate.\
+                format(pltVar2Name, **self.uc.conversionDict[self._var2Name])
 
-        # Set the plot order
-        if plotOrder:
-            self._plotOrder = tuple(plotOrder)
-        else:
-            self._plotOrder = tuple(sorted(list(self._vars.keys())))
-
-        # Check for "ddt" in the variables
-        self._ddtPresent = False
-
-        for var in self._vars:
-            if "ddt" in var:
-                self._ddtVar = var
-                self._ddtPresent = True
-                # Remove ddt from the plotOrder
-                self._plotOrder = list(self._plotOrder)
-                self._plotOrder.remove(var)
-                self._plotOrder = tuple(self._plotOrder)
-                break
-
-        # Update the title
-        self._ph.zTxtDict["value"] = plotNumberFormatter(zPos, None)
-        zTxt =\
-            self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict)
-        self._ph.thetaTxtDict["value"] = plotNumberFormatter(thetaPos, None)
-        thetaTxt =\
-            self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
-        self._spatTitle = self._spatTitle.format(zTxt, thetaTxt)
-    #}}}
-
-    #{{{plotAndSaveProfile
-    def plotAndSaveProfile(self):
-        """
-        Performs the actual plotting of the radial plane
-        """
+        # Set the legends
+        self._var1StdLegend =\
+                self._stdLegendTemplate.\
+                format(pltVarName, **self.uc.conversionDict[self._varName])
+        self._var2StdLegend =\
+                self._stdLegendTemplate.\
+                format(pltVar2Name, **self.uc.conversionDict[self._var2Name])
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                         "{}-{}-{}".format(self._figName, "radial", "1D"))
+                "{}-{}-{}".format(self._varName, self._var2Name, "posOfFluct"))
 
-        # Initial plot
-        self._initialRadialPlot()
+        if self._extension is None:
+            self._extension = "png"
 
-        # Call the save and show routine
-        self.plotSaveShow(self._fig,\
-                          self._fileName,\
-                          self._updateRadialAxInTime,\
-                          len(self._time))
+        self._fileName = "{}.{}".format(self._fileName, self._extension)
     #}}}
 
-    #{{{_initialRadialPlot
-    def _initialRadialPlot(self):
-        #{{{docstring
+    #{{{_prepareLabelsForSecondVar
+    def _prepareLabelsForSecondVar(self):
         """
-        Initial radial plot.
-
-        The initial radial plot:
-            * Calls the generic initial plot routine
-            * Sets the title
-
-        Subsequent animation is done with _updateRadialAxInTime.
+        Prepares the labels for plotting.
         """
-        #}}}
 
-        # Initial plot the axes
-        self._initialPlot()
+        # Set var label template
+        if self.uc.convertToPhysical:
+            norm = ""
+            units = r" $[{units}]$"
+        else:
+            norm = r"${normalization}$"
+            units = ""
+
+        self._stdLegendTemplate = r"$\sqrt{{\langle\langle({0}"+norm+\
+                                  r"-\langle\langle {0}"+norm+\
+                                  r"\rangle_\theta\rangle_t)^2"+\
+                                  r"\rangle_\theta\rangle_t}}$"
+
+        self._stdLabelTemplate = r"${}$" + units + norm
+    #}}}
+
+    #{{{plotSaveShowRadialProfiles
+    def plotSaveShowRadialProfiles(self):
+        """
+        Performs the actual plotting.
+
+        Only setData needs to be called before calling this function
+        """
+
+        # Create the plot
+        fig, (varAx, DDXVarAx) =\
+                plt.subplots(nrows=2, figsize=self._pltSize, sharex=True)
+
+        self._plotProfAndGrad(varAx, DDXVarAx)
 
         # Set the title
-        self._ph.tTxtDict["value"] =\
-            plotNumberFormatter(self._time[0], None)
-        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
+        varAx.set_title(self._title)
+
+        # Adjust the subplots
+        fig.subplots_adjust(hspace=0.1, wspace=0.35)
+
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            self._ph.savePlot(fig, self._fileName)
+
+        plt.close(fig)
     #}}}
 
-    #{{{_updateRadialAxInTime
-    def _updateRadialAxInTime(self, tInd):
+    #{{{_plotProfAndGrad
+    def _plotProfAndGrad(self, varAx, DDXVarAx):
         #{{{docstring
         """
-        Function which updates the data.
+        Plots the profiles and the gradient
 
         Parameters
         ----------
-        tInd : int
-            The current t index.
+        varAx : axis
+            Axis to plot the profile on
+        DDXVarAx : axis
+            Axis to plot the gradient on
         """
         #}}}
+        # Plot on the varAx
+        # Steady state
+        varAx.plot(self._rho,\
+                   self._profGrad["steadyVar"],\
+                   color     = self._colors[0],\
+                   linestyle = self._lines[0],\
+                   label     = self._steadyStateLegend
+                  )
+        # Average
+        varAx.plot(self._rho,\
+                   self._profGrad["varAvg"],\
+                   color     = self._colors[1],\
+                   linestyle = self._lines[1],\
+                   label     = self._varAvgLegend
+                  )
+        # Fill
+        varAx.fill_between(\
+                self._rho,\
+                self._profGrad["varAvg"]+self._profGrad["varAvgStd"],\
+                self._profGrad["varAvg"]-self._profGrad["varAvgStd"],\
+                facecolor=self._colors[1], edgecolor="none", alpha=0.2)
 
-        for line, key in zip(self._lines, self._plotOrder):
-            line.set_data(self._X, self._vars[key][tInd,:])
+        # Set decorations
+        varAx.set_ylabel(self._profileLabel)
 
-        # If ddt is present
-        if self._ddtPresent:
-            # NOTE: ddtLines is one longer than plotOrder
-            for line, key in zip(self._ddtLines, self._plotOrder):
-                line.set_data(self._X, self._vars[key][tInd,:])
+        # Plot on the DDXAx
+        # Steady state
+        DDXVarAx.plot(self._rho,\
+                      self._profGrad["DDXSteadyVar"],\
+                      color     = self._colors[0],\
+                      linestyle = self._lines[0],\
+                      label     = self._steadyStateGradLegend
+                     )
+        # Average
+        DDXVarAx.plot(self._rho,\
+                      self._profGrad["DDXVarAvg"],\
+                      color     = self._colors[1],\
+                      linestyle = self._lines[1],\
+                      label     = self._varGradLegend
+                     )
+        # Fill
+        DDXVarAx.fill_between(\
+                self._rho,\
+                self._profGrad["DDXVarAvg"]+self._profGrad["DDXVarAvgStd"],\
+                self._profGrad["DDXVarAvg"]-self._profGrad["DDXVarAvgStd"],\
+                facecolor=self._colors[1], edgecolor="none", alpha=0.2)
 
-            self._ddtLines[-1].set_data(self._X, self._vars[self._ddtVar][tInd,:])
+        # Set decorations
+        DDXVarAx.set_xlabel(self._xLabel)
+        DDXVarAx.set_ylabel(self._gradLabel)
 
-        # Update the title
-        self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
-        curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
+        # Make the plot look nice
+        self._ph.makePlotPretty(varAx, loc="upper right", ybins = 6)
+        self._ph.makePlotPretty(DDXVarAx, loc="lower right",\
+                                rotation = 45, ybins = 6)
+        #}}}
+
+    #{{{plotSaveShowPosOfFluct
+    def plotSaveShowPosOfFluct(self):
+        """
+        Performs the actual plotting.
+
+        setData and setDataForSecondVar needs to be called before
+        calling this function.
+        """
+
+        # Create the plot
+        fig, (varAx, DDXVarAx, fluct1Ax, fluct2Ax) =\
+                plt.subplots(nrows=4, figsize=self._pltSize, sharex=True)
+
+        self._plotProfAndGrad(varAx, DDXVarAx)
+
+        # Plot the fluctuations
+        fluct1Ax.plot(self._rho                      ,\
+                      self._profGrad["varAvgStd"]    ,\
+                      color     = self._colors[1]    ,\
+                      linestyle = self._lines [1]    ,\
+                      label     = self._var1StdLegend,\
+                     )
+
+        # Set decorations
+        fluct1Ax.set_ylabel(self._stdLabel1)
+
+        fluct2Ax.plot(self._rho                      ,\
+                      self._var2AvgStd               ,\
+                      color     = self._colors[2]    ,\
+                      linestyle = self._lines [2]    ,\
+                      label     = self._var2StdLegend,\
+                     )
+
+        # Set decorations
+        fluct2Ax.set_ylabel(self._stdLabel2)
+        DDXVarAx.set_xlabel("")
+        fluct2Ax.set_xlabel(self._xLabel)
+
+        # Make the plot look nice
+        self._ph.makePlotPretty(fluct1Ax, loc="lower right", ybins = 6)
+        self._ph.makePlotPretty(fluct2Ax, loc="lower right",\
+                                rotation = 45, ybins = 6)
+
+        # Set the title
+        varAx.set_title(self._title)
+
+        # Adjust the subplots
+        fig.subplots_adjust(hspace=0.2, wspace=0.35)
+
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            self._ph.savePlot(fig, self._fileName)
+
+        plt.close(fig)
     #}}}
 #}}}
-
-#   # Collect stuff
-#   #%%
-#   %load_ext autoreload
-#   %autoreload 2
-#
-#   from boutdata import collect
-#   import numpy as np
-#
-#   import os, sys
-#   sys.path.append("/home/mmag/CELMA-dev/celma/common/")
-#   from CELMAPython.statsAndSignals.averages import timeAvg
-#
-#   import pickle
-#
-#   # Must include all zind as we are taking a pol average
-#   lnN = collect("lnN", yind=[16,16])
-#   t = collect("t_array")
-#   n = np.exp(lnN)
-#   polSliceN = n[:,16,0,:]
-#
-#   # nt = [n,t]
-#   # with open("/home/mmag/nt", "wb") as f:
-#   #     pickle.dump(nt, f)
-#
-#   from CELMAPython.statsAndSignals.averages import timeAvg, polAvg
-#
-#   tAvgN, tAvgT = timeAvg(n,t)
-#   nAvgTZ = polAvg(tAvgN)
-#
-#   tLen, xLen, yLen, zLen = n.shape
-#
-#   nTZFluct = np.zeros(n.shape)
-#
-#   for t in range(tLen):
-#       nTZFluct[t,:,:,:] = n[t,:,:,:] - nAvgTZ[0,:,:,:]
-#
-#   stdDev = np.sqrt(polAvg(timeAvg(nTZFluct**2.0)))
-#
-#   avgStd = [nAvgTZ, stdDev]
-#   with open("/home/mmag/avgStd.pickle", "wb") as f:
-#       pickle.dump(avgStd, f)
-
-#   #%%
-#   %load_ext autoreload
-#   %autoreload 2
-#
-#   # Find steady state bg
-#   from boutdata import collect
-#   import numpy as np
-#
-#   import pickle
-#
-#   # Must include all zind as we are taking a pol average
-#   lnN = collect("lnN", yind=[16,16])
-#   t = collect("t_array")
-#   n = np.exp(lnN)
-#   steadyStateN = n[0,:,0,0]
-#
-#   with open("steadyStateN.pickle", "wb") as f:
-#       pickle.dump(steadyStateN, f)
-#   #%%
-
-
-
-
-
-# Plot stuff
-#%%
-import numpy as np
-import matplotlib.pylab as plt
-
-import pickle
-
-with open("avgStd.pickle", "rb") as f:
-    avg, std = pickle.load(f)
-with open("steadyStateN.pickle", "rb") as f:
-    steadyStateN = pickle.load(f)
-
-avg = avg[0,:,0,0]
-std = std[0,:,0,0]
-
-fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True)
-
-# Dummy
-rho = range(len(avg))
-ax1.plot(rho, avg)
-ax1.plot(rho, steadyStateN)
-
-ax1.fill_between(rho,\
-                avg+std, avg-std,\
-                facecolor="blue", edgecolor="none", alpha=0.5)
-
-# Find the gradient
-# FIXME: Need to add the gridspacing there as well, this is given as a
-#        positional vararg
-gradN       = np.gradient(avg, edge_order=2)
-gradNSteady = np.gradient(steadyStateN, edge_order=2)
-# From error propagation
-gradNStd = np.sqrt((np.abs(gradN)**2)*(std**2))
-
-ax2.plot(rho, gradN)
-ax2.plot(rho, gradNSteady)
-ax2.fill_between(rho,\
-                gradN+gradNStd, gradN-gradNStd,\
-                facecolor="blue", edgecolor="none", alpha=0.5)
-
-plt.show()

@@ -7,8 +7,8 @@ Contains class for collecting and calculating the radial profiles
 from ..fields1D import CollectAndCalcFields1D
 from ..collectAndCalcHelpers import (calcN, calcUIPar, calcUEPar,\
                                      polAvg, timeAvg)
+import numpy as np
 
-# FIXME: Maybe rename to radial profiles...yes
 #{{{CollectAndCalcRadialProfile
 class CollectAndCalcRadialProfile(object):
     """
@@ -16,8 +16,9 @@ class CollectAndCalcRadialProfile(object):
     """
 
     #{{{constructor
-    def __init__(self,\
-                 yInd,\
+    def __init__(self  ,\
+                 yInd  ,\
+                 tSlice,\
                  convertToPhysical):
         #{{{docstring
         """
@@ -28,23 +29,30 @@ class CollectAndCalcRadialProfile(object):
         ----------
         yInd : int
             z-position in the cylinder
+        tSlice : slice
+            How the data will be sliced in time
         convertToPhysical : bool
             Whether or not to convert to physical units.
         """
         #}}}
 
         self._convertToPhysical = convertToPhysical
-        # Notice the zSlice is irrelevant, and will be not be used in the
+        # Notice the zInd is irrelevant, and will be not be used in the
         # collect
-        zSlice = 0
-        self._slices = (None, yInd, 0, None)
+        zInd = 0
+        self._slices = (None, yInd, zInd, tSlice)
+
+        # Placeholder
+        self.uc = None
     #}}}
 
     #{{{collectWrapper
     def collectWrapper(self, paths, varName):
         #{{{docstring
         """
-        Wrapper function around the collect routine
+        Wrapper function around the collect routine.
+
+        Sets the units converter if unset
 
         Parameters
         ----------
@@ -67,6 +75,10 @@ class CollectAndCalcRadialProfile(object):
                 processing = None,\
                 return2d   = False,\
                 convertToPhysical = self._convertToPhysical)
+
+        # Set the unitsconverter if not set
+        if self.uc is None:
+            self.uc = ccf1D.uc
 
         ccf1D.setSlice(*self._slices)
         specialCollects = ("n", "uIPar", "uEPar")
@@ -143,12 +155,12 @@ class CollectAndCalcRadialProfile(object):
         """
         #}}}
         # Cacluclate the average
-        avg = polAvg(timeAvg(var**2.0))
+        avg = polAvg(timeAvg(var))
         # Caclculate the fluctuation
-        fluct = var - avgVar
+        fluct = var - avg
         # Calculate the standard deviation
         # This follows from the definition of the standard deviation
-        std = np.sqrt(polAvg(timeAvg(varFluct**2.0)))
+        std = np.sqrt(polAvg(timeAvg(fluct**2.0)))
 
         return avg, fluct, std
     #}}}
