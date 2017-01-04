@@ -15,7 +15,9 @@ from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
 from standardPlots import (fourierModesPlot,\
                            growthRatesPlot,\
                            energyPlot,\
-                           posOfFluctPlot)
+                           posOfFluctPlot,\
+                           PSD2DPlot
+                           )
 
 #{{{findSlices
 def findSlices(dmp_folders):
@@ -161,6 +163,32 @@ def runPosOfFluct():
         sleep(1.5)
 #}}}
 
+#{{{runPSD2D
+def runPSD2D():
+    """
+    Runs the PSD2D
+    """
+
+    loopOver = zip(dmpFolders["turbulence"],\
+                   paramKeys,\
+                   rJobs)
+    for dmp_folders, key, nr in loopOver:
+
+        # Find tSlice
+        tSlice = findSlices(dmp_folders)
+        if tSlice is None:
+            continue
+
+        collectPaths = mergeFromLinear[key]
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths)
+        kwargs = {"tSlice":tSlice}
+        sub.setJobName("PSD2DPlotSliced{}".format(nr))
+        sub.submitFunction(PSD2DPlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
@@ -207,4 +235,5 @@ if __name__ == "__main__":
                }
     # runEnergy(sliced=True)
     sub.setWalltime("00:10:00")
-    runPosOfFluct()
+    # runPosOfFluct()
+    runPSD2D()
