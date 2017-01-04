@@ -25,6 +25,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
                  *args                  ,\
                  mode       = "parallel",\
                  processing = None      ,\
+                 return2d   = True      ,\
                  **kwargs):
         #{{{docstring
         """
@@ -45,6 +46,9 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             * "polAndTimeAvg"      - <<var>_theta>_t will be used
             * "polAvgFluct"        - var - <var>_theta will be used
             * "polAndTimeAvgFluct" - var - <<var>_theta>_t will be used
+        return2d : bool
+            Whether or not the variable should be returned as a
+            2d-array (if True) or 4d-array (if False)
         *kwargs : keyword arguments
             See parent constructor for details.
         """
@@ -71,6 +75,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         self._mode       = mode
         self._processing = processing
+        self._return2d   = return2d
     #}}}
 
     #{{{executeCollectAndCalc
@@ -84,7 +89,9 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         field1D : dict
             Dictionary with the keys:
                 * var    - A 2d array (a 1d spatial array of each time)
-                           of the collected variable.
+                           of the collected variable if return2d is True.
+                           If return2d is false, a 4d variable is
+                           returned instead.
                 * "X"    - The abscissa of the variable
                 * "time" - The time trace
                 * pos1   - The position of the first fixed index
@@ -137,14 +144,15 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         field1D["X"   ] = X
         field1D["time"] = time
 
-        if "parallel" in self._mode:
-            field1D[self._varName] = var[:, 0, :, 0]
-            field1D["rhoPos"]   = self._dh.rho      [xInd[0]]
-            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
-        if "radial" in self._mode:
-            field1D[self._varName] = var[:, :, 0, 0]
-            field1D["zPos"]     = self._dh.z       [yInd[0]]
-            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+        if self._return2d:
+            if "parallel" in self._mode:
+                field1D[self._varName] = var[:, 0, :, 0]
+                field1D["rhoPos"]   = self._dh.rho      [xInd[0]]
+                field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+            if "radial" in self._mode:
+                field1D[self._varName] = var[:, :, 0, 0]
+                field1D["zPos"]     = self._dh.z       [yInd[0]]
+                field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
 
         return field1D
     #}}}
@@ -177,6 +185,10 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         if self._processing:
             if "pol" in self._processing:
+                collectKwargs.pop("zInd")
+
+         if not(self._return2d):
+             if "zInd" in collectKwargs.keys():
                 collectKwargs.pop("zInd")
 
         # Collect
