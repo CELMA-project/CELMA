@@ -14,16 +14,16 @@ import os
 
 #{{{DDX
 def DDX(var, dx):
+    #{{{docstring
     """
     Calculates the first rho-derivative of a profile using a second order
     stencil (assuming that we are using cylinder geometry).
 
     Parameters
     ----------
-    var : array
-        Variable to take the first derivative of (must include ghost
-        points)
-    dx : array
+    var : array-4d
+        Variable to take the first derivative of
+    dx : [array-1d, float]
         The grid spacing in x for the different evaluation points
 
     Returns
@@ -31,6 +31,7 @@ def DDX(var, dx):
     out : iterable
         The rho derivative of the profile
     """
+    #}}}
     if len(var.shape) != 4:
        raise ValueError("Input variable must be 4-dimensional")
 
