@@ -80,6 +80,7 @@ def driverPSD2D(collectPaths     ,\
                 mode             ,\
                 indicesArgs      ,\
                 indicesKwargs    ,\
+                plotLimits       ,\
                 plotSuperKwargs  ,\
                ):
     #{{{docstring
@@ -108,6 +109,10 @@ def driverPSD2D(collectPaths     ,\
     indicesKwargs : dict
         Contains tslice, nPoints, equallySpace and steadyStatePath.
         See CollectAndCalcPointsSuperClass.setIndices for details.
+    plotLimits : dict
+        Dictionary on the form
+        {"xlim":(min,max), "ylim":(min,max), "zlim":(min,max)}
+        The dictionary values may be None rather than a tuple.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
@@ -149,17 +154,33 @@ def driverPSD2D(collectPaths     ,\
     # Make the frequency axis
     freq = PSD[keys[0]]["{}PSDX".format(varName)]
 
+    RHO, FREQ = np.meshgrid(rho, freq)
     # Make the 2D PSD matrix
     PSDMat = np.zeros((len(PSD[keys[0]]["{}PSDY".format(varName)]) ,len(keys)))
     for xInd in range(len(rho)):
         PSDMat[:, xInd] = PSD[keys[xInd]]["{}PSDY".format(varName)]
 
-    import pdb; pdb.set_trace()
+    # Transpose matrix in order to get it on (rho, freq)
+    PSDMat = PSDMat.transpose()
+
+    # Convert to dB
+    PSDMat = np.log10(PSDMat/np.max(PSDMat))
+
+    # Make a new PSD
+    PSD = {\
+           "freqPosMatrix" : PSDMat               ,\
+           "thetaPos"      : keys[0].split(",")[1],\
+           "zPos"          : keys[0].split(",")[2],\
+           "FREQ"          : FREQ                 ,\
+           "RHO"           : RHO                  ,\
+           "varName"       : varName              ,\
+           }
+
     # Plot
     pPSD = PlotPSD(ccPSD.uc         ,\
                    **plotSuperKwargs)
-    pPSD.setData(PSD, mode)
-    pPSD.plotSaveShowPSD()
+    pPSD.setData2D(PSD, mode, plotLimits)
+    pPSD.plotSaveShowPSD2D()
 #}}}
 
 #{{{DriverPSD
@@ -169,13 +190,14 @@ class DriverPSD(DriverPointsSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self                       ,\
-                 dmp_folders                ,\
-                 indicesArgs                ,\
-                 indicesKwargs              ,\
-                 plotSuperKwargs            ,\
-                 varName           = "n"    ,\
-                 mode              = "fluct",\
+    def __init__(self                      ,\
+                 dmp_folders               ,\
+                 indicesArgs               ,\
+                 indicesKwargs             ,\
+                 plotSuperKwargs           ,\
+                 varName          = "n"    ,\
+                 mode             = "fluct",\
+                 plotLimits       = None   ,\
                  **kwargs):
         #{{{docstring
         """
@@ -201,6 +223,11 @@ class DriverPSD(DriverPointsSuperClass):
         mode : ["normal"|"fluct"]
             If mode is "normal" the raw data is given as an output.
             If mode is "fluct" the fluctuations are given as an output.
+        plotLimits : [None|dict]
+            If not None:
+            Dictionary on the form
+            {"xlim":(min,max), "ylim":(min,max), "zlim":(min,max)}
+            The dictionary values may be None rather than a tuple.
         **kwargs : keyword arguments
             See parent class for details.
         """

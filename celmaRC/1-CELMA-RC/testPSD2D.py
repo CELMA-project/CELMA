@@ -8,10 +8,10 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.PSD import DriverPSD, driverPSD
+from CELMAPy.PSD import DriverPSD, driverPSD2D
 
-#{{{PSDTest
-def PSDTest():
+#{{{PSD2DTest
+def PSD2DTest():
     """
     Runs the test for the power spectral density
     """
@@ -26,20 +26,12 @@ def PSDTest():
     convertToPhysical = False
     mode              = "fluct"
 
-    xInd              = 16
     yInd              = 16
     zInd              = 128
     tSlice            = None
-    nPoints           = 3
-    equallySpace      = "x"
-    steadyStatePath   = None
 
-    indicesArgs   = (xInd, yInd, zInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
-                     "nPoints"         : nPoints        ,\
-                     "equallySpace"    : equallySpace   ,\
-                     "steadyStatePath" : steadyStatePath,\
-                     }
+    indicesArgs   = (None, yInd, zInd)
+    indicesKwargs = {"tSlice" : tSlice}
 
     savePath          = "."
 
@@ -52,15 +44,15 @@ def PSDTest():
                         "dmp_folders"  : None,\
                        }
 
-    print("\n\nTesting probability density function")
-    driverPSD(collectPaths     ,\
-              varName          ,\
-              convertToPhysical,\
-              mode             ,\
-              indicesArgs      ,\
-              indicesKwargs    ,\
-              plotSuperKwargs  ,\
-             )
+    print("\n\nTesting 2D probability density function")
+    driverPSD2D(collectPaths     ,\
+                varName          ,\
+                convertToPhysical,\
+                mode             ,\
+                indicesArgs      ,\
+                indicesKwargs    ,\
+                plotSuperKwargs  ,\
+               )
 
     print("Success!\n\n")
 #}}}
