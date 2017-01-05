@@ -4,246 +4,159 @@
 Contains the radial flux calculation
 """
 
-from ..calcHelpers import (DimensionsHelper,\
-                           collectPoloidalProfile,\
-                           polAvg,\
-                           DDZ)
-from ..unitsConverter import UnitsConverter
-from ..timeTrace import calcTimeTrace4d
-import numpy as np
+from ..collectAndCalcHelpers import calcRadialExBPoloidal
 
-#{{{calcRadialFlux
-def calcRadialFlux(paths                      ,\
-                   varName                    ,\
-                   xInd                       ,\
-                   yInd                       ,\
-                   zInd                       ,\
-                   convertToPhysical = True   ,\
-                   mode              = "fluct",\
-                   tSlice            = None):
-    #{{{docstring
-    r"""
-    Function which calculates the radial flux.
-
-    Parameters
-    ----------
-    paths : tuple of strings
-        The paths to collect from
-    varName : str
-        Variable to collect
-    xInd : tuple of ints
-        A tuple of the xInds to collect use when collecting.
-    yInd : tuple of ints
-        The same as xInd, but for the y-index.
-    zInd : tuple of ints
-        The same as xInd, but for the z-index.
-    convertToPhysical : bool
-        Whether or not to convert to physical units.
-    mode : ["normal"|"avg"|"fluct"]
-        If mode is "normal" the output is on the form nu.
-        If mode is "avg" the output is on the form <nu>.
-        If mode is "fluct" the output is on the form \tilde{n}\tilde{u}.
-        Note that
-        <nu> = <(<n>+\tidle{n})(<u>+\tidle{u})>
-             = <<n><u>> + <\tidle{n}\tidle{u})>
-             = <n><u> + <\tidle{n}\tidle{u})>
-        So that <n><u> is given by the "avg" - "fluct"
-    tSlice : [None|Slice}
-        Whether or not to slice the time trace
-
-    Returns
-    -------
-    radialFLux : dict
-        Dictionary where the keys are on the form "rho,theta,z".
-        The value is a dict containing of
-        {varRadialFlux:radialFlux, "time":time}
+#{{{CollectAndCalcRadialFlux
+class CollectAndCalcRadialFlux(object):
     """
+    Class for collecting and calcuating the radial flux
+    """
+
+    #{{{constructor
+    def __init__(self             ,\
+                 collectPaths     ,\
+                 slices           ,\
+                 mode             ,\
+                 dh               ,\
+                 convertToPhysical,\
+                 ):
+        #{{{docstring
+        """
+        This constructor will:
+            * Call the parent constructor
+
+        Parameters
+        ----------
+        collectPaths : tuple
+            Tuple from where to collect
+        slices : tuple of tuples
+            Tuple the indices to use.
+            On the form ((xInd1,...), (yInd1,...), (zInd1,...), (tSlice1,...))
+        mode : ["normal"|"fluct"]
+            Whether to look at fluctuations or normal data
+        dh : DimensionsHelper
+            DimensionHelper object (used to find the Jacobian)
+        convertToPhysical : bool
+            Whether or not to convert to physical
+        """
+        #}}}
+
+        # Set the member data
+        self._collectPaths      = collectPaths
+        self._mode              = mode
+        self._dh                = dh
+        self._convertToPhysical = convertToPhysical
+        self._xInds, self._yInds, self._zInds, self._tSlice = slices
     #}}}
 
-    uc = UnitsConverter(paths[0], convertToPhysical)
-    dh = DimensionsHelper(paths[0], uc)
+    #{{{getRadialExBTrace
+    def getRadialExBTrace(self):
+        #{{{docstring
+        """
+        Function which calculates the radial flux.
 
-    # Set mode to call the functions with
-    if mode == "avg":
-        callMode = "normal"
-    else:
-        callMode = mode
+        NOTE: We are here translating a Field1D to a time trace.
 
-    # Call the time calcTimeTrace function in order to get a time trace
-    varTimeTraces =\
-        calcTimeTrace4d(paths                                ,\
-                        varName                              ,\
-                        xInd                                 ,\
-                        yInd                                 ,\
-                        zInd                                 ,\
-                        convertToPhysical = convertToPhysical,\
-                        mode              = callMode         ,\
-                        tSlice            = tSlice           ,\
-                        uc                = uc               ,\
-                        dh                = dh               ,\
-                        )
+        Returns
+        -------
+        radialExBTraces : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {"uExBRadial":radialExBtimeTrace, "time":time}.
+            And additional key "zInd" will be given in addition to varName
+            and "time" if mode is set to "fluct".
+            The timeTrace is a 1d array.
+        """
+        #}}}
 
-    # To lowest order ExB is the only radial advection
-    radialExB =\
-        calcTimeTraceRadialDerivative(\
-            paths                                ,\
-            "phi"                                ,\
-            xInd                                 ,\
-            yInd                                 ,\
-            zInd                                 ,\
-            convertToPhysical = convertToPhysical,\
-            mode              = callMode         ,\
-            tSlice            = tSlice           ,\
-            uc                = uc               ,\
-            dh                = dh               ,\
-            )
+        # Initialize output
+        raidalExBTraces = {}
+        tCounter = 0
+        for x, y, z in zip(self._xInds, self._yInds, self._zInds):
+            # NOTE: The indices
+            rho   = self._dh.rho     [x]
+            theta = self._dh.thetaDeg[z]
+            par   = self._dh.z       [y]
 
-    # Initialize the output
-    radialFlux = {}
-    varRadialFlux = "{}RadialFlux".format(varName)
+            # Add key and dict to timeTraces
+            key = "{},{},{}".format(rho,theta,par)
+            raidalExBTraces[key] = {}
 
-    keys = sorted(radialExB.keys())
+            if self._tSlice is not None:
+                tStart = self._tSlice[tCounter].start
+                tEnd   = self._tSlice[tCounter].stop
+                t = (tStart, tEnd)
+            else:
+                t = None
 
-    for key in keys:
-        radialFlux[key] = {}
-        if mode == "normal":
-            radialFlux[key][varRadialFlux] =\
-                radialExB[key]*varTimeTraces[key][varName]
-        elif mode == "avg":
-            radialFlux[key][varRadialFlux] =\
-                polAvg(radialExB[key]*varTimeTraces[key][varName])
-        elif mode == "fluct":
-            fluctExB = radialExB[key] - polAvg(radialExB[key])
-            fluctVar = varTimeTraces[key][varName] -\
-                       polAvg(varTimeTraces[key][varName])
+            tCounter += 1
 
-            z = varTimeTraces[key].pop("zInd")
-            radialFlux[key][varRadialFlux] = (fluctExB*fluctVar)[:,:,:,z:z+1]
-        else:
-            raise NotImplementedError("'{}'-mode not implemented")
+            slices = (x, y, t)
+            radialExB, time = calcRadialExBPoloidal(\
+                                self._collectPaths                         ,\
+                                slices                                     ,\
+                                self._dh                                   ,\
+                                mode = self._mode                          ,\
+                                convertToPhysical = self._convertToPhysical,\
+                               )
 
-        # Flatten
-        radialFlux[key][varRadialFlux] = radialFlux[key][varRadialFlux].flatten()
-        radialFlux[key]["time"] = varTimeTraces[key]["time"]
+            # Save and cast to to 2d:
+            raidalExBTraces[key]["uExBRadial"] = radialExB[:, 0, 0, z]
+            raidalExBTraces[key]["time"] = time
 
-    # NOTE: If varTimeTraces and radialExB was converted to physical units,
-    #       then radialFlux is as well
-    return radialFlux
-#}}}
-
-#{{{calcTimeTraceRadialDerivative
-def calcTimeTraceRadialDerivative(paths                      ,\
-                                  varName                    ,\
-                                  xInd                       ,\
-                                  yInd                       ,\
-                                  zInd                       ,\
-                                  convertToPhysical = True   ,\
-                                  mode              = "fluct",\
-                                  tSlice            = None   ,\
-                                  uc                = None   ,\
-                                  dh                = None   ,\
-                                  ):
-    #{{{docstring
-    """
-    Function which calculates the time traces
-
-    Parameters
-    ----------
-    paths : tuple of strings
-        The paths to collect from
-    varName : str
-        Variable to collect
-    xInd : tuple of ints
-        A tuple of the xInds to collect use when collecting.
-    yInd : tuple of ints
-        The same as xInd, but for the y-index.
-    zInd : tuple of ints
-        The same as xInd, but for the z-index.
-    convertToPhysical : bool
-        Whether or not to convert to physical units.
-    mode : ["normal"|"fluct"]
-        If mode is "normal" the raw data is given as an output.
-        If mode is "fluct" the fluctuations are given as an output.
-    tSlice : [None|Slice]
-        Whether or not to slice the time trace
-    uc : [None|UnitsConverter]
-        If not given, the function will create the instance itself.
-        However, there is a possibility to supply this in order to
-        reduce overhead.
-    dh : [None|DimensionsHelper]
-        If not given, the function will create the instance itself.
-        However, there is a possibility to supply this in order to
-        reduce overhead.
-
-    Returns
-    -------
-    DDZVar : dict
-        Dictionary where the keys are on the form "rho,theta,z".
-    """
+        return raidalExBTraces
     #}}}
 
-    if uc is None:
-        # Create the units convertor object
-        uc = UnitsConverter(paths[0], convertToPhysical)
-    # Toggle convertToPhysical in case of errors
-    convertToPhysical = uc.convertToPhysical
+    @staticmethod
+    #{{{calcRadialFlux
+    def calcRadialFlux(timeTraces, radialExBTraces):
+        #{{{docstring
+        """
+        Function which calculates the radial flux.
 
-    if dh is None:
-        # Create the dimensions helper object
-        dh = DimensionsHelper(paths[0], uc)
+        Parameters
+        ----------
+        timeTraces : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varName:timeTrace, "time":time}.
+            And additional key "zInd" will be given in addition to varName
+            and "time" if mode is set to "fluct".
+            The timeTrace is a 1d array.
+        raidalExBTraces : dict
+            The same as the timeTraces, but where the varName is
+            "uExBRadial".
 
-    DDZVars  = {}
-    tCounter = 0
-    for x, y, z in zip(xInd, yInd, zInd):
-        # NOTE: The indices
-        rho   = dh.rho  [x]
-        theta = dh.theta[z]
-        par   = dh.z    [y]
+        Returns
+        -------
+        radialFlux : dict
+            The same as the timeTraces, but where the varName is
+            varNameRadialFlux.
+        """
+        #}}}
 
-        # Add key and dict to timeTraces
-        key = "{},{},{}".format(rho,theta,par)
-        DDZVars[key] = {}
+        # Initialize the output
+        radialFlux = {}
 
-        if tSlice is not None:
-            tStart = tSlice[tCounter].start
-            tEnd   = tSlice[tCounter].stop
-            t = (tStart, tEnd)
-        else:
-            t = None
+        # Obtain the varName
+        ind  = tuple(timeTraces.keys())[0]
+        keys = timeTraces[ind].keys()
+        varName = tuple(var for var in keys if var != "time")[0]
 
-        tCounter += 1
+        # Make the keys
+        fluxKey = "{}RadialFlux".format(varName)
 
-        # Create the Jacobian from J
-        J = np.array(((rho,),))
+        # Obtain the radialFlux
+        for key in timeTraces.keys():
+            # Initialize the radialFlux
+            radialFlux[key] = {}
 
-        if mode == "normal":
-            var    = collectPoloidalProfile(paths, varName, x, y, tInd=t)
-            DDZVar = DDZ(var, J)
-        elif mode == "fluct":
-            var   = collectPoloidalProfile(paths, varName, x, y, tInd=t)
-            DDZVar = DDZ(var, J)
-            DDZVar = (DDZVar - polAvg(DDZVar))
-        else:
-            raise NotImplementedError("'{}'-mode not implemented".format(mode))
+            radialFlux[key]["time"]  = timeTraces[key]["time"]
+            radialFlux[key][fluxKey] =\
+                timeTraces[key][varName] * radialExBTraces[key]["uExBRadial"]
 
-        if tSlice is not None:
-            # Slice the variables with the step
-            # Make a new slice as the collect dealt with the start and
-            # the stop of the slice
-            newSlice = slice(None, None, tSlice.step)
-
-            DDZVar = DDZVar[newSlice]
-
-        if convertToPhysical:
-            # NOTE: 1/J is multiplied with DDZ (which has units of angle)
-            #       We therefore convert to physical units by first
-            #       mutliplying with the factor of var, then with the
-            #       factor of 1/rho
-            DDZVar = uc.physicalConversion(DDZVar, varName)
-            # To convert to 1/J, we use the normFactor of "length"
-            DDZVars[key] = uc.normalizedConversion(DDZVar, "length")
-        else:
-            DDZVars[key] = DDZVar
-
-    return DDZVars
+        # NOTE: If timeTraces was converted to physical units, then radialFlux is
+        #       in physical units as well
+        return radialFlux
+    #}}}
 #}}}
