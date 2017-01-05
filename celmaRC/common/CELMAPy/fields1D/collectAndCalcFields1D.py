@@ -262,4 +262,17 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         return var, time
     #}}}
+
+    #{{{getDh
+    def getDh(self):
+        """
+        Returns the dimension helper.
+
+        Returns
+        -------
+        dh : DimensionHelper
+            The dimension helper object
+        """
+        return self._dh
+    #}}}
 #}}}
