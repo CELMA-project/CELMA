@@ -10,6 +10,7 @@ from ..collectAndCalcHelpers import (collectTime,\
                                      collectConstZ,\
                                      collectParallelProfile,\
                                      collectRadialProfile,\
+                                     collectPoloidalProfile,\
                                      polAvg,\
                                      slicesToIndices,\
                                      timeAvg)
@@ -38,8 +39,9 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         *args : positional arguments
             See parent constructor for details.
         mode : ["radial"|"parallel"]
-            * "radial"    - Radial profiles will be used
-            * "parallel"  - Parallel profiles will be used
+            * "radial"   - Radial profiles will be used
+            * "parallel" - Parallel profiles will be used
+            * "poloidal" - Poloidal profiles will be used
         processing : [None|str]
             * None                 - Raw data will be used
             * "polAvg"             - <var>_theta will be used
@@ -55,7 +57,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         #}}}
 
         # Guard
-        implemented = ("parallel", "radial")
+        implemented = ("parallel", "radial", "poloidal")
         if not(mode in implemented):
             message = "mode '{}' not implemented".format(mode)
             raise NotImplementedError(message)
@@ -113,6 +115,8 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             X = self._dh.z
         elif self._mode == "radial":
             X = self._dh.rho
+        elif self._mode == "poloidal":
+            X = self._dh.theta
 
         # Convert to indices
         xInd = slicesToIndices(self._collectPaths[0], self._xSlice, "x",\
@@ -149,15 +153,22 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
                 field1D[self._varName] = var[:, 0, :, 0]
             else:
                 field1D[self._varName] = var
-            field1D["rhoPos"]   = self._dh.rho      [xInd[0]]
+            field1D["rhoPos"]   = self._dh.rho     [xInd[0]]
             field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
-        if "radial" in self._mode:
+        elif "radial" in self._mode:
             if self._return2d:
                 field1D[self._varName] = var[:, :, 0, 0]
             else:
                 field1D[self._varName] = var
             field1D["zPos"]     = self._dh.z       [yInd[0]]
             field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+        elif "poloidal" in self._mode:
+            if self._return2d:
+                field1D[self._varName] = var[:, 0, 0, :]
+            else:
+                field1D[self._varName] = var
+            field1D["rhoPos"]   = self._dh.rho[xInd[0]]
+            field1D["zPos"]     = self._dh.z  [yInd[0]]
 
         return field1D
     #}}}
@@ -187,6 +198,8 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             collectKwargs.pop("yInd")
         elif self._mode == "radial":
             collectKwargs.pop("xInd")
+        elif self._mode == "poloidal":
+            collectKwargs.pop("zInd")
 
         if self._processing:
             if "pol" in self._processing:
@@ -196,25 +209,30 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
              if "zInd" in collectKwargs.keys():
                 collectKwargs.pop("zInd")
 
-        # Collect
+        # Decide if theta should be collected
+        if not(self._mode == "poloidal"):
+            if (self._processing is not None) and\
+               (self._processing == "poloidal"):
+                collectTheta = True
+            else:
+                collectTheta = False
+
+        # Get collect function
         if self._mode == "parallel":
-            if not(self._processing) and self._return2d:
-                var = collectParallelProfile(self._collectPaths,\
-                                             self._varName     ,\
-                                             **collectKwargs)
+            if not(collectTheta) and self._return2d:
+                collecter = collectParallelProfile
             else:
-                var = collectConstRho(self._collectPaths,\
-                                      self._varName     ,\
-                                      **collectKwargs)
+                collecter = collectConstRho
         elif self._mode == "radial":
-            if not(self._processing) and self._return2d:
-                var = collectRadialProfile(self._collectPaths,\
-                                           self._varName     ,\
-                                           **collectKwargs)
+            if not(collectTheta) and self._return2d:
+                collecter = collectRadialProfile
             else:
-                var = collectConstZ(self._collectPaths,\
-                                    self._varName     ,\
-                                    **collectKwargs)
+                collecter = collectConstZ
+        elif self._mode == "poloidal":
+            collecter = collectPoloidalProfile
+
+        # Collect
+        var = collecter(self._collectPaths, self._varName, **collectKwargs)
 
         time = collectTime(self._collectPaths, collectKwargs["tInd"])
 
