@@ -3,7 +3,7 @@
 """ Contains single driver for radial profiles """
 
 from ..superClasses import DriverSuperClass
-from ..collectAndCalcHelpers import getUniformSpacing, DDX
+from ..collectAndCalcHelpers import DDX
 from .collectAndCalcRadialProfile import CollectAndCalcRadialProfile
 from .plotRadialProfile import PlotProfAndGradCompare
 
@@ -55,7 +55,7 @@ def driverProfAndGradCompare(varName          ,\
     varAvg, varAvgFluct, varAvgStd = ccrp.calcAvgFluctStd(var)
 
     # Calculate the derivatives
-    dx = getUniformSpacing(steadyStatePath, "x")[0,0]
+    dx = ccrp.dh.dx
     DDXSteadyVar = DDX(steadyVar, dx)
     DDXVar = DDX(var, dx)
 
