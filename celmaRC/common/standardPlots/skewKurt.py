@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for the PSD2D"""
+"""Post-processor for the skewness and kurtosis"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -8,10 +8,10 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.PSD import DriverPSD
+from CELMAPy.skewnessKurtosis import DriverSkewnessKurtosis
 
-#{{{PSD2DPlot
-def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
+#{{{skewKurtPlot
+def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
     #{{{docstring
     """
     Runs the standard 2d spectral density plot
@@ -40,10 +40,6 @@ def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
     indicesArgs   = (None, yInd, zInd)
     indicesKwargs = {"tSlice" : tSlice}
 
-    plotLimits = {"xlim":None      ,\
-                  "ylim":(100, 3e4),\
-                  "zlim":(-7,0)}
-
     plotSuperKwargs = {\
                         "showPlot"        : False,\
                         "savePlot"        : True ,\
@@ -54,20 +50,19 @@ def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
                         "timeStampFolder" : False,\
                        }
 
-    dPSD = DriverPSD(
-                     # DriverPSD
+    dSK = DriverSkewnessKurtosis(
+                     # DriverSkewnessKurtosiss
                      dmp_folders                   ,\
                      indicesArgs                   ,\
                      indicesKwargs                 ,\
                      plotSuperKwargs               ,\
                      varName           = varName   ,\
                      mode              = mode      ,\
-                     plotLimits        = plotLimits,\
                      # DriverPointsSuperClass
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dPSD.driverPSD2D()
+    dSK.driverSkewnessKurtosis()
 #}}}

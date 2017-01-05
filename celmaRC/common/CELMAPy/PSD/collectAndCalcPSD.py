@@ -2,7 +2,7 @@
 
 """
 Contains class for collecting and calculating the power spectral density
-function of time traces.
+function of the time traces.
 """
 
 from ..timeTrace import CollectAndCalcTimeTrace
