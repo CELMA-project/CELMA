@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Init-file for statistics
+Init-file for skewness and kurtosis
 """
 
-from .probes import PerpPlaneProbes, Probes
-from .probesPlotter import PlotProbes
-from .growthRates import calcGrowthRate, PlotGrowthRates
+from .collectAndCalcSkewnessKurtosis import CollectAndCalcSkewnessKurtosis
+from .driverSkewnessKurtosis import DriverSkewnessKurtosis, driverSkewnessKurtosis
+from .plotSkewnessKurtosis import PlotSkewnessKurtosis
