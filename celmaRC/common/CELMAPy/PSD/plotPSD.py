@@ -275,7 +275,7 @@ class PlotPSD(PlotSuperClass):
             yVals = np.log10(       self._PSD[key]["{}PSDY".format(self._varName)][1:]/\
                              np.max(self._PSD[key]["{}PSDY".format(self._varName)][1:]))
 
-            #Plot
+            # Plot
             ax.plot(xVals, yVals, color=color, label=label)
 
         # Use logarithmic scale
@@ -310,7 +310,7 @@ class PlotPSD(PlotSuperClass):
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        #Plot
+        # Plot
         CP = ax.contourf(\
             self._PSD["RHO"], self._PSD["FREQ"], self._PSD["freqPosMatrix"],\
             **self._cfKwargs)

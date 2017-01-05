@@ -13,10 +13,11 @@ sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
 from standardPlots import (fourierModesPlot,\
-                           growthRatesPlot,\
-                           energyPlot,\
-                           posOfFluctPlot,\
-                           PSD2DPlot
+                           growthRatesPlot ,\
+                           energyPlot      ,\
+                           posOfFluctPlot  ,\
+                           PSD2DPlot       ,\
+                           skewKurtPlot    ,\
                            )
 
 #{{{findSlices
@@ -189,6 +190,32 @@ def runPSD2D():
         sleep(1.5)
 #}}}
 
+#{{{runSkewKurt
+def runSkewKurt():
+    """
+    Runs the skewness and kurtosis
+    """
+
+    loopOver = zip(dmpFolders["turbulence"],\
+                   paramKeys,\
+                   rJobs)
+    for dmp_folders, key, nr in loopOver:
+
+        # Find tSlice
+        tSlice = findSlices(dmp_folders)
+        if tSlice is None:
+            continue
+
+        collectPaths = mergeFromLinear[key]
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths)
+        kwargs = {"tSlice":tSlice}
+        sub.setJobName("skewnessKurtosisSliced{}".format(nr))
+        sub.submitFunction(skewKurtPlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
@@ -236,4 +263,5 @@ if __name__ == "__main__":
     # runEnergy(sliced=True)
     sub.setWalltime("00:10:00")
     # runPosOfFluct()
-    runPSD2D()
+    # runPSD2D()
+    runSkewKurt()
