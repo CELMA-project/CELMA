@@ -263,4 +263,32 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
                                   normalized)
                 return uEPar
     #}}}
+
+    #{{{getDh
+    def getDh(self):
+        """
+        Returns the dimension helper.
+
+        Returns
+        -------
+        dh : DimensionHelper
+            The dimension helper object
+        """
+        return self._dh
+    #}}}
+
+    #{{{getSlices
+    def getSlices(self):
+        """
+        Returns the slices.
+
+        Returns
+        -------
+        slices : tuple of tuples
+            The slices are on the format
+            ((xInd1,...), (yInd1,...), (zInd1,...), (tSlice1,...))
+        """
+        slices = (self._xInd, self._yInd, self._zInd, self._tSlice)
+        return slices
+    #}}}
 #}}}

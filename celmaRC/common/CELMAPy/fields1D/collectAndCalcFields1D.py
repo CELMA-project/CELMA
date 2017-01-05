@@ -116,7 +116,7 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         elif self._mode == "radial":
             X = self._dh.rho
         elif self._mode == "poloidal":
-            X = self._dh.theta
+            X = self._dh.thetaRad
 
         # Convert to indices
         xInd = slicesToIndices(self._collectPaths[0], self._xSlice, "x",\
