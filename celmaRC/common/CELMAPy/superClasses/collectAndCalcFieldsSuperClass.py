@@ -35,7 +35,7 @@ class CollectAndCalcFieldsSuperClass(CollectAndCalcSuperClass):
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
-        self._notCalled.append("setSlices")
+        self._notCalled.append("setSlice")
     #}}}
 
     #{{{setSlice
@@ -59,8 +59,8 @@ class CollectAndCalcFieldsSuperClass(CollectAndCalcSuperClass):
             Whether or not to slice the time trace
         """
         #}}}
-        if "setSlices" in self._notCalled:
-            self._notCalled.remove("setSlices")
+        if "setSlice" in self._notCalled:
+            self._notCalled.remove("setSlice")
 
         self._xSlice = xSlice
         self._ySlice = ySlice

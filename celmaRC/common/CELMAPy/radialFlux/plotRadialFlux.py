@@ -1,128 +1,190 @@
 #!/usr/bin/env python
 
-"""Class for radial flux plot"""
+"""Class for radialFlux plot"""
 
-from ..superClasses import PlotsSuperClass
-from ..plotHelpers import seqCMap3
+from ..superClasses import PlotSuperClass
+from ..plotHelpers import plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 
 #{{{PlotRadialFlux
-class PlotRadialFlux(PlotsSuperClass):
+class PlotRadialFlux(PlotSuperClass):
     """
-    Class which contains the radial flux data, and the plotting configuration.
+    Class which contains the radial flux data and the plotting configuration.
     """
 
-    #{{{__init___
-    def __init__(self      ,\
-                 *args     ,\
-                 radialFlux,\
-                 mode      ,\
-                 **kwargs):
+    #{{{constructor
+    def __init__(self, *args, pltSize = (15,10), **kwargs):
         #{{{docstring
-        r"""
+        """
         This constructor:
 
-        1. Calls the parent constructor
-        2. Sets the member data
-        3. Prepares the labels
+        * Calls the parent constructor
 
         Parameters
         ----------
-        radialFLux : dict
-            Dictionary where the keys are on the form "rho,theta,z".
-            The value is a dict containing of
-            {"RadialFluxX":RadialFluxX, "RadialFluxY":"RadialFluxY"}
-        mode : ["normal"|"avg"|"fluct"]
-            If mode is "normal" the output is on the form nu.
-            If mode is "avg" the output is on the form <nu>.
-            If mode is "fluct" the output is on the form \tilde{n}\tilde{u}.
-            Note that
-            <nu> = <(<n>+\tidle{n})(<u>+\tidle{u})>
-                 = <<n><u>> + <\tidle{n}\tidle{u})>
-                 = <n><u> + <\tidle{n}\tidle{u})>
-            So that <n><u> is given by the "avg" - "fluct"
+        pltSize : tuple
+            The size of the plot
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
 
-        # Set the member data
-        self._radialFlux    = radialFlux
-        self._colors = seqCMap3(np.linspace(0, 1, len(radialFlux.keys())))
-
-        # Obtain the varname
-        ind  = radialFlux.keys()[0]
-        keys = radialFlux[ind].keys()
-        self._varName = [var[:-4] for var in keys if "RadialFlux" in var][0]
-
-        # Set the labels
-        # NOTE: The probability does not have any units, but in order to
-        #       obtain the probability one has to integrate over
-        #       the RadialFlux.
-        #       Thus will the RadialFlux have the dimension of the inverse of
-        #       what is on the x axis
-        pltVarName   = self.ph.getVarPltName(self._varname)
-
-        norm  = self.uc.conversionDict[self._varName]["normalization"]
-        units = self.uc.conversionDict[self._varName]["units"]
-
-        # Set the variable label
-        if self.convertToPhysical:
-            if mode == "normal":
-                self._xLabel = r"${}$ $[{}]$"
-            elif mode == "fluct":
-                self._xLabel = r"$\tilde{{{}}}$ $[{}]$"
-            self._xLabel = self._xLabel.format(pltVarName, units)
-            self._yLabel = r"$\mathrm{{RadialFlux}}(\tilde{{{}}})$".\
-                    format(pltVarName)
-        else:
-            if mode == "normal":
-                self._xLabel = r"${}{}$"
-            elif mode == "fluct":
-                self._xLabel = r"$\tilde{{{}}}{}$"
-            self._xLabel = self._xLabel.format(pltVarName, norm)
-            self._yLabel = r"$\mathrm{{RadialFlux}}(\tilde{{{}}}{})$".\
-                    format(pltVarName, norm)
+        # Set the plot size
+        self._pltSize = pltSize
     #}}}
 
-    #{{{plotRadialFluxes
-    def plotRadialFluxes(self):
-        """ Plots the radial fluxes."""
+    #{{{setData
+    def setData(self, radialFluxes, mode, timeAx=True):
+        #{{{docstring
+        """
+        Sets the radial fluxes to be plotted.
+
+        This function also sets the variable labels, colors and the save name.
+
+        Parameters
+        ----------
+        radialFluxes : dict
+            Dictionary where the keys are on the form "rho,theta,z".
+            The value is a dict containing of
+            {varName:radialFlux, "time":time}
+        mode : ["normal"|"fluct"]
+            What mode the input is given in.
+        timeAx : bool
+            Whether or not the time should be on the x axis
+        """
+        #}}}
+
+        self._timeAx = timeAx
+
+        # Set the member data
+        self._radialFluxes = radialFluxes
+        self._mode = mode
+
+        # Obtain the varname
+        ind  = tuple(radialFluxes.keys())[0]
+        keys = radialFluxes[ind].keys()
+        self._radialFluxName = tuple(var for var in keys if var != "time")[0]
+        self._varName  = self._radialFluxName[:-len("radialFlux")]
+
+        # Obtain the color (pad away brigthest colors)
+        pad = 3
+        self._colors = seqCMap3(np.linspace(0, 1, len(radialFluxes.keys())+pad))
+
+        self._prepareLabels()
+
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varName)
+
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        # Set the fileName
+        self._fileName =\
+            os.path.join(self._savePath,\
+                "{}-{}-{}".format(self._varName, "radialFluxes", self._fluctName))
+
+        if not(timeAx):
+            self._fileName += "Indices"
+        if (self._sliced):
+            self._fileName += "Sliced"
+
+        if self._extension is None:
+            self._extension = "png"
+
+        self._fileName = "{}.{}".format(self._fileName, self._extension)
+    #}}}
+
+    #{{{_prepareLabels
+    def _prepareLabels(self):
+        """
+        Prepares the labels for plotting.
+        """
+
+        # Set var label template
+        if self.uc.convertToPhysical:
+            unitsOrNormalization = " $[{units}]$"
+        else:
+            unitsOrNormalization = "${normalization}$"
+        if self._mode == "normal":
+            self._varLabelTemplate = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
+                                        format(unitsOrNormalization)
+            self._fluctName = ""
+        elif self._mode == "fluct":
+            self._varLabelTemplate = (\
+                    r"$\widetilde{{{{{{}}}}}} "
+                    r"\widetilde{{{{ u }}}}_{{{{E\times B, \rho}}}}${}").\
+                    format(unitsOrNormalization)
+            self._fluctName = "fluct"
+        else:
+            message = "'{}'-mode not implemented.".format(mode)
+            raise NotImplementedError(message)
+
+        # Set the time label
+        if self._timeAx:
+            self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        else:
+            self._timeLabel = "$\mathrm{Time}$ $\mathrm{index}$"
+    #}}}
+
+    #{{{plotSaveShowRadialFlux
+    def plotSaveShowRadialFlux(self):
+        """
+        Performs the actual plotting.
+        """
 
         # Create the plot
         fig = plt.figure(figsize = self._pltSize)
         ax  = fig.add_subplot(111)
 
-        keys = sorted(self._timeTraces.keys())
+        keys = sorted(self._radialFluxes.keys())
 
-        for key, color in keys, self._colors:
+        for key, color in zip(keys, self._colors):
             # Make the label
             rho, theta, z = key.split(",")
-            label = (r"$\rho={}$ $\theta={}$ $z={}$").format(rho, theta. z)
 
-            ax.plot(self._RadialFlux[key]["time"],\
-                    self._RadialFlux[key][self._varName],\
-                    color=color,\
-                    label=label)
+            # Set values
+            self._ph.rhoTxtDict  ["value"] =\
+                    plotNumberFormatter(float(rho), None)
+            self._ph.zTxtDict    ["value"] =\
+                    plotNumberFormatter(float(z), None)
+            self._ph.thetaTxtDict["value"] =\
+                    plotNumberFormatter(float(theta), None)
+
+            # Make the const values
+            label = (r"{}$,$ {}$,$ {}").\
+                    format(\
+                        self._ph.rhoTxtDict  ["constRhoTxt"].\
+                            format(self._ph.rhoTxtDict),\
+                        self._ph.thetaTxtDict["constThetaTxt"].\
+                            format(self._ph.thetaTxtDict),\
+                        self._ph.zTxtDict["constZTxt"].\
+                            format(self._ph.zTxtDict),\
+                          )
+
+            if self._timeAx:
+                ax.plot(self._radialFluxes[key]["time"],\
+                        self._radialFluxes[key][self._radialFluxName],\
+                        color=color, label=label)
+            else:
+                ax.plot(\
+                        self._radialFluxes[key][self._varName],\
+                        color=color, label=label)
 
         # Set axis labels
-        ax.set_xlabel(self._xLabel)
-        ax.set_ylabel(self._yLabel)
+        ax.set_xlabel(self._timeLabel)
+        ax.set_ylabel(self._varLabel)
 
         # Make the plot look nice
-        self.ph.makePlotPretty(ax, rotation = 45)
+        self._ph.makePlotPretty(ax, rotation = 45)
 
         if self._showPlot:
             plt.show()
 
         if self._savePlot:
-            fileName = "{}.{}".\
-                format(os.path.join(self._savePath, "radialFlux"),\
-                       self._extension)
-            self.ph.savePlot(fig, fileName, (self._leg,))
+            self._ph.savePlot(fig, self._fileName)
 
         plt.close(fig)
     #}}}

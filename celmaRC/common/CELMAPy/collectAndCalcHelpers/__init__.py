@@ -22,3 +22,7 @@ from .meshHelper import addLastThetaSlice, get2DMesh
 from .nonSolvedVariables import calcN, calcUIPar, calcUEPar
 from .scanHelpers import getScanValue
 from .slicesToIndices import slicesToIndices
+
+# Files which depends on external modules which are referring to this
+# package
+from .calcVelocities import calcRadialExBPoloidal
