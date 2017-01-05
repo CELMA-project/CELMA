@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-"""
-Contains functions for animating the 1D fields
-"""
+"""Class for radialProfile plots"""
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap3
 import matplotlib.pylab as plt
 import numpy as np
 import os
+
+# NOTE: May be suffering from a DRY case
 
 #{{{PlotProfAndGradCompare
 class PlotProfAndGradCompare(PlotSuperClass):
