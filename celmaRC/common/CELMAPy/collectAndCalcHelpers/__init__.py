@@ -25,4 +25,4 @@ from .slicesToIndices import slicesToIndices
 
 # Files which depends on external modules which are referring to this
 # package
-from .calcVelocities import calcRadialExBPoloidal
+from .calcVelocities import (calcRadialExBPoloidal, calcPoloidalExBConstZ)

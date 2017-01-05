@@ -95,7 +95,6 @@ class CollectAndCalcRadialFlux(object):
             radialExB, time = calcRadialExBPoloidal(\
                                 self._collectPaths                         ,\
                                 slices                                     ,\
-                                self._dh                                   ,\
                                 mode = self._mode                          ,\
                                 convertToPhysical = self._convertToPhysical,\
                                )
