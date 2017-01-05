@@ -42,8 +42,9 @@ class CollectAndCalcRadialProfile(object):
         zInd = 0
         self._slices = (None, yInd, zInd, tSlice)
 
-        # Placeholder
+        # Placeholder for uc and dh
         self.uc = None
+        self.dh = None
     #}}}
 
     #{{{collectWrapper
@@ -76,9 +77,12 @@ class CollectAndCalcRadialProfile(object):
                 return2d   = False,\
                 convertToPhysical = self._convertToPhysical)
 
-        # Set the unitsconverter if not set
+        # Set the units converter if not set
         if self.uc is None:
             self.uc = ccf1D.uc
+        # Set the dimension helper if not set
+        if self.dh is None:
+            self.dh = ccf1D.dh
 
         ccf1D.setSlice(*self._slices)
         specialCollects = ("n", "uIPar", "uEPar")
