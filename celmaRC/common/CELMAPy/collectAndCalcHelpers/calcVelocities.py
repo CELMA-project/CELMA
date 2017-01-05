@@ -70,7 +70,7 @@ def calcPoloidalExBConstZ(collectPaths, slices,\
                           mode="fluct", convertToPhysical = True):
     #{{{docstring
     """
-    Calculates the poloidal ExB velocity for a z plane
+    Calculates the poloidal ExB velocity for a parallel plane
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ def calcPoloidalExBConstZ(collectPaths, slices,\
     Returns
     -------
     poloidalExB : array-4d
-        The poloidal ExB for a fixed poloidal plane
+        The poloidal ExB for a fixed parallel plane
     time : array-1d
         The corresponding time
     """
