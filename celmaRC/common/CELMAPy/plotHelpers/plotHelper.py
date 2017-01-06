@@ -77,37 +77,37 @@ class PlotHelper(object):
         "momDensParArtVisc" : (r"D_{nu_i,\parallel}"                      \
                                r"\partial^2_{\parallel}nu_{i,\parallel}"),\
         # vort and vortD fields
-        "vortNeutral"               :  r"-\nu_{in}n\Omega"                    ,\
-        "potNeutral"                : (r"-\nu_{in}\nabla_\perp \phi \cdot"     \
-                                       r" \nabla_\perp n")                    ,\
-        "vortDAdv"                  :  r"-\frac{1}{JB}\{\phi, \Omega^D\}"     ,\
-        "vortAdv"                   :  r"-\frac{1}{JB}\{\phi, \Omega\}"       ,\
-        "kinEnAdvN"                 : (r"-\frac{1}{2J}\{\mathbf{u}_E \cdot"    \
-                                       r"\mathbf{u}_E, n\}")                  ,\
-        "parDerDivUIParNGradPerpPhi": (r"-\partial_\parallel \nabla\cdot"      \
-                                       r"\left(u_{i,\parallel}"                \
-                                       r"n \nabla_\perp \phi \right)")        ,\
-        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"   ,\
-        "vortDParArtVisc"           : (r"D_{\Omega^D} \partial^2_{\parallel}"  \
-                                       r"\Omega^D")                           ,\
-        "vortDPerpArtVisc"          : (r"D_{\Omega^D, \perp} \nabla_\perp^2"   \
-                                       r"\Omega^D")                           ,\
-        "vortDHyperVisc"            : (r"D^H_{\Omega^D, \theta}"               \
-                                       r" \partial_\theta^4\Omega^D")         ,\
-        "vortParAdv"                : (r"-u_{i,\parallel}"                     \
-                                       r"\partial_\parallel\Omega")           ,\
-        "DDYGradPerpPhiGradPerpUI"  : (r"-\partial_\parallel"                  \
-                                       r" \left( \nabla_\perp \phi\right)"     \
-                                       r"\cdot \nabla_\perp u_{i,\parallel}") ,\
-        "divSourcePhi"              : (r"-\nabla\cdot"                         \
-                                       r"\left(S\nabla_\perp\phi\right)")     ,\
-        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"   ,\
-        "vortParArtVisc"            : (r"D_{\Omega} \partial^2_{\parallel}"    \
-                                       r"\Omega")                             ,\
-        "vortPerpArtVisc"           : (r"D_{\Omega, \perp} \nabla_\perp^2"     \
-                                       r"\Omega")                             ,\
-        "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                 \
-                                       r"\partial_\theta^4\Omega")            ,\
+        "vortNeutral"               :  r"-\nu_{in}n\Omega"                   ,\
+        "potNeutral"                : (r"-\nu_{in}\nabla_\perp \phi \cdot"    \
+                                       r" \nabla_\perp n")                   ,\
+        "vortDAdv"                  :  r"-\frac{1}{JB}\{\phi, \Omega^D\}"    ,\
+        "vortAdv"                   :  r"-\frac{1}{JB}\{\phi, \Omega\}"      ,\
+        "kinEnAdvN"                 : (r"-\frac{1}{2J}\{\mathbf{u}_E \cdot"   \
+                                       r"\mathbf{u}_E, n\}")                 ,\
+        "parDerDivUIParNGradPerpPhi": (r"-\partial_\parallel \nabla\cdot"     \
+                                       r"\left(u_{i,\parallel}"               \
+                                       r"n \nabla_\perp \phi \right)")       ,\
+        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"  ,\
+        "vortDParArtVisc"           : (r"D_{\Omega^D} \partial^2_{\parallel}" \
+                                       r"\Omega^D")                          ,\
+        "vortDPerpArtVisc"          : (r"D_{\Omega^D, \perp} \nabla_\perp^2"  \
+                                       r"\Omega^D")                          ,\
+        "vortDHyperVisc"            : (r"D^H_{\Omega^D, \theta}"              \
+                                       r" \partial_\theta^4\Omega^D")        ,\
+        "vortParAdv"                : (r"-u_{i,\parallel}"                    \
+                                       r"\partial_\parallel\Omega")          ,\
+        "DDYGradPerpPhiGradPerpUI"  : (r"-\partial_\parallel"                 \
+                                       r" \left( \nabla_\perp \phi\right)"    \
+                                       r"\cdot \nabla_\perp u_{i,\parallel}"),\
+        "divSourcePhi"              : (r"-\nabla\cdot"                        \
+                                       r"\left(S\nabla_\perp\phi\right)")    ,\
+        "divParCur"                 :  r"\partial_{\parallel}j_{\parallel}"  ,\
+        "vortParArtVisc"            : (r"D_{\Omega} \partial^2_{\parallel}"   \
+                                       r"\Omega")                            ,\
+        "vortPerpArtVisc"           : (r"D_{\Omega, \perp} \nabla_\perp^2"    \
+                                       r"\Omega")                            ,\
+        "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                \
+                                       r"\partial_\theta^4\Omega")           ,\
         # Miscellaneous
         "modeNr"    :r"$m_\theta$",\
         "B0"        :r"$B_0$"     ,\
@@ -283,7 +283,8 @@ class PlotHelper(object):
                 leg.get_frame().set_alpha(0.5)
             except AttributeError as ae:
                 if "NoneType" in ae.args[0] and "get_frame" in ae.args[0]:
-                    print("{0}{1}WARNING: Could not set legend{1}{0}".format("\n","!"*4))
+                    print("{0}{1}WARNING: Could not set legend{1}{0}".\
+                          format("\n","!"*4))
                 else:
                     raise ae
 

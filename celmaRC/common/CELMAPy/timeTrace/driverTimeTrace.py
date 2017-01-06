@@ -45,7 +45,47 @@ def driverTimeTrace(collectPaths     ,\
     """
     #}}}
 
+    tt, uc = getTimeTrace(collectPaths     ,\
+                          varName          ,\
+                          convertToPhysical,\
+                          mode             ,\
+                          indicesArgs      ,\
+                          indicesKwargs    ,\
+                         )
 
+    # Plot
+    ptt = PlotTimeTrace(uc              ,\
+                        **plotSuperKwargs)
+    ptt.setData(tt, mode)
+    ptt.plotSaveShowTimeTrace()
+#}}}
+
+#{{{getTimeTrace
+def getTimeTrace(collectPaths     ,\
+                 varName          ,\
+                 convertToPhysical,\
+                 mode             ,\
+                 indicesArgs      ,\
+                 indicesKwargs    ,\
+                ):
+    #{{{docstring
+    """
+    Obtains the time traces.
+
+    Parameters
+    ----------
+    See driverTimeTrace for details.
+
+    Returns
+    -------
+    tt : dict
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {varName:timeTrace, "time":time}
+    uc : UnitsConverter
+        The units converter
+    """
+    #}}}
     # Create collect object
     cctt = CollectAndCalcTimeTrace(collectPaths                         ,\
                                    mode              = mode             ,\
@@ -62,11 +102,7 @@ def driverTimeTrace(collectPaths     ,\
     tt = cctt.executeCollectAndCalc()
     tt = cctt.convertTo1D(tt)
 
-    # Plot
-    ptt = PlotTimeTrace(cctt.uc         ,\
-                        **plotSuperKwargs)
-    ptt.setData(tt, mode)
-    ptt.plotSaveShowTimeTrace()
+    return tt, cctt.uc
 #}}}
 
 #{{{DriverTimeTrace

@@ -153,8 +153,6 @@ def findLargestRadialGrad(var, dx, MXG = None):
     # nanmax excludes the NaNs
     maxGradInds = np.where(np.abs(ddxVar) == np.nanmax(np.abs(ddxVar)))
 
-    maxGrad = ddxVar[maxGradInds]
-
     # Take the firs occurence of the x axis
     maxGradInd = int(maxGradInds[1][0])
     if MXG is not None:
@@ -192,8 +190,6 @@ def findLargestParallelGrad(var, dy, MYG = None):
     # nanmax excludes the NaNs
     maxGradInds = np.where(np.abs(ddyVar) == np.nanmax(np.abs(ddyVar)))
 
-    maxGrad = ddyVar[maxGradInds]
-
     # Take the firs occurence of the y axis
     maxGradInd = int(maxGradInds[2][0])
     if MYG is not None:
@@ -227,8 +223,6 @@ def findLargestPoloidalGrad(var, J):
 
     # nanmax excludes the NaNs
     maxGradInds = np.where(np.abs(ddzVar) == np.nanmax(np.abs(ddzVar)))
-
-    maxGrad = ddzVar[maxGradInds]
 
     # Take the firs occurence of the z axis
     maxGradInd = int(maxGradInds[3][0])

@@ -131,7 +131,8 @@ class PlotGrowthRates(PlotSuperClass):
             self._legendTemplate = r"{0[scanOrMode]} = {2[val]}${1[units]}$"
         else:
             unitsOrNormalization = "${normalization}$"
-            self._legendTemplate = r"{0[scanOrMode]}{1[normalization]} = ${2[val]}$"
+            self._legendTemplate =\
+                r"{0[scanOrMode]}{1[normalization]} = ${2[val]}$"
         self._varLabelTemplate = r"{{}}{}".format(unitsOrNormalization)
 
         # Set the y-axes

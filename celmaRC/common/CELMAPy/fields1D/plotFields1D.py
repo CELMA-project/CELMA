@@ -189,10 +189,12 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
             for line, key in zip(self._ddtLines, self._plotOrder):
                 line.set_data(self._X, self._vars[key][tInd,:])
 
-            self._ddtLines[-1].set_data(self._X, self._vars[self._ddtVar][tInd,:])
+            self._ddtLines[-1].\
+                set_data(self._X, self._vars[self._ddtVar][tInd,:])
 
         # Update the title
-        self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)
+        self._ph.tTxtDict["value"] =\
+            plotNumberFormatter(self._time[tInd], None)
         curTimeTxt = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
         self._fig.suptitle("{}{}".format(self._spatTitle, curTimeTxt))
     #}}}
@@ -308,7 +310,8 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
             self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
         self._ph.thetaTxtDict["value"] = plotNumberFormatter(thetaPos, None)
         thetaTxt =\
-            self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
+            self._ph.thetaTxtDict["constThetaTxt"].\
+            format(self._ph.thetaTxtDict)
         self._spatTitle = self._spatTitle.format(rhoTxt, thetaTxt)
     #}}}
 
@@ -381,7 +384,8 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
             for line, key in zip(self._ddtLines, self._plotOrder):
                 line.set_data(self._X, self._vars[key][tInd,:])
 
-            self._ddtLines[-1].set_data(self._X, self._vars[self._ddtVar][tInd,:])
+            self._ddtLines[-1].\
+                set_data(self._X, self._vars[self._ddtVar][tInd,:])
 
         # Update the title
         self._ph.tTxtDict["value"] = plotNumberFormatter(self._time[tInd], None)

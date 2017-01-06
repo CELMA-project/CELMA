@@ -272,7 +272,6 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                                 )[0]\
                               )
 
-            # FIXME: varyMaxMin currently not implemented
             vMax, vMin = getMaxMinAnimation((self._vars[key],), False, False)
             ax.set_ylim(vMin[0], vMax[0])
 
@@ -301,7 +300,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             pltVarName = self._ph.getVarPltName(self._ddtVar)
             if self.uc.convertToPhysical:
                 legend = self._varLegendTemplate.\
-                    format(pltVarName, **selfuc.conversionDict[key])
+                    format(pltVarName, **self.uc.conversionDict[key])
             else:
                 legend = "${}$".format(pltVarName)
 
@@ -319,7 +318,6 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
 
             # Make an array tuple in order to check for max/min
             arrayTuple = tuple(self._vars[key] for key in self._plotOrder)
-            # FIXME: varyMaxMin currently not implemented
             vMax, vMin = getMaxMinAnimation(arrayTuple, False, False)
             self._axes[-1].set_ylim(vMin[0], vMax[0])
 
@@ -497,7 +495,7 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
             if vmax is not None and vmin is not None:
                 success = False
         if not(success):
-            message = "Either all or none of vmax, vmin and levels must be None"
+            message ="Either all or none of vmax, vmin and levels must be None"
             raise ValueError(message)
 
         if self._iterableLevels:

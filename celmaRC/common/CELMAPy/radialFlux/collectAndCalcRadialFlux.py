@@ -154,8 +154,8 @@ class CollectAndCalcRadialFlux(object):
             radialFlux[key][fluxKey] =\
                 timeTraces[key][varName] * radialExBTraces[key]["uExBRadial"]
 
-        # NOTE: If timeTraces was converted to physical units, then radialFlux is
-        #       in physical units as well
+        # NOTE: If timeTraces was converted to physical units, then radialFlux 
+        #       is in physical units as well
         return radialFlux
     #}}}
 #}}}

@@ -11,7 +11,8 @@ from scipy.stats import kurtosis, skew
 #{{{CollectAndCalcSkewnessKurtosis
 class CollectAndCalcSkewnessKurtosis(CollectAndCalcTimeTrace):
     """
-    Class for collecting and calcuating skewness and kurtosis of the time traces
+    Class for collecting and calcuating skewness and kurtosis of the time 
+    traces
 
     Skewness
     --------
@@ -73,8 +74,8 @@ class CollectAndCalcSkewnessKurtosis(CollectAndCalcTimeTrace):
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {varNameSkew:skewness, varNameKurt:kurtosis}
-            NOTE: Fisher's kurtosis (excess) is used, where 3 is subtracted from
-                  Pearson's definition
+            NOTE: Fisher's kurtosis (excess) is used, where 3 is subtracted
+                  from Pearson's definition
         """
         #}}}
 
