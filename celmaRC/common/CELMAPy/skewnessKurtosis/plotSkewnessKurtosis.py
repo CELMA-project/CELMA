@@ -11,7 +11,8 @@ import os
 #{{{PlotSkewnessKurtosis
 class PlotSkewnessKurtosis(PlotSuperClass):
     """
-    Class which contains the skewness and kurtosis data and the plotting configuration.
+    Class which contains the skewness and kurtosis data and the plotting
+    configuration.
     """
 
     #{{{constructor

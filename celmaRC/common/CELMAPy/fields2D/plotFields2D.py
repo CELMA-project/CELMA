@@ -396,8 +396,11 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         #}}}
 
         # Set title
-        self._ph.thetaTxtDict["value"] = plotNumberFormatter(self._constTheta, None)
-        parTitle = self._ph.thetaTxtDict["constThetaTxt"].format(self._ph.thetaTxtDict)
+        self._ph.thetaTxtDict["value"] =\
+            plotNumberFormatter(self._constTheta, None)
+        parTitle =\
+            self._ph.thetaTxtDict["constThetaTxt"].\
+            format(self._ph.thetaTxtDict)
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
@@ -546,7 +549,9 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
 
         # Plot the poloidal plane
         polPlane = self._polAx.\
-            contourf(self._X_ZT, self._Y_ZT, self._Z_ZT[tInd, :, :].transpose(),\
+            contourf(self._X_ZT,\
+                     self._Y_ZT,\
+                     self._Z_ZT[tInd, :, :].transpose(),\
                      **self._cfKwargs)
 
         # Set rasterization order
@@ -593,8 +598,10 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         #}}}
 
         # Set title
-        self._ph.rhoTxtDict["value"] = plotNumberFormatter(self._constRho, None)
-        polTitle = self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
+        self._ph.rhoTxtDict["value"] =\
+            plotNumberFormatter(self._constRho, None)
+        polTitle =\
+            self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)

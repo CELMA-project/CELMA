@@ -167,11 +167,13 @@ class PlotFourierModes(PlotSuperClass):
                 if self._timeAx:
                     ax.plot(\
                         self._fourierModes[key]["time"],\
-                        self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                        self._fourierModes[key][self._varName+"Magnitude"]\
+                                          [:,modeNr],\
                         color=color, label=label)
                 else:
                     ax.plot(\
-                        self._fourierModes[key][self._varName+"Magnitude"][:,modeNr],\
+                        self._fourierModes[key][self._varName+"Magnitude"]\
+                                          [:,modeNr],\
                         color=color, label=label)
 
             # Set axis labels

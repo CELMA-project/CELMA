@@ -115,7 +115,7 @@ class PlotTimeTrace(PlotSuperClass):
                     format(unitsOrNormalization)
             self._fluctName = "fluct"
         else:
-            message = "'{}'-mode not implemented.".format(mode)
+            message = "'{}'-mode not implemented.".format(self._mode)
             raise NotImplementedError(message)
 
         # Set the time label

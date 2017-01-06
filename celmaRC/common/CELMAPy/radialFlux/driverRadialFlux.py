@@ -46,6 +46,50 @@ def driverRadialFlux(collectPaths     ,\
     """
     #}}}
 
+    radialFlux, uc = getRadialFlux(collectPaths     ,\
+                                   varName          ,\
+                                   convertToPhysical,\
+                                   mode             ,\
+                                   indicesArgs      ,\
+                                   indicesKwargs    ,\
+                                   plotSuperKwargs  ,\
+                                  )
+
+    # Plot
+    ptt = PlotRadialFlux(uc              ,\
+                         **plotSuperKwargs)
+    ptt.setData(radialFlux, mode)
+    ptt.plotSaveShowRadialFlux()
+#}}}
+
+#{{{getRadialFlux
+def getRadialFlux(collectPaths     ,\
+                  varName          ,\
+                  convertToPhysical,\
+                  mode             ,\
+                  indicesArgs      ,\
+                  indicesKwargs    ,\
+                  plotSuperKwargs  ,\
+                 ):
+    #{{{docstring
+    """
+    Obtains the radialFlux.
+
+    Parameters
+    ----------
+    See driverRadialFlux for details.
+
+    Returns
+    -------
+    radialFluxes : dict
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {varName:radialFlux, "time":time}
+    uc : UnitsConverter
+        The units converter
+    """
+    #}}}
+
     # Create collect object
     cctt = CollectAndCalcTimeTrace(collectPaths                         ,\
                                    mode              = mode             ,\
@@ -68,11 +112,7 @@ def driverRadialFlux(collectPaths     ,\
     radialExBTraces = ccrf.getRadialExBTrace()
     radialFlux      = ccrf.calcRadialFlux(tt, radialExBTraces)
 
-    # Plot
-    ptt = PlotRadialFlux(cctt.uc         ,\
-                        **plotSuperKwargs)
-    ptt.setData(radialFlux, mode)
-    ptt.plotSaveShowRadialFlux()
+    return radialFlux, cctt.uc
 #}}}
 
 #{{{DriverRadialFlux

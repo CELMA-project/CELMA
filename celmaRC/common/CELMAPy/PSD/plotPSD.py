@@ -272,8 +272,10 @@ class PlotPSD(PlotSuperClass):
 
             # Clip the very first point as this is very low
             xVals = self._PSD[key]["{}PSDX".format(self._varName)][1:]
-            yVals = np.log10(       self._PSD[key]["{}PSDY".format(self._varName)][1:]/\
-                             np.max(self._PSD[key]["{}PSDY".format(self._varName)][1:]))
+            yVals = np.log10(       self._PSD[key]["{}PSDY".\
+                                     format(self._varName)][1:]/\
+                             np.max(self._PSD[key]["{}PSDY".\
+                                    format(self._varName)][1:]))
 
             # Plot
             ax.plot(xVals, yVals, color=color, label=label)

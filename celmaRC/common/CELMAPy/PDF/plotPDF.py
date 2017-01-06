@@ -136,6 +136,7 @@ class PlotPDF(PlotSuperClass):
         self._xLabelTemplate = r"$" + normalOrFluct + r"$" +\
                r" $" + xLabelunitsOrNormalization + r"$"
     #}}}
+
     #{{{plotSaveShowPDF
     def plotSaveShowPDF(self):
         """ Plots the probability density function."""

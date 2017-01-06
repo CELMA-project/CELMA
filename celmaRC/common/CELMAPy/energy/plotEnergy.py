@@ -117,8 +117,12 @@ class PlotEnergy(PlotSuperClass):
         """
 
         # Create the plot
-        # Not sharex="col" as it seems like the ticks are lost when setting noneAx axis off
-        fig, ((kinEParAx, kinIParAx), (kinEPerpAx, kinIPerpAx), (potEAx, noneAx)) =\
+        # Not sharex="col" as it seems like the ticks are lost when setting
+        # noneAx axis off
+        fig,\
+        ((kinEParAx, kinIParAx),\
+         (kinEPerpAx, kinIPerpAx),\
+         (potEAx, noneAx)) =\
                 plt.subplots(ncols=2, nrows=3, figsize=self._pltSize)
         noneAx.set_axis_off()
 

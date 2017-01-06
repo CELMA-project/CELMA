@@ -100,7 +100,12 @@ def runGrowthRates():
     startInds = tuple(tSlices[key].start for key in tKeys)
     endInds   = tuple(tSlices[key].stop for key in tKeys)
 
-    args = (dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, startInds, endInds)
+    args = (dmp_folders,\
+            scanCollectPaths,\
+            steadyStatePaths,\
+            scanParameter,\
+            startInds,\
+            endInds)
     sub.setJobName("growthRates")
     sub.submitFunction(growthRatesPlot, args=args)
 #}}}

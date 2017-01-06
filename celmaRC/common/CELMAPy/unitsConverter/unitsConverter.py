@@ -78,7 +78,7 @@ class UnitsConverter(object):
             try:
                 for normalizer in normalizers:
                     normalizerDict[normalizer] =\
-                            safeCollect(normalizer, path=self._path, info=False)
+                           safeCollect(normalizer, path=self._path, info=False)
 
                 # The collected Te0 is given in eV, we convert this to J
                 normalizerDict["Te0"].setflags(write=True)
@@ -196,7 +196,7 @@ class UnitsConverter(object):
                                       self._normDict["omCI"]*\
                                       self._normDict["n0"],\
                      },\
-        "ddtMomDensPar":{"units"        :r"\mathrm{kg\;m}^{-2}\mathrm{\;s}^{-2}",\
+        "ddtMomDensPar":{"units"     :r"\mathrm{kg\;m}^{-2}\mathrm{\;s}^{-2}",\
                          "normalization":r"/m_in_0c_s\omega_{{ci}}",\
                          "factor"       :self._normDict["rhoS"]*\
                                          (self._normDict["omCI"]**2)*\
@@ -248,7 +248,7 @@ class UnitsConverter(object):
                       "factor"       :1,\
                       "normFactor"   :1/self._normDict["rhoS"],\
                      },\
-        # NOTE: The masses are not included in the integral from the simulations
+        # NOTE: The masses are not included in the integral from the simulation
         "eEnergy"   :{"units"        :r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}",\
                       "normalization":r"/n_0T_e\rho_s^3",\
                       "factor"       :(cst.m_e/self._normDict["mi"])*\
@@ -257,7 +257,7 @@ class UnitsConverter(object):
                                       (self._normDict["rhoS"])**3,\
                       "normFactor"   :cst.m_e/self._normDict["mi"],\
                       },\
-        # NOTE: The masses are not included in the integral from the simulations
+        # NOTE: The masses are not included in the integral from the simulation
         # NOTE: mi/mi = 1
         "iEnergy"   :{"units"        :r"\mathrm{kg\; m}^2\mathrm{\; s}^{-2}",\
                       "normalization":r"/n_0T_e\rho_s^3",\
