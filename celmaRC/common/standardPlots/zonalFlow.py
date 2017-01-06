@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for the skewness and kurtosis"""
+"""Post-processor for the zonal flow"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -8,13 +8,13 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.skewnessKurtosis import DriverSkewnessKurtosis
+from CELMAPy.zonalFlow import DriverZonalFlow
 
-#{{{skewKurtPlot
-def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
+#{{{zonalFlowPlot
+def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     #{{{docstring
     """
-    Runs the standard skewness and kurtosis plot
+    Runs the standard 2d spectral density plot
 
     Parameters
     ----------
@@ -29,16 +29,8 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
 
     useSubProcess     = False
     convertToPhysical = True
-
-    varName           = "n"
-    mode              = "fluct"
-
     yInd              = 16
-    zInd              = 0
     tSlice            = None
-
-    indicesArgs   = (None, yInd, zInd)
-    indicesKwargs = {"tSlice" : tSlice}
 
     plotSuperKwargs = {\
                         "showPlot"        : False,\
@@ -50,19 +42,17 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
                         "timeStampFolder" : False,\
                        }
 
-    dSK = DriverSkewnessKurtosis(
-                     # DriverSkewnessKurtosiss
-                     dmp_folders                   ,\
-                     indicesArgs                   ,\
-                     indicesKwargs                 ,\
-                     plotSuperKwargs               ,\
-                     varName           = varName   ,\
-                     mode              = mode      ,\
-                     # DriverPointsSuperClass
+    dRP = DriverZonalFlow(
+                     # DriverZonalFlow
+                     dmp_folders                          ,\
+                     steadyStatePath                      ,\
+                     yInd                                 ,\
+                     tSlice                               ,\
+                     plotSuperKwargs                      ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dSK.driverSkewnessKurtosis()
+    dRP.driverZonalFlow()
 #}}}

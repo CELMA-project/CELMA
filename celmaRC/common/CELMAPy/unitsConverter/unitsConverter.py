@@ -229,7 +229,7 @@ class UnitsConverter(object):
         # NOTE: The growth rates are in physical units if the time is in
         #       physical units.
         #       We are here assuming that the time is in physical units
-        "growthRate":{"units"        :r"1/\mathrm{s}",\
+        "growthRate":{"units"        :r"\mathrm{s}^{-1}",\
                       "normalization":r"\omega_{{ci}}",\
                       "factor"       :1,\
                      },\
