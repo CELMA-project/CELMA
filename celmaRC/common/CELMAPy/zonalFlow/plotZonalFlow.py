@@ -270,10 +270,10 @@ class PlotZonalFlow(PlotSuperClass):
                              )
         # Fill
         shearAngPolExBAx.fill_between(\
-                self._rho,\
-                self._polExB["angPolExBShearAvg"]+self._polExB["angPolExBShearStd"],\
-                self._polExB["angPolExBShearAvg"]-self._polExB["angPolExBShearStd"],\
-                facecolor=self._colors[1], edgecolor="none", alpha=0.2)
+          self._rho,\
+          self._polExB["angPolExBShearAvg"]+self._polExB["angPolExBShearStd"],\
+          self._polExB["angPolExBShearAvg"]-self._polExB["angPolExBShearStd"],\
+          facecolor=self._colors[1], edgecolor="none", alpha=0.2)
 
         # Set decorations
         shearAngPolExBAx.set_ylabel(self._angGradPolExBLabel)

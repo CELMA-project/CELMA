@@ -5,5 +5,6 @@ Init-file for skewness and kurtosis
 """
 
 from .collectAndCalcSkewnessKurtosis import CollectAndCalcSkewnessKurtosis
-from .driverSkewnessKurtosis import DriverSkewnessKurtosis, driverSkewnessKurtosis
+from .driverSkewnessKurtosis import (DriverSkewnessKurtosis,\
+                                     driverSkewnessKurtosis)
 from .plotSkewnessKurtosis import PlotSkewnessKurtosis

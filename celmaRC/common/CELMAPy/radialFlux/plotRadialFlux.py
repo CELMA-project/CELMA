@@ -71,7 +71,8 @@ class PlotRadialFlux(PlotSuperClass):
 
         # Obtain the color (pad away brigthest colors)
         pad = 3
-        self._colors = seqCMap3(np.linspace(0, 1, len(radialFluxes.keys())+pad))
+        self._colors =\
+            seqCMap3(np.linspace(0, 1, len(radialFluxes.keys())+pad))
 
         self._prepareLabels()
 
@@ -84,7 +85,7 @@ class PlotRadialFlux(PlotSuperClass):
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}-{}".format(self._varName, "radialFluxes", self._fluctName))
+            "{}-{}-{}".format(self._varName, "radialFluxes", self._fluctName))
 
         if not(timeAx):
             self._fileName += "Indices"
@@ -119,7 +120,7 @@ class PlotRadialFlux(PlotSuperClass):
                     format(unitsOrNormalization)
             self._fluctName = "fluct"
         else:
-            message = "'{}'-mode not implemented.".format(mode)
+            message = "'{}'-mode not implemented.".format(self._mode)
             raise NotImplementedError(message)
 
         # Set the time label

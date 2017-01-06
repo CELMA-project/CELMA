@@ -125,7 +125,8 @@ class CollectAndCalcRadialProfile(object):
         if varName != "n":
             ccf1D.setVarName("momDensPar")
             dict1D.update(ccf1D.executeCollectAndCalc())
-            dict1D.update({"uIPar":calcUIPar(dict1D["momDensPar"],dict1D["n"])})
+            dict1D.update({"uIPar":\
+                           calcUIPar(dict1D["momDensPar"],dict1D["n"])})
         if varName == "uEPar":
             ccf1D.setVarName("jPar")
             dict1D.update(ccf1D.executeCollectAndCalc())

@@ -6,6 +6,7 @@ from ..superClasses import DriverSuperClass
 from ..collectAndCalcHelpers import DDX
 from .collectAndCalcRadialProfile import CollectAndCalcRadialProfile
 from .plotRadialProfile import PlotProfAndGradCompare
+from multiprocessing import Process
 
 #{{{driverProfAndGradCompare
 def driverProfAndGradCompare(varName          ,\
@@ -130,9 +131,8 @@ def driverPosOfFluct(var1Name         ,\
     varAvg, varAvgFluct, varAvgStd = ccrp.calcAvgFluctStd(var)
 
     # Calculate the derivatives of first variable
-    dx = getUniformSpacing(steadyStatePath, "x")[0,0]
-    DDXSteadyVar = DDX(steadyVar, dx)
-    DDXVar = DDX(var, dx)
+    DDXSteadyVar = DDX(steadyVar, ccrp.dh.dx)
+    DDXVar = DDX(var, ccrp.dh.dx)
 
     DDXVarAvg, DDXVarAvgFluct, DDXVarAvgStd = ccrp.calcAvgFluctStd(DDXVar)
 
