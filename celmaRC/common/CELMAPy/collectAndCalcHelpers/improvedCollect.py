@@ -92,6 +92,10 @@ def collectiveCollect(paths               ,\
         else:
             postCollectTInd = None
 
+    # Must cast to list due to corner cases in collect
+    if tInd is not None:
+        tInd = list(tInd)
+
     for var in varStrings:
         for path in paths:
             try:
@@ -143,6 +147,10 @@ def collectiveCollect(paths               ,\
                        else None
 
             data[var] = data[var][postCollectTInd[0]:lastPost]
+
+    # Recast to tuple
+    if tInd is not None:
+        tInd = tuple(tInd)
 
     return data
 #}}}
@@ -214,9 +222,13 @@ def removePathsOutsideRange(paths, tInd):
         tInd = list(tInd)
         for remove, lenT in zip(removePaths, lenTs):
             # +1 removes the duplicate which is present in both files
-            tInd[0] = (tInd[0] - lenT) + 1
+#            tInd[0] = (tInd[0] - lenT) + 1
+            tInd[0] = (tInd[0] - lenT)
             tInd[1] =  tInd[1] - lenT if tInd[1] is not None else None
             paths.remove(remove)
+        # Remove the duplicates present in more files by shifting
+        # the first time index by one per duplicate
+        tInd[0] += len(paths)-1
         tInd = tuple(tInd)
 
     # Cast to tuple
@@ -229,12 +241,13 @@ def removePathsOutsideRange(paths, tInd):
     elif tInd[1] is None:
         b = "tInd[1] is None"
     else:
+        print("tInd[0]-tInd[1]={}".format(tInd[0]-tInd[1]))
         b = (tInd[0]-tInd[1]) == (startTInd[0]-startTInd[1])
     print("\nstartPathLen = {}, endPaths = {}, tInd==startTInd = {}\n".\
             format(len(startPaths),  inds, b)
             )
-    raise RuntimeError("YOU QUITTED")
-    import pdb; pdb.set_trace()
+    # raise RuntimeError("YOU QUITTED")
+    # import pdb; pdb.set_trace()
 # END FIXME:
     paths = tuple(paths)
 
@@ -280,6 +293,8 @@ def collectTime(paths, tInd = None):
         lastT = tInd[1]+1 if tInd[1] is not None else None
         time  = time[tInd[0]:lastT]
 
+# FIXME
+    print("len(time) = {}".format(len(time)))
     return time
 #}}}
 

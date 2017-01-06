@@ -146,6 +146,10 @@ class PlotEnergy(PlotSuperClass):
                 varKey = "{}KinE{}".format(perpOrPar, eOrI.capitalize())
 
                 if self._timeAx:
+# FIXME:
+                    print("var={}".format(len(self._energies["time"])))
+                    print("time={}".format(len(self._energies[varKey])))
+# FIXME:
                     axDict[axKey].plot(self._energies["time"],\
                                        self._energies[varKey],\
                                        color=color)
