@@ -108,7 +108,7 @@ def get1DPSD(collectPaths     ,\
     # Calculate the PSD
     PSD = ccPSD.calcPSD(tt)
 
-    return PSD
+    return PSD, ccPSD.uc
 #}}}
 
 #{{{driverPSD2D

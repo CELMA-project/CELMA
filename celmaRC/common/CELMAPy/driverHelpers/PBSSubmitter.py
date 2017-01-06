@@ -185,13 +185,13 @@ class PBSSubmitter(object):
             tmpFile = f.read()
 
         # Add arguments
+        tmpFile += "\n#Added by PBSSubmitter\n"
         tmpFile += "args={}\nkwargs={}\n".format(args, kwargs)
 
         # Add function call in the end of the script
         tmpFile += "{}({},{})\n".format(function.__name__, "*args", "**kwargs")
 
         # When the script has run, it will delete itself
-        tmpFile += "\n #Added by PBSSubmitter\n"
         tmpFile += "import os\nos.remove('{}')\n".format(fileName)
 
         # Write the python script
@@ -265,6 +265,9 @@ class PBSSubmitter(object):
         with open(scriptName, "w") as shell_script:
                 shell_script.write(jobString)
 
+# FIXME:
+        # return
+# END FIXME
         # Submit the jobs
         if dependentJob is None:
             command = "qsub ./{0}".format(scriptName).split(" ")

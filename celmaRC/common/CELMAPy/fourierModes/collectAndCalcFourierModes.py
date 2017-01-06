@@ -69,8 +69,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
 
         for x, y in zip(self._xInd, self._yInd):
             # NOTE: The indices
-            rho   = self._dh.rho     [x]
-            par   = self._dh.z       [y]
+            rho = self._dh.rho[x]
+            par = self._dh.z  [y]
 
             # Add key and dict to fourierModes
             key = "{},{}".format(rho,par)
