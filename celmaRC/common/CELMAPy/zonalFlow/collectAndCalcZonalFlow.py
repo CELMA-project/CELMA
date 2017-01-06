@@ -4,11 +4,9 @@
 Contains class for collecting and calculating the zonal flows
 """
 
-from ..fields1D import CollectAndCalcFields1D
-from ..collectAndCalcHelpers import (calcPoloidalExBConstZ,\
-                                     polAvg, timeAvg)
-from ..UnitsConverter import UnitsConverter
-import numpy as np
+from ..collectAndCalcHelpers import DimensionsHelper
+from ..calcVelocities import calcPoloidalExBConstZ
+from ..unitsConverter import UnitsConverter
 
 #{{{CollectAndCalcZonalFlow
 class CollectAndCalcZonalFlow(object):
@@ -40,8 +38,7 @@ class CollectAndCalcZonalFlow(object):
         self._convertToPhysical = convertToPhysical
         # Notice the zInd is irrelevant, and will be not be used in the
         # collect
-        zInd = 0
-        self._slices = (None, yInd, zInd, tSlice)
+        self._yTSlices = (yInd, tSlice)
 
         # Placeholder for uc
         self.uc = None
@@ -72,9 +69,9 @@ class CollectAndCalcZonalFlow(object):
         #}}}
 
         poloidalExB, time =\
-            calcPoloidalExBConstZ(paths,\
-                                  self._slices,\
-                                  mode="normal",\
+            calcPoloidalExBConstZ(paths         ,\
+                                  self._yTSlices,\
+                                  mode="normal" ,\
                                   convertToPhysical = self._convertToPhysical)
 
         dict1D = {"uExBPoloidal" : poloidalExB, "time":time}
@@ -82,10 +79,10 @@ class CollectAndCalcZonalFlow(object):
         if self.uc is None:
             self.uc = UnitsConverter(paths[0], self._convertToPhysical)
             self._convertToPhysical = self.uc.convertToPhysical
-            self._dh = DimensionsHelper(paths[0], self._convertToPhysical)
+            self.dh = DimensionsHelper(paths[0], self.uc)
 
         # Get the z position
-        dict1D["zPos"] = self._dh.z[self._slices[1]]
+        dict1D["zPos"] = self.dh.z[self._yTSlices[0]]
 
         return dict1D
     #}}}

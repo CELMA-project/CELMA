@@ -5,8 +5,7 @@ Contains functions for calculating the ExB velocities
 """
 
 from ..fields1D import CollectAndCalcFields1D
-from .averages import polAvg
-from .derivatives import DDX, DDZ
+from ..collectAndCalcHelpers import polAvg, DDX, DDZ
 import numpy as np
 
 #{{{calcRadialExBPoloidal
@@ -94,7 +93,7 @@ def calcPoloidalExBConstZ(collectPaths, slices,\
     #}}}
 
     # Reform the slice
-    zInd, tSlice = slices
+    yInd, tSlice = slices
     slices = (None, yInd, None, tSlice)
 
     # Collect phi

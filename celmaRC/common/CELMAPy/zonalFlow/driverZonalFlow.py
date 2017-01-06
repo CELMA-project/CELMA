@@ -4,9 +4,11 @@
 
 from ..superClasses import DriverSuperClass
 from ..collectAndCalcHelpers import DDX
-from .collectAndCalcRadialProfile import CollectAndCalcRadialProfile
+from ..radialProfile import CollectAndCalcRadialProfile
 from .collectAndCalcZonalFlow import CollectAndCalcZonalFlow
-from .plotZonalFlow import PlotProfAndGradCompare
+from .plotZonalFlow import PlotZonalFlow
+from multiprocessing import Process
+import numpy as np
 
 #{{{driverZonalFlow
 def driverZonalFlow(\
@@ -50,6 +52,14 @@ def driverZonalFlow(\
 
     # Extract the steady state variable at the last time (but keep the 4d)
     sSVar = polExBSS["uExBPoloidal"][-2:-1,:,:,:]
+    # Expand rho in order to have a defined arithmetic operation with sSVar
+    tmp = np.expand_dims(\
+            np.expand_dims(\
+                np.expand_dims(rho, axis=0),\
+            axis=2),\
+          axis=3)
+    rho    = np.empty(sSVar.shape)
+    rho[:] = tmp
     # Calculate the angular velocity
     angVelSSVar =sSVar/rho
     # Calculate the shear
@@ -60,6 +70,9 @@ def driverZonalFlow(\
     var = polExB["uExBPoloidal"]
     # Calculate average, fluct and std
     varAvg, _, varStd = CollectAndCalcRadialProfile.calcAvgFluctStd(var)
+    # Expand rho in order to have a defined arithmetic operation with sSVar
+    rho    = np.empty(varAvg.shape)
+    rho[:] = tmp
     # Calculate the angular velocity (the error propagation is linear)
     angVelVar    = var   /rho
     angVelVarAvg = varAvg/rho
@@ -69,12 +82,12 @@ def driverZonalFlow(\
     angVelShearVar = DDX(angVelVar, dx)
     # Calculate average, fluct and std of the shear
     angVelShearVarAvg, _, angVelShearVarStd =\
-            ccrp.calcAvgFluctStd(angVelShearVar)
+            CollectAndCalcRadialProfile.calcAvgFluctStd(angVelShearVar)
 
     # Recast to dict
     # Remove not needed
     polExB.pop("time")
-    polExB["polExBSS"           = sSvar            [0,:,0,0]
+    polExB["polExBSS"]          = sSVar            [0,:,0,0]
     polExB["angPolExBSS"]       = angVelSSVar      [0,:,0,0]
     polExB["angPolExBShearSS"]  = angVelSSVarShear [0,:,0,0]
     polExB["polExBAvg"]         = varAvg           [0,:,0,0]
@@ -83,12 +96,12 @@ def driverZonalFlow(\
     polExB["angPolExBStd"]      = angVelVarStd     [0,:,0,0]
     polExB["angPolExBShearAvg"] = angVelShearVarAvg[0,:,0,0]
     polExB["angPolExBShearStd"] = angVelShearVarStd[0,:,0,0]
-    polExB["rho"]               = rho
+    polExB["rho"]               = rho              [0,:,0,0]
 
     # Plot
     prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
     prp.setData(polExB)
-    prp.plotSaveShowZonalFlows()
+    prp.plotSaveShowZonalFlow()
 #}}}
 
 #{{{DriverZonalFlow
@@ -166,6 +179,6 @@ class DriverZonalFlow(DriverSuperClass):
             processes = Process(target = driverZonalFlow, args = args)
             processes.start()
         else:
-            driverPosOfFluct(*args)
+            driverZonalFlow(*args)
     #}}}
 #}}}

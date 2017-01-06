@@ -18,6 +18,7 @@ from standardPlots import (fourierModesPlot,\
                            posOfFluctPlot  ,\
                            PSD2DPlot       ,\
                            skewKurtPlot    ,\
+                           zonalFlowPlot   ,\
                            )
 
 #{{{findSlices
@@ -216,6 +217,32 @@ def runSkewKurt():
         sleep(1.5)
 #}}}
 
+#{{{runZonalFlow
+def runZonalFlow():
+    """
+    Runs the skewness and kurtosis
+    """
+    loopOver = zip(dmpFolders["turbulence"],\
+                   dmpFolders["expand"],\
+                   paramKeys,\
+                   rJobs)
+    for dmp_folders, steadyStatePath, key, nr in loopOver:
+
+        # Find tSlice
+        tSlice = findSlices(dmp_folders)
+        if tSlice is None:
+            continue
+
+        collectPaths = mergeFromLinear[key]
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths, steadyStatePath)
+        kwargs = {"tSlice":tSlice}
+        sub.setJobName("zonalFlowSliced{}".format(nr))
+        sub.submitFunction(zonalFlowPlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
@@ -264,4 +291,5 @@ if __name__ == "__main__":
     sub.setWalltime("00:10:00")
     # runPosOfFluct()
     # runPSD2D()
-    runSkewKurt()
+    # runSkewKurt()
+    runZonalFlow()
