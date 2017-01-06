@@ -5,7 +5,9 @@ Contains function which collects and calculates the energies
 """
 
 from ..superClasses import CollectAndCalcSuperClass
-from ..collectAndCalcHelpers import collectiveCollect, collectTime
+from ..collectAndCalcHelpers import (collectiveCollect,\
+                                     collectTime,\
+                                     slicesToIndices)
 
 #{{{CollectAndCalcEnergy
 class CollectAndCalcEnergy(CollectAndCalcSuperClass):
