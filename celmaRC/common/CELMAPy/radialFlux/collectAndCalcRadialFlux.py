@@ -82,13 +82,7 @@ class CollectAndCalcRadialFlux(object):
             key = "{},{},{}".format(rho,theta,par)
             raidalExBTraces[key] = {}
 
-            if self._tSlice is not None:
-                tStart = self._tSlice[tCounter].start
-                tEnd   = self._tSlice[tCounter].stop
-                t = (tStart, tEnd)
-            else:
-                t = None
-
+            t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
             tCounter += 1
 
             slices = (x, y, t)
@@ -154,7 +148,7 @@ class CollectAndCalcRadialFlux(object):
             radialFlux[key][fluxKey] =\
                 timeTraces[key][varName] * radialExBTraces[key]["uExBRadial"]
 
-        # NOTE: If timeTraces was converted to physical units, then radialFlux 
+        # NOTE: If timeTraces was converted to physical units, then radialFlux
         #       is in physical units as well
         return radialFlux
     #}}}
