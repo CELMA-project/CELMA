@@ -270,14 +270,18 @@ class PlotGrowthRates(PlotSuperClass):
         reAx.margins(x=0.1, y=0.1)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(imAx, loc ="lower left")
-        self._ph.makePlotPretty(reAx, loc ="lower left", rotation = 45)
+        self._ph.makePlotPretty(imAx, loc ="upper left")
+        self._ph.makePlotPretty(reAx, loc ="upper left",\
+                                legend = False, rotation = 45)
 
         # Set the ticks
         # reAx.tick_params(labelbottom="off")
         ticks = tuple(gRDF.loc[outerInd]["growthRate"].index.values)
         reAx.xaxis.set_ticks(ticks)
         imAx.xaxis.set_ticks(ticks)
+
+        # Adjust the subplots
+        fig.subplots_adjust(hspace=0.1, wspace=0.35)
 
         if self._showPlot:
             plt.show()

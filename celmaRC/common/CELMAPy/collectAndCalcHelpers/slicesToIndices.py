@@ -7,13 +7,15 @@ Contains function which converts a slice to indices used for BOUT++ collection.
 from .gridSizes import getSizes
 
 #{{{slicesToIndices
-def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
+def slicesToIndices(paths, theSlice, dimension, xguards=False, yguards=False):
     #{{{docstring
     """
     Return the slice such that it can be given as an input to "collect"
 
     Parameters
     ----------
+    paths : tuple
+        Tuple of the paths to collect from
     theSlice : [slice | int | None]
         Current slice to use
     dimension : ["x" | "y" | "z" | "t"]
@@ -26,19 +28,23 @@ def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
     """
     #}}}
 
+    # Guard
+    if type(paths) == str:
+        paths = (paths,)
+
     if type(theSlice) == slice:
         indices = []
         indices.append(theSlice.start)
         if theSlice.stop == None:
             # Find the last index
             if dimension == "x":
-                dimLen = getSizes(path, dimension, includeGhost = xguards)
+                dimLen = getSizes(paths[0], dimension, includeGhost = xguards)
             elif dimension == "y":
-                dimLen = getSizes(path, dimension, includeGhost = yguards)
+                dimLen = getSizes(paths[0], dimension, includeGhost = yguards)
             elif dimension == "z":
-                dimLen = getSizes(path, dimension)
+                dimLen = getSizes(paths[0], dimension)
             elif dimension == "t":
-                dimLen = getSizes(path, dimension)
+                dimLen = getTSize(paths)
             else:
                 raise ValueError("Unknown dimension {}".format(dimension))
 
@@ -62,13 +68,15 @@ def slicesToIndices(path, theSlice, dimension, xguards=False, yguards=False):
             if indices[ind] < 0:
                 # Find the last index
                 if dimension == "x":
-                    dimLen = getSizes(path, dimension, includeGhost = xguards)
+                    dimLen =\
+                        getSizes(paths[0], dimension, includeGhost = xguards)
                 elif dimension == "y":
-                    dimLen = getSizes(path, dimension, includeGhost = yguards)
+                    dimLen =\
+                        getSizes(paths[0], dimension, includeGhost = yguards)
                 elif dimension == "z":
-                    dimLen = getSizes(path, dimension)
+                    dimLen = getSizes(paths[0], dimension)
                 elif dimension == "t":
-                    dimLen = getSizes(path, dimension)
+                    dimLen = getTSize(paths)
                 else:
                     raise ValueError("Unknown dimension {}".format(dimension))
 

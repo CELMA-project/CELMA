@@ -33,9 +33,9 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
     varName           = "n"
     mode              = "fluct"
 
-    yInd              = 16
-    zInd              = 0
-    tSlice            = None
+    yInd   = 16
+    zInd   = 0
+    tSlice = tSlice
 
     indicesArgs   = (None, yInd, zInd)
     indicesKwargs = {"tSlice" : tSlice}

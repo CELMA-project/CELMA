@@ -19,8 +19,7 @@ class CollectAndCalcGrowthRates(object):
     def __init__(self            ,\
                  scanCollectPaths,\
                  steadyStatePaths,\
-                 startInds       ,\
-                 endInds         ,\
+                 tSlices         ,\
                  scanParameter):
         #{{{docstring
         """
@@ -36,20 +35,10 @@ class CollectAndCalcGrowthRates(object):
             Path to the steady state simulation.
             The tuple must be ordered according to the scan order in
             scanCollectPaths.
-        startInds : tuple
-            Index indicating what time index to start the calculations
-            from.
-            The zeroth index is the first index of the first path being
-            used in the tuple which will be used in the collective
-            collect.
-            The tuple must be ordered according to the scan order in
-            scanCollectPaths.
-        endInds : tuple
-            Index indicating what time index to end the calculations
-            at.
-            The zeroth index is the first index of the first path being
-            used in the tuple which will be used in the collective
-            collect.
+        tSlices : tuple of slices
+            The time slices to use for each folder in the scan order.
+            This must manually be selected to the linear phase found in
+            from the fourier moedes.
             The tuple must be ordered according to the scan order in
             scanCollectPaths.
         scanParameter : str
@@ -60,14 +49,13 @@ class CollectAndCalcGrowthRates(object):
         # Set the member data
         self._scanCollectPaths = scanCollectPaths
         self._steadyStatePaths = steadyStatePaths
-        self._startInds        = startInds
-        self._endInds          = endInds
+        self._tSlices          = tSlices
         self._scanParameter    = scanParameter
     #}}}
 
     @staticmethod
     #{{{calcSlopeAndSpread
-    def calcSlopeAndSpread(magnitudes, time, startInd=None, endInd=None):
+    def calcSlopeAndSpread(magnitudes, time):
         #{{{docstring
         """
         Calculates the slope and the spread for the given input.
@@ -81,10 +69,6 @@ class CollectAndCalcGrowthRates(object):
             mode has been excluded)
         time : array
             The time corresponding to the timeTrace of the magnitudes
-        startInd : [None|int]
-            Start index to calcuate from.
-        endInd : [None|int]
-            End index to calcuate to.
 
         Returns
         -------
@@ -100,8 +84,6 @@ class CollectAndCalcGrowthRates(object):
         #}}}
 
         # Slice the magnitudes and the time
-        magnitudes  = magnitudes[startInd:endInd, :]
-        time        = time      [startInd:endInd]
         modeIndices = range(magnitudes.shape[1])
 
         slopes  = []
@@ -118,9 +100,7 @@ class CollectAndCalcGrowthRates(object):
 
     @staticmethod
     #{{{calcAvgAngularVelocityAndSpread
-    def calcAvgAngularVelocityAndSpread(angularVelocity,\
-                                        startInd=None,\
-                                        endInd=None):
+    def calcAvgAngularVelocityAndSpread(angularVelocity):
         #{{{docstring
         """
         Calculates the average angular velocity and the spread for the
@@ -133,10 +113,6 @@ class CollectAndCalcGrowthRates(object):
             transformed poloidal profile on the form (t-1, mode). Where
             the first mode in the array is the 1st mode (i.e. the 0th
             mode has been excluded)
-        startInd : [None|int]
-            Start index to calcuate from.
-        endInd : [None|int]
-            End index to calcuate to.
 
         Returns
         -------
@@ -150,7 +126,6 @@ class CollectAndCalcGrowthRates(object):
         #}}}
 
         # Slice the angularVelocity
-        angularVelocity  = angularVelocity[startInd:endInd, :]
         modeIndices      = range(angularVelocity.shape[1])
 
         avgAngVels = []
@@ -221,14 +196,16 @@ class CollectAndCalcGrowthRates(object):
 
         loopOver = zip(self._scanCollectPaths,\
                        self._steadyStatePaths,\
-                       self._startInds       ,\
-                       self._endInds         ,\
+                       self._tSlices         ,\
                        )
 
         # Loop over the folders
-        for scanPaths, steadyStatePath, startInd, endInd in loopOver:
+        for scanPaths, steadyStatePath, tSlice in loopOver:
             # Obtain the scan value
             scanValue = getScanValue(scanPaths, self._scanParameter)
+
+            # Update with the correct tSlice
+            indicesKwargs.update({"tSlice" : tSlice})
 
             fm, positionTuple, uc = \
                 self._collectAndCalcFourierModes(scanPaths        ,\
@@ -256,16 +233,11 @@ class CollectAndCalcGrowthRates(object):
             slopes, slopesStd =\
                 self.calcSlopeAndSpread(magnitudes[:, modeStart:modeEnd],\
                                         time                            ,\
-                                        startInd = startInd             ,\
-                                        endInd   = endInd               ,\
                                        )
 
             avgAngVels, avgAngVelsStd =\
                 self.calcAvgAngularVelocityAndSpread(\
-                                        angularVelocity[:, modeStart:modeEnd],\
-                                        startInd=startInd                    ,\
-                                        endInd=endInd                        ,\
-                                        )
+                                        angularVelocity[:, modeStart:modeEnd])
 
             for modeInd in range(len(slopes)):
                 # Fill the multiIndexTuple and the dict

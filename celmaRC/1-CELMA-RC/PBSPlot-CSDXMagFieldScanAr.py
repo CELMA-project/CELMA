@@ -90,22 +90,18 @@ def runGrowthRates():
     dmp_folders = (mergeFromLinear["param0"][-1],)
     keys = tuple(sorted(list(mergeFromLinear.keys())))
     scanCollectPaths = tuple(mergeFromLinear[key] for key in keys)
+    steadyStatePaths = dmpFolders["expand"]
 
     # NOTE: The ordering is of the keys are in descending order (because
     #       of the organization in PBSScan)
-    steadyStatePaths = dmpFolders["expand"]
+    growthTSlicesKeys = tuple(sorted(list(tSlices.keys()), reverse=True))
+    growthTSlices = tuple(tSlices[key] for key in growthTSlicesKeys)
 
-    # Set the indices
-    tKeys     = tuple(sorted(list(tSlices.keys()), reverse=True))
-    startInds = tuple(tSlices[key].start for key in tKeys)
-    endInds   = tuple(tSlices[key].stop for key in tKeys)
-
-    args = (dmp_folders,\
+    args = (dmp_folders     ,\
             scanCollectPaths,\
             steadyStatePaths,\
-            scanParameter,\
-            startInds,\
-            endInds)
+            scanParameter   ,\
+            growthTSlices)
     sub.setJobName("growthRates")
     sub.submitFunction(growthRatesPlot, args=args)
 #}}}
@@ -265,7 +261,7 @@ rJobs     = range(len(paramKeys))
 sub = PBSSubmitter()
 sub.setNodes(nodes=1, ppn=2)
 sub.setQueue("xpresq")
-sub.setWalltime("00:05:00")
+sub.setWalltime("00:15:00")
 #}}}
 
 if __name__ == "__main__":
@@ -280,10 +276,8 @@ if __name__ == "__main__":
                "B0_0.08":slice(100,225) ,\
                "B0_0.1" :slice(80,210)  ,\
                }
-    # runFourierModesSliced(sliced=True)
-    sub.setWalltime("00:10:00")
-    # runGrowthRates()
-    sub.setWalltime("00:05:00")
+    runFourierModes(sliced=True)
+    runGrowthRates()
     # runEnergy(sliced=False)
     tSlices = {\
                "B0_0.02":None,\
@@ -292,9 +286,8 @@ if __name__ == "__main__":
                "B0_0.08":slice(1000,None),\
                "B0_0.1" :None,\
                }
-    # runEnergy(sliced=True)
-    sub.setWalltime("00:10:00")
-    # runPosOfFluct()
-    # runPSD2D()
-    # runSkewKurt()
+    runEnergy(sliced=True)
+    runPosOfFluct()
+    runPSD2D()
+    runSkewKurt()
     runZonalFlow()
