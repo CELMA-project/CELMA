@@ -79,6 +79,8 @@ def collectiveCollect(paths               ,\
     # Initialize the data
     data = {var: None for var in varStrings}
 
+    # Initialize postCollectTInd for later checks
+    postCollectTInd = None
     if len(paths) > 1:
         if tInd is not None:
             # Check if it necessary to use all paths
@@ -135,13 +137,12 @@ def collectiveCollect(paths               ,\
                 data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
 
         # Do slicing post collection if necessary
-        if len(paths) > 1:
-            if postCollectTInd is not None:
-                # +1 to include the last point
-                lastPost = postCollectTInd[1]+1 if postCollectTInd[1] is not None\
-                           else None
+        if postCollectTInd is not None:
+            # +1 to include the last point
+            lastPost = postCollectTInd[1]+1 if postCollectTInd[1] is not None\
+                       else None
 
-                data[var] = data[var][postCollectTInd[0]:lastPost]
+            data[var] = data[var][postCollectTInd[0]:lastPost]
 
     return data
 #}}}
@@ -168,6 +169,11 @@ def removePathsOutsideRange(paths, tInd):
     """
     #}}}
 
+# FIXME:
+    from copy import copy
+    startPaths = copy(paths)
+    startTInd  = copy(tInd)
+# END FIXME
     # Cast to list
     paths = list(paths)
 
@@ -209,11 +215,27 @@ def removePathsOutsideRange(paths, tInd):
         for remove, lenT in zip(removePaths, lenTs):
             # +1 removes the duplicate which is present in both files
             tInd[0] = (tInd[0] - lenT) + 1
-            tInd[1]  = tInd[1] - lenT if tInd[1] is not None else None
+            tInd[1] =  tInd[1] - lenT if tInd[1] is not None else None
             paths.remove(remove)
         tInd = tuple(tInd)
 
     # Cast to tuple
+# FIXME:
+    inds = [startPaths.index(path) for path in paths if path in startPaths]
+    if tInd[0] is None:
+        b = "tInd[0] is None"
+        if tInd[1] is None:
+            b = "tInd is None"
+    elif tInd[1] is None:
+        b = "tInd[1] is None"
+    else:
+        b = (tInd[0]-tInd[1]) == (startTInd[0]-startTInd[1])
+    print("\nstartPathLen = {}, endPaths = {}, tInd==startTInd = {}\n".\
+            format(len(startPaths),  inds, b)
+            )
+    raise RuntimeError("YOU QUITTED")
+    import pdb; pdb.set_trace()
+# END FIXME:
     paths = tuple(paths)
 
     return paths, tInd

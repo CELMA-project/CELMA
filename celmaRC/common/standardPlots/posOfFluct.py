@@ -45,7 +45,7 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     varName  = "n"
     var2Name = "phi"
     yInd     = 16
-    tSlice   = None
+    tSlice   = tSlice
 
     dRP = DriverRadialProfile(
                      # DriverRadialProfile

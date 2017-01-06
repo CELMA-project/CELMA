@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.growthRates import DriverGrowthRates
 
 #{{{growthRatesPlot
-def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, startInds, endInds):
+def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, tSlices):
     #{{{docstring
     """
     Runs the standard growth rates plot
@@ -26,12 +26,12 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
         The corresponding steady state paths
     scanParameter : str
         Name of the scan parameter (as in the scan driver)
-    startInds : tuple
-        Tuple of the start indices
-    startInds : tuple
-        Tuple of the end indices
-    tSlice : [None|Slice]
-        How to slice the time.
+    tSlices : tuple of slices
+        The time slices to use for each folder in the scan order.
+        This must manually be selected to the linear phase found in
+        from the fourier moedes.
+        The tuple must be ordered according to the scan order in
+        scanCollectPaths.
     """
     #}}}
 
@@ -43,7 +43,6 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
 
     xInd            = None
     yInd            = 16
-    tSlice          = None
     nPoints         = 3
     equallySpace    = "x"
     steadyStatePath = None
@@ -51,7 +50,7 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
     useSubProcess = True
 
     indicesArgs   = (xInd, yInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
+    indicesKwargs = {"tSlice"          : None           ,\
                      "nPoints"         : nPoints        ,\
                      "equallySpace"    : equallySpace   ,\
                      "steadyStatePath" : steadyStatePath,\
@@ -72,8 +71,7 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
                      dmp_folders                          ,\
                      scanCollectPaths                     ,\
                      steadyStatePaths                     ,\
-                     startInds                            ,\
-                     endInds                              ,\
+                     tSlices                              ,\
                      scanParameter                        ,\
                      indicesArgs                          ,\
                      indicesKwargs                        ,\

@@ -119,12 +119,12 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             X = self._dh.thetaRad
 
         # Convert to indices
-        xInd = slicesToIndices(self._collectPaths[0], self._xSlice, "x",\
+        xInd = slicesToIndices(self._collectPaths, self._xSlice, "x",\
                                xguards=self._xguards)
-        yInd = slicesToIndices(self._collectPaths[0], self._ySlice, "y",\
+        yInd = slicesToIndices(self._collectPaths, self._ySlice, "y",\
                                yguards=self._yguards)
-        zInd = slicesToIndices(self._collectPaths[0], self._zSlice, "z")
-        tInd = slicesToIndices(self._collectPaths[0], self._tSlice, "t")
+        zInd = slicesToIndices(self._collectPaths, self._zSlice, "z")
+        tInd = slicesToIndices(self._collectPaths, self._tSlice, "t")
 
         collectGhost = True if (self._xguards or self._yguards) else False
 

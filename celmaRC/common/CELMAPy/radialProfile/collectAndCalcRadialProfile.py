@@ -82,7 +82,7 @@ class CollectAndCalcRadialProfile(object):
             self.uc = ccf1D.uc
         # Set the dimension helper if not set
         if self.dh is None:
-            self.dh = ccf1D.dh
+            self.dh = ccf1D.getDh()
 
         ccf1D.setSlice(*self._slices)
         specialCollects = ("n", "uIPar", "uEPar")

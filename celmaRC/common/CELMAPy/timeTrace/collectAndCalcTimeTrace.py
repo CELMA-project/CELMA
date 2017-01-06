@@ -91,13 +91,7 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
             key = "{},{},{}".format(rho,theta,par)
             timeTraces[key] = {}
 
-            if self._tSlice is not None:
-                tStart = self._tSlice[tCounter].start
-                tEnd   = self._tSlice[tCounter].stop
-                t = (tStart, tEnd)
-            else:
-                t = None
-
+            t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
             tCounter += 1
 
             var, time = self._collectWrapper(timeTraces,key,x,y,z,t)
