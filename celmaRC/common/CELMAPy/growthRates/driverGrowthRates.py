@@ -59,8 +59,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
                  dmp_folders             ,\
                  scanCollectPaths        ,\
                  steadyStatePaths        ,\
-                 startInds               ,\
-                 endInds                 ,\
+                 tSlices                 ,\
                  scanParameter           ,\
                  indicesArgs             ,\
                  indicesKwargs           ,\
@@ -87,20 +86,10 @@ class DriverGrowthRates(DriverPointsSuperClass):
             Path to the steady state simulation.
             The tuple must be ordered according to the scan order in
             scanCollectPaths.
-        startInds : tuple
-            Index indicating what time index to start the calculations
-            from.
-            The zeroth index is the first index of the first path being
-            used in the tuple which will be used in the collective
-            collect.
-            The tuple must be ordered according to the scan order in
-            scanCollectPaths.
-        endInds : tuple
-            Index indicating what time index to end the calculations
-            at.
-            The zeroth index is the first index of the first path being
-            used in the tuple which will be used in the collective
-            collect.
+        tSlices : tuple of slices
+            The time slices to use for each folder in the scan order.
+            This must manually be selected to the linear phase found in
+            from the fourier moedes.
             The tuple must be ordered according to the scan order in
             scanCollectPaths.
         scanParameter : str
@@ -131,8 +120,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
         # Set the member data
         self._collectArgs = self.makeCollectArgs(scanCollectPaths,\
                                                  steadyStatePaths,\
-                                                 startInds       ,\
-                                                 endInds         ,\
+                                                 tSlices         ,\
                                                  scanParameter)
         self._getDataArgs = self.makeGetDataArgs(varName          ,\
                                                  convertToPhysical,\
@@ -150,8 +138,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
     #{{{makeCollectArgs
     def makeCollectArgs(scanCollectPaths,\
                         steadyStatePaths,\
-                        startInds       ,\
-                        endInds         ,\
+                        tSlices         ,\
                         scanParameter):
         #{{{docstring
         """
@@ -172,8 +159,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
 
         collectArgs = (scanCollectPaths,\
                        steadyStatePaths,\
-                       startInds       ,\
-                       endInds         ,\
+                       tSlices         ,\
                        scanParameter)
 
         return collectArgs

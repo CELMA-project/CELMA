@@ -34,21 +34,13 @@ def growthRatesTest():
          "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
         )
 
-    startInds = (\
-                 80,\
-                 80,\
-                )
-    endInds   = (\
-                 240,\
-                 210,\
-                )
+    tSlices = (slice(80,240), slice(80,210))
 
     scanParameter = "B0"
 
     collectArgs = DriverGrowthRates.makeCollectArgs(scanCollectPaths,\
                                                     steadyStatePaths,\
-                                                    startInds       ,\
-                                                    endInds         ,\
+                                                    tSlices         ,\
                                                     scanParameter)
 
     varName           = "n"

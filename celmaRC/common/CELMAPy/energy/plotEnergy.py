@@ -186,9 +186,10 @@ class PlotEnergy(PlotSuperClass):
         for key in axDict.keys():
             # Make the ax pretty
             self._ph.makePlotPretty(axDict[key],\
-                                    yprune="both",\
-                                    rotation = 45,\
-                                    ybins = 6
+                                    yprune   ="both",\
+                                    rotation = 45   ,\
+                                    ybins    = 6    ,\
+                                    legend   = False,\
                                     )
 
         # Adjust the subplots

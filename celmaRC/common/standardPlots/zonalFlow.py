@@ -30,7 +30,7 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     useSubProcess     = False
     convertToPhysical = True
     yInd              = 16
-    tSlice            = None
+    tSlice            = tSlice
 
     plotSuperKwargs = {\
                         "showPlot"        : False,\

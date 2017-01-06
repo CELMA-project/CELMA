@@ -65,7 +65,6 @@ def driverProfAndGradCompare(varName          ,\
     # Recast to dict
     # Remove not needed
     rp.pop("time")
-    rp.pop("thetaPos")
     rp["varName"]      = varName
     rp["steadyVar"]    = steadyVar   [0,:,0,0]
     rp["DDXSteadyVar"] = DDXSteadyVar[0,:,0,0]
@@ -145,7 +144,6 @@ def driverPosOfFluct(var1Name         ,\
     # Recast to dict
     # Remove not needed
     rp.pop("time")
-    rp.pop("thetaPos")
     rp["varName"]      = var1Name
     rp["var2Name"]     = var2Name
     rp["steadyVar"]    = steadyVar   [0,:,0,0]
