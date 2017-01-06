@@ -2,7 +2,7 @@
 
 """ Contains the DimensionsHelper class """
 
-from .gridSizes import getUniformSpacing, getMYG, getMXG, getSizes
+from .gridSizes import getUniformSpacing, getMYG, getMXG, getGridSizes
 import numpy as np
 
 #{{{DimensionsHelper
@@ -127,7 +127,7 @@ class DimensionsHelper(object):
         #{{{theta
         dz = getUniformSpacing(self._path, "z")
 
-        innerPoints = getSizes(self._path, "z")
+        innerPoints = getGridSizes(self._path, "z")
 
         theta = dz * np.array(np.arange(0.0, innerPoints))
 

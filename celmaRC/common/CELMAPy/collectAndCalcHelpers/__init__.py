@@ -9,8 +9,11 @@ from .derivatives import (DDX, DDY, DDZ,\
                           findLargestPoloidalGrad,\
                           findLargestRadialGradN)
 from .dimensionHelper import DimensionsHelper
-from .gridSizes import (getSizes, getUniformSpacing, getEvenlySpacedIndices,\
-                        getMXG, getMYG)
+from .gridSizes import (getGridSizes,\
+                        getUniformSpacing,\
+                        getEvenlySpacedIndices,\
+                        getMXG,\
+                        getMYG)
 from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectTime, collectPoint,\
                               collectParallelProfile, collectPoloidalProfile,\
@@ -22,3 +25,4 @@ from .meshHelper import addLastThetaSlice, get2DMesh
 from .nonSolvedVariables import calcN, calcUIPar, calcUEPar
 from .scanHelpers import getScanValue
 from .slicesToIndices import slicesToIndices
+from .tSize import getTSize

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Contains functions dealing with sizes of the grid
 """
@@ -6,8 +8,8 @@ from boututils.datafile import DataFile
 import numpy as np
 import os
 
-#{{{getSizes
-def getSizes(path, coordinate, varName="lnN", includeGhost=False):
+#{{{getGridSizes
+def getGridSizes(path, coordinate, varName="lnN", includeGhost=False):
     #{{{docstring
     """
     Fastest way to obtain coordinate sizes.
@@ -51,33 +53,6 @@ def getSizes(path, coordinate, varName="lnN", includeGhost=False):
             raise ValueError("Unknown coordinate {}".format(coordinate))
 
     return coordinateSize
-#}}}
-
-#{{{getTSize
-def getTSize(paths):
-    #{{{docstring
-    """
-    Fastest way to obtain the time size.
-
-    Parameters
-    ----------
-    paths : tuple
-        Tuple of paths to collect from
-
-    Returns
-    -------
-    tSize : int
-        Size of the time
-    """
-    #}}}
-
-    tSize = 0
-    for path in paths:
-        with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
-            t = f.read("t_array")
-            tSize += len(t)
-
-    return tSize
 #}}}
 
 #{{{getUniformSpacing
@@ -172,7 +147,7 @@ def getEvenlySpacedIndices(path, coordinate, indexIn, nPoints = 5):
     #}}}
 
     # Find out if we are above half
-    innerLen = getSizes(path, coordinate)
+    innerLen = getGridSizes(path, coordinate)
     pctOfInd = indexIn/innerLen
 
     # We here find the span of available indices to put the probes at

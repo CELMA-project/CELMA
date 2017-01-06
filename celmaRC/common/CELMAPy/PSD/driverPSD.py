@@ -5,7 +5,7 @@ Contains single driver and driver class for the power spectral density
 """
 
 from ..superClasses import DriverPointsSuperClass
-from ..collectAndCalcHelpers import getSizes
+from ..collectAndCalcHelpers import getGridSizes
 from .collectAndCalcPSD import CollectAndCalcPSD
 from .plotPSD import PlotPSD
 import numpy as np
@@ -163,7 +163,7 @@ def driverPSD2D(collectPaths     ,\
                              )
 
     # Get all the xInds
-    nx = getSizes(collectPaths[0], "x")
+    nx = getGridSizes(collectPaths[0], "x")
     xInds = tuple(range(nx))
     indicesArgs = list(indicesArgs)
     indicesArgs[0] = xInds

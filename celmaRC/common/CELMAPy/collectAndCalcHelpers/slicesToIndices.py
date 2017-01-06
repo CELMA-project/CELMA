@@ -4,7 +4,8 @@
 Contains function which converts a slice to indices used for BOUT++ collection.
 """
 
-from .gridSizes import getSizes
+from .gridSizes import getGridSizes
+from .tSize import getTSize
 
 #{{{slicesToIndices
 def slicesToIndices(paths, theSlice, dimension, xguards=False, yguards=False):
@@ -38,11 +39,11 @@ def slicesToIndices(paths, theSlice, dimension, xguards=False, yguards=False):
         if theSlice.stop == None:
             # Find the last index
             if dimension == "x":
-                dimLen = getSizes(paths[0], dimension, includeGhost = xguards)
+                dimLen = getGridSizes(paths[0], dimension, includeGhost = xguards)
             elif dimension == "y":
-                dimLen = getSizes(paths[0], dimension, includeGhost = yguards)
+                dimLen = getGridSizes(paths[0], dimension, includeGhost = yguards)
             elif dimension == "z":
-                dimLen = getSizes(paths[0], dimension)
+                dimLen = getGridSizes(paths[0], dimension)
             elif dimension == "t":
                 dimLen = getTSize(paths)
             else:
@@ -69,12 +70,12 @@ def slicesToIndices(paths, theSlice, dimension, xguards=False, yguards=False):
                 # Find the last index
                 if dimension == "x":
                     dimLen =\
-                        getSizes(paths[0], dimension, includeGhost = xguards)
+                        getGridSizes(paths[0], dimension, includeGhost = xguards)
                 elif dimension == "y":
                     dimLen =\
-                        getSizes(paths[0], dimension, includeGhost = yguards)
+                        getGridSizes(paths[0], dimension, includeGhost = yguards)
                 elif dimension == "z":
-                    dimLen = getSizes(paths[0], dimension)
+                    dimLen = getGridSizes(paths[0], dimension)
                 elif dimension == "t":
                     dimLen = getTSize(paths)
                 else:
