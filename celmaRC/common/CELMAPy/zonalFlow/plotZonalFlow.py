@@ -12,8 +12,8 @@ import os
 
 # NOTE: May be suffering from a DRY case
 
-#{{{PlotzonalFlow
-class PlotzonalFlow(PlotSuperClass):
+#{{{PlotZonalFlow
+class PlotZonalFlow(PlotSuperClass):
     """
     Class which contains the profile and gradient data and the plotting
     configuration.
@@ -125,9 +125,7 @@ class PlotzonalFlow(PlotSuperClass):
                 format(**self.uc.conversionDict["growthRate"])
 
         # Set the fileName
-        self._fileName =\
-            os.path.join(self._savePath,\
-                "{}-{}".format(self._varName, "zonalFlow"))
+        self._fileName = os.path.join(self._savePath, "zonalFlow")
 
         if self._extension is None:
             self._extension = "png"
@@ -163,24 +161,24 @@ class PlotzonalFlow(PlotSuperClass):
         self._angPolExBLabelTemplate     = angPolExBStr + unitsOrNormalization
         self._angGradPolExBLabelTemplate = gradStr      +\
                                            angPolExBStr +\
-                                           unitsOrNormalization
+                                           gradUnitsOrNorm
 
         # Set the legends
         # Seady state
-        sSStr = r"$_{{\mathrm{{Steady \quad state}}}}$"
+        sSStr = r"$_{{\mathrm{{, \quadSteady \quad state}}}}$"
         self._sSPolExBLegend        = polExBStr + sSStr
         self._sSAngPolExBLegend     = angPolExBStr + sSStr
-        self._gradSSAngPolExBLegend = grad + StrangPolExBStr + sSStr
+        self._gradSSAngPolExBLegend = gradStr + angPolExBStr + sSStr
 
         # Turbulent
         lAngle = r"$\langle\langle$"
         rAngle = r"$\rangle_\theta\rangle_t$"
         self._polExBLegendTemplate        =\
-            lAngle + self._sSPolExBLegend + norm + rAngle
+            lAngle + polExBStr + norm + rAngle
         self._angPolExBLegendTemplate     =\
-            lAngle + self._gradSSAngPolExBLegend + norm + rAngle
+            lAngle + angPolExBStr + norm + rAngle
         self._gradAngPolExBLegendTemplate =\
-            lAngle + self._sSAngPolExBLegend + norm+ r Angle
+            lAngle + gradStr + angPolExBStr + norm + rAngle
 
         # Set the title
         self._ph.zTxtDict    ["value"] =\
@@ -192,8 +190,8 @@ class PlotzonalFlow(PlotSuperClass):
         self._xLabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
-    #{{{plotSaveShowPosOfFluct
-    def plotSaveShowPosOfFluct(self):
+    #{{{plotSaveShowZonalFlow
+    def plotSaveShowZonalFlow(self):
         """
         Performs the actual plotting.
 
@@ -202,7 +200,7 @@ class PlotzonalFlow(PlotSuperClass):
         """
 
         # Create the plot
-        fig, (polExBAx, angPolExBAx, shearPolExBAx) =\
+        fig, (polExBAx, angPolExBAx, shearAngPolExBAx) =\
                 plt.subplots(nrows=3, figsize=self._pltSize, sharex=True)
 
         # Plot on the polExBAx
@@ -264,22 +262,22 @@ class PlotzonalFlow(PlotSuperClass):
                                label     = self._gradSSAngPolExBLegend
                               )
         # Average
-        angPolExBAx.plot(self._rho,\
-                         self._polExB["angPolExBShearAvg"],\
-                         color     = self._colors[1],\
-                         linestyle = self._lines[1],\
-                         label     = self._gradAngPolExBLegend
-                        )
+        shearAngPolExBAx.plot(self._rho,\
+                              self._polExB["angPolExBShearAvg"],\
+                              color     = self._colors[1],\
+                              linestyle = self._lines[1],\
+                              label     = self._gradAngPolExBLegend
+                             )
         # Fill
-        angPolExBAx.fill_between(\
-           self._rho,\
-           self._polExB["angPolExBShearAvg"]+self._polExB["angPolExBshearStd"],\
-           self._polExB["angPolExBShearAvg"]-self._polExB["angPolExBshearStd"],\
-           facecolor=self._colors[1], edgecolor="none", alpha=0.2)
+        shearAngPolExBAx.fill_between(\
+                self._rho,\
+                self._polExB["angPolExBShearAvg"]+self._polExB["angPolExBShearStd"],\
+                self._polExB["angPolExBShearAvg"]-self._polExB["angPolExBShearStd"],\
+                facecolor=self._colors[1], edgecolor="none", alpha=0.2)
 
         # Set decorations
-        angPolExBAx.set_ylabel(self._angGradPolExBLabel)
-        angPolExBAx.set_xlabel(self._xLabel)
+        shearAngPolExBAx.set_ylabel(self._angGradPolExBLabel)
+        shearAngPolExBAx.set_xlabel(self._xLabel)
 
         # Make the plot look nice
         self._ph.makePlotPretty(polExBAx        , loc="lower right", ybins = 6)

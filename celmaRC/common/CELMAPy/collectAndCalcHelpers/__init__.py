@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" Init for the calc helpers package """
+""" Init for the collect and calc helpers package """
 
 from .averages import polAvg, timeAvg
 from .derivatives import (DDX, DDY, DDZ,\
@@ -22,7 +22,3 @@ from .meshHelper import addLastThetaSlice, get2DMesh
 from .nonSolvedVariables import calcN, calcUIPar, calcUEPar
 from .scanHelpers import getScanValue
 from .slicesToIndices import slicesToIndices
-
-# Files which depends on external modules which are referring to this
-# package
-from .calcVelocities import (calcRadialExBPoloidal, calcPoloidalExBConstZ)

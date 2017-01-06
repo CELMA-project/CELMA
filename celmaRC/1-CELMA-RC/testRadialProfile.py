@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor test for profileAndGradientCompare"""
+"""Post-processor test for profileAndGradientCompare and posOfFluctTest"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -98,7 +98,7 @@ def posOfFluctTest():
 #{{{driverTest
 def driverTest():
     """
-    Runs the test for the time traces
+    Runs the test for the radial profiles
     """
 
     dmp_folders  = ("CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1",)
