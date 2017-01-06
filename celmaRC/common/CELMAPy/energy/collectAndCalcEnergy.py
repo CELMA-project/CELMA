@@ -63,12 +63,8 @@ class CollectAndCalcEnergy(CollectAndCalcSuperClass):
         energies = {}
 
         # Set the slice
-        if self._tSlice is not None:
-            tStart = self._tSlice.start
-            tEnd   = self._tSlice.stop
-            tInd = (tStart, tEnd)
-        else:
-            tInd = None
+        tInd = slicesToIndices(self._collectPaths, self._tSlice, "t")
+
         if self._tSlice is not None:
             # Slice the variables with the step
             # Make a new slice as the collect dealt with the start and
