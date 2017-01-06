@@ -9,7 +9,8 @@ from ..collectAndCalcHelpers import (collectTime,\
                                      collectPoloidalProfile,\
                                      calcN,\
                                      calcUIPar,\
-                                     calcUEPar)
+                                     calcUEPar,\
+                                     slicesToIndices)
 import numpy as np
 
 #{{{CollectAndCalcFourierModes
@@ -77,6 +78,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             fourierModes[key] = {}
 
             t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
+            tStep = self._tSlice[tCounter].step if self._tSlice is not None\
+                    else None
             tCounter += 1
 
             var, time = self._collectWrapper(fourierModes,key,x,y,t,tStep)
