@@ -9,7 +9,6 @@ from .plotFields1D import PlotAnim1DRadial, PlotAnim1DParallel
 from ..collectAndCalcHelpers import calcN, calcUIPar, calcUEPar
 from ..superClasses import DriverPlotFieldsSuperClass
 from multiprocessing import Process
-import os
 
 #{{{driver1DFieldSingle
 def driver1DFieldSingle(collectPaths     ,\
@@ -208,7 +207,8 @@ def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
             collectFields.append("vortHyperVisc")
         collectFields = tuple(collectFields)
     else:
-        raise NotImplementedError("{} is not implemented".format(fieldPlotType))
+        message = "{} is not implemented".format(fieldPlotType)
+        raise NotImplementedError(message)
 
     return collectFields, plotOrder
 #}}}

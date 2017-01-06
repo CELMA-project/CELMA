@@ -47,6 +47,48 @@ def driverPSD(collectPaths     ,\
     """
     #}}}
 
+    PSD, uc = get1DPSD(collectPaths     ,\
+                       varName          ,\
+                       convertToPhysical,\
+                       mode             ,\
+                       indicesArgs      ,\
+                       indicesKwargs    ,\
+                      )
+
+    # Plot
+    pPSD = PlotPSD(uc              ,\
+                   **plotSuperKwargs)
+    pPSD.setData(PSD, mode)
+    pPSD.plotSaveShowPSD()
+#}}}
+
+#{{{get1DPSD
+def get1DPSD(collectPaths     ,\
+             varName          ,\
+             convertToPhysical,\
+             mode             ,\
+             indicesArgs      ,\
+             indicesKwargs    ,\
+            ):
+    #{{{docstring
+    """
+    Obtains the 1D power spectral density.
+
+    Parameters
+    ----------
+    See driverPSD for details
+
+    Returns
+    -------
+    PSD : dict
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {"pdfX":pdfX, "pdfY":"pdfY"}
+    uc : UnitsConverter
+        The units converter
+    """
+    #}}}
+
     # Create collect object
     ccPSD = CollectAndCalcPSD(collectPaths                         ,\
                               mode              = mode             ,\
@@ -66,11 +108,7 @@ def driverPSD(collectPaths     ,\
     # Calculate the PSD
     PSD = ccPSD.calcPSD(tt)
 
-    # Plot
-    pPSD = PlotPSD(ccPSD.uc         ,\
-                   **plotSuperKwargs)
-    pPSD.setData(PSD, mode)
-    pPSD.plotSaveShowPSD()
+    return PSD
 #}}}
 
 #{{{driverPSD2D

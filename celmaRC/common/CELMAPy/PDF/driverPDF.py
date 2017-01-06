@@ -45,11 +45,53 @@ def driverPDF(collectPaths     ,\
     """
     #}}}
 
+    PDF, uc = getPDF(collectPaths     ,\
+                     varName          ,\
+                     convertToPhysical,\
+                     mode             ,\
+                     indicesArgs      ,\
+                     indicesKwargs    ,\
+                    )
+
+    # Plot
+    pPDF = PlotPDF(uc ,\
+                   **plotSuperKwargs)
+    pPDF.setData(PDF, mode)
+    pPDF.plotSaveShowPDF()
+#}}}
+
+#{{{getPDF
+def getPDF(collectPaths     ,\
+           varName          ,\
+           convertToPhysical,\
+           mode             ,\
+           indicesArgs      ,\
+           indicesKwargs    ,\
+           ):
+    #{{{docstring
+    """
+    Obtains the probability density functions.
+
+    Parameters
+    ----------
+    See driverPDF for details.
+
+    Returns
+    -------
+    PDF : dict
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {"pdfX":pdfX, "pdfY":"pdfY"}
+    uc : UnitsConverter
+        The units converter
+    """
+    #}}}
+
     # Create collect object
-    ccPDF = CollectAndCalcPDF(collectPaths                         ,\
-                              mode              = mode             ,\
-                              convertToPhysical = convertToPhysical,\
-                             )
+    ccPDF = CollectAndCalcPDF(collectPaths       ,\
+            mode              = mode             ,\
+            convertToPhysical = convertToPhysical,\
+            )
 
     # Set the slice
     ccPDF.setIndices(*indicesArgs, **indicesKwargs)
@@ -64,11 +106,7 @@ def driverPDF(collectPaths     ,\
     # Calculate the PDF
     PDF = ccPDF.calcPDF(tt)
 
-    # Plot
-    pPDF = PlotPDF(ccPDF.uc         ,\
-                   **plotSuperKwargs)
-    pPDF.setData(PDF, mode)
-    pPDF.plotSaveShowPDF()
+    return PDF, ccPDF.uc
 #}}}
 
 #{{{DriverPDF

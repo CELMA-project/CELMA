@@ -146,10 +146,12 @@ class PlotProfAndGradCompare(PlotSuperClass):
         self._profileLabelTemplate = r"${}$" + unitsOrNormalization
         self._gradLabelTemplate    = r"$\partial_\rho {}$" + gradUnitsOrNorm
 
-        self._steadyStateLegendTemplate = r"${}_{{\mathrm{{Steady \quad state}}}}$"
+        self._steadyStateLegendTemplate =\
+            r"${}_{{\mathrm{{Steady \quad state}}}}$"
         self._avgLabelTemplate =\
-                r"$\langle\langle {0}"+norm+r"\rangle_\theta\rangle_t$"
-        self._varGradLegendTemplate = r"$\partial_\rho $"+self._avgLabelTemplate
+            r"$\langle\langle {0}"+norm+r"\rangle_\theta\rangle_t$"
+        self._varGradLegendTemplate =\
+            r"$\partial_\rho $"+self._avgLabelTemplate
 
         # Set the title
         self._ph.zTxtDict    ["value"] =\

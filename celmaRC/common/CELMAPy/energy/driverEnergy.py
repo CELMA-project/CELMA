@@ -7,6 +7,7 @@ Contains single driver and driver class for the energies
 from ..superClasses import DriverSuperClass
 from .collectAndCalcEnergy import CollectAndCalcEnergy
 from .plotEnergy import PlotEnergy
+from multiprocessing import Process
 
 #{{{driverEnergy
 def driverEnergy(collectPaths     ,\
