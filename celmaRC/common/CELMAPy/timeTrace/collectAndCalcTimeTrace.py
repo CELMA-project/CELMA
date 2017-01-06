@@ -11,7 +11,9 @@ from ..collectAndCalcHelpers import (polAvg,\
                                      collectPoloidalProfile,\
                                      calcN,\
                                      calcUIPar,\
-                                     calcUEPar)
+                                     calcUEPar,\
+                                     slicesToIndices,\
+                                     )
 
 #{{{CollectAndCalcTimeTrace
 class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
@@ -91,10 +93,16 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
             key = "{},{},{}".format(rho,theta,par)
             timeTraces[key] = {}
 
+            # Collect and slice
             t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
-            tCounter += 1
-
             var, time = self._collectWrapper(timeTraces,key,x,y,z,t)
+            if self._tSlice[tCounter] is not None:
+                # Slice the variables with the step
+                # Make a new slice as the collect dealt with the start and
+                # the stop of the slice
+                newSlice = slice(None, None, self._tSlice[tCounter].step)
+                var  = var [newSlice]
+                time = time[newSlice]
 
             if self.uc.convertToPhysical:
                 timeTraces[key][self._varName] =\
@@ -105,6 +113,7 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
                 timeTraces[key][self._varName] = var
                 timeTraces[key]["time"]        = time
 
+            tCounter += 1
         return timeTraces
     #}}}
 
@@ -193,15 +202,6 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
         if self._mode == "fluct":
             var = (var - polAvg(var))
             timeTraces[key]["zInd"] = z
-
-        if self._tSlice is not None:
-            # Slice the variables with the step
-            # Make a new slice as the collect dealt with the start and
-            # the stop of the slice
-            newSlice = slice(None, None, self._tSlice.step)
-
-            var  = var [newSlice]
-            time = time[newSlice]
 
         return var, time
     #}}}

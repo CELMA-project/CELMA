@@ -165,6 +165,10 @@ class PlotFourierModes(PlotSuperClass):
                 label=r"$m_\theta={}$".format(modeNr)
 
                 if self._timeAx:
+# FIXME:
+                    print("var={}".format(len(self._fourierModes[key][self._varName+"Magnitude"])))
+                    print("time={}".format(len(self._fourierModes[key]["time"])))
+# FIXME:
                     ax.plot(\
                         self._fourierModes[key]["time"],\
                         self._fourierModes[key][self._varName+"Magnitude"]\
