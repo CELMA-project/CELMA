@@ -76,15 +76,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
             key = "{},{}".format(rho,par)
             fourierModes[key] = {}
 
-            if self._tSlice is not None:
-                tStart = self._tSlice[tCounter].start
-                tEnd   = self._tSlice[tCounter].stop
-                t      = (tStart, tEnd)
-                tStep  = self._tSlice[tCounter].step
-            else:
-                t     = None
-                tStep = None
-
+            t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
             tCounter += 1
 
             var, time = self._collectWrapper(fourierModes,key,x,y,t,tStep)
