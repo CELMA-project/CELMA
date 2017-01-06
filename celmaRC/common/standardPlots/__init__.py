@@ -8,3 +8,4 @@ from .energy import energyPlot
 from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
+from .zonalFlow import zonalFlowPlot

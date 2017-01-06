@@ -36,10 +36,10 @@ class DimensionsHelper(object):
         #}}}
 
         # Set the member data
-        self._path              = path
-        self._unitsConverter    = unitsConverter
-        self._xguards           = xguards
-        self._yguards           = yguards
+        self._path             = path
+        self._unitsConverter   = unitsConverter
+        self._xguards          = xguards
+        self._yguards          = yguards
         self.convertToPhysical = unitsConverter.convertToPhysical
 
         # Get the coordinates

@@ -151,17 +151,17 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         if "parallel" in self._mode:
             if self._return2d:
                 field1D[self._varName] = var[:, 0, :, 0]
+                field1D["thetaPos"]    = self._dh.thetaDeg[zInd[0]]
             else:
                 field1D[self._varName] = var
-            field1D["rhoPos"]   = self._dh.rho     [xInd[0]]
-            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+            field1D["rhoPos"] = self._dh.rho[xInd[0]]
         elif "radial" in self._mode:
             if self._return2d:
                 field1D[self._varName] = var[:, :, 0, 0]
+                field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
             else:
                 field1D[self._varName] = var
-            field1D["zPos"]     = self._dh.z       [yInd[0]]
-            field1D["thetaPos"] = self._dh.thetaDeg[zInd[0]]
+            field1D["zPos"]  = self._dh.z[yInd[0]]
         elif "poloidal" in self._mode:
             if self._return2d:
                 field1D[self._varName] = var[:, 0, 0, :]
