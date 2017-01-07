@@ -51,7 +51,7 @@ def driverZonalFlow(\
     dx = cczf.dh.dx
 
     # Extract the steady state variable at the last time (but keep the 4d)
-    sSVar = polExBSS["uExBPoloidal"][-2:-1,:,:,:]
+    sSVar = polExBSS["uExBPoloidal"][-1:,:,:,:]
     # Expand rho in order to have a defined arithmetic operation with sSVar
     tmp = np.expand_dims(\
             np.expand_dims(\
