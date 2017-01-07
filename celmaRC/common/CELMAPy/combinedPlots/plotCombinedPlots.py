@@ -5,13 +5,14 @@
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap3
 import numpy as np
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import os
 
 #{{{PlotCombinedPlots
 class PlotCombinedPlots(PlotSuperClass):
     """
-    Class which contains the combined plots data and the plotting configuration.
+    Class which contains the combined plots data and the plotting configuration
     """
 
     #{{{constructor
@@ -42,7 +43,9 @@ class PlotCombinedPlots(PlotSuperClass):
         """
         Sets the combined plots to be plotted.
 
-        This function also sets the variable labels, colors and the save name.
+        This function also:
+            * Sets the variable labels, colors and the save name.
+            * Creates the figure and axes
 
         Parameters
         ----------
@@ -74,16 +77,17 @@ class PlotCombinedPlots(PlotSuperClass):
         self._PSD  = PSD
         self._mode = mode
 
-        # Obtain the varname
+        # Obtain the var-names
         ind  = tuple(tt.keys())[0]
         keys = tt[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
-        self._radialFluxName = tuple(var for var in keys if var != "time")[0]
         self._pltVarName = self._ph.getVarPltName(self._varName)
+        keys = rf[ind].keys()
+        self._radialFluxName = tuple(var for var in keys if var != "time")[0]
 
 
         # Make the keys from the time trace
-        self._keys = sorted(self._tt.keys(), reversed = True)
+        self._keys = sorted(self._tt.keys(), reverse = True)
 
         # To be used in the plot name
         if self._mode == "normal":
@@ -96,15 +100,19 @@ class PlotCombinedPlots(PlotSuperClass):
 
         # Obtain the color (pad away brigthest colors)
         pad = 3
-        self._colors = seqCMap3(np.linspace(0, 1, len(combinedPlots.keys())+pad))
+        self._colors = seqCMap3(np.linspace(0, 1, len(tt.keys())+pad))
 
         # Prepare the labels
         self._prepareLabels()
 
+        # Prepare the axes
+        self._prepareAxes()
+
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}-{}".format(self._varName, "combinedPlots", self._fluctName))
+                "{}-{}-{}".\
+                format(self._varName, "combinedPlots", self._fluctName))
 
         if self._extension is None:
             self._extension = "png"
@@ -132,7 +140,7 @@ class PlotCombinedPlots(PlotSuperClass):
             self._makeHorizontalTitles(unitsOrNormalization)
 
         # Make the xLabels
-        self._xLabels = self._makeXLabels(unitsOrNormalization)
+        self._xLabels = self._makeXLabels()
     #}}}
 
     #{{{_makeVerticalTitles
@@ -227,10 +235,14 @@ class PlotCombinedPlots(PlotSuperClass):
         # The power spectral density
         PSDSecondLine = self._preparePSDLabel()
 
-        ttSecondLine  = ttSecondLine .format(self._pltvarName)
-        rfSecondLine  = rfSecondLine .format(self._pltvarName)
-        PDFSecondLine = PDFSecondLine.format(self._pltvarName)
-        PSDSecondLine = PSDSecondLine.format(self._pltvarName)
+        ttSecondLine  = ttSecondLine.\
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
+        rfSecondLine  = rfSecondLine.\
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
+        PDFSecondLine = PDFSecondLine.\
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
+        PSDSecondLine = PSDSecondLine.\
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         horizontalTitles.append(ttFirstLine+ttSecondLine)
         horizontalTitles.append(rfFirstLine+rfSecondLine)
@@ -279,7 +291,7 @@ class PlotCombinedPlots(PlotSuperClass):
         """
         psdStr = r"\mathrm{{PSD}}("
 
-        # Get normalOrFluct
+        # Make normalOrFluct
         if self._mode == "normal":
             normalOrFluct = r"{{}}"
         elif self._mode == "fluct":
@@ -306,15 +318,10 @@ class PlotCombinedPlots(PlotSuperClass):
     #}}}
 
     #{{{_makeXLabels
-    def _makeXLabels(self, unitsOrNormalization):
+    def _makeXLabels(self):
         #{{{docstring
         """
         Makes the x labels.
-
-        Parameters
-        ----------
-        unitsOrNormalization : str
-            String containing either the units or the normalization.
 
         Returns
         -------
@@ -339,9 +346,15 @@ class PlotCombinedPlots(PlotSuperClass):
         # Make the PDFXLabel
         PDFXLabelunitsOrNormalization = "[{units}]"
         PDFXLabelunitsOrNormalization = "{normalization}"
+        # Make normalOrFluct
+        if self._mode == "normal":
+            normalOrFluct = r"{{}}"
+        elif self._mode == "fluct":
+            normalOrFluct = r"\widetilde{{{}}}"
         PDFXLabel = r"$" + normalOrFluct + r"$" +\
-                    r" $" + xLabelunitsOrNormalization + r"$"
-        PDFXLabel.format(unitsOrNormalization)
+                    r" $" + PDFXLabelunitsOrNormalization + r"$"
+        PDFXLabel.\
+            format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         xLabels.append(ttXLabel )
         xLabels.append(rfXLabel )
@@ -382,7 +395,7 @@ class PlotCombinedPlots(PlotSuperClass):
                             *self._PSDAxes[:-1],\
                            ))
 
-        self._setTitlesAndLables()
+        self._setTitlesAndLabels()
     #}}}
 
     #{{{_makeAxes
@@ -403,25 +416,25 @@ class PlotCombinedPlots(PlotSuperClass):
             The power spectral density axis.
         """
         #}}}
-        fig = plt.figure()
+        self._fig = plt.figure(figsize=self._pltSize)
 
         gs = gridspec.GridSpec(3, 4,\
                                width_ratios =(3,3,2,2),\
                                height_ratios=(2,2,2,2),\
                                )
 
-        ax1  = plt.subplot(gs[0])
-        ax2  = plt.subplot(gs[1])
-        ax3  = plt.subplot(gs[2])
-        ax4  = plt.subplot(gs[3])
-        ax5  = plt.subplot(gs[4] , sharex=ax1, sharey=ax1)
-        ax6  = plt.subplot(gs[5] , sharex=ax2, sharey=ax2)
-        ax7  = plt.subplot(gs[6] , sharex=ax3, sharey=ax3)
-        ax8  = plt.subplot(gs[7] , sharex=ax4, sharey=ax4)
-        ax9  = plt.subplot(gs[8] , sharex=ax1, sharey=ax1)
-        ax10 = plt.subplot(gs[9] , sharex=ax2, sharey=ax2)
-        ax11 = plt.subplot(gs[10], sharex=ax3, sharey=ax3)
-        ax12 = plt.subplot(gs[11], sharex=ax4, sharey=ax4)
+        ax1  = self._fig.add_subplot(gs[0])
+        ax2  = self._fig.add_subplot(gs[1])
+        ax3  = self._fig.add_subplot(gs[2])
+        ax4  = self._fig.add_subplot(gs[3])
+        ax5  = self._fig.add_subplot(gs[4] , sharex=ax1, sharey=ax1)
+        ax6  = self._fig.add_subplot(gs[5] , sharex=ax2, sharey=ax2)
+        ax7  = self._fig.add_subplot(gs[6] , sharex=ax3, sharey=ax3)
+        ax8  = self._fig.add_subplot(gs[7] , sharex=ax4, sharey=ax4)
+        ax9  = self._fig.add_subplot(gs[8] , sharex=ax1, sharey=ax1)
+        ax10 = self._fig.add_subplot(gs[9] , sharex=ax2, sharey=ax2)
+        ax11 = self._fig.add_subplot(gs[10], sharex=ax3, sharey=ax3)
+        ax12 = self._fig.add_subplot(gs[11], sharex=ax4, sharey=ax4)
 
         ttAxes  = (ax1,ax5,ax9)
         rfAxes  = (ax2,ax6,ax10)
@@ -455,7 +468,8 @@ class PlotCombinedPlots(PlotSuperClass):
         titleTop = self._ttAxes[0].\
                     text(0,0  ,\
                         self._verticalTitles[0],\
-                        transform=ax1.transAxes, ha="center", va="center",\
+                        transform= self._ttAxes[0].transAxes,\
+                        ha="center", va="center",\
                         )
         titleTop.set_fontsize(titleMid.get_fontsize())
 
@@ -484,9 +498,10 @@ class PlotCombinedPlots(PlotSuperClass):
                                   self._rf[key][self._radialFluxName],\
                                   color=self._colors[nr])
 
-            self._PDFAxes[nr].plot(self._PDF[key]["{}PDFX".format(self._varName)],\
-                                   self._PDF[key]["{}PDFY".format(self._varName)],\
-                                   color=self._colors[nr])
+            self._PDFAxes[nr].\
+                plot(self._PDF[key]["{}PDFX".format(self._varName)],\
+                     self._PDF[key]["{}PDFY".format(self._varName)],\
+                     color=self._colors[nr])
 
             # PSD plot
             # Clip the very first point as this is very low
@@ -495,7 +510,7 @@ class PlotCombinedPlots(PlotSuperClass):
                                          format(self._varName)][1:]/\
                                  np.max(self._PSD[key]["{}PSDY".\
                                         format(self._varName)][1:]))
-            self._PSDAxes[nr].plot(xVals, yVals, color=color)
+            self._PSDAxes[nr].plot(PSDXVals, PSDYVals, color=self._colors[nr])
 
         # Use logarithmic scale
         for ax in self._PDFAxes:
@@ -505,23 +520,21 @@ class PlotCombinedPlots(PlotSuperClass):
 
         # Make the plot look nice
         bottomAxes =\
-            (*self._ttAxes [:-1],\
-             *self._rfAxes [:-1],\
-             *self._PDFAxes[:-1],\
-             *self._PSDAxes[:-1])
+            (*self._ttAxes [1:],\
+             *self._rfAxes [1:],\
+             *self._PDFAxes[1:],\
+             *self._PSDAxes[1:])
         topAxes =\
-            (*self._ttAxes [0],\
-             *self._rfAxes [0],\
-             *self._PDFAxes[0],\
-             *self._PSDAxes[0])
+            (self._ttAxes [0],\
+             self._rfAxes [0],\
+             self._PDFAxes[0],\
+             self._PSDAxes[0])
         for ax in topAxes:
             self._ph.makePlotPretty(ax            ,\
-                                    ybins = 3     ,\
                                     legend = False,\
                                     )
         for ax in bottomAxes:
             self._ph.makePlotPretty(ax            ,\
-                                    ybins = 3     ,\
                                     rotation = 45 ,\
                                     legend = False,\
                                     )
@@ -530,8 +543,8 @@ class PlotCombinedPlots(PlotSuperClass):
             plt.show()
 
         if self._savePlot:
-            self._ph.savePlot(fig, self._fileName)
+            self._ph.savePlot(self._fig, self._fileName)
 
-        plt.close(fig)
+        plt.close(self._fig)
     #}}}
 #}}}
