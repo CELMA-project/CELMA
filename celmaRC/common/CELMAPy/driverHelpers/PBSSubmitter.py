@@ -265,9 +265,6 @@ class PBSSubmitter(object):
         with open(scriptName, "w") as shell_script:
                 shell_script.write(jobString)
 
-# FIXME:
-        # return
-# END FIXME
         # Submit the jobs
         if dependentJob is None:
             command = "qsub ./{0}".format(scriptName).split(" ")
