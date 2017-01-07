@@ -52,7 +52,6 @@ def driverRadialFlux(collectPaths     ,\
                                    mode             ,\
                                    indicesArgs      ,\
                                    indicesKwargs    ,\
-                                   plotSuperKwargs  ,\
                                   )
 
     # Plot
@@ -69,7 +68,6 @@ def getRadialFlux(collectPaths     ,\
                   mode             ,\
                   indicesArgs      ,\
                   indicesKwargs    ,\
-                  plotSuperKwargs  ,\
                  ):
     #{{{docstring
     """
