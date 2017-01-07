@@ -76,6 +76,12 @@ def collectiveCollect(paths               ,\
     """
     #}}}
 
+# FIXME:
+    from copy import copy
+    startPaths = copy(paths)
+    startTInd  = copy(tInd)
+# END FIXME
+
     # Initialize the data
     data = {var: None for var in varStrings}
 
@@ -101,6 +107,8 @@ def collectiveCollect(paths               ,\
             try:
                 # Make a local var which is reused for every interation,
                 # then concatenate the dictionary
+                # NOTE: The collect indices are INCLUSIVE i.e not
+                #       working like pyhton slices
                 curVar =\
                     safeCollect(var,\
                                 path     = path        ,\
@@ -139,18 +147,62 @@ def collectiveCollect(paths               ,\
                 # Remove first point in time in the current time as this
                 # is the same as the last of the previous
                 data[var]=np.concatenate((data[var], curVar[1:,:,:,:]), axis=0)
-
+# FIXME:
+#                # Update the postCollectTInd
+#                if postCollectTInd is not None and postCollectTInd[1] is not None:
+#                    postCollectTInd = list(postCollectTInd)
+#                    postCollectTInd[1] += 999
+#                    postCollectTInd = tuple(postCollectTInd)
+#
         # Do slicing post collection if necessary
         if postCollectTInd is not None:
             # +1 to include the last point
             lastPost = postCollectTInd[1]+1 if postCollectTInd[1] is not None\
                        else None
 
+# FIXME
+#            import pdb; pdb.set_trace()
+        print("Before")
+        if tInd is not None:
+            if tInd[0] is None:
+                print("len(data[var])-(tInd[1]+1-0) = {}".format(len(data[var])-(tInd[1]+1-0)))
+            elif tInd[1] is None:
+                pass
+            else:
+                print("len(data[var])-(tInd[1]+1-tInd[0]) = {}".format(len(data[var])-(tInd[1]+1-tInd[0])))
+        if postCollectTInd is not None:
+            if postCollectTInd[0] is None:
+                print("len(data[var])-(postCollectTInd[1]+1-0) = {}".format(len(data[var])-(postCollectTInd[1]+1-0)))
+            elif postCollectTInd[1] is None:
+                pass
+            else:
+                print("len(data[var])-(postCollectTInd[1]+1-postCollectTInd[0]) = {}".format(len(data[var])-(postCollectTInd[1]+1-postCollectTInd[0])))
+            # import pdb; pdb.set_trace()
+# FIXME END
             data[var] = data[var][postCollectTInd[0]:lastPost]
 
     # Recast to tuple
     if tInd is not None:
         tInd = tuple(tInd)
+
+# FIXME
+    print("After")
+    if tInd is not None:
+        if tInd[0] is None:
+            print("len(data[var])-(tInd[1]+1-0) = {}".format(len(data[var])-(tInd[1]+1-0)))
+        elif tInd[1] is None:
+            pass
+        else:
+            print("len(data[var])-(tInd[1]+1-tInd[0]) = {}".format(len(data[var])-(tInd[1]+1-tInd[0])))
+    if postCollectTInd is not None:
+        if postCollectTInd[0] is None:
+            print("len(data[var])-(postCollectTInd[1]+1-0) = {}".format(len(data[var])-(postCollectTInd[1]+1-0)))
+        elif postCollectTInd[1] is None:
+            pass
+        else:
+            print("len(data[var])-(postCollectTInd[1]+1-postCollectTInd[0]) = {}".format(len(data[var])-(postCollectTInd[1]+1-postCollectTInd[0])))
+        # import pdb; pdb.set_trace()
+# FIXME END
 
     return data
 #}}}
@@ -187,23 +239,28 @@ def removePathsOutsideRange(paths, tInd):
 
     # Check if the paths are needed from the rigth
     if tInd[1] is not None:
-        lenT = 0
-
+        # Start at 1, as one duplicate point will be removed each
+        # iteration
+        lenT = 1
         lastInd = None
         for ind in range(len(paths)):
             with DataFile(os.path.join(paths[ind],"BOUT.dmp.0.nc")) as f:
                 t = f.read("t_array")
-                lenT += len(t)
+                # -1 removes duplicate point
+                lenT += len(t)-1
+# FIXME: NOTE: +1 as collect in INCLUSIVE?
                 if tInd[1] < lenT:
                     lastInd = ind+1
                     break
 
-        # Remove from the rigth
+        # Remove from the right
         paths = paths[:lastInd]
 
     # Check if the paths are needed from the left
     if tInd[0] is not None:
-        lenT  = 0
+        # Start at 1, as one duplicate point will be removed each
+        # iteration
+        lenT  = 1
         # If folders are removed, subtract tInd with number of removed indices
         # lenTs is a placeholder for this
         removePaths = []
@@ -213,8 +270,9 @@ def removePathsOutsideRange(paths, tInd):
                 t = f.read("t_array")
                 curLenT = len(t)
                 lenTs.append(curLenT)
-                lenT += curLenT
-                if tInd[0] > lenT:
+                # -1 removes duplicate point
+                lenT += curLenT - 1
+                if tInd[0] >= lenT:
                     removePaths.append(path)
                 else:
                     break
@@ -222,16 +280,21 @@ def removePathsOutsideRange(paths, tInd):
         tInd = list(tInd)
         for remove, lenT in zip(removePaths, lenTs):
             # +1 removes the duplicate which is present in both files
+# FIXME
 #            tInd[0] = (tInd[0] - lenT) + 1
             tInd[0] = (tInd[0] - lenT)
-            tInd[1] =  tInd[1] - lenT if tInd[1] is not None else None
+            # +1 in order to make tInd[1] inclusive
+            tInd[1] =  tInd[1] - lenT + 1 if tInd[1] is not None else None
             paths.remove(remove)
         # Remove the duplicates present in more files by shifting
         # the first time index by one per duplicate
-        tInd[0] += len(paths)-1
-        tInd = tuple(tInd)
+# FIXME
+#        tInd[0] += len(paths)-1
+#        tInd[0] += len(paths)
+        tInd[0] += len(removePaths)
 
     # Cast to tuple
+    tInd = tuple(tInd)
 # FIXME:
     inds = [startPaths.index(path) for path in paths if path in startPaths]
     if tInd[0] is None:
@@ -282,19 +345,36 @@ def collectTime(paths, tInd = None):
     for path in paths:
         with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
             if time is None:
+#                import pdb; pdb.set_trace()
                 time = f.read("t_array")
             else:
                 # Remove first point in time in the current time as this
                 # is the same as the last of the previous
+# FIXME
+                tLenFirstFolder  = 322
+                tLenSecondFolder = 371
+                tLenThirdFolder  = 491
+                # import pdb; pdb.set_trace()
+# END FIXME
                 time = np.concatenate((time, f.read("t_array")[1:]), axis=0)
 
     if tInd is not None:
-        # +1 as the last point is excluded from a slice
+        # NOTE: +1 since the collect ranges is INCLUSIVE, i.e. not working
+        #       like a python slice
         lastT = tInd[1]+1 if tInd[1] is not None else None
         time  = time[tInd[0]:lastT]
 
 # FIXME
+    if tInd is not None:
+        if tInd[0] is None:
+            print("len(time)-(tInd[1]+1-0) = {}".format(len(time)-(tInd[1]+1-0)))
+        elif tInd[1] is None:
+            pass
+        else:
+            print("len(time)-(tInd[1]+1-tInd[0]) = {}".format(len(time)-(tInd[1]+1-tInd[0])))
+    # import pdb; pdb.set_trace()
     print("len(time) = {}".format(len(time)))
+# FIXME END
     return time
 #}}}
 

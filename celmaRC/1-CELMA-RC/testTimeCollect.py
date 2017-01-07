@@ -10,7 +10,6 @@ sys.path.append(commonDir)
 
 from CELMAPy.collectAndCalcHelpers import collectiveCollect, collectTime
 import numpy as np
-import pdb;
 
 #{{{getTimes
 def getTimes(paths, tInd):
@@ -60,9 +59,7 @@ def verify(a, b):
     if np.allclose(a, b):
         print("Success!\n\n")
     else:
-        print("Test failed, launching pdb for investigation!\n\n")
-        pdb.set_trace()
-        print("\n\nWill continue")
+        raise RuntimeError("The two arrays did not match")
 #}}}
 
 #{{{timeCollectTest
@@ -106,36 +103,72 @@ def timeCollectTest():
     verify(tcc, tct)
 
     print("\n\nTesting time collects for two folders (cutting the first folder)")
-# FIXME: BUG FOUND HERE
-    tcc, tct = getTimes(collectPaths[:2], tInd = [tLenFirstFolder+1, None])
+    tcc, tct = getTimes(collectPaths[:2], tInd = [tLenFirstFolder, None])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for two folders (border case first folder)")
+    tcc, tct = getTimes(collectPaths[:2], tInd = [tLenFirstFolder-1, None])
     verify(tcc, tct)
 
     print("\n\nTesting time collects for two folders (cutting the last folder)")
+    # NOTE: tLen is the length of the folder and indexing is starting at 0
     tcc, tct = getTimes(collectPaths[:2], tInd = [None, tLenFirstFolder-1])
     verify(tcc, tct)
 
+    print("\n\nTesting time collects for two folders (border case last folder)")
+    tcc, tct = getTimes(collectPaths[:2], tInd = [None, tLenFirstFolder])
+    verify(tcc, tct)
+
     print("\n\nTesting time collects for two folders (slice between)")
+    tcc, tct = getTimes(collectPaths[:2], tInd = [1, tLenFirstFolder])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for two folders (slice in first)")
     tcc, tct = getTimes(collectPaths[:2], tInd = [1, tLenFirstFolder-1])
     verify(tcc, tct)
 
-    print("\n\nTesting time collects for 3 folders (no slicing)")
+    print("\n\nTesting time collects for two folders (slice in last)")
+    tcc, tct = getTimes(collectPaths[:2], tInd = [tLenFirstFolder, tLenFirstFolder])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for three folders (no slicing)")
     tcc, tct = getTimes(collectPaths, tInd = None)
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (cutting the first folder)")
-    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder+1, None])
+    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder, None])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for three folders (border case first folder)")
+    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder-1, None])
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (cutting the two first folders)")
-    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder+tLenSecondFolder+1, None])
+    # NOTE: tLenSecondFolder contains one duplicate time point, so - 1
+    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder+tLenSecondFolder-1, None])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for three folders (border case two first folders)")
+    # NOTE: tLenSecondFolder contains one duplicate time point, so - 1
+    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder+tLenSecondFolder-2, None])
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (cutting the last folder)")
+    # NOTE: tLen is the length of the folder and indexing is starting at 0, so -1
+    # NOTE: tLenSecondFolder contains one duplicate time point, so - 1
+    tcc, tct = getTimes(collectPaths, tInd = [None, tLenFirstFolder + tLenSecondFolder-2])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for three folders (border case last folder)")
     tcc, tct = getTimes(collectPaths, tInd = [None, tLenFirstFolder + tLenSecondFolder-1])
     verify(tcc, tct)
 
-    print("\n\nTesting time collects for three folders (cutting the two last folder)")
+    print("\n\nTesting time collects for three folders (cutting the two last folders)")
     tcc, tct = getTimes(collectPaths, tInd = [None, tLenFirstFolder-1])
+    verify(tcc, tct)
+
+    print("\n\nTesting time collects for three folders (border case two last folders)")
+    tcc, tct = getTimes(collectPaths, tInd = [None, tLenFirstFolder])
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (slicing the full array)")
@@ -143,11 +176,12 @@ def timeCollectTest():
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (slicing the two first arrays)")
-    tcc, tct = getTimes(collectPaths, tInd = [1, tLenFirstFolder + tLenSecondFolder-1])
+    tcc, tct = getTimes(collectPaths, tInd = [1, tLenFirstFolder + tLenSecondFolder-2])
     verify(tcc, tct)
 
     print("\n\nTesting time collects for three folders (slicing the two last arrays)")
-    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder + 1, tLenFirstFolder + tLenSecondFolder-1])
+    tcc, tct = getTimes(collectPaths, tInd = [tLenFirstFolder, tLenFirstFolder + tLenThirdFolder-5])
+    print(tcc[-1], tct[-1])
     verify(tcc, tct)
 #}}}
 
