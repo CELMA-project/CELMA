@@ -5,6 +5,7 @@ Contains the radial flux calculation
 """
 
 from ..calcVelocities import calcRadialExBPoloidal
+from ..collectAndCalcHelpers import slicesToIndices
 
 #{{{CollectAndCalcRadialFlux
 class CollectAndCalcRadialFlux(object):
@@ -82,7 +83,13 @@ class CollectAndCalcRadialFlux(object):
             key = "{},{},{}".format(rho,theta,par)
             raidalExBTraces[key] = {}
 
-            t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
+            # Collect and slice
+            if self._tSlice is not None:
+                t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
+                tStep = self._tSlice[tCounter].step
+            else:
+                t = None
+                tStep = None
             tCounter += 1
 
             slices = (x, y, t)
@@ -92,6 +99,14 @@ class CollectAndCalcRadialFlux(object):
                                 mode = self._mode                          ,\
                                 convertToPhysical = self._convertToPhysical,\
                                )
+
+            if tStep is not None:
+                # Slice the variables with the step
+                # Make a new slice as the collect dealt with the start and
+                # the stop of the slice
+                newSlice = slice(None, None, tStep)
+                var  = var [newSlice]
+                time = time[newSlice]
 
             # Save and cast to to 2d:
             raidalExBTraces[key]["uExBRadial"] = radialExB[:, 0, 0, z]
