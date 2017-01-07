@@ -10,7 +10,7 @@ from ..PDF import getPDF
 from ..PSD import get1DPSD
 from ..superClasses import DriverPointsSuperClass
 from .plotCombinedPlots import PlotCombinedPlots
-from multiprocesses import Process
+from multiprocessing import Process
 
 #{{{driverCombinedPlots
 def driverCombinedPlots(collectPaths     ,\
@@ -76,7 +76,7 @@ def driverCombinedPlots(collectPaths     ,\
     # Plot
     ptt = PlotCombinedPlots(uc, **plotSuperKwargs)
     ptt.setData(tt, rf, PDF, PSD, mode)
-    ptt.plotSaveShowCombindedPlots()
+    ptt.plotSaveShowCombinedPlots()
 #}}}
 
 #{{{DriverCombinedPlots

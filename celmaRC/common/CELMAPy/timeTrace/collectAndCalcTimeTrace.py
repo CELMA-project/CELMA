@@ -94,13 +94,21 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
             timeTraces[key] = {}
 
             # Collect and slice
-            t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
+            if self._tSlice is not None:
+                t = slicesToIndices(self._collectPaths, self._tSlice[tCounter], "t")
+                tStep = self._tSlice[tCounter].step
+            else:
+                t = None
+                tStep = None
+            tCounter += 1
+
             var, time = self._collectWrapper(timeTraces,key,x,y,z,t)
-            if self._tSlice[tCounter] is not None:
+
+            if tStep is not None:
                 # Slice the variables with the step
                 # Make a new slice as the collect dealt with the start and
                 # the stop of the slice
-                newSlice = slice(None, None, self._tSlice[tCounter].step)
+                newSlice = slice(None, None, tStep)
                 var  = var [newSlice]
                 time = time[newSlice]
 
