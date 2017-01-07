@@ -121,7 +121,7 @@ def driverPosOfFluct(var1Name         ,\
     # Collect the steady state variable
     rp = ccrp.collectWrapper((steadyStatePath,), var1Name)
     # Extract the steady state variable at the last time (but keep the 4d)
-    steadyVar = rp[var1Name][-2:-1,:,:,:]
+    steadyVar = rp[var1Name][-1:,:,:,:]
 
     # Collect first variable
     rp = ccrp.collectWrapper(collectPaths, var1Name)

@@ -267,7 +267,7 @@ sub.setWalltime("00:15:00")
 if __name__ == "__main__":
 
     # Run the fourier modes
-    runFourierModes(sliced=False)
+    # runFourierModes(sliced=False)
     # Set linear slices and plot the sliced fourier modes
     tSlices = {\
                "B0_0.02":slice(80,240)  ,\
@@ -276,9 +276,9 @@ if __name__ == "__main__":
                "B0_0.08":slice(100,225) ,\
                "B0_0.1" :slice(80,210)  ,\
                }
-    runFourierModes(sliced=True)
-    runGrowthRates()
-    runEnergy(sliced=False)
+    # runFourierModes(sliced=True)
+    # runGrowthRates()
+    # runEnergy(sliced=False)
     tSlices = {\
                "B0_0.02":None,\
                "B0_0.04":None,\
@@ -286,8 +286,8 @@ if __name__ == "__main__":
                "B0_0.08":slice(1000,None),\
                "B0_0.1" :None,\
                }
-    runEnergy(sliced=True)
-    runPosOfFluct()
-    runPSD2D()
-    runSkewKurt()
+    # runEnergy(sliced=True)
+    # runPosOfFluct()
+    # runPSD2D()
+    # runSkewKurt()
     runZonalFlow()
