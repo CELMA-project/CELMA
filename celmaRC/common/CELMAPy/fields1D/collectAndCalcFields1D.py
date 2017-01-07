@@ -124,15 +124,6 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
         yInd = slicesToIndices(self._collectPaths, self._ySlice, "y",\
                                yguards=self._yguards)
         zInd = slicesToIndices(self._collectPaths, self._zSlice, "z")
-
-
-
-# FIXME
-        # import pdb; pdb.set_trace()
-        # self._tSlice = slice(10,20)
-        print(self._tSlice)
-
-
         tInd = slicesToIndices(self._collectPaths, self._tSlice, "t")
 
         collectGhost = True if (self._xguards or self._yguards) else False
@@ -241,8 +232,6 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
             collecter = collectPoloidalProfile
 
         # Collect
-# FIXME
-        # import pdb; pdb.set_trace()
         var = collecter(self._collectPaths, self._varName, **collectKwargs)
 
         time = collectTime(self._collectPaths, collectKwargs["tInd"])
