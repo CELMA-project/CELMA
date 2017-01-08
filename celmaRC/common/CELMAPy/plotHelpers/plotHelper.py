@@ -301,9 +301,15 @@ class PlotHelper(object):
 
         # Set number of bins
         if xbins is not None:
-            ax.locator_params(axis="x", nbins=xbins)
+            if ax.get_xscale() != "log":
+                ax.locator_params(axis="x", nbins=xbins)
+            else:
+                ax.locator_params(axis="x", numticks=xbins)
         if ybins is not None:
-            ax.locator_params(axis="y", nbins=ybins)
+            if ax.get_yscale() != "log":
+                ax.locator_params(axis="y", nbins=ybins)
+            else:
+                ax.locator_params(axis="y", numticks=ybins)
     #}}}
 
     @staticmethod

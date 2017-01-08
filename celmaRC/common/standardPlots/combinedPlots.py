@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for fourierModes"""
+"""Post-processor for combinedPlots"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -8,13 +8,13 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.fourierModes import DriverFourierModes
+from CELMAPy.combinedPlots import DriverCombinedPlots
 
-#{{{fourierModesPlot
-def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
+#{{{combinedPlotsPlot
+def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     #{{{docstring
     """
-    Runs the standard fourier modes plot
+    Runs the standard combined plots plot
 
     Parameters
     ----------
@@ -33,52 +33,46 @@ def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
 
     varName           = "n"
     convertToPhysical = True
-    nModes            = 7
+    mode              = "fluct"
 
-    xInd              = None
     yInd              = 16
-    zInd              = None
-    nPoints           = 1
-    equallySpace      = "x"
+    zInd              = 0
 
     if tSlice is not None:
         sliced = True
     else:
         sliced = False
 
-    indicesArgs   = (xInd, yInd, zInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
-                     "nPoints"         : nPoints        ,\
-                     "equallySpace"    : equallySpace   ,\
-                     "steadyStatePath" : steadyStatePath,\
-                     }
-
     plotSuperKwargs = {\
                         "showPlot"        : False ,\
                         "savePlot"        : True  ,\
                         "savePath"        : None  ,\
-                        "extension"       : None  ,\
                         # NOTE: No implemented func which doesn't
                         #       require theRunName yet
                         "savePathFunc"    : None  ,\
+                        "extension"       : None  ,\
                         "dmp_folders"     : None  ,\
                         "timeStampFolder" : False ,\
                         "sliced"          : sliced,\
                        }
 
-    dFM = DriverFourierModes(
-                     # DriverFourierModes
+    useSubProcess = False
+
+    dTT = DriverCombinedPlots(
+                     # DriverCombinedPlots
                      dmp_folders                ,\
-                     indicesArgs                ,\
-                     indicesKwargs              ,\
+                     steadyStatePath            ,\
+                     yInd                       ,\
+                     zInd                       ,\
+                     tSlice                     ,\
                      plotSuperKwargs            ,\
                      varName           = varName,\
-                     nModes            = nModes ,\
+                     mode              = mode   ,\
                      # DriverPointsSuperClass
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dFM.driverFourierMode()
+    dTT.driverCombinedPlots()
 #}}}

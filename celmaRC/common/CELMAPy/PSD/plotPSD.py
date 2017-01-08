@@ -120,7 +120,7 @@ class PlotPSD(PlotSuperClass):
                                      normalOrFluct +\
                                      r")$" +\
                                      r" $" + units + r"$"
-            self._freqLabel         = r"$1/t$ $[Hz]$"
+            self._freqLabel        = r"$[Hz]$"
         else:
             self._varLabelTemplate = r"$"+\
                                      psdStr +\
@@ -128,7 +128,7 @@ class PlotPSD(PlotSuperClass):
                                      "{normalization}" +\
                                      r")$" +\
                                      r" $" + units + r"$"
-            self._freqLabel         = r"$1/t \omega_{ci}$"
+            self._freqLabel        = r"$1/t \omega_{ci}$"
     #}}}
 
     #{{{setData2D

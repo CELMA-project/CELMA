@@ -60,6 +60,8 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
                         "showPlot"        : False,\
                         "savePlot"        : True ,\
                         "savePath"        : None ,\
+                        # NOTE: No implemented func which doesn't
+                        #       require theRunName yet
                         "savePathFunc"    : None ,\
                         "extension"       : None ,\
                         "timeStampFolder" : False,\

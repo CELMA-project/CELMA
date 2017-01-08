@@ -16,7 +16,7 @@ class PlotCombinedPlots(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (27,12), **kwargs):
+    def __init__(self, *args, pltSize = (27,17), **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -127,7 +127,7 @@ class PlotCombinedPlots(PlotSuperClass):
         """
 
         # Make vertical titles
-        self._verticalTitles = self._makeVerticalTitles()
+        self._figureTitle, self._verticalTitles = self._makeVerticalTitles()
 
         # Set var label template
         if self.uc.convertToPhysical:
@@ -151,6 +151,8 @@ class PlotCombinedPlots(PlotSuperClass):
 
         Returns
         -------
+        figureTitle : str
+            Title of the figure
         verticalTitles : tuple
             Title with the vertical titles (i.e. the positions) in the
             order in descending order.
@@ -170,17 +172,21 @@ class PlotCombinedPlots(PlotSuperClass):
                     plotNumberFormatter(float(theta), None)
 
             # Make the const values
-            verticalTitles.append((r"{}$,$ {}$,$ {}").\
+            verticalTitles.append(("{}").\
                     format(\
                         self._ph.rhoTxtDict  ["constRhoTxt"].\
-                            format(self._ph.rhoTxtDict),\
-                        self._ph.thetaTxtDict["constThetaTxt"].\
-                            format(self._ph.thetaTxtDict),\
-                        self._ph.zTxtDict["constZTxt"].\
-                            format(self._ph.zTxtDict),\
+                            format(self._ph.rhoTxtDict)
                           ))
 
-        return tuple(verticalTitles)
+        figureTitle = ("{}$,$ {}").\
+                format(\
+                    self._ph.thetaTxtDict["constThetaTxt"].\
+                        format(self._ph.thetaTxtDict),\
+                    self._ph.zTxtDict["constZTxt"].\
+                        format(self._ph.zTxtDict)
+                      )
+
+        return figureTitle, tuple(verticalTitles)
     #}}}
 
     #{{{_makeHorizontalTitles
@@ -207,47 +213,42 @@ class PlotCombinedPlots(PlotSuperClass):
 
         horizontalTitles = []
 
-        ttFirstLine  = r"\mathrm{Time \quad trace}" +"\n"
-        rfFirstLine  = r"\mathrm{Raidal \quad flux}"+"\n"
-        PDFFirstLine = r"\mathrm{PDF}"+"\n"
-        PSDFirstLine = r"\mathrm{PSD}"+"\n"
-
         # The time trace
         if self._mode == "normal":
-            ttSecondLine = r"${{}}${}".format(unitsOrNormalization)
+            ttHTitile = r"${{}}${}".format(unitsOrNormalization)
         elif self._mode == "fluct":
-            ttSecondLine = r"$\widetilde{{{{{{}}}}}}${}".\
+            ttHTitile = r"$\widetilde{{{{{{}}}}}}${}".\
                     format(unitsOrNormalization)
 
         # The radial flux
         if self._mode == "normal":
-            rfSecondLine = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
+            rfHTitile = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
                                 format(unitsOrNormalization)
         elif self._mode == "fluct":
-            rfSecondLine = (\
+            rfHTitile = (\
                     r"$\widetilde{{{{{{}}}}}} "
                     r"\widetilde{{{{ u }}}}_{{{{E\times B, \rho}}}}${}").\
                     format(unitsOrNormalization)
 
         # The probability density function
-        PDFSecondLine = self._preparePDFLabel()
+        PDFHTitile = self._preparePDFLabel()
 
         # The power spectral density
-        PSDSecondLine = self._preparePSDLabel()
+        PSDHTitile = self._preparePSDLabel()
 
-        ttSecondLine  = ttSecondLine.\
+        ttHTitile  = ttHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
-        rfSecondLine  = rfSecondLine.\
+        rfHTitile  = rfHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
-        PDFSecondLine = PDFSecondLine.\
+        PDFHTitile = PDFHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
-        PSDSecondLine = PSDSecondLine.\
+        PSDHTitile = PSDHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
-        horizontalTitles.append(ttFirstLine+ttSecondLine)
-        horizontalTitles.append(rfFirstLine+rfSecondLine)
-        horizontalTitles.append(PDFFirstLine+PDFSecondLine)
-        horizontalTitles.append(PSDFirstLine+PSDSecondLine)
+        horizontalTitles.append(ttHTitile)
+        horizontalTitles.append(rfHTitile)
+        horizontalTitles.append(PDFHTitile)
+        horizontalTitles.append(PSDHTitile)
 
         return tuple(horizontalTitles)
     #}}}
@@ -340,12 +341,14 @@ class PlotCombinedPlots(PlotSuperClass):
 
         ttXLabel  = timeLabel
         rfXLabel  = timeLabel
-        PSDXLabel = r"$1/t$ $[Hz]$" if self.uc.convertToPhysical\
+        PSDXLabel = r"$[Hz]$" if self.uc.convertToPhysical\
                     else r"$1/t \omega_{ci}$"
 
         # Make the PDFXLabel
-        PDFXLabelunitsOrNormalization = "[{units}]"
-        PDFXLabelunitsOrNormalization = "{normalization}"
+        if self.uc.convertToPhysical:
+            PDFXLabelunitsOrNormalization = "[{units}]"
+        else:
+            PDFXLabelunitsOrNormalization = "{normalization}"
         # Make normalOrFluct
         if self._mode == "normal":
             normalOrFluct = r"{{}}"
@@ -353,7 +356,7 @@ class PlotCombinedPlots(PlotSuperClass):
             normalOrFluct = r"\widetilde{{{}}}"
         PDFXLabel = r"$" + normalOrFluct + r"$" +\
                     r" $" + PDFXLabelunitsOrNormalization + r"$"
-        PDFXLabel.\
+        PDFXLabel = PDFXLabel.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         xLabels.append(ttXLabel )
@@ -450,16 +453,33 @@ class PlotCombinedPlots(PlotSuperClass):
         Set the titles and the labels
         """
 
-        # Set horizontal titles
-        self._ttAxes[0] .set_title(self._horizontalTitles[0])
-        self._rfAxes[0] .set_title(self._horizontalTitles[1])
-        self._PDFAxes[0].set_title(self._horizontalTitles[2])
-        self._PSDAxes[0].set_title(self._horizontalTitles[3])
+        # Magic numbers
+        hOffset = np.array([-0.35, 0.0])
+        vOffset = np.array([ 0.0 , 0.1])
 
-        # Set time trace labels
+        # Set the figure title
+        self._fig.suptitle(self._figureTitle)
+
+        # Set horizontal titles
+        ttHTitle  = self._ttAxes [0].set_title(self._horizontalTitles[0])
+        rfHTitle  = self._rfAxes [0].set_title(self._horizontalTitles[1])
+        PDFHTitle = self._PDFAxes[0].set_title(self._horizontalTitles[2])
+        PSDHTitle = self._PSDAxes[0].set_title(self._horizontalTitles[3])
+        ttHTitle .set_position(ttHTitle .get_position() + vOffset)
+        rfHTitle .set_position(rfHTitle .get_position() + vOffset)
+        PDFHTitle.set_position(PDFHTitle.get_position() + vOffset)
+        PSDHTitle.set_position(PSDHTitle.get_position() + vOffset)
+
+        # Set empty labels (needed only to get the position)
         labelTop    = self._ttAxes[0].set_ylabel("")
         labelMid    = self._ttAxes[1].set_ylabel("")
         labelBottom = self._ttAxes[2].set_ylabel("")
+
+        # Set the xLabels
+        self._ttAxes [-1].set_xlabel(self._xLabels[0])
+        self._rfAxes [-1].set_xlabel(self._xLabels[1])
+        self._PDFAxes[-1].set_xlabel(self._xLabels[2])
+        self._PSDAxes[-1].set_xlabel(self._xLabels[3])
 
         # Set vertical titles
         titleMid    = self._ttAxes[1].set_title(self._verticalTitles[1])
@@ -473,15 +493,16 @@ class PlotCombinedPlots(PlotSuperClass):
                         )
         titleTop.set_fontsize(titleMid.get_fontsize())
 
-        # Magic numbers
-        offset = np.array([-0.3, 0.0])
-
-        titleTop    .set_rotation(90)
-        titleTop    .set_position(labelTop  .get_position() + offset)
-        titleMid    .set_rotation(90)
-        titleMid    .set_position(labelMid  .get_position() + offset)
+        titleTop   .set_rotation(90)
+        titleTop   .set_position(labelTop  .get_position() + hOffset)
+        titleMid   .set_rotation(90)
+        titleMid   .set_ha("center")
+        titleMid   .set_va("center")
+        titleMid   .set_position(labelMid  .get_position() + hOffset)
         titleBottom.set_rotation(90)
-        titleBottom.set_position(labelBottom.get_position() + offset)
+        titleBottom.set_ha("center")
+        titleBottom.set_va("center")
+        titleBottom.set_position(labelBottom.get_position() + hOffset)
     #}}}
 
     #{{{plotSaveShowCombinedPlots
@@ -531,13 +552,20 @@ class PlotCombinedPlots(PlotSuperClass):
              self._PSDAxes[0])
         for ax in topAxes:
             self._ph.makePlotPretty(ax            ,\
+                                    ybins  = 5    ,\
+                                    xbins  = 5    ,\
                                     legend = False,\
                                     )
         for ax in bottomAxes:
             self._ph.makePlotPretty(ax            ,\
+                                    ybins  = 5    ,\
+                                    xbins  = 5    ,\
                                     rotation = 45 ,\
                                     legend = False,\
                                     )
+
+        # Adjust the subplots
+        self._fig.subplots_adjust(hspace=0.2, wspace=0.4)
 
         if self._showPlot:
             plt.show()
