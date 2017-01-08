@@ -8,6 +8,10 @@ from .maxMinHelper import getMaxMinAnimation, getLevelsAnimation
 import os
 import matplotlib.pyplot as plt
 
+# Tweaked using matplotlib 1.5.3
+import matplotlib.style
+matplotlib.style.use('classic')
+
 # Set proper backend from display
 try:
     os.environ["DISPLAY"]
@@ -53,3 +57,5 @@ seqCMap  = plt.get_cmap("inferno")
 seqCMap2 = plt.get_cmap("plasma")
 seqCMap3 = plt.get_cmap("viridis")
 divCMap  = plt.get_cmap("BrBG")
+# Better to use Vega10 in matplotlib 2.0
+qualCMap  = plt.get_cmap("Dark2")
