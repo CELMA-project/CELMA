@@ -2,6 +2,7 @@
 
 """ Init for standardPlots"""
 
+from .combinedPlots import combinedPlotsPlot
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot

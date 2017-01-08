@@ -33,13 +33,15 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     convertToPhysical = True
 
     plotSuperKwargs = {\
-                        "showPlot"        : False ,\
-                        "savePlot"        : True  ,\
-                        "savePath"        : None  ,\
-                        "savePathFunc"    : None  ,\
-                        "extension"       : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
+                        "showPlot"        : False,\
+                        "savePlot"        : True ,\
+                        "savePath"        : None ,\
+                        # NOTE: No implemented func which doesn't
+                        #       require theRunName yet
+                        "savePathFunc"    : None ,\
+                        "extension"       : None ,\
+                        "dmp_folders"     : None ,\
+                        "timeStampFolder" : False,\
                        }
 
     varName  = "n"
