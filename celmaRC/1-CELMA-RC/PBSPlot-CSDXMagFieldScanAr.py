@@ -26,7 +26,7 @@ tSlices = {\
            "B0_0.08":slice(100,225) ,\
            "B0_0.1" :slice(80,210)  ,\
            }
-plt.setLinearPhaseTSlices(tSlices)
+pltSub.setLinearPhaseTSlices(tSlices)
 
 # pltSub.runFourierModes(sliced=True)
 # pltSub.runGrowthRates()
@@ -38,7 +38,7 @@ tSlices = {\
            "B0_0.08":slice(1000,None),\
            "B0_0.1" :None,\
            }
-plt.setSaturatedTurbulenceTSlices(tSlices)
+pltSub.setSatTurbTSlices(tSlices)
 # pltSub.runEnergy(sliced=True)
 # pltSub.runPosOfFluct()
 # pltSub.runPSD2D()
