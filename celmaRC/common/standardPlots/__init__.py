@@ -2,6 +2,8 @@
 
 """ Init for standardPlots"""
 
+from .plotSubmitter import PlotSubmitter
+
 from .combinedPlots import combinedPlotsPlot
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot

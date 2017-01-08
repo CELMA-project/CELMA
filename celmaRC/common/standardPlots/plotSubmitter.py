@@ -23,7 +23,7 @@ from .skewKurt import skewKurtPlot
 from .zonalFlow import zonalFlowPlot
 
 #{{{PlotSubmitter
-class PlotSubmitter(object)
+class PlotSubmitter(object):
     """Class used to submit the standard plots"""
 
     #{{{constructor
@@ -34,7 +34,8 @@ class PlotSubmitter(object)
 
         The constructor will:
             * Load the pickle containing the dmp_folders.
-            * Generate the submitter to be used
+            * Make variables to loop over
+            * Generate the submitter to be used.
 
         Parameters
         ----------
@@ -51,11 +52,11 @@ class PlotSubmitter(object)
                 dmpFolders = pickle.load(f)
 
         mergeFromLinear =\
-                pathMerger(dmpFolders, ("linear", "turbulence", "extraTurbulence"))
+            pathMerger(dmpFolders, ("linear", "turbulence", "extraTurbulence"))
 
         mergeAll =\
-                pathMerger(dmpFolders,\
-                          ("init", "expand", "linear", "turbulence", "extraTurbulence"))
+           pathMerger(dmpFolders,\
+                ("init", "expand", "linear", "turbulence", "extraTurbulence"))
 
         paramKeys = tuple(sorted(list(mergeFromLinear.keys())))
         rJobs     = range(len(paramKeys))
@@ -95,6 +96,24 @@ class PlotSubmitter(object)
             raise ValueError("Could not find correct slice")
 
         return tSlice
+    #}}}
+
+    #{{{setLinearPhaseTSlices
+    def setLinearPhaseTSlices(self, tSlices):
+        """
+        Set the time slices for the linear phase
+        """
+
+        self._linearTSlices = tSlices
+    #}}}
+
+    #{{{setSatTurbTSlices
+    def setSatTurbTSlices(self, tSlices):
+        """
+        Set the time slices for the saturated turbulence phase
+        """
+
+        self._satTurbTSlices = tSlices
     #}}}
 
     #{{{runFourierModes
