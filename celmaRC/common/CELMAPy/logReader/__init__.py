@@ -4,4 +4,4 @@
 Init-file for the logReader
 """
 
-from .logReader import logReader
+from .logReader import getLogNumbers, collectiveGetLogNumbers

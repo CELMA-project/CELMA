@@ -17,6 +17,7 @@ from standardPlots import (\
                            fourierModesPlot ,\
                            growthRatesPlot  ,\
                            energyPlot       ,\
+                           performancePlot  ,\
                            posOfFluctPlot   ,\
                            PSD2DPlot        ,\
                            skewKurtPlot     ,\
@@ -272,6 +273,36 @@ def runCominedPlots():
         sleep(1.5)
 #}}}
 
+#{{{runPerformance
+def runPerformance(allFolders=False):
+    """
+    Runs the performance plots
+
+    Parameters
+    ----------
+    allFolders : bool
+        If "init" and "expand" should be included in the plot.
+    """
+    loopOver = zip(dmpFolders["turbulence"],\
+                   paramKeys,\
+                   rJobs)
+    for dmp_folders, key, nr in loopOver:
+
+        if allFolders:
+            collectPaths = mergeAll[key]
+            sub.setJobName("performanceAll{}".format(nr))
+            kwargs = {"allFolders":True}
+        else:
+            collectPaths = mergeFromLinear[key]
+            sub.setJobName("performance{}".format(nr))
+            kwargs = {"allFolders":False}
+        dmp_folders  = (dmp_folders,)
+        args = (dmp_folders, collectPaths)
+        sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
+        # Sleep 1.5 seconds to ensure that tmp files will have different names
+        sleep(1.5)
+#}}}
+
 #{{{Globals
 directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
@@ -281,6 +312,10 @@ with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
 
 mergeFromLinear =\
         pathMerger(dmpFolders, ("linear", "turbulence", "extraTurbulence"))
+
+mergeAll =\
+        pathMerger(dmpFolders,\
+                  ("init", "expand", "linear", "turbulence", "extraTurbulence"))
 
 paramKeys = tuple(sorted(list(mergeFromLinear.keys())))
 rJobs     = range(len(paramKeys))
@@ -319,4 +354,6 @@ if __name__ == "__main__":
     # runPSD2D()
     # runSkewKurt()
     # runZonalFlow()
-    runCominedPlots()
+    # runCominedPlots()
+    runPerformance(allFolders=False)
+    runPerformance(allFolders=True)
