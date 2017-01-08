@@ -37,7 +37,7 @@ class PlotPerformance(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, performance):
+    def setData(self, performance, allFolders=False):
         #{{{docstring
         """
         Sets the performance to be plotted.
@@ -47,9 +47,21 @@ class PlotPerformance(PlotSuperClass):
         Parameters
         ----------
         performance : dict
-            Dictionary where the keys are on the form "rho,theta,z".
-            The value is a dict containing of
-            {varName:performance, "time":time}
+            Although the keys may vary depending on the settings, the
+            standard keys are:
+                * time      - The normalized time in the simulation
+                * RHSPrTime - Number of right hand side evaluations before a
+                              time step per time ste:
+                * WallTime  - Physical time used on the step
+                * Calc      - Percentage of time used on arithmetical
+                              calculation
+                * Inv       - Percentage of time used on laplace inversion
+                * Comm      - Percentage of time used on communication
+                * I/O       - Percentage of time used on inupt/output
+                * SOLVER    - Percentage of time used in the solver
+            The values are stored in numpy arrays.
+        allFolders : bool
+            If true, the fileName will be tagged with allFolders.
         """
         #}}}
 
@@ -57,13 +69,17 @@ class PlotPerformance(PlotSuperClass):
         self._performance = performance
         keys = performance.keys()
 
-        self._colors = qualCMap(np.linspace(0, 1, len(performance.keys())))
+        self._colors = qualCMap(np.linspace(0, 1, len(keys)))
 
         self._prepareLabels()
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath, "performance")
+
+        # Whether or not all folders has been used
+        if allFolders:
+            self._fileName += "allFolders"
 
         if self._extension is None:
             self._extension = "png"
@@ -77,24 +93,19 @@ class PlotPerformance(PlotSuperClass):
         Prepares the labels for plotting.
         """
 
-        # Set var label template
-        if self.uc.convertToPhysical:
-            unitsOrNormalization = " $[{units}]$"
-        else:
-            unitsOrNormalization = "${normalization}$"
-
         # Prepare legends
         self._legends = []
-        self._legends.append("\mathrm{Arithmetics}")
-        self._legends.append("\mathrm{Laplace \quad inversions}")
-        self._legends.append("\mathrm{Communication}")
-        self._legends.append("\mathrm{Input/output}")
-        self._legends.append("\mathrm{Solving for time}")
+        self._legends.append("$\mathrm{Arithmetics}$")
+        self._legends.append("$\mathrm{Laplace \quad inversions}$")
+        self._legends.append("$\mathrm{Communication}$")
+        self._legends.append("$\mathrm{Input/output}$")
+        self._legends.append("$\mathrm{Time \quad solver}$")
         self._legends = sorted(self._legends)
         self._legends = tuple(self._legends)
 
-        # Set RHS evals y-label
+        # Set the y-labels
         self._RHSEvalYlabel = r"$\mathrm{RHS \quad evaluations}/\mathrm{Time step}$"
+        self._pctYlabel     = r"$\mathrm{Percentage \quad} [\%]$"
 
         # Set the time label
         self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
@@ -111,7 +122,7 @@ class PlotPerformance(PlotSuperClass):
                 plt.subplots(nrows=2, figsize=self._pltSize, sharex=True)
 
         # Pop RHS evals and time as treated separately
-        RHSEvals = self._performance.pop("RHS evals")
+        RHSEvals = self._performance.pop("RHSPrTime")
         time     = self._performance.pop("time")
 
         # RHS evals axis
@@ -123,13 +134,14 @@ class PlotPerformance(PlotSuperClass):
         for key, color, label in zip(keys, self._colors[1:], self._legends):
             pctAx.plot(time,\
                        self._performance[key],\
-                       color=color, label=label)
+                       color=color, label=label, alpha=0.7)
 
         # Set axis labels
+        pctAx.set_ylabel(self._pctYlabel)
         pctAx.set_xlabel(self._timeLabel)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(RHSAx, rotation = 45)
+        self._ph.makePlotPretty(RHSAx, rotation = 45, legend=False)
         self._ph.makePlotPretty(pctAx, rotation = 45)
 
         if self._showPlot:

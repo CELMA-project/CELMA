@@ -10,9 +10,10 @@ from .plotPerformance import PlotPerformance
 from multiprocessing import Process
 
 #{{{driverPerformance
-def driverPerformance(collectPaths     ,\
-                      convertToPhysical,\
-                      plotSuperKwargs  ,\
+def driverPerformance(collectPaths      ,\
+                      convertToPhysical ,\
+                      plotSuperKwargs   ,\
+                      allFolders = False,\
                      ):
     #{{{docstring
     """
@@ -27,6 +28,8 @@ def driverPerformance(collectPaths     ,\
         Whether or not to convert to physical units.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    allFolders : bool
+        If true, the fileName will be tagged with allFolders.
     """
     #}}}
 
@@ -38,9 +41,8 @@ def driverPerformance(collectPaths     ,\
     # Execute the collection
     perform = ccp.executeCollectAndCalc()
 
-    ptt = PlotPerformance(cct.uc          ,\
-                          **plotSuperKwargs)
-    ptt.setData(perform)
+    ptt = PlotPerformance(ccp.uc, **plotSuperKwargs)
+    ptt.setData(perform, allFolders)
     ptt.plotSaveShowPerformance()
 #}}}
 
@@ -51,14 +53,17 @@ class DriverPerformance(DriverSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self           ,\
-                 dmp_folders    ,\
-                 plotSuperKwargs,\
-                 **kwargs       ):
+    def __init__(self              ,\
+                 dmp_folders       ,\
+                 convertToPhysical ,\
+                 plotSuperKwargs   ,\
+                 allFolders = False,\
+                 **kwargs          ):
         #{{{docstring
         """
         This constructor:
             * Calls the parent class
+            * Sets the member data
             * Updates the plotSuperKwargs
 
         Parameters
@@ -67,6 +72,8 @@ class DriverPerformance(DriverSuperClass):
             Tuple of the dmp_folder (output from bout_runners).
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        allFolders : bool
+            If true, the fileName will be tagged with allFolders.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -74,6 +81,10 @@ class DriverPerformance(DriverSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(dmp_folders, **kwargs)
+
+        # Set the member data
+        self.convertToPhysical = convertToPhysical
+        self._allFolders       = allFolders
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -93,10 +104,13 @@ class DriverPerformance(DriverSuperClass):
                  self.convertToPhysical,\
                  self._plotSuperKwargs ,\
                 )
+        kwargs = {"allFolders":self._allFolders}
         if self._useSubProcess:
-            processes = Process(target = driverPerformance, args = args)
+            processes =\
+                    Process(target = driverPerformance,\
+                            args = args, kwargs=kwargs)
             processes.start()
         else:
-            driverPerformance(*args)
+            driverPerformance(*args, **kwargs)
     #}}}
 #}}}
