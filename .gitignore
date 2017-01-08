@@ -47,7 +47,8 @@
 html/
 
 #BOUT
-*log*
+*.log*
+*log.*
 *.nc
 *.png
 *.pdf
