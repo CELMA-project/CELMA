@@ -5,7 +5,6 @@ Contains the radial flux calculation
 """
 
 from ..calcVelocities import calcRadialExBPoloidal
-from ..collectAndCalcHelpers import slicesToIndices
 
 #{{{CollectAndCalcRadialFlux
 class CollectAndCalcRadialFlux(object):

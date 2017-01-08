@@ -2,6 +2,8 @@
 
 """Contains function which reads the log files."""
 
+from collections import OrderedDict
+import numpy as np
 import os
 
 #{{{getLogNumbers
@@ -15,21 +17,21 @@ def getLogNumbers(path):
     path : str
         The path to the log files.
 
-    Retruns
+    Returns
     -------
     logNumbers : dict
         Although the keys may vary depending on the settings, the
         standard keys are:
-            * Sim Time  - The normalized time in the simulation
-            * RHS evals - Number of right hand side evaluations before a
-                          time step
-            * Wall Time - Physical time used on the step
-            * Calc      - Percentage of time used on arithmetical calculation
-            * Inv       - Percentage of time used on laplace inversion
-            * Comm      - Percentage of time used on communication
-            * I/O       - Percentage of time used on inupt/output
-            * SOLVER    - Percentage of time used in the solver
-        The values are stored in tuples.
+            * SimTime  - The normalized time in the simulation
+            * RHSevals - Number of right hand side evaluations before a
+                         time step
+            * WallTime - Physical time used on the step
+            * Calc     - Percentage of time used on arithmetical calculation
+            * Inv      - Percentage of time used on laplace inversion
+            * Comm     - Percentage of time used on communication
+            * I/O      - Percentage of time used on inupt/output
+            * SOLVER   - Percentage of time used in the solver
+        The values are stored in numpy arrays.
     """
     #}}}
 
@@ -75,8 +77,61 @@ def getLogNumbers(path):
                 data[key].append(float(value))
 
     for key in data.keys():
-        # Cast to tuple
-        data[key] = tuple(data[key])
+        # Cast to non-writeable array
+        data[key] = np.array(data[key])
+        data[key].setflags(write=False)
 
     return dict(data)
+#}}}
+
+#{{{collectiveGetLogNumbers
+def collectiveGetLogNumbers(paths):
+    #{{{docstring
+    """
+    Get the merges the simulation numbers for several BOUT.log.0 files.
+
+    NOTE: The paths should be ordered in ascending temporal order.
+    NOTE: The 0th iteration of each path will be removed.
+
+    Parameters
+    ----------
+    paths : tuple
+        The path to the log files.
+
+    Returns
+    -------
+    logNumbers : dict
+        Although the keys may vary depending on the settings, the
+        standard keys are:
+            * SimTime  - The normalized time in the simulation
+            * RHSevals - Number of right hand side evaluations before a
+                         time step
+            * WallTime - Physical time used on the step
+            * Calc     - Percentage of time used on arithmetical calculation
+            * Inv      - Percentage of time used on laplace inversion
+            * Comm     - Percentage of time used on communication
+            * I/O      - Percentage of time used on inupt/output
+            * SOLVER   - Percentage of time used in the solver
+        The values are stored in numpy arrays.
+    """
+    #}}}
+
+    data = None
+
+    for path in paths:
+        curData = getLogNumbers(path)
+
+        if data is None:
+            data = curData
+            # Remove the first point as this is not counted as a time
+            # step
+            for key in data.keys():
+                data[key]=data[key][1:]
+        else:
+            for key in data.keys():
+                # Remove first point in time in the current time as this
+                # is the same as the last of the previous
+                data[key]=np.concatenate((data[key], curData[key][1:]), axis=0)
+
+    return data
 #}}}
