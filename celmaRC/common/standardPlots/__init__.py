@@ -5,6 +5,8 @@
 from .plotSubmitter import PlotSubmitter
 
 from .combinedPlots import combinedPlotsPlot
+from .fields1D import fields1DAnimation
+from .fields2D import fields2DAnimation
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
