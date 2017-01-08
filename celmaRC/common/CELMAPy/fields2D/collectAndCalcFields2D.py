@@ -210,14 +210,17 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
             else:
                 zPPi = zInd + piInd
 
-        # Collect the negative
-        if not(self._fluct) and self._mode == "par":
+            # Collect the negative
             collectKwargs.update({"zInd":zPPi})
-            varPPi = collectiveCollect(\
+            if not(self._varName == "n" or\
+                   self._varName == "uIPar" or\
+                   self._varName == "uEPar"):
+                varPPi = collectiveCollect(\
                             self._collectPaths,\
                             (self._varName, ) ,\
                             **collectKwargs)
-
+            else:
+                varPPi = self._calcNonSolvedVars(collectKwargs)
             varPPi = varPPi[self._varName]
         else:
             varPPi = None
