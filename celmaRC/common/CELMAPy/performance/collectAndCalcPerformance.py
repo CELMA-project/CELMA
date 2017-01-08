@@ -4,8 +4,10 @@
 Contains class for collecting and calculating the performance
 """
 
+from ..collectAndCalcHelpers import collectTime
+from ..logReader import collectiveGetLogNumbers
 from ..superClasses import CollectAndCalcSuperClass
-from ..logReader import logReader
+import numpy as np
 
 #{{{CollectAndCalcPerformance
 class CollectAndCalcPerformance(CollectAndCalcSuperClass):
@@ -50,7 +52,8 @@ class CollectAndCalcPerformance(CollectAndCalcSuperClass):
                 * RHS evals - Number of right hand side evaluations before a
                               time step
                 * Wall Time - Physical time used on the step
-                * Calc      - Percentage of time used on arithmetical calculation
+                * Calc      - Percentage of time used on arithmetical
+                              calculation
                 * Inv       - Percentage of time used on laplace inversion
                 * Comm      - Percentage of time used on communication
                 * I/O       - Percentage of time used on inupt/output
@@ -59,17 +62,35 @@ class CollectAndCalcPerformance(CollectAndCalcSuperClass):
         """
         #}}}
 
-        performance = logReader(self._collectPaths)
+        performance = collectiveGetLogNumbers(self._collectPaths)
+
+        # Get the dt as we would like to plot RHS evals/timestep
+        dt = None
+        for path in self._collectPaths:
+            time = collectTime((path,))
+            # Minus one as the first step will have no dt
+            curDt = np.empty(len(time)-1)
+            for i in range(len(time)-1):
+                curDt[i] = time[i+1] - time[i]
+            if dt is None:
+                dt = curDt
+            else:
+                dt=np.concatenate((dt, curDt), axis=0)
+
+        # Calc RHSPrTime
+        performance["RHSPrTime"] = performance.pop("RHSevals")/dt
 
         # Rename Calc
         performance["Arithmetic"] = performance.pop("Calc")
 
+        # Convert the sim time, and rename it to time
         if self.uc.convertToPhysical:
-            performance[key]["time"]  =\
-                self.uc.\
-                physicalConversion(performance[key]["Sim Time"], "t")
+            performance["time"]  =\
+                self.uc.physicalConversion(performance["SimTime"], "t")
         else:
-            performance[key]["time"] = performance[key]["Sim Time"]
+            performance["time"] = performance["SimTime"]
+
+        performance.pop("SimTime")
 
         return performance
     #}}}

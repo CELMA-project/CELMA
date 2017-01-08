@@ -72,12 +72,12 @@ class PlotSuperClass(object):
         """
         #}}}
         # Set the member data
-        self._showPlot  = showPlot
-        self._savePlot  = savePlot
-        self._savePath  = savePath
-        self._extension = extension
-        self._sliced    = sliced
-        self.uc         = uc
+        self._showPlot   = showPlot
+        self._savePlot   = savePlot
+        self._savePath   = savePath
+        self._extension  = extension
+        self._sliced     = sliced
+        self.uc          = uc
 
         if dmp_folders is not None:
             # Get the firs dmp_folder (will be used to create the savepath)
@@ -131,5 +131,4 @@ class PlotSuperClass(object):
         self._ph = PlotHelper(uc.convertToPhysical)
         self._ph.makeDimensionStringsDicts(uc)
     #}}}
-
 #}}}
