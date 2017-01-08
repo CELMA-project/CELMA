@@ -13,6 +13,8 @@ sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
 from .combinedPlots import combinedPlotsPlot
+from .fields1D import fields1DAnimation
+from .fields2D import fields2DAnimation
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
@@ -54,13 +56,19 @@ class PlotSubmitter(object):
         with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
                 self._dmpFolderes = pickle.load(f)
 
+        self._mergeAll =\
+           pathMerger(self._dmpFolderes,\
+                ("init", "expand", "linear", "turbulence", "extraTurbulence"))
+
+        self._mergeInitAndExpand =\
+           pathMerger(self._dmpFolderes, ("init", "expand"))
+
         self._mergeFromLinear =\
             pathMerger(self._dmpFolderes,\
                        ("linear", "turbulence", "extraTurbulence"))
 
-        self._mergeAll =\
-           pathMerger(self._dmpFolderes,\
-                ("init", "expand", "linear", "turbulence", "extraTurbulence"))
+
+
 
         self._paramKeys = tuple(sorted(list(self._mergeFromLinear.keys())))
         self._rangeJobs = range(len(self._paramKeys))
@@ -179,6 +187,68 @@ class PlotSubmitter(object):
                 kwargs = {}
                 self.sub.setJobName("energy{}".format(nr))
             self.sub.submitFunction(energyPlot, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
+    #}}}
+
+    #{{{runFields1DAnim
+    def runFields1DAnim(self, hyperIncluded=False):
+        #{{{docstring
+        """
+        Runs the fields 1D for init and expand
+
+        Parameters
+        ----------
+        hyperIncluded : bool
+            If hyper viscosities are used.
+        """
+        #}}}
+
+        loopOver = zip(self._dmpFolderes["expand"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, key, nr in loopOver:
+
+            collectPaths = self._mergeInitAndExpand[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders, collectPaths)
+            kwargs = {"hyperIncluded":hyperIncluded}
+            self.sub.setJobName("fields1D{}".format(nr))
+            self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
+    #}}}
+
+    #{{{runFields2DAnim
+    def runFields2DAnim(self, varName = "n", fluct=False):
+        #{{{docstring
+        """
+        Runs the fields 2D for linear and turbulence
+
+        Parameters
+        ----------
+        varName : str
+            Variable to animate.
+        fluct : bool
+            Whether or not to plot the fluctuations.
+        """
+        #}}}
+
+        loopOver = zip(self._dmpFolderes["turbulence"],\
+                       self._dmpFolderes["expand"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, steadyStatePath, key, nr in loopOver:
+
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders, collectPaths, steadyStatePath)
+            kwargs = {"varName":varName, "fluct":fluct}
+            if fluct:
+                self.sub.setJobName("fields2Dfluct{}".format(nr))
+            else:
+                self.sub.setJobName("fields2D{}".format(nr))
+            self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
     #}}}
@@ -364,7 +434,7 @@ class PlotSubmitter(object):
     #{{{runZonalFlow
     def runZonalFlow(self):
         """
-        Runs the skewness and kurtosis
+        Runs the zonal flow
         """
         loopOver = zip(self._dmpFolderes["turbulence"],\
                        self._dmpFolderes["expand"],\

@@ -16,9 +16,7 @@ scanParameter = "B0"
 # Create the plotSubmitter
 pltSub = PlotSubmitter(directory, scanParameter)
 
-# Run the fourier modes
-# pltSub.runFourierModes(sliced=False)
-# Set linear slices and plot the sliced fourier modes
+# Set linear slices
 tSlices = {\
            "B0_0.02":slice(80,240)  ,\
            "B0_0.04":slice(800,1250),\
@@ -28,9 +26,7 @@ tSlices = {\
            }
 pltSub.setLinearPhaseTSlices(tSlices)
 
-# pltSub.runFourierModes(sliced=True)
-# pltSub.runGrowthRates()
-# pltSub.runEnergy(sliced=False)
+# Set saturated turbulence slices
 tSlices = {\
            "B0_0.02":None,\
            "B0_0.04":None,\
@@ -39,11 +35,24 @@ tSlices = {\
            "B0_0.1" :None,\
            }
 pltSub.setSatTurbTSlices(tSlices)
-# pltSub.runEnergy(sliced=True)
-# pltSub.runPosOfFluct()
-# pltSub.runPSD2D()
-# pltSub.runSkewKurt()
-# pltSub.runZonalFlow()
-# pltSub.runCominedPlots()
+
+# Run the post-processing
+pltSub.runCominedPlots()
+pltSub.runEnergy(sliced=False)
+pltSub.runEnergy(sliced=True)
+pltSub.runFourierModes(sliced=False)
+pltSub.runFourierModes(sliced=True)
+pltSub.runGrowthRates()
 pltSub.runPerformance(allFolders=False)
 pltSub.runPerformance(allFolders=True)
+pltSub.runPosOfFluct()
+pltSub.runPSD2D()
+pltSub.runSkewKurt()
+pltSub.runZonalFlow()
+
+# Run the animations
+pltSub.sub.setWalltime("02:00:00")
+pltSub.sub.setNodes(nodes=1, ppn=20)
+pltSub.runFields1DAnim()
+pltSub.runFields2DAnim(fluct=True)
+pltSub.runFields2DAnim(fluct=False)
