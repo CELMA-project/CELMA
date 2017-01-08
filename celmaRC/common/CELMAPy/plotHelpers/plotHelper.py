@@ -40,7 +40,7 @@ class PlotHelper(object):
         "lnNParArtVisc" :  r"D_{n,\parallel} \partial^2_{\parallel}\ln(n)"   ,\
         # jPar fields
         "jParAdv"        :  r"-\frac{1}{JB}\{\phi,j_{\parallel}\}"   ,\
-        "uIParAdvSum"    : (r"- u_{e,\parallel}\partial_{\parallel}" ,\
+        "uIParAdvSum"    : (r"- u_{e,\parallel}\partial_{\parallel}"  \
                             r"\left(n\left[u_{i,\parallel}+"          \
                             r"u_{e,\parallel}\right]\right)")        ,\
         "uEParDoubleAdv" : (r"2u_{e,\parallel}\partial_{\parallel}"   \
