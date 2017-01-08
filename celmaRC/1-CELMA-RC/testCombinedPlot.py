@@ -79,7 +79,7 @@ def driverTest():
 
     yInd              = 16
     zInd              = 128
-    tSlice            = None
+    tSlice            = slice(10, None, None)
 
     savePath          = "."
 
@@ -94,15 +94,6 @@ def driverTest():
 
 
     useSubProcess = False
-
-    plotSuperKwargs = {\
-                        "showPlot"     : False,\
-                        "savePlot"     : True,\
-                        "savePath"     : None,\
-                        "savePathFunc" : None,\
-                        "extension"    : None,\
-                        "dmp_folders"  : None,\
-                       }
 
     print("\n\nTesting combined plot driver")
     dTT = DriverCombinedPlots(

@@ -36,10 +36,12 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
                         "showPlot"        : False,\
                         "savePlot"        : True ,\
                         "savePath"        : None ,\
-                        "savePathFunc"    : None ,\
-                        "extension"       : None ,\
-                        "dmp_folders"     : None ,\
-                        "timeStampFolder" : False,\
+                        # NOTE: No implemented func which doesn't
+                        #       require theRunName yet
+                        "savePathFunc"    : None  ,\
+                        "extension"       : None  ,\
+                        "dmp_folders"     : None  ,\
+                        "timeStampFolder" : False ,\
                        }
 
     dRP = DriverZonalFlow(

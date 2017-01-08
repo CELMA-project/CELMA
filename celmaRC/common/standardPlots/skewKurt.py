@@ -44,6 +44,8 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
                         "showPlot"        : False,\
                         "savePlot"        : True ,\
                         "savePath"        : None ,\
+                        # NOTE: No implemented func which doesn't
+                        #       require theRunName yet
                         "savePathFunc"    : None ,\
                         "extension"       : None ,\
                         "dmp_folders"     : None ,\

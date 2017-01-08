@@ -100,7 +100,6 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
             else:
                 t = None
                 tStep = None
-            tCounter += 1
 
             var, time = self._collectWrapper(timeTraces,key,x,y,z,t)
 
