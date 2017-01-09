@@ -11,7 +11,8 @@ sys.path.append(commonDir)
 from CELMAPy.zonalFlow import DriverZonalFlow
 
 #{{{zonalFlowPlot
-def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
+def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
+                  tSlice = None):
     #{{{docstring
     """
     Runs the standard 2d spectral density plot
@@ -22,6 +23,8 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -31,18 +34,6 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     convertToPhysical = True
     yInd              = 16
     tSlice            = tSlice
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False,\
-                        "savePlot"        : True ,\
-                        "savePath"        : None ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None  ,\
-                        "extension"       : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
-                       }
 
     dRP = DriverZonalFlow(
                      # DriverZonalFlow

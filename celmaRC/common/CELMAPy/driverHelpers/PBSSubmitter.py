@@ -287,7 +287,6 @@ class PBSSubmitter(object):
             print("\nSubmission failed, printing output\n")
             print(completedProcess.stdout)
             print(completedProcess.stderr)
-            self._errors.append("RuntimeError")
             message = ("The submission failed with exit code {}"
                        ", see the output above").\
                                format(completedProcess.returncode)

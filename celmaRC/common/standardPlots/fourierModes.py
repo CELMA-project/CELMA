@@ -11,7 +11,11 @@ sys.path.append(commonDir)
 from CELMAPy.fourierModes import DriverFourierModes
 
 #{{{fourierModesPlot
-def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
+def fourierModesPlot(dmp_folders,\
+                     collectPaths,\
+                     steadyStatePath,\
+                     plotSuperKwargs,\
+                     tSlice = None):
     #{{{docstring
     """
     Runs the standard fourier modes plot
@@ -19,11 +23,13 @@ def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     Parameters
     ----------
     dmp_folders : tuple
-        Tuple of the dmp_folders
+        Tuple of the dmp_folders.
     collectPaths : tuple
-        Tuple of the paths to collect from
+        Tuple of the paths to collect from.
     steadyStatePath : str
-        The corresponding steady state path
+        The corresponding steady state path.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -46,25 +52,14 @@ def fourierModesPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
     else:
         sliced = False
 
+    plotSuperKwargs["sliced"] = sliced
+
     indicesArgs   = (xInd, yInd, zInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
                      "nPoints"         : nPoints        ,\
                      "equallySpace"    : equallySpace   ,\
                      "steadyStatePath" : steadyStatePath,\
                      }
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False ,\
-                        "savePlot"        : True  ,\
-                        "savePath"        : None  ,\
-                        "extension"       : None  ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
-                        "sliced"          : sliced,\
-                       }
 
     dFM = DriverFourierModes(
                      # DriverFourierModes

@@ -11,7 +11,13 @@ sys.path.append(commonDir)
 from CELMAPy.growthRates import DriverGrowthRates
 
 #{{{growthRatesPlot
-def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParameter, tSlices):
+def growthRatesPlot(dmp_folders     ,\
+                    scanCollectPaths,\
+                    steadyStatePaths,\
+                    scanParameter   ,\
+                    tSlices         ,\
+                    plotSuperKwargs ,\
+                   ):
     #{{{docstring
     """
     Runs the standard growth rates plot
@@ -32,6 +38,8 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
         from the fourier moedes.
         The tuple must be ordered according to the scan order in
         scanCollectPaths.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     """
     #}}}
 
@@ -55,18 +63,6 @@ def growthRatesPlot(dmp_folders, scanCollectPaths, steadyStatePaths, scanParamet
                      "equallySpace"    : equallySpace   ,\
                      "steadyStatePath" : steadyStatePath,\
                      }
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False,\
-                        "savePlot"        : True ,\
-                        "savePath"        : None ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None ,\
-                        "extension"       : None ,\
-                        "timeStampFolder" : False,\
-                        "dmp_folders"     : None ,\
-                       }
 
     dGR = DriverGrowthRates(
                      # DriverGrowthRates

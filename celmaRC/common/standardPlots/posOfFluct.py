@@ -11,7 +11,8 @@ sys.path.append(commonDir)
 from CELMAPy.radialProfile import DriverRadialProfile
 
 #{{{posOfFluctPlot
-def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
+def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
+                   tSlice = None):
     #{{{docstring
     """
     Runs the standard position of the radial profile plot
@@ -22,6 +23,8 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     steadyStatePath : str
         Path to the steady state
     tSlice : [None|Slice]
@@ -31,18 +34,6 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
 
     useSubProcess     = False
     convertToPhysical = True
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False,\
-                        "savePlot"        : True ,\
-                        "savePath"        : None ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None ,\
-                        "extension"       : None ,\
-                        "dmp_folders"     : None ,\
-                        "timeStampFolder" : False,\
-                       }
 
     varName  = "n"
     var2Name = "phi"
