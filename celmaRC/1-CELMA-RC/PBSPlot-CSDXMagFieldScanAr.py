@@ -15,6 +15,7 @@ scanParameter = "B0"
 
 # Create the plotSubmitter
 pltSub = PlotSubmitter(directory, scanParameter)
+pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"))
 
 # Set linear slices
 tSlices = {\
@@ -37,7 +38,7 @@ tSlices = {\
 pltSub.setSatTurbTSlices(tSlices)
 
 # Run the post-processing
-# pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
+pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
 pltSub.runCominedPlots()
 pltSub.runEnergy(sliced=False)
 pltSub.runEnergy(sliced=True)
@@ -53,10 +54,9 @@ pltSub.runZonalFlow()
 
 # Run the animations
 pltSub.updatePlotSuperKwargs({"extension" : None})
-# pltSub.sub.setWalltime("01:00:00")
-# pltSub.sub.setNodes(nodes=1, ppn=20)
-# pltSub.runFields1DAnim()
-# pltSub.sub.setQueue("fatq")
-# pltSub.sub.setWalltime("04:00:00")
-# pltSub.runFields2DAnim(fluct=True)
-# pltSub.runFields2DAnim(fluct=False)
+pltSub.sub.setWalltime("01:00:00")
+pltSub.runFields1DAnim()
+pltSub.sub.setQueue("fatq")
+pltSub.sub.setWalltime("06:00:00")
+pltSub.runFields2DAnim(fluct=True)
+pltSub.runFields2DAnim(fluct=False)

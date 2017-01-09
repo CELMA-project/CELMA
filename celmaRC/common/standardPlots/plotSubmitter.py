@@ -56,15 +56,19 @@ class PlotSubmitter(object):
 
         # Set the folders to use
         with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
-                self._dmpFolderes = pickle.load(f)
-        self._mergeAll =\
-           pathMerger(self._dmpFolderes,\
-                ("init", "expand", "linear", "turbulence", "extraTurbulence"))
+                self._dmpFolders = pickle.load(f)
+        all = ["init", "expand", "linear", "turbulence", "extraTurbulence"]
+        fromLinear = ["linear", "turbulence", "extraTurbulence"]
+        # Pop extra turbulence if not present
+        if len(self._dmpFolders["extraTurbulence"]) == 0:
+            all.remove("extraTurbulence")
+            fromLinear.remove("extraTurbulence")
+        all = tuple(all)
+        fromLinear = tuple(fromLinear)
+        self._mergeAll = pathMerger(self._dmpFolders, all)
         self._mergeInitAndExpand =\
-           pathMerger(self._dmpFolderes, ("init", "expand"))
-        self._mergeFromLinear =\
-            pathMerger(self._dmpFolderes,\
-                       ("linear", "turbulence", "extraTurbulence"))
+           pathMerger(self._dmpFolders, ("init", "expand"))
+        self._mergeFromLinear = pathMerger(self._dmpFolders, fromLinear)
 
         # Ranges to loop over
         self._paramKeys = tuple(sorted(list(self._mergeFromLinear.keys())))
@@ -72,7 +76,7 @@ class PlotSubmitter(object):
 
         # Generate the submitter
         self.sub = PBSSubmitter()
-        self.sub.setNodes(nodes=1, ppn=2)
+        self.sub.setNodes(nodes=1, ppn=20)
         self.sub.setQueue("xpresq")
         self.sub.setWalltime("00:15:00")
 
@@ -160,8 +164,8 @@ class PlotSubmitter(object):
         """
         Runs the combined plots
         """
-        loopOver = zip(self._dmpFolderes["turbulence"],\
-                       self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, steadyStatePath, key, nr in loopOver:
@@ -194,7 +198,7 @@ class PlotSubmitter(object):
         sliced : bool
             Whether or not to slice the time
         """
-        loopOver = zip(self._dmpFolderes["turbulence"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, key, nr in loopOver:
@@ -232,7 +236,7 @@ class PlotSubmitter(object):
         """
         #}}}
 
-        loopOver = zip(self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, key, nr in loopOver:
@@ -262,8 +266,8 @@ class PlotSubmitter(object):
         """
         #}}}
 
-        loopOver = zip(self._dmpFolderes["turbulence"],\
-                       self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, steadyStatePath, key, nr in loopOver:
@@ -297,8 +301,8 @@ class PlotSubmitter(object):
         """
         #}}}
 
-        loopOver = zip(self._dmpFolderes["turbulence"],\
-                       self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, steadyStatePath, key, nr in loopOver:
@@ -336,7 +340,7 @@ class PlotSubmitter(object):
         dmp_folders = (self._mergeFromLinear["param0"][-1],)
         keys = tuple(sorted(list(self._mergeFromLinear.keys())))
         scanCollectPaths = tuple(self._mergeFromLinear[key] for key in keys)
-        steadyStatePaths = self._dmpFolderes["expand"]
+        steadyStatePaths = self._dmpFolders["expand"]
 
         # NOTE: The ordering is of the keys are in descending order (because
         #       of the organization in PBSScan)
@@ -373,7 +377,7 @@ class PlotSubmitter(object):
             If "init" and "expand" should be included in the plot.
         """
         #}}}
-        loopOver = zip(self._dmpFolderes["turbulence"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, key, nr in loopOver:
@@ -399,8 +403,8 @@ class PlotSubmitter(object):
         Runs the position of fluct
         """
 
-        loopOver = zip(self._dmpFolderes["turbulence"],\
-                       self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, steadyStatePath, key, nr in loopOver:
@@ -429,7 +433,7 @@ class PlotSubmitter(object):
         Runs the PSD2D
         """
 
-        loopOver = zip(self._dmpFolderes["turbulence"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, key, nr in loopOver:
@@ -455,7 +459,7 @@ class PlotSubmitter(object):
         Runs the skewness and kurtosis
         """
 
-        loopOver = zip(self._dmpFolderes["turbulence"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, key, nr in loopOver:
@@ -480,8 +484,8 @@ class PlotSubmitter(object):
         """
         Runs the zonal flow
         """
-        loopOver = zip(self._dmpFolderes["turbulence"],\
-                       self._dmpFolderes["expand"],\
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
         for dmp_folders, steadyStatePath, key, nr in loopOver:
