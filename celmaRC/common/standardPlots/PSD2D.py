@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.PSD import DriverPSD
 
 #{{{PSD2DPlot
-def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
+def PSD2DPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     #{{{docstring
     """
     Runs the standard 2d spectral density plot
@@ -22,6 +22,8 @@ def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -43,18 +45,6 @@ def PSD2DPlot(dmp_folders, collectPaths, tSlice = None):
     plotLimits = {"xlim":None      ,\
                   "ylim":(100, 3e4),\
                   "zlim":(-7,0)}
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False,\
-                        "savePlot"        : True ,\
-                        "savePath"        : None ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None ,\
-                        "extension"       : None ,\
-                        "dmp_folders"     : None ,\
-                        "timeStampFolder" : False,\
-                       }
 
     dPSD = DriverPSD(
                      # DriverPSD

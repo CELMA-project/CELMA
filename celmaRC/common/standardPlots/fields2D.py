@@ -11,8 +11,12 @@ sys.path.append(commonDir)
 from CELMAPy.fields2D import Driver2DFields
 
 #{{{fields2DAnimation
-def fields2DAnimation(dmp_folders, collectPaths, steadyStatePath,\
-                      varName = "n", fluct=False):
+def fields2DAnimation(dmp_folders,\
+                      collectPaths,\
+                      steadyStatePath,\
+                      plotSuperKwargs,\
+                      varName = "n",\
+                      fluct=False):
     #{{{docstring
     """
     Runs the standard fields2D animation
@@ -25,6 +29,8 @@ def fields2DAnimation(dmp_folders, collectPaths, steadyStatePath,\
         Tuple of the paths to collect from.
     steadyStatePath : str
         Path to the steady state.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     varName : str
         Variable to animate.
     fluct : bool
@@ -57,17 +63,6 @@ def fields2DAnimation(dmp_folders, collectPaths, steadyStatePath,\
                                    "yInd"    : yInd  ,\
                                    "zInd"    : zInd  ,\
                                   }
-
-    # Plot super kwargs
-    plotSuperKwargs = {\
-                        "showPlot"        : False      ,\
-                        "savePlot"        : True       ,\
-                        "savePath"        : None       ,\
-                        "savePathFunc"    : None       ,\
-                        "extension"       : None       ,\
-                        "dmp_folders"     : dmp_folders,\
-                        "timeStampFolder" : False      ,\
-                       }
 
     d2DF = Driver2DFields(
                    # Driver2DFields

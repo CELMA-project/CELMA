@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.skewnessKurtosis import DriverSkewnessKurtosis
 
 #{{{skewKurtPlot
-def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
+def skewKurtPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     #{{{docstring
     """
     Runs the standard skewness and kurtosis plot
@@ -19,9 +19,11 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
     Parameters
     ----------
     dmp_folders : tuple
-        Tuple of the dmp_folders
+        Tuple of the dmp_folders.
     collectPaths : tuple
-        Tuple of the paths to collect from
+        Tuple of the paths to collect from.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -39,18 +41,6 @@ def skewKurtPlot(dmp_folders, collectPaths, tSlice = None):
 
     indicesArgs   = (None, yInd, zInd)
     indicesKwargs = {"tSlice" : tSlice}
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False,\
-                        "savePlot"        : True ,\
-                        "savePath"        : None ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None ,\
-                        "extension"       : None ,\
-                        "dmp_folders"     : None ,\
-                        "timeStampFolder" : False,\
-                       }
 
     dSK = DriverSkewnessKurtosis(
                      # DriverSkewnessKurtosiss
