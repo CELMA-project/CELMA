@@ -23,6 +23,7 @@ from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
 from .zonalFlow import zonalFlowPlot
+from copy import copy
 
 #{{{PlotSubmitter
 class PlotSubmitter(object):
@@ -53,23 +54,19 @@ class PlotSubmitter(object):
 
         self._scanParameter = scanParameter
 
+        # Set the folders to use
         with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
                 self._dmpFolderes = pickle.load(f)
-
         self._mergeAll =\
            pathMerger(self._dmpFolderes,\
                 ("init", "expand", "linear", "turbulence", "extraTurbulence"))
-
         self._mergeInitAndExpand =\
            pathMerger(self._dmpFolderes, ("init", "expand"))
-
         self._mergeFromLinear =\
             pathMerger(self._dmpFolderes,\
                        ("linear", "turbulence", "extraTurbulence"))
 
-
-
-
+        # Ranges to loop over
         self._paramKeys = tuple(sorted(list(self._mergeFromLinear.keys())))
         self._rangeJobs = range(len(self._paramKeys))
 
@@ -78,6 +75,18 @@ class PlotSubmitter(object):
         self.sub.setNodes(nodes=1, ppn=2)
         self.sub.setQueue("xpresq")
         self.sub.setWalltime("00:15:00")
+
+        # Create default plotSuperKwargs
+        self._plotSuperKwargs = {\
+                                 "showPlot"        : False        ,\
+                                 "savePlot"        : True         ,\
+                                 "savePath"        : None         ,\
+                                 "savePathFunc"    : "onlyScan"   ,\
+                                 "extension"       : None         ,\
+                                 "timeStampFolder" : False        ,\
+                                 # scanParameter needed in onlyScans
+                                 "scanParameter"   : scanParameter,\
+                                }
     #}}}
 
     #{{{_findSlices
@@ -130,6 +139,22 @@ class PlotSubmitter(object):
         self._satTurbTSlices = tSlices
     #}}}
 
+    #{{{updatePlotSuperKwargs
+    def updatePlotSuperKwargs(self, updateDict):
+        #{{{docstring
+        """
+        Function to update the plotSuperKwargs
+
+        Paramteres
+        ----------
+        updateDict : dict
+            Dictionary used to update the member plotSuperKwargs
+        """
+        #}}}
+
+        self._plotSuperKwargs.update(updateDict)
+    #}}}
+
     #{{{runCominedPlots
     def runCominedPlots(self):
         """
@@ -148,7 +173,10 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths, steadyStatePath)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("combinedPlotsSliced{}".format(nr))
             self.sub.submitFunction(combinedPlotsPlot,args=args,kwargs=kwargs)
@@ -179,7 +207,7 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             if sliced:
                 kwargs = {"tSlice":tSlice}
                 self.sub.setJobName("energySliced{}".format(nr))
@@ -211,7 +239,7 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeInitAndExpand[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             kwargs = {"hyperIncluded":hyperIncluded}
             self.sub.setJobName("fields1D{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
@@ -242,7 +270,10 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths, steadyStatePath)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
             kwargs = {"varName":varName, "fluct":fluct}
             if fluct:
                 self.sub.setJobName("fields2Dfluct{}".format(nr))
@@ -279,7 +310,10 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders   = (dmp_folders,)
-            args = (dmp_folders, collectPaths, steadyStatePath)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
             if sliced:
                 kwargs = {"tSlice":(tSlice,)}
                 self.sub.setJobName("fourierModesSliced{}".format(nr))
@@ -311,11 +345,18 @@ class PlotSubmitter(object):
         growthTSlices =\
                 tuple(self._linearTSlices[key] for key in growthTSlicesKeys)
 
+        # Local modification of plotSuperKwargs
+        plotSuperKwargs = copy(self._plotSuperKwargs)
+        newVals = {"savePath" : "all", "savePathFunc" : None}
+        plotSuperKwargs.update(newVals)
+
         args = (dmp_folders        ,\
                 scanCollectPaths   ,\
                 steadyStatePaths   ,\
                 self._scanParameter,\
-                growthTSlices)
+                growthTSlices      ,\
+                plotSuperKwargs    ,\
+                )
         self.sub.setJobName("growthRates")
         self.sub.submitFunction(growthRatesPlot, args=args)
     #}}}
@@ -346,7 +387,7 @@ class PlotSubmitter(object):
                 self.sub.setJobName("performance{}".format(nr))
                 kwargs = {"allFolders":False}
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
@@ -371,7 +412,10 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths, steadyStatePath)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("posOfFluctSliced{}".format(nr))
             self.sub.submitFunction(posOfFluctPlot, args=args, kwargs=kwargs)
@@ -397,7 +441,7 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("PSD2DPlotSliced{}".format(nr))
             self.sub.submitFunction(PSD2DPlot, args=args, kwargs=kwargs)
@@ -423,7 +467,7 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("skewnessKurtosisSliced{}".format(nr))
             self.sub.submitFunction(skewKurtPlot, args=args, kwargs=kwargs)
@@ -449,7 +493,10 @@ class PlotSubmitter(object):
 
             collectPaths = self._mergeFromLinear[key]
             dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths, steadyStatePath)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("zonalFlowSliced{}".format(nr))
             self.sub.submitFunction(zonalFlowPlot, args=args, kwargs=kwargs)

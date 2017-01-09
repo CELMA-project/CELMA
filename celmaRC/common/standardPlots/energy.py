@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.energy import DriverEnergy
 
 #{{{energyPlot
-def energyPlot(dmp_folders, collectPaths, tSlice = None):
+def energyPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     #{{{docstring
     """
     Runs the standard energy plot
@@ -22,6 +22,8 @@ def energyPlot(dmp_folders, collectPaths, tSlice = None):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -35,16 +37,7 @@ def energyPlot(dmp_folders, collectPaths, tSlice = None):
     else:
         sliced = False
 
-    plotSuperKwargs = {\
-                        "showPlot"        : False ,\
-                        "savePlot"        : True  ,\
-                        "savePath"        : None  ,\
-                        "savePathFunc"    : None  ,\
-                        "extension"       : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
-                        "sliced"          : sliced,\
-                       }
+    plotSuperKwargs["sliced"] = sliced
 
     dE = DriverEnergy(
                      # DriverEnergy

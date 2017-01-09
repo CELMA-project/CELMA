@@ -11,7 +11,8 @@ sys.path.append(commonDir)
 from CELMAPy.fields1D import Driver1DFields
 
 #{{{fields1DAnimation
-def fields1DAnimation(dmp_folders, collectPaths, hyperIncluded=False):
+def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
+                      hyperIncluded=False):
     #{{{docstring
     """
     Runs the standard fields1D animation
@@ -19,9 +20,11 @@ def fields1DAnimation(dmp_folders, collectPaths, hyperIncluded=False):
     Parameters
     ----------
     dmp_folders : tuple
-        Tuple of the dmp_folders
+        Tuple of the dmp_folders.
     collectPaths : tuple
-        Tuple of the paths to collect from
+        Tuple of the paths to collect from.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     hyperIncluded : bool
         If hyper viscosities are used.
     """
@@ -48,16 +51,6 @@ def fields1DAnimation(dmp_folders, collectPaths, hyperIncluded=False):
                                    "yInd"    : yInd  ,\
                                    "zInd"    : zInd  ,\
                                   }
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False ,\
-                        "savePlot"        : True  ,\
-                        "savePath"        : None  ,\
-                        "savePathFunc"    : None  ,\
-                        "extension"       : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
-                       }
 
     d1DF = Driver1DFields(\
                    # Driver1DFields
