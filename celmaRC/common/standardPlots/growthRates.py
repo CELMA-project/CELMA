@@ -43,8 +43,6 @@ def growthRatesPlot(dmp_folders     ,\
     """
     #}}}
 
-    scanParameter = "B0"
-
     varName           = "n"
     convertToPhysical = True
     nModes            = 7

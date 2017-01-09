@@ -31,10 +31,10 @@ series_add = (\
 
 # Set the main options
 scanB0.setMainOptions(\
-                       scanParameters = scanParameters  ,\
-                       series_add     = series_add      ,\
-                       theRunName     = directory       ,\
-                       make           = False           ,\
+                       scanParameters   = scanParameters,\
+                       series_add       = series_add    ,\
+                       theRunName       = directory     ,\
+                       make             = False         ,\
                        boutRunnersNoise = {"vortD":1e-6},\
                      )
 
