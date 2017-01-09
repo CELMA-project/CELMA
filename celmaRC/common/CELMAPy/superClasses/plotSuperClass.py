@@ -4,7 +4,7 @@
 Contains the super class for the plotting
 """
 
-from ..driverHelpers import scanWTagSaveFunc, getTime
+from ..driverHelpers import scanWTagSaveFunc, onlyScan, getTime
 from ..plotHelpers import PlotHelper
 import os
 
@@ -89,6 +89,8 @@ class PlotSuperClass(object):
                 #        Would be nice if could send in a function instead.
                 if savePathFunc == "scanWTagSaveFunc":
                     savePath = scanWTagSaveFunc(dmp_folder, **kwargs)
+                elif savePathFunc == "onlyScan":
+                    savePath = onlyScan(dmp_folder, **kwargs)
                 else:
                     message  = "{0}Warning: savePathFunc '{1}' not found, "
                     message += "falling back to standard implementation{0}"

@@ -11,7 +11,8 @@ sys.path.append(commonDir)
 from CELMAPy.combinedPlots import DriverCombinedPlots
 
 #{{{combinedPlotsPlot
-def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None):
+def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath,\
+                      plotSuperKwargs, tSlice = None):
     #{{{docstring
     """
     Runs the standard combined plots plot
@@ -24,6 +25,8 @@ def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None)
         Tuple of the paths to collect from
     steadyStatePath : str
         The corresponding steady state path
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     tSlice : [None|Slice]
         How to slice the time.
     """
@@ -42,19 +45,6 @@ def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath, tSlice = None)
         sliced = True
     else:
         sliced = False
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False ,\
-                        "savePlot"        : True  ,\
-                        "savePath"        : None  ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None  ,\
-                        "extension"       : None  ,\
-                        "dmp_folders"     : None  ,\
-                        "timeStampFolder" : False ,\
-                        "sliced"          : sliced,\
-                       }
 
     useSubProcess = False
 

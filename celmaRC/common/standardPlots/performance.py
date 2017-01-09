@@ -11,7 +11,8 @@ sys.path.append(commonDir)
 from CELMAPy.performance import DriverPerformance
 
 #{{{performancePlot
-def performancePlot(dmp_folders, collectPaths, allFolders = False):
+def performancePlot(dmp_folders, collectPaths, plotSuperKwargs,\
+                    allFolders = False):
     #{{{docstring
     """
     Runs the standard performance plot
@@ -22,6 +23,8 @@ def performancePlot(dmp_folders, collectPaths, allFolders = False):
         Tuple of the dmp_folders
     collectPaths : tuple
         Tuple of the paths to collect from
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
     allFolders : bool
         If "init" and "expand" has been included in the plot.
     """
@@ -29,19 +32,6 @@ def performancePlot(dmp_folders, collectPaths, allFolders = False):
 
     useSubProcess = False
     convertToPhysical = True
-
-    plotSuperKwargs = {\
-                        "showPlot"        : False     ,\
-                        "savePlot"        : True      ,\
-                        "savePath"        : None      ,\
-                        "extension"       : None      ,\
-                        # NOTE: No implemented func which doesn't
-                        #       require theRunName yet
-                        "savePathFunc"    : None      ,\
-                        "dmp_folders"     : None      ,\
-                        "timeStampFolder" : False     ,\
-                        "allFolders"      : allFolders,\
-                       }
 
     dP = DriverPerformance(
                      # DriverPerformance
