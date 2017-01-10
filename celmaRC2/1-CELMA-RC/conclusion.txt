@@ -1,0 +1,6 @@
+Copied from celmaRC/1-CELMA-RC/
+
+- Fixed bug in parallel momentum and current eq
+
+Results:
+========
