@@ -57,15 +57,15 @@ class PlotSubmitter(object):
         # Set the folders to use
         with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
                 self._dmpFolders = pickle.load(f)
-        all = ["init", "expand", "linear", "turbulence", "extraTurbulence"]
+        allDir = ["init", "expand", "linear", "turbulence", "extraTurbulence"]
         fromLinear = ["linear", "turbulence", "extraTurbulence"]
         # Pop extra turbulence if not present
         if len(self._dmpFolders["extraTurbulence"]) == 0:
-            all.remove("extraTurbulence")
+            allDir.remove("extraTurbulence")
             fromLinear.remove("extraTurbulence")
-        all = tuple(all)
+        allDir = tuple(allDir)
         fromLinear = tuple(fromLinear)
-        self._mergeAll = pathMerger(self._dmpFolders, all)
+        self._mergeAll = pathMerger(self._dmpFolders, allDir)
         self._mergeInitAndExpand =\
            pathMerger(self._dmpFolders, ("init", "expand"))
         self._mergeFromLinear = pathMerger(self._dmpFolders, fromLinear)
