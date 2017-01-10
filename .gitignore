@@ -60,6 +60,8 @@ celma/*/celmaSLEPc
 celmaCurMom/*/celmaCurMom
 celmaRC/*/celmaRC
 celmaRC/*/BCelmaRC
+celmaRC2/*/celmaRC
+celmaRC2/*/BCelmaRC
 celmaApar/*/celmaApar
 nx_*/
 ny_*/
