@@ -1,0 +1,8 @@
+Copied from celmaCurMom/B7-CELMACurMomWParamsConstViscClean/
+
+- Fixed 0.51 bug
+
+Results:
+========
+WRONGBCS-CSDXMagFieldScanAr - Run with wrong BCs on vorticity, see results in own folder
+CSDXMagFieldScanAr - Running
