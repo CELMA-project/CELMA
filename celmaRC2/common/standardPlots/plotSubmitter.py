@@ -371,6 +371,44 @@ class PlotSubmitter(object):
         self.sub.submitFunction(growthRatesPlot, args=args)
     #}}}
 
+    #{{{runModesSnapShot
+    def runModesSnapShot(self, paramKey, slices, varName = "n"):
+        #{{{docstring
+        """
+        Gets snapshot of the modes.
+
+        Parameters
+        ----------
+        paramKey : str
+            What paramKey to use collective collect from
+        slices : tuple
+            Tuple of the tSlices to use.
+        varName : str
+            Variable to animate.
+        """
+        #}}}
+
+        fluct = True
+
+        collectPaths    = self._mergeFromLinear[paramKey]
+        steadyStatePath = self._dmpFolders["expand"][0]
+        dmp_folders  = (collectPaths[-1],)
+        args = (dmp_folders,\
+                collectPaths,\
+                steadyStatePath,\
+                self._plotSuperKwargs)
+        for nr, tSlice in enumerate(slices):
+            kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
+            self.sub.setJobName("runModesSnapShot{}".format(nr))
+            self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            # FIXME: This is no guaranty for different names, but a
+            #        workaround the cascade of variables arguments tru
+            #        the system.
+            #        Will fail if there is queue on the system
+            sleep(self._sleepS + 30)
+    #}}}
+
     #{{{runPerformance
     def runPerformance(self, allFolders=False):
         #{{{docstring
@@ -507,7 +545,7 @@ class PlotSubmitter(object):
                       "boussinesq"    : self._boussinesq,\
                       "tSlice"        : tSlice,\
                      }
-            self.sub.setJobName("fields1D{}".format(nr))
+            self.sub.setJobName("steadyState{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
