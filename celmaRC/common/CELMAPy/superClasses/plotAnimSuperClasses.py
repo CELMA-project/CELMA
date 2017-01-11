@@ -12,6 +12,7 @@ from ..plotHelpers import getMaxMinAnimation
 from .plotSuperClass import PlotSuperClass
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
+from glob import glob
 import numpy as np
 import matplotlib.animation as animation
 import matplotlib.pylab as plt
@@ -89,6 +90,10 @@ class PlotAnimSuperClass(PlotSuperClass):
         """
         Saves, show and closes the plot.
 
+        NOTE: In order to make .png and .pdf snapshots of the fields, .pngs
+              and .pdfs will not be overwritten, but gets an increasing
+              number appended the name.
+
         Parameters
         ----------
         fig : Figure
@@ -130,8 +135,16 @@ class PlotAnimSuperClass(PlotSuperClass):
                 if self._extension is None:
                     self._extension = "png"
 
+                # Get the number
+                files = glob(fileName + "*")
+                if len(files) !=0:
+                    files = sorted(files)
+                    nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+                else:
+                    nr = 0
+
                 # Save the figure
-                fileName = "{}.{}".format(fileName, self._extension)
+                fileName = "{}-{}.{}".format(fileName, nr, self._extension)
                 fig.savefig(fileName,\
                             transparent = True  ,\
                             bbox_inches = "tight",\
