@@ -371,11 +371,11 @@ class PlotSubmitter(object):
         self.sub.submitFunction(growthRatesPlot, args=args)
     #}}}
 
-    #{{{runModesSnapShot
-    def runModesSnapShot(self, paramKey, slices, varName = "n"):
+    #{{{runModeSnapShotSameScanVal
+    def runModeSnapShotSameScanVal(self, paramKey, slices, varName = "n"):
         #{{{docstring
         """
-        Gets snapshot of the modes.
+        Gets snapshot of a specific mode.
 
         Parameters
         ----------
@@ -399,7 +399,7 @@ class PlotSubmitter(object):
                 self._plotSuperKwargs)
         for nr, tSlice in enumerate(slices):
             kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
-            self.sub.setJobName("runModesSnapShot{}".format(nr))
+            self.sub.setJobName("modeSnapShotSameScanVal{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             # FIXME: This is no guaranty for different names, but a
@@ -407,6 +407,46 @@ class PlotSubmitter(object):
             #        the system.
             #        Will fail if there is queue on the system
             sleep(self._sleepS + 30)
+    #}}}
+
+    #{{{runModesSnapShotDifferentScanVals
+    def runModesSnapShotDifferentScanVals(self, slices, varName = "n"):
+        #{{{docstring
+        """
+        Gets snapshot of the different modes.
+
+        Parameters
+        ----------
+        slices : dict
+            Dictionary containing the tSlices.
+        varName : str
+            Variable to animate.
+        """
+        #}}}
+
+        fluct = True
+
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, steadyStatePath, key, nr in loopOver:
+
+            tSlice = self._findSlices(dmp_folders, slices)
+            if tSlice is None:
+                continue
+
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
+            kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
+            self.sub.setJobName("modesSnapShotDifferentScanVals{}".format(nr))
+            self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
     #}}}
 
     #{{{runPerformance

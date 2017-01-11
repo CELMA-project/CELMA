@@ -37,12 +37,6 @@ tSlices = {\
            }
 pltSub.setSatTurbTSlices(tSlices)
 
-modeSlices = (\
-              slice(138,138),\
-              slice(150,150),\
-              slice(162,162),\
-             )
-
 # Run the post-processing
 pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
 pltSub.runCominedPlots()
@@ -69,4 +63,19 @@ pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
 
 # Snapshots plot
-pltSub.runModesSnapShot("param0", modeSlices)
+modeSlices = (\
+              slice(138,138),\
+              slice(150,150),\
+              slice(162,162),\
+             )
+pltSub.runModeSnapShotSameScanVal("param0", modeSlices)
+
+modesSlices = {\
+               "B0_0.02":slice( 147,  147),\
+               "B0_0.04":slice(1500, 1500),\
+               "B0_0.06":slice( 300,  300),\
+               "B0_0.08":slice( 230,  230),\
+               "B0_0.1" :slice( 152,  152),\
+               }
+
+pltSub.runModesSnapShotDifferentScanVals(modesSlices)
