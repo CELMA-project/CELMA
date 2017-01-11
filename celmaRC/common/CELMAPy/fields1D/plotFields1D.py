@@ -44,7 +44,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         self._pltSize = pltSize
 
         # Set the spatial part of the title
-        self._spatTitle = "{}$,$ {}$,$"
+        self._spatTitle = "{}$,$ {}$,$ "
         # Set the x-axis label
         self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
@@ -236,7 +236,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         self._pltSize = pltSize
 
         # Set the spatial part of the title
-        self._spatTitle = "{}$,$ {}$,$"
+        self._spatTitle = "{}$,$ {}$,$ "
         # Set the x-axis label
         self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
