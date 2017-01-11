@@ -41,9 +41,9 @@ class PlotHelper(object):
         # jPar fields
         "jParAdv"        :  r"-\frac{1}{JB}\{\phi,j_{\parallel}\}"   ,\
         "uEParAdv"       : (r"nu_{e,\parallel}\partial_\parallel"     \
-                            r"u_{e,\parallel}")                      ,\
+                            r" u_{e,\parallel}")                     ,\
         "uIParAdv"       : (r"-nu_{i,\parallel}\partial_\parallel"    \
-                            r"u_{i,\parallel}")                      ,\
+                            r" u_{i,\parallel}")                     ,\
         "jParParAdv"     : (r"-\frac{j_\parallel}{n}"                 \
                             r"\partial_\parallel(nu_{e,\parallel})") ,\
         "gradPhiLnN"     : (r"\mu n\partial_{\parallel}"              \
