@@ -65,6 +65,9 @@ scanB0.runScan()
 
 # POST-PROCESS
 # =============================================================================
+# Have support $\parallel$
+import matplotlib.pylab as plt
+plt.rc("text", usetex=False)
 with open(os.path.join(directory, "dmpFoldersDict.pickle"), "rb") as f:
         dmpFolders = pickle.load(f)
 
