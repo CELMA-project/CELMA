@@ -35,16 +35,24 @@ scanB0.setMainOptions(\
                        series_add       = series_add    ,\
                        theRunName       = directory     ,\
                        make             = False         ,\
-                       boutRunnersNoise = {"vortD":1e-6},\
+                       boutRunnersNoise = {"vort":1e-6} ,\
                      )
+
+scanB0.setInitOptions(BOUT_walltime = "72:00:00")
+
+scanB0.setExpandOptions(timestep      = 25       ,\
+                        nout          = 2        ,\
+                        BOUT_walltime = "72:00:00")
 
 # Set common runner options
 scanB0.setCommonRunnerOptions(\
-                              nproc      = 48  ,\
-                              cpy_source = True,\
-                              BOUT_nodes = 3   ,\
-                              BOUT_ppn   = 16  ,\
+                              nproc        = 48            ,\
+                              cpy_source   = True          ,\
+                              BOUT_nodes   = 2             ,\
+                              BOUT_ppn     = 36            ,\
+                              BOUT_queue   = "xfualongprod",\
+                              BOUT_account = "FUA11_SOLF"  ,\
                              )
 
 # Run
-scanB0.runScan(restartTurb=1)
+scanB0.runScan(restartTurb=3, boussinesq = True)
