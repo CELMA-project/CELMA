@@ -371,11 +371,12 @@ class PlotSubmitter(object):
         self.sub.submitFunction(growthRatesPlot, args=args)
     #}}}
 
-    #{{{runModeSnapShotSameScanVal
-    def runModeSnapShotSameScanVal(self, paramKey, slices, varName = "n"):
+    #{{{runSnapShotsSameScanVal
+    def runSnapShotsSameScanVal(self, paramKey, slices,\
+                                fluct = False, varName = "n"):
         #{{{docstring
         """
-        Gets snapshot of a specific mode.
+        Gets snapshot of a specific scan value.
 
         Parameters
         ----------
@@ -383,13 +384,12 @@ class PlotSubmitter(object):
             What paramKey to use collective collect from
         slices : tuple
             Tuple of the tSlices to use.
+        fluct : bool
+            Whether or not to display the fluctuations.
         varName : str
             Variable to animate.
         """
         #}}}
-
-        fluct = True
-
         collectPaths    = self._mergeFromLinear[paramKey]
         steadyStatePath = self._dmpFolders["expand"][0]
         dmp_folders  = (collectPaths[-1],)
@@ -399,7 +399,7 @@ class PlotSubmitter(object):
                 self._plotSuperKwargs)
         for nr, tSlice in enumerate(slices):
             kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
-            self.sub.setJobName("modeSnapShotSameScanVal{}".format(nr))
+            self.sub.setJobName("snapShotsSameScanVal{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             # FIXME: This is no guaranty for different names, but a
@@ -409,16 +409,18 @@ class PlotSubmitter(object):
             sleep(self._sleepS + 30)
     #}}}
 
-    #{{{runModesSnapShotDifferentScanVals
-    def runModesSnapShotDifferentScanVals(self, slices, varName = "n"):
+    #{{{runSnapShotDifferentScanVals
+    def runSnapShotDifferentScanVals(self, slices, fluct = True, varName = "n"):
         #{{{docstring
         """
-        Gets snapshot of the different modes.
+        Gets snapshot of all the scan values.
 
         Parameters
         ----------
         slices : dict
             Dictionary containing the tSlices.
+        fluct : bool
+            Whether or not to display the fluctuations.
         varName : str
             Variable to animate.
         """
@@ -443,7 +445,7 @@ class PlotSubmitter(object):
                     steadyStatePath,\
                     self._plotSuperKwargs)
             kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
-            self.sub.setJobName("modesSnapShotDifferentScanVals{}".format(nr))
+            self.sub.setJobName("snapShotDifferentScanVals{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
