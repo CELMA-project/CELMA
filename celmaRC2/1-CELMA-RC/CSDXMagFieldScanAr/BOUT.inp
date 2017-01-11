@@ -126,8 +126,8 @@ viscosityGuard      = false
 #       Dimensions: Burin et al 2005 PoP
 #       Ionization: Burin et al 2005 PoP
 #       n0 and Te : Burin et al 2005 PoP
-radius = 0.080   # The length of x from boundary to boundary in [m]
-length = 2.80    # The length of y from boundary to boundary in [m]
+radius = 0.080   # The length of x from boundary to boundary in m
+length = 2.80    # The length of y from boundary to boundary in m
 n0     = 1.0e19  # m^-3
 Te0    = 2.5     # eV
 Ti0    = 0.0     # eV

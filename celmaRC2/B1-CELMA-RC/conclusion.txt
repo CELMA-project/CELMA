@@ -1,8 +1,6 @@
-Copied from celmaCurMom/B7-CELMACurMomWParamsConstViscClean/
+Copied from celmaRC/B1-CELMA-RC/
 
-- Fixed 0.51 bug
+- Fixed bug in parallel momentum and current eq
 
 Results:
 ========
-WRONGBCS-CSDXMagFieldScanAr - Run with wrong BCs on vorticity, see results in own folder
-CSDXMagFieldScanAr - Running

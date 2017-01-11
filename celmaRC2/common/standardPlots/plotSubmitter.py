@@ -30,7 +30,7 @@ class PlotSubmitter(object):
     """Class used to submit the standard plots"""
 
     #{{{constructor
-    def __init__(self, directory, scanParameter):
+    def __init__(self, directory, scanParameter, boussinesq=False):
         #{{{docstring
         """
         Constructor for the PlotSubmitter class.
@@ -46,6 +46,8 @@ class PlotSubmitter(object):
             Root directory of the simulations.
         scanParameter : str
             The scan parameter.
+        boussinesq : bool
+            Whether or not the boussinesq approximation is used
         """
         #}}}
 
@@ -91,6 +93,9 @@ class PlotSubmitter(object):
                                  # scanParameter needed in onlyScans
                                  "scanParameter"   : scanParameter,\
                                 }
+
+        # Set memeber data
+        self._boussinesq = boussinesq
     #}}}
 
     #{{{_findSlices
@@ -244,7 +249,8 @@ class PlotSubmitter(object):
             collectPaths = self._mergeInitAndExpand[key]
             dmp_folders  = (dmp_folders,)
             args = (dmp_folders, collectPaths, self._plotSuperKwargs)
-            kwargs = {"hyperIncluded":hyperIncluded}
+            kwargs = {"hyperIncluded" : hyperIncluded,\
+                      "boussinesq"    : self._boussinesq}
             self.sub.setJobName("fields1D{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
