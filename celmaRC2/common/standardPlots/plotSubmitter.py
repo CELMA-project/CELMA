@@ -485,6 +485,34 @@ class PlotSubmitter(object):
             sleep(self._sleepS)
     #}}}
 
+    #{{{runSteadyState
+    def runSteadyState(self):
+        """
+        Runs the 1D steady state profiles
+        """
+
+        hyperIncluded = False
+        tSlice = slice(-1,-1)
+
+
+        loopOver = zip(self._dmpFolders["expand"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, key, nr in loopOver:
+
+            collectPaths = self._mergeInitAndExpand[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
+            kwargs = {"hyperIncluded" : hyperIncluded,\
+                      "boussinesq"    : self._boussinesq,\
+                      "tSlice"        : tSlice,\
+                     }
+            self.sub.setJobName("fields1D{}".format(nr))
+            self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
+    #}}}
+
     #{{{runZonalFlow
     def runZonalFlow(self):
         """
