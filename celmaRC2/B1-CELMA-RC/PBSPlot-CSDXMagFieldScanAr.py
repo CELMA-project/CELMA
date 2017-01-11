@@ -14,29 +14,26 @@ directory = "CSDXMagFieldScanAr"
 scanParameter = "B0"
 
 # Create the plotSubmitter
-pltSub = PlotSubmitter(directory, scanParameter)
+pltSub = PlotSubmitter(directory, scanParameter, boussinesq=True)
 pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"))
 
 # Set linear slices
 tSlices = {\
-           "B0_0.02":slice(200, 400),\
-           "B0_0.04":slice(100, 300),\
-           "B0_0.06":slice(200, 500),\
-           "B0_0.08":slice(400, 750),\
-           "B0_0.1" :slice(250, 530),\
+           "B0_0.02":None,\
+           "B0_0.04":None,\
+           "B0_0.06":None,\
+           "B0_0.08":None,\
+           "B0_0.1" :None,\
            }
 pltSub.setLinearPhaseTSlices(tSlices)
 
 # Set saturated turbulence slices
 tSlices = {\
-           # NOTE: Not really saturated
-           "B0_0.02":slice( 600, None),\
-           # NOTE: Not really saturated
-           "B0_0.04":slice( 700, None),\
-           # NOTE: Not really saturated
-           "B0_0.06":slice(1800, None),\
-           "B0_0.08":slice(2000, None),\
-           "B0_0.1" :slice(2000, None),\
+           "B0_0.02":None,\
+           "B0_0.04":None,\
+           "B0_0.06":None,\
+           "B0_0.08":None,\
+           "B0_0.1" :None,\
            }
 pltSub.setSatTurbTSlices(tSlices)
 

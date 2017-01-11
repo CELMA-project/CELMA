@@ -19,19 +19,19 @@ pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"))
 
 # Set linear slices
 tSlices = {\
-           "nn_5e+19"                 : slice(180, 270),\
-           "nn_2.5e+19"               : slice(150, 240),\
-           "nn_1.6666666666666668e+19": slice(150, 300),\
-           "nn_1.25e+19"              : slice(180, 270),\
+           "nn_5e+19"                 : None,\
+           "nn_2.5e+19"               : None,\
+           "nn_1.6666666666666668e+19": None,\
+           "nn_1.25e+19"              : None,\
            }
 pltSub.setLinearPhaseTSlices(tSlices)
 
 # Set saturated turbulence slices
 tSlices = {\
-           "nn_5e+19"                 : slice(1000, None),\
-           "nn_2.5e+19"               : slice(1000, None),\
-           "nn_1.6666666666666668e+19": slice(1200, None),\
-           "nn_1.25e+19"              : slice(1000, None),\
+           "nn_5e+19"                 : None,\
+           "nn_2.5e+19"               : None,\
+           "nn_1.6666666666666668e+19": None,\
+           "nn_1.25e+19"              : None,\
            }
 pltSub.setSatTurbTSlices(tSlices)
 
