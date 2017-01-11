@@ -63,13 +63,15 @@ pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
 
 # Snapshots plot
+# Obtain evolution of the mode
 modeSlices = (\
               slice(138,138),\
               slice(150,150),\
               slice(162,162),\
              )
-pltSub.runModeSnapShotSameScanVal("param0", modeSlices)
+pltSub.runSnapShotsSameScanVal("param0", modeSlices, fluct=True)
 
+# Obtain the different modes
 modesSlices = {\
                "B0_0.02":slice( 147,  147),\
                "B0_0.04":slice(1500, 1500),\
@@ -77,5 +79,21 @@ modesSlices = {\
                "B0_0.08":slice( 230,  230),\
                "B0_0.1" :slice( 152,  152),\
                }
+pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True)
 
-pltSub.runModesSnapShotDifferentScanVals(modesSlices)
+# Obtain the turbulence
+turbSlices = (\
+              # Steady state
+              slice(  0,   0),\
+              # Violent overshoot
+              slice(464, 464),\
+              # Plasma off center
+              slice(862, 862),\
+             )
+pltSub.runSnapShotsSameScanVal("param0", turbSlices, fluct=False)
+
+# Obtain the turbulence fluctuations
+turbSlices = (\
+              slice(961, 961),\
+             )
+pltSub.runSnapShotsSameScanVal("param0", turbSlices, fluct=True)
