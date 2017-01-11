@@ -47,8 +47,8 @@ def getMaxMinAnimation(tupleOfArrays, fluct, varyMaxMin):
         vMin = np.zeros(nFrames)
 
         for frame in range(nFrames):
-            curFrameArrayMax = np.zeros(nFrames)
-            curFrameArrayMin = np.zeros(nFrames)
+            curFrameArrayMax = np.zeros(lenTuple)
+            curFrameArrayMin = np.zeros(lenTuple)
             for arrayNr in range(lenTuple):
                 curFrameArrayMax[arrayNr] =\
                     np.max(tupleOfArrays[arrayNr][frame,:,:])
@@ -81,8 +81,8 @@ def getMaxMinAnimation(tupleOfArrays, fluct, varyMaxMin):
         vMin = np.zeros(nFrames)
 
         for frame in range(nFrames):
-            curFrameArrayMax = np.zeros(nFrames)
-            curFrameArrayMin = np.zeros(nFrames)
+            curFrameArrayMax = np.zeros(lenTuple)
+            curFrameArrayMin = np.zeros(lenTuple)
             for arrayNr in range(lenTuple):
                 curFrameArrayMax[arrayNr] =\
                     np.max(tupleOfArrays[arrayNr][frame,:,:])
