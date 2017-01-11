@@ -70,12 +70,12 @@ int CelmaCurMom::init(bool restarting)
         SAVE_REPEAT3(lnNAdv, lnNRes, gradUEPar);
         SAVE_REPEAT4(lnNUeAdv, srcN, lnNParArtVisc, lnNPerpArtVisc);
         // jPar terms
-        SAVE_REPEAT3(jParAdv, uIParAdvSum, uEParDoubleAdv);
+        SAVE_REPEAT4(jParAdv, uEParAdv, uIParAdv, jParParAdv);
         SAVE_REPEAT4(jParRes, gradPhiLnN, neutralERes, neutralIRes);
         SAVE_REPEAT2(jParParArtVisc, jParPerpArtVisc);
         // momDensPar terms
-        SAVE_REPEAT2(momDensAdv, elPressure);
-        SAVE_REPEAT3(densDiffusion, momDensParArtVisc, momDensPerpArtVisc);
+        SAVE_REPEAT4(momDensAdv, uIFluxAdv, elPressure, densDiffusion);
+        SAVE_REPEAT3(neutralEResMu, momDensParArtVisc, momDensPerpArtVisc);
         // Vorticity terms
         SAVE_REPEAT2(vortNeutral, potNeutral);
         SAVE_REPEAT4(divParCur, divSourcePhi, vortParArtVisc, vortPerpArtVisc);
@@ -154,10 +154,11 @@ int CelmaCurMom::rhs(BoutReal t)
     // Terms in jPar
     // ************************************************************************
     jParAdv         = - invJ*bracket(phi, jPar, bm);
-    uIParAdvSum     = - Vpar_Grad_par(uIPar, n*(uIPar + uEPar));
-    uEParDoubleAdv  = 2.0*Vpar_Grad_par(uEPar, n*uEPar);
+    uEParAdv        =   n*(Vpar_Grad_par(uEPar, uEPar));
+    uIParAdv        = - n*(Vpar_Grad_par(uIPar, uIPar));
+    jParParAdv      = - Vpar_Grad_par((jPar/n), uEPar);
+    gradPhiLnN      = mu*n*DDY(lnN - phi);
     jParRes         = - 0.51*nuEI*jPar;
-    gradPhiLnN     = mu*n*DDY(lnN - phi);
     neutralERes     = n*nuEN*uEPar;
     neutralIRes     = - n*nuIN*uIPar;
     jParParArtVisc  = (artViscParJpar)*D2DY2(jPar);
@@ -165,10 +166,11 @@ int CelmaCurMom::rhs(BoutReal t)
 
     ddt(jPar) =
           jParAdv
-        + uIParAdvSum
-        + uEParDoubleAdv
-        + jParRes
+        + uEParAdv
+        + uIParAdv
+        + jParParAdv
         + gradPhiLnN
+        + jParRes
         + neutralERes
         + neutralIRes
         + jParParArtVisc
@@ -181,20 +183,24 @@ int CelmaCurMom::rhs(BoutReal t)
 
     // Terms in momDensPar
     // ************************************************************************
-    momDensAdv   = - invJ*bracket(phi, momDensPar, bm);
- // uIParAdvSum calculated above
-    elPressure   = - DDY(n);
+    momDensAdv = - invJ*bracket(phi, momDensPar, bm);
+ // UIParAdv calculated above
+    uIFluxAdv     = - Vpar_Grad_par(uIPar, n*uEPar);
+    elPressure    = - DDY(n);
+    densDiffusion = nuEI*(uIPar/mu)*Laplace_perp(n);
  // neutralIRes calculated above
-    densDiffusion      = nuEI*(uIPar/mu)*Laplace_perp(n);
+    neutralEResMu      = neutralERes/mu;
     momDensParArtVisc  = (artViscParMomDens)*D2DY2(momDensPar);
     momDensPerpArtVisc = (artViscPerpMomDens)*Laplace_perp(momDensPar);
 
     ddt(momDensPar) =
         + momDensAdv
-        + uIParAdvSum
+        + uIFluxAdv
+        + uIParAdv
         + elPressure
-        + neutralIRes
         + densDiffusion
+        + neutralIRes
+        + neutralEResMu
         + momDensParArtVisc
         + momDensPerpArtVisc
         ;
