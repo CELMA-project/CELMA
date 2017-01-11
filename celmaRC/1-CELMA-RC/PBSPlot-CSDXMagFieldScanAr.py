@@ -37,6 +37,12 @@ tSlices = {\
            }
 pltSub.setSatTurbTSlices(tSlices)
 
+modeSlices = (\
+              slice(138,138),\
+              slice(150,150),\
+              slice(162,162),\
+             )
+
 # Run the post-processing
 pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
 pltSub.runCominedPlots()
@@ -61,3 +67,6 @@ pltSub.sub.setQueue("fatq")
 pltSub.sub.setWalltime("06:00:00")
 pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
+
+# Snapshots plot
+pltSub.runModesSnapShot("param0", modeSlices)
