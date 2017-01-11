@@ -11,12 +11,14 @@ sys.path.append(commonDir)
 from CELMAPy.fields2D import Driver2DFields
 
 #{{{fields2DAnimation
-def fields2DAnimation(dmp_folders,\
-                      collectPaths,\
+def fields2DAnimation(dmp_folders    ,\
+                      collectPaths   ,\
                       steadyStatePath,\
                       plotSuperKwargs,\
-                      varName = "n",\
-                      fluct=False):
+                      varName = "n"  ,\
+                      fluct   = False,\
+                      tSlice  = None ,\
+                      ):
     #{{{docstring
     """
     Runs the standard fields2D animation
@@ -35,20 +37,20 @@ def fields2DAnimation(dmp_folders,\
         Variable to animate.
     fluct : bool
         Whether or not to plot the fluctuations.
+    tSlice : [None|Slice]
+        Temporal slice
     """
     #}}}
 
     useSubProcess = False
 
     convertToPhysical = True
-    tSlice            = None
     varyMaxMin = True if fluct else False
 
     # DriverPlotFieldsSuperClass
     xSlice = None
     ySlice = None
     zSlice = None
-    tSlice = None
     xInd   = None
     yInd   = 16
     zInd   = 0
