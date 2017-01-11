@@ -24,7 +24,6 @@ class PBSSubmitter(object):
         Sets functions not called and call setMisc
         """
 
-        self.setMisc()
         self._notCalled = [\
                             "setJobName" ,\
                             "setNodes"   ,\
@@ -63,6 +62,8 @@ class PBSSubmitter(object):
         # Make dir if not exists
         if not os.path.exists(logPath):
             os.makedirs(logPath)
+
+        self._miscCalled = True
     #}}}
 
     #{{{setJobName
@@ -175,6 +176,9 @@ class PBSSubmitter(object):
             message = "The following functions were not called:\n{}".\
                         format("\n".join(self._notCalled))
             raise RuntimeError(message)
+
+        if not(self._miscCalled):
+            self.setMisc()
 
         # The name of the file
         fileName = "tmp_{}_{}.py".format(function.__name__, self._time)
