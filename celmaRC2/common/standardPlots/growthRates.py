@@ -49,7 +49,7 @@ def growthRatesPlot(dmp_folders     ,\
 
     xInd            = None
     yInd            = 16
-    nPoints         = 3
+    nPoints         = 1
     equallySpace    = "x"
     steadyStatePath = None
 
