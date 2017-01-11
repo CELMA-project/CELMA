@@ -17,6 +17,8 @@ directory = "CSDXNeutralScanAr"
 scanNn = ScanDriver(directory)
 
 # Set the scan
+# NOTE: The scan must be in descending order in order for the growth
+#       rates post-processing to work
 ionizationPercents = (80, 60, 40, 20)
 option = BOUTOptions(directory)
 n0 = float(option.input["n0"])
@@ -36,20 +38,21 @@ scanNn.setMainOptions(\
                        boutRunnersNoise = {"vortD":1e-6},\
                      )
 
-# Increase to max walltime
 scanNn.setInitOptions(BOUT_walltime = "72:00:00")
-# Do timestep 25 rather than 50 in order to save time
-scanNn.setExpandOptions(timestep      = 25,\
-                        nout          = 2,\
+
+scanNn.setExpandOptions(timestep      = 25       ,\
+                        nout          = 2        ,\
                         BOUT_walltime = "72:00:00")
 
 # Set common runner options
 scanNn.setCommonRunnerOptions(\
-                              nproc              = 48  ,\
-                              cpy_source         = True,\
-                              BOUT_nodes         = 3   ,\
-                              BOUT_ppn           = 16  ,\
+                              nproc        = 48            ,\
+                              cpy_source   = True          ,\
+                              BOUT_nodes   = 2             ,\
+                              BOUT_ppn     = 36            ,\
+                              BOUT_queue   = "xfualongprod",\
+                              BOUT_account = "FUA11_SOLF"  ,\
                              )
 
 # Run
-scanNn.runScan()
+scanNn.runScan(restartTurb=3)
