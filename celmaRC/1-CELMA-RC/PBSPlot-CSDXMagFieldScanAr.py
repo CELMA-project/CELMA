@@ -50,6 +50,7 @@ pltSub.runPerformance(allFolders=True)
 pltSub.runPosOfFluct()
 pltSub.runPSD2D()
 pltSub.runSkewKurt()
+pltSub.runSteadyState()
 pltSub.runZonalFlow()
 
 # Run the animations

@@ -12,7 +12,7 @@ from CELMAPy.fields1D import Driver1DFields
 
 #{{{fields1DAnimation
 def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
-                      hyperIncluded=False, boussinesq=False):
+                      hyperIncluded=False, boussinesq=False, tSlice=None):
     #{{{docstring
     """
     Runs the standard fields1D animation
@@ -25,10 +25,12 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
         Tuple of the paths to collect from.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
-    boussinesq : bool
-        Whether or not the boussinesq approximation is used
     hyperIncluded : bool
         If hyper viscosities are used.
+    boussinesq : bool
+        Whether or not the boussinesq approximation is used
+    tSlice : [None|Slice]
+        Temporal slice
     """
     #}}}
 
@@ -38,7 +40,6 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
     xSlice = None
     ySlice = None
     zSlice = None
-    tSlice = None
     xInd = 0
     yInd = 16
     zInd = 0
