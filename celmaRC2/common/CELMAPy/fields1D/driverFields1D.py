@@ -145,6 +145,20 @@ def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
                      "uIPar", "momDensPar",\
                      "uEPar", "S"         ,\
                     )
+    if fieldPlotType == "mainFieldsBoussinesq":
+        collectFields  = ("lnN"       ,\
+                          "jPar"      ,\
+                          "phi"       ,\
+                          "vort"      ,\
+                          "momDensPar",\
+                          "S"         ,\
+                         )
+        plotOrder = ("lnN"  , "phi"       ,\
+                     "n"    , "vort"      ,\
+                     "jPar" , "momDensPar",\
+                     "uIPar", "S"         ,\
+                     "uEPar",\
+                    )
     elif fieldPlotType == "lnN":
         collectFields  = ("ddt(lnN)"      ,\
                           "lnNAdv"        ,\
@@ -224,7 +238,6 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
 
     #{{{static members
     _fieldPlotTypes = (\
-                       "mainFields",\
                        "momDensPar",\
                        "lnN"       ,\
                        "jPar"      ,\
@@ -274,10 +287,12 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
             Driver1DFields._fieldPlotTypes =\
                     list(Driver1DFields._fieldPlotTypes)
             Driver1DFields._fieldPlotTypes.append("vortD")
+            Driver1DFields._fieldPlotTypes.append("mainFields")
         else:
             Driver1DFields._fieldPlotTypes =\
                     list(Driver1DFields._fieldPlotTypes)
             Driver1DFields._fieldPlotTypes.append("vort")
+            Driver1DFields._fieldPlotTypes.append("mainFieldsBoussinesq")
 
         # Recast to tuple
         Driver1DFields._fieldPlotTypes =\

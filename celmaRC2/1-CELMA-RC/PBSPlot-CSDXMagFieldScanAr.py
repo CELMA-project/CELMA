@@ -19,11 +19,11 @@ pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"))
 
 # Set linear slices
 tSlices = {\
-           "B0_0.02":slice(80,240)  ,\
-           "B0_0.04":slice(800,1250),\
-           "B0_0.06":slice(180,300) ,\
-           "B0_0.08":slice(100,225) ,\
-           "B0_0.1" :slice(80,210)  ,\
+           "B0_0.02":None,\
+           "B0_0.04":None,\
+           "B0_0.06":None,\
+           "B0_0.08":None,\
+           "B0_0.1" :None,\
            }
 pltSub.setLinearPhaseTSlices(tSlices)
 
@@ -31,8 +31,8 @@ pltSub.setLinearPhaseTSlices(tSlices)
 tSlices = {\
            "B0_0.02":None,\
            "B0_0.04":None,\
-           "B0_0.06":slice(1200,None),\
-           "B0_0.08":slice(1000,None),\
+           "B0_0.06":None,\
+           "B0_0.08":None,\
            "B0_0.1" :None,\
            }
 pltSub.setSatTurbTSlices(tSlices)

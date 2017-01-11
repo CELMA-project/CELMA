@@ -77,13 +77,13 @@ private:
     Field3D lnNAdv, lnNRes, gradUEPar;
     Field3D lnNUeAdv, srcN, lnNParArtVisc, lnNPerpArtVisc;
     // jPar fields
-    Field3D jParAdv, uIParAdvSum, uEParDoubleAdv;
+    Field3D jParAdv, uEParAdv, uIParAdv, jParParAdv;
     Field3D jParRes, gradPhiLnN;
     Field3D neutralERes, neutralIRes;
     Field3D jParParArtVisc, jParPerpArtVisc;
     // momDensPar fields
-    Field3D momDensAdv, elPressure, densDiffusion;
-    Field3D momDensParArtVisc, momDensPerpArtVisc;
+    Field3D momDensAdv, uIFluxAdv, elPressure, densDiffusion;
+    Field3D neutralEResMu, momDensParArtVisc, momDensPerpArtVisc;
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
     Field3D DDYGradPerpPhiGradPerpUI;
