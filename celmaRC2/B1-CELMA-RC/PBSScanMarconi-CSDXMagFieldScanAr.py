@@ -10,7 +10,7 @@ sys.path.append(commonDir)
 
 from CELMAPy.scanDriver import ScanDriver
 
-directory = "CSDXMagFieldScanAr"
+directory = "BousCSDXMagFieldScanAr"
 
 # Create object
 scanB0 = ScanDriver(directory)
