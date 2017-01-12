@@ -67,7 +67,7 @@ def driver1DFieldSingle(collectPaths     ,\
     collectFields, plotOrder =\
             getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded)
 
-    if fieldPlotType != "mainFields" and convertToPhysical:
+    if not("mainFields" in fieldPlotType) and convertToPhysical:
         # NOTE: Normalization for each term not implemented
         convertToPhysical = False
         print("fieldPlotType is not 'mainFields', "\
@@ -89,7 +89,7 @@ def driver1DFieldSingle(collectPaths     ,\
         ccf1D.setVarName(field)
         dict1D.update(ccf1D.executeCollectAndCalc())
 
-    if fieldPlotType == "mainFields":
+    if"mainFields" in fieldPlotType:
         # Non-collects
         dict1D.update({"n"    : calcN(dict1D["lnN"],\
                                       not(ccf1D.convertToPhysical),\
@@ -144,6 +144,20 @@ def getCollectFieldsAndPlotOrder(fieldPlotType, hyperIncluded):
                      "jPar" , "vort"      ,\
                      "uIPar", "momDensPar",\
                      "uEPar", "S"         ,\
+                    )
+    elif fieldPlotType == "mainFieldsBoussinesq":
+        collectFields  = ("lnN"       ,\
+                          "jPar"      ,\
+                          "phi"       ,\
+                          "vort"      ,\
+                          "momDensPar",\
+                          "S"         ,\
+                         )
+        plotOrder = ("lnN"  , "phi"       ,\
+                     "n"    , "vort"      ,\
+                     "jPar" , "momDensPar",\
+                     "uIPar", "S"         ,\
+                     "uEPar",\
                     )
     elif fieldPlotType == "lnN":
         collectFields  = ("ddt(lnN)"      ,\
@@ -221,11 +235,9 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
 
     #{{{static members
     _fieldPlotTypes = (\
-                       "mainFields",\
-                       "momDensPar",\
                        "lnN"       ,\
-                       "jPar"      ,\
                        "momDensPar",\
+                       "jPar"      ,\
                       )
     #}}}
 
@@ -271,10 +283,12 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
             Driver1DFields._fieldPlotTypes =\
                     list(Driver1DFields._fieldPlotTypes)
             Driver1DFields._fieldPlotTypes.append("vortD")
+            Driver1DFields._fieldPlotTypes.append("mainFields")
         else:
             Driver1DFields._fieldPlotTypes =\
                     list(Driver1DFields._fieldPlotTypes)
             Driver1DFields._fieldPlotTypes.append("vort")
+            Driver1DFields._fieldPlotTypes.append("mainFieldsBoussinesq")
 
         # Recast to tuple
         Driver1DFields._fieldPlotTypes =\
