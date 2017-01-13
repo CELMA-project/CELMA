@@ -65,9 +65,9 @@ pltSub.runFields2DAnim(fluct=False)
 # Snapshots plot
 # Obtain evolution of the mode
 modeSlices = (\
-              slice(138,138),\
-              slice(150,150),\
-              slice(162,162),\
+              slice(138, 138),\
+              slice(162, 162),\
+              slice(184, 184),\
              )
 pltSub.runSnapShotsSameScanVal("param0", modeSlices, fluct=True)
 
