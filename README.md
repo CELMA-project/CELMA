@@ -11,7 +11,7 @@ Current implementation works with the latest commit of BOUT++ version 3
 2. The `parallel bug` - Mistake in momentum density derivation spreads to
    current and sum of momentum density equation in the code.
 
-* additionalPlots: Additional plots related to the CELMA code
+* additionalPyScript: Additional python scripts used in the CELMA project
 * celma: Folder with the codes - Suffers from `0.51 bug` and `parallel bug`
 * celmaCurMom: CELMA codes where the current and parallel momentum is solved -
   Suffers from `0.51 bug` and `parallel bug`
