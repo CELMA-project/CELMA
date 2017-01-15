@@ -3,6 +3,7 @@
 
 #include "../include/parameters.hxx"
 
+// FIXME: This constructor is long. Should be refactored!
 /*!
  * \brief Constructor to Parameters
  *
@@ -59,6 +60,34 @@ Parameters::Parameters(BoutReal    const &radius,
     }
     else if (gas_ == "Ar"){
         mi = 39.948*u;
+        // Guard
+        bool allPass = true;
+        std::ostringstream stream;
+        if (Te0_ < 0.1 || Te0_ > 10){
+            stream << "Cross section for electron-neutral collision only "
+                   << "valid in range 0.1-10eV.\n";
+            allPass = false;
+        }
+        if (Ti0_ < 0.1 || Ti0_ > 10){
+            stream << "Cross section for ion-neutral collision only "
+                   << "valid in range 0.1-10eV.\n";
+            allPass = false;
+        }
+        // Throw error or warning
+        if (!allPass){
+            std::string str = stream.str();
+            // Cast the stream to a const char in order to use it in BoutException
+            const char* message = str.c_str();
+            std::string newlines    = "\n\n\n";
+            std::string exclamation (80, '!');
+            if(warn_){
+                output << newlines << exclamation << "\nWARNING: "
+                       << message << exclamation << newlines << std::endl;
+            }
+            else{
+                throw BoutException(message);
+            }
+        }
     }
     else{
         std::ostringstream stream;
@@ -129,13 +158,39 @@ Parameters::Parameters(BoutReal    const &radius,
      */
     nuII = (ni*pow(e, 4.0)*coloumbLog)/
            (12.0*pow(PI, 1.5)*pow(eps0, 2.0)*pow(mi, 0.5)*pow(Ti0J, 1.5));
-    /* Own calculations:
-     * See thesis
-     */
-    nuEN = (pow(2.0*PI, 0.5)*8.0*nn*pow(a0,2.0)*pow(Te0J, 0.5))/
-           (3.0*pow(me, 0.5));
-    nuIN = (8.0*nn*pow(PI, 0.5)*pow(a0,2.0)*pow(Ti0J, 0.5))/
-           (3.0*pow(mi, 0.5));
+
+    if (gas_ == "H"){
+        output << "Im H" <<std::endl;
+        /* Own calculations:
+         * See thesis
+         */
+        nuEN = (8.0*pow(2.0, 0.5)/3.0)*pow(PI, 0.5)*nn*pow(a0,2.0)*pow(Te0J/me,0.5);
+        nuIN = (8.0              /3.0)*pow(PI, 0.5)*nn*pow(a0,2.0)*pow(Ti0J/mi,0.5);
+    }
+    else if(gas_ == "Ar"){
+        /* Own calculations:
+         * See thesis and calculations in additionalPyScripts
+         */
+        // NOTE: Some quantities are given in eV
+        nuEN = (nn/2.5e19)*(
+                   33640.349990*pow(Te0_, 0)
+                -  33174.059200*pow(Te0_, 1)
+                + 642273.100111*pow(Te0_, 2)
+                - 188328.743082*pow(Te0_, 3)
+                +  25742.288823*pow(Te0_, 4)
+                -   1784.118597*pow(Te0_, 5)
+                +     50.336945*pow(Te0_, 6)
+                );
+
+        if (Ti0_ > 0.1){
+            nuIN = (8.0*pow(2.0, 0.5)/3.0)*(nn/pow(PI, 0.5))*pow(Ti0J/mi,0.5)*
+                   9.6e-19*pow((1.0+0.14*log(1.0/Ti0_)), 2.0);
+        }
+        else{
+            nuIN = 0.0;
+        }
+    }
+
     /* Friedberg:
      * Plasma Physics and Fusion Energy - equation (9.52)
      * NOTE: These are probably not Maxwellian averaged!
@@ -186,26 +241,6 @@ Parameters::Parameters(BoutReal    const &radius,
     if(coloumbLog <= 1.0){
         // Huba, J.D. - NRL PLASMA FORMULARY 2013
         stream << "Coloumb Logarithm under 1.0. Theory fails.\n";
-        allPass = false;
-    }
-    if(nuEINorm >= 1.0){
-        stream << "Normalized nuEI was " << nuEINorm << ", and did thereby "
-                  "break the drift approximation\n";
-        allPass = false;
-    }
-    if(SNorm >= 1.0){
-        stream << "Normalized SNorm was " << SNorm << ", and did thereby "
-                  "break the drift approximation\n";
-        allPass = false;
-    }
-    if(nuENNorm >= 1.0){
-        stream << "Normalized nuENNorm was " << nuENNorm << ", and did thereby "
-                  "break the drift approximation\n";
-        allPass = false;
-    }
-    if(nuINNorm >= 1.0){
-        stream << "Normalized nuINNorm was " << nuINNorm << ", and did thereby "
-                  "break the drift approximation\n";
         allPass = false;
     }
 
