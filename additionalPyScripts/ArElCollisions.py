@@ -114,12 +114,12 @@ def getPolyFit(deg = 6):
     p = p[::-1]
     polyStr = ""
     for i in range(deg+1):
-        polyStr += "{:+f}*pow(x,{})".format(p[i], i)
+        polyStr += "{:+f}*pow(Te0_, {})\n".format(p[i], i)
 
     if polyStr[0] == "+":
         polyStr = polyStr[1:]
-    polyStr = "result = (nn/2.5e-19)*" + polyStr
-    polyStr += ";"
+    polyStr = "nuEN = (nn/2.5e-19)*(\n" + polyStr
+    polyStr += ");"
 
     return p, polyStr
 #}}}
