@@ -87,10 +87,9 @@ def collectiveCollect(paths               ,\
             paths, tInd = removePathsOutsideRange(paths, tInd)
             # If more than one path, we will slice in time after
             # collection
-            postCollectTInd = tInd
-            tInd = None
-        else:
-            postCollectTInd = None
+            if len(paths) > 1:
+                postCollectTInd = tInd
+                tInd = None
 
     # Must cast to list due to corner cases in collect
     if tInd is not None:
