@@ -674,7 +674,7 @@ void CelmaCurMom::setAndSaveViscosities()
     output << "    For ln(n)    : "  << artViscPerpLnN     << std::endl;
     output << "    For j_{\\|}   : " << artViscPerpJPar    << std::endl;
     output << "    For nu_{i,\\|}: " << artViscPerpMomDens << std::endl;
-    output << "    For vort    : "   << artViscPerpVort    << std::endl;
+    output << "    For vort     : "  << artViscPerpVort    << std::endl;
     output << "Parallel";
     if (!constViscPar){
         output << " (SQ(mesh->dy(0,0)) = "

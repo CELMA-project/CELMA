@@ -19,10 +19,13 @@ scanNn = ScanDriver(directory)
 # Set the scan
 # NOTE: The scan must be in descending order in order for the growth
 #       rates post-processing to work
-ionizationPercents = (80, 60, 40, 20)
+ionizationDegrees = (80, 60, 40, 20, 1)
 option = BOUTOptions(directory)
 n0 = float(option.input["n0"])
-nn = tuple(n0/((pct)/100) for pct in ionizationPercents)
+# Ionization degree
+# d = ni/(ni+nn) => nn = (ni/d) - ni
+# NOTE: Conversion from percent to fraction
+nn = tuple(n0/(d/100) - n0 for d in ionizationDegrees)
 
 scanParameters  = ("nn",)
 series_add = (\
