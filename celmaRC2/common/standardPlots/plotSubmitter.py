@@ -373,7 +373,7 @@ class PlotSubmitter(object):
 
     #{{{runSnapShotsSameScanVal
     def runSnapShotsSameScanVal(self, paramKey, slices,\
-                                fluct = False, varName = "n"):
+                                fluct = False, varName = "n", vMaxVMin = None):
         #{{{docstring
         """
         Gets snapshot of a specific scan value.
@@ -388,15 +388,25 @@ class PlotSubmitter(object):
             Whether or not to display the fluctuations.
         varName : str
             Variable to animate.
+        vMaxVMin : [None|tuple]
+            Max and min of the colors (if not None)
         """
         #}}}
+
+        plotSuperKwargs = copy(self._plotSuperKwargs)
+
+        if vMaxVMin is not None:
+            plotSuperKwargs["vmax"] = (vMaxVMin[0],)
+            plotSuperKwargs["vmin"] = (vMaxVMin[1],)
+            plotSuperKwargs["levels"] = None
+
         collectPaths    = self._mergeFromLinear[paramKey]
         steadyStatePath = self._dmpFolders["expand"][0]
         dmp_folders  = (collectPaths[-1],)
         args = (dmp_folders,\
                 collectPaths,\
                 steadyStatePath,\
-                self._plotSuperKwargs)
+                plotSuperKwargs)
         for nr, tSlice in enumerate(slices):
             kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
             self.sub.setJobName("snapShotsSameScanVal{}".format(nr))
