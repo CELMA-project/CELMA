@@ -87,6 +87,18 @@ class PlotFourierModes(PlotSuperClass):
         self._varLabel = self._varLabelTemplate.\
             format(pltVarName, **self.uc.conversionDict[self._varName])
 
+        # FIXME: This is just a dirty way of doing things, consider
+        #        refactor for clearity
+        # Add FT around the varLabel
+        if self.uc.convertToPhysical:
+            theSplit = self._varLabel.split("[")
+            # Exclude the last $
+            var = theSplit[0][:-1].replace("$", "")
+            units = ("[" + theSplit[1]).replace("$", "")
+            self._varLabel = r"$\mathrm{{FT}}({})$ ${}$".format(var, units)
+        else:
+            self._varLabel = r"$\mathrm{{FT}}({})$".format(self._varLabel)
+
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
