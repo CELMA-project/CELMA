@@ -92,6 +92,17 @@ turbSlices = (\
              )
 pltSub.runSnapShotsSameScanVal("param0", turbSlices, fluct=False)
 
+# Obtain frames to see evolution
+# B=0.08
+start   = 2055
+end     = 2155
+pics    = 3
+frameNr = np.linspace(start, end, pics)
+# Run runSnapShotsSameScanVal without vMaxVmin in order to see maxMin
+maxMin = (6.8e18, 1.3e18)
+turbSlices = tuple(slice(int(frame),int(frame)) for frame in frameNr)
+pltSub.runSnapShotsSameScanVal("param1",turbSlices,fluct=False,vMaxVMin=maxMin)
+
 # Obtain the turbulence fluctuations
 turbSlices = (\
               slice(961, 961),\

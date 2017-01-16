@@ -64,3 +64,13 @@ pltSub.sub.setQueue("fatq")
 pltSub.sub.setWalltime("06:00:00")
 pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
+
+# Snapshots
+start   = 3600
+end     = 3850
+pics    = 3
+frameNr = np.linspace(start, end, pics)
+# Run runSnapShotsSameScanVal without vMaxVmin in order to see maxMin
+maxMin = (8.2e18, 1.3e18)
+turbSlices = tuple(slice(int(frame),int(frame)) for frame in frameNr)
+pltSub.runSnapShotsSameScanVal("param1",turbSlices,fluct=False,vMaxVMin=maxMin)
