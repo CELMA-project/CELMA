@@ -231,15 +231,21 @@ def findLargestPoloidalGrad(var, J):
 #}}}
 
 #{{{findLargestRadialGradN
-def findLargestRadialGradN(steadyStatePath):
+def findLargestRadialGradN(steadyStatePath, yInd = 0):
     #{{{docstring
     """
     Find the largest gradient in n.
 
+    NOTE:
+        * If yInd is unspecified, one is assuming that the position of
+          the max gradient is constant in the parallel direction.
+
     Parameters
     ----------
     steadyStatePath : str
-        Path to collect from
+        Path to collect from.
+    yInd : int
+        Index for the parallel coordinate.
 
     Returns
     -------
@@ -248,7 +254,33 @@ def findLargestRadialGradN(steadyStatePath):
     """
     #}}}
 
-    dx = getUniformSpacing(steadyStatePath, "x")
+    dx    = getUniformSpacing(steadyStatePath, "x")
+    n     = collectSteadyN(steadyStatePath, yInd = yInd)
+    xInd  = findLargestRadialGrad(n, dx[0,0])
+
+    return xInd
+#}}}
+
+#{{{collectSteadyN
+def collectSteadyN(steadyStatePath, yInd):
+    #{{{docstring
+    """
+    Collects n in the steady state.
+
+    Parameters
+    ----------
+    steadyStatePath : str
+        Path to collect from
+    yInd : int
+        Index for the parallel coordinate.
+
+    Returns
+    -------
+    n : array-4d
+        The density at the steady state
+    """
+    #}}}
+
     # Check last t index
     with DataFile(os.path.join(steadyStatePath, "BOUT.dmp.0.nc")) as f:
         tLast = len(f.read("t_array")) - 1
@@ -257,13 +289,14 @@ def findLargestRadialGradN(steadyStatePath):
     # throughout in the domain, so we use yInd=0, zInd=0 in the
     # collect
     lnN = collect("lnN",\
-                  path=steadyStatePath,\
-                  xguards=False,\
-                  yguards=False,\
+                  path=steadyStatePath   ,\
+                  xguards=False          ,\
+                  yguards=False          ,\
+                  yind   = [yInd, yInd]  ,\
+                  zind   = [0   , 0]     ,\
                   tind   = [tLast, tLast],\
                   info=False)
     n = calcN(lnN, normalized = True)
-    xInd  = findLargestRadialGrad(n, dx[0,0])
 
-    return xInd
+    return n
 #}}}
