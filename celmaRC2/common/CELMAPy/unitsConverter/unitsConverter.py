@@ -108,7 +108,6 @@ class UnitsConverter(object):
         return normalizerDict
     #}}}
 
-# FIXME: Update
     #{{{_makeConversionDict
     def _makeConversionDict(self):
         #{{{docstring
