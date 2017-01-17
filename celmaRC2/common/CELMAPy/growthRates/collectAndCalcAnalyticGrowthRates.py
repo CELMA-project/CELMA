@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 
+from ..collectAndCalcHelpers import (collectSteadyN        ,\
+                                     DDX                   ,\
+                                     getUniformSpacing     ,\
+                                     findLargestRadialGradN,\
+                                    )
+from ..superClasses import CollectAndCalcSuperClass
+from .analyticalGrowthRates import (calcOmCE         ,\
+                                    calcOmStar       ,\
+                                    calcPecseliB     ,\
+                                    calcSigmaPar     ,\
+                                    calcUDE          ,\
+                                    pecseliAnalytical,\
+                                   )
+from boututils.datafile import DataFile
+import scipy.constants as cst
+import os
+
 #{{{CollectAndCalcAnalyticGrowthRates
 class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
     """
@@ -28,9 +45,12 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
+
+        self._path = self._collectPaths[0]
     #}}}
 
-    def calcPecseliAnalytical(self, B, kz):
+    #{{{calcPecseliSemiAnalytical
+    def calcPecseliSemiAnalytical(self, m, kz, yInd):
         #{{{docstring
         """
         Calculates the analytical growth rates based on the dispersion
@@ -40,44 +60,70 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
         Low Frequency Waves and Turbulence in Magnetized Laboratory Plasmas and in the Ionosphere
         IOP Publishing 2016
 
+        Gets the value of the max gradient position and the max gradient
+        from the simulations.
+
+        NOTE:
+            * Assumes singly ionized particles
+            * Assumes relationship between number of nodes and
+              wavelength.
+
         Parameters
         ----------
+        m : int
+            Mode number
         kz : float
-            T
+            The wavenumber of the fluctuations in z.
+            Equals 2*pi/lambda_z measured in m^-1.
+            Although not a proper wavelength, this can be inferred from
+            the 2D poloidal field plots of the fluctuations.
+        yInd : int
+            The parallel index to slice the data
 
         Returns
         -------
+        om : complex
+            The omega in exp(-i[k*x-omega*t])
         """
         #}}}
-        # Get the position of the largest gradient
-        ind = findLargestRadialGradN(steadyStatePath)
-        rhoMax = self._dh.rho[ind]
 
-        # Use the Ellis approach
+        # Get the position of the largest gradient
+        indMaxGrad = findLargestRadialGradN(self._path)
+        rhoMax = self._dh.rho[indMaxGrad]
+
         ky = m/rhoMax
-        kx = ky
+
+        # Calculate B
+        mi   = self.uc.getNormalizationParameter("mi")
+        omCI = self.uc.getNormalizationParameter("omCI")*mi/cst.e
+        B    = omCI*mi/cst.e
 
         # Calculation of omStar
         # NOTE: For now: Duplication of work as gradient in already
         #       calculated in findLargestRadialGradN
-        n    = collectSteadyN(steadyStatePath, yInd)
-        dx   = getUniformSpacing(steadyStatePath, "x")
+        n    = collectSteadyN(self._path, yInd)
+        dx   = getUniformSpacing(self._path, "x")
         dndx = DDX(n, dx)
+        n    = n   [0,indMaxGrad,yInd,0]
+        dndx = dndx[0,indMaxGrad,yInd,0]
         Te   = self.uc.getParamFromNormDict("Te0")
-        uDe  = calcUDE(Te, B, n, dndx)
+        uDE  = calcUDE(Te, B, n, dndx)
         omStar = calcOmStar(ky, uDE)
 
         # Calculation of b
-        rhoS = self.uc.getParamFromNormDict("rhoS")
-        b = calcPecseliB(ky, rhoS)
+        rhoS = self.uc.getNormalizationParameter("rhoS")
+        b    = calcPecseliB(ky, rhoS)
 
         # Calculation of sigmaPar
+        omCE = calcOmCE(B)
+        with DataFile(os.path.join(self._path,"BOUT.dmp.0.nc")) as f:
+            nuEI = f.read("nuEI")
         sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
 
         # Test as a function of B
         # For different mode numbers
-        pecseliAnalytical(omStar, b, sigmaPar)
+        om = pecseliAnalytical(omStar, b, sigmaPar)
 
-
-
+        return om
+    #}}}
 #}}}
