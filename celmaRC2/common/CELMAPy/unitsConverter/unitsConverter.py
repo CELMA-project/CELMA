@@ -45,14 +45,14 @@ class UnitsConverter(object):
         self.convertToPhysical = convertToPhysical
 
         # Get the normalizer dict
-        self._normDict = self._getNormalizerDict()
+        self._normDict = self._collectNormalizerDict()
 
         # Makes the conversion dict
         self._makeConversionDict()
     #}}}
 
-    #{{{_getNormalizerDict
-    def _getNormalizerDict(self):
+    #{{{_collectNormalizerDict
+    def _collectNormalizerDict(self):
         #{{{docstring
         """
         Get the conversion dict.
@@ -408,5 +408,31 @@ class UnitsConverter(object):
             return ""
         else:
             return self.conversionDict[key]["normalization"]
+    #}}}
+
+    #{{{getNormalizationParameter
+    def getNormalizationParameter(self, key):
+        #{{{docstring
+        """
+        Returns the normalization parameter.
+
+        Parameters
+        ----------
+        key : ["omCI"|"rhoS"|"n0"|"Te0"|"mi"]
+            The desired return parameter
+
+        Returns
+        -------
+        var : [float|None]
+            If self.convertToPhysical is True, the value of the desired
+            key is returned. If not, None is returned.
+            Note that Te0 is returned in Joules.
+        """
+        #}}}
+
+        if self.convertToPhysical:
+            return None
+        else:
+            return self._normDict[key]
     #}}}
 #}}}
