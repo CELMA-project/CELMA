@@ -3,9 +3,9 @@
 from ..collectAndCalcHelpers import (collectSteadyN        ,\
                                      DDX                   ,\
                                      getUniformSpacing     ,\
+                                     getScanValue          ,\
                                      findLargestRadialGradN,\
                                     )
-from ..superClasses import CollectAndCalcSuperClass
 from .analyticalGrowthRates import (calcOmCE         ,\
                                     calcOmStar       ,\
                                     calcPecseliB     ,\
@@ -18,39 +18,58 @@ import scipy.constants as cst
 import os
 
 #{{{CollectAndCalcAnalyticGrowthRates
-class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
+class CollectAndCalcAnalyticGrowthRates(object):
     """
     Class for collecting and calculating variables needed for
     calculations of the analytical growth rates.
     """
 
     #{{{constructor
-    def __init__(self, *args, **kwargs):
+    def __init__(self, steadyStatePaths, scanParameter, yInd):
+
         #{{{docstring
         """
         This constructor will:
-            * Call the parent constructor
-
-        NOTE: Mode is set to normal as the poloidal average equals the
-              zeroth mode.
+            * Set the member data
 
         Parameters
         ----------
-        *args : positional arguments
-            See parent constructor for details.
-        *kwargs : keyword arguments
-            See parent constructor for details.
+        steadyStatePaths : tuple
+            Path to the steady state simulation.
+            The tuple must be ordered according to the scan order in
+            scanCollectPaths.
+        scanParameter : str
+            String segment representing the scan
+        yInd : int
+            y-index to collect from
         """
         #}}}
 
-        # Call the constructor of the parent class
-        super().__init__(*args, **kwargs)
-
-        self._path = self._collectPaths[0]
+        self._steadyStatePaths = steadyStatePaths
+        self._scanParameter    = scanParameter
+        self._yInd             = yInd
+        self._maxRhoInd        = None
     #}}}
 
-    #{{{calcPecseliSemiAnalytical
-    def calcPecseliSemiAnalytical(self, m, kz, yInd):
+    #{{{_setUcAndDh
+    def _setUcAndDh(self, path):
+        #{{{docstring
+        """
+        Sets the unitsConverter and the dimensionsHelper
+
+        Parameters
+        ----------
+        path : str
+            The path to use for the objects
+        """
+        #}}}
+        # Create the units convertor object
+        self.uc  = UnitsConverter  (path, True)
+        self._dh = DimensionsHelper(path, uc)
+    #}}}
+
+    #{{{_calcPecseliSemiAnalytical
+    def _calcPecseliSemiAnalytical(self, path, m, kz, yInd):
         #{{{docstring
         """
         Calculates the analytical growth rates based on the dispersion
@@ -70,6 +89,8 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
 
         Parameters
         ----------
+        path : str
+            Path to collect from
         m : int
             Mode number
         kz : float
@@ -88,8 +109,10 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
         #}}}
 
         # Get the position of the largest gradient
-        indMaxGrad = findLargestRadialGradN(self._path)
+        indMaxGrad = findLargestRadialGradN(path)
         rhoMax = self._dh.rho[indMaxGrad]
+        if self._maxRhoInd is None:
+            self_maxRhoInd = rhoMax
 
         ky = m/rhoMax
 
@@ -101,8 +124,8 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
         # Calculation of omStar
         # NOTE: For now: Duplication of work as gradient in already
         #       calculated in findLargestRadialGradN
-        n    = collectSteadyN(self._path, yInd)
-        dx   = getUniformSpacing(self._path, "x")
+        n    = collectSteadyN(path, yInd)
+        dx   = getUniformSpacing(path, "x")
         dndx = DDX(n, dx)
         n    = n   [0,indMaxGrad,yInd,0]
         dndx = dndx[0,indMaxGrad,yInd,0]
@@ -116,7 +139,7 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
 
         # Calculation of sigmaPar
         omCE = calcOmCE(B)
-        with DataFile(os.path.join(self._path,"BOUT.dmp.0.nc")) as f:
+        with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
             nuEI = f.read("nuEI")
         sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
 
@@ -125,5 +148,80 @@ class CollectAndCalcAnalyticGrowthRates(CollectAndCalcSuperClass):
         om = pecseliAnalytical(omStar, b, sigmaPar)
 
         return om
+    #}}}
+
+    #{{{getData
+    def getData(self, nModes = 7):
+        #{{{docstring
+        """
+        Makes a DataFrame of the growth rates and angular velocities.
+
+        NOTE:
+            * Assumes singly ionization
+            * Assumes that kz is twice the simulation box
+
+        Parameters
+        ----------
+        nModes : int
+            Number of modes.
+
+        Returns
+        -------
+        analyticalGRDataFrame : DataFrame
+            DataFrame consisting of the variables (measured properties):
+                * "analyticalGR"
+                * "angularVelocity"
+            over the observation "modeNr" over the observation "Scan"
+        positionTuple : tuple
+            The tuple containing (rho, z).
+            Needed in the plotting routine.
+        uc : Units Converter
+            The units converter used when obtaining the fourier modes.
+            Needed in the plotting routine.
+        """
+        #}}}
+
+        # For ideas on how to append a DataFrame, see:
+        # https://github.com/pandas-dev/pandas/blob/master/doc/cheatsheet/Pandas_Cheat_Sheet.pdf
+        # http://stackoverflow.com/questions/10715965/add-one-row-in-a-pandas-dataframe
+
+        multiTuples = []
+        fullDict = {"analyticalGR":[], "angularVelocity":[]}
+
+        loopOver = zip(self._steadyStatePaths)
+
+        # Loop over the folders
+        for steadyStatePath in self._steadyStatePaths:
+            # Set the units converter and the dimension helper
+            self._setUcAndDh(steadyStatePath)
+            # Obtain the scan value
+            scanValue = getScanValue(scanPaths, self._scanParameter)
+
+            # Assume kz is double of the cylinder heigth (observed in
+            # the fluctuations)
+            kz = 2*(self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2])
+
+            for modeNr in range(len(1, nModes+1)):
+                # Fill the multiIndexTuple and the dict
+                multiTuples.append((scanValue, modeNr))
+
+                om = self._calcPecseliSemiAnalytical(steadyStatePath,\
+                                                     modeNr         ,\
+                                                     kz             ,\
+                                                     self._yInd      )
+
+                fullDict["analyticalGR"].append(om.imag)
+                fullDict["angularVelocity"].append(om.real)
+
+        # Make the data frame
+        analyticalGRDataFrame =\
+            pd.DataFrame(fullDict,\
+                         index=pd.MultiIndex.from_tuples(\
+                            multiTuples,
+                            names=(self._scanParameter,"modeNr")))
+
+        positionTuple = (rho[self._maxRhoInd], z[self._yInd])
+
+        return analyticalGRDataFrame, positionTuple, self.uc
     #}}}
 #}}}
