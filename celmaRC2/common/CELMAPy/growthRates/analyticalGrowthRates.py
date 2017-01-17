@@ -25,12 +25,11 @@ def ellisAnalytical(omStar, bEllis, nuPar, om1, nuIN):
     Function which calculates the real and imaginary omega from the
     dispersion relation given in the paper by Ellis et al.
 
-    NOTE: Underlying assumption neutral collision dominates Coloumb
+    NOTE:
+        * Underlying assumption neutral collision dominates Coloumb
           collisions.
-
-    NOTE: All input parameters must be in non-normalized units.
-
-    NOTE: Underlying assumption kx >> (1/n)(dn/dx)
+        * All input parameters must be in non-normalized units.
+        * Underlying assumption kx >> (1/n)(dn/dx)
 
     Parameters
     ----------
@@ -72,12 +71,11 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar):
     Function which calculates the real and imaginary omega from the
     dispersion relation assuming Ti = 0 by Pecseli.
 
-    NOTE: Underlying assumption that sigmaPar/omStar is large and b is
+    NOTE:
+        * Underlying assumption that sigmaPar/omStar is large and b is
           small.
-
-    NOTE: The rest of the underlying assumption found in section 5.1 in draft.
-
-    NOTE: All input parameters must be in non-normalized units.
+        * The rest of the underlying assumption found in section 5.1 in draft.
+        * All input parameters must be in non-normalized units.
 
     Parameters
     ----------
@@ -114,7 +112,7 @@ def calcNuPar(kz, Te, nuEN):
     Parameters
     ----------
     kz : float
-        The inverse wavelength in z measured in m^-1.
+        The wavenumber of the fluctuations in z measured in m^-1.
     Te : float
         The electron temperature measured in J.
     nuEN :float
@@ -138,7 +136,7 @@ def calcOm1(kz, u0):
     Parameters
     ----------
     kz : float
-        The inverse wavelength in z measured in m^-1.
+        The wavenumber of the fluctuations in z measured in m^-1.
         Equals 2*pi/lambda_z.
         NOTE: Typo in the article where it says k2
     u0 : float
@@ -163,11 +161,11 @@ def calcSigmaPar(ky, kz, omCE, omCI, nuEI):
     Parameters
     ----------
     ky : float
-        The inverse wavelength in y.
+        The wavenumber of the fluctuations in y.
         Equals 2*pi/lambda_y measured in m^-1.
     kz : float
-        The inverse wavelength in z.
-        Equals 2*pi/lambda_y measured in m^-1.
+        The wavenumber of the fluctuations in z.
+        Equals 2*pi/lambda_z measured in m^-1.
     omCE : float
         Electron cyclotron frequency measured in s^-1
     omCI : float
@@ -198,10 +196,10 @@ def calcEllisB(kx, ky, rhoS):
     Parameters
     ----------
     kx : float
-        The inverse wavelength in x measured in m^-1.
+        The wavenumber of the fluctuations in x measured in m^-1.
         Equals 2*pi/lambda_x.
     ky : float
-        The inverse wavelength in y measured in m^-1.
+        The wavenumber of the fluctuations in y measured in m^-1.
         Equals 2*pi/lambda_y.
     rhoS : float
         cs/omCI measured in m.
@@ -230,7 +228,7 @@ def calcPecseliB(ky, rhoS):
     Parameters
     ----------
     ky : float
-        The inverse wavelength in y measured in m^-1.
+        The wavenumber of the fluctuations in y measured in m^-1.
         Equals 2*pi/lambda_y.
     rhoS : float
         cs/omCI measured in m.
@@ -259,7 +257,7 @@ def calcOmStar(ky, uDE):
     Parameters
     ----------
     ky : float
-        The inverse wavelength in y measured in m^-1.
+        The wavenumber of the fluctuations in y measured in m^-1.
         Equals 2*pi/lambda_y.
     uDE : float
         The electron diamagnetic velocity.
