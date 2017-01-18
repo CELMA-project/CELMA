@@ -15,6 +15,7 @@ Analytical expression for growth rates in drift waves given by
    IOP Publishing 2016
 """
 
+from scipy.optimize import fsolve
 import scipy.constants as cst
 import numpy as np
 
@@ -65,16 +66,14 @@ def ellisAnalytical(omStar, bEllis, nuPar, om1, nuIN):
 #}}}
 
 #{{{pecseliAnalytical
-def pecseliAnalytical(omStar, bPecseli, sigmaPar, verbose=False):
+def pecseliAnalytical(omStar, bPecseli, sigmaPar):
     #{{{docstring
     """
     Function which calculates the real and imaginary omega from the
     dispersion relation assuming Ti = 0 by Pecseli.
 
     NOTE:
-        * Underlying assumption that sigmaPar/omStar is large and b is
-          small.
-        * The rest of the underlying assumption found in section 5.1 in draft.
+        * Underlying assumption found in section 5.1 in draft.
         * All input parameters must be in non-normalized units.
 
     Parameters
@@ -87,9 +86,6 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar, verbose=False):
         to rhoS.
     sigmaPar : float
         Parameter which tells something about the conductivity.
-    verbose : bool
-        If the relationship between b and sigmaPar/omStar should be
-        printed.
 
     Returns
     -------
@@ -99,19 +95,46 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar, verbose=False):
     #}}}
 
     b = bPecseli
-    if b >= sigmaPar/omStar:
-        message = "Model breaks down as b => sigmaPar/omStar."
-        raise RuntimeError(message)
-    else:
-        if verbose:
-            message = ("b = {:.2e}"
-                       "\nsigmaPar = {:.2e}"
-                       "\nomStar = {:.2e}"
-                       "\nb/(sigmaPar/omStar)={:.2e}\n").\
-                               format(b, sigmaPar, omStar, b/(sigmaPar/omStar))
-            print(message)
 
-    return complex(omStar*(1-b), omStar**2/sigmaPar)
+    def fullExpression(om, sigmaPar, b, omStar):
+        #{{{docstring
+        """
+        Returns equation 5.25 in Pecseli's draft
+
+        We have here used the substitution om = omR + i*omI in 5.25, and
+        splitted the equation in a real and an imaginary part.
+        The function can be solved analytical, but as this gives a long
+        expression, it is here solved iteratively.
+
+        Paramteres
+        ----------
+        om : tuple
+            Tuple containing the real part of om and the imaginary part
+            of om
+        sigmaPar : float
+            Parameter which tells something about the conductivity.
+        b : float
+            Tells something about the size of the perturbation as compared
+            to rhoS.
+        omStar : float
+            Parameter telling about electron diamagnetic frequency.
+        """
+        #}}}
+        omR  = om[0]
+        omI  = om[1]
+        real = -omI**2 - omI*sigmaPar*(b+1) + omR**2
+        imag = 2.0*omI*omR + sigmaPar*(omR*(b+1)-omStar)
+        return (real, imag)
+
+    # Get the real and the imaginary
+    # The angular frequency should be in the electron diamagnetic
+    # direction, which is here negative
+    # It is found that the largest roots in the simulations are around 1e4
+    # Therefore, starting around 1e5
+    realRoot, imagRoot =\
+        fsolve(fullExpression, (-1e5, 1e5), args=(sigmaPar, b, omStar))
+
+    return complex(realRoot, imagRoot)
 #}}}
 
 #{{{calcNuPar
@@ -286,7 +309,7 @@ def calcOmStar(ky, uDE):
 #}}}
 
 #{{{calcUDE
-def calcUDE(Te, B, n, dndx):
+def calcUDE(Te, B, n, dndx, leftHanded=True):
     #{{{docstring
     """
     Calculates the electron diamagnetic velocity, assuming constant
@@ -302,6 +325,17 @@ def calcUDE(Te, B, n, dndx):
         Density measured in m^-3.
     dndx : float
         The density gradient measured in m^-4.
+    leftHanded : bool
+        Whether or not we are in a left handed coordinate system.
+        Normal coordinate system is right handed.
+        BOUT++ is left handed.
+        This has implications on how the cross product is calculated.
+        NOTE: The right hand rule always gives the correct direction of
+              the vector.
+              However, if B is pointing into the paper, the y direction
+              in a right handed coordinate system is pointing downwards,
+              whereas it will point upward in a left handed coordinate
+              system.
 
     Returns
     -------
@@ -310,7 +344,10 @@ def calcUDE(Te, B, n, dndx):
     """
     #}}}
 
-    return -(Te/(cst.e*B))*(1/n)*dndx
+    if leftHanded:
+        return (Te/(cst.e*B))*(1/n)*dndx
+    else:
+        return -(Te/(cst.e*B))*(1/n)*dndx
 #}}}
 
 #{{{calcRhoS
