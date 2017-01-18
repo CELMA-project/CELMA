@@ -9,8 +9,8 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 # FIXME
-# from CELMAPy.growthRates import DriverGrowthRates, driverGrowthRates
-from CELMAPy.growthRates import driverGrowthRates
+# from CELMAPy.growthRates import DriverAnalyticGrowthRates, driverAnalyticGrowthRates
+from CELMAPy.growthRates import driverAnalyticGrowthRates
 
 #{{{analyticGrowthRatesTest
 def analyticGrowthRatesTest():
@@ -28,10 +28,10 @@ def analyticGrowthRatesTest():
     yInd          = 16
 
     print("\n\nTesting analytic growth rates")
-    driverGrowthRates(steadyStatePaths,\
-                          scanParameter   ,\
-                          yInd            ,\
-                          # plotSuperKwargs,\
-                     )
+    driverAnalyticGrowthRates(steadyStatePaths,\
+                              scanParameter   ,\
+                              yInd            ,\
+                              # plotSuperKwargs,\
+                             )
     print("Success!\n\n")
 #}}}

@@ -431,8 +431,8 @@ class UnitsConverter(object):
         #}}}
 
         if self.convertToPhysical:
-            return None
-        else:
             return self._normDict[key]
+        else:
+            return None
     #}}}
 #}}}
