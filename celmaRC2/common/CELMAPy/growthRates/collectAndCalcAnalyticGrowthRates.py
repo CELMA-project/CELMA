@@ -7,6 +7,7 @@ from ..collectAndCalcHelpers import (DimensionsHelper      ,\
                                      getScanValue          ,\
                                      findLargestRadialGradN,\
                                     )
+from ..unitsConverter import UnitsConverter
 from .analyticalGrowthRates import (calcOmCE         ,\
                                     calcOmStar       ,\
                                     calcPecseliB     ,\
@@ -14,7 +15,6 @@ from .analyticalGrowthRates import (calcOmCE         ,\
                                     calcUDE          ,\
                                     pecseliAnalytical,\
                                    )
-from .unitsConverter import UnitsConverter
 from boututils.datafile import DataFile
 import pandas as pd
 import scipy.constants as cst
@@ -28,8 +28,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
     """
 
     #{{{constructor
-    def __init__(self, steadyStatePaths, scanParameter, yInd):
-
+    def __init__(self, steadyStatePaths, scanParameter, yInd, verbose = True):
         #{{{docstring
         """
         This constructor will:
@@ -45,13 +44,15 @@ class CollectAndCalcAnalyticGrowthRates(object):
             String segment representing the scan
         yInd : int
             y-index to collect from
+        verbose : bool
+            If pecseliAnalytical should be verbose
         """
         #}}}
 
         self._steadyStatePaths = steadyStatePaths
         self._scanParameter    = scanParameter
         self._yInd             = yInd
-        self._maxRhoInd        = None
+        self._verbose          = verbose
     #}}}
 
     #{{{_setUcAndDh
@@ -116,24 +117,29 @@ class CollectAndCalcAnalyticGrowthRates(object):
 
         # Calculate B
         mi   = self.uc.getNormalizationParameter("mi")
-        omCI = self.uc.getNormalizationParameter("omCI")*mi/cst.e
+        omCI = self.uc.getNormalizationParameter("omCI")
         B    = omCI*mi/cst.e
 
         # Calculation of omStar
         # NOTE: For now: Duplication of work as gradient in already
         #       calculated in findLargestRadialGradN
         n    = collectSteadyN(path, yInd)
-        dx   = getUniformSpacing(path, "x")
+        # Convert to physical units
+        n    = self.uc.physicalConversion(n , "n")
+        # NOTE: dx is already in physical units
+        dx   = self._dh.dx
         dndx = DDX(n, dx)
-        n    = n   [0,indMaxGrad,yInd,0]
-        dndx = dndx[0,indMaxGrad,yInd,0]
-        Te   = self.uc.getParamFromNormDict("Te0")
+        n    = n   [0,indMaxGrad,0,0]
+        dndx = dndx[0,indMaxGrad,0,0]
+        Te   = self.uc.getNormalizationParameter("Te0")
         uDE  = calcUDE(Te, B, n, dndx)
 
         # Needed for calculation of sigmaPar
         omCE = calcOmCE(B)
         with DataFile(os.path.join(path,"BOUT.dmp.0.nc")) as f:
             nuEI = f.read("nuEI")
+            # Convert to physical units
+            nuEI *= omCI
 
         # Needed for calculation of b
         rhoS = self.uc.getNormalizationParameter("rhoS")
@@ -200,6 +206,8 @@ class CollectAndCalcAnalyticGrowthRates(object):
             self._setUcAndDh(steadyStatePath)
             # Obtain the scan value
             scanValue = getScanValue(steadyStatePath, self._scanParameter)
+            if self._verbose:
+                print(scanValue)
 
             # Assume kz is double of the cylinder heigth (observed in
             # the fluctuations)
@@ -221,7 +229,9 @@ class CollectAndCalcAnalyticGrowthRates(object):
             paramDict["uDE"]   .append(uDE)
             paramDict["nuEI"]  .append(nuEI)
 
-            for m in range(len(1, nModes+1)):
+            for m in range(1, nModes+1):
+                if self._verbose:
+                    print(m)
                 # Fill the multiIndexTuple and the dict
                 multiIndexTuple.append((scanValue, m))
 
@@ -230,7 +240,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 omStar = calcOmStar(ky, uDE)
                 b = calcPecseliB(ky, rhoS)
                 sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
-                om = pecseliAnalytical(omStar, b, sigmaPar)
+                om=pecseliAnalytical(omStar, b, sigmaPar, verbose=self._verbose)
 
                 fullDict["analyticalGR"].append(om.imag)
                 fullDict["angularVelocity"].append(om.real)
@@ -244,7 +254,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
                             multiIndexTuple,
                             names=(self._scanParameter,"modeNr")))
 
-        positionTuple = (self._dh.rho[self._maxRhoInd], self._dh.z[self._yInd])
+        positionTuple = (rhoMax, self._dh.z[self._yInd])
 
         return analyticalGRDataFrame, paramDataFrame, positionTuple, self.uc
     #}}}

@@ -65,7 +65,7 @@ def ellisAnalytical(omStar, bEllis, nuPar, om1, nuIN):
 #}}}
 
 #{{{pecseliAnalytical
-def pecseliAnalytical(omStar, bPecseli, sigmaPar):
+def pecseliAnalytical(omStar, bPecseli, sigmaPar, verbose=False):
     #{{{docstring
     """
     Function which calculates the real and imaginary omega from the
@@ -87,6 +87,9 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar):
         to rhoS.
     sigmaPar : float
         Parameter which tells something about the conductivity.
+    verbose : bool
+        If the relationship between b and sigmaPar/omStar should be
+        printed.
 
     Returns
     -------
@@ -99,6 +102,14 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar):
     if b >= sigmaPar/omStar:
         message = "Model breaks down as b => sigmaPar/omStar."
         raise RuntimeError(message)
+    else:
+        if verbose:
+            message = ("b = {:.2e}"
+                       "\nsigmaPar = {:.2e}"
+                       "\nomStar = {:.2e}"
+                       "\nb/(sigmaPar/omStar)={:.2e}\n").\
+                               format(b, sigmaPar, omStar, b/(sigmaPar/omStar))
+            print(message)
 
     return complex(omStar*(1-b), omStar**2/sigmaPar)
 #}}}
@@ -179,6 +190,7 @@ def calcSigmaPar(ky, kz, omCE, omCI, nuEI):
         Variable defined as ((kz/ky)**2)*(omCE/nuEI)*omCI.
     """
     #}}}
+
     return ((kz/ky)**2)*(omCE/nuEI)*omCI
 #}}}
 
