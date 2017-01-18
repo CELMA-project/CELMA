@@ -2,10 +2,18 @@
 
 """
 Contains functions for calculating the ExB velocities
+
+From the calculations in "The Poisson bracket operator", we have that
+
+uExB = (-e_theta*DDX(phi)             +  e_rho*DDZ(phi))*(Bclebcsh/Bcyl)
+     = (-e_theta*DDX(phi)             +  e_rho*DDZ(phi))*(1/(J*Bcyl))
+     = (-(hat{e}_theta*rho)*DDX(phi)  + (hat{e}_rho)*DDZ(phi))*(1/(J*Bcyl))
+     = (-(hat{e}_theta)*DDX(phi)/Bcyl + (hat{e}_rho/rho)*DDZ(phi))/Bcyl
 """
 
 from ..fields1D import CollectAndCalcFields1D
 from ..collectAndCalcHelpers import polAvg, DDX, DDZ
+import scipy.sre_constants as  cst
 import numpy as np
 
 #{{{calcRadialExBPoloidal
@@ -52,15 +60,19 @@ def calcRadialExBPoloidal(collectPaths, slices,\
     phiDict = ccf1D.executeCollectAndCalc()
     phi = phiDict.pop("phi")
 
-    # Calculate the radial ExB
-    dh = ccf1D.getDh()
-    J = np.array((dh.rho,))
-    DDZPhi = DDZ(phi, J)
+    # Calculate the derivative
+    DDZPhi = DDZ(phi)
     if mode == "fluct":
         DDZPhi = (DDZPhi - polAvg(DDZPhi))
 
-    # Minus as we have a left handed coordinate system
-    radialExB = DDZPhi
+    # Obtain B
+    omCI = ccf1D.uc.getNormalizationParameter("omCI")
+    mi   = ccf1D.uc.getNormalizationParameter("mi")
+    B    = omCI*(mi/cst.e)
+
+    # Divide by the Jacobian (rho) as we are in a cylindrical coordinate system
+    dh = ccf1D.getDh()
+    radialExB = DDZPhi/(dh.rho*B)
 
     return radialExB, phiDict.pop("time")
 #}}}
@@ -115,7 +127,13 @@ def calcPoloidalExBConstZ(collectPaths, slices,\
     if mode == "fluct":
         DDXPhi = (DDXPhi - polAvg(DDXPhi))
 
-    poloidalExB = DDXPhi
+    # Obtain B
+    omCI = ccf1D.uc.getNormalizationParameter("omCI")
+    mi   = ccf1D.uc.getNormalizationParameter("mi")
+    B    = omCI*(mi/cst.e)
+
+    # Divide by the Jacobian (rho) as we are in a cylindrical coordinate system
+    poloidalExB = -DDXPhi/B
 
     return poloidalExB, phiDict.pop("time")
 #}}}
