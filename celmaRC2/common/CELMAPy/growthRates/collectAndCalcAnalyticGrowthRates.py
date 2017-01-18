@@ -28,7 +28,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
     """
 
     #{{{constructor
-    def __init__(self, steadyStatePaths, scanParameter, yInd, verbose = True):
+    def __init__(self, steadyStatePaths, scanParameter, yInd):
         #{{{docstring
         """
         This constructor will:
@@ -44,15 +44,12 @@ class CollectAndCalcAnalyticGrowthRates(object):
             String segment representing the scan
         yInd : int
             y-index to collect from
-        verbose : bool
-            If pecseliAnalytical should be verbose
         """
         #}}}
 
         self._steadyStatePaths = steadyStatePaths
         self._scanParameter    = scanParameter
         self._yInd             = yInd
-        self._verbose          = verbose
     #}}}
 
     #{{{_setUcAndDh
@@ -123,16 +120,19 @@ class CollectAndCalcAnalyticGrowthRates(object):
         # Calculation of omStar
         # NOTE: For now: Duplication of work as gradient in already
         #       calculated in findLargestRadialGradN
-        n    = collectSteadyN(path, yInd)
+        n      = collectSteadyN(path, yInd)
         # Convert to physical units
-        n    = self.uc.physicalConversion(n , "n")
+        n      = self.uc.physicalConversion(n , "n")
         # NOTE: dx is already in physical units
-        dx   = self._dh.dx
-        dndx = DDX(n, dx)
-        n    = n   [0,indMaxGrad,0,0]
-        dndx = dndx[0,indMaxGrad,0,0]
-        Te   = self.uc.getNormalizationParameter("Te0")
-        uDE  = calcUDE(Te, B, n, dndx)
+        dx      = self._dh.dx
+        dndx    = DDX(n, dx)
+        n       = n   [0,indMaxGrad,0,0]
+        dndx    = dndx[0,indMaxGrad,0,0]
+        Te      = self.uc.getNormalizationParameter("Te0")
+        uDE     = calcUDE(Te, B, n, dndx)
+        # NOTE: There is a bit of overhead by collecting the whole slice
+        #       (and the time)
+        uExBPol, _ = calcPoloidalExBConstZ((path,), (yInd, -1), mode="normal")
 
         # Needed for calculation of sigmaPar
         omCE = calcOmCE(B)
@@ -144,7 +144,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
         # Needed for calculation of b
         rhoS = self.uc.getNormalizationParameter("rhoS")
 
-        return omCE, omCI, rhoS, rhoMax, n, dndx, uDE, nuEI
+        return omCE, omCI, rhoS, rhoMax, n, dndx, uDE, uExBPol, nuEI
     #}}}
 
     #{{{getData
@@ -156,6 +156,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
         NOTE:
             * Assumes singly ionization
             * Assumes that kz is twice the simulation box
+            * Corrects for the poloidal ExB velocity
 
         Parameters
         ----------
@@ -197,7 +198,8 @@ class CollectAndCalcAnalyticGrowthRates(object):
         multiIndexTuple  = []
         fullDict = {"analyticalGR":[], "angularVelocity":[]}
 
-        keys = ("omCE", "omCI", "rhoS", "rhoMax", "n", "dndx", "uDE", "nuEI")
+        keys = ("omCE", "omCI", "rhoS",\
+                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI")
         paramDict = {key:[] for key in keys}
 
         # Loop over the folders
@@ -206,32 +208,29 @@ class CollectAndCalcAnalyticGrowthRates(object):
             self._setUcAndDh(steadyStatePath)
             # Obtain the scan value
             scanValue = getScanValue(steadyStatePath, self._scanParameter)
-            if self._verbose:
-                print(scanValue)
 
             # Assume kz is double of the cylinder heigth (observed in
             # the fluctuations)
             kz = 2*(self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2]))
 
             # Collect variables
-            omCE, omCI, rhoS, rhoMax, n, dndx, uDE, nuEI =\
+            omCE, omCI, rhoS, rhoMax, n, dndx, uDE, uExBPol, nuEI =\
                 self._collectForPecseliSemiAnalytical(steadyStatePath,\
                                                       self._yInd)
 
             # Update the single index tuple, insert into parameter dictionary
             singleIndexTuple.append(scanValue)
-            paramDict["omCE"]  .append(omCE)
-            paramDict["omCI"]  .append(omCI)
-            paramDict["rhoS"]  .append(rhoS)
-            paramDict["rhoMax"].append(rhoMax)
-            paramDict["n"]     .append(n)
-            paramDict["dndx"]  .append(dndx)
-            paramDict["uDE"]   .append(uDE)
-            paramDict["nuEI"]  .append(nuEI)
+            paramDict["omCE"]   .append(omCE)
+            paramDict["omCI"]   .append(omCI)
+            paramDict["rhoS"]   .append(rhoS)
+            paramDict["rhoMax"] .append(rhoMax)
+            paramDict["n"]      .append(n)
+            paramDict["dndx"]   .append(dndx)
+            paramDict["uDE"]    .append(uDE)
+            paramDict["uExBPol"].append(uExBPol)
+            paramDict["nuEI"]   .append(nuEI)
 
             for m in range(1, nModes+1):
-                if self._verbose:
-                    print(m)
                 # Fill the multiIndexTuple and the dict
                 multiIndexTuple.append((scanValue, m))
 
@@ -240,10 +239,11 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 omStar = calcOmStar(ky, uDE)
                 b = calcPecseliB(ky, rhoS)
                 sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
-                om=pecseliAnalytical(omStar, b, sigmaPar, verbose=self._verbose)
+                om=pecseliAnalytical(omStar, b, sigmaPar)
 
                 fullDict["analyticalGR"].append(om.imag)
-                fullDict["angularVelocity"].append(om.real)
+                # Correct for ExB angular velocity (not in Pecseli's derivation)
+                fullDict["angularVelocity"].append(om.real + uExBPol/rhoMax)
 
         # Make the data frames
         paramDataFrame = pd.DataFrame(paramDict, index=singleIndexTuple)
