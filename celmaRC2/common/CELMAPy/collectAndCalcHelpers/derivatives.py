@@ -86,14 +86,14 @@ def DDY(var, dy):
 #}}}
 
 #{{{DDZ
-def DDZ(var, J):
+def DDZ(var):
+    #{{{docstring
     """
     Calculates the first theta-derivative of a profile using spectral
     methods (assuming that we are using cylinder geometry).
 
-    Note that in cylinder geometry, this derivative has to be multiplied
-    with 1/J. Also note that the profile must go from [0, 2*pi[ (which
-    is standard output from BOUT++, and NOT [0, 2*pi]
+    Also note that the profile must go from [0, 2*pi[ (which is standard
+    output from BOUT++), and NOT [0, 2*pi]
 
     Parameters
     ----------
@@ -107,10 +107,9 @@ def DDZ(var, J):
     out : iterable
         The theta derivative of the profile
     """
+   #}}}
     if len(var.shape) != 4:
        raise ValueError("Input variable must be 4-dimensional")
-    if len(J.shape) != 2:
-       raise ValueError("Input Jacobian must be 2-dimensional")
 
     tLen, xLen, yLen, _ = var.shape
 
@@ -120,7 +119,7 @@ def DDZ(var, J):
         for xInd in range(xLen):
             for yInd in range(yLen):
                 out[tInd, xInd, yInd, :] =\
-                    diff(var[tInd, xInd, yInd, :])*J[xInd, yInd]
+                    diff(var[tInd, xInd, yInd, :])
 
     return out
 #}}}
@@ -200,7 +199,7 @@ def findLargestParallelGrad(var, dy, MYG = None):
 #}}}
 
 #{{{findLargestPoloidalGrad
-def findLargestPoloidalGrad(var, J):
+def findLargestPoloidalGrad(var):
     #{{{docstring
     """
     Returns the index of the maximum absolute gradient along theta
@@ -209,8 +208,6 @@ def findLargestPoloidalGrad(var, J):
     ----------
     var : array
         The variable to investigate.
-    J : array
-        The Jacobian
 
     Returns
     -------
@@ -219,7 +216,7 @@ def findLargestPoloidalGrad(var, J):
     """
     #}}}
 
-    ddzVar = DDZ(var, J)
+    ddzVar = DDZ(var)
 
     # nanmax excludes the NaNs
     maxGradInds = np.where(np.abs(ddzVar) == np.nanmax(np.abs(ddzVar)))
