@@ -59,6 +59,7 @@ def calcRadialExBPoloidal(collectPaths, slices,\
     if mode == "fluct":
         DDZPhi = (DDZPhi - polAvg(DDZPhi))
 
+    # Minus as we have a left handed coordinate system
     radialExB = DDZPhi
 
     return radialExB, phiDict.pop("time")
