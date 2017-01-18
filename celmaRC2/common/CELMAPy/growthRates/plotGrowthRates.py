@@ -50,7 +50,11 @@ class PlotGrowthRates(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, varName, growthRateDataFrame, positionTuple):
+    def setData(self,\
+                varName,\
+                growthRateDataFrame,\
+                positionTuple,\
+                analytic = False):
         #{{{docstring
         """
         Sets the data to be plotted.
@@ -66,15 +70,21 @@ class PlotGrowthRates(PlotSuperClass):
             Name of the variable
         growthRateDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
-                * "growthRate"
-                * "growthRateStd"
-                * "averageAngularVelocity"
-                * "averageAngularVelocityStd"
+                * "growthRate"                  - Always present
+                * "growthRateStd"               - Only if analytic = False
+                * "averageAngularVelocity"      - Only if analytic = False
+                * "averageAngularVelocityStd"   - Only if analytic = False
+                * "angularVelocity"             - Only if analytic = True
             over the observation "modeNr" over the observation "Scan"
         positionTuple : tuple
             The tuple containing (rho, z).
+        analytic : bool
+            Wheter or not an analytical or semi-analytical expression
+            has been used.
         """
         #}}}
+
+        self._analytic = analytic
 
         # NOTE: Theta remains unspecified as we have done a fourier transform
         rho, z = positionTuple
@@ -96,16 +106,18 @@ class PlotGrowthRates(PlotSuperClass):
         # frame observations
         self._varName = varName
 
-        # Set the plot name
-        self._pltVarName = self._ph.getVarPltName(self._varName)
+        if not(analytic):
+            # Set the plot name
+            self._pltVarName = self._ph.getVarPltName(self._varName)
 
         self._prepareLabels()
 
         # Set the fileName
+        grName = "growthRatesAnalytic" if analytic else "growthAnalytic"
         self._fileName =\
             os.path.join(self._savePath,\
                 "{}-{}-rho-{}-z-{}".\
-                format(self._varName, "growthRates", rhoVal, zVal))
+                format(self._varName, grName, rhoVal, zVal))
 
         if self._extension is None:
             self._extension = "png"
@@ -136,8 +148,12 @@ class PlotGrowthRates(PlotSuperClass):
         self._varLabelTemplate = r"{{}}{}".format(unitsOrNormalization)
 
         # Set the y-axes
-        imag = r"$\Im(\omega_{})$".format(self._pltVarName.replace("$",""))
-        real = r"$\Re(\omega_{})$".format(self._pltVarName.replace("$",""))
+        if not(self._analytic):
+            imag = r"$\Im(\omega_{})$".format(self._pltVarName.replace("$",""))
+            real = r"$\Re(\omega_{})$".format(self._pltVarName.replace("$",""))
+        else:
+            imag = r"$\Im(\omega)$"
+            real = r"$\Re(\omega)$"
         self._imLabel =\
             self._varLabelTemplate.\
                 format(imag, **self.uc.conversionDict["growthRate"])
@@ -169,6 +185,11 @@ class PlotGrowthRates(PlotSuperClass):
         """
         Performs the plotting by calling the workers.
         """
+
+        if not(self._analytic):
+            self._gRDF.rename(columns=\
+                    {"averageAngularVelocity":"angularVelocity",\
+                     "averageAngularVelocityStd":"angularVelocityStd"})
 
         # Make the scan plot
         scanColors =\
@@ -234,21 +255,26 @@ class PlotGrowthRates(PlotSuperClass):
             # Update the colors legend
             self._errorbarOptions.update({"color":color, "ecolor":color})
 
+            yerr = None if self._analytic\
+                    else gRDF.loc[outerInd]["growthRateStd"].values
+
             (_, caps, _) = imAx.errorbar(\
-                gRDF.loc[outerInd]["growthRate"].index.values     ,\
-                gRDF.loc[outerInd]["growthRate"].values           ,\
-                yerr  = gRDF.loc[outerInd]["growthRateStd"].values,\
-                label = label                                     ,\
+                gRDF.loc[outerInd]["growthRate"].index.values,\
+                gRDF.loc[outerInd]["growthRate"].values      ,\
+                yerr  = yerr                                 ,\
+                label = label                                ,\
                 **self._errorbarOptions)
 
             for cap in caps:
                 cap.set_markeredgewidth(self._markeredgewidth)
 
+            yerr = None if self._analytic\
+                    else gRDF.loc[outerInd]["angularVelocityStd"].values
+
             (_, caps, _) = reAx.errorbar(\
-                gRDF.loc[outerInd]["averageAngularVelocity"].index.values,\
-                gRDF.loc[outerInd]["averageAngularVelocity"].values      ,\
-                yerr  =\
-                   gRDF.loc[outerInd]["averageAngularVelocityStd"].values,\
+                gRDF.loc[outerInd]["angularVelocity"].index.values,\
+                gRDF.loc[outerInd]["angularVelocity"].values      ,\
+                yerr  = yerr                                      ,\
                 **self._errorbarOptions)
 
             for cap in caps:
