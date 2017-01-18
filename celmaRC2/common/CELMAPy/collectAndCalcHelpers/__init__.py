@@ -4,6 +4,7 @@
 
 from .averages import polAvg, timeAvg
 from .derivatives import (DDX, DDY, DDZ,\
+                          collectSteadyN,\
                           findLargestRadialGrad,\
                           findLargestParallelGrad,\
                           findLargestPoloidalGrad,\
