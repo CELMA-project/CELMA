@@ -13,7 +13,7 @@ uExB = (-e_theta*DDX(phi)             +  e_rho*DDZ(phi))*(Bclebcsh/Bcyl)
 
 from ..fields1D import CollectAndCalcFields1D
 from ..collectAndCalcHelpers import polAvg, DDX, DDZ
-import scipy.sre_constants as  cst
+import scipy.constants as  cst
 import numpy as np
 
 #{{{calcRadialExBPoloidal

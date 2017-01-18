@@ -27,11 +27,24 @@ def analyticGrowthRatesTest():
     scanParameter = "B0"
     yInd          = 16
 
+    savePath          = "."
+
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
     print("\n\nTesting analytic growth rates")
     driverAnalyticGrowthRates(steadyStatePaths,\
                               scanParameter   ,\
                               yInd            ,\
-                              # plotSuperKwargs,\
+                              plotSuperKwargs ,\
                              )
     print("Success!\n\n")
 #}}}
+
+# FIXME: Main as well
