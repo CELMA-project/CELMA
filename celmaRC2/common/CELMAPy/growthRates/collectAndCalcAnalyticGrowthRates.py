@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+
+from ..calcVelocities import calcPoloidalExBConstZ
 from ..collectAndCalcHelpers import (DimensionsHelper      ,\
                                      collectSteadyN        ,\
                                      DDX                   ,\
@@ -132,7 +134,10 @@ class CollectAndCalcAnalyticGrowthRates(object):
         uDE     = calcUDE(Te, B, n, dndx)
         # NOTE: There is a bit of overhead by collecting the whole slice
         #       (and the time)
+        # NOTE: uExBPol in slab coordinates overlaps with
+        #       uExBPol in cylindrical coordinates
         uExBPol, _ = calcPoloidalExBConstZ((path,), (yInd, -1), mode="normal")
+        uExBPol = uExBPol[0,indMaxGrad,0,0]
 
         # Needed for calculation of sigmaPar
         omCE = calcOmCE(B)
@@ -167,7 +172,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
         -------
         analyticalGRDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
-                * "analyticalGR"
+                * "growthRate"
                 * "angularVelocity"
             over the observation "modeNr" over the observation "Scan"
         paramDataFrame : DataFrame
@@ -196,7 +201,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
 
         singleIndexTuple = []
         multiIndexTuple  = []
-        fullDict = {"analyticalGR":[], "angularVelocity":[]}
+        fullDict = {"growthRate":[], "angularVelocity":[]}
 
         keys = ("omCE", "omCI", "rhoS",\
                 "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI")
@@ -241,12 +246,13 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
                 om=pecseliAnalytical(omStar, b, sigmaPar)
 
-                fullDict["analyticalGR"].append(om.imag)
+                fullDict["growthRate"].append(om.imag)
                 # Correct for ExB angular velocity (not in Pecseli's derivation)
                 fullDict["angularVelocity"].append(om.real + uExBPol/rhoMax)
 
         # Make the data frames
         paramDataFrame = pd.DataFrame(paramDict, index=singleIndexTuple)
+        paramDataFrame.index.name = self._scanParameter
 
         analyticalGRDataFrame =\
             pd.DataFrame(fullDict,\

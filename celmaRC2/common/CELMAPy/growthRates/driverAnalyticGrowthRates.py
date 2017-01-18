@@ -4,30 +4,25 @@ Contains single driver and driver class for the analytic growth rates
 """
 from ..superClasses import DriverPointsSuperClass
 from .collectAndCalcAnalyticGrowthRates import CollectAndCalcAnalyticGrowthRates
+from .plotGrowthRates import PlotGrowthRates
 from multiprocessing import Process
 
 #{{{driverAnalyticGrowthRates
 def driverAnalyticGrowthRates(steadyStatePaths,\
                               scanParameter   ,\
                               yInd            ,\
-                              # plotSuperKwargs,\
+                              plotSuperKwargs ,\
                              ):
-# FIXME
     #{{{docstring
     """
-    Driver for plotting growth rates.
+    Driver for plotting analytic growth rates.
 
     Parameters
     ----------
-    collectArgs : tuple
-        Tuple containing arguments used in the collect function.
-        See the constructor of CollectAndCalcGrowthRates for details.
-    getDataArgs : tuple
-        Tuple containing arguments used in
-        CollectAndCalcGrowthRates.getData (including the keyword
-        argument nModes).
-        See the constructor of CollectAndCalcGrowthRates.getData for
-        details.
+    steadyStatePaths : tuple
+        Paths to the steady states
+    scanParameter : str
+        String of the parameter which is scanned
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
@@ -42,10 +37,14 @@ def driverAnalyticGrowthRates(steadyStatePaths,\
     analyticalGRDataFrame, paramDataFrame, positionTuple, uc =\
         ccagr.getData()
 
-    import pdb; pdb.set_trace()
-    a = 1
+    # Plot
+    pagr = PlotGrowthRates(uc         ,\
+                           **plotSuperKwargs)
+    pagr.setData("", analyticalGRDataFrame, positionTuple, analytic=True)
+    pagr.plotSaveShowGrowthRates()
 #}}}
 
+# FIXME:
 #{{{DriverAnalyticGrowthRates
 class DriverAnalyticGrowthRates(DriverPointsSuperClass):
     """
