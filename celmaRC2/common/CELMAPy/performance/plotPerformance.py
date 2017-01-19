@@ -3,7 +3,7 @@
 """Class for performance plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, qualCMap
+from ..plotHelpers import qualCMap
 import numpy as np
 import matplotlib.pyplot as plt
 import os
