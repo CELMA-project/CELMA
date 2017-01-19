@@ -74,7 +74,7 @@ def poloidalIntegration(f, rho, startInd=None, endInd=None):
     dTheta = 2*np.pi/f.shape[-1]
     out = f[:,:,:,startInd:endInd].sum(axis=-1)
     # Expand to a 4d numpy array
-    out = np.expand_dims(out*rho*dtheta, axis=-1)
+    out = np.expand_dims(out*rho*dTheta, axis=-1)
 
     return out
 #}}}
