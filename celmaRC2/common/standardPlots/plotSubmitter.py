@@ -12,6 +12,7 @@ commonDir = os.path.abspath("./../")
 sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
+from .analyticGrowthRates import analyticGrowthRatesPlot
 from .combinedPlots import combinedPlotsPlot
 from .fields1D import fields1DAnimation
 from .fields2D import fields2DAnimation
@@ -191,6 +192,31 @@ class PlotSubmitter(object):
             self.sub.submitFunction(combinedPlotsPlot,args=args,kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
+    #}}}
+
+    #{{{runAnalyticGrowthRates
+    def runAnalyticGrowthRates(self):
+        """
+        Runs the growth rates
+        """
+
+        # NOTE: The ordering of param is in descending order (because of the
+        #       organization in PBSScan)
+        dmp_folders = (self._mergeFromLinear["param0"][-1],)
+        steadyStatePaths = self._dmpFolders["expand"]
+
+        # Local modification of plotSuperKwargs
+        plotSuperKwargs = copy(self._plotSuperKwargs)
+        newVals = {"savePath" : "all", "savePathFunc" : None}
+        plotSuperKwargs.update(newVals)
+
+        args = (dmp_folders        ,\
+                steadyStatePaths   ,\
+                self._scanParameter,\
+                plotSuperKwargs    ,\
+                )
+        self.sub.setJobName("analyticGrowthRates")
+        self.sub.submitFunction(analyticGrowthRatesPlot, args=args)
     #}}}
 
     #{{{runEnergy

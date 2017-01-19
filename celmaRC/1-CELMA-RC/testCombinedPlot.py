@@ -81,12 +81,10 @@ def driverTest():
     zInd              = 128
     tSlice            = slice(10, None, None)
 
-    savePath          = "."
-
     plotSuperKwargs = {\
                         "showPlot"     : False,\
                         "savePlot"     : True,\
-                        "savePath"     : savePath,\
+                        "savePath"     : None,\
                         "savePathFunc" : None,\
                         "extension"    : None,\
                         "dmp_folders"  : None,\
