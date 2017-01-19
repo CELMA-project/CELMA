@@ -12,9 +12,15 @@ uExB = (-e_theta*DDX(phi)             +  e_rho*DDZ(phi))*(Bclebcsh/Bcyl)
 """
 
 from ..fields1D import CollectAndCalcFields1D
-from ..collectAndCalcHelpers import polAvg, DDX, DDZ
+from ..collectAndCalcHelpers import (DimensionsHelper,\
+                                     collectConstRho ,\
+                                     polAvg          ,\
+                                     slicesToIndices ,\
+                                     DDX             ,\
+                                     DDZ             ,\
+                                     )
+from ..unitsConverter import UnitsConverter
 import scipy.constants as  cst
-import numpy as np
 
 #{{{calcRadialExBPoloidal
 def calcRadialExBPoloidal(collectPaths, slices,\
@@ -75,6 +81,75 @@ def calcRadialExBPoloidal(collectPaths, slices,\
     radialExB = DDZPhi/(dh.rho*B)
 
     return radialExB, phiDict.pop("time")
+#}}}
+
+#{{{calcRadialExBConstRho
+def calcRadialExBConstRho(collectPaths           ,\
+                          xInd                   ,\
+                          tSlice = None          ,\
+                          mode   = "fluct"       ,\
+                          convertToPhysical = True):
+    #{{{docstring
+    """
+    Calculates the radial ExB velocity for a fixes rho
+
+    Parameters
+    ----------
+    collectPaths : tuple
+        Tuple from where to collect.
+    xInd : int
+        The rho index.
+    tSlice : [None|slice]
+        The slice in time.
+    mode : ["normal"|"fluct"]
+        Whether to look at fluctuations or normal data
+    convertToPhysical : bool
+        Whether or not to convert to physical
+
+    Returns
+    -------
+    radialExB : array-4d
+        The radial ExB in the fixed rho and z position
+    time : array-1d
+        The corresponding time
+    """
+    #}}}
+
+    tInd = slicesToIndices(collectPaths[0], tSlice, "t")
+
+    # Collect phi
+    phi = collectConstRho(collectPaths, "phi", xInd, tInd = tInd)
+
+    # Slice
+    if tSlice is not None:
+        if type(tSlice) == slice:
+            if tSlice.step is not None:
+                phi = phi [::tSlice.step]
+
+    # Convert to physical units
+    uc = UnitsConverter(collectPaths[0], convertToPhysical)
+    convertToPhysical = uc.convertToPhysical
+    dh = DimensionsHelper(collectPaths[0], uc)
+    if convertToPhysical:
+        phi = uc.physicalConversion(phi, "phi")
+
+    # Calculate the derivative
+    DDZPhi = DDZ(phi)
+    if mode == "fluct":
+        DDZPhi = (DDZPhi - polAvg(DDZPhi))
+
+    # Obtain B
+    if convertToPhysical:
+        omCI = uc.getNormalizationParameter("omCI")
+        mi   = uc.getNormalizationParameter("mi")
+        B    = omCI*(mi/cst.e)
+    else:
+        B = 1.0
+
+    # Divide by the Jacobian (rho) as we are in a cylindrical coordinate system
+    radialExB = DDZPhi/(dh.rho*B)
+
+    return radialExB
 #}}}
 
 #{{{calcPoloidalExBConstZ

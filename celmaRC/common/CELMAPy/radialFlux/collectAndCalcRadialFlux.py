@@ -35,7 +35,7 @@ class CollectAndCalcRadialFlux(object):
         mode : ["normal"|"fluct"]
             Whether to look at fluctuations or normal data
         dh : DimensionsHelper
-            DimensionHelper object (used to find the Jacobian)
+            DimensionHelper object
         convertToPhysical : bool
             Whether or not to convert to physical
         """
