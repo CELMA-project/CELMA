@@ -14,4 +14,5 @@ from .posOfFluct import posOfFluctPlot
 from .plotSubmitter import PlotSubmitter
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
+from .totalFlux import totalFluxPlot
 from .zonalFlow import zonalFlowPlot
