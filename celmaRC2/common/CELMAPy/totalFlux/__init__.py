@@ -5,5 +5,5 @@ Init-file for totalFlux
 """
 
 from .collectAndCalcTotalFlux import CollectAndCalcTotalFlux
-from .driverTotalFlux import DriverTotalFlux, driverTotalFlux, getTotalFlux
+from .driverTotalFlux import DriverTotalFlux, driverTotalFlux
 from .plotTotalFlux import PlotTotalFlux

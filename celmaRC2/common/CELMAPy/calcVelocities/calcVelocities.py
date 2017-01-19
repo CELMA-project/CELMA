@@ -147,7 +147,7 @@ def calcRadialExBConstRho(collectPaths           ,\
         B = 1.0
 
     # Divide by the Jacobian (rho) as we are in a cylindrical coordinate system
-    radialExB = DDZPhi/(dh.rho*B)
+    radialExB = DDZPhi/(dh.rho[xInd]*B)
 
     return radialExB
 #}}}

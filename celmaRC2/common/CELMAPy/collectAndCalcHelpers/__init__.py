@@ -15,7 +15,9 @@ from .gridSizes import (getGridSizes,\
                         getEvenlySpacedIndices,\
                         getMXG,\
                         getMYG)
-from .integrators import parallelIntegration, poloidalIntegration
+from .integrators import (parallelIntegration,\
+                          poloidalIntegration,\
+                          radialIntegration)
 from .improvedCollect import (safeCollect, collectiveCollect,\
                               collectTime, collectPoint,\
                               collectParallelProfile, collectPoloidalProfile,\
