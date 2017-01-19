@@ -39,6 +39,7 @@ pltSub.setSatTurbTSlices(tSlices)
 
 # Run the post-processing
 pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
+pltSub.runAnalyticGrowthRates()
 pltSub.runCominedPlots()
 pltSub.runEnergy(sliced=False)
 pltSub.runEnergy(sliced=True)
