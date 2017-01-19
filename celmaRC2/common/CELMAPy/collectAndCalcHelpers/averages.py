@@ -14,7 +14,7 @@ def polAvg(f):
 
     Parameters
     ----------
-    f : array
+    f : array-4d
         The field to find the poloidal average of.
         The field must be a 4D field, and should not include the last
         poloidal slice (i.e. the domain should go from [0,2pi[)
@@ -49,7 +49,7 @@ def timeAvg(f, t = None, startInd = 0, endInd = -1):
 
     Parameters
     ----------
-    f : array
+    f : array-4d
         The field to find the time average of.
         The field must be a 4D field.
     t : [None|array]
