@@ -20,9 +20,11 @@ def driverAnalyticGrowthRates(steadyStatePaths,\
     Parameters
     ----------
     steadyStatePaths : tuple
-        Paths to the steady states
+        Paths to the steady states.
     scanParameter : str
-        String of the parameter which is scanned
+        String of the parameter which is scanned.
+    yInd : int
+        The y-index to use.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
@@ -44,7 +46,6 @@ def driverAnalyticGrowthRates(steadyStatePaths,\
     pagr.plotSaveShowGrowthRates()
 #}}}
 
-# FIXME:
 #{{{DriverAnalyticGrowthRates
 class DriverAnalyticGrowthRates(DriverPointsSuperClass):
     """
@@ -52,18 +53,12 @@ class DriverAnalyticGrowthRates(DriverPointsSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self                    ,\
-                 dmp_folders             ,\
-                 scanCollectPaths        ,\
-                 steadyStatePaths        ,\
-                 tSlices                 ,\
-                 scanParameter           ,\
-                 indicesArgs             ,\
-                 indicesKwargs           ,\
-                 plotSuperKwargs         ,\
-                 varName           = "n" ,\
-                 nModes            = 7   ,\
-                 convertToPhysical = True,\
+    def __init__(self            ,\
+                 dmp_folders     ,\
+                 steadyStatePaths,\
+                 scanParameter   ,\
+                 yInd            ,\
+                 plotSuperKwargs ,\
                  **kwargs):
         #{{{docstring
         """
@@ -76,36 +71,14 @@ class DriverAnalyticGrowthRates(DriverPointsSuperClass):
         ----------
         dmp_folders : tuple
             Tuple of the dmp_folder (output from bout_runners).
-        scanCollectPaths : tuple of tuple of strings
-            One tuple of strings for each value of the scan which will
-            be used in collective collect.
         steadyStatePaths : tuple
-            Path to the steady state simulation.
-            The tuple must be ordered according to the scan order in
-            scanCollectPaths.
-        tSlices : tuple of slices
-            The time slices to use for each folder in the scan order.
-            This must manually be selected to the linear phase found in
-            from the fourier moedes.
-            The tuple must be ordered according to the scan order in
-            scanCollectPaths.
+            Paths to the steady states.
         scanParameter : str
-            String segment representing the scan
-        indicesArgs : tuple
-            Tuple of indices to use when collecting.
-            NOTE: Only one spatial point should be used.
-        indicesKwargs : dict
-            Keyword arguments to use when setting the indices for
-            collecting.
-            NOTE: Only one spatial point should be used.
-        varName : str
-            Name of variable to find the growth rates of.
-        nModes : int
-            Number of modes.
+            String of the parameter which is scanned.
+        yInd : int
+            The y-index to use.
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
-        convertToPhysical : bool
-            Whether or not to convert to physical units.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -115,15 +88,10 @@ class DriverAnalyticGrowthRates(DriverPointsSuperClass):
         super().__init__(dmp_folders, **kwargs)
 
         # Set the member data
-        self._collectArgs = self.makeCollectArgs(scanCollectPaths,\
-                                                 steadyStatePaths,\
-                                                 tSlices         ,\
-                                                 scanParameter)
-        self._getDataArgs = self.makeGetDataArgs(varName          ,\
-                                                 convertToPhysical,\
-                                                 indicesArgs      ,\
-                                                 indicesKwargs    ,\
-                                                 nModes)
+        self._steadyStatePaths = steadyStatePaths
+        self._scanParameter    = scanParameter
+        self._yInd             = yInd
+        self._plotSuperKwargs  = plotSuperKwargs
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -139,14 +107,15 @@ class DriverAnalyticGrowthRates(DriverPointsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectArgs    ,\
-                 self._getDataArgs    ,\
-                 self._plotSuperKwargs,\
-                )
+                self._steadyStatePaths,\
+                self._scanParameter   ,\
+                self._yInd            ,\
+                self._plotSuperKwargs ,\
+               )
         if self._useSubProcess:
-            processes = Process(target = driverGrowthRates, args = args)
+            processes = Process(target = driverAnalyticGrowthRates, args = args)
             processes.start()
         else:
-            driverGrowthRates(*args)
+            driverAnalyticGrowthRates(*args)
     #}}}
 #}}}

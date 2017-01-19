@@ -114,10 +114,11 @@ class PlotGrowthRates(PlotSuperClass):
 
         # Set the fileName
         grName = "growthRatesAnalytic" if analytic else "growthAnalytic"
+        fileVarName = self._varName if analytic else self._varName + "-"
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}-rho-{}-z-{}".\
-                format(self._varName, grName, rhoVal, zVal))
+                "{}{}-rho-{}-z-{}".\
+                format(fileVarName, grName, rhoVal, zVal))
 
         if self._extension is None:
             self._extension = "png"
