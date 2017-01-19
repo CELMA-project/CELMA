@@ -51,7 +51,6 @@ def driverTotalFlux(collectPaths     ,\
 
     intFluxes = ccTF.executeCollectAndCalc()
 
-
     # Plot
     import pdb; pdb.set_trace()
     ptf = PlotTotalFlux(ccTF.uc         ,\

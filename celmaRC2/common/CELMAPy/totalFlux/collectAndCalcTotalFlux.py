@@ -4,12 +4,21 @@
 Contains the total flux calculation
 """
 
-from ..calcVelocities import calcRadialExBPoloidal
+from ..calcVelocities import calcRadialExBConstRho
 from ..collectAndCalcHelpers import (DimensionsHelper   ,\
+                                     calcUEPar          ,\
+                                     calcUIPar          ,\
+                                     collectConstZ      ,\
+                                     collectConstRho    ,\
+                                     collectTime        ,\
+                                     getGridSizes       ,\
                                      parallelIntegration,\
                                      poloidalIntegration,\
+                                     radialIntegration  ,\
+                                     slicesToIndices    ,\
                                     )
 from ..unitsConverter import UnitsConverter
+import numpy as np
 
 #{{{CollectAndCalcTotalFlux
 class CollectAndCalcTotalFlux(object):
@@ -20,8 +29,8 @@ class CollectAndCalcTotalFlux(object):
     #{{{constructor
     def __init__(self                        ,\
                  collectPaths                ,\
-                 xInd                        ,\
-                 yInd                        ,\
+                 xInd              = None    ,\
+                 yInd              = None    ,\
                  tSlice            = None    ,\
                  mode              = "normal",\
                  convertToPhysical = True    ,\
@@ -35,10 +44,13 @@ class CollectAndCalcTotalFlux(object):
         ----------
         collectPaths : tuple
             Tuple from where to collect
-        xInd : int
+        xInd : [None|int]
             How to slice in the radial direction.
-        yInd : int
+            If None, the last inner point is selected.
+        yInd : [None|int]
             How to slice in the parallel direction.
+            If None, the last inner point is selected.
+        yInd : [None|int]
         tSlice : [None|slice]
             How to slice in time.
         mode : ["normal"|"fluct"]
@@ -51,9 +63,19 @@ class CollectAndCalcTotalFlux(object):
         # Set the member data
         self._collectPaths = collectPaths
         self._mode         = mode
-        self._xInd         = xInd
-        self._yInd         = yInd
         self._tSlice       = tSlice
+
+        # Set the indices
+        if xInd is None:
+            # NOTE: Indices counting from 0
+            self._xInd = getGridSizes(collectPaths[0], "x") - 1
+        else:
+            self._xInd  = xInd
+        if yInd is None:
+            # NOTE: Indices counting from 0
+            self._yInd = getGridSizes(collectPaths[0], "y") - 1
+        else:
+            self._yInd  = yInd
         # Get the units converter
         self.uc = UnitsConverter(self._collectPaths[0], convertToPhysical)
         self.convertToPhysical = self.uc.convertToPhysical
@@ -92,21 +114,36 @@ class CollectAndCalcTotalFlux(object):
         # Initialize output
         intFluxes = {}
 
-        # Collect the variables
-        radialExB = calcRadialExBConstRho(\
-                          self._collectPaths                               ,\
-                          self._xInd                                       ,\
-                          self._tSlice                                     ,\
-                          self._mode              = self._mode             ,\
-                          self._convertToPhysical = self._convertToPhysical,\
-                          )
-        parElVel  = self._collectAndCalcConstZ("uEPar")
-        parIonVel = self._collectAndCalcConstZ("uIPar")
+        # Collect densities
         radialN = np.exp(self._collectAndCalcConstRho("lnN"))
         parN    = np.exp(self._collectAndCalcConstZ("lnN"))
 
+        if self.convertToPhysical:
+            radialN = self.uc.physicalConversion(radialN, "n")
+            parN    = self.uc.physicalConversion(parN   , "n")
+
+        # Collect the parallel velocities
+        parMomDensPar = self._collectAndCalcConstZ("momDensPar")
+        parJPar       = self._collectAndCalcConstZ("jPar")
+        import pdb; pdb.set_trace()
+        parIonVel = calcUIPar(parMomDensPar, parN)
+        parElVel  = calcUEPar(parIonVel, parJPar, parN,\
+                              not(self._collectAndCalcConstZ))
+
+        # Collect the perpendicular velocities
+        radialExB = calcRadialExBConstRho(\
+                          self._collectPaths                        ,\
+                          self._xInd                                ,\
+                          self._tSlice                              ,\
+                          mode              = self._mode            ,\
+                          convertToPhysical = self.convertToPhysical,\
+                          )
+
         # Collect time
         time = collectTime(self._collectPaths, tInd = self._tInd)
+        if self.convertToPhysical:
+            time = self.uc.physicalConversion(time ,"t")
+
         if self._tSlice is not None:
             if type(self._tSlice) == slice:
                 if self._tSlice.step is not None:
@@ -118,7 +155,7 @@ class CollectAndCalcTotalFlux(object):
         parIonFluxDens = parN*parIonVel
 
         # Integration multipliers
-        rho = self._dh.rho
+        rho = self._dh.rho[self._xInd]
         dx = self._dh.dx
         dy = self._dh.dy
 
@@ -172,7 +209,7 @@ class CollectAndCalcTotalFlux(object):
 
         # Convert to physical units
         if self.convertToPhysical:
-            var = uc.physicalConversion(var, varName)
+            var = self.uc.physicalConversion(var, varName)
 
         if self._mode == "fluct":
             var = (var - polAvg(var))
@@ -214,7 +251,7 @@ class CollectAndCalcTotalFlux(object):
 
         # Convert to physical units
         if self.convertToPhysical:
-            var = uc.physicalConversion(var, varName)
+            var = self.uc.physicalConversion(var, varName)
 
         if self._mode == "fluct":
             var = (var - polAvg(var))
