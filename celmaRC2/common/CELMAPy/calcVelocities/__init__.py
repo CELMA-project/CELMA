@@ -2,4 +2,8 @@
 
 """ Init for the calc velocities package """
 
-from .calcVelocities import (calcRadialExBPoloidal, calcPoloidalExBConstZ)
+from .calcVelocities import (\
+                             calcPoloidalExBConstZ,\
+                             calcRadialExBPoloidal,\
+                             calcRadialExBConstRho,\
+                             )
