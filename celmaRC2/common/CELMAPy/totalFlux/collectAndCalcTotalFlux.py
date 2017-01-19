@@ -101,18 +101,20 @@ class CollectAndCalcTotalFlux(object):
 
         Returns
         -------
-        intFluxes : dict
+        totalFluxes : dict
             Dictionary on the form:
             {"parElIntFlux"  : parallelElectronIntegratedFlux,
              "parIonIntFlux" : parallelIonIntegratedFlux,
              "perpIntFlux"   : perpendicularIntegratedFlux,
              "time"          : time,
+             "rho"           : rho,
+             "z"             : z,
             }
         """
         #}}}
 
         # Initialize output
-        intFluxes = {}
+        totalFluxes = {}
 
         # Collect densities
         radialN = np.exp(self._collectAndCalcConstRho("lnN"))
@@ -125,10 +127,15 @@ class CollectAndCalcTotalFlux(object):
         # Collect the parallel velocities
         parMomDensPar = self._collectAndCalcConstZ("momDensPar")
         parJPar       = self._collectAndCalcConstZ("jPar")
-        import pdb; pdb.set_trace()
         parIonVel = calcUIPar(parMomDensPar, parN)
-        parElVel  = calcUEPar(parIonVel, parJPar, parN,\
-                              not(self._collectAndCalcConstZ))
+        parElVel  = calcUEPar(parIonVel, parJPar, parN,
+                              not(self.convertToPhysical))
+
+        if self._mode == "fluct":
+            radialN   = (radialN   - polAvg(radialN))
+            parN      = (parN      - polAvg(parN))
+            parIonVel = (parIonVel - polAvg(parIonVel))
+            parElVel  = (parElVel  - polAvg(parElVel))
 
         # Collect the perpendicular velocities
         radialExB = calcRadialExBConstRho(\
@@ -164,13 +171,19 @@ class CollectAndCalcTotalFlux(object):
         intParElFluxDens  = poloidalIntegration(parElFluxDens , rho)
         intParIonFluxDens = poloidalIntegration(parIonFluxDens, rho)
 
-        # Storing
-        intFluxes["parElIntFlux"]  = radialIntegration  (intRadFluxDens   , dx)
-        intFluxes["parIonIntFlux"] = radialIntegration  (intParElFluxDens , dx)
-        intFluxes["perpIntFlux"]   = parallelIntegration(intParIonFluxDens, dy)
-        intFluxes["time"]          = time
+        int2RadFluxDens    = radialIntegration  (intParElFluxDens , dx)
+        int2ParElFluxDens  = radialIntegration  (intParIonFluxDens, dx)
+        int2ParIonFluxDens = parallelIntegration(intRadFluxDens   , dy)
 
-        return intFluxes
+        # Storing
+        totalFluxes["parElIntFlux"]  = int2RadFluxDens   .flatten()
+        totalFluxes["parIonIntFlux"] = int2ParElFluxDens .flatten()
+        totalFluxes["perpIntFlux"]   = int2ParIonFluxDens.flatten()
+        totalFluxes["time"]          = time
+        totalFluxes["rho"]           = rho
+        totalFluxes["z"]             = self._dh.z[self._yInd]
+
+        return totalFluxes
     #}}}
 
     #{{{_collectAndCalcConstZ
@@ -211,9 +224,6 @@ class CollectAndCalcTotalFlux(object):
         if self.convertToPhysical:
             var = self.uc.physicalConversion(var, varName)
 
-        if self._mode == "fluct":
-            var = (var - polAvg(var))
-
         return var
     #}}}
 
@@ -252,9 +262,6 @@ class CollectAndCalcTotalFlux(object):
         # Convert to physical units
         if self.convertToPhysical:
             var = self.uc.physicalConversion(var, varName)
-
-        if self._mode == "fluct":
-            var = (var - polAvg(var))
 
         return var
     #}}}

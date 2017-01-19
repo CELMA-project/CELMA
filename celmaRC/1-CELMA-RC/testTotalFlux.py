@@ -64,27 +64,12 @@ def driverTest():
         "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
        )
 
-    useSubProcess = False
-
-    varName           = "n"
-    convertToPhysical = True
-    mode              = "fluct"
-
+    useSubProcess     = False
     xInd              = None
-    yInd              = 16
-    zInd              = 128
+    yInd              = None
     tSlice            = None
-    nPoints           = 3
-    equallySpace      = "x"
-
-    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
-
-    indicesArgs   = (xInd, yInd, zInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
-                     "nPoints"         : nPoints        ,\
-                     "equallySpace"    : equallySpace   ,\
-                     "steadyStatePath" : steadyStatePath,\
-                     }
+    mode              = "normal"
+    convertToPhysical = True
 
     plotSuperKwargs = {\
                         "showPlot"     : False,\
@@ -96,21 +81,20 @@ def driverTest():
                        }
 
     print("\n\nTesting total flux driver")
-    dTT = DriverTotalFlux(
+    dTF = DriverTotalFlux(\
                      # DriverTotalFlux
-                     dmp_folders                ,\
-                     indicesArgs                ,\
-                     indicesKwargs              ,\
-                     plotSuperKwargs            ,\
-                     varName           = varName,\
-                     mode              = mode   ,\
-                     # DriverPointsSuperClass
+                     dmp_folders                          ,\
+                     plotSuperKwargs                      ,\
+                     xInd              = xInd             ,\
+                     yInd              = yInd             ,\
+                     tSlice            = tSlice           ,\
+                     mode              = mode             ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dTT.driverTotalFlux()
+    dTF.driverTotalFlux()
     print("Success!\n\n")
 #}}}
 
