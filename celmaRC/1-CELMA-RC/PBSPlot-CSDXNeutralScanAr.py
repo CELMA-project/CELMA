@@ -49,6 +49,10 @@ pltSub.runPosOfFluct()
 pltSub.runPSD2D()
 pltSub.runSkewKurt()
 pltSub.runZonalFlow()
+# Post processing taking longer time
+pltSub.sub.setQueue("workq")
+pltSub.sub.setWalltime("00:30:00")
+pltSub.runTotalFlux()
 
 # Run the animations
 pltSub.updatePlotSuperKwargs({"extension" : None})

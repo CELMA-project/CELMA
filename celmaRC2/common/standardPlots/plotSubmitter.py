@@ -23,6 +23,7 @@ from .performance import performancePlot
 from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
+from .totalFlux import totalFluxPlot
 from .zonalFlow import zonalFlowPlot
 from copy import copy
 
@@ -625,6 +626,25 @@ class PlotSubmitter(object):
                      }
             self.sub.setJobName("steadyState{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
+    #}}}
+
+    #{{{runTotalFlux
+    def runTotalFlux(self):
+        """
+        Runs the total flux
+        """
+
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, key, nr in loopOver:
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
+            self.sub.setJobName("totalFlux{}".format(nr))
+            self.sub.submitFunction(totalFluxPlot, args=args)
             # Sleep to ensure that tmp files will have different names
             sleep(self._sleepS)
     #}}}

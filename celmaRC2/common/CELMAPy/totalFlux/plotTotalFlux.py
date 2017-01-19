@@ -47,9 +47,14 @@ class PlotTotalFlux(PlotSuperClass):
         Parameters
         ----------
         totalFluxes : dict
-            Dictionary where the keys are on the form "rho,theta,z".
-            The value is a dict containing of
-            {varName:totalFlux, "time":time}
+            Dictionary on the form:
+            {"parElIntFlux"  : parallelElectronIntegratedFlux,
+             "parIonIntFlux" : parallelIonIntegratedFlux,
+             "perpIntFlux"   : perpendicularIntegratedFlux,
+             "time"          : time,
+             "rho"           : rho,
+             "z"             : z,
+            }
         mode : ["normal"|"fluct"]
             What mode the input is given in.
         timeAx : bool
@@ -60,32 +65,24 @@ class PlotTotalFlux(PlotSuperClass):
         self._timeAx = timeAx
 
         # Set the member data
-        self._totalFluxes = totalFluxes
-        self._mode = mode
-
-        # Obtain the varname
-        ind  = tuple(totalFluxes.keys())[0]
-        keys = totalFluxes[ind].keys()
-        self._totalFluxName = tuple(var for var in keys if var != "time")[0]
-        self._varName  = self._totalFluxName[:-len("totalFlux")]
+        self._parElFlux  = totalFluxes.pop("parElIntFlux")
+        self._parIonFlux = totalFluxes.pop("parIonIntFlux")
+        self._perpFlux   = totalFluxes.pop("perpIntFlux")
+        self._t          = totalFluxes.pop("time")
+        self._rho        = totalFluxes.pop("rho")
+        self._z          = totalFluxes.pop("z")
+        self._mode       = mode
 
         # Obtain the color (pad away brigthest colors)
-        pad = 3
-        self._colors =\
-            seqCMap3(np.linspace(0, 1, len(totalFluxes.keys())+pad))
+        pad = 1
+        self._colors = seqCMap3(np.linspace(0, 1, 3+pad))
 
         self._prepareLabels()
-
-        # Set the var label
-        pltVarName = self._ph.getVarPltName(self._varName)
-
-        self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self.uc.conversionDict[self._varName])
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-            "{}-{}-{}".format(self._varName, "totalFluxes", self._fluctName))
+            "{}{}".format("totalFluxes", self._fluctName))
 
         if not(timeAx):
             self._fileName += "Indices"
@@ -106,22 +103,42 @@ class PlotTotalFlux(PlotSuperClass):
 
         # Set var label template
         if self.uc.convertToPhysical:
-            unitsOrNormalization = " $[{units}]$"
+            self._units = "$[s^{-1}]$"
+            normalization = ""
         else:
-            unitsOrNormalization = "${normalization}$"
+            self._units = "$[]$"
+            normalization = r"/n_0c_s\rho_s^{2}"
+
+        template = r"$\iint {}{} \rho\mathrm{{d}}\theta\mathrm{{d}}z$"
+
         if self._mode == "normal":
-            self._varLabelTemplate = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
-                                        format(unitsOrNormalization)
+            var = "nu"
             self._fluctName = ""
         elif self._mode == "fluct":
-            self._varLabelTemplate = (\
-                    r"$\widetilde{{{{{{}}}}}} "
-                    r"\widetilde{{{{ u }}}}_{{{{E\times B, \rho}}}}${}").\
-                    format(unitsOrNormalization)
-            self._fluctName = "fluct"
+            var = "\widetilde{n}\widetilde{u}"
+            self._fluctName = "-fluct"
         else:
             message = "'{}'-mode not implemented.".format(self._mode)
             raise NotImplementedError(message)
+
+        elTxt   = "{}_{{e,\parallel}}".format(var)
+        ionTxt  = "{}_{{i,\parallel}}".format(var)
+        perpTxt = "{}_{{E,\perp}}"    .format(var)
+
+        self._elLegend   = template.format(elTxt  , normalization)
+        self._ionLegend  = template.format(ionTxt , normalization)
+        self._perpLegend = template.format(perpTxt, normalization)
+
+        # Set values
+        self._ph.rhoTxtDict["value"] = plotNumberFormatter(self._rho, None)
+        self._ph.zTxtDict  ["value"] = plotNumberFormatter(self._z  , None)
+
+        self._parTitle = r"{}".\
+            format(self._ph.zTxtDict["constZTxt"].format(self._ph.zTxtDict))
+
+        self._perpTitle = r"{}".\
+            format(self._ph.rhoTxtDict["constRhoTxt"].\
+                   format(self._ph.rhoTxtDict))
 
         # Set the time label
         if self._timeAx:
@@ -134,52 +151,50 @@ class PlotTotalFlux(PlotSuperClass):
     def plotSaveShowTotalFlux(self):
         """
         Performs the actual plotting.
+
+        setData and setDataForSecondVar needs to be called before
+        calling this function.
         """
 
         # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
-        ax  = fig.add_subplot(111)
+        fig, (elIonAx, perpAx) =\
+                plt.subplots(nrows=2, figsize=self._pltSize, sharex=True)
 
-        keys = sorted(self._totalFluxes.keys())
+        # Plot the parallel integrated flux
+        elIonAx.plot(self._t                ,\
+                     self._parElFlux        ,\
+                     color = self._colors[0],\
+                     label = self._elLegend ,\
+                    )
+        elIonAx.plot(self._t                ,\
+                     self._parIonFlux       ,\
+                     color = self._colors[2],\
+                     label = self._ionLegend,\
+                    )
 
-        for key, color in zip(keys, self._colors):
-            # Make the label
-            rho, theta, z = key.split(",")
+        # Plot the perpendicular integrated flux
+        perpAx.plot(self._t                 ,\
+                    self._perpFlux          ,\
+                    color = self._colors[1] ,\
+                    label = self._perpLegend,\
+                   )
 
-            # Set values
-            self._ph.rhoTxtDict  ["value"] =\
-                    plotNumberFormatter(float(rho), None)
-            self._ph.zTxtDict    ["value"] =\
-                    plotNumberFormatter(float(z), None)
-            self._ph.thetaTxtDict["value"] =\
-                    plotNumberFormatter(float(theta), None)
+        # Set decorations
+        elIonAx.set_title(self._parTitle)
+        perpAx .set_title(self._perpTitle)
 
-            # Make the const values
-            label = (r"{}$,$ {}$,$ {}").\
-                    format(\
-                        self._ph.rhoTxtDict  ["constRhoTxt"].\
-                            format(self._ph.rhoTxtDict),\
-                        self._ph.thetaTxtDict["constThetaTxt"].\
-                            format(self._ph.thetaTxtDict),\
-                        self._ph.zTxtDict["constZTxt"].\
-                            format(self._ph.zTxtDict),\
-                          )
+        elIonAx.set_ylabel(self._units)
+        perpAx .set_ylabel(self._units)
 
-            if self._timeAx:
-                ax.plot(self._totalFluxes[key]["time"],\
-                        self._totalFluxes[key][self._totalFluxName],\
-                        color=color, label=label)
-            else:
-                ax.plot(\
-                        self._totalFluxes[key][self._varName],\
-                        color=color, label=label)
-
-        # Set axis labels
-        ax.set_xlabel(self._timeLabel)
-        ax.set_ylabel(self._varLabel)
+        perpAx.set_xlabel(self._timeLabel)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(ax, rotation = 45)
+        self._ph.makePlotPretty(elIonAx, loc="lower right", ybins = 6)
+        self._ph.makePlotPretty(perpAx, loc="lower right",\
+                                rotation = 45, ybins = 6)
+
+        # Adjust the subplots
+        fig.subplots_adjust(hspace=0.2, wspace=0.35)
 
         if self._showPlot:
             plt.show()

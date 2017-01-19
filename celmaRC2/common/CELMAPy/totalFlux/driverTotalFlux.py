@@ -52,7 +52,6 @@ def driverTotalFlux(collectPaths     ,\
     intFluxes = ccTF.executeCollectAndCalc()
 
     # Plot
-    import pdb; pdb.set_trace()
     ptf = PlotTotalFlux(ccTF.uc         ,\
                         **plotSuperKwargs)
     ptf.setData(intFluxes, mode)
@@ -68,10 +67,10 @@ class DriverTotalFlux(DriverPointsSuperClass):
     #{{{Constructor
     def __init__(self                        ,\
                  dmp_folders                 ,\
-                 xInd                        ,\
-                 yInd                        ,\
-                 tSlice                      ,\
                  plotSuperKwargs             ,\
+                 xInd              = None    ,\
+                 yInd              = None    ,\
+                 tSlice            = None    ,\
                  mode              = "normal",\
                  convertToPhysical = True    ,\
                  **kwargs):
@@ -86,16 +85,16 @@ class DriverTotalFlux(DriverPointsSuperClass):
         ----------
         dmp_folders : tuple
             Tuple of the dmp_folder (output from bout_runners).
-        collectPaths : tuple
-            Tuple from where to collect
-        xInd : int
-            How to slice in the radial direction.
-        yInd : int
-            How to slice in the parallel direction.
-        tSlice : [None|slice]
-            How to slice in time.
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        xInd : [None|int]
+            How to slice in the radial direction.
+            If set to None, the last inner point is chosen.
+        yInd : [None|int]
+            How to slice in the parallel direction.
+            If set to None, the last inner point is chosen.
+        tSlice : [None|slice]
+            How to slice in time.
         mode : ["normal"|"fluct"]
             Whether to look at fluctuations or normal data
         convertToPhysical : bool
