@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
-
 from ..calcVelocities import calcPoloidalExBConstZ
 from ..collectAndCalcHelpers import (DimensionsHelper      ,\
                                      collectSteadyN        ,\
                                      DDX                   ,\
-                                     getUniformSpacing     ,\
                                      getScanValue          ,\
                                      findLargestRadialGradN,\
                                     )
