@@ -74,6 +74,8 @@ def pecseliAnalytical(omStar, bPecseli, sigmaPar):
 
     NOTE:
         * Underlying assumption found in section 5.1 in draft.
+        * Neglection of phi''(x) and phi'(x) is essentially kx is small,
+          i.e. that the perturbations in x are very long.
         * All input parameters must be in non-normalized units.
 
     Parameters
