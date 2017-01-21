@@ -78,7 +78,7 @@ def calcRadialExBPoloidal(collectPaths, slices,\
 
     # Divide by the Jacobian (rho) as we are in a cylindrical coordinate system
     dh = ccf1D.getDh()
-    radialExB = DDZPhi/(dh.rho*B)
+    radialExB = DDZPhi/(dh.rho[xInd]*B)
 
     return radialExB, phiDict.pop("time")
 #}}}
