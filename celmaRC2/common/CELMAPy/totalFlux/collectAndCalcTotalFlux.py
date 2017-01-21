@@ -102,14 +102,21 @@ class CollectAndCalcTotalFlux(object):
         Returns
         -------
         totalFluxes : dict
-            Dictionary on the form:
-            {"parElIntFlux"  : parallelElectronIntegratedFlux,
-             "parIonIntFlux" : parallelIonIntegratedFlux,
-             "perpIntFlux"   : perpendicularIntegratedFlux,
-             "time"          : time,
-             "rho"           : rho,
-             "z"             : z,
-            }
+            Dictionary with the keys:
+                * "parElIntFlux"  - Time trace of the parallel electron flux
+                                    crossing the end plate.
+                * "parIonIntFlux" -  Time trace of the parallel ion flux
+                                    crossing the end plate.
+                * "perpIntFlux"   - Time trace of the perpendicular * flux.
+                * "timeIntEl"     - Total number of electrons lost in
+                                    the parallel direction.
+                * "timeIntIon"    - Total number of ion lost in the parallel
+                                    direction.
+                * "timeIntPerp"   - Total number of particles lost in the
+                                    perpendicular direction.
+                * "time"          - Array of the time.
+                * "rho"           - The fixed rho value.
+                * "z"             - The fixes z value.
         """
         #}}}
 
@@ -175,10 +182,19 @@ class CollectAndCalcTotalFlux(object):
         int2ParElFluxDens  = radialIntegration  (intParIonFluxDens, dx)
         int2ParIonFluxDens = parallelIntegration(intRadFluxDens   , dy)
 
+        # Integrating over time
+        dt = time[1] - time[0]
+        timeIntRadFluxDens    = int2RadFluxDens   .sum()*dt
+        timeIntParElFluxDens  = int2ParElFluxDens .sum()*dt
+        timeIntParIonFluxDens = int2ParIonFluxDens.sum()*dt
+
         # Storing
         totalFluxes["parElIntFlux"]  = int2RadFluxDens   .flatten()
         totalFluxes["parIonIntFlux"] = int2ParElFluxDens .flatten()
         totalFluxes["perpIntFlux"]   = int2ParIonFluxDens.flatten()
+        totalFluxes["timeIntEl"]     = timeIntRadFluxDens
+        totalFluxes["timeIntIon"]    = timeIntParElFluxDens
+        totalFluxes["timeIntPerp"]   = timeIntParIonFluxDens
         totalFluxes["time"]          = time
         totalFluxes["rho"]           = rho
         totalFluxes["z"]             = self._dh.z[self._yInd]
