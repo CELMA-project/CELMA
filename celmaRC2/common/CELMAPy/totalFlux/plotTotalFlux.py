@@ -46,15 +46,21 @@ class PlotTotalFlux(PlotSuperClass):
 
         Parameters
         ----------
-        totalFluxes : dict
-            Dictionary on the form:
-            {"parElIntFlux"  : parallelElectronIntegratedFlux,
-             "parIonIntFlux" : parallelIonIntegratedFlux,
-             "perpIntFlux"   : perpendicularIntegratedFlux,
-             "time"          : time,
-             "rho"           : rho,
-             "z"             : z,
-            }
+            Dictionary with the keys:
+                * "parElIntFlux"  - Time trace of the parallel electron flux
+                                    crossing the end plate.
+                * "parIonIntFlux" -  Time trace of the parallel ion flux
+                                    crossing the end plate.
+                * "perpIntFlux"   - Time trace of the perpendicular * flux.
+                * "timeIntEl"     - Total number of electrons lost in
+                                    the parallel direction.
+                * "timeIntIon"    - Total number of ion lost in the parallel
+                                    direction.
+                * "timeIntPerp"   - Total number of particles lost in the
+                                    perpendicular direction.
+                * "time"          - Array of the time.
+                * "rho"           - The fixed rho value.
+                * "z"             - The fixes z value.
         mode : ["normal"|"fluct"]
             What mode the input is given in.
         timeAx : bool
@@ -68,6 +74,9 @@ class PlotTotalFlux(PlotSuperClass):
         self._parElFlux  = totalFluxes.pop("parElIntFlux")
         self._parIonFlux = totalFluxes.pop("parIonIntFlux")
         self._perpFlux   = totalFluxes.pop("perpIntFlux")
+        self._parElLoss  = totalFluxes.pop("timeIntEl")
+        self._parIonLoss = totalFluxes.pop("timeIntIon")
+        self._perpLoss   = totalFluxes.pop("timeIntPerp")
         self._t          = totalFluxes.pop("time")
         self._rho        = totalFluxes.pop("rho")
         self._z          = totalFluxes.pop("z")
@@ -101,7 +110,7 @@ class PlotTotalFlux(PlotSuperClass):
         Prepares the labels for plotting.
         """
 
-        # Set var label template
+        # Set label templates
         if self.uc.convertToPhysical:
             self._units = "$[s^{-1}]$"
             normalization = ""
@@ -109,7 +118,8 @@ class PlotTotalFlux(PlotSuperClass):
             self._units = "$[]$"
             normalization = r"/n_0c_s\rho_s^{2}"
 
-        template = r"$\iint {}{} \rho\mathrm{{d}}\theta\mathrm{{d}}z$"
+        templatePlate  = r"$\iint {}{} \rho\mathrm{{d}}\theta\mathrm{{d}}\rho$"
+        templateOuterR = r"$\iint {}{} \rho\mathrm{{d}}\theta\mathrm{{d}}z$"
 
         if self._mode == "normal":
             var = "nu"
@@ -125,9 +135,24 @@ class PlotTotalFlux(PlotSuperClass):
         ionTxt  = "{}_{{i,\parallel}}".format(var)
         perpTxt = "{}_{{E,\perp}}"    .format(var)
 
-        self._elLegend   = template.format(elTxt  , normalization)
-        self._ionLegend  = template.format(ionTxt , normalization)
-        self._perpLegend = template.format(perpTxt, normalization)
+        self._elLegend   = templatePlate .format(elTxt  , normalization)
+        self._ionLegend  = templatePlate .format(ionTxt , normalization)
+        self._perpLegend = templateOuterR.format(perpTxt, normalization)
+
+        # Set total number text
+        parElLossTxt = \
+            ("$\mathrm{{Total\;\parallel\; electron\; loss}}=${}$\;"
+             " \mathrm{{particles}}$").\
+                format(plotNumberFormatter(self._parElLoss, None))
+        parIonLossTxt = \
+            ("$\mathrm{{Total\;\parallel\; ion\; loss}}=${}$\;"
+             " \mathrm{{particles}}$").\
+                format(plotNumberFormatter(self._parIonLoss, None))
+        self._parElIonLossTxt = "{}\n{}".format(parElLossTxt, parIonLossTxt)
+        self._perpLossTxt = \
+            ("$\mathrm{{Total\;\perp\; loss}}=2\cdot${}$\;"
+             " \mathrm{{particles}}$").\
+                format(plotNumberFormatter(self._perpLoss, None))
 
         # Set values
         self._ph.rhoTxtDict["value"] = plotNumberFormatter(self._rho, None)
@@ -171,6 +196,17 @@ class PlotTotalFlux(PlotSuperClass):
                      color = self._colors[2],\
                      label = self._ionLegend,\
                     )
+        # Get the textSize
+        txtSize = elIonAx.legend().get_texts()[0].get_fontsize()
+        # Add text
+        lossTxtElIon = elIonAx.\
+                        text(0.95, 0.95,\
+                            self._parElIonLossTxt,\
+                            transform = elIonAx.transAxes,\
+                            ha="right", va="top",\
+                            bbox={"facecolor":"white", "alpha":0.5, "pad":10},\
+                            )
+        lossTxtElIon.set_fontsize(txtSize)
 
         # Plot the perpendicular integrated flux
         perpAx.plot(self._t                 ,\
@@ -178,6 +214,16 @@ class PlotTotalFlux(PlotSuperClass):
                     color = self._colors[1] ,\
                     label = self._perpLegend,\
                    )
+
+        # Add text
+        lossTxtElIon = perpAx.\
+                        text(0.95, 0.95,\
+                            self._perpLossTxt,\
+                            transform = perpAx.transAxes,\
+                            ha="right", va="top",\
+                            bbox={"facecolor":"white", "alpha":0.5, "pad":10},\
+                            )
+        lossTxtElIon.set_fontsize(txtSize)
 
         # Set decorations
         elIonAx.set_title(self._parTitle)
