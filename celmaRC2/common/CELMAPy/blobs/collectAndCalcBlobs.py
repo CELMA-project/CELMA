@@ -4,7 +4,7 @@
 Contains the blobs calculation
 """
 
-from ..collectAndCalcHelpers import DimensionsHelper
+from ..collectAndCalcHelpers import DimensionsHelper, polAvg
 from ..fields2D import CollectAndCalcFields2D
 from ..radialFlux import getRadialFlux
 import numpy as np
@@ -20,6 +20,7 @@ class CollectAndCalcBlobs(object):
                  collectPaths     ,\
                  slices           ,\
                  convertToPhysical,\
+                 pctPadding = 400 ,\
                  ):
         #{{{docstring
         """
@@ -35,144 +36,265 @@ class CollectAndCalcBlobs(object):
             On the form (xInd, yInd, zInd, tSlice)
         convertToPhysical : bool
             Whether or not to convert to physical
+        pctPadding : float
+            Padding around the maximum pulsewidth which satisfies the
+            condition.
+            Measured in percent.
         """
         #}}}
 
         # Set the member data
         self._collectPaths      = collectPaths
         self._convertToPhysical = convertToPhysical
+        self._pctPadding        = pctPadding
         self._xInd, self._yInd, self._zInd, self._tSlice = slices
+
+        self._notCalled = ["prepareCollectAndCalc"]
     #}}}
 
-    #{{{executeCollectAndCalc
-    def executeCollectAndCalc(self):
-# FIXME: Clean this
-# FIXME: Consider to have getters for the output
+    #{{{prepareCollectAndCalc
+    def prepareCollectAndCalc(self):
         #{{{docstring
         """
+        Prepares the instance for collection.
+
         This function will:
             * Collect the density flux at the probe place.
             * Find the times where the fluxs meets the condition.
-            * Collect the density at the time where the condition is met.
-            * Sort the blobs from the holes (negative perturbation
-              transported inwards).
-            * Make the averages.
+            * Collect the density fluctuations from the perpendicular 2D
+              slice at the specified y-index (used to identify blobs and
+              holes [negative perturbation propagating inwards]).
+            * Set which indices are blobs and which are holes.
+            * Set the window time.
 
         NOTE: The treshold condition is made in the flux as:
                 1. One can have high perturbation as a consequence of
                    high azimuthal flux.
                 2. The plasma can be alongated and spin in the azimuthal
                    direction.
-
-        Organization of ouput dict
-        --------------------------
-        The output dicts contains the keys
-            * par2D     - The parallel 2D slice
-            * perp2D    - The perpednicular 2D slice
-            * timeTrace - The time trace in the point
-        All the keys will have one of the following suffixes
-            * Blobs     - A tuple of the blobs bins dictionary
-            * BlobsAvg  - A dictionary where the bins have been averaged
-            * Holes     - A tuple of the holes bins dictionary
-            * HolesAvg  - A dictionary where the bins have been averaged
-        The sub dictionaries will contain the following keys
-            * "n"
-            * "time"
-            * ""
-
-        Returns
-        -------
-        blobBinsDict : dict
-            Dict of the blob-bins dicts.
-            See "Organization of ouput dict" for more info.
-        holeBinsDict : dict
-            Dict of the holes-bins dicts.
-            See "Organization of ouput dict" for more info.
-        blobsAvgDict : dict
-            Dict of the average blobs dicts.
-            See "Organization of ouput dict" for more info.
-        holesAvgDict : dict
-            Dict of the average holes dicts.
-            See "Organization of ouput dict" for more info.
         """
         #}}}
 
+        if "prepareCollectAndCalc" in self._notCalled:
+            self._notCalled.remove("prepareCollectAndCalc")
+        else:
+            print("The preparation has already been made")
+            return
+
         # Collect flux
-        radialFlux, self._uc = self._collectRadialFlux()
+        self._radialFlux, self._uc = self._collectRadialFlux()
         self._dh = DimensionsHelper(self._collectPaths[0], self._uc)
 
         # Initialize
-        key = radialFlux.keys()[0]
-        flux = radialFlux[key]["nRadialFlux"]
+        key = list(self._radialFlux.keys())[0]
+        flux = self._radialFlux[key]["nRadialFlux"]
         condition = flux.std()*3
         rhoPos, thetaPos, zPos = key.split(",")
-        time = radialFlux[key]["time"]
-        dt = time[1] - time[0]
+        time = self._radialFlux[key]["time"]
+        self._dt = time[1] - time[0]
 
         # Get indices and window sizes
-        indices = self._getIndicesMeetingCondition(flux, condition)
-        waitingTimes, pulseWidths =\
-                self._getWaitingTimesAndPulseWidth(indices, dt)
-        windowSize = self._getWindowSize(indices, self._pctPadding)
-        slices =\
-            self._transformContiguousIndicesToSlices(indices,\
-                                                     windowSize)
+        self._indices = self._getIndicesMeetingCondition(flux, condition)
+        windowSize = self._getWindowSize(self._indices, self._pctPadding)
 
+        # Correct for the start of tSlice
+        maxInd = len(time)-1 + self._tSlice.start
+        slices =\
+            self._transformContiguousIndicesToSlices(self._indices   ,\
+                                                     windowSize,\
+                                                     maxInd    ,\
+                                                     )
         # Collect the bins
-        par2DBins, perp2DBins = self._collect2DBins(slices)
-        timeTraceBins         = self._getTimeTraceBins(perp2DBins)
+        self._perp2DBins = self._collect2DBins(slices, False, "perp")
+        self._timeTraceBins, self._perp2DBinsFluct =\
+                self._getTimeTraceBins(self._perp2DBins)
 
         # Sort into blobs and holes
-        midIndex = int((slices[0].stop - slices[0].start)/2)
-        blobsIndices, holesIndices =\
-            self._idendtifyBlobsAndHoles(self, timeTraceBins, midIndex)
-        par2DBlobs, par2DHoles =\
-            self._extractBlobsAndHoles(blobsIndices, holesIndices, par2DBins)
-        perp2DBlobs, perp2DHoles =\
-            self._extractBlobsAndHoles(blobsIndices, holesIndices, perp2DBins)
-        timeTraceBlobs, timeTraceHoles =\
-            self._extractBlobsAndHoles(blobsIndices,\
-                                       holesIndices,\
-                                       timeTraceBins)
+        self._midIndex = int((slices[0].stop - slices[0].start)/2)
+        self._blobsIndices, self._holesIndices =\
+            self._identifyBlobsAndHoles(self._timeTraceBins, self._midIndex)
 
         # Make averages
         # +1 for symmetry
-        self._timeSlice = np.array(range(-windowSize,windowSize+1))*dt
-        blobs = (par2DBlobs, perp2DBlobs, timeTraceBlobs)
-        holes = (par2DHoles, perp2DHoles, timeTraceHoles)
+        self._windowTime = np.array(range(-windowSize,windowSize+1))*self._dt
+    #}}}
 
-        par2DBlobAvg, perp2DBlobAvg, timeTraceBlobAvg =\
-            self._calcAverages(blobs)
+    #{{{getRadialFlux
+    def getRadialFlux(self):
+        """
+        Getter for the radial flux.
+        """
 
-        par2DBHolesAvg, perp2DHolesAvg, timeTraceHolesAvg =\
-            self._calcAverages(holes)
+        if "prepareCollectAndCalc" in self._notCalled:
+            message = ("'prepareCollectAndCalc' must be called before"
+                       "the execution")
+            raise RuntimeError(message)
 
-        # Make return dicts
-        blobBinsDict = {\
-            "par2DBlobs"     : par2DBlobs    ,\
-            "perp2DBlobs"    : perp2DBlobs   ,\
-            "timeTraceBlobs" : timeTraceBlobs,\
-                   }
+        return self._radialFlux
+    #}}}
 
-        holeBinsDict = {\
-            "par2DHoles"     : par2DHoles    ,\
-            "perp2DHoles"    : perp2DHoles   ,\
-            "timeTraceHoles" : timeTraceHoles,\
-                       }
+    #{{{getWaitingTimesAndPulseWidth
+    def getWaitingTimesAndPulseWidth(self, type):
+        #{{{docstring
+        """
+        Returns the waiting times and the pulse widths
 
-        blobsAvgDict = {\
-            "par2DBlobAvg"     : par2DBlobAvg    ,\
-            "perp2DBlobAvg"    : perp2DBlobAvg   ,\
-            "timeTraceBlobAvg" : timeTraceBlobAvg,\
-                      }
+        Parameters
+        ----------
+        type : ["blobs"|"holes"]
+            Whether the waiting times and pulse widths for blobs or
+            holes are to be returned.
 
-        holesAvgDict = {\
-            "par2DBHolesAvg"    : par2DBHolesAvg   ,\
-            "perp2DHolesAvg"    : perp2DHolesAvg   ,\
-            "timeTraceHolesAvg" : timeTraceHolesAvg,\
-                   }
+        Returns
+        -------
+        waitingTimes : tuple
+            Tuple of waiting times in time units.
+        pulseWidths : tuple
+            Tuple of pulse widths in time units.
+        """
+        #}}}
 
-        return blobBinsDict, holeBinsDict, blobsAvgDict, holesAvgDict
+        if "prepareCollectAndCalc" in self._notCalled:
+            message = ("'prepareCollectAndCalc' must be called before"
+                       "the execution")
+            raise RuntimeError(message)
+
+        if type == "blobs":
+            blobsIndices = []
+            for i in self._blobsIndices:
+                blobsIndices.append(self._indices[i])
+            contiguousTimes = tuple(ind*self._dt for ind in blobsIndices)
+        elif type == "holes":
+            holesIndices = []
+            for i in self._holesIndices:
+                holesIndices.append(self._indices[i])
+            contiguousTimes = tuple(ind*self._dt for ind in holesIndices)
+        else:
+            message =\
+                "'type' expected 'blobs' or 'holes', but got '{}'".\
+                format(type)
+            raise ValueError(message)
+
+        waitingTimes = []
+        pulseWidths  = []
+        for times in contiguousTimes:
+            pulseWidths.append(times[-1]-times[0])
+            mid = int(len(times)/2)
+            if len(pulseWidths) == 1:
+                # Initialize waiting times
+                waitingStart = times[mid]
+                continue
+
+            waitingEnd = times[mid]
+            waitingTimes.append(waitingEnd - waitingStart)
+            waitingStart = waitingEnd.copy()
+
+        waitingTimes = tuple(waitingTimes)
+        pulseWidths  = tuple(pulseWidths)
+
+        return waitingTimes, pulseWidths
+    #}}}
+
+    #{{{executeCollectAndCalc1D
+    def executeCollectAndCalc1D(self):
+        #{{{docstring
+        """
+        Collect and calcs the blobs and holes for the 1D time trace.
+
+        Returns
+        -------
+        timeTraceBlobAvg : dict
+            Dictionary of the averaged blob.
+            Contains the keys "n", "time" and "pos".
+        timeTraceBlobs : tuple
+            Tuple containing the dictionaries used to calculate the
+            averaged blob.
+            Each element contains the same keys as timeTraceBlobAvg.
+        timeTraceHolesAvg : dict
+            Dictionary of the averaged hole.
+            Contains the same keys as timeTraceBlobAvg.
+        timeTraceHoles : tuple
+            Tuple containing the dictionaries used to calculate the
+            averaged hole.
+            Each element contains the same keys as timeTraceBlobAvg.
+        """
+        #}}}
+
+        if "prepareCollectAndCalc" in self._notCalled:
+            message = ("'prepareCollectAndCalc' must be called before"
+                       "the execution")
+            raise RuntimeError(message)
+
+        # Separate into holes and blobs
+        timeTraceBlobs, timeTraceHoles =\
+            self._extractBlobsAndHoles(self._timeTraceBins)
+
+        timeTraceBlobAvg  = self._calcAverages(timeTraceBlobs)
+        timeTraceHolesAvg = self._calcAverages(timeTraceHoles)
+
+        return timeTraceBlobAvg ,\
+               timeTraceBlobs   ,\
+               timeTraceHolesAvg,\
+               timeTraceHoles
+    #}}}
+
+    #{{{executeCollectAndCalc2D
+    def executeCollectAndCalc2D(self, mode, fluct):
+        #{{{docstring
+        """
+        Collect and calcs the blobs and holes for the in 2D.
+
+        Parameters
+        ----------
+        mode : ["perp"|"par"|"pol"]
+            Mode to use for 2D collection.
+        fluct : bool
+            Wheter or not the variables shold be fluctuating or not.
+
+        Returns
+        -------
+        blobs2DAvg : dict
+            Dictionary of the averaged blob.
+            Contains the keys:
+                * "n"    - The 2D variable.
+                * "nPPi" - The 2D variable pi away from the set zInd
+                           (only when mode is "par").
+                * "time" - The corresponding time.
+                * "X"    - The X-mesh.
+                * "Y"    - The Y-mesh.
+        blobs2D : tuple
+            Tuple containing the dictionaries used to calculate the
+            averaged blob.
+            Each element contains the same keys as blobs2DAvg.
+        holes2DAvg : dict
+            Dictionary of the averaged hole.
+            Contains the same keys as blobs2DAvg.
+        holes2D : tuple
+            Tuple containing the dictionaries used to calculate the
+            averaged blob.
+            Each element contains the same keys as blobs2DAvg.
+        """
+        #}}}
+
+        if "prepareCollectAndCalc" in self._notCalled:
+            message = ("'prepareCollectAndCalc' must be called before"
+                       "the execution")
+            raise RuntimeError(message)
+
+        if mode != "perp":
+            bins2D = self._collect2DBins(slices, fluct, mode)
+        else:
+            if fluct:
+                bins2D = self._perp2DBinsFluct
+            else:
+                bins2D = self._perp2DBins
+
+        blobs2D, holes2D = self._extractBlobsAndHoles(bins2D)
+
+        blobs2DAvg = self._calcAverages(blobs2D)
+        holes2DAvg = self._calcAverages(holes2D)
+
+        return blobs2DAvg, blobs2D, holes2DAvg, holes2D
     #}}}
 
     #{{{_collectRadialFlux
@@ -263,51 +385,6 @@ class CollectAndCalcBlobs(object):
         return contiguousIndices
     #}}}
 
-    #{{{_getWaitingTimesAndPulseWidth
-    def _getWaitingTimesAndPulseWidth(self, contiguousIndices, dt):
-        #{{{docstring
-        """
-        Returns the waiting times and the pulse widths
-
-        Parameters
-        ----------
-        contiguousIndices : tuple
-            Tuple of arrays, where each element in the tuple is a series
-            of indices, contiguous, in ascending order where the
-            condition is meet.
-        dt : float
-            The time incrementation between two indices.
-
-        Returns
-        -------
-        waitingTimes : tuple
-            Tuple of waiting times in time units.
-        waitingTimes : tuple
-            Tuple of pulse widths in time units.
-        """
-        #}}}
-
-        contiguousTimes = tuple(indices*dt for indices in contiguousIndices)
-        waitingTimes = []
-        pulseWidths  = []
-        for times in contiguousTimes:
-            pulseWidths.append(times[-1]-times[0])
-            mid = int(len(times)/2)
-            if len(pulseWidths) == 1:
-                # Initialize waiting times
-                waitingStart = times[mid]
-                continue
-
-            waitingEnd = times[mid]
-            waitingTimes.append(waitingEnd - waitingStart)
-            waitingStart = waitingEnd.copy()
-
-        waitingTimes = tuple(waitingTimes)
-        pulseWidths  = tuple(pulseWidths)
-
-        return waitingTimes, pulseWidths
-    #}}}
-
     #{{{_getWindowSize
     def _getWindowSize(self, contiguousIndices, pctPadding):
         #{{{docstring
@@ -342,9 +419,12 @@ class CollectAndCalcBlobs(object):
     #{{{_transformContiguousIndicesToSlices
     def _transformContiguousIndicesToSlices(self,\
                                             contiguousIndices,\
-                                            windowSize):
+                                            windowSize,\
+                                            maxInd,\
+                                            ):
         #{{{docstring
         """
+        Transforms the contiguous indices to slices.
 
         Parameters
         ----------
@@ -353,14 +433,15 @@ class CollectAndCalcBlobs(object):
             of indices, contiguous, in ascending order where the
             condition is meet.
         windowSize : int
+            Number of indices to defining the size of one bin.
+        maxInd : int
+            Max index in time.
 
         Returns
         -------
         slices : tuple
             Tuple of slices, where the individual slices are the slices
             which will be used to collect a bin.
-        windowSize : int
-            Number of indices to defining the size of one bin.
         """
         #}}}
 
@@ -375,15 +456,16 @@ class CollectAndCalcBlobs(object):
             # Guard for the beginning
             if curSlice.start >= 0:
                 # Guard for the end
-                if curSlice.stop <= len(indices):
+                if curSlice.stop <= maxInd:
                     slices.append(curSlice)
+
         slices = tuple(slices)
 
         return slices
     #}}}
 
     #{{{_collect2DBins
-    def _collect2DBins(self, slices):
+    def _collect2DBins(self, slices, fluct, mode):
         #{{{docstring
         """
         Collects the bins which will be used in the average.
@@ -393,24 +475,20 @@ class CollectAndCalcBlobs(object):
         slices : tuple
             Tuple of slices, where the individual slices are the slices
             which will be used to collect a bin.
+        fluct : bool
+            Whether or not to collect the fluctuations only.
+        mode : ["perp"|"par"|"pol"]
+            Type of 2D calculation.
 
         Returns
         -------
-        par2DBins : tuple
-            A tuple of the parallel 2D bins stored as dicts with the
+        tupleOfBins2D : tuple
+            A tuple of the 2D bins stored as dicts with the
             keys:
                 * "n"    - A 3d array (a 2d spatial array of each time)
                            of the collected variable.
                 * "nPPi" - The field at pi away from the varName field
-                * "X"    - The cartesian x mesh to the field
-                * "Y"    - The cartesian Y mesh to the field
-                * "time" - The time trace
-                * pos    - The position of the fixed index
-        perp2DBins : tuple
-            A tuple of the perpendicular 2D bins stored as dicts with
-            the keys:
-                * "n"    - A 3d array (a 2d spatial array of each time)
-                           of the collected variable.
+                           (only if "type" == "par")
                 * "X"    - The cartesian x mesh to the field
                 * "Y"    - The cartesian Y mesh to the field
                 * "time" - The time trace
@@ -418,41 +496,42 @@ class CollectAndCalcBlobs(object):
         """
         #}}}
 
-        fluct             = True
         xSlice            = None
         ySlice            = None
         zSlice            = None
+        xInd              = self._xInd
         yInd              = self._yInd
         zInd              = self._zInd
         convertToPhysical = self._convertToPhysical
         varName           = "n"
 
-        par2DBins  = []
-        perp2DBins = []
+        tupleOfBins2D = []
 
+        # FIXME: Consider to make a multiprocess out of this
         for tSlice in slices:
             # Pependicular collection
             ccf2D = CollectAndCalcFields2D(\
                         self._collectPaths        ,\
                         fluct             = fluct ,\
-                        mode              = "perp",\
+                        mode              = mode  ,\
                         convertToPhysical = convertToPhysical)
 
-            ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
-            ccf2D.setVarName(varName)
-            perp2DBins.append(ccf2D.executeCollectAndCalc())
+            if mode == "perp":
+                ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
+            elif mode == "par":
+                ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
+            elif mode == "pol":
+                ccf2D.setSlice(xInd, yInd, zSlice, tSlice)
+            else:
+                message =\
+                    "'mode' expected 'perp', 'par' or 'pol', but got '{}'".\
+                    format(mode)
+                raise ValueError(message)
 
-            # Parallel collection
-            ccf2D = CollectAndCalcFields2D(\
-                        self._collectPaths       ,\
-                        fluct             = fluct,\
-                        mode              = "par",\
-                        convertToPhysical = convertToPhysical)
-            ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
             ccf2D.setVarName(varName)
-            par2DBins.append(ccf2D.executeCollectAndCalc())
+            tupleOfBins2D.append(ccf2D.executeCollectAndCalc())
 
-        return par2DBins, perp2DBins
+        return tupleOfBins2D
     #}}}
 
     #{{{_getTimeTraceBins
@@ -481,25 +560,45 @@ class CollectAndCalcBlobs(object):
                            of the collected variable.
                 * "time" - The time trace
                 * "pos"  - Tuple of the (rho, theta, z) fixed positions.
+        perp2DBinFluct : tuple
+            A by-product of the process.
+            A tuple of the 2D bins stored as dicts with the
+            keys:
+                * "n"    - A 3d array (a 2d spatial array of each time)
+                           of the collected variable.
+                * "X"    - The cartesian x mesh to the field
+                * "Y"    - The cartesian Y mesh to the field
+                * "time" - The time trace
+                * pos    - The position of the fixed index
         """
         #}}}
 
         timeTraceBins = []
+        perp2DBinFluct = []
         rhoPos   = self._dh.rho     [self._xInd]
         thetaPos = self._dh.thetaRad[self._yInd]
         for perp2DBin in perp2DBins:
             curDict         = {}
-            curDict["n"]    =\
-                   perp2DBins["n"][:, self._xInd, self._yInd, self._zInd]
-            curDict["time"] = perp2DBins["time"]
-            curDict["pos"]  = (rhoPos, thetaPos, perp2DBins["z"])
+            # Must manually take the poloidal average
+            var = np.expand_dims(perp2DBin["n"], axis=2)
+            fluct = var - polAvg(var)
+            # Add to perp2DBinFluct
+            fluctDict = perp2DBin.copy()
+            fluctDict["n"] = fluct
+            perp2DBinFluct.append(fluctDict)
+
+            # Store to dict
+            curDict["n"]    = fluct[:, self._xInd, 0, self._zInd]
+            curDict["time"] = perp2DBin["time"]
+            curDict["pos"]  = (rhoPos, thetaPos, perp2DBin["zPos"])
             timeTraceBins.append(curDict)
 
-        return timeTraceBins
+        perp2DBinFluct = tuple(perp2DBinFluct)
+        return timeTraceBins, perp2DBinFluct
     #}}}
 
-    #{{{_idendtifyBlobsAndHoles
-    def _idendtifyBlobsAndHoles(self, timeTraceBins, midIndex):
+    #{{{_identifyBlobsAndHoles
+    def _identifyBlobsAndHoles(self, timeTraceBins, midIndex):
         #{{{docstring
         """
         Identifies whether the bin contains a blob or a hole.
@@ -545,17 +644,13 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{_extractBlobsAndHoles
-    def _extractBlobsAndHoles(self, blobsIndices, holesIndices, bins):
+    def _extractBlobsAndHoles(self, bins):
         #{{{docstring
         """
         Extracts blobs and holes from a tuple of bins.
 
         Parameters
         ----------
-        blobsIndices : tuple
-            Tuple of blob indices.
-        holesIndices : tuple
-            Tuple of holes indices.
         bins : tuple
             Bins to be separated.
 
@@ -571,16 +666,16 @@ class CollectAndCalcBlobs(object):
         blobs = []
         holes = []
 
-        for i in blobsIndices:
+        for i in self._blobsIndices:
             blobs.append(bins[i])
-        for i in holesIndices:
+        for i in self._holesIndices:
             holes.append(bins[i])
 
-        return blobs, holes
+        return tuple(blobs), tuple(holes)
     #}}}
 
     #{{{_calcAverages
-    def _calcAverages(self, tupleOfDicts):
+    def _calcAverages(self, tupleOfDictsWithBins):
         #{{{docstring
         """
         Returns a tuple of dict where "n" and "time" in the dicts has
@@ -588,24 +683,30 @@ class CollectAndCalcBlobs(object):
 
         Parameters
         ----------
-        tupleOfDicts : tuple
+        tupleOfDictsWithBins : tuple
             Tuple of dicts, where each dict contains the keys "n" and
             "time".
 
         Returns
         -------
-        averages : tuple
-            Tuple of the dicts where "n" and "time" has been averaged.
+        binAverageDict : tuple
+            Dict where the bins have been averaged.
         """
         #}}}
-        averages = []
 
-        for curDict in tupleOfDicts:
-            avgDict         = curDict.copy()
-            avgDict["n"]    = np.array(curDict["n"]).mean(axis=0)
-            avgDict["time"] = self._timeSlice
-            averages.append(avgDict)
+        # Guard if tupleOfDictsWithBins is empty (i.e. either no holes
+        # or no blobs)
+        if len(tupleOfDictsWithBins) == 0:
+            return ()
 
-        return averages
+        binAverageDict = tupleOfDictsWithBins[0].copy()
+        sumN = np.zeros(tupleOfDictsWithBins[0]["n"].shape)
+        for curDict in tupleOfDictsWithBins:
+            sumN += curDict["n"]
+
+        binAverageDict["n"]    = sumN/len(tupleOfDictsWithBins)
+        binAverageDict["time"] = self._windowTime
+
+        return binAverageDict
     #}}}
 #}}}
