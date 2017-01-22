@@ -10,24 +10,24 @@ sys.path.append(commonDir)
 
 from CELMAPy.blobs import DriverBlobs, driverBlobs
 
-#{{{blobsTest
-def blobsTest():
+#{{{testBlobs
+def testBlobs():
     """
     Runs the test for the blobs
     """
 
     collectPaths =\
        (\
-                        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
-                        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
-                        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/",\
+        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
        )
 
     xInd   = 26
     yInd   = 16
     zInd   = 0
-    tSlice = slice(1200,None)
+    tSlice = slice(1000,None)
     slices = (xInd, yInd, zInd, tSlice)
+    pctPadding = 400
 
     convertToPhysical = True
 
@@ -48,6 +48,7 @@ def blobsTest():
                 slices           ,\
                 convertToPhysical,\
                 plotSuperKwargs  ,\
+                pctPadding       ,\
                )
     print("Success!\n\n")
 #}}}
@@ -73,6 +74,8 @@ def driverTest():
     tSlice = slice(1200,None)
     slices = (xInd, yInd, zInd, tSlice)
 
+    pctPadding = 400
+
     convertToPhysical = True
 
     useSubProcess = False
@@ -87,13 +90,14 @@ def driverTest():
                        }
 
 
-    print("\n\nTesting fourier mode driver")
+    print("\n\nTesting the blobs driver")
     dB = DriverBlobs(\
                      # DriverBlobs
                      dmp_folders      ,\
                      slices           ,\
                      convertToPhysical,\
                      plotSuperKwargs  ,\
+                     pctPadding       ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
