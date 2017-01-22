@@ -8,29 +8,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-# Save the time traces
-from matplotlib.pylab import plt
-for nr, curDens in enumerate(posDensSlices):
-    fig, ax = plt.subplots()
-    ax.plot(timeSlice, curDens)
-    ax.grid()
-    plt.savefig("posDens{}.png".format(nr))
-
-for nr, curDens in enumerate(negDensSlices):
-    fig, ax = plt.subplots()
-    ax.plot(timeSlice, curDens)
-    ax.grid()
-    plt.savefig("negDens{}.png".format(nr))
-
-fig, ax = plt.subplots()
-ax.plot(timeSlice, avgPosDens)
-ax.grid()
-plt.savefig("avgPosDens.png")
-
-fig, ax = plt.subplots()
-ax.plot(timeSlice, avgNegDens)
-ax.grid()
-plt.savefig("avgNegDens.png")
+#   # Save the time traces
+#   from matplotlib.pylab import plt
+#   for nr, curDens in enumerate(posDensSlices):
+#       fig, ax = plt.subplots()
+#       ax.plot(timeSlice, curDens)
+#       ax.grid()
+#       plt.savefig("posDens{}.png".format(nr))
+#
+#   for nr, curDens in enumerate(negDensSlices):
+#       fig, ax = plt.subplots()
+#       ax.plot(timeSlice, curDens)
+#       ax.grid()
+#       plt.savefig("negDens{}.png".format(nr))
+#
+#   fig, ax = plt.subplots()
+#   ax.plot(timeSlice, avgPosDens)
+#   ax.grid()
+#   plt.savefig("avgPosDens.png")
+#
+#   fig, ax = plt.subplots()
+#   ax.plot(timeSlice, avgNegDens)
+#   ax.grid()
+#   plt.savefig("avgNegDens.png")
 
 #{{{PlotBlobs
 class PlotBlobs(PlotSuperClass):
