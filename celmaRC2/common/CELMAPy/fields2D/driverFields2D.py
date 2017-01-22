@@ -382,7 +382,8 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
 
     # Set the plot limits
     tupleOfArrays = (perp2D[varName], par2D[varName])
-    vmax, vmin, levels = getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+    vmax, vmin, levels =\
+            getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPerpPar = PlotAnim2DPerpPar(ccf2D.uc        ,\
