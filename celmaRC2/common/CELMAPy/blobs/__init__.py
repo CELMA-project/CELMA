@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Init-file for blob
+Init-file for blobs
 """
 
-from .collectAndCalcBlob import CollectAndCalcBlob
-from .driverBlob import DriverBlob, driverBlob, getBlob
-from .plotBlob import PlotBlob
+from .collectAndCalcBlobs import CollectAndCalcBlobs
+from .driverBlobs import DriverBlobs, driverBlobs
+from .plotBlobs import PlotBlobs
