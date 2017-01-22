@@ -12,6 +12,7 @@ from multiprocessing import Process
 #{{{driverBlobs
 def driverBlobs(collectPaths     ,\
                 slices           ,\
+                pctPadding       ,\
                 convertToPhysical,\
                 plotSuperKwargs  ,\
                ):
@@ -26,6 +27,10 @@ def driverBlobs(collectPaths     ,\
     slices : tuple of tuples
         Tuple the indices to use.
         On the form (xInd, yInd, zInd, tSlice)
+    pctPadding : float
+        Padding around the maximum pulsewidth which satisfies the
+        condition.
+        Measured in percent.
     convertToPhysical : bool
         Whether or not to convert to physical
     plotSuperKwargs : dict
@@ -35,12 +40,28 @@ def driverBlobs(collectPaths     ,\
 
     ccb = CollectAndCalcBlobs(collectPaths, slices, convertToPhysical)
 
-    blobBinsDict, holeBinsDict, blobsAvgDict, holesAvgDict =\
-        ccb.executeCollectAndCalc()
+    ccb.prepareCollectAndCalc()
 
+    rf = ccb.getRadialFlux()
+
+    holesWaitingTime, holesPulseWidths = ccb.getWaitingTimesAndPulseWidth("holes")
+    blobsWaitingTime, blobsPulseWidths = ccb.getWaitingTimesAndPulseWidth("blobs")
+
+    timeTraceBlobAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
+        ccb.executeCollectAndCalc1D()
+
+    perpBlobAvg, perpBlobs, perpHolesAvg, perpHoles =\
+        ccb.executeCollectAndCalc2D("perp", False)
+
+    YOU ARE HERE, TEST PAR AND POL
     import pdb; pdb.set_trace()
+    a = 1
 
     # Plot
+# FIXME: Have different kind of plots here
+# First: Holes and blobs: Can use the same drivers, just add txt "blob", "hole"
+# Second: bins and averages
+# Third: 1D and 2D
     ptt = PlotBlobs(ccb.uc              ,\
                     **plotSuperKwargs)
     ptt.setData(blobBinsDict, mode="foo")
@@ -57,6 +78,7 @@ class DriverBlobs(DriverSuperClass):
     def __init__(self             ,\
                  dmp_folders      ,\
                  slices           ,\
+                 pctPadding       ,\
                  convertToPhysical,\
                  plotSuperKwargs  ,\
                  **kwargs):
@@ -74,6 +96,10 @@ class DriverBlobs(DriverSuperClass):
         slices : tuple of tuples
             Tuple the indices to use.
             On the form (xInd, yInd, zInd, tSlice)
+        pctPadding : float
+            Padding around the maximum pulsewidth which satisfies the
+            condition.
+            Measured in percent.
         convertToPhysical : bool
             Whether or not to convert to physical
         plotSuperKwargs : dict
@@ -89,6 +115,7 @@ class DriverBlobs(DriverSuperClass):
         # Set the member data
         self._slices            = slices
         self._convertToPhysical = convertToPhysical
+        self._pctPadding        = pctPadding
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -104,7 +131,9 @@ class DriverBlobs(DriverSuperClass):
         """
         #}}}
         args =  (\
+                 self._collectPaths     ,\
                  self._slices           ,\
+                 self._pctPadding       ,\
                  self._convertToPhysical,\
                  self._plotSuperKwargs  ,\
                 )
