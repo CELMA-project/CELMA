@@ -4,129 +4,61 @@
 Contains drivers for the blobs
 """
 
-from ..superClasses import DriverPointsSuperClass
-from ..timeTrace import CollectAndCalcTimeTrace
+from ..superClasses import DriverSuperClass
 from .collectAndCalcBlobs import CollectAndCalcBlobs
 from .plotBlobs import PlotBlobs
 from multiprocessing import Process
 
 #{{{driverBlobs
 def driverBlobs(collectPaths     ,\
-                     varName          ,\
-                     convertToPhysical,\
-                     mode             ,\
-                     indicesArgs      ,\
-                     indicesKwargs    ,\
-                     plotSuperKwargs  ,\
-                    ):
+                slices           ,\
+                convertToPhysical,\
+                plotSuperKwargs  ,\
+               ):
     #{{{docstring
     """
-    Driver for plotting blobses.
+    Driver for plotting blobs.
 
     Parameters
     ----------
     collectPaths : tuple
-        Paths to collect from.
-        The corresponind 't_array' of the paths must be in ascending order.
-    varName : str
-        The variable name which will be used.
+        Tuple from where to collect
+    slices : tuple of tuples
+        Tuple the indices to use.
+        On the form (xInd, yInd, zInd, tSlice)
     convertToPhysical : bool
-        Whether or not to convert to physical units.
-    mode : ["normal"|"fluct"]
-        If mode is "normal" the raw data is given as an output.
-        If mode is "fluct" the fluctuations are given as an output.
-    indicesArgs : tuple
-        Contains xInd, yInd and zInd.
-        See CollectAndCalcPointsSuperClass.setIndices for details.
-    indicesKwargs : dict
-        Contains tslice, nPoints, equallySpace and steadyStatePath.
-        See CollectAndCalcPointsSuperClass.setIndices for details.
+        Whether or not to convert to physical
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
     #}}}
 
-    blobs, uc = getBlobs(collectPaths     ,\
-                                   varName          ,\
-                                   convertToPhysical,\
-                                   mode             ,\
-                                   indicesArgs      ,\
-                                   indicesKwargs    ,\
-                                  )
+    ccb = CollectAndCalcBlobs(collectPaths, slices, convertToPhysical)
+
+    blobBinsDict, holeBinsDict, blobsAvgDict, holesAvgDict =\
+        ccb.executeCollectAndCalc()
+
+    import pdb; pdb.set_trace()
 
     # Plot
-    ptt = PlotBlobs(uc              ,\
-                         **plotSuperKwargs)
-    ptt.setData(blobs, mode)
+    ptt = PlotBlobs(ccb.uc              ,\
+                    **plotSuperKwargs)
+    ptt.setData(blobBinsDict, mode="foo")
     ptt.plotSaveShowBlobs()
 #}}}
 
-#{{{getBlobs
-def getBlobs(collectPaths     ,\
-                  varName          ,\
-                  convertToPhysical,\
-                  mode             ,\
-                  indicesArgs      ,\
-                  indicesKwargs    ,\
-                 ):
-    #{{{docstring
-    """
-    Obtains the blobs.
-
-    Parameters
-    ----------
-    See driverBlobs for details.
-
-    Returns
-    -------
-    blobses : dict
-        Dictionary where the keys are on the form "rho,theta,z".
-        The value is a dict containing of
-        {varName:blobs, "time":time}
-    uc : UnitsConverter
-        The units converter
-    """
-    #}}}
-
-    # Create collect object
-    cctt = CollectAndCalcTimeTrace(collectPaths                         ,\
-                                   mode              = mode             ,\
-                                   convertToPhysical = convertToPhysical,\
-                                  )
-
-    # Set the slice
-    cctt.setIndices(*indicesArgs, **indicesKwargs)
-
-    # Set name
-    cctt.setVarName(varName)
-
-    # Execute the collection
-    tt = cctt.executeCollectAndCalc()
-    tt = cctt.convertTo1D(tt)
-
-    # Get the blobs
-    ccrf = CollectAndCalcBlobs(collectPaths, cctt.getSlices(),\
-                                    mode, cctt.getDh(), cctt.convertToPhysical)
-    radialExBTraces = ccrf.getRadialExBTrace()
-    blobs      = ccrf.calcBlobs(tt, radialExBTraces)
-
-    return blobs, cctt.uc
-#}}}
-
 #{{{DriverBlobs
-class DriverBlobs(DriverPointsSuperClass):
+class DriverBlobs(DriverSuperClass):
     """
-    Class for driving of the plotting of the blobses.
+    Class for driving of the plotting of the blobs.
     """
 
     #{{{Constructor
-    def __init__(self                       ,\
-                 dmp_folders                ,\
-                 indicesArgs                ,\
-                 indicesKwargs              ,\
-                 plotSuperKwargs            ,\
-                 varName           = "n"    ,\
-                 mode              = "fluct",\
+    def __init__(self             ,\
+                 dmp_folders      ,\
+                 slices           ,\
+                 convertToPhysical,\
+                 plotSuperKwargs  ,\
                  **kwargs):
         #{{{docstring
         """
@@ -139,19 +71,13 @@ class DriverBlobs(DriverPointsSuperClass):
         ----------
         dmp_folders : tuple
             Tuple of the dmp_folder (output from bout_runners).
-        indicesArgs : tuple
-            Contains xInd, yInd and zInd.
-            See CollectAndCalcPointsSuperClass.setIndices for details.
-        indicesKwargs : dict
-            Contains tslice, nPoints, equallySpace and steadyStatePath.
-            See CollectAndCalcPointsSuperClass.setIndices for details.
+        slices : tuple of tuples
+            Tuple the indices to use.
+            On the form (xInd, yInd, zInd, tSlice)
+        convertToPhysical : bool
+            Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
-        varName : str
-            Name of variable to collect and plot
-        mode : ["normal"|"fluct"]
-            If mode is "normal" the raw data is given as an output.
-            If mode is "fluct" the fluctuations are given as an output.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -161,14 +87,12 @@ class DriverBlobs(DriverPointsSuperClass):
         super().__init__(dmp_folders, **kwargs)
 
         # Set the member data
-        self._varName       = varName
-        self._mode          = mode
-        self._indicesArgs   = indicesArgs
-        self._indicesKwargs = indicesKwargs
+        self._slices            = slices
+        self._convertToPhysical = convertToPhysical
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
-        plotSuperKwargs.update({"plotType"   :"blobses"})
+        plotSuperKwargs.update({"plotType"   :"blobs"})
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
@@ -180,13 +104,9 @@ class DriverBlobs(DriverPointsSuperClass):
         """
         #}}}
         args =  (\
-                 self._collectPaths    ,\
-                 self._varName         ,\
-                 self.convertToPhysical,\
-                 self._mode            ,\
-                 self._indicesArgs     ,\
-                 self._indicesKwargs   ,\
-                 self._plotSuperKwargs ,\
+                 self._slices           ,\
+                 self._convertToPhysical,\
+                 self._plotSuperKwargs  ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driverBlobs, args = args)

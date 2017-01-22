@@ -4,8 +4,10 @@
 Contains the blobs calculation
 """
 
-from ..calcVelocities import calcRadialExBPoloidal
-
+from ..collectAndCalcHelpers import DimensionsHelper
+from ..fields2D import CollectAndCalcFields2D
+from ..radialFlux import getRadialFlux
+import numpy as np
 
 #{{{CollectAndCalcBlobs
 class CollectAndCalcBlobs(object):
@@ -97,7 +99,7 @@ class CollectAndCalcBlobs(object):
 
         # Collect flux
         radialFlux, self._uc = self._collectRadialFlux()
-        self._dh = DimensionHelper(self._collectPaths[0], self._uc)
+        self._dh = DimensionsHelper(self._collectPaths[0], self._uc)
 
         # Initialize
         key = radialFlux.keys()[0]
@@ -113,7 +115,7 @@ class CollectAndCalcBlobs(object):
                 self._getWaitingTimesAndPulseWidth(indices, dt)
         windowSize = self._getWindowSize(indices, self._pctPadding)
         slices =\
-            self._transformContiguousIndicesToSlices(contiguousIndices,\
+            self._transformContiguousIndicesToSlices(indices,\
                                                      windowSize)
 
         # Collect the bins
@@ -129,7 +131,9 @@ class CollectAndCalcBlobs(object):
         perp2DBlobs, perp2DHoles =\
             self._extractBlobsAndHoles(blobsIndices, holesIndices, perp2DBins)
         timeTraceBlobs, timeTraceHoles =\
-            self._extractBlobsAndHoles(blobsIndices, holesIndices, timeTraceBins)
+            self._extractBlobsAndHoles(blobsIndices,\
+                                       holesIndices,\
+                                       timeTraceBins)
 
         # Make averages
         # +1 for symmetry
@@ -141,7 +145,7 @@ class CollectAndCalcBlobs(object):
             self._calcAverages(blobs)
 
         par2DBHolesAvg, perp2DHolesAvg, timeTraceHolesAvg =\
-            self._calcAverages(blobs)
+            self._calcAverages(holes)
 
         # Make return dicts
         blobBinsDict = {\
@@ -283,7 +287,7 @@ class CollectAndCalcBlobs(object):
         """
         #}}}
 
-        contiguousTimes = tuple(indices*dt for indices in contiguousindices)
+        contiguousTimes = tuple(indices*dt for indices in contiguousIndices)
         waitingTimes = []
         pulseWidths  = []
         for times in contiguousTimes:
@@ -336,7 +340,9 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{_transformContiguousIndicesToSlices
-    def _transformContiguousIndicesToSlices(self, contiguousIndices, windowSize):
+    def _transformContiguousIndicesToSlices(self,\
+                                            contiguousIndices,\
+                                            windowSize):
         #{{{docstring
         """
 
@@ -364,11 +370,12 @@ class CollectAndCalcBlobs(object):
             # Find the mid of the indices
             mid = int(len(indices)/2)
             # +1 for symmetry
-            curSlice = slice(indices[mid]-windowSize, indices[mid]+windowSize+1)
+            curSlice =\
+                slice(indices[mid]-windowSize, indices[mid]+windowSize+1)
             # Guard for the beginning
             if curSlice.start >= 0:
                 # Guard for the end
-                if curSlice.stop <= len(dens):
+                if curSlice.stop <= len(indices):
                     slices.append(curSlice)
         slices = tuple(slices)
 
@@ -413,8 +420,10 @@ class CollectAndCalcBlobs(object):
 
         fluct             = True
         xSlice            = None
-        ySlice            = self._ySlice
-        zSlice            = self._zSlice
+        ySlice            = None
+        zSlice            = None
+        yInd              = self._yInd
+        zInd              = self._zInd
         convertToPhysical = self._convertToPhysical
         varName           = "n"
 
@@ -424,7 +433,7 @@ class CollectAndCalcBlobs(object):
         for tSlice in slices:
             # Pependicular collection
             ccf2D = CollectAndCalcFields2D(\
-                        collectPaths              ,\
+                        self._collectPaths        ,\
                         fluct             = fluct ,\
                         mode              = "perp",\
                         convertToPhysical = convertToPhysical)
@@ -435,7 +444,7 @@ class CollectAndCalcBlobs(object):
 
             # Parallel collection
             ccf2D = CollectAndCalcFields2D(\
-                        collectPaths             ,\
+                        self._collectPaths       ,\
                         fluct             = fluct,\
                         mode              = "par",\
                         convertToPhysical = convertToPhysical)
@@ -480,7 +489,8 @@ class CollectAndCalcBlobs(object):
         thetaPos = self._dh.thetaRad[self._yInd]
         for perp2DBin in perp2DBins:
             curDict         = {}
-            curDict["n"]    = perp2DBins["n"][:, self._xInd, self._yInd, self._zInd]
+            curDict["n"]    =\
+                   perp2DBins["n"][:, self._xInd, self._yInd, self._zInd]
             curDict["time"] = perp2DBins["time"]
             curDict["pos"]  = (rhoPos, thetaPos, perp2DBins["z"])
             timeTraceBins.append(curDict)
