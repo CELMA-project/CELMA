@@ -89,7 +89,6 @@ class CollectAndCalcBlobs(object):
         key = list(self._radialFlux.keys())[0]
         flux = self._radialFlux[key]["nRadialFlux"]
         condition = flux.std()*3
-        rhoPos, thetaPos, zPos = key.split(",")
         time = self._radialFlux[key]["time"]
         self._dt = time[1] - time[0]
 
