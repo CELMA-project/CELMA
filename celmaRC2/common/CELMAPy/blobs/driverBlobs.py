@@ -83,9 +83,8 @@ def driverWaitingTimePulse(ccb, plotSuperKwargs, normed = False):
         print("No hole time statistic made as no holes were detected")
 #}}}
 
-# FIXME:
-#{{{driverTimeTraces
-def driverTimeTraces(ccb, plotSuperKwargs):
+#{{{driverBlobTimeTraces
+def driverBlobTimeTraces(ccb, plotSuperKwargs):
     #{{{docstring
     """
     Driver which plots the time traces.
@@ -102,7 +101,7 @@ def driverTimeTraces(ccb, plotSuperKwargs):
     timeTraceBlobAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
         ccb.executeCollectAndCalc1D()
 
-# FIXME:
+# FIXME: Auto detect whether average or not
     ptt = PlotBlobs(ccb.uc              ,\
                     **plotSuperKwargs)
     ptt.setData(blobBinsDict, mode="foo")
