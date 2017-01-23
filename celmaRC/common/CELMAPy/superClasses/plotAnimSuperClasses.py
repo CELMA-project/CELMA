@@ -126,8 +126,16 @@ class PlotAnimSuperClass(PlotSuperClass):
                 if self._extension is None:
                     self._extension = "mp4"
 
+                # Get the number
+                files = glob(fileName + "*")
+                if len(files) !=0:
+                    files = sorted(files)
+                    nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+                else:
+                    nr = 0
+
                 # Save the animation
-                fileName = "{}.{}".format(fileName, self._extension)
+                fileName = "{}-{}.{}".format(fileName, nr, self._extension)
                 anim.save(fileName, writer = writer)
                 print("Saved to {}".format(fileName))
         else:
