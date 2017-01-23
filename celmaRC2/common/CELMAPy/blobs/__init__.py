@@ -7,9 +7,9 @@ Init-file for blobs
 from .collectAndCalcBlobs import CollectAndCalcBlobs
 from .driverBlobs import (DriverBlobs           ,\
                           driverPlot2DData      ,\
-                          driverTimeTraces      ,\
+                          driverBlobTimeTraces  ,\
                           driverWaitingTimePulse,\
                           get2DData             ,\
                           prepareBlobs          ,\
                           )
-from .plotBlobs import PlotBlobs, PlotTemporalStats
+from .plotBlobs import PlotBlobs, PlotBlobTimeTrace
