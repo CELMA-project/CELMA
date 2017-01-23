@@ -177,7 +177,7 @@ def get2DData(ccb, mode, fluct):
 #}}}
 
 #{{{driverPlot2DData
-def driverPlot2DData(ccb, mode, fluct, varyMaxMin, plotSuperKwargs):
+def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
     #{{{docstring
     """
     Driver which plots the 2D data.
@@ -190,42 +190,49 @@ def driverPlot2DData(ccb, mode, fluct, varyMaxMin, plotSuperKwargs):
         The mode to collect.
     fluct : bool
         Whether or not the fluctuations will be collected.
-    varyMaxMin : bool
-        If the colorbar should be adjusted to the max and min of the
-        current timestep.
-        If False, the global max and min is used.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
     #}}}
 
     varName = "n"
+    # We would like all the frames to have the same max/min
+    varyMaxMin = False
 
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
         get2DData(ccb, mode, fluct)
 
-    for blob in (blobs2DAvg, *blobs2D):
-        if mode == "perp":
-            # Set the plot limits
-            tupleOfArrays = (blob[varName],)
-            vmax, vmin, levels =\
-                    getVmaxVminLevels(plotSuperKwargs,\
-                                      tupleOfArrays,\
-                                      fluct,\
-                                      varyMaxMin)
+    blobsAndHoles = ((blobs2DAvg, *blobs2D), (holes2DAvg, *holes2D))
+    for curTuple, blobOrHole in zip(blobsAndHoles,("blobs", "holes")):
+        if len(curTuple[0]) == 0:
+            continue
+        plotSuperKwargs["blobOrHole"] = blobOrHole
+        for nr, blob in enumerate(curTuple):
+            if nr == 0:
+                plotSuperKwargs["averagedBlobOrHole"] = True
+            else:
+                plotSuperKwargs["averagedBlobOrHole"] = False
+            if mode == "perp":
+                # Set the plot limits
+                tupleOfArrays = (blob[varName],)
+                vmax, vmin, levels =\
+                        getVmaxVminLevels(plotSuperKwargs,\
+                                          tupleOfArrays,\
+                                          fluct,\
+                                          varyMaxMin)
 
-            # Create the plotting object
-            p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
-                                     fluct    = fluct,\
-                                     **plotSuperKwargs)
-            p2DPerp.setContourfArguments(vmax, vmin, levels)
-            p2DPerp.setPerpData(blob["X"],\
-                                blob["Y"],\
-                                blob[varName],\
-                                blob["time"],\
-                                blob["zPos"],\
-                                varName)
-            p2DPerp.plotAndSavePerpPlane()
+                # Create the plotting object
+                p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
+                                         fluct    = fluct,\
+                                         **plotSuperKwargs)
+                p2DPerp.setContourfArguments(vmax, vmin, levels)
+                p2DPerp.setPerpData(blob["X"],\
+                                    blob["Y"],\
+                                    blob[varName],\
+                                    blob["time"],\
+                                    blob["zPos"],\
+                                    varName)
+                p2DPerp.plotAndSavePerpPlane()
 #}}}
 
 #{{{DriverBlobs
