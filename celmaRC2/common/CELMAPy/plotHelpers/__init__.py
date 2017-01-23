@@ -4,7 +4,9 @@
 
 from .plotHelper import PlotHelper
 from .plotNumberFormatter import plotNumberFormatter
-from .maxMinHelper import getMaxMinAnimation, getLevelsAnimation
+from .maxMinHelper import (getMaxMinAnimation,\
+                           getLevelsAnimation,\
+                           getVmaxVminLevels)
 import os
 import matplotlib.pyplot as plt
 
