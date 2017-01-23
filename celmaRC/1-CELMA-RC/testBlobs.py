@@ -8,10 +8,10 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.blobs import DriverBlobs, driverBlobs
+from CELMAPy.blobs import DriverBlobs, prepareBlobs, driverWaitingTimePulse
 
-#{{{testBlobs
-def testBlobs():
+#{{{testWaitingTimeAndPulseWidth
+def testWaitingTimeAndPulseWidth():
     """
     Runs the test for the blobs
     """
@@ -43,13 +43,12 @@ def testBlobs():
                        }
 
     print("\n\nTesting blobs")
-    driverBlobs(\
-                collectPaths     ,\
-                slices           ,\
-                convertToPhysical,\
-                plotSuperKwargs  ,\
-                pctPadding       ,\
-               )
+    ccb = prepareBlobs(collectPaths     ,\
+                       slices           ,\
+                       pctPadding       ,\
+                       convertToPhysical,\
+                      )
+    driverWaitingTimePulse(ccb, plotSuperKwargs)
     print("Success!\n\n")
 #}}}
 
