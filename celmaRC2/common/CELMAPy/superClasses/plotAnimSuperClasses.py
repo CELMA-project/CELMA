@@ -12,6 +12,7 @@ from ..plotHelpers import getMaxMinAnimation
 from .plotSuperClass import PlotSuperClass
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
+from glob import glob
 import numpy as np
 import matplotlib.animation as animation
 import matplotlib.pylab as plt
@@ -26,20 +27,29 @@ class PlotAnimSuperClass(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self    ,\
-                 *args   ,\
+    def __init__(self                     ,\
+                 *args                    ,\
+                 blobOrHole         = None,\
+                 averagedBlobOrHole = None,\
                  **kwargs):
         #{{{docstring
         """
         Constructor for PlotAnimSuperClass.
 
         * Calls the parent constructor
+        * Sets member data
         * Sets the animation options
 
         Parameters
         ----------
         *args : positional arguments
-            See parent constructor for details
+            See parent constructor for details.
+        blobOrHole : [None|"blobs"|"holes"]
+            Only in use when looking at blobs.
+            Used  when setting the fileName.
+        averagedBlobOrHole : [None|bool]
+            Only in use when looking at blobs.
+            Used  when setting the fileName.
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -47,6 +57,10 @@ class PlotAnimSuperClass(PlotSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
+
+        # Set member data
+        self._blobOrHole         = blobOrHole
+        self._averagedBlobOrHole = averagedBlobOrHole
 
         # Set animation and text options
         self.setAnimationOptions()
@@ -89,6 +103,10 @@ class PlotAnimSuperClass(PlotSuperClass):
         """
         Saves, show and closes the plot.
 
+        NOTE: In order to make .png and .pdf snapshots of the fields, .pngs
+              and .pdfs will not be overwritten, but gets an increasing
+              number appended the name.
+
         Parameters
         ----------
         fig : Figure
@@ -103,6 +121,11 @@ class PlotAnimSuperClass(PlotSuperClass):
             If this is less than one, a normal plot will be made.
         """
         #}}}
+
+        if self._blobOrHole is not None:
+            fileName += "-{}".format(self._blobOrHole)
+            if self._averagedBlobOrHole:
+                fileName += "-{}".format("avg")
 
         if frames > 1:
             # Animate
@@ -121,8 +144,16 @@ class PlotAnimSuperClass(PlotSuperClass):
                 if self._extension is None:
                     self._extension = "mp4"
 
+                # Get the number
+                files = glob(fileName + "*")
+                if len(files) !=0:
+                    files = sorted(files)
+                    nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+                else:
+                    nr = 0
+
                 # Save the animation
-                fileName = "{}.{}".format(fileName, self._extension)
+                fileName = "{}-{}.{}".format(fileName, nr, self._extension)
                 anim.save(fileName, writer = writer)
                 print("Saved to {}".format(fileName))
         else:
@@ -130,8 +161,16 @@ class PlotAnimSuperClass(PlotSuperClass):
                 if self._extension is None:
                     self._extension = "png"
 
+                # Get the number
+                files = glob(fileName + "*")
+                if len(files) !=0:
+                    files = sorted(files)
+                    nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+                else:
+                    nr = 0
+
                 # Save the figure
-                fileName = "{}.{}".format(fileName, self._extension)
+                fileName = "{}-{}.{}".format(fileName, nr, self._extension)
                 fig.savefig(fileName,\
                             transparent = True  ,\
                             bbox_inches = "tight",\
