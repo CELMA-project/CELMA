@@ -6,10 +6,10 @@ Contains drivers for the blobs
 
 from ..plotHelpers import getVmaxVminLevels
 from ..superClasses import DriverSuperClass
-from ..plotFields2D import (PlotAnim2DPerp,\
-                            PlotAnim2DPar,\
-                            PlotAnim2DPol,\
-                           )
+from ..fields2D import (PlotAnim2DPerp,\
+                        PlotAnim2DPar,\
+                        PlotAnim2DPol,\
+                       )
 from .collectAndCalcBlobs import CollectAndCalcBlobs
 from .plotBlobs import PlotTemporalStats, PlotBlobTimeTrace
 from multiprocessing import Process
@@ -200,7 +200,7 @@ def driverPlot2DData(ccb, mode, fluct, varyMaxMin, plotSuperKwargs):
     #}}}
 
     varName = "n"
-    
+
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
         get2DData(ccb, mode, fluct)
 

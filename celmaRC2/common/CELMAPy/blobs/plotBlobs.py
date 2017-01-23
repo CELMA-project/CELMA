@@ -4,7 +4,7 @@
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap3
-import glob as glob
+from glob import glob
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -73,7 +73,7 @@ class PlotBlobTimeTrace(PlotSuperClass):
 
         # Set the fileName
         fileName = os.path.join(self._savePath,\
-            "{}-{}".format(, self._blobOrHole))
+            "{}-{}".format(fileName, self._blobOrHole))
 
         # Get the number
         files = glob(fileName + "*")
@@ -129,13 +129,12 @@ class PlotBlobTimeTrace(PlotSuperClass):
         # Create the plot
         fig, ax = plt.subplots(figsize = self._pltSize)
 
-        # Waiting time
-        ax.plot(self._var ,\
-                self._time,\
+        # Do the plotting
+        ax.plot(self._time,\
+                self._var ,\
                )
         ax.set_xlabel(self._xLabel)
-        ax.set_ylabel(self._yLabelW)
-        ax.set_title(self._wTitle)
+        ax.set_ylabel(self._yLabel)
 
         # Set the title
         fig.suptitle(self._title)
