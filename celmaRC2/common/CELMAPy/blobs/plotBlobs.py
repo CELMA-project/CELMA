@@ -4,6 +4,7 @@
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap3
+import glob as glob
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -57,21 +58,35 @@ class PlotBlobTimeTrace(PlotSuperClass):
         #}}}
 
         # Set the member data
-        self._theAverage     = theAverage
-        self._individualBins = individualBins
-        self._blobOrHole     = blobOrHole
+        self._var        = theDict.pop("n")
+        self._time       = theDict.pop("time")
+        self._pos        = theDict.pop("pos")
+        self._blobOrHole = blobOrHole
+
+        self._avg = True if self._time[0] < 0 else False
+
+        avg = "-avg" if self._avg else ""
+
+        fileName = "timeTrace-{}{}".format(self._blobOrHole, avg)
 
         self._prepareLabels()
 
         # Set the fileName
-        self._fileName =\
-            os.path.join(self._savePath,\
-            "{}-{}".format("temporalStats", self._blobOrHole))
+        fileName = os.path.join(self._savePath,\
+            "{}-{}".format(, self._blobOrHole))
+
+        # Get the number
+        files = glob(fileName + "*")
+        if len(files) !=0:
+            files = sorted(files)
+            nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+        else:
+            nr = 0
 
         if self._extension is None:
             self._extension = "png"
 
-        self._fileName = "{}.{}".format(self._fileName, self._extension)
+        self._fileName = "{}-{}.{}".format(fileName, nr, self._extension)
     #}}}
 
     #{{{_prepareLabels
@@ -83,73 +98,50 @@ class PlotBlobTimeTrace(PlotSuperClass):
         # Set x and y labels
         if self.uc.convertToPhysical:
             units  = r"$[\mathrm{s}]$"
-            yUnits = r"$[\mathrm{s}^{-1}]$"
+            yUnits = r"$[\mathrm{m}^{-3}]$"
             normalization  = ""
             yNormalization = ""
         else:
             units  = ""
             yUnits = ""
             normalization  = r"$\om_{ci}$"
-            yNormalization = r"$/\om_{ci}$"
+            yNormalization = r"$/n_0$"
 
-        self._xLabel  = r"$t$ " + normalization + units
-        if self._normed:
-            self._yLabelW = r"$\mathrm{PDF}(\mathrm{Waiting\;time}$ " +\
-                            normalization +\
-                            "$) $" +\
-                            units
-            self._yLabelP = r"$\mathrm{PDF}(\mathrm{Pulse\;width}$ " +\
-                            normalization +\
-                            "$) $" +\
-                            units
-        else:
-            self._yLabelW = r"$\mathrm{Waiting\;time\;count}$"
-            self._yLabelP = r"$\mathrm{Pulse\;width\;count}$"
+        self._xLabel = r"$t$ " + normalization + units
+        self._yLabel = r"$\widetilde{n}$ " +\
+                       yNormalization +\
+                       yUnits
 
         # Set title
-        self._title = r"$\mathrm{{Temporal \;statistics \;for \;{}}}$".\
-                        format(self._blobOrHole)
-        self._wTitle = r"$\mathrm{Waiting \;time}$"
-        self._pTitle = r"$\mathrm{Pulse \;width}$"
+        if self._avg:
+            self._title = r"$\mathrm{{Average \;{}}}$".format(self._blobOrHole)
+        else:
+            self._title = r"$\mathrm{{{}}}$".\
+                    format(self._blobOrHole.capitalize())
     #}}}
 
-    #{{{plotSaveShowTemporalStats
-    def plotSaveShowTemporalStats(self):
+    #{{{plotSaveShowTimeTrace
+    def plotSaveShowTimeTrace(self):
         """
         Performs the actual plotting.
         """
 
         # Create the plot
-        fig, (wAx, pAx) =\
-                plt.subplots(nrows=1, ncols=2, figsize = self._pltSize)
+        fig, ax = plt.subplots(figsize = self._pltSize)
 
         # Waiting time
-        wAx.hist(self._pulseWidths    ,\
-                 self._bins           ,\
-                 normed = self._normed,\
-                 alpha  = 0.75)
-        wAx.set_xlabel(self._xLabel)
-        wAx.set_ylabel(self._yLabelW)
-        wAx.set_title(self._wTitle)
-
-        # Pulse width
-        pAx.hist(self._waitingTimes   ,\
-                 self._bins           ,\
-                 normed = self._normed,\
-                 alpha  = 0.75)
-        pAx.set_xlabel(self._xLabel)
-        pAx.set_ylabel(self._yLabelP)
-        pAx.set_title(self._pTitle)
+        ax.plot(self._var ,\
+                self._time,\
+               )
+        ax.set_xlabel(self._xLabel)
+        ax.set_ylabel(self._yLabelW)
+        ax.set_title(self._wTitle)
 
         # Set the title
         fig.suptitle(self._title)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(wAx, rotation = 45, legend = False)
-        self._ph.makePlotPretty(pAx, rotation = 45, legend = False)
-
-        # Adjust the subplots
-        fig.subplots_adjust(hspace=0.2, wspace=0.35)
+        self._ph.makePlotPretty(ax, rotation = 45, legend = False)
 
         if self._showPlot:
             plt.show()
@@ -255,13 +247,13 @@ class PlotTemporalStats(PlotSuperClass):
         self._xLabel  = r"$t$ " + normalization + units
         if self._normed:
             self._yLabelW = r"$\mathrm{PDF}(\mathrm{Waiting\;time}$ " +\
-                            normalization +\
+                            yNormalization +\
                             "$) $" +\
-                            units
+                            yUnits
             self._yLabelP = r"$\mathrm{PDF}(\mathrm{Pulse\;width}$ " +\
-                            normalization +\
+                            yNormalization +\
                             "$) $" +\
-                            units
+                            yUnits
         else:
             self._yLabelW = r"$\mathrm{Waiting\;time\;count}$"
             self._yLabelP = r"$\mathrm{Pulse\;width\;count}$"
