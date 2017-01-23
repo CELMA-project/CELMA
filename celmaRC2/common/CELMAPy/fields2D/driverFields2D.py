@@ -4,7 +4,7 @@
 Contains single driver and driver class for 2D fields
 """
 
-from ..plotHelpers import getMaxMinAnimation, getLevelsAnimation
+from ..plotHelpers import getVmaxVminLevels
 from ..superClasses import DriverPlotFieldsSuperClass
 from ..collectAndCalcHelpers import findLargestRadialGradN
 from .collectAndCalcFields2D import CollectAndCalcFields2D
@@ -15,62 +15,6 @@ from .plotFields2D import (PlotAnim2DPerp,\
                            PlotAnim2DPerpPol,\
                            )
 from multiprocessing import Process
-
-#{{{getVmaxVminLevels
-def getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin):
-    #{{{docstring
-    """
-    Getter for vmax, vmin, levels
-
-    Parameters
-    ----------
-    plotSuperKwargs : dict
-        Keyword arguments for the plot super class
-    tupleOfArrays : tuple
-        Tuple of the arrays to find the max and min of.
-
-    Returns
-    -------
-    vmax : tuple
-        Tuple of the vmax values used in contourf
-    vmin : tuple
-        Tuple of the vmin values used in contourf
-    levels : tuple
-        Tuple of the levels values used in contourf
-    fluct : bool
-        If the variables are fluctuating or not (will symmetrize the max
-        and the min)
-        Only active if plotSuperKwargs["vmax"] is not set
-    varyMaxMin : bool
-        If the max and min allowed to vary
-        Only active if plotSuperKwargs["vmax"] is not set
-    """
-    #}}}
-    if "vmax" in plotSuperKwargs.keys():
-        if plotSuperKwargs["vmax"] is not None:
-            vmax = plotSuperKwargs.pop("vmax")
-            vmin = plotSuperKwargs.pop("vmin")
-        else:
-            plotSuperKwargs.pop("vmax")
-            plotSuperKwargs.pop("vmin")
-            vmax, vmin = getMaxMinAnimation(tupleOfArrays,\
-                                            fluct        ,\
-                                            varyMaxMin)
-    else:
-        vmax, vmin = getMaxMinAnimation(tupleOfArrays,\
-                                        fluct        ,\
-                                        varyMaxMin)
-    if "levels" in plotSuperKwargs.keys():
-        if plotSuperKwargs["levels"] is not None:
-            levels = plotSuperKwargs.pop("levels")
-        else:
-            plotSuperKwargs.pop("levels")
-            levels = getLevelsAnimation(vmax, vmin, 100)
-    else:
-        levels = getLevelsAnimation(vmax, vmin, 100)
-
-    return vmax, vmin, levels
-#}}}
 
 #{{{driver2DFieldPerpSingle
 def driver2DFieldPerpSingle(collectPaths     ,\
@@ -134,7 +78,8 @@ def driver2DFieldPerpSingle(collectPaths     ,\
 
     # Set the plot limits
     tupleOfArrays = (perp2D[varName],)
-    vmax, vmin, levels = getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+    vmax, vmin, levels =\
+        getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPerp = PlotAnim2DPerp(ccf2D.uc        ,\
@@ -213,7 +158,8 @@ def driver2DFieldParSingle(collectPaths     ,\
 
     # Set the plot limits
     tupleOfArrays = (par2D[varName],)
-    vmax, vmin, levels = getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+    vmax, vmin, levels =\
+        getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPar = PlotAnim2DPar(ccf2D.uc        ,\
@@ -293,7 +239,8 @@ def driver2DFieldPolSingle(collectPaths     ,\
 
     # Set the plot limits
     tupleOfArrays = (pol2D[varName],)
-    vmax, vmin, levels = getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+    vmax, vmin, levels =\
+        getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPol = PlotAnim2DPol(ccf2D.uc        ,\
@@ -383,7 +330,7 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
     # Set the plot limits
     tupleOfArrays = (perp2D[varName], par2D[varName])
     vmax, vmin, levels =\
-            getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+        getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPerpPar = PlotAnim2DPerpPar(ccf2D.uc        ,\
@@ -480,7 +427,8 @@ def driver2DFieldPerpPolSingle(collectPaths     ,\
 
     # Set the plot limits
     tupleOfArrays = (perp2D[varName], pol2D[varName])
-    vmax, vmin, levels = getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
+    vmax, vmin, levels =\
+        getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
     # Create the plotting object
     p2DPerpPol = PlotAnim2DPerpPol(ccf2D.uc        ,\
@@ -679,7 +627,8 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
-            processes = Process(target = driver2DFieldPerpParSingle, args = args)
+            processes =\
+                Process(target = driver2DFieldPerpParSingle, args = args)
             processes.start()
         else:
             driver2DFieldPerpParSingle(*args)
@@ -707,7 +656,8 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._plotSuperKwargs ,\
                 )
         if self._useSubProcess:
-            processes = Process(target = driver2DFieldPerpPolSingle, args = args)
+            processes =\
+                Process(target = driver2DFieldPerpPolSingle, args = args)
             processes.start()
         else:
             driver2DFieldPerpPolSingle(*args)

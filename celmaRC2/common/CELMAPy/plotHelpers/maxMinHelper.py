@@ -141,3 +141,59 @@ def getLevelsAnimation(vMax, vMin, nCont):
 
     return tuple(levels)
 #}}}
+
+#{{{getVmaxVminLevels
+def getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin):
+    #{{{docstring
+    """
+    Getter for vmax, vmin, levels
+
+    Parameters
+    ----------
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class
+    tupleOfArrays : tuple
+        Tuple of the arrays to find the max and min of.
+
+    Returns
+    -------
+    vmax : tuple
+        Tuple of the vmax values used in contourf
+    vmin : tuple
+        Tuple of the vmin values used in contourf
+    levels : tuple
+        Tuple of the levels values used in contourf
+    fluct : bool
+        If the variables are fluctuating or not (will symmetrize the max
+        and the min)
+        Only active if plotSuperKwargs["vmax"] is not set
+    varyMaxMin : bool
+        If the max and min allowed to vary
+        Only active if plotSuperKwargs["vmax"] is not set
+    """
+    #}}}
+    if "vmax" in plotSuperKwargs.keys():
+        if plotSuperKwargs["vmax"] is not None:
+            vmax = plotSuperKwargs.pop("vmax")
+            vmin = plotSuperKwargs.pop("vmin")
+        else:
+            plotSuperKwargs.pop("vmax")
+            plotSuperKwargs.pop("vmin")
+            vmax, vmin = getMaxMinAnimation(tupleOfArrays,\
+                                            fluct        ,\
+                                            varyMaxMin)
+    else:
+        vmax, vmin = getMaxMinAnimation(tupleOfArrays,\
+                                        fluct        ,\
+                                        varyMaxMin)
+    if "levels" in plotSuperKwargs.keys():
+        if plotSuperKwargs["levels"] is not None:
+            levels = plotSuperKwargs.pop("levels")
+        else:
+            plotSuperKwargs.pop("levels")
+            levels = getLevelsAnimation(vmax, vmin, 100)
+    else:
+        levels = getLevelsAnimation(vmax, vmin, 100)
+
+    return vmax, vmin, levels
+#}}}
