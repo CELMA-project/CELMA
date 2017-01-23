@@ -98,14 +98,26 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs):
     """
     #}}}
 
-    timeTraceBlobAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
+    timeTraceBlosbAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
         ccb.executeCollectAndCalc1D()
 
-# FIXME: Auto detect whether average or not
-    ptt = PlotBlobs(ccb.uc              ,\
-                    **plotSuperKwargs)
-    ptt.setData(blobBinsDict, mode="foo")
-    ptt.plotSaveShowBlobs()
+    pbtt = PlotBlobTimeTrace(ccb.uc, **plotSuperKwargs)
+
+    # Blobs
+    if len(timeTraceBlobs) > 0:
+        for theDict in (timeTraceBlobsAvg, *timeTraceBlobs):
+            pbtt.setData(theDict, "blobs")
+            pbtt.plotSaveShowTimeTrace()
+    else:
+        print("No blobs plotted as no blobs were detected")
+
+    # Holes
+    if len(timeTraceHoles) > 0:
+        for theDict in (timeTraceHolesAvg, *timeTraceHoles):
+            pbtt.setData(theDict, "holes")
+            pbtt.plotSaveShowTimeTrace()
+    else:
+        print("No holes plotted as no holes were detected")
 #}}}
 
 # FIXME:
