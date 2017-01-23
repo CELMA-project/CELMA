@@ -115,7 +115,7 @@ class CollectAndCalcBlobs(object):
 
         # Make averages
         # +1 for symmetry
-        self._windowTime = np.array(range(-windowSize,windowSize+1))*self._dt
+        self._windowTime = np.array(range(-windowSize, windowSize+1))*self._dt
     #}}}
 
     #{{{getRadialFlux
@@ -449,9 +449,13 @@ class CollectAndCalcBlobs(object):
         for indices in contiguousIndices:
             # Find the mid of the indices
             mid = int(len(indices)/2)
-            # +1 for symmetry
+            # NOTE: boutdata.collect includes the last point, whereas
+            #       the slice does not.
+            #       When this slice is used for collecting in
+            #       boutdata.collect, the last point will be included so
+            #       that the window would be symmetric
             curSlice =\
-                slice(indices[mid]-windowSize, indices[mid]+windowSize+1)
+                slice(indices[mid]-windowSize, indices[mid]+windowSize)
             # Guard for the beginning
             if curSlice.start >= 0:
                 # Guard for the end
