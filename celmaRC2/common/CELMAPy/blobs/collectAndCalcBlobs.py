@@ -82,8 +82,8 @@ class CollectAndCalcBlobs(object):
             return
 
         # Collect flux
-        self._radialFlux, self._uc = self._collectRadialFlux()
-        self._dh = DimensionsHelper(self._collectPaths[0], self._uc)
+        self._radialFlux, self.uc = self._collectRadialFlux()
+        self._dh = DimensionsHelper(self._collectPaths[0], self.uc)
 
         # Initialize
         key = list(self._radialFlux.keys())[0]
