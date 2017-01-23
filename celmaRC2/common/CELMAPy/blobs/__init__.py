@@ -12,4 +12,4 @@ from .driverBlobs import (DriverBlobs           ,\
                           get2DData             ,\
                           prepareBlobs          ,\
                           )
-from .plotBlobs import PlotBlobs, PlotBlobTimeTrace
+from .plotBlobs import PlotBlobTimeTrace, PlotTemporalStats
