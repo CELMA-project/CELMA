@@ -4,9 +4,14 @@
 Contains drivers for the blobs
 """
 
+from ..plotHelpers import getVmaxVminLevels
 from ..superClasses import DriverSuperClass
+from ..plotFields2D import (PlotAnim2DPerp,\
+                            PlotAnim2DPar,\
+                            PlotAnim2DPol,\
+                           )
 from .collectAndCalcBlobs import CollectAndCalcBlobs
-from .plotBlobs import PlotBlobs, PlotTemporalStats
+from .plotBlobs import PlotTemporalStats, PlotBlobTimeTrace
 from multiprocessing import Process
 
 #{{{prepareBlobs
@@ -64,8 +69,10 @@ def driverWaitingTimePulse(ccb, plotSuperKwargs, normed = False):
     """
     #}}}
 
-    holesWaitingTime, holesPulseWidths = ccb.getWaitingTimesAndPulseWidth("holes")
-    blobsWaitingTime, blobsPulseWidths = ccb.getWaitingTimesAndPulseWidth("blobs")
+    holesWaitingTime, holesPulseWidths =\
+        ccb.getWaitingTimesAndPulseWidth("holes")
+    blobsWaitingTime, blobsPulseWidths =\
+        ccb.getWaitingTimesAndPulseWidth("blobs")
 
     pts = PlotTemporalStats(ccb.uc          ,\
                             **plotSuperKwargs)
@@ -98,7 +105,7 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs):
     """
     #}}}
 
-    timeTraceBlosbAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
+    timeTraceBlobsAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
         ccb.executeCollectAndCalc1D()
 
     pbtt = PlotBlobTimeTrace(ccb.uc, **plotSuperKwargs)
@@ -166,11 +173,11 @@ def get2DData(ccb, mode, fluct):
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
         ccb.executeCollectAndCalc2D(mode, fluct)
 
-    return blobsAvg2D, blobs2D, holesAvg2D, holes2D
+    return blobs2DAvg, blobs2D, holes2DAvg, holes2D
 #}}}
 
 #{{{driverPlot2DData
-def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
+def driverPlot2DData(ccb, mode, fluct, varyMaxMin, plotSuperKwargs):
     #{{{docstring
     """
     Driver which plots the 2D data.
@@ -183,16 +190,21 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
         The mode to collect.
     fluct : bool
         Whether or not the fluctuations will be collected.
+    varyMaxMin : bool
+        If the colorbar should be adjusted to the max and min of the
+        current timestep.
+        If False, the global max and min is used.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     """
     #}}}
 
-    blobsAvg2D, blobs2D, holesAvg2D, holes2D =\
+    varName = "n"
+    
+    blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
         get2DData(ccb, mode, fluct)
 
-YOU ARE HERE
-    for blob in (blobsAvg2D, *blobs2D):
+    for blob in (blobs2DAvg, *blobs2D):
         if mode == "perp":
             # Set the plot limits
             tupleOfArrays = (blob[varName],)
@@ -203,7 +215,7 @@ YOU ARE HERE
                                       varyMaxMin)
 
             # Create the plotting object
-            p2DPerp = PlotAnim2DPerp(ccf2D.uc        ,\
+            p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
                                      fluct    = fluct,\
                                      **plotSuperKwargs)
             p2DPerp.setContourfArguments(vmax, vmin, levels)
@@ -212,7 +224,7 @@ YOU ARE HERE
                                 blob[varName],\
                                 blob["time"],\
                                 blob["zPos"],\
-                                "n")
+                                varName)
             p2DPerp.plotAndSavePerpPlane()
 #}}}
 
@@ -271,24 +283,25 @@ class DriverBlobs(DriverSuperClass):
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{driverBlobs
-    def driverBlobs(self):
-        #{{{docstring
-        """
-        Wrapper to driverBlobs
-        """
-        #}}}
-        args =  (\
-                 self._collectPaths     ,\
-                 self._slices           ,\
-                 self._pctPadding       ,\
-                 self._convertToPhysical,\
-                 self._plotSuperKwargs  ,\
-                )
-        if self._useSubProcess:
-            processes = Process(target = driverBlobs, args = args)
-            processes.start()
-        else:
-            driverBlobs(*args)
-    #}}}
-#}}}
+# FIXME: The drivers needs an update
+#    #{{{driverBlobs
+#    def driverBlobs(self):
+#        #{{{docstring
+#        """
+#        Wrapper to driverBlobs
+#        """
+#        #}}}
+#        args =  (\
+#                 self._collectPaths     ,\
+#                 self._slices           ,\
+#                 self._pctPadding       ,\
+#                 self._convertToPhysical,\
+#                 self._plotSuperKwargs  ,\
+#                )
+#        if self._useSubProcess:
+#            processes = Process(target = driverBlobs, args = args)
+#            processes.start()
+#        else:
+#            driverBlobs(*args)
+#    #}}}
+##}}}
