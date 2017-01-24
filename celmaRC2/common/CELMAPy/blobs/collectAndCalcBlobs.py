@@ -7,6 +7,8 @@ Contains the blobs calculation
 from ..collectAndCalcHelpers import DimensionsHelper, polAvg
 from ..fields2D import CollectAndCalcFields2D
 from ..radialFlux import getRadialFlux
+from itertools import starmap
+from multiprocessing import Pool
 import numpy as np
 
 #{{{CollectAndCalcBlobs
@@ -16,11 +18,12 @@ class CollectAndCalcBlobs(object):
     """
 
     #{{{constructor
-    def __init__(self             ,\
-                 collectPaths     ,\
-                 slices           ,\
-                 convertToPhysical,\
-                 pctPadding = 400 ,\
+    def __init__(self                ,\
+                 collectPaths        ,\
+                 slices              ,\
+                 convertToPhysical   ,\
+                 pctPadding    = 400 ,\
+                 useSubProcess = True,\
                  ):
         #{{{docstring
         """
@@ -47,6 +50,7 @@ class CollectAndCalcBlobs(object):
         self._collectPaths      = collectPaths
         self._convertToPhysical = convertToPhysical
         self._pctPadding        = pctPadding
+        self._useSubProcess     = useSubProcess
         self._xInd, self._yInd, self._zInd, self._tSlice = slices
 
         self._notCalled = ["prepareCollectAndCalc"]
@@ -98,18 +102,18 @@ class CollectAndCalcBlobs(object):
 
         # Correct for the start of tSlice
         maxInd = len(time)-1 + self._tSlice.start
-        slices =\
+        self._tSlices =\
             self._transformContiguousIndicesToSlices(self._indices   ,\
                                                      windowSize,\
                                                      maxInd    ,\
                                                      )
         # Collect the bins
-        self._perp2DBins = self._collect2DBins(slices, False, "perp")
+        self._perp2DBins = self._collect2DBins(self._tSlices, False, "perp")
         self._timeTraceBins, self._perp2DBinsFluct =\
                 self._getTimeTraceBins(self._perp2DBins)
 
         # Sort into blobs and holes
-        self._midIndex = int((slices[0].stop - slices[0].start)/2)
+        self._midIndex = int((self._tSlices[0].stop - self._tSlices[0].start)/2)
         self._blobsIndices, self._holesIndices =\
             self._identifyBlobsAndHoles(self._timeTraceBins, self._midIndex)
 
@@ -281,7 +285,7 @@ class CollectAndCalcBlobs(object):
             raise RuntimeError(message)
 
         if mode != "perp":
-            bins2D = self._collect2DBins(slices, fluct, mode)
+            bins2D = self._collect2DBins(self._tSlices, fluct, mode)
         else:
             if fluct:
                 bins2D = self._perp2DBinsFluct
@@ -423,7 +427,7 @@ class CollectAndCalcBlobs(object):
                                             ):
         #{{{docstring
         """
-        Transforms the contiguous indices to slices.
+        Transforms the contiguous indices to tSlices.
 
         Parameters
         ----------
@@ -438,14 +442,13 @@ class CollectAndCalcBlobs(object):
 
         Returns
         -------
-        slices : tuple
-            Tuple of slices, where the individual slices are the slices
+        tSlices : tuple
+            Tuple of time slices, where the individual slice is the slice
             which will be used to collect a bin.
         """
         #}}}
 
-        # Transform to slices
-        slices = []
+        tSlices = []
         for indices in contiguousIndices:
             # Find the mid of the indices
             mid = int(len(indices)/2)
@@ -460,23 +463,23 @@ class CollectAndCalcBlobs(object):
             if curSlice.start >= 0:
                 # Guard for the end
                 if curSlice.stop <= maxInd:
-                    slices.append(curSlice)
+                    tSlices.append(curSlice)
 
-        slices = tuple(slices)
+        tSlices = tuple(tSlices)
 
-        return slices
+        return tSlices
     #}}}
 
     #{{{_collect2DBins
-    def _collect2DBins(self, slices, fluct, mode):
+    def _collect2DBins(self, tSlices, fluct, mode):
         #{{{docstring
         """
         Collects the bins which will be used in the average.
 
         Parameters
         ----------
-        slices : tuple
-            Tuple of slices, where the individual slices are the slices
+        tSlices : tuple
+            Tuple of time slices, where the individual slice is the slice
             which will be used to collect a bin.
         fluct : bool
             Whether or not to collect the fluctuations only.
@@ -499,42 +502,83 @@ class CollectAndCalcBlobs(object):
         """
         #}}}
 
+        args = tuple((tSlice, fluct, mode) for tSlice in tSlices)
+        if self._useSubProcess:
+            # Set a max of 10 processors in order not to saturate the memory
+            with Pool(10) as p:
+                # Here using Pool.starmap
+                tupleOfBins2D = tuple(p.starmap(self._collect2DBin, args))
+        else:
+            # Here using itertools.starmap
+            tupleOfBins2D = tuple(starmap(self._collect2DBin, args))
+
+        return tupleOfBins2D
+    #}}}
+
+    #{{{_collect2DBin
+    def _collect2DBin(self, tSlice, fluct, mode):
+        #{{{docstring
+        """
+        Collects the bins which will be used in the average.
+
+        Parameters
+        ----------
+        tSlices : tuple
+            Tuple of time slices, where the individual slice is the slice
+            which will be used to collect a bin.
+        fluct : bool
+            Whether or not to collect the fluctuations only.
+        mode : ["perp"|"par"|"pol"]
+            Type of 2D calculation.
+
+        Returns
+        -------
+        bin : dict
+            A dict with the keys:
+                * "n"    - A 3d array (a 2d spatial array of each time)
+                           of the collected variable.
+                * "nPPi" - The field at pi away from the varName field
+                           (only if "type" == "par")
+                * "X"    - The cartesian x mesh to the field
+                * "Y"    - The cartesian Y mesh to the field
+                * "time" - The time trace
+                * pos    - The position of the fixed index
+        """
+        #}}}
+
         xSlice            = None
         ySlice            = None
         zSlice            = None
         xInd              = self._xInd
         yInd              = self._yInd
         zInd              = self._zInd
+
         convertToPhysical = self._convertToPhysical
         varName           = "n"
 
-        tupleOfBins2D = []
+        # Pependicular collection
+        ccf2D = CollectAndCalcFields2D(\
+                    self._collectPaths        ,\
+                    fluct             = fluct ,\
+                    mode              = mode  ,\
+                    convertToPhysical = convertToPhysical)
 
-        # FIXME: Consider to make a multiprocess out of this
-        for tSlice in slices:
-            # Pependicular collection
-            ccf2D = CollectAndCalcFields2D(\
-                        self._collectPaths        ,\
-                        fluct             = fluct ,\
-                        mode              = mode  ,\
-                        convertToPhysical = convertToPhysical)
+        if mode == "perp":
+            ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
+        elif mode == "par":
+            ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
+        elif mode == "pol":
+            ccf2D.setSlice(xInd, yInd, zSlice, tSlice)
+        else:
+            message =\
+                "'mode' expected 'perp', 'par' or 'pol', but got '{}'".\
+                format(mode)
+            raise ValueError(message)
 
-            if mode == "perp":
-                ccf2D.setSlice(xSlice, yInd, zSlice, tSlice)
-            elif mode == "par":
-                ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
-            elif mode == "pol":
-                ccf2D.setSlice(xInd, yInd, zSlice, tSlice)
-            else:
-                message =\
-                    "'mode' expected 'perp', 'par' or 'pol', but got '{}'".\
-                    format(mode)
-                raise ValueError(message)
+        ccf2D.setVarName(varName)
+        bin = ccf2D.executeCollectAndCalc()
 
-            ccf2D.setVarName(varName)
-            tupleOfBins2D.append(ccf2D.executeCollectAndCalc())
-
-        return tupleOfBins2D
+        return bin
     #}}}
 
     #{{{_getTimeTraceBins
