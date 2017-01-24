@@ -166,7 +166,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
     #}}}
 
     @staticmethod
-    #{{{makeGetDatatArgs
+    #{{{makeGetDataArgs
     def makeGetDataArgs(varName          ,\
                         convertToPhysical,\
                         indicesArgs      ,\

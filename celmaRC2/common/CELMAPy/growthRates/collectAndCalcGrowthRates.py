@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains class to calculate the and the growth rate and angular velocity
+Contains class to calculate the growth rate and angular velocity
 of a time trace of a spatial FFT.
 """
 
@@ -208,13 +208,13 @@ class CollectAndCalcGrowthRates(object):
             indicesKwargs.update({"tSlice" : tSlice})
 
             fm, positionTuple, uc = \
-                self._collectAndCalcFourierModes(scanPaths        ,\
-                                                 varName          ,\
-                                                 convertToPhysical,\
-                                                 steadyStatePath  ,\
-                                                 indicesArgs      ,\
-                                                 indicesKwargs    ,\
-                                                )
+                self.collectAndCalcFourierModes(scanPaths        ,\
+                                                varName          ,\
+                                                convertToPhysical,\
+                                                steadyStatePath  ,\
+                                                indicesArgs      ,\
+                                                indicesKwargs    ,\
+                                               )
 
             # NOTE: We skip the offset mode.
             #       Thus, we add 1 in the range in order to look at
@@ -262,15 +262,17 @@ class CollectAndCalcGrowthRates(object):
         return growthRateDataFrame, positionTuple, uc
     #}}}
 
-    #{{{_collectAndCalcFourierModes
-    def _collectAndCalcFourierModes(self             ,\
-                                    scanPaths        ,\
-                                    varName          ,\
-                                    convertToPhysical,\
-                                    steadyStatePath  ,\
-                                    indicesArgs      ,\
-                                    indicesKwargs    ,\
-                                   ):
+    @staticmethod
+    #{{{collectAndCalcFourierModes
+    def collectAndCalcFourierModes(scanPaths                 ,\
+                                   varName                   ,\
+                                   convertToPhysical         ,\
+                                   steadyStatePath           ,\
+                                   indicesArgs               ,\
+                                   indicesKwargs             ,\
+                                   calcMagnitude       = True,\
+                                   calcAngularVelocity = True,\
+                                  ):
         #{{{docstring
         """
         Collects and calculates the fourier modes.
@@ -290,6 +292,10 @@ class CollectAndCalcGrowthRates(object):
         indicesKwargs : dict
             Keyword arguments to use when setting the indices for
             collecting.
+        calcMagnitude : bool
+            If the magnitude should be collected.
+        calcAngularVelocity : bool
+            If the angular velocity should be collected.
 
         Returns
         -------
@@ -319,8 +325,10 @@ class CollectAndCalcGrowthRates(object):
         # Execute the collection
         fm = ccfm.executeCollectAndCalc()
         fm = ccfm.convertTo2D(fm)
-        fm = ccfm.calcMagnitude(fm)
-        fm = ccfm.calcAngularVelocity(fm)
+        if calcMagnitude:
+            fm = ccfm.calcMagnitude(fm)
+        if calcAngularVelocity:
+            fm = ccfm.calcAngularVelocity(fm)
 
         # NOTE: Theta remains unspecified as we have done a fourier transform
         firstKey = tuple(fm.keys())[0]
