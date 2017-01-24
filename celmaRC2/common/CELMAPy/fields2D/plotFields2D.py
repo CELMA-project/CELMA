@@ -350,8 +350,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
             contourf(self._X_RZ, self._Y_RZ, self._Z_RZ[tInd, :, :],\
                      **self._cfKwargs)
         # Plot the negative parallel plane
-        parPlane =\
-        self._parAx.\
+        parPlane = self._parAx.\
             contourf(-self._X_RZ, self._Y_RZ, self._Z_RZ_PPi[tInd, :, :],\
                      **self._cfKwargs)
 
