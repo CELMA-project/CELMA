@@ -111,7 +111,7 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
                                 axis=-1),\
                             axis=-1)
                 modeAvg = timeAvg(mode)
-                modeStd = timeAvg((mode - modeAvg)**2.0)
+                modeStd = np.sqrt(timeAvg((mode - modeAvg)**2.0))
 
                 # Flatten again after timeAvg
                 modesAvg[i] = modeAvg.flatten()

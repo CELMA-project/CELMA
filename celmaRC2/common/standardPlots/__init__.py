@@ -8,6 +8,7 @@ from .fields1D import fields1DAnimation
 from .fields2D import fields2DAnimation
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
+from .magnitudeSpectrum import magnitudeSpectrumPlot
 from .energy import energyPlot
 from .performance import performancePlot
 from .posOfFluct import posOfFluctPlot

@@ -67,11 +67,11 @@ def driverTest():
     Runs the test for the magnitude spectrum
     """
 
-    dmp_folders  = ("CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1",)
+    dmp_folders  = ("CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1",)
     collectPaths =\
        (\
-        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
-        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/"\
+        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
        )
 
     useSubProcess = False
@@ -83,11 +83,11 @@ def driverTest():
     xInd              = None
     yInd              = 16
     zInd              = None
-    tSlice            = None
+    tSlice            = slice(1000,None)
     nPoints           = 3
     equallySpace      = "x"
 
-    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
+    steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
     indicesArgs   = (xInd, yInd, zInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
@@ -105,22 +105,21 @@ def driverTest():
                         "dmp_folders"  : None,\
                        }
 
-    print("\n\nTesting fourier mode driver")
-    dFM = DriverMagnitudeSpectrum(
+    print("\n\nTesting magnitude spectrum driver")
+    dMS = DriverMagnitudeSpectrum(
                      # DriverMagnitudeSpectrum
-                     dmp_folders                ,\
-                     indicesArgs                ,\
-                     indicesKwargs              ,\
-                     plotSuperKwargs            ,\
-                     varName           = varName,\
-                     nModes            = nModes ,\
+                     dmp_folders              ,\
+                     indicesArgs              ,\
+                     indicesKwargs            ,\
+                     plotSuperKwargs          ,\
+                     varName         = varName,\
                      # DriverPointsSuperClass
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                           )
-    dFM.driverFourierMode()
+    dMS.driverMagnitudeSpectrum()
     print("Success!\n\n")
 #}}}
 

@@ -19,6 +19,8 @@ from .fields2D import fields2DAnimation
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
+from .growthRates import growthRatesPlot
+from .magnitudeSpectrum import magnitudeSpectrumPlot
 from .performance import performancePlot
 from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
@@ -396,6 +398,36 @@ class PlotSubmitter(object):
                 )
         self.sub.setJobName("growthRates")
         self.sub.submitFunction(growthRatesPlot, args=args)
+    #}}}
+
+    #{{{runMagnitudeSpectrum
+    def runMagnitudeSpectrum(self):
+        """
+        Runs the magnitude spectrum
+        """
+
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._dmpFolders["expand"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, steadyStatePath, key, nr in loopOver:
+
+            tSlice = self._findSlices(dmp_folders, self._linearTSlices)
+            if tSlice is None:
+                continue
+
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders   = (dmp_folders,)
+            args = (dmp_folders,\
+                    collectPaths,\
+                    steadyStatePath,\
+                    self._plotSuperKwargs)
+
+            kwargs = {}
+            self.sub.setJobName("magnitudeSpectrum{}".format(nr))
+            self.sub.submitFunction(magnitudeSpectrumPlot, args=args, kwargs=kwargs)
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
     #}}}
 
     #{{{runSnapShotsSameScanVal
