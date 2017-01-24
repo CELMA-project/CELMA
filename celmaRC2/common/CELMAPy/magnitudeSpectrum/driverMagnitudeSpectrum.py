@@ -16,7 +16,7 @@ def driverMagnitudeSpectrum(collectPaths     ,\
                             indicesArgs      ,\
                             indicesKwargs    ,\
                             plotSuperKwargs  ,\
-                            ):
+                           ):
     #{{{docstring
     """
     Driver for plotting magnitude spectrum.
@@ -43,22 +43,21 @@ def driverMagnitudeSpectrum(collectPaths     ,\
 
     # Create collect object
     ccms = CollectAndCalcMagnitudeSpectrum(\
-                             collectPaths                         ,\
-                             convertToPhysical = convertToPhysical,\
-                            )
+                                collectPaths     ,\
+                                varName          ,\
+                                convertToPhysical,\
+                                indicesArgs      ,\
+                                indicesKwargs    ,\
+                                         )
 
     # Execute the collection
-    fm, positionTuple, uc = ccms.executeCollectAndCalc()
+    mSpec, uc = ccms.executeCollectAndCalc()
 
-    import pdb; pdb.set_trace()
-    a = 1
-#    # Plot
-#    pfm = PlotMagnitudeSpectrum(ccms.uc         ,\
-#                           **plotSuperKwargs)
-#    pfm.setData(fm, nModes, timeAx = True)
-#    pfm.plotSaveShowMagnitudeSpectrum()
-#    pfm.setData(fm, nModes, timeAx = False)
-#    pfm.plotSaveShowMagnitudeSpectrum()
+    # Plot
+    pfm = PlotMagnitudeSpectrum(uc         ,\
+                                **plotSuperKwargs)
+    pfm.setData(mSpec, varName)
+    pfm.plotSaveShowMagnitudeSpectrum()
 #}}}
 
 #{{{DriverMagnitudeSpectrum
