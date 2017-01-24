@@ -28,7 +28,7 @@ def magnitudeSpectrumTest():
     xInd            = 16
     yInd            = 16
     tSlice          = slice(200,400)
-    nPoints         = 3
+    nPoints         = 1
     equallySpace    = "x"
     steadyStatePath = None
 
@@ -50,7 +50,7 @@ def magnitudeSpectrumTest():
                         "dmp_folders"  : None,\
                        }
 
-    print("\n\nTesting fourier mode")
+    print("\n\nTesting magnitude spectrum")
     driverMagnitudeSpectrum(collectPaths     ,\
                             varName          ,\
                             convertToPhysical,\
@@ -84,7 +84,7 @@ def driverTest():
     yInd              = 16
     zInd              = None
     tSlice            = None
-    nPoints           = 1
+    nPoints           = 3
     equallySpace      = "x"
 
     steadyStatePath   = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
