@@ -168,9 +168,14 @@ class PlotAnimSuperClass(PlotSuperClass):
 
                 # Get the number
                 files = glob(fileName + "*")
-                if len(files) !=0:
-                    files = sorted(files)
-                    nr    = int(files[-1].split("-")[-1].split(".")[0])+1
+                if self._averagedBlobOrHole is not None\
+                   and not self._averagedBlobOrHole:
+                    # Remove the entries containing avg
+                    files = [f for f in files if "avg" not in f]
+                if len(files) != 0:
+                    nrs = sorted([int(curFile.split("-")[-1].split(".")[0])\
+                                  for curFile in files])
+                    nr  = nrs[-1] + 1
                 else:
                     nr = 0
 
