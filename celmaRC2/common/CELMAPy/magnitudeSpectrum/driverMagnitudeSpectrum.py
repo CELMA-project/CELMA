@@ -38,6 +38,8 @@ def driverMagnitudeSpectrum(collectPaths     ,\
         See CollectAndCalcPointsSuperClass.setIndices for details.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    includeErrorBars : bool
+        Whether or not to include the error bars.
     """
     #}}}
 
@@ -54,10 +56,12 @@ def driverMagnitudeSpectrum(collectPaths     ,\
     mSpec, uc = ccms.executeCollectAndCalc()
 
     # Plot
-    pfm = PlotMagnitudeSpectrum(uc         ,\
-                                **plotSuperKwargs)
-    pfm.setData(mSpec, varName)
-    pfm.plotSaveShowMagnitudeSpectrum()
+    for b in (True, False):
+        pfm = PlotMagnitudeSpectrum(uc                  ,\
+                                    includeErrorBars = b,\
+                                    **plotSuperKwargs)
+        pfm.setData(mSpec, varName)
+        pfm.plotSaveShowMagnitudeSpectrum()
 #}}}
 
 #{{{DriverMagnitudeSpectrum
@@ -73,7 +77,6 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
                  indicesKwargs          ,\
                  plotSuperKwargs        ,\
                  varName           = "n",\
-                 nModes            = 7  ,\
                  **kwargs):
         #{{{docstring
         """
@@ -108,7 +111,6 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
 
         # Set the member data
         self._varName       = varName
-        self._nModes        = nModes
         self._indicesArgs   = indicesArgs
         self._indicesKwargs = indicesKwargs
 
@@ -118,8 +120,8 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{driverFourierMode
-    def driverFourierMode(self):
+    #{{{driverMagnitudeSpectrum
+    def driverMagnitudeSpectrum(self):
         #{{{docstring
         """
         Wrapper to driverFourierMode
@@ -129,7 +131,6 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
                  self._collectPaths    ,\
                  self._varName         ,\
                  self.convertToPhysical,\
-                 self._nModes          ,\
                  self._indicesArgs     ,\
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\

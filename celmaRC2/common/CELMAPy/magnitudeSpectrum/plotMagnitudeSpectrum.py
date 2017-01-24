@@ -27,7 +27,11 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
     #}}}
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self                   ,\
+                 *args                  ,\
+                 includeErrorBars = True,\
+                 pltSize = (15,10)      ,\
+                 **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -36,8 +40,10 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
 
         Parameters
         ----------
+        includeErrorBars : bool
+            Whether or not to include the error bars.
         pltSize : tuple
-            The size of the plot
+            The size of the plot.
         """
         #}}}
 
@@ -46,6 +52,7 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
 
         # Set the member data
         self._pltSize = pltSize
+        self._includeErrorBars = includeErrorBars
     #}}}
 
     #{{{setData
@@ -84,6 +91,9 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
         self._fileName =\
             os.path.join(self._savePath,\
                 "{}-{}".format(self._varName, "magnitudeSpectrum"))
+
+        if not(self._includeErrorBars):
+            self._fileName += "NoErrorBar"
 
         if self._extension is None:
             self._extension = "png"
@@ -164,11 +174,15 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
             # Make the const values
             title = (r"{}$,$ {}").format(rhoTitle, zTitle)
 
+            if self._includeErrorBars:
+                yerr = self._mSpec[key]["modeStd"]
+            else:
+                yerr = None
             # Range starts from one, as we excludes the offset mode
             (_, caps, _) = ax.errorbar(\
-                self._mSpec[key]["modeNr"]          ,\
-                self._mSpec[key]["modeAvg"]         ,\
-                yerr  = self._mSpec[key]["modeStd"] ,\
+                self._mSpec[key]["modeNr"] ,\
+                self._mSpec[key]["modeAvg"],\
+                yerr  = yerr               ,\
                 **self._errorbarOptions)
 
             for cap in caps:
