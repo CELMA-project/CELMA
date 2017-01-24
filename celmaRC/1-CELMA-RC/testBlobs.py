@@ -144,6 +144,96 @@ def test2DDataPerp():
     print("Success!\n\n")
 #}}}
 
+#{{{test2DDataPar
+def test2DDataPar():
+    """
+    Runs the 2D par test for the blobs
+    """
+
+    collectPaths =\
+       (\
+        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
+       )
+
+    xInd   = 26
+    yInd   = 16
+    zInd   = 0
+    tSlice = slice(1000,None)
+    slices = (xInd, yInd, zInd, tSlice)
+    pctPadding = 400
+
+    mode  = "par"
+    fluct = False
+
+    convertToPhysical = True
+
+    savePath          = "."
+
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
+    print("\n\nTesting blobs 2D par")
+    ccb = prepareBlobs(collectPaths     ,\
+                       slices           ,\
+                       pctPadding       ,\
+                       convertToPhysical,\
+                      )
+    driverPlot2DData(ccb, mode, fluct, plotSuperKwargs)
+    print("Success!\n\n")
+#}}}
+
+#{{{test2DDataPol
+def test2DDataPol():
+    """
+    Runs the 2D pol test for the blobs
+    """
+
+    collectPaths =\
+       (\
+        "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
+        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
+       )
+
+    xInd   = 26
+    yInd   = 16
+    zInd   = 0
+    tSlice = slice(1000,None)
+    slices = (xInd, yInd, zInd, tSlice)
+    pctPadding = 400
+
+    mode  = "pol"
+    fluct = True
+
+    convertToPhysical = True
+
+    savePath          = "."
+
+    plotSuperKwargs = {\
+                        "showPlot"     : False,\
+                        "savePlot"     : True,\
+                        "savePath"     : savePath,\
+                        "savePathFunc" : None,\
+                        "extension"    : None,\
+                        "dmp_folders"  : None,\
+                       }
+
+    print("\n\nTesting blobs 2D pol")
+    ccb = prepareBlobs(collectPaths     ,\
+                       slices           ,\
+                       pctPadding       ,\
+                       convertToPhysical,\
+                      )
+    driverPlot2DData(ccb, mode, fluct, plotSuperKwargs)
+    print("Success!\n\n")
+#}}}
+
 #{{{driverTest
 def driverTest():
     """
@@ -198,5 +288,5 @@ def driverTest():
 #}}}
 
 if __name__ == "__main__":
-    blobsTest()
+    test2DDataPar()
 #    driverTest()

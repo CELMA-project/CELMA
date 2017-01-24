@@ -202,8 +202,9 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
         if self._mode == "par":
             # In this case zSlice is an integer
             zInd = self._zSlice
+
             # Then theta index corresponding to pi
-            piInd = round(var.shape[3]/2)
+            piInd = round(len(self._dh.thetaRad)/2)
 
             if zInd > piInd:
                 zPPi = zInd - piInd
@@ -221,6 +222,7 @@ class CollectAndCalcFields2D(CollectAndCalcFieldsSuperClass):
                             **collectKwargs)
             else:
                 varPPi = self._calcNonSolvedVars(collectKwargs)
+
             varPPi = varPPi[self._varName]
         else:
             varPPi = None

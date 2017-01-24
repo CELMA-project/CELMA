@@ -182,6 +182,9 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
     """
     Driver which plots the 2D data.
 
+    NOTE: mode == "par" is slower then the rest, as this requires more
+          opening of files.
+
     Parameters
     ----------
     cbb : CollectAndCalcBlobs
@@ -212,27 +215,178 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
                 plotSuperKwargs["averagedBlobOrHole"] = True
             else:
                 plotSuperKwargs["averagedBlobOrHole"] = False
+            args = (blob          ,\
+                    varName       ,\
+                    varyMaxMin    ,\
+                    fluct         ,\
+                    ccb           ,\
+                    plotSuperKwargs)
             if mode == "perp":
-                # Set the plot limits
-                tupleOfArrays = (blob[varName],)
-                vmax, vmin, levels =\
-                        getVmaxVminLevels(plotSuperKwargs,\
-                                          tupleOfArrays,\
-                                          fluct,\
-                                          varyMaxMin)
+                plotBlob2DPerp(*args)
+            elif mode == "par":
+                plotBlob2DPar(*args)
+            elif mode == "pol":
+                plotBlob2DPar(*args)
+#}}}
 
-                # Create the plotting object
-                p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
-                                         fluct    = fluct,\
-                                         **plotSuperKwargs)
-                p2DPerp.setContourfArguments(vmax, vmin, levels)
-                p2DPerp.setPerpData(blob["X"],\
-                                    blob["Y"],\
-                                    blob[varName],\
-                                    blob["time"],\
-                                    blob["zPos"],\
-                                    varName)
-                p2DPerp.plotAndSavePerpPlane()
+#{{{plotBlob2DPerp
+def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+    #{{{docstring
+    """
+    Performs the plotting of the blob in a 2D perp plane.
+
+    Parameters
+    -----------
+    blob : dict
+        Dictionary with the variables to be plotted.
+        Contains the keys:
+            * "n"    - The 2D variable.
+            * "nPPi" - The 2D variable pi away from the set zInd
+                       (only when mode is "par").
+            * "time" - The corresponding time.
+            * "X"    - The X-mesh.
+            * "Y"    - The Y-mesh.
+            * pos    - The position of the fixed index
+    varName : str
+        Name of the variable.
+    varyMaxMin : bool
+        Whether or not to vary the max and min for each plot in the
+        colorbar.
+    fluct : bool
+        Wheter or not only the fluctuations are given as an input
+    cbb : CollectAndCalcBlobs
+        The initialized CollectAndCalcBlobs object.
+    plotSuperKwargs : dict
+        Keyword arguments for the PlotSuperClass class.
+    """
+    #}}}
+    # Set the plot limits
+    tupleOfArrays = (blob[varName],)
+    vmax, vmin, levels =\
+            getVmaxVminLevels(plotSuperKwargs,\
+                              tupleOfArrays,\
+                              fluct,\
+                              varyMaxMin)
+
+    # Create the plotting object
+    p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
+                             fluct    = fluct,\
+                             **plotSuperKwargs)
+    p2DPerp.setContourfArguments(vmax, vmin, levels)
+    p2DPerp.setPerpData(blob["X"],\
+                        blob["Y"],\
+                        blob[varName],\
+                        blob["time"],\
+                        blob["zPos"],\
+                        varName)
+    p2DPerp.plotAndSavePerpPlane()
+#}}}
+
+#{{{plotBlob2DPar
+def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+    #{{{docstring
+    """
+    Performs the plotting of the blob in a 2D par plane.
+
+    Parameters
+    -----------
+    blob : dict
+        Dictionary with the variables to be plotted.
+        Contains the keys:
+            * "n"    - The 2D variable.
+            * "nPPi" - The 2D variable pi away from the set zInd
+                       (only when mode is "par").
+            * "time" - The corresponding time.
+            * "X"    - The X-mesh.
+            * "Y"    - The Y-mesh.
+            * pos    - The position of the fixed index
+    varName : str
+        Name of the variable.
+    varyMaxMin : bool
+        Whether or not to vary the max and min for each plot in the
+        colorbar.
+    fluct : bool
+        Wheter or not only the fluctuations are given as an input
+    cbb : CollectAndCalcBlobs
+        The initialized CollectAndCalcBlobs object.
+    plotSuperKwargs : dict
+        Keyword arguments for the PlotSuperClass class.
+    """
+    #}}}
+    # Set the plot limits
+    tupleOfArrays = (blob[varName], blob[varName+"PPi"])
+    vmax, vmin, levels =\
+            getVmaxVminLevels(plotSuperKwargs,\
+                              tupleOfArrays,\
+                              fluct,\
+                              varyMaxMin)
+
+    # Create the plotting object
+    p2DPar = PlotAnim2DPar(ccb.uc          ,\
+                           fluct    = fluct,\
+                           **plotSuperKwargs)
+    p2DPar.setContourfArguments(vmax, vmin, levels)
+    p2DPar.setParData(blob["X"]          ,\
+                      blob["Y"]          ,\
+                      blob[varName]      ,\
+                      blob[varName+"PPi"],\
+                      blob["time"]       ,\
+                      blob["thetaPos"]   ,\
+                      varName)
+    p2DPar.plotAndSaveParPlane()
+#}}}
+
+#{{{plotBlob2DPol
+def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+    #{{{docstring
+    """
+    Performs the plotting of the blob in a 2D pol plane.
+
+    Polameters
+    -----------
+    blob : dict
+        Dictionary with the variables to be plotted.
+        Contains the keys:
+            * "n"    - The 2D variable.
+            * "nPPi" - The 2D variable pi away from the set zInd
+                       (only when mode is "pol").
+            * "time" - The corresponding time.
+            * "X"    - The X-mesh.
+            * "Y"    - The Y-mesh.
+            * pos    - The position of the fixed index
+    varName : str
+        Name of the variable.
+    varyMaxMin : bool
+        Whether or not to vary the max and min for each plot in the
+        colorbar.
+    fluct : bool
+        Wheter or not only the fluctuations are given as an input
+    cbb : CollectAndCalcBlobs
+        The initialized CollectAndCalcBlobs object.
+    plotSuperKwargs : dict
+        Keyword arguments for the PlotSuperClass class.
+    """
+    #}}}
+    # Set the plot limits
+    tupleOfArrays = (blob[varName],)
+    vmax, vmin, levels =\
+            getVmaxVminLevels(plotSuperKwargs,\
+                              tupleOfArrays,\
+                              fluct,\
+                              varyMaxMin)
+
+    # Create the plotting object
+    p2DPol = PlotAnim2DPol(ccb.uc          ,\
+                             fluct    = fluct,\
+                             **plotSuperKwargs)
+    p2DPol.setContourfArguments(vmax, vmin, levels)
+    p2DPol.setPolData(blob["X"],\
+                      blob["Y"],\
+                      blob[varName],\
+                      blob["time"],\
+                      blob["rhoPos"],\
+                      varName)
+    p2DPol.plotAndSavePolPlane()
 #}}}
 
 #{{{DriverBlobs
@@ -240,7 +394,6 @@ class DriverBlobs(DriverSuperClass):
     """
     Class for driving of the plotting of the blobs.
     """
-
     #{{{Constructor
     def __init__(self             ,\
                  dmp_folders      ,\
@@ -290,25 +443,27 @@ class DriverBlobs(DriverSuperClass):
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-# FIXME: The drivers needs an update
-#    #{{{driverBlobs
-#    def driverBlobs(self):
-#        #{{{docstring
-#        """
-#        Wrapper to driverBlobs
-#        """
-#        #}}}
-#        args =  (\
-#                 self._collectPaths     ,\
-#                 self._slices           ,\
-#                 self._pctPadding       ,\
-#                 self._convertToPhysical,\
-#                 self._plotSuperKwargs  ,\
-#                )
-#        if self._useSubProcess:
-#            processes = Process(target = driverBlobs, args = args)
-#            processes.start()
-#        else:
-#            driverBlobs(*args)
-#    #}}}
+#    driverWaitingTimePulse
+#    driverBlobTimeTraces
+#    driverPlot2DData
+    #{{{driverBlobs
+    def driverBlobs(self):
+        #{{{docstring
+        """
+        Wrapper to driverBlobs
+        """
+        #}}}
+        args =  (\
+                 self._collectPaths     ,\
+                 self._slices           ,\
+                 self._pctPadding       ,\
+                 self._convertToPhysical,\
+                 self._plotSuperKwargs  ,\
+                )
+        if self._useSubProcess:
+            processes = Process(target = driverBlobs, args = args)
+            processes.start()
+        else:
+            driverBlobs(*args)
+    #}}}
 ##}}}
