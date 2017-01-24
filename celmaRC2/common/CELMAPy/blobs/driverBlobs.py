@@ -226,7 +226,7 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
             elif mode == "par":
                 plotBlob2DPar(*args)
             elif mode == "pol":
-                plotBlob2DPar(*args)
+                plotBlob2DPol(*args)
 #}}}
 
 #{{{plotBlob2DPerp
@@ -401,6 +401,7 @@ class DriverBlobs(DriverSuperClass):
                  pctPadding       ,\
                  convertToPhysical,\
                  plotSuperKwargs  ,\
+                 normed = False   ,\
                  **kwargs):
         #{{{docstring
         """
@@ -424,6 +425,8 @@ class DriverBlobs(DriverSuperClass):
             Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        normed : bool
+            Wheter or not to norm the histogram
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -436,34 +439,122 @@ class DriverBlobs(DriverSuperClass):
         self._slices            = slices
         self._convertToPhysical = convertToPhysical
         self._pctPadding        = pctPadding
+        self._normed            = normed
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
         plotSuperKwargs.update({"plotType"   :"blobs"})
         self._plotSuperKwargs = plotSuperKwargs
+
+        # Prepare the blobs
+        self._ccb =\
+            prepareBlobs(self._collectPaths,\
+                         slices            ,\
+                         pctPadding        ,\
+                         convertToPhysical)
     #}}}
 
-#    driverWaitingTimePulse
-#    driverBlobTimeTraces
-#    driverPlot2DData
-    #{{{driverBlobs
-    def driverBlobs(self):
+    #{{{driverAll
+    def driverAll(self):
         #{{{docstring
         """
-        Wrapper to driverBlobs
+        Runs all the drivers
         """
         #}}}
-        args =  (\
-                 self._collectPaths     ,\
-                 self._slices           ,\
-                 self._pctPadding       ,\
-                 self._convertToPhysical,\
-                 self._plotSuperKwargs  ,\
-                )
+
+        self.driverWaitingTimePulse()
+        self.driverBlobTimeTraces()
+        modes = ("perp", "par", "pol")
+        for mode in modes:
+            self.setMode(mode)
+            for b in (True, False):
+                self.setFluct(b)
+                self.driverPlot2DData()
+    #}}}
+
+    #{{{driverWaitingTimePulse
+    def driverWaitingTimePulse(self):
+        #{{{docstring
+        """
+        Wrapper to driverWaitingTimePulse
+        """
+        #}}}
+
+        args   = (self._ccb, self._plotSuperKwargs)
+        kwargs = {"normed":self._normed}
         if self._useSubProcess:
-            processes = Process(target = driverBlobs, args = args)
+            processes = Process(target = driverWaitingTimePulse,\
+                                args   = args                  ,\
+                                kwargs = kwargs)
             processes.start()
         else:
-            driverBlobs(*args)
+            driverWaitingTimePulse(*args, **kwargs)
+    #}}}
+
+    #{{{driverBlobTimeTraces
+    def driverBlobTimeTraces(self):
+        #{{{docstring
+        """
+        Wrapper to driverBlobTimeTraces
+        """
+        #}}}
+
+        args  = (self._ccb, self._plotSuperKwargs)
+        if self._useSubProcess:
+            processes = Process(target = driverBlobTimeTraces,\
+                                args   = args                ,\
+                               )
+            processes.start()
+        else:
+            driverBlobTimeTraces(*args)
+    #}}}
+
+    #{{{driverPlot2DData
+    def driverPlot2DData(self):
+        #{{{docstring
+        """
+        Wrapper to driverPlot2DData
+        """
+        #}}}
+
+        args  = (self._ccb            ,\
+                 self._mode           ,\
+                 self._fluct          ,\
+                 self._plotSuperKwargs,\
+                )
+        if self._useSubProcess:
+            processes = Process(target = driverPlot2DData,\
+                                args   = args            ,\
+                               )
+            processes.start()
+        else:
+            driverPlot2DData(*args)
+    #}}}
+
+    #{{{setMode
+    def setMode(self, mode):
+        #{{{docstring
+        """
+        Setter for self._mode
+        """
+        #}}}
+        implemeted = ("perp" ,"par", "pol")
+        if not(mode in implemeted):
+            message = "Got '{}', expected one of the following:\n".format(mode)
+            for i in implemented:
+                message += "{}".format(i)
+            raise ValueError(message)
+
+        self._mode = mode
+    #}}}
+
+    #{{{setFluct
+    def setFluct(self, fluct):
+        #{{{docstring
+        """
+        Setter for self._fluct
+        """
+        #}}}
+        self._fluct = fluct
     #}}}
 ##}}}
