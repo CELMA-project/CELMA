@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Class for fourier modes plot"""
+"""Class for magnitude spectrum plot"""
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import plotNumberFormatter, seqCMap2
@@ -8,11 +8,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-#{{{PlotFourierModes
-class PlotFourierModes(PlotSuperClass):
+#{{{PlotMagnitudeSpectrum
+class PlotMagnitudeSpectrum(PlotSuperClass):
     """
-    Class which contains the fourier modes data and the plotting configuration.
+    Class which contains the magnitude spectrum data and the plotting configuration.
     """
+    #{{{Static members
+    _errorbarOptions = {"color"     :"k",\
+                        "fmt"       :"o",\
+                        "fmt"       :"o",\
+                        "markersize":10 ,\
+                        "ecolor"    :"k",\
+                        "capsize"   :7  ,\
+                        "elinewidth":3  ,\
+                        }
+
+    _markeredgewidth = 3
+    #}}}
 
     #{{{constructor
     def __init__(self, *args, pltSize = (15,10), **kwargs):
@@ -37,10 +49,10 @@ class PlotFourierModes(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, fourierModes, nModes = 7, timeAx = True):
+    def setData(self, magnitudeSpectrum, varName):
         #{{{docstring
         """
-        Sets the fourier modes to be plotted.
+        Sets the magnitude spectrum to be plotted.
 
         This function:
             * Sets the variable labels
@@ -49,64 +61,29 @@ class PlotFourierModes(PlotSuperClass):
 
         Parameters
         ----------
-        fourierModes : dict
-            Dictionary where the keys are on the form "rho,z".
-            The value is a dict containing of
-            {varName:fourierModes, "time":time}
-        nModes : int
-            Number of modes to use
-        timeAx : bool
-            Whether or not the time should be on the x axis
+        magnitudeSpectrum : dict
+            The dictionary containing the mode spectra.
+            The keys of the dict is on the form (rho,z), with a new dict
+            as the value. This dict contains the following keys:
+                * "modeAvg" - The average magnitude of the mode
+                * "modeStd" - The standard deviation of the magnitude of
+                              the mode
+                * "modeNr"  - The mode number
+        varName : str
+            Name of the variable.
         """
         #}}}
 
-        self._timeAx = timeAx
-
-        # Plus one as the offset mode will be excluded
-        self._nModes  = nModes + 1
-
         # Set the member data
-        self._fourierModes = fourierModes
-
-        # Obtain the varname
-        ind  = tuple(fourierModes.keys())[0]
-        keys = fourierModes[ind].keys()
-        self._varName = tuple(var for var in keys if var != "time")[0]
-        # Strip the variable name
-        self._varName = self._varName.replace("Magnitude","")
-        self._varName = self._varName.replace("AngularVelocity","")
-
-        # Obtain the color
-        self._colors = seqCMap2(np.linspace(0, 1, self._nModes))
+        self._mSpec   = magnitudeSpectrum
+        self._varName = varName
 
         self._prepareLabels()
-
-        # Set the var label
-        pltVarName = self._ph.getVarPltName(self._varName)
-
-        self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self.uc.conversionDict[self._varName])
-
-        # FIXME: This is just a dirty way of doing things, consider
-        #        refactor for clearity
-        # Add FT around the varLabel
-        if self.uc.convertToPhysical:
-            theSplit = self._varLabel.split("[")
-            # Exclude the last $
-            var = theSplit[0][:-1].replace("$", "")
-            units = ("[" + theSplit[1]).replace("$", "")
-            self._varLabel = r"$|\mathrm{{FT}}({})|$ ${}$".format(var, units)
-        else:
-            self._varLabel = r"$|\mathrm{{FT}}({})|$".format(self._varLabel)
 
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}".format(self._varName, "fourierModes"))
-        if not(timeAx):
-            self._fileName += "Indices"
-        if (self._sliced):
-            self._fileName += "Sliced"
+                "{}-{}".format(self._varName, "magnitudeSpectrum"))
 
         if self._extension is None:
             self._extension = "png"
@@ -131,22 +108,37 @@ class PlotFourierModes(PlotSuperClass):
             unitsOrNormalization = " $[{units}]$"
         else:
             unitsOrNormalization = "${normalization}$"
+
+        # Set the var label
+        pltVarName = self._ph.getVarPltName(self._varName)
+
         self._varLabelTemplate = r"${{}}${}".format(unitsOrNormalization)
 
-        # Set the time label
-        if self._timeAx:
-            self._timeLabel = self._ph.tTxtDict["tTxtLabel"]
+        self._varLabel = self._varLabelTemplate.\
+            format(pltVarName, **self.uc.conversionDict[self._varName])
+
+        # FIXME: This is just a dirty way of doing things, consider
+        #        refactor for clearity
+        if self.uc.convertToPhysical:
+            theSplit = self._varLabel.split("[")
+            # Exclude the last $
+            var = theSplit[0][:-1].replace("$", "")
+            units = ("[" + theSplit[1]).replace("$", "")
+            self._varLabel = r"$|\mathrm{{FT}}({})|$ ${}$".format(var, units)
         else:
-            self._timeLabel = "$\mathrm{Time}$ $\mathrm{index}$"
+            self._varLabel = r"$|\mathrm{{FT}}({})|$".format(self._varLabel)
+
+        # Set the x-label
+        self._xLabel = r"$\mathrm{Mode\;number}$"
     #}}}
 
-    #{{{plotSaveShowFourierModes
-    def plotSaveShowFourierModes(self):
+    #{{{plotSaveShowMagnitudeSpectrum
+    def plotSaveShowMagnitudeSpectrum(self):
         """
         Performs the actual plotting.
         """
 
-        keys = sorted(self._fourierModes.keys())
+        keys = sorted(self._mSpec.keys())
 
         for key in keys:
             # Create the plot
@@ -173,23 +165,17 @@ class PlotFourierModes(PlotSuperClass):
             title = (r"{}$,$ {}").format(rhoTitle, zTitle)
 
             # Range starts from one, as we excludes the offset mode
-            for modeNr, color in zip(range(1, self._nModes), self._colors):
-                label=r"$m_\theta={}$".format(modeNr)
+            (_, caps, _) = ax.errorbar(\
+                self._mSpec[key]["modeNr"]          ,\
+                self._mSpec[key]["modeAvg"]         ,\
+                yerr  = self._mSpec[key]["modeStd"] ,\
+                **self._errorbarOptions)
 
-                if self._timeAx:
-                    ax.plot(\
-                        self._fourierModes[key]["time"],\
-                        self._fourierModes[key][self._varName+"Magnitude"]\
-                                          [:,modeNr],\
-                        color=color, label=label)
-                else:
-                    ax.plot(\
-                        self._fourierModes[key][self._varName+"Magnitude"]\
-                                          [:,modeNr],\
-                        color=color, label=label)
+            for cap in caps:
+                cap.set_markeredgewidth(self._markeredgewidth)
 
             # Set axis labels
-            ax.set_xlabel(self._timeLabel)
+            ax.set_xlabel(self._xLabel)
             ax.set_ylabel(self._varLabel)
 
             # Set logarithmic scale
@@ -199,7 +185,7 @@ class PlotFourierModes(PlotSuperClass):
             ax.set_title(title)
 
             # Make the plot look nice
-            self._ph.makePlotPretty(ax, rotation = 45)
+            self._ph.makePlotPretty(ax, rotation = 45, legend = False)
 
             if self._showPlot:
                 plt.show()

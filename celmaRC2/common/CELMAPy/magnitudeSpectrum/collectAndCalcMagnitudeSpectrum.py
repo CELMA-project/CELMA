@@ -7,6 +7,8 @@ spatial FFT.
 
 from ..growthRates import CollectAndCalcGrowthRates
 from ..superClasses import CollectAndCalcPointsSuperClass
+from ..collectAndCalcHelpers import timeAvg
+import numpy as np
 
 #{{{CollectAndCalcMagnitudeSpectrum
 class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
@@ -19,7 +21,6 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
                  collectPaths     ,\
                  varName          ,\
                  convertToPhysical,\
-                 steadyStatePath  ,\
                  indicesArgs      ,\
                  indicesKwargs    ,\
                  ):
@@ -37,8 +38,6 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
             Name of variable to find the growth rates of.
         convertToPhysical : bool
             Whether or not to convert to physical units.
-        steadyStatePath : str
-            String containing the steady state path
         indicesArgs : tuple
             Tuple containing the indices.
         indicesKwargs : dict
@@ -49,52 +48,85 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
 
         # Set the member data
         self._collectPaths      = collectPaths
-        self._steadyStatePath   = steadyStatePath
-        self._collectPaths      = collectPaths
         self._varName           = varName
         self._convertToPhysical = convertToPhysical
-        self._steadyStatePath   = steadyStatePath
         self._indicesArgs       = indicesArgs
         self._indicesKwargs     = indicesKwargs
     #}}}
 
     #{{{executeCollectAndCalc
     def executeCollectAndCalc(self):
-# FIXME:
         #{{{docstring
         """
         Returns
         -------
-        fm : dict
-            The dictionary containing the fourier modes, containing the
-            following keys:
-                * foo
-        positionTuple : tuple
-            The tuple containing (rho, z).
-            Needed in the plotting routine.
+        magnitudeSpectrum : dict
+            The dictionary containing the mode spectra.
+            The keys of the dict is on the form (rho,z), with a new dict
+            as the value. This dict contains the following keys:
+                * "modeAvg" - The average magnitude of the mode
+                * "modeStd" - The standard deviation of the magnitude of
+                              the mode
+                * "modeNr"  - The mode number
         uc : Units Converter
             The units converter used when obtaining the fourier modes.
             Needed in the plotting routine.
         """
         #}}}
 
-        fm, positionTuple, uc =\
+        steadyStatePath = self._indicesKwargs["steadyStatePath"]
+        fm, _, uc =\
                 CollectAndCalcGrowthRates.collectAndCalcFourierModes(\
-                                   (self._collectPaths,)      ,\
+                                   self._collectPaths         ,\
                                    self._varName              ,\
                                    self._convertToPhysical    ,\
-                                   self._steadyStatePath      ,\
+                                   steadyStatePath            ,\
                                    self._indicesArgs          ,\
                                    self._indicesKwargs        ,\
                                    calcAngularVelocity = False,\
                                       )
 
-        # Check number of modes, and how data is packed
-        import pdb; pdb.set_trace()
-        a = 1
+        # Initialize the output
+        magnitudeSpectrum = {}
 
-        # for each mode average and find the standard deviation
+        for key in fm.keys():
+            # Pop variables not needed
+            fm[key].pop(self._varName)
+            fm[key].pop("time")
 
-        return fm, positionTuple, uc
+            # Remove the offset mode
+            fm[key][self._varName + "Magnitude"] =\
+                    fm[key][self._varName + "Magnitude"][:, 1:]
+
+            modes    = fm[key][self._varName + "Magnitude"]
+            nModes   = modes.shape[1]
+            modesAvg = np.empty(nModes)
+            modesStd = np.empty(nModes)
+            mNr      = np.empty(nModes)
+            for i in range(nModes):
+                # Bloat the modes so that timeAvg can read them
+                mode    = np.expand_dims(\
+                            np.expand_dims(\
+                                np.expand_dims(modes[:,i],axis=-1),\
+                                axis=-1),\
+                            axis=-1)
+                modeAvg = timeAvg(mode)
+                modeStd = timeAvg((mode - modeAvg)**2.0)
+
+                # Flatten again after timeAvg
+                modesAvg[i] = modeAvg.flatten()
+                modesStd[i] = modeStd.flatten()
+                mNr     [i] = i+1
+
+            fm[key].pop(self._varName + "Magnitude")
+
+            # Rename to mSpec
+            magnitudeSpectrum[key] = {\
+                                      "modeAvg" : modesAvg,\
+                                      "modeStd" : modesStd,\
+                                      "modeNr"  : mNr     ,\
+                                     }
+
+        return magnitudeSpectrum, uc
     #}}}
 #}}}
