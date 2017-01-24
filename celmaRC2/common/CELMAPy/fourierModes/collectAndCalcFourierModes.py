@@ -26,9 +26,6 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         This constructor will:
             * Call the parent constructor
 
-        NOTE: Mode is set to normal as the poloidal average equals the
-              zeroth mode.
-
         Parameters
         ----------
         *args : positional arguments
