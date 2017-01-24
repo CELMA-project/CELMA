@@ -288,6 +288,11 @@ class CollectAndCalcBlobs(object):
             bins2D = self._collect2DBins(self._tSlices, fluct, mode)
         else:
             if fluct:
+                # Cast to 3D from 4D
+                self._perp2DBinsFluct = list(self._perp2DBinsFluct)
+                for i in range(len(self._perp2DBinsFluct)):
+                    self._perp2DBinsFluct[i]["n"] = self._perp2DBinsFluct[i]["n"][:,:,0,:]
+                self._perp2DBinsFluct = tuple(self._perp2DBinsFluct)
                 bins2D = self._perp2DBinsFluct
             else:
                 bins2D = self._perp2DBins
@@ -568,7 +573,7 @@ class CollectAndCalcBlobs(object):
         elif mode == "par":
             ccf2D.setSlice(xSlice, ySlice, zInd, tSlice)
         elif mode == "pol":
-            ccf2D.setSlice(xInd, yInd, zSlice, tSlice)
+            ccf2D.setSlice(xInd, ySlice, zSlice, tSlice)
         else:
             message =\
                 "'mode' expected 'perp', 'par' or 'pol', but got '{}'".\

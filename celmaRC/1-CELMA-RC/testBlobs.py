@@ -119,7 +119,7 @@ def test2DDataPerp():
     pctPadding = 400
 
     mode  = "perp"
-    fluct = False
+    fluct = True
 
     convertToPhysical = True
 
@@ -246,7 +246,6 @@ def driverTest():
        (\
                         "CSDXMagFieldScanAr/nout_1000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_forceAddNoise_False_switch_includeNoise_False_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-2-linearPhase1_0/",\
                         "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
-                        "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_4.718_geom_Ly_165.1286_input_B0_0.06_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/",\
        )
 
     xInd   = 26
@@ -256,9 +255,8 @@ def driverTest():
     slices = (xInd, yInd, zInd, tSlice)
 
     pctPadding = 400
-
+    normed     = False
     convertToPhysical = True
-
     useSubProcess = False
 
     plotSuperKwargs = {\
@@ -276,17 +274,17 @@ def driverTest():
                      # DriverBlobs
                      dmp_folders      ,\
                      slices           ,\
+                     pctPadding       ,\
                      convertToPhysical,\
                      plotSuperKwargs  ,\
-                     pctPadding       ,\
+                     normed = normed  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
                     )
-    dB.driverBlobs()
+    dB.driverAll()
     print("Success!\n\n")
 #}}}
 
 if __name__ == "__main__":
-    test2DDataPar()
-#    driverTest()
+    driverTest()
