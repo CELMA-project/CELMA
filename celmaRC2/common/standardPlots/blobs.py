@@ -10,16 +10,82 @@ sys.path.append(commonDir)
 
 from CELMAPy.blobs import DriverBlobs
 
-UNDER CONSTRUCTION
-#{{{blobsPlot
-def blobsPlot(dmp_folders,\
-              collectPaths,\
-              steadyStatePath,\
-              plotSuperKwargs,\
-              tSlice = None):
+# Global data without encapsulation
+xInd   = 26
+yInd   = 16
+zInd   = 0
+
+pctPadding = 400
+normed     = False
+convertToPhysical = True
+useSubProcess = False
+
+#{{{blobWaitingTimePulsePlot
+def blobWaitingTimePulsePlot(*args):
     #{{{docstring
     """
-    Runs the standard blobs plot
+    Plots the waiting time and pulse width.
+
+    Parameters
+    ----------
+    See getBlobDriver for details.
+    """
+    #}}}
+
+    dB = getBlobDriver(*args)
+
+    dB.driverWaitingTimePulse()
+#}}}
+
+#{{{blobTimeTracesPlot
+def blobTimeTracesPlot(*args):
+    #{{{docstring
+    """
+    Plots a timetrace of the blob and its individual bins.
+
+    Parameters
+    ----------
+    See getBlobDriver for details.
+    """
+    #}}}
+
+    dB = getBlobDriver(*args)
+
+    dB.driverBlobTimeTraces()
+#}}}
+
+#{{{blob2DPlot
+def blob2DPlot(*args, mode=None, fluct=None):
+    #{{{docstring
+    """
+    Plots a timetrace of the blob and its individual bins.
+
+    Parameters
+    ----------
+    *arg : positional arguments
+        See getBlobDriver for details.
+    mode : ["perp"|"par"|"pol"]
+        The 2D mode to use.
+    fluct : bool
+        Whether or not to use fluctuation.
+    """
+    #}}}
+
+    dB = getBlobDriver(*args)
+    dB.setMode(mode)
+    dB.setFluct(fluct)
+    dB.driverPlot2DData()
+#}}}
+
+#{{{getBlobDriver
+def getBlobDriver(dmp_folders    ,\
+                  collectPaths   ,\
+                  plotSuperKwargs,\
+                  tSlice         ,\
+                 ):
+    #{{{docstring
+    """
+    Returns the blob driver.
 
     Parameters
     ----------
@@ -27,45 +93,32 @@ def blobsPlot(dmp_folders,\
         Tuple of the dmp_folders.
     collectPaths : tuple
         Tuple of the paths to collect from.
-    steadyStatePath : str
-        The corresponding steady state path.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
-    tSlice : [None|Slice]
+    tSlice : slice
         How to slice the time.
+
+    Returns
+    -------
+    dB : DriverBlobs
+        The blob driver.
     """
     #}}}
 
-    useSubProcess = False
+    slices = (xInd, yInd, zInd, tSlice)
 
-    varName           = "n"
-    convertToPhysical = True
-
-    xInd              = None
-    yInd              = 16
-    zInd              = None
-    nPoints           = 3
-    equallySpace      = "x"
-
-    indicesArgs   = (xInd, yInd, zInd)
-    indicesKwargs = {"tSlice"          : tSlice         ,\
-                     "nPoints"         : nPoints        ,\
-                     "equallySpace"    : equallySpace   ,\
-                     "steadyStatePath" : steadyStatePath,\
-                     }
-
-    dMS = DriverBlobs(
+    dB = DriverBlobs(\
                      # DriverBlobs
-                     dmp_folders              ,\
-                     indicesArgs              ,\
-                     indicesKwargs            ,\
-                     plotSuperKwargs          ,\
-                     varName         = varName,\
-                     # DriverPointsSuperClass
-                     convertToPhysical = convertToPhysical,\
+                     dmp_folders      ,\
+                     slices           ,\
+                     pctPadding       ,\
+                     convertToPhysical,\
+                     plotSuperKwargs  ,\
+                     normed = normed  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\
-                          )
-    dMS.driverBlobs()
+                    )
+
+    return dB
 #}}}
