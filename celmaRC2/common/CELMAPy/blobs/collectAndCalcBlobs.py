@@ -92,6 +92,7 @@ class CollectAndCalcBlobs(object):
         # Initialize
         key = list(self._radialFlux.keys())[0]
         flux = self._radialFlux[key]["nRadialFlux"]
+# FIMXE: YOU ARE HERE: Test the std plot stuff with radial fluxes
         condition = flux.std()*3
         time = self._radialFlux[key]["time"]
         self._dt = time[1] - time[0]
