@@ -13,10 +13,10 @@ while True:
     else:
         # Step one back and join celma, common
         path      = os.path.dirname(path)
-        commonDir = os.path.join(path, "celma", "common")
+        commonDir = os.path.join(path, "celmaRC2", "common")
         break
 
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotHelpers import __init__
+from CELMAPy.plotHelpers import __init__
