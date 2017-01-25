@@ -26,6 +26,9 @@ plt.rc("ytick",  labelsize = 12)
 plt.rc("legend", fontsize  = 12)
 plt.rc("lines",  linewidth = 1)
 
+# Use computer modern as default for mathtext
+plt.rc("mathtext", fontset = "cm")
+
 oldFont = {"family":plt.rcParams["font.family"],\
            "serif":plt.rcParams["font.serif"]}
 try:
