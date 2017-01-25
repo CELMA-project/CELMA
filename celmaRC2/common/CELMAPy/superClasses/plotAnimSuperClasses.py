@@ -141,8 +141,8 @@ class PlotAnimSuperClass(PlotSuperClass):
                                       fps     = self._fps    ,\
                                       codec   = self._codec)
 
-                if self._extension is None:
-                    self._extension = "mp4"
+                # Hard coded magic number
+                self._extension = "mp4"
 
                 # Get the number
                 files = glob(fileName + "*")

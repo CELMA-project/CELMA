@@ -52,6 +52,36 @@ def prepareBlobs(collectPaths     ,\
     return ccb
 #}}}
 
+#{{{driverRadialFluxWStdLines
+def driverRadialFluxWStdLines(ccb            ,\
+                              plotSuperKwargs,\
+                              stdConditions  ,\
+                             ):
+    #{{{docstring
+    """
+    Driver for plotting radial fluxes with standard deviation lines.
+
+    Parameters
+    ----------
+    cbb : CollectAndCalcBlobs
+        The initialized CollectAndCalcBlobs object.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
+    plotSuperKwargs : dict
+        Keyword arguments for the plot super class.
+    stdConditions : tuple
+        Conditions for the conditional averages.
+    """
+    #}}}
+
+    radialFlux = getRadialFlux()
+
+    # Plot
+    ptt = PlotRadialFlux(ccb.uc, **plotSuperKwargs)
+    ptt.setData(radialFlux, mode, stdLines=stdConditions)
+    ptt.plotSaveShowRadialFlux()
+#}}}
+
 #{{{driverWaitingTimePulse
 def driverWaitingTimePulse(ccb, plotSuperKwargs, normed = False):
     #{{{docstring
@@ -395,13 +425,14 @@ class DriverBlobs(DriverSuperClass):
     Class for driving of the plotting of the blobs.
     """
     #{{{Constructor
-    def __init__(self             ,\
-                 dmp_folders      ,\
-                 slices           ,\
-                 pctPadding       ,\
-                 convertToPhysical,\
-                 plotSuperKwargs  ,\
-                 normed = False   ,\
+    def __init__(self                       ,\
+                 dmp_folders                ,\
+                 slices                     ,\
+                 pctPadding                 ,\
+                 convertToPhysical          ,\
+                 plotSuperKwargs            ,\
+                 stdConditions = (4,3,2.5,2),\
+                 normed        = False      ,\
                  **kwargs):
         #{{{docstring
         """
@@ -425,6 +456,8 @@ class DriverBlobs(DriverSuperClass):
             Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        stdConditions : tuple
+            Conditions for the conditional averages.
         normed : bool
             Wheter or not to norm the histogram
         **kwargs : keyword arguments
@@ -439,6 +472,7 @@ class DriverBlobs(DriverSuperClass):
         self._slices            = slices
         self._convertToPhysical = convertToPhysical
         self._pctPadding        = pctPadding
+        self._stdConditions     = stdConditions
         self._normed            = normed
 
         # Update the plotSuperKwargs dict
@@ -464,12 +498,34 @@ class DriverBlobs(DriverSuperClass):
 
         self.driverWaitingTimePulse()
         self.driverBlobTimeTraces()
+        self.driverRadialFluxWStdLines()
         modes = ("perp", "par", "pol")
         for mode in modes:
             self.setMode(mode)
             for b in (True, False):
                 self.setFluct(b)
                 self.driverPlot2DData()
+    #}}}
+
+    #{{{driverRadialFluxWStdLines
+    def driverRadialFluxWStdLines(self):
+        #{{{docstring
+        """
+        Wrapper to driverRadialFluxWStdLines
+        """
+        #}}}
+
+        args = (\
+                ccb            ,\
+                plotSuperKwargs,\
+                stdConditions  ,\
+               )
+        if self._useSubProcess:
+            processes = Process(target = driverRadialFluxWStdLines,\
+                                args   = args                     )
+            processes.start()
+        else:
+            driverRadialFluxWStdLines(*args, **kwargs)
     #}}}
 
     #{{{driverWaitingTimePulse
