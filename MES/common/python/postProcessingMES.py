@@ -2,42 +2,13 @@
 
 """Post processing which performs MES"""
 
+from CELMAPy.plotHelpers import SizeMaker, plotNumberFormatter
 from boutdata import collect
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 import matplotlib.cm as cm
 import numpy as np
 import os
-
-#{{{plotNumberFormatter
-def plotNumberFormatter(val, pos, precision=3):
-    #{{{docstring
-    """
-    Formatting numbers in the plot
-
-    Parameters
-    ----------
-    val : float
-        The value.
-    pos : [None | float]
-        The position (needed as input from FuncFormatter).
-    """
-    #}}}
-
-    tickString = "${{:.{}g}}".format(precision).format(val)
-    if "e+" in tickString:
-        tickString = tickString.replace("e+0", r"\cdot 10^{")
-        tickString = tickString.replace("e+" , r"\cdot 10^{")
-        tickString += "}$"
-    elif "e-" in tickString:
-        tickString = tickString.replace("e-0", r"\cdot 10^{-")
-        tickString = tickString.replace("e-" , r"\cdot 10^{-")
-        tickString += "}$"
-    else:
-        tickString += "$"
-
-    return tickString
-#}}}
 
 #{{{perform_MES_test
 def perform_MES_test(\
@@ -224,25 +195,7 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
     """Function which handles the actual plotting"""
 
     # Plot errors
-    # Set the plotting style
-    title_size = 30
-    plt.rc("font", size = 30)
-    plt.rc("axes", labelsize = 25, titlesize = title_size)
-    plt.rc("xtick", labelsize = 25)
-    plt.rc("ytick", labelsize = 25)
-    plt.rc("legend", fontsize = 30)
-    plt.rc("lines", linewidth = 3.0)
-    plt.rc("lines", markersize = 20.0)
-    plt_size = (10, 7)
-    fig_no = 1
-    # Try to make a figure with the current backend
-    try:
-        fig = plt.figure(fig_no, figsize = plt_size)
-    except:
-        # Switch if a backend needs the display
-        plt.switch_backend('Agg')
-        fig = plt.figure(fig_no, figsize = plt_size)
-
+    fig = plt.figure(figsize = SizeMaker.standard(s=0.6))
     ax = fig.add_subplot(111)
 
     # Plot errors
@@ -275,19 +228,7 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
     #       = a*[ln(x)-ln(x[-1])] + ln[y(x[-1])]
     #       = a*[ln(x/x[-1])] + ln[ys(x[-1])]
     #       = ln[(x/x[-1])^a*y(x[-1])]
-    #}}}
-    # Order in the inf norm
-    ax.plot(\
-             (data['spacing'][-1],\
-              data['spacing'][0]),\
-             (\
-              ((data['spacing'][-1] / data['spacing'][-1])**order_inf)*\
-                data['error_inf'][-1],\
-              ((data['spacing'][0]  / data['spacing'][-1])**order_inf)*\
-                data['error_inf'][-1]\
-             ),\
-             'm--',\
-             label=r"$\mathcal{O}_{L_\infty}"+"%.2f"%(order_inf)+r"$")
+    #}}}jj
     # Order in the 2 norm
     ax.plot(\
              (data['spacing'][-1],\
@@ -299,7 +240,19 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
                 data['error_2'][-1]\
              ),\
              'c--',\
-             label=r"$\mathcal{O}_{L_2}"+"%.2f"%(order_2)+r"$")
+             label=r"$\mathcal{{O}}_{{L_2}}={:.1f}$".format(order_2))
+    # Order in the inf norm
+    ax.plot(\
+             (data['spacing'][-1],\
+              data['spacing'][0]),\
+             (\
+              ((data['spacing'][-1] / data['spacing'][-1])**order_inf)*\
+                data['error_inf'][-1],\
+              ((data['spacing'][0]  / data['spacing'][-1])**order_inf)*\
+                data['error_inf'][-1]\
+             ),\
+             'm--',\
+             label=r"$\mathcal{{O}}_{{L_\infty}}={:.1f}$".format(order_inf))
 
     # Set logaraithmic scale
     ax.set_yscale('log')
@@ -323,7 +276,7 @@ def do_plot(data, order_2, order_inf, root_folder, name, extension,\
 
     # Save the plot
     filename = os.path.join(root_folder, name  + '.' + extension)
-    plt.savefig(filename)
+    fig.savefig(filename)
     print('\nPlot saved to ' + filename + '\n'*2)
 
     if xz_error_plot:
@@ -361,7 +314,7 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
             E['field'] =\
                     E['field'].reshape(E['field'].shape[-3], E['field'].shape[-1])
 
-        fig = plt.figure(figsize = (10, 7))
+        fig = plt.figure(figsize = SizeMaker.golden(s=0.45))
         ax  = plt.subplot()
         # zorder decides what should be drawn first
         cplot = ax.contourf(RHO, THETA, E['field'], 500,\
@@ -373,9 +326,10 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
 
         # Decorations
         cbar = plt.colorbar(cplot, format=FuncFormatter(plotNumberFormatter))
+        cbar.locator = MaxNLocator(nbins=5)
+        cbar.update_ticks()
         cbar.ax.set_ylabel('Error')
-        # Plot the grid
-        ax.grid()
+
         ax.set_xlabel(r"$\rho$")
         ax.set_ylabel(r"$\theta$")
         # Set figure name
@@ -390,11 +344,11 @@ def plot_xz_errors(data, root_folder, extension, y_plane, directions):
                            ['$0$', r'$\pi/2$', r'$\pi$',
                                r'$3\pi/2$', r'$2\pi$'])
 
-        plt.tight_layout()
+        fig.tight_layout()
 
         # Save the plot
         filename = os.path.join(root_folder, name  + '.' + extension)
-        plt.savefig(filename)
+        fig.savefig(filename)
         print('\nPlot saved to ' + filename + '\n'*2)
 #}}}
 
@@ -421,7 +375,7 @@ def plot_xy_errors(data, root_folder, extension, z_plane, directions):
             E['field'] =\
                     E['field'].reshape(E['field'].shape[-3], E['field'].shape[-2])
 
-        fig = plt.figure(figsize = (10, 7))
+        fig = plt.figure(figsize = SizeMaker.golden(s=0.45))
         ax  = plt.subplot()
         # zorder decides what should be drawn first
         cplot = ax.contourf(RHO, Z, E['field'], 500,\
@@ -432,12 +386,11 @@ def plot_xy_errors(data, root_folder, extension, z_plane, directions):
         ax.set_rasterization_zorder(-10)
 
         # Decorations
-        cbar = plt.colorbar(cplot)
-        cbar.ax.set_ylabel('Error')
-        cbar.formatter.set_useOffset(False)
+        cbar = plt.colorbar(cplot, format=FuncFormatter(plotNumberFormatter))
+        cbar.locator = MaxNLocator(nbins=5)
         cbar.update_ticks()
-        # Plot the grid
-        ax.grid()
+        cbar.ax.set_ylabel('Error')
+
         ax.set_xlabel(r"$\rho$")
         ax.set_ylabel(r"$z$")
         # Set figure name
@@ -448,10 +401,10 @@ def plot_xy_errors(data, root_folder, extension, z_plane, directions):
             name += 'ny={} '.format(E['field'].shape[1])
         fig.canvas.set_window_title(name)
 
-        plt.tight_layout()
+        fig.tight_layout()
 
         # Save the plot
         filename = os.path.join(root_folder, name  + '.' + extension)
-        plt.savefig(filename)
+        fig.savefig(filename)
         print('\nPlot saved to ' + filename + '\n'*2)
 #}}}
