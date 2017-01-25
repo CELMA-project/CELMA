@@ -18,9 +18,9 @@ from common.python.postProcessingMES import perform_MES_test
 nx = [2**n+2 for n in range(4, 12)]
 
 # Additional options
-remove_old = True
+remove_old = False
 directory  = "gaussianWSinAndParabola"
-make       = True
+make       = False
 nproc      = 4
 # =============================================================================
 

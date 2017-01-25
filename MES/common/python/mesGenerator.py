@@ -1,4 +1,5 @@
-# Generate MMS solutions for the laplace inversion
+from CELMAPy.plotHelpers import SizeMaker
+
 from boutdata.mms import x, y, z
 from boutdata.mms import exprToStr
 from boutdata.mms import Metric
@@ -12,6 +13,7 @@ import numpy as np
 import matplotlib.pylab as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.ticker import MaxNLocator
 
 import re
 
@@ -150,6 +152,7 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                                     N, cmap = cm.inferno, zorder=-20)
                 cbar = plt.colorbar(cont)
                 cbar.ax.set_ylabel(cur_var_key)
+                cbar.locator = MaxNLocator(nbins=5)
                 cbar.formatter.set_useOffset(False)
                 cbar.update_ticks()
                 # Set the labels
@@ -158,14 +161,13 @@ def make_plot(folder, the_vars, plot3d = True, plot2d = False, direction='x',\
                     ax2.set_ylabel(r'$\rho$')
                 elif direction == 'y':
                     ax2.set_ylabel(r'$z$')
-                # Set the grid
-                ax2.grid()
 
                 if save:
                     # Set zorder value below which artists will be rasterized
                     # If this is not set, everything will be vecotrized, giving
                     # plots with a huge size
                     ax2.set_rasterization_zorder(-10)
+                    fig.set_size_inches(*SizeMaker.golden(s=0.45))
                     plt.tight_layout()
                     plt.savefig('{}.pdf'.format(cur_var_key))
     #}}}
