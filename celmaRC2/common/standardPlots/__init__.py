@@ -3,6 +3,7 @@
 """ Init for standardPlots"""
 
 from .analyticGrowthRates import analyticGrowthRatesPlot
+from .blobs import blobWaitingTimePulsePlot, blobTimeTracesPlot, blob2DPlot
 from .combinedPlots import combinedPlotsPlot
 from .fields1D import fields1DAnimation
 from .fields2D import fields2DAnimation

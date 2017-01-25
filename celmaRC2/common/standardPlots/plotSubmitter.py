@@ -13,6 +13,7 @@ sys.path.append(commonDir)
 
 from CELMAPy.driverHelpers import PBSSubmitter, pathMerger
 from .analyticGrowthRates import analyticGrowthRatesPlot
+from .blobs import blobWaitingTimePulsePlot, blobTimeTracesPlot, blob2DPlot
 from .combinedPlots import combinedPlotsPlot
 from .fields1D import fields1DAnimation
 from .fields2D import fields2DAnimation
@@ -166,6 +167,70 @@ class PlotSubmitter(object):
         #}}}
 
         self._plotSuperKwargs.update(updateDict)
+    #}}}
+
+    #{{{runBlobs
+    def runBlobs(self, modes="all", fluct="both"):
+        #{{{docstring
+        """
+        Runs blobs.
+
+        Parameters
+        ----------
+        modes : ["all"|"perp"|"par"|"pol"]
+            2D mode to use
+        fluct : ["both"|bool]
+            Fluctuations to use
+        """
+        #}}}
+
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+
+        if modes == "all":
+            modes = ("perp", "par", "pol")
+        else:
+            modes = (modes,)
+        if fluct == "both":
+            fluct = (True, False)
+        else:
+            fluct = (fluct,)
+
+        for dmp_folders, key, nr in loopOver:
+
+            tSlice = self._findSlices(dmp_folders, self._satTurbTSlices)
+            if tSlice is None:
+                continue
+
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders   = (dmp_folders,)
+
+            args = (dmp_folders          ,\
+                    collectPaths         ,\
+                    self._plotSuperKwargs,\
+                    tSlice               ,\
+                    )
+
+            kwargs = {}
+            self.sub.setJobName("blobWaitingTimePulse{}".format(nr))
+            self.sub.submitFunction(blobWaitingTimePulsePlot, args=args, kwargs=kwargs)
+
+            self.sub.setJobName("blobTimeTrace{}".format(nr))
+            self.sub.submitFunction(blobTimeTracesPlot, args=args, kwargs=kwargs)
+
+            for mode in modes:
+                for b in (True, False):
+                    kwargs = {"mode":mode, "fluct":b}
+                    if b:
+                        fluct = "-fluct"
+                    else:
+                        fluct = ""
+                    self.sub.setJobName("blob2DPlot-{}{}-{}".format(mode,fluct,nr))
+                    self.sub.submitFunction(blob2DPlot, args=args, kwargs=kwargs)
+
+            # Sleep to ensure that tmp files will have different names
+            sleep(self._sleepS)
     #}}}
 
     #{{{runCominedPlots
