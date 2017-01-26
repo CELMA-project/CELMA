@@ -31,6 +31,8 @@ def getTime(depth = "second"):
         nowStr += "-{:02d}".format(now.minute)
     if depth == "second":
         nowStr += "-{:02d}".format(now.second)
+    if depth == "microsecond":
+        nowStr += "-{}".format(now.microsecond)
 
     return nowStr
 #}}}

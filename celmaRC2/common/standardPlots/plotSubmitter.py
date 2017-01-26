@@ -56,9 +56,6 @@ class PlotSubmitter(object):
         """
         #}}}
 
-        # Magic number
-        self._sleepS = 1.5
-
         self._scanParameter = scanParameter
 
         # Set the folders to use
@@ -228,9 +225,6 @@ class PlotSubmitter(object):
                         fluct = ""
                     self.sub.setJobName("blob2DPlot-{}{}-{}".format(mode,fluct,nr))
                     self.sub.submitFunction(blob2DPlot, args=args, kwargs=kwargs)
-
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runCominedPlots
@@ -258,8 +252,6 @@ class PlotSubmitter(object):
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("combinedPlotsSliced{}".format(nr))
             self.sub.submitFunction(combinedPlotsPlot,args=args,kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runAnalyticGrowthRates
@@ -318,8 +310,6 @@ class PlotSubmitter(object):
                 kwargs = {}
                 self.sub.setJobName("energy{}".format(nr))
             self.sub.submitFunction(energyPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runFields1DAnim
@@ -347,8 +337,6 @@ class PlotSubmitter(object):
                       "boussinesq"    : self._boussinesq}
             self.sub.setJobName("fields1D{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runFields2DAnim
@@ -384,8 +372,6 @@ class PlotSubmitter(object):
             else:
                 self.sub.setJobName("fields2D{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runFourierModes
@@ -425,8 +411,6 @@ class PlotSubmitter(object):
                 kwargs = {}
                 self.sub.setJobName("fourierModes{}".format(nr))
             self.sub.submitFunction(fourierModesPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runGrowthRates
@@ -491,8 +475,6 @@ class PlotSubmitter(object):
             kwargs = {}
             self.sub.setJobName("magnitudeSpectrum{}".format(nr))
             self.sub.submitFunction(magnitudeSpectrumPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runSnapShotsSameScanVal
@@ -540,7 +522,7 @@ class PlotSubmitter(object):
             #        workaround the cascade of variables arguments tru
             #        the system.
             #        Will fail if there is queue on the system
-            sleep(self._sleepS + 30)
+            sleep(30)
     #}}}
 
     #{{{runSnapShotDifferentScanVals
@@ -581,8 +563,6 @@ class PlotSubmitter(object):
             kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
             self.sub.setJobName("snapShotDifferentScanVals{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runPerformance
@@ -613,8 +593,6 @@ class PlotSubmitter(object):
             dmp_folders  = (dmp_folders,)
             args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runPosOfFluct
@@ -643,8 +621,6 @@ class PlotSubmitter(object):
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("posOfFluctSliced{}".format(nr))
             self.sub.submitFunction(posOfFluctPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runPSD2D
@@ -669,8 +645,6 @@ class PlotSubmitter(object):
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("PSD2DPlotSliced{}".format(nr))
             self.sub.submitFunction(PSD2DPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runSkewKurt
@@ -695,8 +669,6 @@ class PlotSubmitter(object):
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("skewnessKurtosisSliced{}".format(nr))
             self.sub.submitFunction(skewKurtPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runSteadyState
@@ -723,8 +695,6 @@ class PlotSubmitter(object):
                      }
             self.sub.setJobName("steadyState{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runTotalFlux
@@ -742,8 +712,6 @@ class PlotSubmitter(object):
             args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             self.sub.setJobName("totalFlux{}".format(nr))
             self.sub.submitFunction(totalFluxPlot, args=args)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 
     #{{{runZonalFlow
@@ -771,7 +739,5 @@ class PlotSubmitter(object):
             kwargs = {"tSlice":tSlice}
             self.sub.setJobName("zonalFlowSliced{}".format(nr))
             self.sub.submitFunction(zonalFlowPlot, args=args, kwargs=kwargs)
-            # Sleep to ensure that tmp files will have different names
-            sleep(self._sleepS)
     #}}}
 #}}}
