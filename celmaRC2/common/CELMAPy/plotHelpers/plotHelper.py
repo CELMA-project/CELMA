@@ -325,8 +325,6 @@ class PlotHelper(object):
             The figure.
         fileName : str
             Full path of the plot.
-        extraArtist : tuple
-            Tuple of bbox_extra_artists to be saved
         """
 
         # Create path if not exists
@@ -336,11 +334,8 @@ class PlotHelper(object):
                     os.makedirs(directory)
                     print("{} created".format(directory))
 
-        fig.savefig(fileName,\
-                    transparent = True             ,\
-                    bbox_inches = "tight"          ,\
-                    bbox_extra_artists=extraArtists,\
-                    pad_inches  = 0                ,\
+        fig.savefig(fileName          ,\
+                    transparent = True,\
                     )
 
         print("Saved to {}".format(fileName))
