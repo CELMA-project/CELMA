@@ -80,7 +80,7 @@ class PBSSubmitter(object):
         #}}}
 
         self._jobName = jobName
-        self._time    = getTime()
+        self._time    = getTime(depth = "microsecond")
 
         if "setJobName" in self._notCalled:
             self._notCalled.remove("setJobName")
