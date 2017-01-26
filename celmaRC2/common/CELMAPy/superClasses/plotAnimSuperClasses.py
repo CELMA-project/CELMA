@@ -8,7 +8,7 @@ from ..plotHelpers import (plotNumberFormatter,\
                            seqCMap,\
                            seqCMap3,\
                            divCMap)
-from ..plotHelpers import getMaxMinAnimation
+from ..plotHelpers import getMaxMinAnimation, SizeMaker
 from .plotSuperClass import PlotSuperClass
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
@@ -183,7 +183,6 @@ class PlotAnimSuperClass(PlotSuperClass):
                 fileName = "{}-{}.{}".format(fileName, nr, self._extension)
                 fig.savefig(fileName,\
                             transparent = True  ,\
-                            bbox_inches = "tight",\
                             pad_inches  = 0      ,\
                             )
                 print("Saved to {}".format(fileName))
@@ -253,7 +252,13 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         rows = int(np.ceil(len(self._vars)/self._cols))
 
         # Create the figure
-        self._fig = plt.figure(figsize=self._pltSize)
+# FIXME: YOU ARE HERE: Set the size according to number of rows and cols
+        figSize = SizeMaker.array(self._cols    ,\
+                                  rows          ,\
+                                  # w       = 7.5 ,\
+                                  aSingle = 0.40,\
+                                  )
+        self._fig = plt.figure(figsize=figSize)
 
         # Create the axes
         gs = GridSpec(rows, self._cols)
@@ -279,7 +284,9 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
             self._axes[nr].set_xlabel(self._xlabel)
 
         # Adjust the subplots
-        self._fig.subplots_adjust(hspace=0.1, wspace=0.35)
+        # NOTE: Measured in fractions of average axis widths
+        self._fig.subplots_adjust(hspace=0.17, wspace=0.55,\
+                                  left=0.12, right=1.0, bottom=0.1, top=0.925)
     #}}}
 
     #{{{_initialPlot

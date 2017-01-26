@@ -20,11 +20,12 @@ except KeyError:
 # Set the plot style for all plots
 titleSize = 14
 
-plt.rc("axes",   labelsize = 12, titlesize = titleSize)
-plt.rc("xtick",  labelsize = 12)
-plt.rc("ytick",  labelsize = 12)
-plt.rc("legend", fontsize  = 12)
-plt.rc("lines",  linewidth = 1)
+plt.rc("axes",   labelsize  = 12, titlesize = titleSize)
+plt.rc("xtick",  labelsize  = 12)
+plt.rc("ytick",  labelsize  = 12)
+plt.rc("legend", fontsize   = 12)
+plt.rc("lines",  linewidth  = 1)
+plt.rc("lines",  markersize = 1.5)
 
 # Use computer modern as default for mathtext
 plt.rc("mathtext", fontset = "cm")
@@ -52,8 +53,8 @@ except (RuntimeError, FileNotFoundError) as er:
 plt.close("all")
 
 # Set the colorfunc
-seqCMap  = plt.get_cmap("inferno")
-seqCMap2 = plt.get_cmap("plasma")
-seqCMap3 = plt.get_cmap("viridis")
-divCMap  = plt.get_cmap("BrBG")
+seqCMap   = plt.get_cmap("inferno")
+seqCMap2  = plt.get_cmap("plasma")
+seqCMap3  = plt.get_cmap("viridis")
+divCMap   = plt.get_cmap("BrBG")
 qualCMap  = plt.get_cmap("Vega10")
