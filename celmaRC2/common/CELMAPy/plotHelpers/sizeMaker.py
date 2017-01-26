@@ -17,7 +17,7 @@ class SizeMaker(object):
     # \textwidth
     # \usepackage{layouts}
     # \printinunitsof{in}\prntlen{\textwidth}
-    textwidth = 6.3
+    textWidth = 6.3
     # Golden ratio of heigth/width
     aspect = 0.7
     # Dots (default from matplotlib dpi = 100 for 6.8 inches)
@@ -27,9 +27,9 @@ class SizeMaker(object):
     #{{{setTextWidth
     def setTextWidth(w):
         """
-        Sets the static textwidth with w
+        Sets the static textWidth (in inches) with w
         """
-        SizeMaker.textwidth = w
+        SizeMaker.textWidth = w
     #}}}
 
     @staticmethod
@@ -42,25 +42,34 @@ class SizeMaker(object):
     #}}}
 
     @staticmethod
+    #{{{setDots
+    def setDots(d):
+        """
+        Sets the static dots (used to calculate dpi) with d
+        """
+        SizeMaker.dots = d
+    #}}}
+
+    @staticmethod
     #{{{standard
-    def standard(s = 1, w = textwidth, a = aspect):
+    def standard(s = 1, w = textWidth, a = aspect):
         #{{{docstring
         """
-        Returns the standard plot size
+        Returns the standard plot size, recalculates the dpi.
 
         Parameters
         ----------
         s : float
             The scale of the width and heigth.
         w : float
-            The width.
+            The width (in inches).
         a : float
             The aspec ratio heigth/width.
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth)
+            The plot size as (width, heigth) in inches.
         """
         #}}}
 
@@ -71,24 +80,24 @@ class SizeMaker(object):
 
     @staticmethod
     #{{{golden
-    def golden(s = 1, w = textwidth, a = 1/1.618):
+    def golden(s = 1, w = textWidth, a = 1/1.618):
         #{{{docstring
         """
-        Returns the golden ratio plot size
+        Returns the golden ratio plot size, recalculates the dpi.
 
         Parameters
         ----------
         s : float
             The scale of the width and heigth.
         w : float
-            The width.
+            The width (in inches).
         a : float
             The aspec ratio heigth/width.
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth)
+            The plot size as (width, heigth) in inches.
         """
         #}}}
 
@@ -99,27 +108,63 @@ class SizeMaker(object):
 
     @staticmethod
     #{{{square
-    def square(s = 1, w = textwidth):
+    def square(s = 1, w = textWidth):
         #{{{docstring
         """
-        Returns the square plot size
+        Returns the square plot size, recalculates the dpi.
 
         Parameters
         ----------
         s : float
             The scale of the width and heigth.
         w : float
-            The width.
+            The width (in inches).
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth)
+            The plot size as (width, heigth) in inches.
         """
         #}}}
 
         w *= s
         plt.rc("figure", dpi = SizeMaker.dots/w)
         return (w, w)
+    #}}}
+
+    @staticmethod
+    #{{{array
+    def array(cols, rows, hSpace, wSpace, w = textWidth, aSingle = aspect):
+        #{{{docstring
+        """
+        Returns the plot size for an array plot, recalculates the dpi.
+
+        Parameters
+        ----------
+        cols : int
+            Number of columns in the array.
+        rows : int
+            Number of rows in the array.
+        hSpace : float
+            Spacing between the rows (in inches).
+        wSpace : float
+            Spacing between the columns (in inches).
+        w : float
+            Width of the entire figure.
+        aSingle : float
+            Aspect for a single plot in the array.
+
+        Returns
+        -------
+        plotSize : tuple
+            The plot size as (width, heigth) in inches.
+        """
+        #}}}
+
+        wSingle = (w/cols) - wSpace
+        hSingle = aSingle*wSingle
+        h       = (hSingle + hSpace)*rows
+        plt.rc("figure", dpi = SizeMaker.dots/w)
+        return (w, h)
     #}}}
 #}}}
