@@ -252,10 +252,8 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         rows = int(np.ceil(len(self._vars)/self._cols))
 
         # Create the figure
-# FIXME: YOU ARE HERE: Set the size according to number of rows and cols
         figSize = SizeMaker.array(self._cols    ,\
                                   rows          ,\
-                                  # w       = 7.5 ,\
                                   aSingle = 0.40,\
                                   )
         self._fig = plt.figure(figsize=figSize)
