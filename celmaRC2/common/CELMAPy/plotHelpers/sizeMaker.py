@@ -134,7 +134,7 @@ class SizeMaker(object):
 
     @staticmethod
     #{{{array
-    def array(cols, rows, hSpace, wSpace, w = textWidth, aSingle = aspect):
+    def array(cols, rows, wSpace=0.0, hSpace=0.0, w = textWidth, aSingle = aspect):
         #{{{docstring
         """
         Returns the plot size for an array plot, recalculates the dpi.
@@ -145,10 +145,12 @@ class SizeMaker(object):
             Number of columns in the array.
         rows : int
             Number of rows in the array.
-        hSpace : float
-            Spacing between the rows (in inches).
         wSpace : float
             Spacing between the columns (in inches).
+            Setting this will make the the total height more correct.
+        hSpace : float
+            Spacing between the rows (in inches).
+            Setting this will make the the total height more correct.
         w : float
             Width of the entire figure.
         aSingle : float
