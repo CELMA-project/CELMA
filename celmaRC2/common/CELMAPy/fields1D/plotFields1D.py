@@ -17,7 +17,7 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the Plot1DRadial
@@ -30,8 +30,6 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -39,9 +37,6 @@ class PlotAnim1DRadial(PlotAnim1DSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
 
         # Set the spatial part of the title
         self._spatTitle = "{}$,$ {}$,$ "
@@ -209,7 +204,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the Plot1DParallel
@@ -222,8 +217,6 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -231,9 +224,6 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
 
         # Set the spatial part of the title
         self._spatTitle = "{}$,$ {}$,$ "
