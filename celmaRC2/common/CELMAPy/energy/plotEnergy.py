@@ -3,7 +3,7 @@
 """Class for energy plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import seqCMap3
+from ..plotHelpers import SizeMaker, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -15,7 +15,7 @@ class PlotEnergy(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (27,12), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -24,16 +24,15 @@ class PlotEnergy(PlotSuperClass):
 
         Parameters
         ----------
-        pltSize : tuple
-            The size of the plot
+        *args : positional arguments
+            See parent constructor for details
+        **kwargs : keyword arguments
+            See parent constructor for details
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the plot size
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -98,7 +97,15 @@ class PlotEnergy(PlotSuperClass):
         else:
             unitsOrNormalization = "${normalization}$"
 
-        self._varLabelTemplate = r"$\mathrm{{E}}_{{{},{}{}}}$ " + unitsOrNormalization
+        self._varLabelTemplate = r"$\mathrm{{E}}_{{{},{}{}}}$"
+
+        self._eTitle =\
+            ("$\mathrm{{Electron \quad energy}}$" +\
+             "\n" + unitsOrNormalization).\
+            format(**self.uc.conversionDict["eEnergy"])
+        self._iTitle =\
+            ("$\mathrm{{Ion \quad energy}}$" + "\n" + unitsOrNormalization).\
+            format(**self.uc.conversionDict["iEnergy"])
 
         # Set the time label
         if self._timeAx:
@@ -119,11 +126,15 @@ class PlotEnergy(PlotSuperClass):
         # Create the plot
         # Not sharex="col" as it seems like the ticks are lost when setting
         # noneAx axis off
+        figSize = SizeMaker.array(2             ,\
+                                  3             ,\
+                                  aSingle = 0.40,\
+                                  )
         fig,\
         ((kinEParAx, kinIParAx),\
          (kinEPerpAx, kinIPerpAx),\
          (potEAx, noneAx)) =\
-                plt.subplots(ncols=2, nrows=3, figsize=self._pltSize)
+                plt.subplots(ncols=2, nrows=3, figsize=figSize)
         noneAx.set_axis_off()
 
         axesToTurnOff = (kinEParAx, kinIParAx, kinEPerpAx)
@@ -158,7 +169,7 @@ class PlotEnergy(PlotSuperClass):
                                         r"\mathrm{kin}",\
                                         eOrI,\
                                         self._perpParLatex[perpOrPar],\
-                                        **self.uc.conversionDict[eOrI+"Energy"])
+                                        )
                 axDict[axKey].set_ylabel(varLabel)
 
         # Plot the potential energies
@@ -179,8 +190,8 @@ class PlotEnergy(PlotSuperClass):
         kinIPerpAx.set_xlabel(self._timeLabel)
 
         # Set titles
-        kinEParAx.set_title("$\mathrm{Electron \quad energy}$")
-        kinIParAx.set_title("$\mathrm{Ion \quad energy}$")
+        kinEParAx.set_title(self._eTitle)
+        kinIParAx.set_title(self._iTitle)
 
         # Make the plot look nice
         for key in axDict.keys():
@@ -193,7 +204,8 @@ class PlotEnergy(PlotSuperClass):
                                     )
 
         # Adjust the subplots
-        fig.subplots_adjust(hspace=0.1, wspace=0.35)
+        fig.subplots_adjust(hspace=0.17, wspace=0.70,\
+                            left=0.17, right=0.98, bottom=0.2, top=0.87)
 
         if self._showPlot:
             plt.show()

@@ -245,7 +245,7 @@ class PBSSubmitter(object):
             jobString += "#PBS -A {}\n".format(self._account)
         # If we want to be notified by mail
         if self._mail is not None:
-            jobString += "#PBS -M e {}\n".format(self._mail)
+            jobString += "#PBS -M {}\n".format(self._mail)
         # #PBS -m abe
         # a=aborted b=begin e=ended
         jobString += "#PBS -m e\n"
