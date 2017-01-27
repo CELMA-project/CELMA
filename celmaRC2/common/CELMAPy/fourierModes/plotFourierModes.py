@@ -3,7 +3,7 @@
 """Class for fourier modes plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap2
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -15,7 +15,7 @@ class PlotFourierModes(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -24,16 +24,15 @@ class PlotFourierModes(PlotSuperClass):
 
         Parameters
         ----------
-        pltSize : tuple
-            The size of the plot
+        *args : positional arguments
+            See parent constructor for details
+        **kwargs : keyword arguments
+            See parent constructor for details
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -150,7 +149,7 @@ class PlotFourierModes(PlotSuperClass):
 
         for key in keys:
             # Create the plot
-            fig = plt.figure(figsize = self._pltSize)
+            fig = plt.figure(figsize = SizeMaker.standard(s=0.7))
             ax  = fig.add_subplot(111)
 
             # Make the label
