@@ -4,6 +4,7 @@
 
 from .plotNumberFormatter import plotNumberFormatter
 from matplotlib.ticker import MaxNLocator, FuncFormatter
+import pickle
 import os
 
 #{{{PlotHelper
@@ -315,7 +316,8 @@ class PlotHelper(object):
 
     @staticmethod
     #{{{savePlot
-    def savePlot(fig, fileName, extraArtists=None):
+    def savePlot(fig, fileName, extraArtists=None, crop=True):
+        #{{{docstring
         """
         Saves the figure
 
@@ -327,7 +329,20 @@ class PlotHelper(object):
             Full path of the plot.
         extraArtist : tuple
             Tuple of bbox_extra_artists to be saved
+        crop : bool
+            If True, whitespace will be removed.
         """
+        #}}}
+
+        if crop:
+            bbox_inches        = "tight"
+            bbox_extra_artists = extraArtists
+            pad_inches         = 0
+        else:
+            bbox_inches        = None
+            bbox_extra_artists = None
+            pad_inches         = None
+
 
         # Create path if not exists
         directory = os.path.dirname(fileName)
@@ -336,13 +351,23 @@ class PlotHelper(object):
                     os.makedirs(directory)
                     print("{} created".format(directory))
 
-        fig.savefig(fileName,\
-                    transparent = True             ,\
-                    bbox_inches = "tight"          ,\
-                    bbox_extra_artists=extraArtists,\
-                    pad_inches  = 0                ,\
+        fig.savefig(fileName                               ,\
+                    transparent        = True              ,\
+                    bbox_inches        = bbox_inches       ,\
+                    bbox_extra_artists = bbox_extra_artists,\
+                    pad_inches         = pad_inches        ,\
                     )
 
         print("Saved to {}".format(fileName))
+
+        # Redo fileName
+        fileName = os.path.splitext(fileName)[0] + ".pickle"
+        with open(fileName, "wb") as f:
+            pickle.dump(fig, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+        print("Pickled to {}".format(fileName))
+        print(("NOTE: Due to CEMLA.plotHelpers.plotFormatter, the "
+               "unpickling must take place where 'import CELMAPy' is "
+               "possible"))
     #}}}
 #}}}
