@@ -176,7 +176,8 @@ class UnitsConverter(object):
                       "normalization":r" q/T_{{e,0}}",\
                       "factor"       :self._normDict["Te0"]/cst.e,\
                      },\
-        "jPar"      :{"units"        :r"\mathrm{C}\mathrm{s}^{-1}",\
+        "jPar"      :{"units"        :\
+                        r"\mathrm{C}\mathrm{m}^{-2}\mathrm{s}^{-1}",\
                       "normalization":r"/n_0c_sq",\
                       "factor"       :cst.e*\
                                       self._normDict["rhoS"]*\

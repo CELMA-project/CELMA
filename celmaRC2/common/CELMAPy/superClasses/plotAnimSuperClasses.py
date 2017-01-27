@@ -8,7 +8,7 @@ from ..plotHelpers import (plotNumberFormatter,\
                            seqCMap,\
                            seqCMap3,\
                            divCMap)
-from ..plotHelpers import getMaxMinAnimation, SizeMaker
+from ..plotHelpers import PlotHelper, getMaxMinAnimation, SizeMaker
 from .plotSuperClass import PlotSuperClass
 from matplotlib.gridspec import GridSpec
 from matplotlib.ticker import FuncFormatter
@@ -181,11 +181,7 @@ class PlotAnimSuperClass(PlotSuperClass):
 
                 # Save the figure
                 fileName = "{}-{}.{}".format(fileName, nr, self._extension)
-                fig.savefig(fileName,\
-                            transparent = True  ,\
-                            pad_inches  = 0      ,\
-                            )
-                print("Saved to {}".format(fileName))
+                PlotHelper.savePlot(fig, fileName)
 
         if self._showPlot:
             fig.show()
@@ -283,8 +279,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
 
         # Adjust the subplots
         # NOTE: Measured in fractions of average axis widths
-        self._fig.subplots_adjust(hspace=0.17, wspace=0.55,\
-                                  left=0.12, right=1.0, bottom=0.1, top=0.925)
+        self._fig.subplots_adjust(hspace=0.17, wspace=0.55)
     #}}}
 
     #{{{_initialPlot

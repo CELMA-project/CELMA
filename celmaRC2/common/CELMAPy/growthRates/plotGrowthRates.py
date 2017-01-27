@@ -5,7 +5,7 @@ Contains class to plot the growth rates
 """
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap2, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap2, seqCMap3
 import numpy as np
 import matplotlib.pylab as plt
 import os
@@ -28,7 +28,7 @@ class PlotGrowthRates(PlotSuperClass):
     #}}}
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -37,16 +37,15 @@ class PlotGrowthRates(PlotSuperClass):
 
         Parameters
         ----------
-        pltSize : tuple
-            The size of the plot
+        *args : positional arguments
+            See parent constructor for details
+        **kwargs : keyword arguments
+            See parent constructor for details
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -242,8 +241,9 @@ class PlotGrowthRates(PlotSuperClass):
         #}}}
 
         # Create the axes
+        figSize = SizeMaker.array(1, 2, w = 6.3, aSingle = 0.7*0.7)
         fig, (imAx, reAx) =\
-            plt.subplots(nrows=2, sharex=True, figsize=self._pltSize)
+            plt.subplots(nrows=2, sharex=True, figsize=figSize)
 
         for outerInd, color in zip(gRDF.index.levels[0].values, colors):
             # Get the value for the legend
