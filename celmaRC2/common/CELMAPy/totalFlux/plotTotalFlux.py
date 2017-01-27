@@ -3,7 +3,7 @@
 """Class for totalFlux plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -15,7 +15,7 @@ class PlotTotalFlux(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -24,16 +24,15 @@ class PlotTotalFlux(PlotSuperClass):
 
         Parameters
         ----------
-        pltSize : tuple
-            The size of the plot
+        *args : positional arguments
+            See parent constructor for details
+        **kwargs : keyword arguments
+            See parent constructor for details
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the plot size
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -181,26 +180,31 @@ class PlotTotalFlux(PlotSuperClass):
         calling this function.
         """
 
+        textPos = (0.96, 0.91)
+
         # Create the plot
+        figSize = SizeMaker.array(1, 2, w = 6.3, aSingle = 0.7*0.7)
         fig, (elIonAx, perpAx) =\
-                plt.subplots(nrows=2, figsize=self._pltSize, sharex=True)
+                plt.subplots(nrows=2, figsize=figSize, sharex=True)
 
         # Plot the parallel integrated flux
         elIonAx.plot(self._t                ,\
                      self._parElFlux        ,\
                      color = self._colors[0],\
                      label = self._elLegend ,\
+                     alpha = 0.7            ,\
                     )
         elIonAx.plot(self._t                ,\
                      self._parIonFlux       ,\
                      color = self._colors[2],\
                      label = self._ionLegend,\
+                     alpha = 0.7            ,\
                     )
         # Get the textSize
         txtSize = elIonAx.legend().get_texts()[0].get_fontsize()
         # Add text
         lossTxtElIon = elIonAx.\
-                        text(0.95, 0.95,\
+                        text(*textPos,\
                             self._parElIonLossTxt,\
                             transform = elIonAx.transAxes,\
                             ha="right", va="top",\
@@ -217,7 +221,7 @@ class PlotTotalFlux(PlotSuperClass):
 
         # Add text
         lossTxtElIon = perpAx.\
-                        text(0.95, 0.95,\
+                        text(*textPos,\
                             self._perpLossTxt,\
                             transform = perpAx.transAxes,\
                             ha="right", va="top",\
