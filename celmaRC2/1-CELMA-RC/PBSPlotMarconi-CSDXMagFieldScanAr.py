@@ -80,18 +80,17 @@ modeSlices = (\
               slice(183, 183),\
               slice(198, 198),\
               )
-pltSub.runSnapShotsSameScanVal("param0", modeSlices, fluct=True)
+pltSub.runSnapShotsSameScanVal("param0", modeSlices, fluct=True, yInd=50)
 
 # Obtain the different modes
-# FIXME:
 modesSlices = {\
-               "B0_0.02":slice(None, None),\
-               "B0_0.04":slice(None, None),\
-               "B0_0.06":slice(None, None),\
-               "B0_0.08":slice(None, None),\
-               "B0_0.1" :slice(None, None),\
+               "B0_0.02":slice( 147,  147),\
+               "B0_0.04":slice(1500, 1500),\
+               "B0_0.06":slice( 300,  300),\
+               "B0_0.08":slice( 230,  230),\
+               "B0_0.1" :slice( 198,  198),\
                }
-pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True)
+pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True, yInd=50)
 
 # Obtain frames to see evolution
 # FIXME:
