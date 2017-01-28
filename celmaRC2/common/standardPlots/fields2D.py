@@ -18,6 +18,7 @@ def fields2DAnimation(dmp_folders    ,\
                       varName = "n"  ,\
                       fluct   = False,\
                       tSlice  = None ,\
+                      yInd    = 16   ,\
                       ):
     #{{{docstring
     """
@@ -39,6 +40,8 @@ def fields2DAnimation(dmp_folders    ,\
         Whether or not to plot the fluctuations.
     tSlice : [None|Slice]
         Temporal slice
+    yInd : int
+        Parallel index to slice at.
     """
     #}}}
 
@@ -52,7 +55,6 @@ def fields2DAnimation(dmp_folders    ,\
     ySlice = None
     zSlice = None
     xInd   = None
-    yInd   = 16
     zInd   = 0
     guardSlicesAndIndicesKwargs = {\
                                    "xguards" : False ,\

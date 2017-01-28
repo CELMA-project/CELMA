@@ -479,7 +479,8 @@ class PlotSubmitter(object):
 
     #{{{runSnapShotsSameScanVal
     def runSnapShotsSameScanVal(self, paramKey, slices,\
-                                fluct = False, varName = "n", vMaxVMin = None):
+                                fluct = False, varName = "n", vMaxVMin = None,\
+                                yInd = 16):
         #{{{docstring
         """
         Gets snapshot of a specific scan value.
@@ -496,6 +497,8 @@ class PlotSubmitter(object):
             Variable to animate.
         vMaxVMin : [None|tuple]
             Max and min of the colors (if not None)
+        yInd : int
+            Parallel index to slice at.
         """
         #}}}
 
@@ -514,7 +517,10 @@ class PlotSubmitter(object):
                 steadyStatePath,\
                 plotSuperKwargs)
         for nr, tSlice in enumerate(slices):
-            kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
+            kwargs = {"varName":varName,\
+                      "fluct":fluct,\
+                      "tSlice":tSlice,
+                      "yInd" : yInd}
             self.sub.setJobName("snapShotsSameScanVal{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
             # Sleep to ensure that tmp files will have different names
@@ -526,7 +532,8 @@ class PlotSubmitter(object):
     #}}}
 
     #{{{runSnapShotDifferentScanVals
-    def runSnapShotDifferentScanVals(self, slices, fluct = True, varName = "n"):
+    def runSnapShotDifferentScanVals(self, slices,\
+                                     fluct = True, varName = "n", yInd = 16):
         #{{{docstring
         """
         Gets snapshot of all the scan values.
@@ -539,6 +546,8 @@ class PlotSubmitter(object):
             Whether or not to display the fluctuations.
         varName : str
             Variable to animate.
+        yInd : str
+            Parallel index to slice at.
         """
         #}}}
 
@@ -560,7 +569,10 @@ class PlotSubmitter(object):
                     collectPaths,\
                     steadyStatePath,\
                     self._plotSuperKwargs)
-            kwargs = {"varName":varName, "fluct":fluct, "tSlice":tSlice}
+            kwargs = {"varName":varName,\
+                      "fluct":fluct,\
+                      "tSlice":tSlice,
+                      "yInd" : yInd}
             self.sub.setJobName("snapShotDifferentScanVals{}".format(nr))
             self.sub.submitFunction(fields2DAnimation, args=args, kwargs=kwargs)
     #}}}
