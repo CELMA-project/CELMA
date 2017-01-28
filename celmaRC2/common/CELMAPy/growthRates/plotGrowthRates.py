@@ -17,14 +17,13 @@ class PlotGrowthRates(PlotSuperClass):
     #{{{Static members
     _errorbarOptions = {"color"     :"k",\
                         "fmt"       :"o",\
-                        "fmt"       :"o",\
-                        "markersize":10 ,\
+                        "markersize":7  ,\
                         "ecolor"    :"k",\
                         "capsize"   :7  ,\
+                        "capthick"  :3  ,\
                         "elinewidth":3  ,\
+                        "alpha"     :0.7,\
                         }
-
-    _markeredgewidth = 3
     #}}}
 
     #{{{constructor
@@ -241,7 +240,7 @@ class PlotGrowthRates(PlotSuperClass):
         #}}}
 
         # Create the axes
-        figSize = SizeMaker.array(1, 2, w = 6.3, aSingle = 0.7*0.7)
+        figSize = SizeMaker.standard(w = 2.0, a = 2.0)
         fig, (imAx, reAx) =\
             plt.subplots(nrows=2, sharex=True, figsize=figSize)
 
@@ -259,27 +258,21 @@ class PlotGrowthRates(PlotSuperClass):
             yerr = None if self._analytic\
                     else gRDF.loc[outerInd]["growthRateStd"].values
 
-            (_, caps, _) = imAx.errorbar(\
+            imAx.errorbar(\
                 gRDF.loc[outerInd]["growthRate"].index.values,\
                 gRDF.loc[outerInd]["growthRate"].values      ,\
-                yerr  = yerr                                 ,\
-                label = label                                ,\
+                yerr       = yerr                            ,\
+                label      = label                           ,\
                 **self._errorbarOptions)
-
-            for cap in caps:
-                cap.set_markeredgewidth(self._markeredgewidth)
 
             yerr = None if self._analytic\
                     else gRDF.loc[outerInd]["angularVelocityStd"].values
 
-            (_, caps, _) = reAx.errorbar(\
+            reAx.errorbar(\
                 gRDF.loc[outerInd]["angularVelocity"].index.values,\
                 gRDF.loc[outerInd]["angularVelocity"].values      ,\
                 yerr  = yerr                                      ,\
                 **self._errorbarOptions)
-
-            for cap in caps:
-                cap.set_markeredgewidth(self._markeredgewidth)
 
         # Set labels
         imAx.set_ylabel(self._imLabel)
@@ -287,9 +280,6 @@ class PlotGrowthRates(PlotSuperClass):
 
         # Set scan label
         reAx.set_xlabel(xlabel)
-
-        # Set the title
-        fig.suptitle(self._title)
 
         # Tweak the ticks
         # Add 10% margins for readability
@@ -309,6 +299,22 @@ class PlotGrowthRates(PlotSuperClass):
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0.1, wspace=0.35)
+
+        # Set the title
+        fig.suptitle(self._title, y=0.9, transform=imAx.transAxes, va="bottom")
+
+        # Remove old legend
+        leg = imAx.legend()
+        leg.remove()
+        # Put the legend outside
+        handles, labels = imAx.get_legend_handles_labels()
+        fig.legend(handles,\
+                   labels,\
+                   bbox_to_anchor=(1.05, 1.0),\
+                   loc="upper left",\
+                   borderaxespad=0.,\
+                   bbox_transform = imAx.transAxes,\
+                   )
 
         if self._showPlot:
             plt.show()
