@@ -66,7 +66,6 @@ class PlotAnimSuperClass(PlotSuperClass):
         self.setAnimationOptions()
 
         # Magic numbers
-        self._labelSize = 35
         self._axRasterization = -10
     #}}}
 
@@ -583,5 +582,37 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
             fileName = "{}-{}-{}".format(self._varName, plotTypeName, "2D")
 
         self._fileName = os.path.join(self._savePath, fileName)
+    #}}}
+
+    #{{{_setupDoubleFigs
+    def _setupDoubleFigs(self):
+        """
+        Sets up the double figures
+        """
+
+        figSize = SizeMaker.standard(w=6.3, a=0.39)
+        # NOTE: tight_layout=True gives wobbly plot as the precision of
+        #       the colorbar changes during the animation
+        self._fig = plt.figure(figsize = figSize)
+
+        # Create figure and axes
+        gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
+        self._perpAx = self._fig.add_subplot(gs[0])
+        self._cBarAx = self._fig.add_subplot(gs[2])
+        self._fig.subplots_adjust(wspace=0.50)
+        self._perpAx.grid(True)
+
+        name = self.__class__.__name__
+        if name == "PlotAnim2DPerpPar":
+            self._parAx  = self._fig.add_subplot(gs[1])
+            self._parAx.grid(True)
+        elif name == "PlotAnim2DPerpPol":
+            self._polAx  = self._fig.add_subplot(gs[1])
+            self._polAx.grid(True)
+
+        # Adjust the colorbar
+        pos = self._cBarAx.get_position()
+        pos = (pos.x0-0.075, pos.y0, pos.width, pos.height)
+        self._cBarAx.set_position(pos)
     #}}}
 #}}}

@@ -11,10 +11,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pylab as plt
 import numpy as np
 
-# Reset the size
-plt.rc("xtick",  labelsize = 35)
-plt.rc("ytick",  labelsize = 35)
-
 #{{{PlotAnim2DPerp
 class PlotAnim2DPerp(PlotAnim2DSuperClass):
     """
@@ -154,12 +150,9 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         # Draw the grids
         self._perpAx.grid(b=True)
         # Set x and y labels
-        self._perpAx.\
-            set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
-                       fontsize = self._labelSize)
-        self._perpAx.\
-            set_ylabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
-                       fontsize = self._labelSize)
+        self._perpAx.set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"])
+        self._perpAx.set_ylabel(self._ph.rhoTxtDict["rhoTxtLabel"])
+        self._perpAx.locator_params(axis='x',nbins=7)
 
         # Update the text
         self._updatePerpPlotTxt(tInd)
@@ -168,7 +161,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         self._updateColorbar(self._fig, perpPlane, self._cBarAx, tInd)
 
         # Set title
-        self._cBar.set_label(self._varLabel, fontsize = self._labelSize)
+        self._cBar.set_label(self._varLabel)
 
         # Set equal axis
         self._perpAx.axis("equal")
@@ -198,15 +191,14 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._perpAx.set_title(self._axTitle.format(perpTitle, timeTitle),\
-                               fontsize = self._labelSize)
+        self._perpAx.set_title(self._axTitle.format(perpTitle, timeTitle))
 
         # Format axes
         self._ph.makePlotPretty(self._perpAx,\
                                 xprune   = "both",\
                                 yprune   = "both",\
                                 legend   = False,\
-                                rotation = 20,\
+                                rotation = 60,\
                                 )
     #}}}
 #}}}
@@ -359,12 +351,8 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         # Draw the grids
         self._parAx.grid(b=True)
         # Set x and y labels
-        self._parAx.\
-            set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"],\
-                       fontsize = self._labelSize)
-        self._parAx.\
-            set_ylabel(self._ph.zTxtDict["zTxtLabel"],\
-                       fontsize = self._labelSize)
+        self._parAx.set_xlabel(self._ph.rhoTxtDict["rhoTxtLabel"])
+        self._parAx.set_ylabel(self._ph.zTxtDict["zTxtLabel"])
 
         # Update the text
         self._updateParPlotTxt(tInd)
@@ -373,7 +361,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         self._updateColorbar(self._fig, parPlane, self._cBarAx, tInd)
 
         # Set title
-        self._cBar.set_label(self._varLabel, fontsize = self._labelSize)
+        self._cBar.set_label(self._varLabel)
     #}}}
 
     #{{{_updateParPlotTxt
@@ -403,15 +391,14 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._parAx.set_title(self._axTitle.format(parTitle, timeTitle),\
-                               fontsize = self._labelSize)
+        self._parAx.set_title(self._axTitle.format(parTitle, timeTitle))
 
         # Format axes
         self._ph.makePlotPretty(self._parAx,\
                                 xprune   = "both",\
                                 yprune   = "both",\
                                 legend   = False,\
-                                rotation = 20,\
+                                rotation = 60,\
                                 )
     #}}}
 #}}}
@@ -558,10 +545,8 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         # Draw the grids
         self._polAx.grid(b=True)
         # Set x and y labels
-        self._polAx. set_xlabel(r"$\theta$", fontsize = self._labelSize)
-        self._polAx.\
-            set_ylabel(self._ph.zTxtDict["zTxtLabel"],\
-                       fontsize = self._labelSize)
+        self._polAx.set_xlabel(r"$\theta$")
+        self._polAx.set_ylabel(self._ph.zTxtDict["zTxtLabel"])
 
         # Update the text
         self._updatePolPlotTxt(tInd)
@@ -575,7 +560,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         self._updateColorbar(self._fig, polPlane, self._cBarAx, tInd)
 
         # Set title
-        self._cBar.set_label(self._varLabel, fontsize = self._labelSize)
+        self._cBar.set_label(self._varLabel)
     #}}}
 
     #{{{_updatePolPlotTxt
@@ -604,8 +589,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         self._ph.tTxtDict["value"] =\
             plotNumberFormatter(self._time[tInd], None, precision=4)
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._polAx.set_title(self._axTitle.format(polTitle, timeTitle),\
-                               fontsize = self._labelSize)
+        self._polAx.set_title(self._axTitle.format(polTitle, timeTitle))
 
         # Format axes
         self._ph.makePlotPretty(self._polAx,\
@@ -625,7 +609,7 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (35,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the PlotAnim2DPerpPar
@@ -637,8 +621,6 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         ----------
         *args : positional arguments
             See parent constructors for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructors for details
         """
@@ -649,20 +631,8 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
 
         # Re-open the figure
         plt.close("all")
-        # NOTE: tight_layout=True gives wobbly plot as the precision of
-        #       the colorbar changes during the animation
-        self._fig = plt.figure(figsize = pltSize)
 
-        # Create figure and axes
-        # NOTE: tight_layout=True gives wobbly plot as the precision of
-        #       the colorbar changes during the animation
-        gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
-        self._perpAx = self._fig.add_subplot(gs[0])
-        self._parAx  = self._fig.add_subplot(gs[1])
-        self._cBarAx = self._fig.add_subplot(gs[2])
-        self._fig.subplots_adjust(wspace=0.25)
-        self._parAx.grid(True)
-        self._perpAx.grid(True)
+        self._setupDoubleFigs()
 
         # Set the axis title
         self._axTitle = "{}\n"
@@ -752,8 +722,7 @@ class PlotAnim2DPerpPar(PlotAnim2DPerp, PlotAnim2DPar):
         self._drawLines()
 
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._fig.suptitle("{}\n\n\n".\
-                           format(timeTitle), fontsize = self._labelSize)
+        self._fig.suptitle("{}\n\n\n".format(timeTitle), x = 0.445)
     #}}}
 
     #{{{_drawLines
@@ -804,7 +773,7 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (35,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the PlotAnim2DPerpPol class
@@ -816,8 +785,6 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
         ----------
         *args : positional arguments
             See parent constructors for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructors for details
         """
@@ -828,20 +795,8 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
 
         # Re-open the figure
         plt.close("all")
-        # NOTE: tight_layout=True gives wobbly plot as the precision of
-        #       the colorbar changes during the animation
-        self._fig = plt.figure(figsize = pltSize)
 
-        # Create figure and axes
-        # NOTE: tight_layout=True gives wobbly plot as the precision of
-        #       the colorbar changes during the animation
-        gs           = GridSpec(1, 3, width_ratios=(20, 20, 1))
-        self._perpAx = self._fig.add_subplot(gs[0])
-        self._polAx  = self._fig.add_subplot(gs[1])
-        self._cBarAx = self._fig.add_subplot(gs[2])
-        self._fig.subplots_adjust(wspace=0.25)
-        self._polAx.grid(True)
-        self._perpAx.grid(True)
+        self._setupDoubleFigs()
 
         # Set the axis title
         self._axTitle = "{}\n"
@@ -922,8 +877,7 @@ class PlotAnim2DPerpPol(PlotAnim2DPerp, PlotAnim2DPol):
         self._drawLines()
 
         timeTitle = self._ph.tTxtDict["constTTxt"].format(self._ph.tTxtDict)
-        self._fig.suptitle("{}\n\n\n".\
-                           format(timeTitle), fontsize = self._labelSize)
+        self._fig.suptitle("{}\n\n\n".format(timeTitle), x = 0.445)
     #}}}
 
     #{{{_drawLines

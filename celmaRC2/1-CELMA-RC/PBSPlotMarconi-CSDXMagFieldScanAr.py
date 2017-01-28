@@ -75,12 +75,11 @@ pltSub.runFields2DAnim(fluct=False)
 
 # Snapshots plot
 # Obtain evolution of the mode
-# FIXME:
 modeSlices = (\
-              slice(None, None),\
-              slice(None, None),\
-              slice(None, None),\
-             )
+              slice(168, 168),\
+              slice(183, 183),\
+              slice(198, 198),\
+              )
 pltSub.runSnapShotsSameScanVal("param0", modeSlices, fluct=True)
 
 # Obtain the different modes
