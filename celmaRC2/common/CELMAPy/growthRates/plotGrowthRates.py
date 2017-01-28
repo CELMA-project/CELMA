@@ -111,7 +111,7 @@ class PlotGrowthRates(PlotSuperClass):
         self._prepareLabels()
 
         # Set the fileName
-        grName = "growthRatesAnalytic" if analytic else "growthAnalytic"
+        grName = "growthRatesAnalytic" if analytic else "growthRates"
         fileVarName = self._varName if analytic else self._varName + "-"
         self._fileName =\
             os.path.join(self._savePath,\
@@ -186,7 +186,7 @@ class PlotGrowthRates(PlotSuperClass):
         """
 
         if not(self._analytic):
-            self._gRDF.rename(columns=\
+            self._gRDF = self._gRDF.rename(columns=\
                     {"averageAngularVelocity":"angularVelocity",\
                      "averageAngularVelocityStd":"angularVelocityStd"})
 
