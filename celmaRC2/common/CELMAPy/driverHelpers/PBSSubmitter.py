@@ -30,6 +30,20 @@ class PBSSubmitter(object):
                             "setQueue"   ,\
                             "setWalltime",\
                           ]
+
+        self._submit = True
+    #}}}
+
+    #{{{toggleSubmitOrRun
+    def toggleSubmitOrRun(self):
+        """
+        Toggles submit or run.
+        """
+
+        # Use xor
+        self._submit = bool(self._submit^1)
+
+        print("Submission to PBS queue is: {}".format(self._submit))
     #}}}
 
     #{{{setMisc
@@ -180,43 +194,49 @@ class PBSSubmitter(object):
         if not(self._miscCalled):
             self.setMisc()
 
-        # The name of the file
-        fileName = "tmp_{}_{}.py".format(function.__name__, self._time)
+        if self._submit:
+            # The name of the file
+            fileName = "tmp_{}_{}.py".format(function.__name__, self._time)
 
-        # Make the script
-        functionPath = inspect.getmodule(function).__file__
-        with open(functionPath, "r") as f:
-            tmpFile = f.read()
+            # Make the script
+            functionPath = inspect.getmodule(function).__file__
+            with open(functionPath, "r") as f:
+                tmpFile = f.read()
 
-        # Add arguments
-        tmpFile += "\n#Added by PBSSubmitter\n"
-        tmpFile += "args={}\nkwargs={}\n".format(args, kwargs)
+            # Add arguments
+            tmpFile += "\n#Added by PBSSubmitter\n"
+            tmpFile += "args={}\nkwargs={}\n".format(args, kwargs)
 
-        # Add function call in the end of the script
-        tmpFile += "{}({},{})\n".format(function.__name__, "*args", "**kwargs")
+            # Add function call in the end of the script
+            tmpFile += "{}({},{})\n".\
+                    format(function.__name__, "*args", "**kwargs")
 
-        # When the script has run, it will delete itself
-        tmpFile += "import os\nos.remove('{}')\n".format(fileName)
+            # When the script has run, it will delete itself
+            tmpFile += "import os\nos.remove('{}')\n".format(fileName)
 
-        # Write the python script
-        with open(fileName, "w") as f:
-            f.write(tmpFile)
+            # Write the python script
+            with open(fileName, "w") as f:
+                f.write(tmpFile)
 
-        # Get core of the job string
-        jobString = self._createPBSCoreString()
+            # Get core of the job string
+            jobString = self._createPBSCoreString()
 
-        # Call the python script in the submission
-        jobString += "python {}\n".format(fileName)
-        jobString += "exit"
+            # Call the python script in the submission
+            jobString += "python {}\n".format(fileName)
+            jobString += "exit"
 
-        # Create the dependencies
-        if dependencies is not None:
-            dependencies = ":".join(dependencies)
+            # Create the dependencies
+            if dependencies is not None:
+                dependencies = ":".join(dependencies)
 
-        # Submit the job
-        print("\nSubmitting '{}'\n".format(self._jobName))
+            # Submit the job
+            print("\nSubmitting '{}'\n".format(self._jobName))
 
-        self._submit(jobString, dependentJob = dependencies)
+            self._submit(jobString, dependentJob = dependencies)
+        else:
+            # Running the job
+            print("\nRunning '{}'\n".format(self._jobName))
+            function(*args, **kwargs)
     #}}}
 
     #{{{_createPBSCoreString
