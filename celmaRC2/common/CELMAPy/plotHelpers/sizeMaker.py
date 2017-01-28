@@ -9,16 +9,15 @@ class SizeMaker(object):
     r"""
     Class which determines the size (in inches) and calculates the dpi.
 
-    NOTE: For the text size to remain constant one must use
-          {s\textwidth} in the plots in LaTeX, where 's' is the scale
-          set in the function.
+    NOTE: For the text size to remain constant, do NOT use {s\textwidth}
+          in the plots in LaTeX (where 's' the scale).
     """
 
     # \textwidth
     # \usepackage{layouts}
     # \printinunitsof{in}\prntlen{\textwidth}
     textWidth = 6.3
-    # Golden ratio of heigth/width
+    # Personal opinion that this looks nicer than the golden ratio
     aspect = 0.7
     # Dots (default from matplotlib dpi = 100 for 6.8 inches)
     dots = 1000
@@ -134,7 +133,7 @@ class SizeMaker(object):
 
     @staticmethod
     #{{{array
-    def array(cols, rows, wSpace=0.0, hSpace=0.0, w = textWidth, aSingle = aspect):
+    def array(cols, rows, w = textWidth, aSingle = aspect):
         #{{{docstring
         """
         Returns the plot size for an array plot, recalculates the dpi.
@@ -145,12 +144,6 @@ class SizeMaker(object):
             Number of columns in the array.
         rows : int
             Number of rows in the array.
-        wSpace : float
-            Spacing between the columns (in inches).
-            Setting this will make the the total height more correct.
-        hSpace : float
-            Spacing between the rows (in inches).
-            Setting this will make the the total height more correct.
         w : float
             Width of the entire figure.
         aSingle : float
@@ -163,9 +156,9 @@ class SizeMaker(object):
         """
         #}}}
 
-        wSingle = (w/cols) - wSpace
+        wSingle = w/cols
         hSingle = aSingle*wSingle
-        h       = (hSingle + hSpace)*rows
+        h       = hSingle*rows
         plt.rc("figure", dpi = SizeMaker.dots/w)
         return (w, h)
     #}}}
