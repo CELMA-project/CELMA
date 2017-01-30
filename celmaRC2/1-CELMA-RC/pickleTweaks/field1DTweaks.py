@@ -7,6 +7,7 @@ Tweak of profile plots to be used in thesis.
 import pickle
 import matplotlib.pylab as plt
 import numpy as np
+from subprocess import Popen
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -53,4 +54,6 @@ for direction in ("radial", "parallel"):
     elif direction == "parallel":
         fileName = "B010Par.pdf"
 
-    PlotHelper.savePlot(fig, fileName)
+    # Let pdfcrop do the cropping as "tigth" cuts some text
+    PlotHelper.savePlot(fig, fileName, crop=False)
+    Popen("pdfcrop {0} {0}".format(fileName), shell=True).wait()
