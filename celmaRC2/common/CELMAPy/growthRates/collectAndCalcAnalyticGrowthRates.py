@@ -18,6 +18,7 @@ from .analyticalGrowthRates import (calcOmCE         ,\
 from boututils.datafile import DataFile
 import pandas as pd
 import scipy.constants as cst
+import numpy as np
 import os
 
 #{{{CollectAndCalcAnalyticGrowthRates
@@ -218,9 +219,10 @@ class CollectAndCalcAnalyticGrowthRates(object):
             # Obtain the scan value
             scanValue = getScanValue(steadyStatePath, self._scanParameter)
 
-            # Assume kz is double of the cylinder heigth (observed in
-            # the fluctuations)
-            kz = 2*(self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2]))
+            # lambda approx 2*Lz => kz (observed in the fluctuations)
+            # This means that kz approx pi/Lz
+            Lz = self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2])
+            kz = np.pi/Lz
 
             # Collect variables
             omCE, omCI, rhoS, rhoMax, n, dndx, uDE, uExBPol, nuEI =\
