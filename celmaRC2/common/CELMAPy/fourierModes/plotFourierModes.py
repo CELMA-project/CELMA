@@ -73,7 +73,7 @@ class PlotFourierModes(PlotSuperClass):
         self._varName = tuple(var for var in keys if var != "time")[0]
         # Strip the variable name
         self._varName = self._varName.replace("Magnitude","")
-        self._varName = self._varName.replace("AngularVelocity","")
+        self._varName = self._varName.replace("AngularFrequency","")
 
         # Obtain the color
         self._colors = seqCMap2(np.linspace(0, 1, self._nModes))
