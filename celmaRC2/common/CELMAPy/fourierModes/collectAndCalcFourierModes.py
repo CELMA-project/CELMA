@@ -288,8 +288,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         return fourierModes2d
     #}}}
 
-    #{{{calcAngularVelocity
-    def calcAngularVelocity(self, fourierModes2d):
+    #{{{calcAngularFrequency
+    def calcAngularFrequency(self, fourierModes2d):
         #{{{docstring
         """
         Calculates the phaseShift of the 2d fourier signal.
@@ -302,9 +302,9 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         Returns
         -------
         fourierModes2d : dict
-            As the input, but contains the key varNameAngularVelocity
+            As the input, but contains the key varNameAngularFrequency
             with values on the form (t, (nz/2) + 1) for each position.
-            NOTE: A negative angular velocity means that the
+            NOTE: A negative angular frequency means that the
                   perturbations are moving in the negative theta
                   direction.
         """
@@ -362,7 +362,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                     angularFreq[tInd-1, modeNr] = phaseShiftDiff/deltaT
 
             # Insert into the dict
-            fourierModes2d[key][self._varName+"AngularVelocity"] = angularFreq
+            fourierModes2d[key][self._varName+"AngularFrequency"] = angularFreq
         return fourierModes2d
     #}}}
 #}}}

@@ -70,9 +70,9 @@ class PlotGrowthRates(PlotSuperClass):
             DataFrame consisting of the variables (measured properties):
                 * "growthRate"                  - Always present
                 * "growthRateStd"               - Only if analytic = False
-                * "averageAngularVelocity"      - Only if analytic = False
-                * "averageAngularVelocityStd"   - Only if analytic = False
-                * "angularVelocity"             - Only if analytic = True
+                * "averageAngularFrequency"      - Only if analytic = False
+                * "averageAngularFrequencyStd"   - Only if analytic = False
+                * "angularFrequency"             - Only if analytic = True
             over the observation "modeNr" over the observation "Scan"
         positionTuple : tuple
             The tuple containing (rho, z).
@@ -187,8 +187,8 @@ class PlotGrowthRates(PlotSuperClass):
 
         if not(self._analytic):
             self._gRDF = self._gRDF.rename(columns=\
-                    {"averageAngularVelocity":"angularVelocity",\
-                     "averageAngularVelocityStd":"angularVelocityStd"})
+                    {"averageAngularFrequency":"angularFrequency",\
+                     "averageAngularFrequencyStd":"angularFrequencyStd"})
 
         # Make the scan plot
         scanColors =\
@@ -266,11 +266,11 @@ class PlotGrowthRates(PlotSuperClass):
                 **self._errorbarOptions)
 
             yerr = None if self._analytic\
-                    else gRDF.loc[outerInd]["angularVelocityStd"].values
+                    else gRDF.loc[outerInd]["angularFrequencyStd"].values
 
             reAx.errorbar(\
-                gRDF.loc[outerInd]["angularVelocity"].index.values,\
-                gRDF.loc[outerInd]["angularVelocity"].values      ,\
+                gRDF.loc[outerInd]["angularFrequency"].index.values,\
+                gRDF.loc[outerInd]["angularFrequency"].values      ,\
                 yerr  = yerr                                      ,\
                 **self._errorbarOptions)
 
