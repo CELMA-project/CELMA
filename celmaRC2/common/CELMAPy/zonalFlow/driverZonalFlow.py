@@ -60,10 +60,10 @@ def driverZonalFlow(\
           axis=3)
     rho    = np.empty(sSVar.shape)
     rho[:] = tmp
-    # Calculate the angular velocity
-    angVelSSVar =sSVar/rho
+    # Calculate the angular frequency
+    angFreqSSVar =sSVar/rho
     # Calculate the shear
-    angVelSSVarShear = DDX(angVelSSVar, dx)
+    angFreqSSVarShear = DDX(angFreqSSVar, dx)
 
     # Calculate the poloidal ExB in the saturarted turbulence state
     polExB = cczf.calcPoloidalExB(collectPaths)
@@ -73,29 +73,29 @@ def driverZonalFlow(\
     # Expand rho in order to have a defined arithmetic operation with sSVar
     rho    = np.empty(varAvg.shape)
     rho[:] = tmp
-    # Calculate the angular velocity (the error propagation is linear)
-    angVelVar    = var   /rho
-    angVelVarAvg = varAvg/rho
-    angVelVarStd = varStd/rho
+    # Calculate the angular frequency (the error propagation is linear)
+    angFreqVar    = var   /rho
+    angFreqVarAvg = varAvg/rho
+    angFreqVarStd = varStd/rho
 
     # Calculate the shear
-    angVelShearVar = DDX(angVelVar, dx)
+    angFreqShearVar = DDX(angFreqVar, dx)
     # Calculate average, fluct and std of the shear
-    angVelShearVarAvg, _, angVelShearVarStd =\
-            CollectAndCalcRadialProfile.calcAvgFluctStd(angVelShearVar)
+    angFreqShearVarAvg, _, angFreqShearVarStd =\
+            CollectAndCalcRadialProfile.calcAvgFluctStd(angFreqShearVar)
 
     # Recast to dict
     # Remove not needed
     polExB.pop("time")
     polExB["polExBSS"]          = sSVar            [0,:,0,0]
-    polExB["angPolExBSS"]       = angVelSSVar      [0,:,0,0]
-    polExB["angPolExBShearSS"]  = angVelSSVarShear [0,:,0,0]
+    polExB["angPolExBSS"]       = angFreqSSVar      [0,:,0,0]
+    polExB["angPolExBShearSS"]  = angFreqSSVarShear [0,:,0,0]
     polExB["polExBAvg"]         = varAvg           [0,:,0,0]
     polExB["polExBStd"]         = varStd           [0,:,0,0]
-    polExB["angPolExBAvg"]      = angVelVarAvg     [0,:,0,0]
-    polExB["angPolExBStd"]      = angVelVarStd     [0,:,0,0]
-    polExB["angPolExBShearAvg"] = angVelShearVarAvg[0,:,0,0]
-    polExB["angPolExBShearStd"] = angVelShearVarStd[0,:,0,0]
+    polExB["angPolExBAvg"]      = angFreqVarAvg     [0,:,0,0]
+    polExB["angPolExBStd"]      = angFreqVarStd     [0,:,0,0]
+    polExB["angPolExBShearAvg"] = angFreqShearVarAvg[0,:,0,0]
+    polExB["angPolExBShearStd"] = angFreqShearVarStd[0,:,0,0]
     polExB["rho"]               = rho              [0,:,0,0]
 
     # Plot
