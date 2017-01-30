@@ -39,6 +39,8 @@ def driverAnalyticGrowthRates(steadyStatePaths,\
     analyticalGRDataFrame, paramDataFrame, positionTuple, uc =\
         ccagr.getData()
 
+    print(paramDataFrame)
+
     # Plot
     pagr = PlotGrowthRates(uc         ,\
                            **plotSuperKwargs)
