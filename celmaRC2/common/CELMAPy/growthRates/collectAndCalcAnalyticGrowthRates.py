@@ -18,6 +18,7 @@ from .analyticalGrowthRates import (calcOmCE         ,\
 from boututils.datafile import DataFile
 import pandas as pd
 import scipy.constants as cst
+import numpy as np
 import os
 
 #{{{CollectAndCalcAnalyticGrowthRates
@@ -171,7 +172,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
         analyticalGRDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
                 * "growthRate"
-                * "angularVelocity"
+                * "angularFrequency"
             over the observation "modeNr" over the observation "Scan"
         paramDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
@@ -199,11 +200,17 @@ class CollectAndCalcAnalyticGrowthRates(object):
 
         singleIndexTuple = []
         multiIndexTuple  = []
-        fullDict = {"growthRate":[], "angularVelocity":[]}
+        fullDict = {"growthRate":[], "angularFrequency":[]}
 
-        keys = ("omCE", "omCI", "rhoS",\
-                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI")
-        paramDict = {key:[] for key in keys}
+        keys = ["kz", "omCE", "omCI", "rhoS",\
+                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI"]
+
+        # Find mid mode
+        midMode = int((nModes+1)/2)
+        midModeKeys = ("ky", "omStar", "b", "sigmaPar")
+        midModeKeys = ["{}AtM{}".format(key, midMode) for key in midModeKeys]
+
+        paramDict = {key:[] for key in (*keys, *midModeKeys)}
 
         # Loop over the folders
         for steadyStatePath in self._steadyStatePaths:
@@ -212,9 +219,10 @@ class CollectAndCalcAnalyticGrowthRates(object):
             # Obtain the scan value
             scanValue = getScanValue(steadyStatePath, self._scanParameter)
 
-            # Assume kz is double of the cylinder heigth (observed in
-            # the fluctuations)
-            kz = 2*(self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2]))
+            # lambda approx 2*Lz => kz (observed in the fluctuations)
+            # This means that kz approx pi/Lz
+            Lz = self._dh.z[-1] + 0.5*(self._dh.z[-1] - self._dh.z[-2])
+            kz = np.pi/Lz
 
             # Collect variables
             omCE, omCI, rhoS, rhoMax, n, dndx, uDE, uExBPol, nuEI =\
@@ -232,6 +240,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
             paramDict["uDE"]    .append(uDE)
             paramDict["uExBPol"].append(uExBPol)
             paramDict["nuEI"]   .append(nuEI)
+            paramDict["kz"]     .append(kz)
 
             for m in range(1, nModes+1):
                 # Fill the multiIndexTuple and the dict
@@ -242,11 +251,19 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 omStar = calcOmStar(ky, uDE)
                 b = calcPecseliB(ky, rhoS)
                 sigmaPar = calcSigmaPar(ky, kz, omCE, omCI, nuEI)
+
+                # Add to dict
+                if m == midMode:
+                    paramDict["kyAtM{}"      .format(midMode)].append(ky)
+                    paramDict["omStarAtM{}"  .format(midMode)].append(omStar)
+                    paramDict["bAtM{}"       .format(midMode)].append(b)
+                    paramDict["sigmaParAtM{}".format(midMode)].append(sigmaPar)
+
                 om=pecseliAnalytical(omStar, b, sigmaPar)
 
                 fullDict["growthRate"].append(om.imag)
-                # Correct for ExB angular velocity (not in Pecseli's derivation)
-                fullDict["angularVelocity"].append(om.real + uExBPol/rhoMax)
+                # Correct for ExB angular frequency (not in Pecseli's derivation)
+                fullDict["angularFrequency"].append(om.real + uExBPol/rhoMax)
 
         # Make the data frames
         paramDataFrame = pd.DataFrame(paramDict, index=singleIndexTuple)

@@ -83,7 +83,7 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
                                    steadyStatePath            ,\
                                    self._indicesArgs          ,\
                                    self._indicesKwargs        ,\
-                                   calcAngularVelocity = False,\
+                                   calcAngularFrequency = False,\
                                       )
 
         # Initialize the output

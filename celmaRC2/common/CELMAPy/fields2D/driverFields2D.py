@@ -157,7 +157,7 @@ def driver2DFieldParSingle(collectPaths     ,\
     par2D = ccf2D.executeCollectAndCalc()
 
     # Set the plot limits
-    tupleOfArrays = (par2D[varName],)
+    tupleOfArrays = (par2D[varName],par2D[varName+"PPi"])
     vmax, vmin, levels =\
         getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 
@@ -328,7 +328,7 @@ def driver2DFieldPerpParSingle(collectPaths     ,\
     par2D = ccf2D.executeCollectAndCalc()
 
     # Set the plot limits
-    tupleOfArrays = (perp2D[varName], par2D[varName])
+    tupleOfArrays = (perp2D[varName], par2D[varName], par2D[varName+"PPi"])
     vmax, vmin, levels =\
         getVmaxVminLevels(plotSuperKwargs, tupleOfArrays, fluct, varyMaxMin)
 

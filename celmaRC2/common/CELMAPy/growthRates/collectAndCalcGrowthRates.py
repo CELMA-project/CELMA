@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Contains class to calculate the growth rate and angular velocity
+Contains class to calculate the growth rate and angular frequency
 of a time trace of a spatial FFT.
 """
 
@@ -99,24 +99,24 @@ class CollectAndCalcGrowthRates(object):
     #}}}
 
     @staticmethod
-    #{{{calcAvgAngularVelocityAndSpread
-    def calcAvgAngularVelocityAndSpread(angularVelocity):
+    #{{{calcAvgAngularFrequencyAndSpread
+    def calcAvgAngularFrequencyAndSpread(angularFrequency):
         #{{{docstring
         """
-        Calculates the average angular velocity and the spread for the
+        Calculates the average angular frequency and the spread for the
         given input.
 
         Parameters
         ----------
-        angularVelocity : array 2d
-            Array of the time trace of the angular velocity of a fourier
+        angularFrequency : array 2d
+            Array of the time trace of the angular frequency of a fourier
             transformed poloidal profile on the form (t-1, mode). Where
             the first mode in the array is the 1st mode (i.e. the 0th
             mode has been excluded)
 
         Returns
         -------
-        avgAngVel : tuple
+        avgAngFreq : tuple
             Tuple of all the calculated averaged angular velocities.
             The tuple is ordered after ascending modenumber (starting at 1).
         spread : tuple
@@ -125,18 +125,18 @@ class CollectAndCalcGrowthRates(object):
         """
         #}}}
 
-        # Slice the angularVelocity
-        modeIndices      = range(angularVelocity.shape[1])
+        # Slice the angularFrequency
+        modeIndices      = range(angularFrequency.shape[1])
 
-        avgAngVels = []
+        avgAngFreqs = []
         spreads    = []
 
         for modeNr in modeIndices:
             # Calculate the average and the spread
-            avgAngVels.append(angularVelocity[:,modeNr].mean())
-            spreads   .append(angularVelocity[:,modeNr].std() )
+            avgAngFreqs.append(angularFrequency[:,modeNr].mean())
+            spreads   .append(angularFrequency[:,modeNr].std() )
 
-        return tuple(avgAngVels), tuple(spreads)
+        return tuple(avgAngFreqs), tuple(spreads)
     #}}}
 
     #{{{getData
@@ -173,8 +173,8 @@ class CollectAndCalcGrowthRates(object):
             DataFrame consisting of the variables (measured properties):
                 * "growthRate"
                 * "growthRateStd"
-                * "averageAngularVelocity"
-                * "averageAngularVelocityStd"
+                * "averageAngularFrequency"
+                * "averageAngularFrequencyStd"
             over the observation "modeNr" over the observation "Scan"
         positionTuple : tuple
             The tuple containing (rho, z).
@@ -192,7 +192,7 @@ class CollectAndCalcGrowthRates(object):
         multiTuples = []
         fullDict =\
             {"growthRate":[], "growthRateStd":[],\
-             "averageAngularVelocity":[], "averageAngularVelocityStd":[]}
+             "averageAngularFrequency":[], "averageAngularFrequencyStd":[]}
 
         loopOver = zip(self._scanCollectPaths,\
                        self._steadyStatePaths,\
@@ -225,19 +225,19 @@ class CollectAndCalcGrowthRates(object):
             # Get the keys
             firstKey = tuple(fm.keys())[0]
 
-            # Obtain the time, magitude and the angular velocity
+            # Obtain the time, magitude and the angular frequency
             time            = fm[firstKey]["time"]
             magnitudes      = fm[firstKey][varName+"Magnitude"]
-            angularVelocity = fm[firstKey][varName+"AngularVelocity"]
+            angularFrequency = fm[firstKey][varName+"AngularFrequency"]
 
             slopes, slopesStd =\
                 self.calcSlopeAndSpread(magnitudes[:, modeStart:modeEnd],\
                                         time                            ,\
                                        )
 
-            avgAngVels, avgAngVelsStd =\
-                self.calcAvgAngularVelocityAndSpread(\
-                                        angularVelocity[:, modeStart:modeEnd])
+            avgAngFreqs, avgAngFreqsStd =\
+                self.calcAvgAngularFrequencyAndSpread(\
+                                        angularFrequency[:, modeStart:modeEnd])
 
             for modeInd in range(len(slopes)):
                 # Fill the multiIndexTuple and the dict
@@ -247,10 +247,10 @@ class CollectAndCalcGrowthRates(object):
                         append(slopes[modeInd])
                 fullDict["growthRateStd"            ].\
                         append(slopesStd[modeInd])
-                fullDict["averageAngularVelocity"   ].\
-                        append(avgAngVels[modeInd])
-                fullDict["averageAngularVelocityStd"].\
-                        append(avgAngVelsStd[modeInd])
+                fullDict["averageAngularFrequency"   ].\
+                        append(avgAngFreqs[modeInd])
+                fullDict["averageAngularFrequencyStd"].\
+                        append(avgAngFreqsStd[modeInd])
 
         # Make the data frame
         growthRateDataFrame =\
@@ -271,7 +271,7 @@ class CollectAndCalcGrowthRates(object):
                                    indicesArgs               ,\
                                    indicesKwargs             ,\
                                    calcMagnitude       = True,\
-                                   calcAngularVelocity = True,\
+                                   calcAngularFrequency = True,\
                                   ):
         #{{{docstring
         """
@@ -294,8 +294,8 @@ class CollectAndCalcGrowthRates(object):
             collecting.
         calcMagnitude : bool
             If the magnitude should be collected.
-        calcAngularVelocity : bool
-            If the angular velocity should be collected.
+        calcAngularFrequency : bool
+            If the angular frequency should be collected.
 
         Returns
         -------
@@ -327,8 +327,8 @@ class CollectAndCalcGrowthRates(object):
         fm = ccfm.convertTo2D(fm)
         if calcMagnitude:
             fm = ccfm.calcMagnitude(fm)
-        if calcAngularVelocity:
-            fm = ccfm.calcAngularVelocity(fm)
+        if calcAngularFrequency:
+            fm = ccfm.calcAngularFrequency(fm)
 
         # NOTE: Theta remains unspecified as we have done a fourier transform
         firstKey = tuple(fm.keys())[0]
