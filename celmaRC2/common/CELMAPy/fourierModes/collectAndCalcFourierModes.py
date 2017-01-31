@@ -278,8 +278,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         ----------
         fourierModes2d : dict
             Dictionary where the keys are on the form "rho,z".
-            The value is a dict containing of
-            {varName:fourierModes, "time":time}.
+            The value is a dict containing of at least
+            {varName:fourierModes}.
             The fourierModes is a 2d array on the form (t,mode).
 
         Returns

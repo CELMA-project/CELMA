@@ -205,11 +205,10 @@ class CollectAndCalcAnalyticGrowthRates(object):
 
         singleIndexTuple = []
         multiIndexTuple  = []
-        fullDict = {"growthRate":[], "angularFrequency":[]}
+        fullDict = {"growthRate":[], "angularFrequency":[], "phaseShiftNPhi":[]}
 
         keys = ("kz", "omCE", "omCI", "rhoS",\
-                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI",\
-                "phaseShiftNPhi")
+                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI")
 
         # Find mid mode
         midMode = int((nModes+1)/2)
