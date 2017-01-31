@@ -26,6 +26,7 @@ plt.rc("lines",  linewidth = 2)
 
 
 def checkModes(path):
+    path = path[0]
     defaultCollect = partial(collect,\
                         path=path, xguards=False, yguards=False, info=False)
     unfiltered = defaultCollect("unfiltered")
