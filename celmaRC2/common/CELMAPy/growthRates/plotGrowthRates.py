@@ -68,11 +68,11 @@ class PlotGrowthRates(PlotSuperClass):
             Name of the variable
         growthRateDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
-                * "growthRate"                  - Always present
-                * "growthRateStd"               - Only if analytic = False
-                * "averageAngularFrequency"      - Only if analytic = False
-                * "averageAngularFrequencyStd"   - Only if analytic = False
-                * "angularFrequency"             - Only if analytic = True
+                * "growthRate"                 - Always present
+                * "growthRateStd"              - Only if analytic = False
+                * "averageAngularFrequency"    - Only if analytic = False
+                * "averageAngularFrequencyStd" - Only if analytic = False
+                * "angularFrequency"           - Only if analytic = True
             over the observation "modeNr" over the observation "Scan"
         positionTuple : tuple
             The tuple containing (rho, z).
