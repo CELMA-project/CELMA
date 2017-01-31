@@ -235,8 +235,41 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                 return uEPar
     #}}}
 
+    @staticmethod
+    #{{{obtainVarName
+    def obtainVarName(fourierModes2d):
+        #{{{docstring
+        """
+        Obtains the varName of the input dict
+
+        Parameters
+        ----------
+        fourierModes2d : dict
+            Dictionary where the keys are on the form "rho,z".
+            The value is a dict containing of
+            {varName:fourierModes, "time":time}.
+            The fourierModes is a 2d array on the form (t,mode).
+
+        Returns
+        -------
+        varName : str
+            The variable name
+        """
+        #}}}
+        # Obtain the varname
+        ind  = tuple(fourierModes.keys())[0]
+        keys = fourierModes[ind].keys()
+        varName = tuple(var for var in keys if var != "time")[0]
+        # Strip the variable name
+        varName = varName.replace("Magnitude","")
+        varName = varName.replace("AngularFrequency","")
+
+        return varName
+    #}}}
+
+    @staticmethod
     #{{{calcMagnitude
-    def calcMagnitude(self, fourierModes2d):
+    def calcMagnitude(fourierModes2d):
         #{{{docstring
         """
         Calculates the magnitude of the 2d fourier signal.
@@ -244,7 +277,10 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         Parameters
         ----------
         fourierModes2d : dict
-            Output from executeCollectAndCalc and _convertTo2D.
+            Dictionary where the keys are on the form "rho,z".
+            The value is a dict containing of
+            {varName:fourierModes, "time":time}.
+            The fourierModes is a 2d array on the form (t,mode).
 
         Returns
         -------
@@ -254,8 +290,10 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         """
         #}}}
 
+        varName = CollectAndCalcFourierModes.obtainVarName(fourierModes2d)
+
         for key in fourierModes2d.keys():
-            modes = fourierModes2d[key][self._varName].copy()
+            modes = fourierModes2d[key][varName].copy()
             tSize, N  = modes.shape
             nyquistMode = int(N/2) + 1
             magnitude = np.zeros((tSize, nyquistMode))
@@ -284,12 +322,13 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                 magnitude[:, modeNr] = (posFreq + negFreq)/N
 
             # Insert into the dict
-            fourierModes2d[key][self._varName+"Magnitude"] = magnitude
+            fourierModes2d[key][varName+"Magnitude"] = magnitude
         return fourierModes2d
     #}}}
 
+    @staticmethod
     #{{{calcAngularFrequency
-    def calcAngularFrequency(self, fourierModes2d):
+    def calcAngularFrequency(fourierModes2d):
         #{{{docstring
         """
         Calculates the phaseShift of the 2d fourier signal.
@@ -297,7 +336,10 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         Parameters
         ----------
         fourierModes2d : dict
-            Output from executeCollectAndCalc and _convertTo2D.
+            Dictionary where the keys are on the form "rho,z".
+            The value is a dict containing of
+            {varName:fourierModes, "time":time}.
+            The fourierModes is a 2d array on the form (t,mode).
 
         Returns
         -------
@@ -310,8 +352,10 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         """
         #}}}
 
+        varName = CollectAndCalcFourierModes.obtainVarName(fourierModes2d)
+
         for key in fourierModes2d.keys():
-            modes    = fourierModes2d[key][self._varName].copy()
+            modes    = fourierModes2d[key][varName].copy()
             time     = fourierModes2d[key]["time"]
             tSize, N = modes.shape
             nyquistMode = int(N/2) + 1
@@ -362,7 +406,7 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
                     angularFreq[tInd-1, modeNr] = phaseShiftDiff/deltaT
 
             # Insert into the dict
-            fourierModes2d[key][self._varName+"AngularFrequency"] = angularFreq
+            fourierModes2d[key][varName+"AngularFrequency"] = angularFreq
         return fourierModes2d
     #}}}
 #}}}
