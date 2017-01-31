@@ -173,6 +173,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
             DataFrame consisting of the variables (measured properties):
                 * "growthRate"
                 * "angularFrequency"
+                * "phaseShiftNPhi"
             over the observation "modeNr" over the observation "Scan"
         paramDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
@@ -184,6 +185,10 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 * "dndx"
                 * "uDE"
                 * "nuEI"
+                * ky at nModes/2
+                * omStar at nModes/2
+                * b at nModes/2
+                * sigmaPar at nModes/2
             over the observation "Scan".
         positionTuple : tuple
             The tuple containing (rho, z).
@@ -202,8 +207,9 @@ class CollectAndCalcAnalyticGrowthRates(object):
         multiIndexTuple  = []
         fullDict = {"growthRate":[], "angularFrequency":[]}
 
-        keys = ["kz", "omCE", "omCI", "rhoS",\
-                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI"]
+        keys = ("kz", "omCE", "omCI", "rhoS",\
+                "rhoMax", "n", "dndx", "uDE", "uExBPol", "nuEI",\
+                "phaseShiftNPhi")
 
         # Find mid mode
         midMode = int((nModes+1)/2)
@@ -262,8 +268,14 @@ class CollectAndCalcAnalyticGrowthRates(object):
                 om=pecseliAnalytical(omStar, b, sigmaPar)
 
                 fullDict["growthRate"].append(om.imag)
-                # Correct for ExB angular frequency (not in Pecseli's derivation)
+                # Correct for ExB angular frequency
+                # (not in Pecseli's derivation)
                 fullDict["angularFrequency"].append(om.real + uExBPol/rhoMax)
+
+                # Calculate the phase shift (from section 5.6 in the
+                # draft)
+                fullDict["phaseShiftNPhi"].append(\
+                        np.angle((omStar+1j*b*sigmaPar)/(om+1j*b*sigmaPar)))
 
         # Make the data frames
         paramDataFrame = pd.DataFrame(paramDict, index=singleIndexTuple)
