@@ -4,10 +4,14 @@
 Contains class to calculate the phase shift between n and phi.
 """
 
+from ..collectAndCalcHelpers import getScanValue
 from ..fourierModes import CollectAndCalcFourierModes
 from ..timeTrace import getTimeTrace
+from .collectAndCalcAnalyticGrowthRates import\
+     CollectAndCalcAnalyticGrowthRates
 from scipy import signal
 import pandas as pd
+import numpy as np
 
 #{{{CollectAndCalcPhaseShift
 class CollectAndCalcPhaseShift(object):
@@ -25,7 +29,8 @@ class CollectAndCalcPhaseShift(object):
     #}}}
 
     #{{{setCollectArgs
-    def setCollectArgs(scanCollectPaths,\
+    def setCollectArgs(self,\
+                       scanCollectPaths,\
                        steadyStatePaths,\
                        tSlices,\
                        scanParameter):
@@ -56,18 +61,19 @@ class CollectAndCalcPhaseShift(object):
         """
         #}}}
 
-    if "setCollectArgs":
-        self._notCalled.remove("setCollectArgs")
+        if "setCollectArgs":
+            self._notCalled.remove("setCollectArgs")
 
-    # Set the member data
-    self._scanCollectPaths = scanCollectPaths
-    self._steadyStatePaths = steadyStatePaths
-    self._tSlices          = tSlices
-    self._scanParameter    = scanParameter
+        # Set the member data
+        self._scanCollectPaths = scanCollectPaths
+        self._steadyStatePaths = steadyStatePaths
+        self._tSlices          = tSlices
+        self._scanParameter    = scanParameter
     #}}}
 
     #{{{setGetDataArgs
-    def setGetDataArgs(convertToPhysical,\
+    def setGetDataArgs(self,\
+                       convertToPhysical,\
                        indicesArgs      ,\
                        indicesKwargs    ,\
                        ):
@@ -83,7 +89,7 @@ class CollectAndCalcPhaseShift(object):
         convertToPhysical : bool
             Whether or not to convert to physical units.
         indicesArgs : tuple
-            Contains (xInd, yInd)
+            Contains (xInd, yInd, zInd)
             NOTE: Only one spatial point should be used.
         indicesKwargs : dict
             Keyword arguments to use when setting the indices for
@@ -96,14 +102,14 @@ class CollectAndCalcPhaseShift(object):
         """
         #}}}
 
-    if "setGetDataArgs":
-        self._notCalled.remove("setGetDataArgs")
+        if "setGetDataArgs":
+            self._notCalled.remove("setGetDataArgs")
 
-    # Set the data
-    self._convertToPhysical = convertToPhysical
-    self._indicesArgs       = indicesArgs
-    self._yInd              = indicesArgs[1]
-    self._indicesKwargs     = indicesKwargs
+        # Set the data
+        self._convertToPhysical = convertToPhysical
+        self._indicesArgs       = indicesArgs
+        self._yInd              = indicesArgs[1]
+        self._indicesKwargs     = indicesKwargs
     #}}}
 
     #{{{getData
@@ -123,7 +129,7 @@ class CollectAndCalcPhaseShift(object):
                 * "phaseShift"
             over the observation "Scan"
         positionTuple : tuple
-            The tuple containing (rho, z).
+            The tuple containing (rho, theta, z).
             Needed in the plotting routine.
         uc : Units Converter
             The units converter used when obtaining the fourier modes.
@@ -143,11 +149,16 @@ class CollectAndCalcPhaseShift(object):
                                                   self._scanParameter,\
                                                   self._yInd)
         # Obtain the data
-        analyticalGRDataFrame, _, positionTuple, uc =\
+        analyticalGRDataFrame, _, _, uc =\
             ccagr.getData()
 
         # Recast the data frame
-        import pdb; pdb.set_trace()
+        analyticalGRDataFrame.drop("growthRate", axis=1, inplace=True)
+        analyticalGRDataFrame.drop("angularFrequency", axis=1, inplace=True)
+        analyticalPhaseShiftDataFrame =\
+            analyticalGRDataFrame.\
+                rename(columns={"phaseShiftNPhi":"phaseShift"})
+
         # Recast the data frame
         phaseShiftDataFrame = 0
 
@@ -169,14 +180,17 @@ class CollectAndCalcPhaseShift(object):
             # Update with the correct tSlice
             self._indicesKwargs.update({"tSlice" : tSlice})
 
-            import pdb; pdb.set_trace()
-            # FIXME: What are these scanPaths???
-            n, phi = self._getTimeTraces(scanPaths)
+            # Obtain teh time traces
+            n, phi, positionTuple = self._getTimeTraces(scanPaths)
 
             # Obtain the cross spectral density
+            # NOTE: If this is below the number of samples, a smoothing
+            #       will occur
+            nperseg = len(n)
             # NOTE: The triangular window corresponds to the periodogram
             #       estimate of the spectral density
-            csd = signal.csd(n, phi, window="triang")
+            # NOTE: The first output (frequency) is not used
+            _, csd = signal.csd(n, phi, window="triang", nperseg=nperseg)
 
             maxInd = self._getMaxIndOfMagnitude(csd)
 
@@ -189,12 +203,15 @@ class CollectAndCalcPhaseShift(object):
         phaseShiftDataFrame = pd.DataFrame(dataFrameDict, index=scanValues)
         phaseShiftDataFrame.index.name = self._scanParameter
 
-        return analyticalPhaseShiftDataFrame, phaseShiftDataFrame, positionTuple, uc
+        return analyticalPhaseShiftDataFrame,\
+               phaseShiftDataFrame,\
+               positionTuple,\
+               uc
     #}}}
 
     #{{{_getTimeTraces
-    def _getTimeTraces(self):
-        #{{{
+    def _getTimeTraces(self, collectPaths):
+        #{{{docstring
         """
         Returns the n and phi time traces
 
@@ -209,6 +226,8 @@ class CollectAndCalcPhaseShift(object):
             The time trace of n.
         phi : array 1-d
             The time trace of phi.
+        positionTuple : tuple
+            Tuple with the rho, theta and z value.
         """
         #}}}
         mode = "fluct"
@@ -224,11 +243,13 @@ class CollectAndCalcPhaseShift(object):
                    for varName in ("n", "phi")\
                    )
 
-        # Extract n and phi
-        n   = tt[0][0]
-        phi = tt[1][0]
+        # Extract n, phi and the position tuple
+        nDict         = tt[0][0]
+        positionTuple = list(nDict.keys())[0]
+        n             = nDict[positionTuple]["n"]
+        phi           = tt[1][0][positionTuple]["phi"]
 
-        return n, phi
+        return n, phi, positionTuple
     #}}}
 
     #{{{_getMaxIndOfMagnitude
@@ -263,7 +284,7 @@ class CollectAndCalcPhaseShift(object):
         csdDictWMagnitues = CollectAndCalcFourierModes.calcMagnitude(csdDict)
 
         # Extract Magnitudes
-        magnitudes = csdDict["0"]["csdMagnitude"]
+        magnitudes = csdDictWMagnitues["0"]["csdMagnitude"]
 
         # NOTE: Only first occurence is returned from numpy argmax
         maxInd = np.argmax(magnitudes)
