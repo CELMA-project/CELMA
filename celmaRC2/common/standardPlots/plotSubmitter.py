@@ -23,6 +23,7 @@ from .energy import energyPlot
 from .growthRates import growthRatesPlot
 from .magnitudeSpectrum import magnitudeSpectrumPlot
 from .performance import performancePlot
+from .phaseShift import phaseShiftPlot
 from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
@@ -605,6 +606,42 @@ class PlotSubmitter(object):
             dmp_folders  = (dmp_folders,)
             args = (dmp_folders, collectPaths, self._plotSuperKwargs)
             self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
+    #}}}
+
+    #{{{runPhaseShift
+    def runPhaseShift(self):
+        """
+        Runs the phase shift
+        """
+
+        # NOTE: The ordering of param is in descending order (because of the
+        #       organization in PBSScan)
+        dmp_folders = (self._mergeFromLinear["param0"][-1],)
+        keys = tuple(sorted(list(self._mergeFromLinear.keys())))
+        scanCollectPaths = tuple(self._mergeFromLinear[key] for key in keys)
+        steadyStatePaths = self._dmpFolders["expand"]
+
+        # NOTE: The ordering is of the keys are in descending order (because
+        #       of the organization in PBSScan)
+        growthTSlicesKeys =\
+                tuple(sorted(list(self._linearTSlices.keys()), reverse=True))
+        growthTSlices =\
+                tuple(self._linearTSlices[key] for key in growthTSlicesKeys)
+
+        # Local modification of plotSuperKwargs
+        plotSuperKwargs = copy(self._plotSuperKwargs)
+        newVals = {"savePath" : "all", "savePathFunc" : None}
+        plotSuperKwargs.update(newVals)
+
+        args = (dmp_folders        ,\
+                scanCollectPaths   ,\
+                steadyStatePaths   ,\
+                self._scanParameter,\
+                growthTSlices      ,\
+                plotSuperKwargs    ,\
+                )
+        self.sub.setJobName("phaseShift")
+        self.sub.submitFunction(phaseShiftPlot, args=args)
     #}}}
 
     #{{{runPosOfFluct
