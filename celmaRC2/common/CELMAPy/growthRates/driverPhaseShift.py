@@ -33,45 +33,7 @@ def driverPhaseShift(collectArgs    ,\
     """
     #}}}
 
-# Collect the analytic phase shift
-    # Create collect object
-    # FIXME: Mixing of interfaces gives hard to read code
-    steadyStatePaths = collectArgs[-3]
-    scanParameter    = collectArgs[-1]
-    yInd             = getDataArgs[2][1]
-    ccagr = CollectAndCalcAnalyticGrowthRates(steadyStatePaths,\
-                                              scanParameter,\
-                                              yInd)
-
-    # Obtain the data
-    analyticalGRDataFrame, paramDataFrame, positionTuple, uc =\
-        ccagr.getData()
-
-# Do this for all the b0 scans
-# Make a dict for the indices to extract from
-    from scipy import signal
-    # NOTE: The triangular window corresponds to the periodogram
-    # estimate of the spectral density
-    csd = signal.csd(n, phi, window="triang")
-
-    # Find the magnitude
-    # Expand the time dimension (only one point)
-    csd = np.expand_dims(csd,axis=0)
-    # Put into dict so in can be used in calcMagnitude
-    # FIXME: Hack: Recast csd to a 2d signal, expand dimension so that
-    # only one time, then can use
-csdDictWMagnitues = CollectAndCalcGrowthRates.calcMagnitude(csdDict)
-# Extract Magnitudes
-
-    # Recast to 1d
-    csd = csd[0,:]
-find max index
-avgPhaseShiftNPhi = np.angle(csd[maxInd])
-
-
-    foo you are here
     import pdb; pdb.set_trace()
-    print(paramDataFrame)
 
     # Plot
     pagr = PlotGrowthRates(uc         ,\
