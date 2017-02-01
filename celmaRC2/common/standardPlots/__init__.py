@@ -12,6 +12,7 @@ from .growthRates import growthRatesPlot
 from .magnitudeSpectrum import magnitudeSpectrumPlot
 from .energy import energyPlot
 from .performance import performancePlot
+from .phaseShift import phaseShiftPlot
 from .posOfFluct import posOfFluctPlot
 from .plotSubmitter import PlotSubmitter
 from .PSD2D import PSD2DPlot
