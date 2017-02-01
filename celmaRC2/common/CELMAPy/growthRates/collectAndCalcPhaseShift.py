@@ -123,7 +123,7 @@ class CollectAndCalcPhaseShift(object):
         phaseShiftDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
                 * "phaseShift"
-            over the observation "modeNr" over the observation "Scan"
+            over the observation "Scan" over the observation "modeNr"
         phaseShiftDataFrame : DataFrame
             DataFrame consisting of the variables (measured properties):
                 * "phaseShift"
@@ -158,6 +158,9 @@ class CollectAndCalcPhaseShift(object):
         analyticalPhaseShiftDataFrame =\
             analyticalGRDataFrame.\
                 rename(columns={"phaseShiftNPhi":"phaseShift"})
+
+        # Get the levels correct
+        analyticalPhaseShiftDataFrame = analyticalPhaseShiftDataFrame.swaplevel()
 
         # Recast the data frame
         phaseShiftDataFrame = 0
@@ -248,6 +251,8 @@ class CollectAndCalcPhaseShift(object):
         positionTuple = list(nDict.keys())[0]
         n             = nDict[positionTuple]["n"]
         phi           = tt[1][0][positionTuple]["phi"]
+        # Cast the string to a tuple
+        positionTuple = tuple(float(val) for val in positionTuple.split(","))
 
         return n, phi, positionTuple
     #}}}
