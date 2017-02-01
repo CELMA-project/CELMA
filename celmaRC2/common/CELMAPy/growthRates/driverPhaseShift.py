@@ -3,9 +3,8 @@
 Contains single driver and driver class for the phase shifts
 """
 from ..superClasses import DriverPointsSuperClass
-from .collectAndCalcAnalyticGrowthRates import CollectAndCalcAnalyticGrowthRates
-from .collectAndCalcGrowthRates import CollectAndCalcGrowthRates
-from .plotGrowthRates import PlotGrowthRates
+from .collectAndCalcPhaseShift import CollectAndCalcPhaseShift
+# from .plotPhaseShift import PlotPhaseShift
 from multiprocessing import Process
 
 #{{{driverPhaseShift
@@ -33,13 +32,19 @@ def driverPhaseShift(collectArgs    ,\
     """
     #}}}
 
+    ccps = CollectAndCalcPhaseShift()
+    ccps.setCollectArgs(*collectArgs)
+    ccps.setGetDataArgs(*getDataArgs[1:-1])
+    apsdf, psdf, positionTuple, uc = ccps.getData()
+    
     import pdb; pdb.set_trace()
+    a=1
 
-    # Plot
-    pagr = PlotGrowthRates(uc         ,\
-                           **plotSuperKwargs)
-    pagr.setData("", analyticalGRDataFrame, positionTuple, analytic=True)
-    pagr.plotSaveShowGrowthRates()
+#    # Plot
+#    pagr = PlotGrowthRates(uc         ,\
+#                           **plotSuperKwargs)
+#    pagr.setData("", analyticalGRDataFrame, positionTuple, analytic=True)
+#    pagr.plotSaveShowGrowthRates()
 #}}}
 
 # FIXME: NEW INPUTS
