@@ -193,7 +193,9 @@ class CollectAndCalcPhaseShift(object):
             # NOTE: The triangular window corresponds to the periodogram
             #       estimate of the spectral density
             # NOTE: The first output (frequency) is not used
-            _, csd = signal.csd(n, phi, window="triang", nperseg=nperseg)
+            # NOTE: The order is so that n leads phi if the phase is
+            #       positive
+            _, csd = signal.csd(phi, n, window="triang", nperseg=nperseg)
 
             maxInd = self._getMaxIndOfMagnitude(csd)
 

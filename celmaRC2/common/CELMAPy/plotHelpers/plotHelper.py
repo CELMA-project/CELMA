@@ -208,82 +208,85 @@ class PlotHelper(object):
     #}}}
 
     @staticmethod
-#{{{radiansOnAxis
-def radiansOnAxis(ax, axis):
-    #{{{docstring
-    """
-    Sets radians on the given axis.
+    #{{{radiansOnAxis
+    def radiansOnAxis(ax, axis):
+        #{{{docstring
+        """
+        Sets radians on the given axis.
 
-    Parameters
-    ----------
-    ax : Axis
-        Axis to change x-axis on.
-    axis : ["x"|"y"|"z"]
-        Which axis to be modified
-    """
+        Parameters
+        ----------
+        ax : Axis
+            Axis to change x-axis on.
+        axis : ["x"|"y"|"z"]
+            Which axis to be modified
+        """
+        #}}}
+
+        if axis == "x":
+            getTicks  = ax.get_xticks
+            setTicks  = ax.set_xticks
+            setLabels = ax.set_xticklabels
+            setLim    = ax.set_xlim
+        elif axis == "y":
+            getTicks  = ax.get_yticks
+            setTicks  = ax.set_yticks
+            setLabels = ax.set_yticklabels
+            setLim    = ax.set_ylim
+        elif axis == "z":
+            getTicks  = ax.get_zticks
+            setTicks  = ax.set_zticks
+            setLabels = ax.set_zticklabels
+            setLim    = ax.set_zlim
+        else:
+            message =\
+                "{} is not a valid axis.\nExpected 'x','y' or 'z'".format(axis)
+            raise ValueError(message)
+
+        # Tigthen the x axis
+        ax.autoscale(enable=True, axis=axis, tight=True)
+
+        # Find max and min of the ticks
+        ticks = getTicks()
+        minAx = ticks[0]
+        maxAx = ticks[-1]
+
+        # Cast to radians
+        # Floor to include the bottom-most tick
+        minRad = int(np.floor(minAx/(np.pi/4)))
+        # Ceil to include the top-most tick
+        maxRad = int(np.ceil(maxAx/(np.pi/4)))
+
+        # NOTE: Range excludes the last point
+        theRange = range(minRad, maxRad+1)
+        # Reset tick values
+        setTicks(tuple(i*np.pi/4 for i in theRange))
+
+        # Obtain the tick labels
+        labelVals    = tuple(str(i*Rational(1, 4)) for i in theRange)
+        labelStrings = []
+
+        # NOTE: We add the sign to eaiser filter out 1pi
+        for label in labelVals:
+            if "/" in label:
+                label =\
+                    r"${:+d}\pi/{}$".\
+                    format(int(label.split("/")[0]), label.split("/")[1])
+            elif not("0" in label):
+                label = r"${:+d}\pi$".format(int(label))
+            elif "0" in label:
+                label = r"$0$"
+
+            labelStrings.append(label)
+
+        # Remove 1pi
+        labels = tuple(i.replace(r"-1\pi",r"-\pi") for i in labelStrings)
+        labels = tuple(i.replace(r"+1\pi",r"\pi") for i in labels)
+        labels = tuple(i.replace("+","") for i in labels)
+
+        # Set the ticks
+        setLabels(labels)
     #}}}
-
-    if axis == "x":
-        getTicks  = ax.get_xticks
-        setTicks  = ax.set_xticks
-        setLabels = ax.set_xticklabels
-        setLim    = ax.set_xlim
-    elif axis == "y":
-        getTicks  = ax.get_ytick
-        setTicks  = ax.set_ytick
-        setLabels = ax.set_yticklabels
-        setLim    = ax.set_ylim
-    elif axis == "z":
-        getTicks  = ax.get_ztick
-        setTicks  = ax.set_ztick
-        setLabels = ax.set_zticklabels
-        setLim    = ax.set_zlim
-    else:
-        message =\
-            "{} is not a valid axis.\nExpected 'x','y' or 'z'".format(axis)
-        raise ValueError(message)
-
-    # Tigthen the x axis
-    ax.autoscale(enable=True, axis=axis, tight=True)
-
-    # Find max and min of the ticks
-    ticks = getTicks()
-    minAx = ticks[0]
-    maxAx = ticks[-1]
-
-    # Cast to radians
-    # Floor to include the bottom-most tick
-    minRad = int(np.floor(minAx/(np.pi/4)))
-    # Ceil to include the top-most tick
-    maxRad = int(np.ceil(maxAx/(np.pi/4)))
-
-    # NOTE: Range excludes the last point
-    theRange = range(minRad, maxRad+1)
-    # Reset tick values
-    setTicks(tuple(i*np.pi/4 for i in theRange))
-
-    # Obtain the tick labels
-    labelVals    = tuple(str(i*Rational(1, 4)) for i in theRange)
-    labelStrings = []
-
-    # NOTE: We add the sign to eaiser filter out 1pi
-    for label in labelVals:
-        if "/" in label:
-            label =\
-                r"${:+d}\pi/{}$".format(int(label.split("/")[0]), label.split("/")[1])
-        elif not("0" in label):
-            label = r"${:+d}\pi$".format(int(label))
-
-        labelStrings.append(label)
-
-    # Remove 1pi
-    labels = tuple(i.replace(r"-1\pi",r"-\pi") for i in labelStrings)
-    labels = tuple(i.replace(r"+1\pi",r"\pi") for i in labels)
-    labels = tuple(i.replace("+","") for i in labels)
-
-    # Set the ticks
-    setLabels(labels)
-#}}}
 
     @staticmethod
     #{{{getVarPltName
