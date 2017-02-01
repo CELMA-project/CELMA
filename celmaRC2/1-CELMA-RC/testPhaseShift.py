@@ -49,12 +49,13 @@ def phaseShiftTest():
 
     xInd            = 16
     yInd            = 16
+    zInd            = 0
     tSlice          = None
     nPoints         = 1
     equallySpace    = "x"
     steadyStatePath = None
 
-    indicesArgs   = (xInd, yInd)
+    indicesArgs   = (xInd, yInd, zInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
                      "nPoints"         : nPoints        ,\
                      "equallySpace"    : equallySpace   ,\

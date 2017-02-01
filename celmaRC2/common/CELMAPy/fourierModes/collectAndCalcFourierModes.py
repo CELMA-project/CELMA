@@ -257,8 +257,8 @@ class CollectAndCalcFourierModes(CollectAndCalcPointsSuperClass):
         """
         #}}}
         # Obtain the varname
-        ind  = tuple(fourierModes.keys())[0]
-        keys = fourierModes[ind].keys()
+        ind  = tuple(fourierModes2d.keys())[0]
+        keys = fourierModes2d[ind].keys()
         varName = tuple(var for var in keys if var != "time")[0]
         # Strip the variable name
         varName = varName.replace("Magnitude","")
