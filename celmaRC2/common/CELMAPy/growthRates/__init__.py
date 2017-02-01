@@ -27,3 +27,4 @@ from .driverAnalyticGrowthRates import (DriverAnalyticGrowthRates,\
 from .driverGrowthRates import DriverGrowthRates, driverGrowthRates
 from .driverPhaseShift import DriverPhaseShift, driverPhaseShift
 from .plotGrowthRates import PlotGrowthRates
+from .plotPhaseShift import PlotPhaseShift
