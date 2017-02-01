@@ -193,13 +193,12 @@ class CollectAndCalcPhaseShift(object):
             # NOTE: The triangular window corresponds to the periodogram
             #       estimate of the spectral density
             # NOTE: The first output (frequency) is not used
-            # NOTE: The order is so that n leads phi if the phase is
-            #       positive
-            _, csd = signal.csd(phi, n, window="triang", nperseg=nperseg)
+            _, csd = signal.csd(n, phi, window="triang", nperseg=nperseg)
 
             maxInd = self._getMaxIndOfMagnitude(csd)
 
-            avgPhaseShiftNPhi = np.angle(csd[maxInd])
+            # FIXME: Not sure why, but there seem to be a sign error
+            avgPhaseShiftNPhi = -np.angle(csd[maxInd])
 
             scanValues.append(scanValue)
             dataFrameDict["phaseShift"].append(avgPhaseShiftNPhi)
