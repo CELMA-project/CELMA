@@ -4,7 +4,7 @@ Contains single driver and driver class for the phase shifts
 """
 from ..superClasses import DriverPointsSuperClass
 from .collectAndCalcPhaseShift import CollectAndCalcPhaseShift
-# from .plotPhaseShift import PlotPhaseShift
+from .plotPhaseShift import PlotPhaseShift
 from multiprocessing import Process
 
 #{{{driverPhaseShift
@@ -36,15 +36,12 @@ def driverPhaseShift(collectArgs    ,\
     ccps.setCollectArgs(*collectArgs)
     ccps.setGetDataArgs(*getDataArgs[1:-1])
     apsdf, psdf, positionTuple, uc = ccps.getData()
-    
-    import pdb; pdb.set_trace()
-    a=1
 
-#    # Plot
-#    pagr = PlotGrowthRates(uc         ,\
-#                           **plotSuperKwargs)
-#    pagr.setData("", analyticalGRDataFrame, positionTuple, analytic=True)
-#    pagr.plotSaveShowGrowthRates()
+    # Plot
+    paps = PlotPhaseShift(uc         ,\
+                          **plotSuperKwargs)
+    paps.setData(apsdf, psdf, positionTuple)
+    paps.plotSaveShowPhaseShift()
 #}}}
 
 # FIXME: NEW INPUTS
