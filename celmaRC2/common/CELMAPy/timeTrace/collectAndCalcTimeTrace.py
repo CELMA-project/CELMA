@@ -80,13 +80,17 @@ class CollectAndCalcTimeTrace(CollectAndCalcPointsSuperClass):
                         format("\n".join(self._notCalled))
             raise RuntimeError(message)
 
+        # Make sure zInd is not None
+        self._zInd =\
+            tuple(zInd if zInd is not None else 0 for zInd in self._zInd)
+
         # Initialize output
         timeTraces = {}
         tCounter = 0
         for x, y, z in zip(self._xInd, self._yInd, self._zInd):
             # NOTE: The indices
             rho   = self._dh.rho     [x]
-            theta = self._dh.thetaDeg[z]
+            theta = self._dh.thetaDeg[z] if z is not None else 0
             par   = self._dh.z       [y]
 
             # Add key and dict to timeTraces
