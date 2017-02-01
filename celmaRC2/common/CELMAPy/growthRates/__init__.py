@@ -20,6 +20,7 @@ from .analyticalGrowthRates import (ellisAnalytical  ,\
                                     )
 from .collectAndCalcAnalyticGrowthRates import CollectAndCalcAnalyticGrowthRates
 from .collectAndCalcGrowthRates import CollectAndCalcGrowthRates
+from .collectAndCalcPhaseShift import CollectAndCalcPhaseShift
 from .driverAnalyticGrowthRates import (DriverAnalyticGrowthRates,\
                                         driverAnalyticGrowthRates,\
                                        )

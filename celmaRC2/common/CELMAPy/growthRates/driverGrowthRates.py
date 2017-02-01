@@ -187,8 +187,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
             Tuple containing arguments used in
             CollectAndCalcGrowthRates.getData (including the keyword
             argument nModes).
-            See the constructor of CollectAndCalcGrowthRates.getData for
-            details.
+            See CollectAndCalcGrowthRates.getData for details.
         """
         #}}}
 
