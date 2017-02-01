@@ -188,12 +188,10 @@ class PlotPhaseShift(PlotSuperClass):
                                 legend = True, rotation = 45)
 
         # Set the ticks
-        # ax.tick_params(labelbottom="off")
         ticks = tuple(self._aPDF.loc[outerInd]["phaseShift"].index.values)
         ax.xaxis.set_ticks(ticks)
+        self._ph.radiansOnAxis(ax, "y")
 
-        # Adjust the subplots
-        fig.subplots_adjust(hspace=0.1, wspace=0.35)
 
         # Set the title
         fig.suptitle(self._title, y=0.9, transform=ax.transAxes, va="bottom")

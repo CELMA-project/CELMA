@@ -109,33 +109,24 @@ def driverTest():
 
     steadyStatePaths =\
         (\
-         "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_1.5727_geom_Ly_55.0429_input_B0_0.02_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
-         "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
+         "CSDXMagFieldScanAr/nout_2_timestep_25/nz_256/geom_Lx_1.5727_geom_Ly_55.0429_input_B0_0.02_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
+         "CSDXMagFieldScanAr/nout_2_timestep_25/nz_256/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/",\
         )
 
-    startInds = (\
-                 80,\
-                 80,\
-                )
-    endInds   = (\
-                 240,\
-                 210,\
-                )
+    tSlices = (slice(80,240), slice(80,210))
 
     scanParameter = "B0"
 
-    varName           = "n"
     convertToPhysical = True
-    nModes            = 7
 
     xInd            = None
     yInd            = 16
     tSlice          = None
-    nPoints         = 3
+    nPoints         = 1
     equallySpace    = "x"
-    steadyStatePath = None
+    steadyStatePath = steadyStatePaths[0]
 
-    useSubProcess = True
+    useSubProcess = False
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
@@ -159,14 +150,11 @@ def driverTest():
                      dmp_folders                          ,\
                      scanCollectPaths                     ,\
                      steadyStatePaths                     ,\
-                     startInds                            ,\
-                     endInds                              ,\
+                     tSlices                              ,\
                      scanParameter                        ,\
                      indicesArgs                          ,\
                      indicesKwargs                        ,\
                      plotSuperKwargs                      ,\
-                     varName           = varName          ,\
-                     nModes            = nModes           ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      useSubProcess = useSubProcess,\
@@ -176,5 +164,4 @@ def driverTest():
 #}}}
 
 if __name__ == "__main__":
-    phaseShiftTest()
-    # driverTest()
+    driverTest()
