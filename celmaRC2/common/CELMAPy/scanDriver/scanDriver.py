@@ -851,8 +851,11 @@ class ScanDriver(object):
             # NOTE: bout_runners are making a restart 0 folder for
             #       copied restart files, as a hack, the 0th restart
             #       folder is excluded
-            folders = tuple(folder for folder in folders if\
-                            ("restart" in folder) and (folder != "restart_0"))
+            # Sort the folders
+            folders = sorted(\
+                        tuple(folder for folder in folders if\
+                            ("restart" in folder) and (folder != "restart_0"))\
+                        )
 
             extraTrubulenceRuns.append(\
                    tuple(os.path.join(turboDmp, folder) for folder in folders))
