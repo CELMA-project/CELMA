@@ -92,6 +92,7 @@ modesSlices = {\
 pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True, yInd=50)
 
 # Obtain frames to see evolution
+# NOTE: Plot 4,6 and 8 are chosen
 # B=0.01
 start   = 2055
 end     = 2155
@@ -105,6 +106,6 @@ pltSub.runSnapShotsSameScanVal("param0",turbSlices,fluct=False,vMaxVMin=maxMin)
 # Obtain the turbulence fluctuations
 # FIXME:
 turbSlices = (\
-              slice(None, None),\
+              slice(2122, 2122),\
              )
 pltSub.runSnapShotsSameScanVal("param0", turbSlices, fluct=True)
