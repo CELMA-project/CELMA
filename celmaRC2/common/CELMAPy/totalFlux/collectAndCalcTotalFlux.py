@@ -68,7 +68,12 @@ class CollectAndCalcTotalFlux(object):
         # Set the indices
         if xInd is None:
             # NOTE: Indices counting from 0
-            self._xInd = getGridSizes(collectPaths[0], "x") - 1
+            # NOTE: BC at edge: phi = 0 => DDZ(phi) = 0
+            #       Therefore: Locate the integration cylinder a bit
+            #       inwards.
+            # NOTE: Perp flux decreases rapidly outside here.
+            #       Probably due to the shear from Omega
+            self._xInd = getGridSizes(collectPaths[0], "x") - 7
         else:
             self._xInd  = xInd
         if yInd is None:
