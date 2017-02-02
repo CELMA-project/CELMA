@@ -36,7 +36,10 @@ def repairBrokenExit(path, mode="rmLastTime"):
     print("Number of files found: " + str(nfiles))
 
     # Make a backup
-    bakPath = path + "BAK"
+    bakPathDirName = os.path.dirname(path) + "BAK"
+    if os.path.exists(bakPathDirName):
+        os.mkdir(bakPathDirName)
+    bakPath = os.path.join(bakPathDirName, os.path.basename(path))
     shutil.move(path, bakPath)
     print("Moved backup to" + bakPath)
     os.mkdir(path)

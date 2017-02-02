@@ -2,6 +2,8 @@
 
 """Driver which plots the results of the simulations."""
 
+import numpy as np
+
 import os, sys
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")
@@ -52,14 +54,13 @@ pltSub.runGrowthRates()
 pltSub.runMagnitudeSpectrum()
 pltSub.runPerformance(allFolders=False)
 pltSub.runPerformance(allFolders=True)
+pltSub.runPhaseShift()
 pltSub.runPosOfFluct()
 pltSub.runPSD2D()
 pltSub.runSkewKurt()
 pltSub.runSteadyState()
 pltSub.runZonalFlow()
 # Post processing taking longer time
-# FIXME:
-pltSub.sub.setQueue("workq")
 pltSub.sub.setWalltime("00:30:00")
 pltSub.runTotalFlux()
 
@@ -67,8 +68,6 @@ pltSub.runTotalFlux()
 pltSub.updatePlotSuperKwargs({"extension" : None})
 pltSub.sub.setWalltime("01:00:00")
 pltSub.runFields1DAnim()
-# FIXME:
-pltSub.sub.setQueue("fatq")
 pltSub.sub.setWalltime("06:00:00")
 pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
@@ -93,17 +92,15 @@ modesSlices = {\
 pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True, yInd=50)
 
 # Obtain frames to see evolution
-# FIXME:
-# B=0.08
-start   = None
-end     = None
-pics    = 3
+# B=0.01
+start   = 2055
+end     = 2155
+pics    = 10
 frameNr = np.linspace(start, end, pics)
 # Run runSnapShotsSameScanVal without vMaxVmin in order to see maxMin
-# FIXME:
-maxMin = (None, None)
+maxMin = (1.35e18, 7.50e18)
 turbSlices = tuple(slice(int(frame),int(frame)) for frame in frameNr)
-pltSub.runSnapShotsSameScanVal("param1",turbSlices,fluct=False,vMaxVMin=maxMin)
+pltSub.runSnapShotsSameScanVal("param0",turbSlices,fluct=False,vMaxVMin=maxMin)
 
 # Obtain the turbulence fluctuations
 # FIXME:
