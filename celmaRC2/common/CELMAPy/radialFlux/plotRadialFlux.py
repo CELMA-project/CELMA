@@ -37,7 +37,7 @@ class PlotRadialFlux(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, radialFluxes, mode, timeAx=True, stdLines=None):
+    def setData(self, radialFluxes, mode, timeAx=True):
         #{{{docstring
         """
         Sets the radial fluxes to be plotted.
@@ -54,9 +54,6 @@ class PlotRadialFlux(PlotSuperClass):
             What mode the input is given in.
         timeAx : bool
             Whether or not the time should be on the x axis
-        stdLines : [None|tuple]
-            If set: Lines corresponding to the element*std will be
-            plotted atop of the time trace.
         """
         #}}}
 
@@ -64,7 +61,6 @@ class PlotRadialFlux(PlotSuperClass):
         self._radialFluxes = radialFluxes
         self._mode         = mode
         self._timeAx       = timeAx
-        self._stdLines     = stdLines
 
         # Obtain the varname
         ind  = tuple(radialFluxes.keys())[0]
@@ -176,15 +172,6 @@ class PlotRadialFlux(PlotSuperClass):
                 ax.plot(\
                         self._radialFluxes[key][self._varName],\
                         color=color, label=label)
-            if self._stdLines is not None:
-                xStart = self._radialFluxes[key]["time"][0]
-                xStop  = self._radialFluxes[key]["time"][-1]
-                x      = (xStart, xStop)
-                std    = self._radialFluxes[key][self._radialFluxName].std()
-                for stdMultipler in self._stdLines:
-                    y = (std*stdMultipler,)*2
-                    label = r"$\mathrm{{Std.\;dev\;={}}}$".format(stdVal)
-                    ax.plot(x, y, label=label)
 
         # Set axis labels
         ax.set_xlabel(self._timeLabel)
