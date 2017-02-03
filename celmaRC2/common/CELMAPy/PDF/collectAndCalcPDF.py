@@ -91,7 +91,7 @@ class CollectAndCalcPDF(CollectAndCalcTimeTrace):
             # Calculate pdfY
             PDF[key][yKey], bins =\
                 np.histogram(timeTraces[key][varName],\
-                             bins="auto",\
+                             bins="sqrt",\
                              density=True)
 
             # Initialize x

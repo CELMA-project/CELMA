@@ -3,7 +3,7 @@
 """Class for radialProfile plots"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
 import matplotlib.pylab as plt
 import numpy as np
 import os
@@ -18,21 +18,17 @@ class PlotProfAndGradCompare(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (10,16), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for PlotProfAndGradCompare
 
         * Calls the parent class
-        * Sets the spatial title
-        * Sets the xlabel
 
         Parameters
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -40,9 +36,6 @@ class PlotProfAndGradCompare(PlotSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -149,7 +142,7 @@ class PlotProfAndGradCompare(PlotSuperClass):
         self._steadyStateLegendTemplate =\
             r"${}_{{\mathrm{{Steady \quad state}}}}$"
         self._avgLabelTemplate =\
-            r"$\langle\langle {0}"+norm+r"\rangle_\theta\rangle_t$"
+            r"$\langle {0}"+norm+r"\rangle_{{\theta,t}}$"
         self._varGradLegendTemplate =\
             r"$\partial_\rho $"+self._avgLabelTemplate
 
@@ -238,10 +231,10 @@ class PlotProfAndGradCompare(PlotSuperClass):
             norm = r"${normalization}$"
             units = ""
 
-        self._stdLegendTemplate = r"$\sqrt{{\langle\langle({0}"+norm+\
-                                  r"-\langle\langle {0}"+norm+\
-                                  r"\rangle_\theta\rangle_t)^2"+\
-                                  r"\rangle_\theta\rangle_t}}$"
+        self._stdLegendTemplate = r"$\sqrt{{\langle\left({0}"+norm+\
+                                  r"-\langle {0}"+norm+\
+                                  r"\rangle_{{\theta,t}}\right)^2"+\
+                                  r"\rangle_{{\theta,t}}}}$"
 
         self._stdLabelTemplate = r"${}$" + units + norm
     #}}}
@@ -254,9 +247,10 @@ class PlotProfAndGradCompare(PlotSuperClass):
         Only setData needs to be called before calling this function
         """
 
+        figSize = SizeMaker.standard(w=3, a=2)
         # Create the plot
         fig, (varAx, DDXVarAx) =\
-                plt.subplots(nrows=2, figsize=self._pltSize, sharex=True)
+                plt.subplots(nrows=2, figsize=figSize, sharex=True)
 
         self._plotProfAndGrad(varAx, DDXVarAx)
 
@@ -356,9 +350,12 @@ class PlotProfAndGradCompare(PlotSuperClass):
         """
 
         # Create the plot
-        fig, (varAx, DDXVarAx, fluct1Ax, fluct2Ax) =\
-                plt.subplots(nrows=4, figsize=self._pltSize, sharex=True)
+        figSize = SizeMaker.standard(w=3, a=2)
+        fig, axes =\
+                plt.subplots(nrows=4, figsize=figSize, sharex=True)
+        varAx, DDXVarAx, fluct1Ax, fluct2Ax = axes
 
+        # Plot the profile and the gradient
         self._plotProfAndGrad(varAx, DDXVarAx)
 
         # Plot the fluctuations
@@ -391,6 +388,23 @@ class PlotProfAndGradCompare(PlotSuperClass):
 
         # Set the title
         varAx.set_title(self._title)
+
+        # Move the legend outside of the axes
+        for ax in axes:
+            handles, labels = ax.get_legend_handles_labels()
+
+            leg = ax.legend()
+
+            # Remove old legend
+            leg.remove()
+
+            ax.legend(handles,\
+                     labels,\
+                     bbox_to_anchor=(1.05, 1.0),\
+                     loc="upper left",\
+                     borderaxespad=0.,\
+                     bbox_transform = ax.transAxes,\
+                     )
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0.2, wspace=0.35)

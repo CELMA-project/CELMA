@@ -104,7 +104,6 @@ turbSlices = tuple(slice(int(frame),int(frame)) for frame in frameNr)
 pltSub.runSnapShotsSameScanVal("param0",turbSlices,fluct=False,vMaxVMin=maxMin)
 
 # Obtain the turbulence fluctuations
-# FIXME:
 turbSlices = (\
               slice(2122, 2122),\
              )
