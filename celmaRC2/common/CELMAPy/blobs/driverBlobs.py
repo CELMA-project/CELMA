@@ -55,7 +55,6 @@ def prepareBlobs(collectPaths     ,\
 #{{{driverRadialFluxWStdLines
 def driverRadialFluxWStdLines(ccb            ,\
                               plotSuperKwargs,\
-                              stdConditions  ,\
                              ):
     #{{{docstring
     """
@@ -69,8 +68,6 @@ def driverRadialFluxWStdLines(ccb            ,\
         Keyword arguments for the plot super class.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
-    stdConditions : tuple
-        Conditions for the conditional averages.
     """
     #}}}
 
@@ -78,7 +75,7 @@ def driverRadialFluxWStdLines(ccb            ,\
 
     # Plot
     ptt = PlotRadialFlux(ccb.uc, **plotSuperKwargs)
-    ptt.setData(radialFlux, mode, stdLines=stdConditions)
+    ptt.setData(radialFlux, mode)
     ptt.plotSaveShowRadialFlux()
 #}}}
 
@@ -425,14 +422,13 @@ class DriverBlobs(DriverSuperClass):
     Class for driving of the plotting of the blobs.
     """
     #{{{Constructor
-    def __init__(self                       ,\
-                 dmp_folders                ,\
-                 slices                     ,\
-                 pctPadding                 ,\
-                 convertToPhysical          ,\
-                 plotSuperKwargs            ,\
-                 stdConditions = (4,3,2.5,2),\
-                 normed        = False      ,\
+    def __init__(self             ,\
+                 dmp_folders      ,\
+                 slices           ,\
+                 pctPadding       ,\
+                 convertToPhysical,\
+                 plotSuperKwargs  ,\
+                 normed = False   ,\
                  **kwargs):
         #{{{docstring
         """
@@ -456,8 +452,6 @@ class DriverBlobs(DriverSuperClass):
             Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
-        stdConditions : tuple
-            Conditions for the conditional averages.
         normed : bool
             Wheter or not to norm the histogram
         **kwargs : keyword arguments

@@ -422,8 +422,8 @@ class PlotCombinedPlots(PlotSuperClass):
         self._fig = plt.figure(figsize=self._pltSize)
 
         gs = gridspec.GridSpec(3, 4,\
+                               height_ratios=(2,2,2)  ,\
                                width_ratios =(3,3,2,2),\
-                               height_ratios=(2,2,2,2),\
                                )
 
         ax1  = self._fig.add_subplot(gs[0])

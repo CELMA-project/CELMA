@@ -22,7 +22,7 @@ dmpFolders["extraTurbulence"] = tuple(dmpFolders["extraTurbulence"])
 dmpFolders["turbulence"] = list(dmpFolders["turbulence"])
 for nr in range(len(dmpFolders["turbulence"])):
     # Set the last finished folder to the last finished folder
-    dmpFolders["turbulence"][nr] += "/restart_5"
+    dmpFolders["turbulence"][nr] += "/restart_6"
 dmpFolders["turbulence"] = tuple(dmpFolders["turbulence"])
 
 with open("dmpFoldersDict.pickle", "wb") as f:
