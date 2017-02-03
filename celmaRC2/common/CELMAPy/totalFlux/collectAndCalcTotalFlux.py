@@ -73,7 +73,9 @@ class CollectAndCalcTotalFlux(object):
             #       inwards.
             # NOTE: Perp flux decreases rapidly outside here.
             #       Probably due to the shear from Omega
+# FIXME:
             self._xInd = getGridSizes(collectPaths[0], "x") - 7
+            self._xInd = 16
         else:
             self._xInd  = xInd
         if yInd is None:
