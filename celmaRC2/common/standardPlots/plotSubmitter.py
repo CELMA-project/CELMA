@@ -168,7 +168,7 @@ class PlotSubmitter(object):
     #}}}
 
     #{{{runBlobs
-    def runBlobs(self, modes="all", fluct="both"):
+    def runBlobs(self, modes="all", fluct="both", condition=3):
         #{{{docstring
         """
         Runs blobs.
@@ -179,6 +179,9 @@ class PlotSubmitter(object):
             2D mode to use
         fluct : ["both"|bool]
             Fluctuations to use
+        condition : float
+            The condition in the conditional average will be set to
+            flux.std()*condition
         """
         #}}}
 
@@ -195,37 +198,47 @@ class PlotSubmitter(object):
         else:
             fluct = (fluct,)
 
-        for dmp_folders, key, nr in loopOver:
+        for condition in (3,4,2):
+            for dmp_folders, key, nr in loopOver:
 
-            tSlice = self._findSlices(dmp_folders, self._satTurbTSlices)
-            if tSlice is None:
-                continue
+                tSlice = self._findSlices(dmp_folders, self._satTurbTSlices)
+                if tSlice is None:
+                    continue
 
-            collectPaths = self._mergeFromLinear[key]
-            dmp_folders   = (dmp_folders,)
+                collectPaths = self._mergeFromLinear[key]
+                dmp_folders   = (dmp_folders,)
 
-            args = (dmp_folders          ,\
-                    collectPaths         ,\
-                    self._plotSuperKwargs,\
-                    tSlice               ,\
-                    )
+                args = (dmp_folders          ,\
+                        collectPaths         ,\
+                        self._plotSuperKwargs,\
+                        tSlice               ,\
+                        condition            ,\
+                        )
 
-            kwargs = {}
-            self.sub.setJobName("blobWaitingTimePulse{}".format(nr))
-            self.sub.submitFunction(blobWaitingTimePulsePlot, args=args, kwargs=kwargs)
+                kwargs = {}
+                self.sub.setJobName("blobRadialFlux{}".format(nr))
+                self.sub.submitFunction(blobRadialFlux,\
+                                        args=args, kwargs=kwargs)
 
-            self.sub.setJobName("blobTimeTrace{}".format(nr))
-            self.sub.submitFunction(blobTimeTracesPlot, args=args, kwargs=kwargs)
+                self.sub.setJobName("blobWaitingTimePulse{}".format(nr))
+                self.sub.submitFunction(blobWaitingTimePulsePlot,\
+                                        args=args, kwargs=kwargs)
 
-            for mode in modes:
-                for b in (True, False):
-                    kwargs = {"mode":mode, "fluct":b}
-                    if b:
-                        fluct = "-fluct"
-                    else:
-                        fluct = ""
-                    self.sub.setJobName("blob2DPlot-{}{}-{}".format(mode,fluct,nr))
-                    self.sub.submitFunction(blob2DPlot, args=args, kwargs=kwargs)
+                self.sub.setJobName("blobTimeTrace{}".format(nr))
+                self.sub.submitFunction(blobTimeTracesPlot,\
+                                        args=args, kwargs=kwargs)
+
+                for mode in modes:
+                    for b in (True, False):
+                        kwargs = {"mode":mode, "fluct":b}
+                        if b:
+                            fluct = "-fluct"
+                        else:
+                            fluct = ""
+                        self.sub.setJobName("blob2DPlot-{}{}-{}".\
+                                            format(mode,fluct,nr))
+                        self.sub.submitFunction(blob2DPlot,\
+                                                args=args, kwargs=kwargs)
     #}}}
 
     #{{{runCominedPlots
