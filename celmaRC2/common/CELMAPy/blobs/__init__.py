@@ -8,6 +8,7 @@ from .collectAndCalcBlobs import CollectAndCalcBlobs
 from .driverBlobs import (DriverBlobs           ,\
                           driverPlot2DData      ,\
                           driverBlobTimeTraces  ,\
+                          driverRadialFlux      ,\
                           driverWaitingTimePulse,\
                           get2DData             ,\
                           prepareBlobs          ,\

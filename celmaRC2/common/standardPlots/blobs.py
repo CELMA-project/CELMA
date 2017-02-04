@@ -19,6 +19,24 @@ pctPadding = 400
 normed     = False
 convertToPhysical = True
 useSubProcess = False
+plotAll = False
+
+#{{{blobRadialFlux
+def blobRadialFlux(*args):
+    #{{{docstring
+    """
+    Plots the radialFlux.
+
+    Parameters
+    ----------
+    See getBlobDriver for details.
+    """
+    #}}}
+
+    dB = getBlobDriver(*args)
+
+    dB.driverRadialFlux()
+#}}}
 
 #{{{blobWaitingTimePulsePlot
 def blobWaitingTimePulsePlot(*args):
@@ -82,6 +100,8 @@ def getBlobDriver(dmp_folders    ,\
                   collectPaths   ,\
                   plotSuperKwargs,\
                   tSlice         ,\
+                  condition      ,\
+                  plotAll        ,\
                  ):
     #{{{docstring
     """
@@ -97,6 +117,9 @@ def getBlobDriver(dmp_folders    ,\
         Keyword arguments for the plot super class.
     tSlice : slice
         How to slice the time.
+    condition : float
+        The condition in the conditional average will be set to
+        flux.std()*condition
 
     Returns
     -------
@@ -109,12 +132,14 @@ def getBlobDriver(dmp_folders    ,\
 
     dB = DriverBlobs(\
                      # DriverBlobs
-                     dmp_folders      ,\
-                     slices           ,\
-                     pctPadding       ,\
-                     convertToPhysical,\
-                     plotSuperKwargs  ,\
-                     normed = normed  ,\
+                     dmp_folders          ,\
+                     slices               ,\
+                     pctPadding           ,\
+                     convertToPhysical    ,\
+                     plotSuperKwargs      ,\
+                     condition = condition,\
+                     normed    = normed   ,\
+                     plotAll   = plotAll  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useSubProcess = useSubProcess,\

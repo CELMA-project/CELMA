@@ -3,9 +3,7 @@
 """Class for blobs plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
 from glob import glob
-import numpy as np
 import matplotlib.pyplot as plt
 import os
 

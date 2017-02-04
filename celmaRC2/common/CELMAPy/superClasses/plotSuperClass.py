@@ -133,4 +133,15 @@ class PlotSuperClass(object):
         self._ph = PlotHelper(uc.convertToPhysical)
         self._ph.makeDimensionStringsDicts(uc)
     #}}}
+
+    #{{{getSavePath
+    def getSavePath(self):
+        #{{{docstring
+        """
+        Returns the save path
+        """
+        #}}}
+
+        return self._savePath
+    #}}}
 #}}}
