@@ -120,6 +120,7 @@ def getBlobDriver(dmp_folders    ,\
     condition : float
         The condition in the conditional average will be set to
         flux.std()*condition
+    plotAll : bool
 
     Returns
     -------
