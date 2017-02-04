@@ -20,6 +20,9 @@ from collections import namedtuple
 import os, pickle
 import numpy as np
 
+# This should be placed in the filescop in order for it to be pickable
+Count = namedtuple("Count", ("blobs", "holes"))
+
 #{{{prepareBlobs
 def prepareBlobs(collectPaths     ,\
                  slices           ,\
@@ -61,8 +64,7 @@ def prepareBlobs(collectPaths     ,\
 
     collect = True
     if picklePath:
-        import pdb; pdb.set_trace()
-        fileName = picklePath + "ccb.pickle"
+        fileName = os.path.join(picklePath, "ccb.pickle")
         if os.path.exists(fileName):
             collect = False
             with open(fileName, "rb") as f:
@@ -112,7 +114,6 @@ def driverRadialFlux(ccb            ,\
 
     # Store counts into a namedtuple
     blobCount, holeCount = ccb.getCounts()
-    Count = namedtuple("Count", ("blobs", "holes"))
     count = Count(blobCount, holeCount)
     # Pickle the named tuple
     fileName = os.path.join(ptt.getSavePath(), "counts.pickle")
@@ -284,18 +285,19 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
     for curTuple, blobOrHole in zip(blobsAndHoles,("blobs", "holes")):
         if len(curTuple[0]) == 0:
             continue
-        plotSuperKwargs["blobOrHole"] = blobOrHole
+        curPSK = plotSuperKwargs.copy()
+        curPSK["blobOrHole"] = blobOrHole
         for nr, blob in enumerate(curTuple):
             if nr == 0:
-                plotSuperKwargs["averagedBlobOrHole"] = True
+                curPSK["averagedBlobOrHole"] = True
             else:
-                plotSuperKwargs["averagedBlobOrHole"] = False
-            args = (blob          ,\
-                    varName       ,\
-                    varyMaxMin    ,\
-                    fluct         ,\
-                    ccb           ,\
-                    plotSuperKwargs)
+                curPSK["averagedBlobOrHole"] = False
+            args = (blob      ,\
+                    varName   ,\
+                    varyMaxMin,\
+                    fluct     ,\
+                    ccb       ,\
+                    curPSK)
             if mode == "perp":
                 plotBlob2DPerp(*args)
             elif mode == "par":
@@ -420,14 +422,14 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     indices = getBurstIndices(len(blob["time"]))
 
     for ind in indices:
-        p2DPar.setPerpData(blob["X"]                         ,\
-                           blob["Y"]                         ,\
-                           blob[varName][ind:ind+1,...]      ,\
-                           blob[varName+"PPi"][ind:ind+1,...],\
-                           blob["time"][ind:ind+1,...]       ,\
-                           blob["zPos"]                      ,\
-                           varName)
-        p2DPar.plotAndSavePerpPlane()
+        p2DPar.setParData(blob["X"]                         ,\
+                          blob["Y"]                         ,\
+                          blob[varName][ind:ind+1,...]      ,\
+                          blob[varName+"PPi"][ind:ind+1,...],\
+                          blob["time"][ind:ind+1,...]       ,\
+                          blob["thetaPos"]                  ,\
+                          varName)
+        p2DPar.plotAndSaveParPlane()
 
     # Make the animation
     p2DPar.setParData(blob["X"]          ,\
@@ -489,13 +491,13 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     indices = getBurstIndices(len(blob["time"]))
 
     for ind in indices:
-        p2DPol.setPerpData(blob["X"]                   ,\
-                           blob["Y"]                   ,\
-                           blob[varName][ind:ind+1,...],\
-                           blob["time"][ind:ind+1,...] ,\
-                           blob["zPos"]                ,\
-                           varName)
-        p2DPol.plotAndSavePerpPlane()
+        p2DPol.setPolData(blob["X"]                   ,\
+                          blob["Y"]                   ,\
+                          blob[varName][ind:ind+1,...],\
+                          blob["time"][ind:ind+1,...] ,\
+                          blob["rhoPos"]              ,\
+                          varName)
+        p2DPol.plotAndSavePolPlane()
 
     # Make the animation
     p2DPol.setPolData(blob["X"],\
@@ -604,6 +606,7 @@ class DriverBlobs(DriverSuperClass):
         self._pctPadding        = pctPadding
         self._condition         = condition
         self._normed            = normed
+        self._plotAll           = plotAll
 
         # Set the plot type
         plotType = os.path.join("blobs",str(condition))
