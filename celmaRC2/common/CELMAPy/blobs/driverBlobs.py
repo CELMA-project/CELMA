@@ -10,15 +10,23 @@ from ..fields2D import (PlotAnim2DPerp,\
                         PlotAnim2DPar,\
                         PlotAnim2DPol,\
                        )
+from ..radialFlux import PlotRadialFlux
+from ..superClasses import PlotSuperClass
+from ..unitsConverter import UnitsConverter
 from .collectAndCalcBlobs import CollectAndCalcBlobs
 from .plotBlobs import PlotTemporalStats, PlotBlobTimeTrace
 from multiprocessing import Process
+from collections import namedtuple
+import os, pickle
+import numpy as np
 
 #{{{prepareBlobs
 def prepareBlobs(collectPaths     ,\
                  slices           ,\
                  pctPadding       ,\
                  convertToPhysical,\
+                 condition = 3    ,\
+                 picklePath = None,\
                 ):
     #{{{docstring
     """
@@ -37,6 +45,12 @@ def prepareBlobs(collectPaths     ,\
         Measured in percent.
     convertToPhysical : bool
         Whether or not to convert to physical
+    condition : float
+        The condition in the conditional average will be set to
+        flux.std()*condition
+    picklePath : [None|str]
+        If set, the ccb will be pickled to the path if it doesn't
+        exists, or read from the pickle if already exists
 
     Returns
     -------
@@ -45,20 +59,38 @@ def prepareBlobs(collectPaths     ,\
     """
     #}}}
 
-    ccb = CollectAndCalcBlobs(collectPaths, slices, convertToPhysical)
+    collect = True
+    if picklePath:
+        import pdb; pdb.set_trace()
+        fileName = picklePath + "ccb.pickle"
+        if os.path.exists(fileName):
+            collect = False
+            with open(fileName, "rb") as f:
+                ccb = pickle.load(f)
 
-    ccb.prepareCollectAndCalc()
+    if collect:
+        ccb = CollectAndCalcBlobs(collectPaths          ,\
+                                  slices                ,\
+                                  convertToPhysical     ,\
+                                  condition =  condition,\
+                                  )
+
+        ccb.prepareCollectAndCalc()
+
+    if picklePath and collect:
+        with open(fileName, "wb") as f:
+            pickle.dump(ccb, f, pickle.HIGHEST_PROTOCOL)
 
     return ccb
 #}}}
 
-#{{{driverRadialFluxWStdLines
-def driverRadialFluxWStdLines(ccb            ,\
-                              plotSuperKwargs,\
-                             ):
+#{{{driverRadialFlux
+def driverRadialFlux(ccb            ,\
+                     plotSuperKwargs,\
+                    ):
     #{{{docstring
     """
-    Driver for plotting radial fluxes with standard deviation lines.
+    Driver for plotting the radial fluxes. Also stores the blob count.
 
     Parameters
     ----------
@@ -71,12 +103,22 @@ def driverRadialFluxWStdLines(ccb            ,\
     """
     #}}}
 
-    radialFlux = getRadialFlux()
+    radialFlux = ccb.getRadialFlux()
 
     # Plot
     ptt = PlotRadialFlux(ccb.uc, **plotSuperKwargs)
-    ptt.setData(radialFlux, mode)
+    ptt.setData(radialFlux, "fluct")
     ptt.plotSaveShowRadialFlux()
+
+    # Store counts into a namedtuple
+    blobCount, holeCount = ccb.getCounts()
+    Count = namedtuple("Count", ("blobs", "holes"))
+    count = Count(blobCount, holeCount)
+    # Pickle the named tuple
+    fileName = os.path.join(ptt.getSavePath(), "counts.pickle")
+    with open(fileName, "wb") as f:
+        pickle.dump(count, f, pickle.HIGHEST_PROTOCOL)
+        print("Counts saved to "+fileName)
 #}}}
 
 #{{{driverWaitingTimePulse
@@ -204,7 +246,7 @@ def get2DData(ccb, mode, fluct):
 #}}}
 
 #{{{driverPlot2DData
-def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
+def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
     #{{{docstring
     """
     Driver which plots the 2D data.
@@ -222,6 +264,9 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
         Whether or not the fluctuations will be collected.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    plotAll : bool
+        If True: All the individual frames making up the average will be
+        plotted.
     """
     #}}}
 
@@ -232,7 +277,10 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs):
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
         get2DData(ccb, mode, fluct)
 
-    blobsAndHoles = ((blobs2DAvg, *blobs2D), (holes2DAvg, *holes2D))
+    if plotAll:
+        blobsAndHoles = ((blobs2DAvg, *blobs2D), (holes2DAvg, *holes2D))
+    else:
+        blobsAndHoles = ((blobs2DAvg, ), (holes2DAvg, ))
     for curTuple, blobOrHole in zip(blobsAndHoles,("blobs", "holes")):
         if len(curTuple[0]) == 0:
             continue
@@ -300,6 +348,20 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                              fluct    = fluct,\
                              **plotSuperKwargs)
     p2DPerp.setContourfArguments(vmax, vmin, levels)
+
+    # Burst the sequence into single pdfs
+    indices = getBurstIndices(len(blob["time"]))
+
+    for ind in indices:
+        p2DPerp.setPerpData(blob["X"]                   ,\
+                            blob["Y"]                   ,\
+                            blob[varName][ind:ind+1,...],\
+                            blob["time"][ind:ind+1,...] ,\
+                            blob["zPos"]                ,\
+                            varName)
+        p2DPerp.plotAndSavePerpPlane()
+
+    # Make the animation
     p2DPerp.setPerpData(blob["X"],\
                         blob["Y"],\
                         blob[varName],\
@@ -353,6 +415,21 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                            fluct    = fluct,\
                            **plotSuperKwargs)
     p2DPar.setContourfArguments(vmax, vmin, levels)
+
+    # Burst the sequence into single pdfs
+    indices = getBurstIndices(len(blob["time"]))
+
+    for ind in indices:
+        p2DPar.setPerpData(blob["X"]                         ,\
+                           blob["Y"]                         ,\
+                           blob[varName][ind:ind+1,...]      ,\
+                           blob[varName+"PPi"][ind:ind+1,...],\
+                           blob["time"][ind:ind+1,...]       ,\
+                           blob["zPos"]                      ,\
+                           varName)
+        p2DPar.plotAndSavePerpPlane()
+
+    # Make the animation
     p2DPar.setParData(blob["X"]          ,\
                       blob["Y"]          ,\
                       blob[varName]      ,\
@@ -407,6 +484,20 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                              fluct    = fluct,\
                              **plotSuperKwargs)
     p2DPol.setContourfArguments(vmax, vmin, levels)
+
+    # Burst the sequence into single pdfs
+    indices = getBurstIndices(len(blob["time"]))
+
+    for ind in indices:
+        p2DPol.setPerpData(blob["X"]                   ,\
+                           blob["Y"]                   ,\
+                           blob[varName][ind:ind+1,...],\
+                           blob["time"][ind:ind+1,...] ,\
+                           blob["zPos"]                ,\
+                           varName)
+        p2DPol.plotAndSavePerpPlane()
+
+    # Make the animation
     p2DPol.setPolData(blob["X"],\
                       blob["Y"],\
                       blob[varName],\
@@ -414,6 +505,43 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                       blob["rhoPos"],\
                       varName)
     p2DPol.plotAndSavePolPlane()
+#}}}
+
+#{{{getBurstIndices
+def getBurstIndices(theLen, frames=10):
+    #{{{docstring
+    """
+    Returns equally spaced indices.
+
+    Paramters
+    ---------
+    theLen : int
+        Number of indices in the array
+    frames : int
+        Number of output indices
+
+    Returns
+    -------
+    indices : tuple
+        Tuple of equally spaced indices.
+    """
+    #}}}
+
+    # Minus 1 as the indices start from 0
+    endInd = theLen-1
+    # Minus 1 as we have one less segment than number
+    remainder = endInd%(frames-1)
+    # SUbtract the last point if the remainder is not even
+    even = (remainder%2 == 0)
+    if not(even):
+        endInd -= 1
+        remainder = endInd%(frames-1)
+    # Set the padding
+    pad = remainder/2
+
+    indices = tuple(int(i) for i in np.linspace(pad, endInd-pad, frames))
+
+    return indices
 #}}}
 
 #{{{DriverBlobs
@@ -428,7 +556,9 @@ class DriverBlobs(DriverSuperClass):
                  pctPadding       ,\
                  convertToPhysical,\
                  plotSuperKwargs  ,\
+                 condition = 3    ,\
                  normed = False   ,\
+                 plotAll = False  ,\
                  **kwargs):
         #{{{docstring
         """
@@ -452,8 +582,14 @@ class DriverBlobs(DriverSuperClass):
             Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        condition : float
+            The condition in the conditional average will be set to
+            flux.std()*condition
         normed : bool
             Wheter or not to norm the histogram
+        plotAll : bool
+           If True: All the individual frames making up the average will be
+           plotted in the 2D plot.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -466,20 +602,31 @@ class DriverBlobs(DriverSuperClass):
         self._slices            = slices
         self._convertToPhysical = convertToPhysical
         self._pctPadding        = pctPadding
-        self._stdConditions     = stdConditions
+        self._condition         = condition
         self._normed            = normed
+
+        # Set the plot type
+        plotType = os.path.join("blobs",str(condition))
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
-        plotSuperKwargs.update({"plotType"   :"blobs"})
+        plotSuperKwargs.update({"plotType"   :plotType})
         self._plotSuperKwargs = plotSuperKwargs
+
+        # Make a plotter object in order to get the picklePath
+        uc = UnitsConverter(dmp_folders[0])
+        tmp = PlotSuperClass(uc, **plotSuperKwargs)
+        picklePath = tmp.getSavePath()
 
         # Prepare the blobs
         self._ccb =\
-            prepareBlobs(self._collectPaths,\
-                         slices            ,\
-                         pctPadding        ,\
-                         convertToPhysical)
+            prepareBlobs(self._collectPaths     ,\
+                         slices                 ,\
+                         pctPadding             ,\
+                         convertToPhysical      ,\
+                         condition = condition  ,\
+                         picklePath = picklePath,\
+                         )
     #}}}
 
     #{{{driverAll
@@ -492,7 +639,7 @@ class DriverBlobs(DriverSuperClass):
 
         self.driverWaitingTimePulse()
         self.driverBlobTimeTraces()
-        self.driverRadialFluxWStdLines()
+        self.driverRadialFlux()
         modes = ("perp", "par", "pol")
         for mode in modes:
             self.setMode(mode)
@@ -501,25 +648,23 @@ class DriverBlobs(DriverSuperClass):
                 self.driverPlot2DData()
     #}}}
 
-    #{{{driverRadialFluxWStdLines
-    def driverRadialFluxWStdLines(self):
+    #{{{driverRadialFlux
+    def driverRadialFlux(self):
         #{{{docstring
         """
-        Wrapper to driverRadialFluxWStdLines
+        Wrapper to driverRadialFlux
         """
         #}}}
-
         args = (\
-                ccb            ,\
-                plotSuperKwargs,\
-                stdConditions  ,\
+                self._ccb            ,\
+                self._plotSuperKwargs,\
                )
         if self._useSubProcess:
-            processes = Process(target = driverRadialFluxWStdLines,\
-                                args   = args                     )
+            processes = Process(target = driverRadialFlux,\
+                                args   = args             )
             processes.start()
         else:
-            driverRadialFluxWStdLines(*args, **kwargs)
+            driverRadialFlux(*args)
     #}}}
 
     #{{{driverWaitingTimePulse
@@ -571,6 +716,7 @@ class DriverBlobs(DriverSuperClass):
                  self._mode           ,\
                  self._fluct          ,\
                  self._plotSuperKwargs,\
+                 self._plotAll        ,\
                 )
         if self._useSubProcess:
             processes = Process(target = driverPlot2DData,\
@@ -588,8 +734,8 @@ class DriverBlobs(DriverSuperClass):
         Setter for self._mode
         """
         #}}}
-        implemeted = ("perp" ,"par", "pol")
-        if not(mode in implemeted):
+        implemented = ("perp" ,"par", "pol")
+        if not(mode in implemented):
             message = "Got '{}', expected one of the following:\n".format(mode)
             for i in implemented:
                 message += "{}".format(i)

@@ -22,6 +22,7 @@ class CollectAndCalcBlobs(object):
                  collectPaths        ,\
                  slices              ,\
                  convertToPhysical   ,\
+                 condition     = 3   ,\
                  pctPadding    = 400 ,\
                  useSubProcess = True,\
                  ):
@@ -39,19 +40,29 @@ class CollectAndCalcBlobs(object):
             On the form (xInd, yInd, zInd, tSlice)
         convertToPhysical : bool
             Whether or not to convert to physical
+        condition : float
+            The condition in the conditional average will be set to
+            flux.std()*condition
         pctPadding : float
             Padding around the maximum pulsewidth which satisfies the
             condition.
             Measured in percent.
+        useSubProcess : bool
+            Whether or not to use sub process.
         """
         #}}}
 
         # Set the member data
         self._collectPaths      = collectPaths
         self._convertToPhysical = convertToPhysical
+        self._condition         = condition
         self._pctPadding        = pctPadding
         self._useSubProcess     = useSubProcess
         self._xInd, self._yInd, self._zInd, self._tSlice = slices
+
+        # Initialize the count
+        self._blobCount = None
+        self._holeCount = None
 
         self._notCalled = ["prepareCollectAndCalc"]
     #}}}
@@ -92,8 +103,8 @@ class CollectAndCalcBlobs(object):
         # Initialize
         key = list(self._radialFlux.keys())[0]
         flux = self._radialFlux[key]["nRadialFlux"]
-# FIMXE: YOU ARE HERE: Test the std plot stuff with radial fluxes
-        condition = flux.std()*3
+
+        condition = flux.std()*self._condition
         time = self._radialFlux[key]["time"]
         self._dt = time[1] - time[0]
 
@@ -121,6 +132,28 @@ class CollectAndCalcBlobs(object):
         # Make averages
         # +1 for symmetry
         self._windowTime = np.array(range(-windowSize, windowSize+1))*self._dt
+    #}}}
+
+    #{{{getCounts
+    def getCounts(self):
+        #{{{docstring
+        """
+        Returns the blob count and the holes count.
+
+        Returns
+        -------
+        blobCount : int
+            Number of blobs found
+        holeCount : int
+            Number of holes found
+        """
+        #}}}
+
+        if self._blobCount is None:
+            message = "prepareCollectAndCalc must be called prior to getCounts"
+            raise RuntimeError(message)
+
+        return self._blobCount, self._holeCount
     #}}}
 
     #{{{getRadialFlux
@@ -656,6 +689,8 @@ class CollectAndCalcBlobs(object):
         """
         Identifies whether the bin contains a blob or a hole.
 
+        Sets the blobCount and holeCount.
+
         An outward transportation of positive fluctuations is a positive
         flux.
         A negative transportation of a negative fluctuation is also a
@@ -692,6 +727,10 @@ class CollectAndCalcBlobs(object):
 
         blobsIndices = tuple(blobsIndices)
         holesIndices = tuple(holesIndices)
+
+        # Set the counts
+        self._blobCount = len(blobsIndices)
+        self._holeCount = len(holesIndices)
 
         return blobsIndices, holesIndices
     #}}}
