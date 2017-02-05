@@ -265,7 +265,7 @@ class PlotTemporalStats(PlotSuperClass):
         fig, (wAx, pAx) =\
                 plt.subplots(nrows=1, ncols=2, figsize = figSize)
 
-        kwargs = {"normed"=self._normed, "ec":"k", "fc":"g", "alpha":0.75}
+        kwargs = {"normed":self._normed, "ec":"k", "fc":"g", "alpha":0.75}
         # Waiting time
         wAx.hist(self._pulseWidths, self._bins, **kwargs)
         wAx.set_xlabel(self._xLabel)

@@ -71,7 +71,7 @@ class PlotRadialFlux(PlotSuperClass):
         pltVarName = self._ph.getVarPltName(self._varName)
 
         self._varLabel = self._varLabelTemplate.\
-            format(pltVarName, **self.uc.conversionDict[self._varName])
+            format(pltVarName, **self.uc.conversionDict["flux" + self._varName])
 
         # Set the fileName
         self._fileName =\

@@ -112,12 +112,14 @@ class PlotHelper(object):
                                        r"\Omega")                            ,\
         "vortHyperVisc"             : (r"D^H_{\Omega, \theta}"                \
                                        r"\partial_\theta^4\Omega")           ,\
+        # Fluxes
+        "fluxn" :r"nu_{E\times B,\rho}"  ,\
         # Miscellaneous
-        "modeNr"    :r"$m_\theta$",\
-        "B0"        :r"$B_0$"     ,\
-        "Te0"       :r"$T_e$"     ,\
-        "nn"        :r"$n_n$"     ,\
-        "length"    :r"$z$"       ,\
+        "modeNr":r"$m_\theta$",\
+        "B0"    :r"$B_0$"     ,\
+        "Te0"   :r"$T_e$"     ,\
+        "nn"    :r"$n_n$"     ,\
+        "length":r"$z$"       ,\
         }
     #}}}
 
