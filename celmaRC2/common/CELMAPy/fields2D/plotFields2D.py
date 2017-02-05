@@ -5,7 +5,7 @@ Contains functions for animating the 2D fields
 """
 
 from ..superClasses import PlotAnim2DSuperClass
-from ..plotHelpers import plotNumberFormatter
+from ..plotHelpers import SizeMaker, plotNumberFormatter
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.pylab as plt
@@ -20,7 +20,7 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the PlotAnim2DPerp
@@ -32,8 +32,6 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -44,7 +42,8 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
 
         # NOTE: tight_layout=True gives wobbly plot as the precision of
         #       the colorbar changes during the animation
-        self._fig = plt.figure(figsize = pltSize)
+        figSize = SizeMaker.standard(w=3.0, a=1.0)
+        self._fig = plt.figure(figsize = figSize)
         self._fig.subplots_adjust(left=0.0)
         self._perpAx = self._fig.add_subplot(111)
         self._cBarAx = make_axes_locatable(self._perpAx).\
@@ -212,7 +211,7 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the PlotAnim2DPar
@@ -224,8 +223,6 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -237,7 +234,8 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
         # Create figure and axes
         # NOTE: tight_layout=True gives wobbly plot as the precision of
         #       the colorbar changes during the animation
-        self._fig = plt.figure(figsize = pltSize)
+        figSize = SizeMaker.standard(w=3.0, a=1.0)
+        self._fig = plt.figure(figsize = figSize)
         self._fig.subplots_adjust(right=0.8)
         self._parAx = self._fig.add_subplot(111)
         self._cBarAx = make_axes_locatable(self._parAx).\
@@ -412,7 +410,7 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (20,15), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for the PlotAnim2DPol
@@ -424,8 +422,6 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -437,7 +433,8 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
         # Create figure and axes
         # NOTE: tight_layout=True gives wobbly plot as the precision of
         #       the colorbar changes during the animation
-        self._fig = plt.figure(figsize = pltSize)
+        figSize = SizeMaker.standard(w=3.0, a=1.0)
+        self._fig = plt.figure(figsize = figSize)
         self._fig.subplots_adjust(right=0.8)
         self._polAx = self._fig.add_subplot(111)
         self._cBarAx = make_axes_locatable(self._polAx).\

@@ -186,8 +186,7 @@ class PlotSubmitter(object):
             The condition in the conditional average will be set to
             flux.std()*condition
         plotAll : bool
-           If True: All the individual frames making up the average will be
-           plotted in the 2D plot.
+           If True: The individual blobs will be plotted.
         """
         #}}}
 

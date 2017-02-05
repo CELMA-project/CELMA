@@ -161,7 +161,7 @@ def driverWaitingTimePulse(ccb, plotSuperKwargs, normed = False):
 #}}}
 
 #{{{driverBlobTimeTraces
-def driverBlobTimeTraces(ccb, plotSuperKwargs):
+def driverBlobTimeTraces(ccb, plotSuperKwargs, plotAll):
     #{{{docstring
     """
     Driver which plots the time traces.
@@ -172,6 +172,8 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs):
         The initialized CollectAndCalcBlobs object.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    plotAll : bool
+           If True: The individual blobs will be plotted.
     """
     #}}}
 
@@ -182,7 +184,11 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs):
 
     # Blobs
     if len(timeTraceBlobs) > 0:
-        for theDict in (timeTraceBlobsAvg, *timeTraceBlobs):
+        if plotAll:
+            loopOver = (timeTraceBlobsAvg, *timeTraceBlobs)
+        else:
+            loopOver = (timeTraceBlobsAvg, )
+        for theDict in loopOver:
             pbtt.setData(theDict, "blobs")
             pbtt.plotSaveShowTimeTrace()
     else:
@@ -190,7 +196,11 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs):
 
     # Holes
     if len(timeTraceHoles) > 0:
-        for theDict in (timeTraceHolesAvg, *timeTraceHoles):
+        if plotAll:
+            loopOver = (timeTraceHolesAvg, *timeTraceHoles)
+        else:
+            loopOver =  (timeTraceHolesAvg, )
+        for theDict in loopOver:
             pbtt.setData(theDict, "holes")
             pbtt.plotSaveShowTimeTrace()
     else:
@@ -266,8 +276,7 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     plotAll : bool
-        If True: All the individual frames making up the average will be
-        plotted.
+           If True: The individual blobs will be plotted.
     """
     #}}}
 
@@ -509,8 +518,9 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     p2DPol.plotAndSavePolPlane()
 #}}}
 
+# FIXME: Could add padding pct to focus the plots closer to tau=0
 #{{{getBurstIndices
-def getBurstIndices(theLen, frames=10):
+def getBurstIndices(theLen, frames=5):
     #{{{docstring
     """
     Returns equally spaced indices.
@@ -697,7 +707,7 @@ class DriverBlobs(DriverSuperClass):
         """
         #}}}
 
-        args  = (self._ccb, self._plotSuperKwargs)
+        args  = (self._ccb, self._plotSuperKwargs, self._plotAll)
         if self._useSubProcess:
             processes = Process(target = driverBlobTimeTraces,\
                                 args   = args                ,\

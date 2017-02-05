@@ -3,7 +3,9 @@
 """Class for blobs plot"""
 
 from ..superClasses import PlotSuperClass
+from ..plotHelpers import SizeMaker
 from glob import glob
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import os
 
@@ -15,26 +17,17 @@ class PlotBlobTimeTrace(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
 
         * Calls the parent constructor
-        * Sets member data
-
-        Parameters
-        ----------
-        pltSize : tuple
-            The size of the plot
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -113,7 +106,8 @@ class PlotBlobTimeTrace(PlotSuperClass):
 
         # Set title
         if self._avg:
-            self._title = r"$\mathrm{{Average \;{}}}$".format(self._blobOrHole)
+            self._title = r"$\mathrm{{Average \;{}}}$".\
+                    format(self._blobOrHole[:-1])
         else:
             self._title = r"$\mathrm{{{}}}$".\
                     format(self._blobOrHole.capitalize())
@@ -126,7 +120,7 @@ class PlotBlobTimeTrace(PlotSuperClass):
         """
 
         # Create the plot
-        fig, ax = plt.subplots(figsize = self._pltSize)
+        fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4.0, a=0.5))
 
         # Do the plotting
         ax.plot(self._time,\
@@ -159,7 +153,7 @@ class PlotTemporalStats(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (30,10), bins = "sqrt", **kwargs):
+    def __init__(self, *args, bins = "sqrt", **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -169,8 +163,6 @@ class PlotTemporalStats(PlotSuperClass):
 
         Parameters
         ----------
-        pltSize : tuple
-            The size of the plot
         bins : [int|str]
             The binning, see numpy.histogram for details.
         """
@@ -180,8 +172,7 @@ class PlotTemporalStats(PlotSuperClass):
         super().__init__(*args, **kwargs)
 
         # Set the member data
-        self._pltSize = pltSize
-        self._bins    = bins
+        self._bins = bins
     #}}}
 
     #{{{setData
@@ -270,23 +261,19 @@ class PlotTemporalStats(PlotSuperClass):
         """
 
         # Create the plot
+        figSize = SizeMaker.standard(w=6.0, a=1/3)
         fig, (wAx, pAx) =\
-                plt.subplots(nrows=1, ncols=2, figsize = self._pltSize)
+                plt.subplots(nrows=1, ncols=2, figsize = figSize)
 
+        kwargs = {"normed"=self._normed, "ec":"k", "fc":"g", "alpha":0.75}
         # Waiting time
-        wAx.hist(self._pulseWidths    ,\
-                 self._bins           ,\
-                 normed = self._normed,\
-                 alpha  = 0.75)
+        wAx.hist(self._pulseWidths, self._bins, **kwargs)
         wAx.set_xlabel(self._xLabel)
         wAx.set_ylabel(self._yLabelW)
         wAx.set_title(self._wTitle)
 
         # Pulse width
-        pAx.hist(self._waitingTimes   ,\
-                 self._bins           ,\
-                 normed = self._normed,\
-                 alpha  = 0.75)
+        pAx.hist(self._waitingTimes, self._bins, **kwargs)
         pAx.set_xlabel(self._xLabel)
         pAx.set_ylabel(self._yLabelP)
         pAx.set_title(self._pTitle)
@@ -297,6 +284,10 @@ class PlotTemporalStats(PlotSuperClass):
         # Make the plot look nice
         self._ph.makePlotPretty(wAx, rotation = 45, legend = False)
         self._ph.makePlotPretty(pAx, rotation = 45, legend = False)
+
+        # Only integers on the yaxis
+        wAx.get_yaxis().set_major_locator(MaxNLocator(integer=True))
+        pAx.get_yaxis().set_major_locator(MaxNLocator(integer=True))
 
         # Adjust the subplots
         fig.subplots_adjust(hspace=0.2, wspace=0.35)
