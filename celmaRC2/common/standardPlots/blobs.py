@@ -121,6 +121,7 @@ def getBlobDriver(dmp_folders    ,\
         The condition in the conditional average will be set to
         flux.std()*condition
     plotAll : bool
+           If True: The individual blobs will be plotted.
 
     Returns
     -------
