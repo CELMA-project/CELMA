@@ -11,6 +11,7 @@ from ..fields2D import (PlotAnim2DPerp,\
                         PlotAnim2DPol,\
                        )
 from ..radialFlux import PlotRadialFlux
+from ..PDF import CollectAndCalcPDF, PlotPDF
 from ..superClasses import PlotSuperClass
 from ..unitsConverter import UnitsConverter
 from .collectAndCalcBlobs import CollectAndCalcBlobs
@@ -92,7 +93,12 @@ def driverRadialFlux(ccb            ,\
                     ):
     #{{{docstring
     """
-    Driver for plotting the radial fluxes. Also stores the blob count.
+    Driver which:
+
+        1. Plots the time trace of the radial flux.
+        2. Plots the PDF of the radial flux.
+           NOTE: The labels will be wrong, but will be fixed in pickleTweaks
+        3. Stores the blob count.
 
     Parameters
     ----------
@@ -107,10 +113,21 @@ def driverRadialFlux(ccb            ,\
 
     radialFlux = ccb.getRadialFlux()
 
-    # Plot
+    # Plot the time trace
     ptt = PlotRadialFlux(ccb.uc, **plotSuperKwargs)
     ptt.setData(radialFlux, "fluct")
     ptt.plotSaveShowRadialFlux()
+
+    # Plot the PDF
+    # NOTE: The labels will be wrong, but will be fixed in pickleTweaks
+    PDF = CollectAndCalcPDF.calcPDF(radialFlux)
+    # Rename the keys for conversion dict to find the key
+    for key in list(PDF.keys()):
+        PDF[key]["fluxnPDFX"] = PDF[key].pop("nRadialFluxPDFX")
+        PDF[key]["fluxnPDFY"] = PDF[key].pop("nRadialFluxPDFY")
+    ppdf = PlotPDF(ccb.uc, **plotSuperKwargs)
+    ppdf.setData(PDF, "fluct")
+    ppdf.plotSaveShowPDF()
 
     # Store counts into a namedtuple
     blobCount, holeCount = ccb.getCounts()
