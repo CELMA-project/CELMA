@@ -23,14 +23,14 @@ def plotNumberFormatter(val, pos, precision=3):
     if "0.000" in tickString:
         checkForPeriod = True
         tickString = tickString.replace("0.000", "")
-        if tickString[0] == "-":
+        if tickString[1] == "-":
             tickString = "{}.{}e-03".format(tickString[0:3], tickString[3:])
         else:
             tickString = "{}.{}e-03".format(tickString[0:2], tickString[2:])
     elif "0.00" in tickString:
         checkForPeriod = True
         tickString = tickString.replace("0.00", "")
-        if tickString[0] == "-":
+        if tickString[1] == "-":
             tickString = "{}.{}e-02".format(tickString[0:3], tickString[3:])
         else:
             tickString = "{}.{}e-02".format(tickString[0:2], tickString[2:])

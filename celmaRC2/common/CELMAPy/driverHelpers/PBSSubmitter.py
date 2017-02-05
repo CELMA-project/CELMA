@@ -31,7 +31,7 @@ class PBSSubmitter(object):
                             "setWalltime",\
                           ]
 
-        self._submit = True
+        self._submitWithPBS = True
     #}}}
 
     #{{{toggleSubmitOrRun
@@ -41,9 +41,9 @@ class PBSSubmitter(object):
         """
 
         # Use xor
-        self._submit = bool(self._submit^1)
+        self._submitWithPBS = bool(self._submitWithPBS^1)
 
-        print("Submission to PBS queue is: {}".format(self._submit))
+        print("Submission to PBS queue is: {}".format(self._submitWithPBS))
     #}}}
 
     #{{{setMisc
@@ -194,7 +194,7 @@ class PBSSubmitter(object):
         if not(self._miscCalled):
             self.setMisc()
 
-        if self._submit:
+        if self._submitWithPBS:
             # The name of the file
             fileName = "tmp_{}_{}.py".format(function.__name__, self._time)
 
