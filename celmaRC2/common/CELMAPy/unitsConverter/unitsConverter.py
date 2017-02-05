@@ -269,7 +269,13 @@ class UnitsConverter(object):
         "modeNr"   :{"units"        :r"{}",\
                      "normalization":r"{}",\
                      "factor"       :1 ,\
-                     },\
+                    },\
+        "fluxn"    :{"units"        :r"\mathrm{m}^{-2}\mathrm{s}^{-1}",\
+                     "normalization":r"/n_0c_s",\
+                     "factor"       :self._normDict["n0"]*\
+                                     self._normDict["rhoS"]*\
+                                     self._normDict["omCI"],\
+                    },\
         }
     #}}}
 

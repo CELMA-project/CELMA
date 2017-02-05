@@ -3,7 +3,7 @@
 """Class for PDF plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -15,25 +15,17 @@ class PlotPDF(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
 
         * Calls the parent constructor
-
-        Parameters
-        ----------
-        pltSize : tuple
-            The size of the plot
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the plot size
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -49,7 +41,7 @@ class PlotPDF(PlotSuperClass):
         PDF : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
-            {"pdfX":pdfX, "pdfY":"pdfY"}
+            {varPDFX:pdfX, varPDFY:pdfY}
         mode : ["normal"|"fluct"]
             What mode the input is given in.
         """
@@ -142,7 +134,7 @@ class PlotPDF(PlotSuperClass):
         """ Plots the probability density function."""
 
         # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
+        fig = plt.figure(figsize = SizeMaker.standard(w=4.0))
         ax  = fig.add_subplot(111)
 
         keys = sorted(self._PDF.keys())
