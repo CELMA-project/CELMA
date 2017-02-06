@@ -199,9 +199,9 @@ class PlotSubmitter(object):
         else:
             modes = (modes,)
         if fluct == "both":
-            fluct = (True, False)
+            flucts = (True, False)
         else:
-            fluct = (fluct,)
+            flucts = (fluct,)
 
         for dmp_folders, key, nr in loopOver:
 
@@ -234,7 +234,7 @@ class PlotSubmitter(object):
                                     args=args, kwargs=kwargs)
 
             for mode in modes:
-                for b in (True, False):
+                for b in flucts:
                     kwargs = {"mode":mode, "fluct":b}
                     if b:
                         fluct = "-fluct"
