@@ -128,8 +128,7 @@ class PlotRadialFlux(PlotSuperClass):
         """
 
         # Create the plot
-        fig = plt.figure(figsize = SizeMaker.standard(w=4.0))
-        ax  = fig.add_subplot(111)
+        fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4.0))
 
         keys = sorted(self._radialFluxes.keys())
 
