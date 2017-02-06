@@ -234,7 +234,7 @@ class PlotSubmitter(object):
                                     args=args, kwargs=kwargs)
 
             for mode in modes:
-                for b in (True, False):
+                for b in fluct:
                     kwargs = {"mode":mode, "fluct":b}
                     if b:
                         fluct = "-fluct"
