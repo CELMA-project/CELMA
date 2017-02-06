@@ -135,7 +135,7 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverMagnitudeSpectrum, args = args)
             processes.start()
         else:

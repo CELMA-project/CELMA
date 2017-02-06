@@ -689,7 +689,7 @@ class DriverBlobs(DriverSuperClass):
                 self._ccb            ,\
                 self._plotSuperKwargs,\
                )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverRadialFlux,\
                                 args   = args             )
             processes.start()
@@ -707,7 +707,7 @@ class DriverBlobs(DriverSuperClass):
 
         args   = (self._ccb, self._plotSuperKwargs)
         kwargs = {"normed":self._normed}
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverWaitingTimePulse,\
                                 args   = args                  ,\
                                 kwargs = kwargs)
@@ -725,7 +725,7 @@ class DriverBlobs(DriverSuperClass):
         #}}}
 
         args  = (self._ccb, self._plotSuperKwargs, self._plotAll)
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverBlobTimeTraces,\
                                 args   = args                ,\
                                )
@@ -748,7 +748,7 @@ class DriverBlobs(DriverSuperClass):
                  self._plotSuperKwargs,\
                  self._plotAll        ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverPlot2DData,\
                                 args   = args            ,\
                                )

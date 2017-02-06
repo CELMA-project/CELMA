@@ -545,7 +545,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._varyMaxMin      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driver2DFieldPerpSingle, args = args)
             processes.start()
         else:
@@ -572,7 +572,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._varyMaxMin      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driver2DFieldParSingle, args = args)
             processes.start()
         else:
@@ -598,7 +598,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._varyMaxMin      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driver2DFieldPolSingle, args = args)
             processes.start()
         else:
@@ -626,7 +626,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._varyMaxMin      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes =\
                 Process(target = driver2DFieldPerpParSingle, args = args)
             processes.start()
@@ -655,7 +655,7 @@ class Driver2DFields(DriverPlotFieldsSuperClass):
                  self._varyMaxMin      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes =\
                 Process(target = driver2DFieldPerpPolSingle, args = args)
             processes.start()

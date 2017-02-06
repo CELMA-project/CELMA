@@ -134,7 +134,7 @@ def driverTest():
     equallySpace    = "x"
     steadyStatePath = None
 
-    useSubProcess = True
+    useMultiProcess = True
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
@@ -168,7 +168,7 @@ def driverTest():
                      nModes            = nModes           ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dGR.driverGrowthRates()
     print("Success!\n\n")

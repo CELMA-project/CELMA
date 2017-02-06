@@ -105,7 +105,7 @@ class DriverPerformance(DriverSuperClass):
                  self._plotSuperKwargs ,\
                 )
         kwargs = {"allFolders":self._allFolders}
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes =\
                     Process(target = driverPerformance,\
                             args = args, kwargs=kwargs)

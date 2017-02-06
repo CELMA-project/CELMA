@@ -143,7 +143,7 @@ class DriverFourierModes(DriverPointsSuperClass):
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverFourierModes, args = args)
             processes.start()
         else:

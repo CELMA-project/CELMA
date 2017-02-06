@@ -242,7 +242,7 @@ class DriverRadialProfile(DriverSuperClass):
                  self._tSlice          ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverProfAndGradCompare, args = args)
             processes.start()
         else:
@@ -266,7 +266,7 @@ class DriverRadialProfile(DriverSuperClass):
                  self._tSlice          ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverPosOfFluct, args = args)
             processes.start()
         else:

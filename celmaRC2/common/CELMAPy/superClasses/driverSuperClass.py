@@ -15,7 +15,7 @@ class DriverSuperClass(object):
     #{{{Constructor
     def __init__(self                ,\
                  dmp_folders         ,\
-                 useSubProcess = True,\
+                 useMultiProcess = True,\
                  collectPaths  = None,\
                  ):
         #{{{docstring
@@ -32,7 +32,7 @@ class DriverSuperClass(object):
         collectPaths : [None|tuple]
             Tuple containing the collect paths
             If None, the dmp_folders will be used
-        useSubProcess : bool
+        useMultiProcess : bool
             Whether each job will be made by a new sub process, if not,
             the jobs will be done in series.
         """
@@ -44,9 +44,9 @@ class DriverSuperClass(object):
 
         # Set the member data
         self._collectPaths  = collectPaths
-        self._useSubProcess = useSubProcess
+        self._useMultiProcess = useMultiProcess
 
-        if self._useSubProcess:
+        if self._useMultiProcess:
             #{{{ The multiprocess currently only works with the Agg backend
             # Qt4Agg currently throws
             # [xcb] Unknown sequence number while processing queue

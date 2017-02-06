@@ -188,7 +188,7 @@ class DriverRadialFlux(DriverPointsSuperClass):
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverRadialFlux, args = args)
             processes.start()
         else:

@@ -34,7 +34,7 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
     """
     #}}}
 
-    useSubProcess     = True
+    useMultiProcess     = True
     convertToPhysical = True
 
     xSlice = None
@@ -66,7 +66,7 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
                    convertToPhysical = convertToPhysical,\
                    # DriverSuperClass
                    collectPaths  = collectPaths ,\
-                   useSubProcess = useSubProcess,\
+                   useMultiProcess = useMultiProcess,\
                   )
 
     d1DF.driver1DFieldsAll()

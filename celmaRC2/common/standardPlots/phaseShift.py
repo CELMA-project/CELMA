@@ -51,7 +51,7 @@ def phaseShiftPlot(dmp_folders     ,\
     equallySpace    = "x"
     steadyStatePath = steadyStatePaths[0]
 
-    useSubProcess = False
+    useMultiProcess = False
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : None           ,\
@@ -72,7 +72,7 @@ def phaseShiftPlot(dmp_folders     ,\
                      plotSuperKwargs                      ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dGR.driverPhaseShift()
 #}}}

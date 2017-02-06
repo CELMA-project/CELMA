@@ -35,7 +35,7 @@ def fourierModesPlot(dmp_folders,\
     """
     #}}}
 
-    useSubProcess = False
+    useMultiProcess = False
 
     varName           = "n"
     convertToPhysical = True
@@ -73,7 +73,7 @@ def fourierModesPlot(dmp_folders,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dFM.driverFourierMode()
 #}}}
