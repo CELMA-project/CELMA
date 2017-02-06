@@ -24,7 +24,7 @@ class CollectAndCalcBlobs(object):
                  convertToPhysical   ,\
                  condition     = 3   ,\
                  pctPadding    = 400 ,\
-                 useSubProcess = True,\
+                 useMultiProcess = True,\
                  ):
         #{{{docstring
         """
@@ -47,7 +47,7 @@ class CollectAndCalcBlobs(object):
             Padding around the maximum pulsewidth which satisfies the
             condition.
             Measured in percent.
-        useSubProcess : bool
+        useMultiProcess : bool
             Whether or not to use sub process.
         """
         #}}}
@@ -57,7 +57,7 @@ class CollectAndCalcBlobs(object):
         self._convertToPhysical = convertToPhysical
         self._condition         = condition
         self._pctPadding        = pctPadding
-        self._useSubProcess     = useSubProcess
+        self._useMultiProcess     = useMultiProcess
         self._xInd, self._yInd, self._zInd, self._tSlice = slices
 
         # Initialize the count
@@ -542,7 +542,7 @@ class CollectAndCalcBlobs(object):
         #}}}
 
         args = tuple((tSlice, fluct, mode) for tSlice in tSlices)
-        if self._useSubProcess:
+        if self._useMultiProcess:
             # Set a max of 10 processors in order not to saturate the memory
             with Pool(10) as p:
                 # Here using Pool.starmap

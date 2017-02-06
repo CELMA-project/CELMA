@@ -32,7 +32,7 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
     """
     #}}}
 
-    useSubProcess     = False
+    useMultiProcess     = False
     convertToPhysical = True
 
     varName  = "n"
@@ -52,7 +52,7 @@ def posOfFluctPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dRP.driverPosOfFluct()
 #}}}

@@ -35,7 +35,7 @@ def magnitudeSpectrumPlot(dmp_folders,\
     """
     #}}}
 
-    useSubProcess = False
+    useMultiProcess = False
 
     varName           = "n"
     convertToPhysical = True
@@ -64,7 +64,7 @@ def magnitudeSpectrumPlot(dmp_folders,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dMS.driverMagnitudeSpectrum()
 #}}}

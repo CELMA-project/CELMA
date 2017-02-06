@@ -61,7 +61,7 @@ def driverTest():
 
     scanParameter = "B0"
     yInd          = 16
-    useSubProcess = False
+    useMultiProcess = False
 
     plotSuperKwargs = {\
                         "showPlot"     : False,\
@@ -81,7 +81,7 @@ def driverTest():
                                      yInd            ,\
                                      plotSuperKwargs ,\
                                      # DriverSuperClass
-                                     useSubProcess = useSubProcess,\
+                                     useMultiProcess = useMultiProcess,\
                                     )
     dAGR.driverAnalyticGrowthRates()
     print("Success!\n\n")

@@ -212,7 +212,7 @@ class DriverGrowthRates(DriverPointsSuperClass):
                  self._getDataArgs    ,\
                  self._plotSuperKwargs,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverGrowthRates, args = args)
             processes.start()
         else:

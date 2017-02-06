@@ -175,7 +175,7 @@ class DriverZonalFlow(DriverSuperClass):
                  self._tSlice          ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverZonalFlow, args = args)
             processes.start()
         else:

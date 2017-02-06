@@ -30,7 +30,7 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
     """
     #}}}
 
-    useSubProcess     = False
+    useMultiProcess     = False
     convertToPhysical = True
     yInd              = 16
     tSlice            = tSlice
@@ -45,7 +45,7 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dRP.driverZonalFlow()
 #}}}

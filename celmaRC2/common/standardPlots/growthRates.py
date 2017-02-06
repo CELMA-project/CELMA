@@ -53,7 +53,7 @@ def growthRatesPlot(dmp_folders     ,\
     equallySpace    = "x"
     steadyStatePath = None
 
-    useSubProcess = True
+    useMultiProcess = True
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : None           ,\
@@ -76,7 +76,7 @@ def growthRatesPlot(dmp_folders     ,\
                      nModes            = nModes           ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dGR.driverGrowthRates()
 #}}}

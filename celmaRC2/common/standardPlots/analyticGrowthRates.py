@@ -36,7 +36,7 @@ def analyticGrowthRatesPlot(dmp_folders     ,\
     #}}}
 
     yInd          = 16
-    useSubProcess = False
+    useMultiProcess = False
 
     dAGR = DriverAnalyticGrowthRates(
                                      # DriverAnalyticGrowthRates
@@ -46,7 +46,7 @@ def analyticGrowthRatesPlot(dmp_folders     ,\
                                      yInd            ,\
                                      plotSuperKwargs ,\
                                      # DriverSuperClass
-                                     useSubProcess = useSubProcess,\
+                                     useMultiProcess = useMultiProcess,\
                                     )
     dAGR.driverAnalyticGrowthRates()
 #}}}
