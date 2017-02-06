@@ -13,4 +13,4 @@ from .driverBlobs import (DriverBlobs           ,\
                           get2DData             ,\
                           prepareBlobs          ,\
                           )
-from .plotBlobs import PlotBlobTimeTrace, PlotTemporalStats
+from .plotBlobs import PlotBlobOrHoleTimeTraceSingle, PlotTemporalStats

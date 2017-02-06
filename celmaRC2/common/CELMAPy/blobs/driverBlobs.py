@@ -15,7 +15,7 @@ from ..PDF import CollectAndCalcPDF, PlotPDF
 from ..superClasses import PlotSuperClass
 from ..unitsConverter import UnitsConverter
 from .collectAndCalcBlobs import CollectAndCalcBlobs
-from .plotBlobs import PlotTemporalStats, PlotBlobTimeTrace
+from .plotBlobs import PlotTemporalStats, PlotBlobOrHoleTimeTraceSingle
 from multiprocessing import Process
 from collections import namedtuple
 import os, pickle
@@ -197,7 +197,7 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs, plotAll):
     timeTraceBlobsAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
         ccb.executeCollectAndCalc1D()
 
-    pbtt = PlotBlobTimeTrace(ccb.uc, **plotSuperKwargs)
+    pbtt = PlotBlobOrHoleTimeTraceSingle(ccb.uc, **plotSuperKwargs)
 
     # Blobs
     if len(timeTraceBlobs) > 0:
