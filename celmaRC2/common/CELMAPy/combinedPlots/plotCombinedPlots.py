@@ -3,12 +3,13 @@
 """Class for combinedPlots plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
 import numpy as np
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import os
 
+# FIXME: Removing rf is done in a simple, stupid way
 #{{{PlotCombinedPlots
 class PlotCombinedPlots(PlotSuperClass):
     """
@@ -53,10 +54,11 @@ class PlotCombinedPlots(PlotSuperClass):
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {varName:timeTrace, "time":time}
-        radialFluxes : dict
+        radialFluxes : [None|dict]
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
             {varName:radialFlux, "time":time}
+            Will be ignored if None
         PDF : dict
             Dictionary where the keys are on the form "rho,theta,z".
             The value is a dict containing of
@@ -82,12 +84,15 @@ class PlotCombinedPlots(PlotSuperClass):
         keys = tt[ind].keys()
         self._varName = tuple(var for var in keys if var != "time")[0]
         self._pltVarName = self._ph.getVarPltName(self._varName)
-        keys = rf[ind].keys()
-        self._radialFluxName = tuple(var for var in keys if var != "time")[0]
+        keys = tt[ind].keys()
+        if rf is not None:
+            keys = rf[ind].keys()
+            self._radialFluxName =\
+                    tuple(var for var in keys if var != "time")[0]
 
 
         # Make the keys from the time trace
-        self._keys = sorted(self._tt.keys(), reverse = True)
+        self._keys = sorted(self._tt.keys())
 
         # To be used in the plot name
         if self._mode == "normal":
@@ -172,11 +177,10 @@ class PlotCombinedPlots(PlotSuperClass):
                     plotNumberFormatter(float(theta), None)
 
             # Make the const values
-            verticalTitles.append(("{}").\
-                    format(\
-                        self._ph.rhoTxtDict  ["constRhoTxt"].\
-                            format(self._ph.rhoTxtDict)
-                          ))
+            rho = self._ph.rhoTxtDict["constRhoTxt"].format(self._ph.rhoTxtDict)
+            rho = rho.split("=")
+            rho = "{}\n{}".format(rho[0][:-2],rho[1][2:])
+            verticalTitles.append(rho)
 
         figureTitle = ("{}$,$ {}").\
                 format(\
@@ -220,16 +224,6 @@ class PlotCombinedPlots(PlotSuperClass):
             ttHTitile = r"$\widetilde{{{{{{}}}}}}${}".\
                     format(unitsOrNormalization)
 
-        # The radial flux
-        if self._mode == "normal":
-            rfHTitile = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
-                                format(unitsOrNormalization)
-        elif self._mode == "fluct":
-            rfHTitile = (\
-                    r"$\widetilde{{{{{{}}}}}} "
-                    r"\widetilde{{{{ u }}}}_{{{{E\times B, \rho}}}}${}").\
-                    format(unitsOrNormalization)
-
         # The probability density function
         PDFHTitile = self._preparePDFLabel()
 
@@ -238,17 +232,30 @@ class PlotCombinedPlots(PlotSuperClass):
 
         ttHTitile  = ttHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
-        rfHTitile  = rfHTitile.\
-            format(self._pltVarName, **self.uc.conversionDict[self._varName])
         PDFHTitile = PDFHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
         PSDHTitile = PSDHTitile.\
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         horizontalTitles.append(ttHTitile)
-        horizontalTitles.append(rfHTitile)
         horizontalTitles.append(PDFHTitile)
         horizontalTitles.append(PSDHTitile)
+
+        # The radial flux
+        if self._rf is not None:
+            if self._mode == "normal":
+                rfHTitile = r"${{}}u_{{{{E\times B, \rho}}}}${}".\
+                                    format(unitsOrNormalization)
+            elif self._mode == "fluct":
+                rfHTitile = (\
+                        r"$\widetilde{{{{{{}}}}}} "
+                        r"\widetilde{{{{ u }}}}_{{{{E\times B, \rho}}}}${}").\
+                        format(unitsOrNormalization)
+            rfHTitile  = rfHTitile.\
+                format(self._pltVarName,\
+                       **self.uc.conversionDict[self._varName])
+            horizontalTitles.append(rfHTitile)
+
 
         return tuple(horizontalTitles)
     #}}}
@@ -340,7 +347,6 @@ class PlotCombinedPlots(PlotSuperClass):
         timeLabel = self._ph.tTxtDict["tTxtLabel"]
 
         ttXLabel  = timeLabel
-        rfXLabel  = timeLabel
         PSDXLabel = r"$[Hz]$" if self.uc.convertToPhysical\
                     else r"$1/t \omega_{ci}$"
 
@@ -360,9 +366,12 @@ class PlotCombinedPlots(PlotSuperClass):
             format(self._pltVarName, **self.uc.conversionDict[self._varName])
 
         xLabels.append(ttXLabel )
-        xLabels.append(rfXLabel )
         xLabels.append(PDFXLabel)
         xLabels.append(PSDXLabel)
+
+        if self._rf is not None:
+            rfXLabel  = timeLabel
+            xLabels.append(rfXLabel )
 
         return tuple(xLabels)
     #}}}
@@ -389,14 +398,23 @@ class PlotCombinedPlots(PlotSuperClass):
         # http://stackoverflow.com/questions/21191519/python-matplotlib-moving-graph-title-to-the-y-axis
         # http://matplotlib.org/users/gridspec.html
 
-        self._ttAxes, self._rfAxes, self._PDFAxes, self._PSDAxes =\
-                self._makeAxes()
+        if self._rf is not None:
+            self._ttAxes, self._rfAxes, self._PDFAxes, self._PSDAxes =\
+                    self._makeAxes()
 
-        self.turnOffXTicks((*self._ttAxes [:-1],\
-                            *self._rfAxes [:-1],\
-                            *self._PDFAxes[:-1],\
-                            *self._PSDAxes[:-1],\
-                           ))
+            self.turnOffXTicks((*self._ttAxes [:-1],\
+                                *self._rfAxes [:-1],\
+                                *self._PDFAxes[:-1],\
+                                *self._PSDAxes[:-1],\
+                               ))
+        else:
+            self._ttAxes, self._PDFAxes, self._PSDAxes =\
+                    self._makeAxes()
+
+            self.turnOffXTicks((*self._ttAxes [:-1],\
+                                *self._PDFAxes[:-1],\
+                                *self._PSDAxes[:-1],\
+                               ))
 
         self._setTitlesAndLabels()
     #}}}
@@ -413,38 +431,60 @@ class PlotCombinedPlots(PlotSuperClass):
             The time trace axis.
         rfAxes : axis
             The radial flux axis.
+            NOTE: Only if the radial flux will be plotted
         PDFAxes: axis
             The probability density function axis.
         PSDAxes: axis
             The power spectral density axis.
         """
         #}}}
-        self._fig = plt.figure(figsize=self._pltSize)
 
-        gs = gridspec.GridSpec(3, 4,\
-                               height_ratios=(2,2,2)  ,\
-                               width_ratios =(3,3,2,2),\
-                               )
+        figSize = SizeMaker.standard()
+        self._fig = plt.figure(figsize=figSize)
 
-        ax1  = self._fig.add_subplot(gs[0])
-        ax2  = self._fig.add_subplot(gs[1])
-        ax3  = self._fig.add_subplot(gs[2])
-        ax4  = self._fig.add_subplot(gs[3])
-        ax5  = self._fig.add_subplot(gs[4] , sharex=ax1, sharey=ax1)
-        ax6  = self._fig.add_subplot(gs[5] , sharex=ax2, sharey=ax2)
-        ax7  = self._fig.add_subplot(gs[6] , sharex=ax3, sharey=ax3)
-        ax8  = self._fig.add_subplot(gs[7] , sharex=ax4, sharey=ax4)
-        ax9  = self._fig.add_subplot(gs[8] , sharex=ax1, sharey=ax1)
-        ax10 = self._fig.add_subplot(gs[9] , sharex=ax2, sharey=ax2)
-        ax11 = self._fig.add_subplot(gs[10], sharex=ax3, sharey=ax3)
-        ax12 = self._fig.add_subplot(gs[11], sharex=ax4, sharey=ax4)
+        if self._rf is not None:
+            gs = gridspec.GridSpec(3, 4,\
+                                   height_ratios=(2,2,2)  ,\
+                                   width_ratios =(3,3,2,2),\
+                                   )
 
-        ttAxes  = (ax1,ax5,ax9)
-        rfAxes  = (ax2,ax6,ax10)
-        PDFAxes = (ax3,ax7,ax11)
-        PSDAxes = (ax4,ax8,ax12)
+            ax1  = self._fig.add_subplot(gs[0])
+            ax2  = self._fig.add_subplot(gs[1])
+            ax3  = self._fig.add_subplot(gs[2])
+            ax4  = self._fig.add_subplot(gs[3])
+            ax5  = self._fig.add_subplot(gs[4] , sharex=ax1, sharey=ax1)
+            ax6  = self._fig.add_subplot(gs[5] , sharex=ax2, sharey=ax2)
+            ax7  = self._fig.add_subplot(gs[6] , sharex=ax3, sharey=ax3)
+            ax8  = self._fig.add_subplot(gs[7] , sharex=ax4, sharey=ax4)
+            ax9  = self._fig.add_subplot(gs[8] , sharex=ax1, sharey=ax1)
+            ax10 = self._fig.add_subplot(gs[9] , sharex=ax2, sharey=ax2)
+            ax11 = self._fig.add_subplot(gs[10], sharex=ax3, sharey=ax3)
+            ax12 = self._fig.add_subplot(gs[11], sharex=ax4, sharey=ax4)
 
-        return ttAxes, rfAxes, PDFAxes, PSDAxes,
+            ttAxes  = (ax1,ax5,ax9)
+            rfAxes  = (ax2,ax6,ax10)
+            PDFAxes = (ax3,ax7,ax11)
+            PSDAxes = (ax4,ax8,ax12)
+
+            return ttAxes, rfAxes, PDFAxes, PSDAxes,
+        else:
+            gs = gridspec.GridSpec(3, 3)
+
+            ax1 = self._fig.add_subplot(gs[0])
+            ax2 = self._fig.add_subplot(gs[1])
+            ax3 = self._fig.add_subplot(gs[2])
+            ax4 = self._fig.add_subplot(gs[3] , sharex=ax1, sharey=ax1)
+            ax5 = self._fig.add_subplot(gs[4] , sharex=ax2, sharey=ax2)
+            ax6 = self._fig.add_subplot(gs[5] , sharex=ax3, sharey=ax3)
+            ax7 = self._fig.add_subplot(gs[6] , sharex=ax1, sharey=ax1)
+            ax8 = self._fig.add_subplot(gs[7] , sharex=ax2, sharey=ax2)
+            ax9 = self._fig.add_subplot(gs[8] , sharex=ax3, sharey=ax3)
+
+            ttAxes  = (ax1,ax4,ax7)
+            PDFAxes = (ax2,ax5,ax8)
+            PSDAxes = (ax3,ax6,ax9)
+
+            return ttAxes, PDFAxes, PSDAxes,
     #}}}
 
     #{{{_setTitlesAndLabels
@@ -454,19 +494,33 @@ class PlotCombinedPlots(PlotSuperClass):
         """
 
         # Magic numbers
-        hOffset = np.array([-0.35, 0.0])
-        vOffset = np.array([ 0.0 , 0.1])
+        # FIXME:
+        if self._rf is not None:
+            hOffset = np.array([-0.35, 0.0])
+            vOffset = np.array([ 0.0 , 0.1])
+        else:
+            hOffset = np.array([-1.0 , 0.0])
+            vOffset = np.array([ 0.0 , 0.1])
 
         # Set the figure title
         self._fig.suptitle(self._figureTitle)
+        t = self._fig.texts[0]
+        pos = list(t.get_position())
+        pos[1] = 1.0
+        t.set_position(pos)
+        t.set_va("bottom")
 
         # Set horizontal titles
         ttHTitle  = self._ttAxes [0].set_title(self._horizontalTitles[0])
-        rfHTitle  = self._rfAxes [0].set_title(self._horizontalTitles[1])
-        PDFHTitle = self._PDFAxes[0].set_title(self._horizontalTitles[2])
-        PSDHTitle = self._PSDAxes[0].set_title(self._horizontalTitles[3])
+        if self._rf is not None:
+            rfHTitle  = self._rfAxes [0].set_title(self._horizontalTitles[1])
+            PDFHTitle = self._PDFAxes[0].set_title(self._horizontalTitles[2])
+            PSDHTitle = self._PSDAxes[0].set_title(self._horizontalTitles[3])
+            rfHTitle .set_position(rfHTitle .get_position() + vOffset)
+        else:
+            PDFHTitle = self._PDFAxes[0].set_title(self._horizontalTitles[1])
+            PSDHTitle = self._PSDAxes[0].set_title(self._horizontalTitles[2])
         ttHTitle .set_position(ttHTitle .get_position() + vOffset)
-        rfHTitle .set_position(rfHTitle .get_position() + vOffset)
         PDFHTitle.set_position(PDFHTitle.get_position() + vOffset)
         PSDHTitle.set_position(PSDHTitle.get_position() + vOffset)
 
@@ -477,9 +531,13 @@ class PlotCombinedPlots(PlotSuperClass):
 
         # Set the xLabels
         self._ttAxes [-1].set_xlabel(self._xLabels[0])
-        self._rfAxes [-1].set_xlabel(self._xLabels[1])
-        self._PDFAxes[-1].set_xlabel(self._xLabels[2])
-        self._PSDAxes[-1].set_xlabel(self._xLabels[3])
+        if self._rf is not None:
+            self._rfAxes [-1].set_xlabel(self._xLabels[1])
+            self._PDFAxes[-1].set_xlabel(self._xLabels[2])
+            self._PSDAxes[-1].set_xlabel(self._xLabels[3])
+        else:
+            self._PDFAxes[-1].set_xlabel(self._xLabels[1])
+            self._PSDAxes[-1].set_xlabel(self._xLabels[2])
 
         # Set vertical titles
         titleMid    = self._ttAxes[1].set_title(self._verticalTitles[1])
@@ -515,9 +573,10 @@ class PlotCombinedPlots(PlotSuperClass):
                                   self._tt[key][self._varName],\
                                   color=self._colors[nr])
 
-            self._rfAxes[nr].plot(self._rf[key]["time"]              ,\
-                                  self._rf[key][self._radialFluxName],\
-                                  color=self._colors[nr])
+            if self._rf is not None:
+                self._rfAxes[nr].plot(self._rf[key]["time"]              ,\
+                                      self._rf[key][self._radialFluxName],\
+                                      color=self._colors[nr])
 
             self._PDFAxes[nr].\
                 plot(self._PDF[key]["{}PDFX".format(self._varName)],\
@@ -540,32 +599,27 @@ class PlotCombinedPlots(PlotSuperClass):
             ax.set_xscale("log")
 
         # Make the plot look nice
-        bottomAxes =\
-            (*self._ttAxes [1:],\
-             *self._rfAxes [1:],\
-             *self._PDFAxes[1:],\
-             *self._PSDAxes[1:])
-        topAxes =\
-            (self._ttAxes [0],\
-             self._rfAxes [0],\
-             self._PDFAxes[0],\
-             self._PSDAxes[0])
-        for ax in topAxes:
+        if self._rf is not None:
+            axes =\
+                (*self._ttAxes ,\
+                 *self._rfAxes ,\
+                 *self._PDFAxes,\
+                 *self._PSDAxes)
+        else:
+            axes =\
+                (*self._ttAxes ,\
+                 *self._PDFAxes,\
+                 *self._PSDAxes)
+        for ax in axes:
             self._ph.makePlotPretty(ax            ,\
-                                    ybins  = 5    ,\
-                                    xbins  = 5    ,\
-                                    legend = False,\
-                                    )
-        for ax in bottomAxes:
-            self._ph.makePlotPretty(ax            ,\
-                                    ybins  = 5    ,\
-                                    xbins  = 5    ,\
-                                    rotation = 45 ,\
+                                    ybins     = 5 ,\
+                                    xbins     = 5 ,\
+                                    rotation  = 45,\
                                     legend = False,\
                                     )
 
         # Adjust the subplots
-        self._fig.subplots_adjust(hspace=0.2, wspace=0.4)
+        self._fig.subplots_adjust(hspace=0.2, wspace=0.8)
 
         if self._showPlot:
             plt.show()
