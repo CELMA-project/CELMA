@@ -315,14 +315,15 @@ class PlotHelper(object):
 
     @staticmethod
     #{{{makePlotPretty
-    def makePlotPretty(ax                     ,\
-                       xprune   = "lower"     ,\
-                       yprune   = None        ,\
-                       rotation = "horizontal",\
-                       loc      = "best"      ,\
-                       legend   = True        ,\
-                       xbins    = None        ,\
-                       ybins    = None        ,\
+    def makePlotPretty(ax                      ,\
+                       xprune    = "lower"     ,\
+                       yprune    = None        ,\
+                       rotation  = "horizontal",\
+                       rotationY = None        ,\
+                       loc       = "best"      ,\
+                       legend    = True        ,\
+                       xbins     = None        ,\
+                       ybins     = None        ,\
                        ):
         #{{{docstring
         """
@@ -338,6 +339,8 @@ class PlotHelper(object):
             What ticks should be pruned on the y axis.
         rotation : [str | int]
             Rotation of the x axis.
+        rotationY : [None | str | int]
+            Rotation of the y axis.
         loc : str
             Location of the legend
         legend : bool
@@ -358,6 +361,9 @@ class PlotHelper(object):
         # Format the tick labels
         ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=rotation)
         ax.get_xaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
+        if rotationY:
+            ax.set_yticklabels(ax.yaxis.get_majorticklabels(),\
+                               rotation=rotationY)
         ax.get_yaxis().set_major_formatter(FuncFormatter(plotNumberFormatter))
 
         # Plot the legend

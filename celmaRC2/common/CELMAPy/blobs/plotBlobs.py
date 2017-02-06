@@ -406,9 +406,16 @@ class PlotTemporalStats(PlotSuperClass):
         # Set the title
         fig.suptitle(self._title)
 
+        # Modify title position
+        t = fig.texts[0]
+        pos = list(t.get_position())
+        pos[1] = 1.0
+        t.set_position(pos)
+        t.set_va("bottom")
+
         # Make the plot look nice
-        self._ph.makePlotPretty(wAx, rotation = 45, legend = False)
-        self._ph.makePlotPretty(pAx, rotation = 45, legend = False)
+        self._ph.makePlotPretty(wAx, rotation = 45, legend = False, xbins=7)
+        self._ph.makePlotPretty(pAx, rotation = 45, legend = False, xbins=7)
 
         # Only integers on the yaxis
         wAx.get_yaxis().set_major_locator(MaxNLocator(integer=True))
