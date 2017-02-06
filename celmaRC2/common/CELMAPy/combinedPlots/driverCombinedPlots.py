@@ -17,6 +17,7 @@ def driverCombinedPlots(collectPaths     ,\
                         steadyStatePath  ,\
                         varName          ,\
                         convertToPhysical,\
+                        includeRadialFlux,\
                         mode             ,\
                         yInd             ,\
                         zInd             ,\
@@ -38,6 +39,8 @@ def driverCombinedPlots(collectPaths     ,\
         The variable name which will be used.
     convertToPhysical : bool
         Whether or not to convert to physical units.
+    includeRadialFlux : bool
+        Whether or not to include the radial flux.
     mode : ["normal"|"fluct"]
         If mode is "normal" the raw data is given as an output.
         If mode is "fluct" the fluctuations are given as an output.
@@ -69,7 +72,10 @@ def driverCombinedPlots(collectPaths     ,\
            )
 
     tt , uc = getTimeTrace(*args)
-    rf , _  = getRadialFlux(*args)
+    if includeRadialFlux:
+        rf , _  = getRadialFlux(*args)
+    else:
+        rf = None
     PDF, _  = getPDF(*args)
     PSD, _  = get1DPSD(*args)
 
@@ -95,6 +101,7 @@ class DriverCombinedPlots(DriverPointsSuperClass):
                  plotSuperKwargs            ,\
                  varName           = "n"    ,\
                  mode              = "fluct",\
+                 includeRadialFlux = False  ,\
                  **kwargs):
         #{{{docstring
         """
@@ -122,6 +129,8 @@ class DriverCombinedPlots(DriverPointsSuperClass):
         mode : ["normal"|"fluct"]
             If mode is "normal" the raw data is given as an output.
             If mode is "fluct" the fluctuations are given as an output.
+        includeRadialFlux : bool
+            Whether or not to include the radial flux.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -131,12 +140,13 @@ class DriverCombinedPlots(DriverPointsSuperClass):
         super().__init__(dmp_folders, **kwargs)
 
         # Set the member data
-        self._varName         = varName
-        self._mode            = mode
-        self._steadyStatePath = steadyStatePath
-        self._yInd            = yInd
-        self._zInd            = zInd
-        self._tSlice          = tSlice
+        self._varName           = varName
+        self._mode              = mode
+        self._steadyStatePath   = steadyStatePath
+        self._yInd              = yInd
+        self._zInd              = zInd
+        self._tSlice            = tSlice
+        self._includeRadialFlux = includeRadialFlux
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -152,15 +162,16 @@ class DriverCombinedPlots(DriverPointsSuperClass):
         """
         #}}}
         args = (\
-                self._collectPaths    ,\
-                self._steadyStatePath ,\
-                self._varName         ,\
-                self.convertToPhysical,\
-                self._mode            ,\
-                self._yInd            ,\
-                self._zInd            ,\
-                self._tSlice          ,\
-                self._plotSuperKwargs ,\
+                self._collectPaths     ,\
+                self._steadyStatePath  ,\
+                self._varName          ,\
+                self.convertToPhysical ,\
+                self._includeRadialFlux,\
+                self._mode             ,\
+                self._yInd             ,\
+                self._zInd             ,\
+                self._tSlice           ,\
+                self._plotSuperKwargs  ,\
                )
         if self._useMultiProcess:
             processes = Process(target = driverCombinedPlots, args = args)
