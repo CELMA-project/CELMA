@@ -140,16 +140,16 @@ class PlotTotalFlux(PlotSuperClass):
 
         # Set total number text
         parElLossTxt = \
-            ("$\mathrm{{Total\;\parallel\; electron\; loss}}=${}$\;"
+            ("$\mathrm{{Total\; \parallel\; electron\;flux}}=${}$\;"
              " \mathrm{{particles}}$").\
                 format(plotNumberFormatter(self._parElLoss, None))
         parIonLossTxt = \
-            ("$\mathrm{{Total\;\parallel\; ion\; loss}}=${}$\;"
+            ("$\mathrm{{Total\; \parallel\; ion\; \;flux}}=${}$\;"
              " \mathrm{{particles}}$").\
                 format(plotNumberFormatter(self._parIonLoss, None))
         self._parElIonLossTxt = "{}\n{}".format(parElLossTxt, parIonLossTxt)
         self._perpLossTxt = \
-            ("$\mathrm{{Total\;\perp\; loss}}=2\cdot${}$\;"
+            ("$\mathrm{{Total\; \perp\; \;flux}}=2\cdot${}$\;"
              " \mathrm{{particles}}$").\
                 format(plotNumberFormatter(self._perpLoss, None))
 
