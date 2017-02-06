@@ -30,7 +30,7 @@ def performancePlot(dmp_folders, collectPaths, plotSuperKwargs,\
     """
     #}}}
 
-    useSubProcess = False
+    useMultiProcess = False
     convertToPhysical = True
 
     dP = DriverPerformance(
@@ -41,7 +41,7 @@ def performancePlot(dmp_folders, collectPaths, plotSuperKwargs,\
                      allFolders = allFolders,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dP.driverPerformance()
 #}}}

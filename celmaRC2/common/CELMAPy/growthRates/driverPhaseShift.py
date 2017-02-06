@@ -137,7 +137,7 @@ class DriverPhaseShift(DriverPointsSuperClass):
                 self._getDataArgs    ,\
                 self._plotSuperKwargs,\
                )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverPhaseShift, args = args)
             processes.start()
         else:

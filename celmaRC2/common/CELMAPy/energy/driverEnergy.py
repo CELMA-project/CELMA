@@ -114,7 +114,7 @@ class DriverEnergy(DriverSuperClass):
                  self._tSlice          ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverEnergy, args = args)
             processes.start()
         else:

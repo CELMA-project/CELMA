@@ -93,7 +93,7 @@ def driverTest():
                        }
 
 
-    useSubProcess = False
+    useMultiProcess = False
 
     print("\n\nTesting combined plot driver")
     dTT = DriverCombinedPlots(
@@ -110,7 +110,7 @@ def driverTest():
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dTT.driverCombinedPlots()
     print("Success!\n\n")

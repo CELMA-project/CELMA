@@ -110,7 +110,7 @@ def driverTest():
 
     steadyStatePath = "CSDXMagFieldScanAr/nout_2_timestep_50/nz_256/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0/"
 
-    useSubProcess = False
+    useMultiProcess = False
 
     varName           = "n"
     var2Name          = "phi"
@@ -141,7 +141,7 @@ def driverTest():
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dRP.driverPosOfFluct()
     print("Success!\n\n")

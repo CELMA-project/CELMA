@@ -67,7 +67,7 @@ def driverTest():
         "CSDXMagFieldScanAr/nout_5000_timestep_1/geom_Lx_6.2906_geom_Ly_220.1715_input_B0_0.08_switch_saveTerms_False_switch_useHyperViscAzVortD_True_tag_CSDXMagFieldScanAr-3-turbulentPhase1_0/restart_1/",\
        )
 
-    useSubProcess = False
+    useMultiProcess = False
 
     varName           = "n"
     convertToPhysical = True
@@ -102,7 +102,7 @@ def driverTest():
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dSK.driverSkewnessKurtosis()
     print("Success!\n\n")

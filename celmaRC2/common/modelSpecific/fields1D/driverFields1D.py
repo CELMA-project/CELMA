@@ -319,7 +319,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
         member data.
         """
         #}}}
-        if self._useSubProcess:
+        if self._useMultiProcess:
             parallelProcess = Process(\
                                  target = self.driver1DFieldsParallel,\
                                  args   = ()                         ,\
@@ -361,7 +361,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
                         self._hyperIncluded   ,\
                         self._plotSuperKwargs ,\
                        ]
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = {}
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()
@@ -401,7 +401,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
                         self._hyperIncluded   ,\
                         self._plotSuperKwargs ,\
                        ]
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = {}
             for fieldPlotType in Driver1DFields._fieldPlotTypes:
                 args = argTemplate.copy()

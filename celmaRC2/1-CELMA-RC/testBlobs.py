@@ -257,7 +257,7 @@ def driverTest():
     pctPadding = 400
     normed     = False
     convertToPhysical = True
-    useSubProcess = False
+    useMultiProcess = False
 
     plotSuperKwargs = {\
                         "showPlot"     : False,\
@@ -280,7 +280,7 @@ def driverTest():
                      normed = normed  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                     )
     dB.driverAll()
     print("Success!\n\n")

@@ -18,7 +18,7 @@ zInd   = 0
 pctPadding = 400
 normed     = False
 convertToPhysical = True
-useSubProcess = False
+useMultiProcess = False
 plotAll = False
 
 #{{{blobRadialFlux
@@ -144,7 +144,7 @@ def getBlobDriver(dmp_folders    ,\
                      plotAll   = plotAll  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                     )
 
     return dB

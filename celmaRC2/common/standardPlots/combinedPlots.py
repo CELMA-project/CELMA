@@ -32,7 +32,7 @@ def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath,\
     """
     #}}}
 
-    useSubProcess = False
+    useMultiProcess = False
 
     varName           = "n"
     convertToPhysical = True
@@ -46,7 +46,7 @@ def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath,\
     else:
         sliced = False
 
-    useSubProcess = False
+    useMultiProcess = False
 
     dTT = DriverCombinedPlots(
                      # DriverCombinedPlots
@@ -62,7 +62,7 @@ def combinedPlotsPlot(dmp_folders, collectPaths, steadyStatePath,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dTT.driverCombinedPlots()
 #}}}

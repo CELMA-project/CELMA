@@ -29,7 +29,7 @@ def PSD2DPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     """
     #}}}
 
-    useSubProcess     = False
+    useMultiProcess     = False
     convertToPhysical = True
 
     varName = "n"
@@ -59,7 +59,7 @@ def PSD2DPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dPSD.driverPSD2D()
 #}}}

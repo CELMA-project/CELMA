@@ -126,7 +126,7 @@ def driverTest():
     equallySpace    = "x"
     steadyStatePath = steadyStatePaths[0]
 
-    useSubProcess = False
+    useMultiProcess = False
 
     indicesArgs   = (xInd, yInd)
     indicesKwargs = {"tSlice"          : tSlice         ,\
@@ -157,7 +157,7 @@ def driverTest():
                      plotSuperKwargs                      ,\
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dGR.driverPhaseShift()
     print("Success!\n\n")
