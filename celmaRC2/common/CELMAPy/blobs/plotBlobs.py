@@ -13,7 +13,7 @@ import os
 class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
     """
     Class which contains the time traces together with the plotting
-    configuration.
+    configuration of either blobs, or holes.
     """
 
     #{{{constructor
@@ -40,8 +40,8 @@ class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
 
         Parameters
         ----------
-        theAverage : dict
-            Dictionary of the averaged blob/hole.
+        theDict : dict
+            Dictionary of the blob/hole.
             Contains the keys "n", "time" and "pos".
         blobOrHole : ["blobs"|"holes"]
             Whether blob data or hole data is given as an input.
@@ -60,11 +60,20 @@ class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
 
         fileName = "timeTrace-{}{}".format(self._blobOrHole, avg)
 
-        self._prepareLabels()
+        self._title = self._prepareLabels(self._blobOrHole)
 
+        self._setFileName(fileName)
+    #}}}
+
+    #{{{_setFileName
+    def _setFileName(self, fileName):
+        #{{{docstring
+        """
+        Sets self._fileName
+        """
+        #}}}
         # Set the fileName
-        fileName = os.path.join(self._savePath,\
-            "{}-{}".format(fileName, self._blobOrHole))
+        fileName = os.path.join(self._savePath, fileName)
 
         # Get the number
         files = glob(fileName + "*")
@@ -82,10 +91,22 @@ class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
     #}}}
 
     #{{{_prepareLabels
-    def _prepareLabels(self):
+    def _prepareLabels(self, blobOrHole):
+        #{{{docstring
         """
         Prepares the labels for plotting.
+
+        Parameters
+        ----------
+        blobOrHole : ["blob"|"hole"]
+            Whether blobs or holes are being considered.
+
+        Returns
+        -------
+        axTitle : str
+            The axis title
         """
+        #}}}
 
         # Set x and y labels
         if self.uc.convertToPhysical:
@@ -99,42 +120,146 @@ class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
             normalization  = r"$\om_{ci}$"
             yNormalization = r"$/n_0$"
 
-        self._xLabel = r"$t$ " + normalization + units
+        self._xLabel = r"$t$ " if self._time[0] >= 0 else r"$\tau$ "
+        self._xLabel += normalization + units
         self._yLabel = r"$\widetilde{n}$ " +\
                        yNormalization +\
                        yUnits
 
         # Set title
         if self._avg:
-            self._title = r"$\mathrm{{Average \;{}}}$".\
-                    format(self._blobOrHole[:-1])
+            title = r"$\mathrm{{Average \;{}}}$".format(blobOrHole[:-1])
         else:
-            self._title = r"$\mathrm{{{}}}$".\
-                    format(self._blobOrHole.capitalize())
+            title = r"$\mathrm{{{}}}$".format(blobOrHole[:-1].capitalize())
+
+        return title
     #}}}
 
     #{{{plotSaveShowTimeTrace
     def plotSaveShowTimeTrace(self):
         """
-        Performs the actual plotting.
+        Performs the plotting by calling the plot worker.
         """
 
         # Create the plot
         fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4.0, a=0.5))
 
+        self._plotWorker(ax, self._var, self._time, self._title)
+
+        # Show and save
+        if self._showPlot:
+            plt.show()
+
+        if self._savePlot:
+            self._ph.savePlot(fig, self._fileName)
+
+        plt.close(fig)
+    #}}}
+
+    #{{{_plotWorker
+    def _plotWorker(self, ax, var, time, title, xbins=None):
+        #{{{docstring
+        """
+        Performs axis plotting.
+
+        Parameters
+        ----------
+        ax : axis
+            The axis to plot on.
+        var : array 1-d
+            Variable to plot against time.
+        time : array 1-d
+            The time.
+        title : str
+            Title to  be used in the axis.
+        xbins : [None|int]
+            Number of bins to use on the x-axis
+        """
+        #}}}
+
         # Do the plotting
-        ax.plot(self._time,\
-                self._var ,\
-               )
+        ax.plot(time, var)
         ax.set_xlabel(self._xLabel)
         ax.set_ylabel(self._yLabel)
 
         # Set the title
-        fig.suptitle(self._title)
+        ax.set_title(title)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(ax, rotation = 45, legend = False)
+        self._ph.makePlotPretty(ax, rotation = 45, legend = False, xbins=xbins)
+    #}}}
+#}}}
 
+#{{{PlotBlobAndHoleTimeTraceDouble
+class PlotBlobAndHoleTimeTraceDouble(PlotBlobOrHoleTimeTraceSingle):
+    """
+    Class which contains the time traces together with the plotting
+    configuration of blobs and holes.
+    """
+
+    #{{{setData
+    def setData(self, blobDict, holeDict):
+        #{{{docstring
+        """
+        Sets the waiting time and pulse widths to be plotted.
+
+        This function also sets the variable labels, colors and the save name.
+
+        Parameters
+        ----------
+        blobDict : dict
+            Dictionary of the blob.
+            Contains the keys "n", "time" and "pos".
+        holeDict : dict
+            Dictionary of the hole.
+            Contains the keys "n", "time" and "pos".
+        """
+        #}}}
+
+        # Set the member data
+        self._blobVar  = blobDict.pop("n")
+        self._holeVar  = holeDict.pop("n")
+        self._time     = blobDict.pop("time")
+        self._pos      = blobDict.pop("pos")
+
+        self._avg = True if self._time[0] < 0 else False
+
+        avg = "-avg" if self._avg else ""
+
+        fileName = "timeTrace-blobAndHole{}".format(avg)
+
+        self._blobTitle = self._prepareLabels("blobs")
+        self._holeTitle = self._prepareLabels("holes")
+
+        self._setFileName(fileName)
+    #}}}
+
+    #{{{plotSaveShowTimeTrace
+    def plotSaveShowTimeTrace(self):
+        """
+        Performs the plotting by calling the plot worker.
+        """
+
+        # Create the plot
+        fig, (blobAx, holeAx) =\
+                plt.subplots(ncols=2, figsize = SizeMaker.array(2,1))
+
+        xbins = 5
+        self._plotWorker(blobAx,\
+                         self._blobVar,\
+                         self._time,\
+                         self._blobTitle,\
+                         xbins = xbins,\
+                         )
+        self._plotWorker(holeAx,\
+                         self._holeVar,\
+                         self._time,\
+                         self._holeTitle,\
+                         xbins = xbins,\
+                         )
+        fig.subplots_adjust(wspace=0.75)
+
+        # Show and save
         if self._showPlot:
             plt.show()
 
