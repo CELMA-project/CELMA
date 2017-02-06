@@ -135,7 +135,7 @@ class DriverTotalFlux(DriverPointsSuperClass):
                  self.convertToPhysical,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverTotalFlux, args = args)
             processes.start()
         else:

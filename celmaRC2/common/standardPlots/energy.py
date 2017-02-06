@@ -29,7 +29,7 @@ def energyPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     """
     #}}}
 
-    useSubProcess     = False
+    useMultiProcess     = False
     convertToPhysical = True
 
     if tSlice is not None:
@@ -48,7 +48,7 @@ def energyPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dE.driverEnergy()
 #}}}

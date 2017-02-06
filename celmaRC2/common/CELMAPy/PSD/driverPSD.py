@@ -305,7 +305,7 @@ class DriverPSD(DriverPointsSuperClass):
                  self._indicesKwargs   ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverPSD, args = args)
             processes.start()
         else:
@@ -329,7 +329,7 @@ class DriverPSD(DriverPointsSuperClass):
                  self._plotLimits      ,\
                  self._plotSuperKwargs ,\
                 )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverPSD2D, args = args)
             processes.start()
         else:

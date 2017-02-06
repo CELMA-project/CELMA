@@ -29,7 +29,7 @@ def totalFluxPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
     """
     #}}}
 
-    useSubProcess     = False
+    useMultiProcess     = False
     xInd              = None
     yInd              = None
     mode              = "normal"
@@ -46,7 +46,7 @@ def totalFluxPlot(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
                      convertToPhysical = convertToPhysical,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
-                     useSubProcess = useSubProcess,\
+                     useMultiProcess = useMultiProcess,\
                           )
     dTF.driverTotalFlux()
 #}}}

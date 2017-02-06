@@ -45,7 +45,7 @@ def fields2DAnimation(dmp_folders    ,\
     """
     #}}}
 
-    useSubProcess = False
+    useMultiProcess = False
 
     convertToPhysical = True
     varyMaxMin = True if fluct else False
@@ -80,7 +80,7 @@ def fields2DAnimation(dmp_folders    ,\
                    convertToPhysical = convertToPhysical,\
                    # DriverSuperClass
                    collectPaths  = collectPaths ,\
-                   useSubProcess = useSubProcess,\
+                   useMultiProcess = useMultiProcess,\
                   )
 
     if fluct:

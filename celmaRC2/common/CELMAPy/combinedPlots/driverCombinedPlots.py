@@ -162,7 +162,7 @@ class DriverCombinedPlots(DriverPointsSuperClass):
                 self._tSlice          ,\
                 self._plotSuperKwargs ,\
                )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverCombinedPlots, args = args)
             processes.start()
         else:

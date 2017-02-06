@@ -114,7 +114,7 @@ class DriverAnalyticGrowthRates(DriverPointsSuperClass):
                 self._yInd            ,\
                 self._plotSuperKwargs ,\
                )
-        if self._useSubProcess:
+        if self._useMultiProcess:
             processes = Process(target = driverAnalyticGrowthRates, args = args)
             processes.start()
         else:
