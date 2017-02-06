@@ -15,7 +15,9 @@ from ..PDF import CollectAndCalcPDF, PlotPDF
 from ..superClasses import PlotSuperClass
 from ..unitsConverter import UnitsConverter
 from .collectAndCalcBlobs import CollectAndCalcBlobs
-from .plotBlobs import PlotTemporalStats, PlotBlobOrHoleTimeTraceSingle
+from .plotBlobs import (PlotTemporalStats,\
+                        PlotBlobOrHoleTimeTraceSingle,\
+                        PlotBlobAndHoleTimeTraceDouble)
 from multiprocessing import Process
 from collections import namedtuple
 import os, pickle
@@ -197,31 +199,37 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs, plotAll):
     timeTraceBlobsAvg, timeTraceBlobs, timeTraceHolesAvg, timeTraceHoles =\
         ccb.executeCollectAndCalc1D()
 
-    pbtt = PlotBlobOrHoleTimeTraceSingle(ccb.uc, **plotSuperKwargs)
-
-    # Blobs
-    if len(timeTraceBlobs) > 0:
-        if plotAll:
-            loopOver = (timeTraceBlobsAvg, *timeTraceBlobs)
-        else:
-            loopOver = (timeTraceBlobsAvg, )
-        for theDict in loopOver:
-            pbtt.setData(theDict, "blobs")
-            pbtt.plotSaveShowTimeTrace()
+    if not(plotAll) and (len(timeTraceBlobs) > 0 and len(timeTraceHoles) > 0):
+        # Plot the blobs and holes in one
+        pbtt = PlotBlobAndHoleTimeTraceDouble(ccb.uc, **plotSuperKwargs)
+        pbtt.setData(timeTraceBlobsAvg, timeTraceHolesAvg)
+        pbtt.plotSaveShowTimeTrace()
     else:
-        print("No blobs plotted as no blobs were detected")
-
-    # Holes
-    if len(timeTraceHoles) > 0:
-        if plotAll:
-            loopOver = (timeTraceHolesAvg, *timeTraceHoles)
+        # Plot the blobs and holes separately
+        pbtt = PlotBlobOrHoleTimeTraceSingle(ccb.uc, **plotSuperKwargs)
+        # Blobs
+        if len(timeTraceBlobs) > 0:
+            if plotAll:
+                loopOver = (timeTraceBlobsAvg, *timeTraceBlobs)
+            else:
+                loopOver = (timeTraceBlobsAvg, )
+            for theDict in loopOver:
+                pbtt.setData(theDict, "blobs")
+                pbtt.plotSaveShowTimeTrace()
         else:
-            loopOver =  (timeTraceHolesAvg, )
-        for theDict in loopOver:
-            pbtt.setData(theDict, "holes")
-            pbtt.plotSaveShowTimeTrace()
-    else:
-        print("No holes plotted as no holes were detected")
+            print("No blobs plotted as no blobs were detected")
+
+        # Holes
+        if len(timeTraceHoles) > 0:
+            if plotAll:
+                loopOver = (timeTraceHolesAvg, *timeTraceHoles)
+            else:
+                loopOver =  (timeTraceHolesAvg, )
+            for theDict in loopOver:
+                pbtt.setData(theDict, "holes")
+                pbtt.plotSaveShowTimeTrace()
+        else:
+            print("No holes plotted as no holes were detected")
 #}}}
 
 #{{{get2DData
