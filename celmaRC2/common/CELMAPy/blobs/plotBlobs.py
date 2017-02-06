@@ -9,8 +9,8 @@ from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import os
 
-#{{{PlotBlobTimeTrace
-class PlotBlobTimeTrace(PlotSuperClass):
+#{{{PlotBlobOrHoleTimeTraceSingle
+class PlotBlobOrHoleTimeTraceSingle(PlotSuperClass):
     """
     Class which contains the time traces together with the plotting
     configuration.
