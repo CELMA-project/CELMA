@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweaks the PDF obtained from the blob runner.
+Tweaks the flux PDF obtained from the blob runner.
 
 To be runned after fluxBlobTweak.py as needs the numbers from the sigmas
 """
