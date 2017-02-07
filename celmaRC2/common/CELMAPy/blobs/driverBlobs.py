@@ -379,16 +379,17 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               fluct,\
                               varyMaxMin)
 
-    # Create the plotting object
-    p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
-                             fluct    = fluct,\
-                             **plotSuperKwargs)
-    p2DPerp.setContourfArguments(vmax, vmin, levels)
-
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
 
     for ind in indices:
+        # Re-create the plotting object inside the loop to avoid
+        # problems with pickling
+        p2DPerp = PlotAnim2DPerp(ccb.uc          ,\
+                                 fluct    = fluct,\
+                                 **plotSuperKwargs)
+        p2DPerp.setContourfArguments(vmax, vmin, levels)
+
         p2DPerp.setPerpData(blob["X"]                   ,\
                             blob["Y"]                   ,\
                             blob[varName][ind:ind+1,...],\
@@ -446,16 +447,18 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               fluct,\
                               varyMaxMin)
 
-    # Create the plotting object
-    p2DPar = PlotAnim2DPar(ccb.uc          ,\
-                           fluct    = fluct,\
-                           **plotSuperKwargs)
-    p2DPar.setContourfArguments(vmax, vmin, levels)
-
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
 
     for ind in indices:
+        # Re-create the plotting object inside the loop to avoid
+        # problems with pickling
+        p2DPar = PlotAnim2DPar(ccb.uc          ,\
+                               fluct    = fluct,\
+                               **plotSuperKwargs)
+        p2DPar.setContourfArguments(vmax, vmin, levels)
+
+
         p2DPar.setParData(blob["X"]                         ,\
                           blob["Y"]                         ,\
                           blob[varName][ind:ind+1,...]      ,\
@@ -515,16 +518,17 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               fluct,\
                               varyMaxMin)
 
-    # Create the plotting object
-    p2DPol = PlotAnim2DPol(ccb.uc          ,\
-                             fluct    = fluct,\
-                             **plotSuperKwargs)
-    p2DPol.setContourfArguments(vmax, vmin, levels)
-
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
 
     for ind in indices:
+        # Re-create the plotting object inside the loop to avoid
+        # problems with pickling
+        p2DPol = PlotAnim2DPol(ccb.uc          ,\
+                               fluct    = fluct,\
+                               **plotSuperKwargs)
+        p2DPol.setContourfArguments(vmax, vmin, levels)
+
         p2DPol.setPolData(blob["X"]                   ,\
                           blob["Y"]                   ,\
                           blob[varName][ind:ind+1,...],\
@@ -545,7 +549,7 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
 
 # FIXME: Could add padding pct to focus the plots closer to tau=0
 #{{{getBurstIndices
-def getBurstIndices(theLen, frames=5):
+def getBurstIndices(theLen, frames=9):
     #{{{docstring
     """
     Returns equally spaced indices.
