@@ -22,7 +22,7 @@ pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"),\
                    account = "FUA11_SOLF")
 pltSub.sub.setQueue("xfualongprod")
 
-# Set linear slices
+# Set linear slices (found from looking at the Fourier modes)
 tSlices = {\
            "B0_0.02":slice(80,300)  ,\
            "B0_0.04":slice(800,1250),\
@@ -32,7 +32,7 @@ tSlices = {\
           }
 pltSub.setLinearPhaseTSlices(tSlices)
 
-# Set saturated turbulence slices
+# Set saturated turbulence slices (found from looking at the energies)
 tSlices = {\
            "B0_0.02":None            ,\
            "B0_0.04":None            ,\
@@ -45,6 +45,13 @@ pltSub.setSatTurbTSlices(tSlices)
 # Run the post-processing
 pltSub.updatePlotSuperKwargs({"extension" : "pdf"})
 pltSub.runAnalyticGrowthRates()
+
+pltSub.runBlobs(modes="perp", fluct=True, condition=3)
+pltSub.runBlobs(modes="perp", fluct=True, condition=2)
+pltSub.runBlobs(modes="perp", fluct=True, condition=4)
+
+pltSub.runBlobDensPDF()
+
 pltSub.runCominedPlots()
 pltSub.runEnergy(sliced=False)
 pltSub.runEnergy(sliced=True)
@@ -60,13 +67,10 @@ pltSub.runPSD2D()
 pltSub.runSkewKurt()
 pltSub.runSteadyState()
 pltSub.runZonalFlow()
-# Post processing taking longer time
-pltSub.sub.setWalltime("00:30:00")
 pltSub.runTotalFlux()
 
 # Run the animations
 pltSub.updatePlotSuperKwargs({"extension" : None})
-pltSub.sub.setWalltime("01:00:00")
 pltSub.runFields1DAnim()
 pltSub.sub.setWalltime("06:00:00")
 pltSub.runFields2DAnim(fluct=True)
