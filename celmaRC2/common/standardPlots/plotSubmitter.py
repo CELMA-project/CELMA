@@ -17,6 +17,7 @@ from .blobs import (blobRadialFlux          ,\
                     blobWaitingTimePulsePlot,\
                     blobTimeTracesPlot      ,\
                     blob2DPlot)
+from .blobDensPDF import blobDensPDF
 from .combinedPlots import combinedPlotsPlot
 from .fields1D import fields1DAnimation
 from .fields2D import fields2DAnimation
@@ -244,6 +245,29 @@ class PlotSubmitter(object):
                                         format(mode,fluct,nr))
                     self.sub.submitFunction(blob2DPlot,\
                                             args=args, kwargs=kwargs)
+    #}}}
+
+    #{{{runBlobDensPDF
+    def runBlobDensPDF(self):
+        """
+        Runs the density PDFs for the blobs
+        """
+        loopOver = zip(self._dmpFolders["turbulence"],\
+                       self._paramKeys,\
+                       self._rangeJobs)
+        for dmp_folders, key, nr in loopOver:
+
+            # Find tSlice
+            tSlice = self._findSlices(dmp_folders, self._satTurbTSlices)
+            if tSlice is None:
+                continue
+
+            collectPaths = self._mergeFromLinear[key]
+            dmp_folders  = (dmp_folders,)
+            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
+            kwargs = {"tSlice":tSlice}
+            self.sub.setJobName("blobDensPDF{}".format(nr))
+            self.sub.submitFunction(blobDensPDF, args=args, kwargs=kwargs)
     #}}}
 
     #{{{runCominedPlots
