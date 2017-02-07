@@ -4,10 +4,13 @@
 Contains single driver and driver class for the probability density functions
 """
 
-from ..superClasses import DriverPointsSuperClass
+from ..driverHelpers import onlyScan
 from .collectAndCalcPDF import CollectAndCalcPDF
+from ..superClasses import DriverPointsSuperClass
 from .plotPDF import PlotPDF
+from scipy import stats
 from multiprocessing import Process
+import os, pickle
 
 #{{{driverPDF
 def driverPDF(collectPaths     ,\
@@ -21,6 +24,7 @@ def driverPDF(collectPaths     ,\
     #{{{docstring
     """
     Driver for plotting probability density functions.
+    Pickles the PDFStats to the desitnation folder.
 
     Parameters
     ----------
@@ -45,13 +49,34 @@ def driverPDF(collectPaths     ,\
     """
     #}}}
 
-    PDF, uc = getPDF(collectPaths     ,\
-                     varName          ,\
-                     convertToPhysical,\
-                     mode             ,\
-                     indicesArgs      ,\
-                     indicesKwargs    ,\
-                    )
+    PDF, uc, PDFStats = getPDF(collectPaths      ,\
+                               varName           ,\
+                               convertToPhysical ,\
+                               mode              ,\
+                               indicesArgs       ,\
+                               indicesKwargs     ,\
+                               returnStats = True,\
+                              )
+
+    # FIXME: The saving of the PDFStats is a ugly hack for now
+    root = collectPaths[0].split("/")[0]
+    if convertToPhysical:
+        path = os.path.join(root, "visualizationPhysical")
+    else:
+        path = os.path.join(root, "visualizationNormalized")
+
+    scanPath = onlyScan(plotSuperKwargs["dmp_folders"],\
+                        plotSuperKwargs["scanParameter"])
+
+    path = os.path.join(path, scanPath, "PDFs")
+
+    if not(os.path.exists(path)):
+        os.makedirs(path)
+
+    fileName = os.path.join(path,"PDFStats.pickle")
+    with open(fileName, "wb") as f:
+        pickle.dump(PDFStats, f, pickle.HIGHEST_PROTOCOL)
+        print("Pickled PDFStats to {}".format(fileName))
 
     # Plot
     pPDF = PlotPDF(uc ,\
@@ -61,12 +86,13 @@ def driverPDF(collectPaths     ,\
 #}}}
 
 #{{{getPDF
-def getPDF(collectPaths     ,\
-           varName          ,\
-           convertToPhysical,\
-           mode             ,\
-           indicesArgs      ,\
-           indicesKwargs    ,\
+def getPDF(collectPaths       ,\
+           varName            ,\
+           convertToPhysical  ,\
+           mode               ,\
+           indicesArgs        ,\
+           indicesKwargs      ,\
+           returnStats = False,\
            ):
     #{{{docstring
     """
@@ -74,7 +100,9 @@ def getPDF(collectPaths     ,\
 
     Parameters
     ----------
-    See driverPDF for details.
+    returnStats : bool
+        Wheter or not to return PDFStats.
+    See driverPDF for details about the other parameters.
 
     Returns
     -------
@@ -84,6 +112,11 @@ def getPDF(collectPaths     ,\
         {"pdfX":pdfX, "pdfY":"pdfY"}
     uc : UnitsConverter
         The units converter
+    PDFStats : dict
+        Only returned if returnStats is True
+        Dictionary where the keys are on the form "rho,theta,z".
+        The value is a dict containing of
+        {"skew":skewness, "kurtExcess":excessKurtosis}
     """
     #}}}
 
@@ -106,7 +139,16 @@ def getPDF(collectPaths     ,\
     # Calculate the PDF
     PDF = ccPDF.calcPDF(tt)
 
-    return PDF, ccPDF.uc
+    if returnStats:
+        # Calculate the skewness and kurtosis
+        PDFStats = {}
+        for key in tt.keys():
+            PDFStats[key] = {"skew":stats.skew(tt[key][varName]),\
+                             "kurtExcess":stats.kurtosis(tt[key][varName])}
+
+        return PDF, ccPDF.uc, PDFStats
+    else:
+        return PDF, ccPDF.uc
 #}}}
 
 #{{{DriverPDF
