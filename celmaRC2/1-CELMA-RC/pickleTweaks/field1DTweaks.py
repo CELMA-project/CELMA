@@ -24,7 +24,7 @@ for direction in ("radial", "parallel"):
     with open(picklePath, "rb") as f:
         fig = pickle.load(f)
 
-    lnAx, phiAx, nAx, omDAx, jPaAx, omAx, uiAx, nuiAx, ueAx, sAx =\
+    lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx =\
             fig.get_axes()
 
     # Swap axes
@@ -43,7 +43,7 @@ for direction in ("radial", "parallel"):
     t.set_va("bottom")
 
     # Color adjust
-    axes = (nAx, phiAx, jPaAx, omAx, uiAx, sAx, ueAx)
+    axes = (nAx, phiAx, jParAx, omAx, uiAx, sAx, ueAx)
     colors = seqCMap3(np.linspace(0, 1, len(axes)))
 
     # Recolor the lines
