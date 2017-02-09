@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-Tweak of profile plots to be used in thesis.
+Tweak of profile plots as a function of B.
+To be used in thesis.
 """
 
 import pickle
@@ -20,11 +21,12 @@ from CELMAPy.plotHelpers import PlotHelper, seqCMap3
 
 scans  = ("B0_0.1", "B0_0.08", "B0_0.06", "B0_0.04", "B0_0.02")
 markers = ("*", "o", "s", "v", "^")
-ls = ((0, (1, 1)),\
+ls = (\
+      (0, ()),\
       (0, (5, 5)),\
       (0, (3, 1, 1, 1)),\
       (0, (3, 1, 1, 1, 1, 1)),\
-      (0, ()),\
+      (0, (1, 1)),\
      )
 fields = ("n", "phi", "jPar", "om", "ui", "sA", "ue")
 
@@ -162,5 +164,4 @@ for direction in ("radial", "parallel"):
     elif direction == "parallel":
         fileName = "BScanPar.pdf"
 
-    # Let pdfcrop do the cropping as "tigth" cuts some text
     PlotHelper.savePlot(fig, fileName)
