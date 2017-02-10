@@ -49,10 +49,10 @@ scanB0.setCommonRunnerOptions(\
                               nproc        = 48            ,\
                               cpy_source   = True          ,\
                               BOUT_nodes   = 2             ,\
-                              BOUT_ppn     = 36            ,\
+                              BOUT_ppn     = 32            ,\
                               BOUT_queue   = "xfualongprod",\
                               BOUT_account = "FUA11_SOLF"  ,\
                              )
 
 # Run
-scanB0.runScan(restartTurb=9)
+scanB0.runScan(restartTurb=10)
