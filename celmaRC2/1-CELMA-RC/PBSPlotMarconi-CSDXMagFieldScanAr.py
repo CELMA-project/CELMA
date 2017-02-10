@@ -96,7 +96,7 @@ modesSlices = {\
 pltSub.runSnapShotDifferentScanVals(modesSlices, fluct=True, yInd=50)
 
 # Obtain frames to see evolution
-# NOTE: Plot 4,6 and 8 are chosen
+# NOTE: Plot 5,6 and 7 are chosen
 # B=0.01
 start   = 2055
 end     = 2155
