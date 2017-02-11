@@ -13,25 +13,25 @@ import numpy as np
 from numpy import log, sqrt
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from matplotlib.ticker import MaxNLocator
 import scipy.constants as cst
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../celma/common")
+commonDir = os.path.abspath("./../celmaRC2/common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotHelpers import plotNumberFormatter, PlotHelper
+from CELMAPy.plotHelpers import SizeMaker, PlotHelper, plotNumberFormatter
 
-showPlots = True
-savePlots = "png"
+showPlots = False
+savePlots = "pdf"
 
 #{{{Common for simple plots
 # Set the plotting style
 title_height = 1.02
 fig_no = 1
-plt_size = (10, 7)
+plt_size_n  = SizeMaker.standard(w=2.7, a=1)
+plt_size_t = SizeMaker.standard(w=2.3, a=0.9)
 title_size = 30
 #}}}}
 
@@ -41,7 +41,20 @@ def setNScanAxes(fig, ax, yLabel, Te0EV):
     ax.set_ylabel(yLabel)
     title = r"$Te=${} $[\mathrm{{eV}}]$".format(plotNumberFormatter(Te0EV, None))
     fig.suptitle(title, y=title_height)
-    PlotHelper.makePlotPretty(ax, rotation=45)
+    PlotHelper.makePlotPretty(ax, rotation=90, ybins=4)
+
+    # Remove old legend
+    leg = ax.legend()
+    leg.remove()
+    # Put the legend outside
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles,\
+               labels,\
+               bbox_to_anchor=(1.05, 1.0),\
+               loc="upper left",\
+               borderaxespad=0.,\
+               bbox_transform = ax.transAxes,\
+               )
 
     # Includes the xlabel if outside
     fig.tight_layout(rect=[0.001,0.001,1,1])
@@ -54,7 +67,20 @@ def setTScanAxes(fig, ax, yLabel, n0):
     ax.set_ylabel(yLabel)
     title = r"$n=${} $[\mathrm{{m}}^{{-3}}]$".format(plotNumberFormatter(n0, None))
     fig.suptitle(title, y=title_height)
-    PlotHelper.makePlotPretty(ax, rotation=45)
+    PlotHelper.makePlotPretty(ax, rotation=90, ybins=4)
+
+    # Remove old legend
+    leg = ax.legend()
+    leg.remove()
+    # Put the legend outside
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles,\
+               labels,\
+               bbox_to_anchor=(1.05, 1.0),\
+               loc="upper left",\
+               borderaxespad=0.,\
+               bbox_transform = ax.transAxes,\
+               )
 
     # Includes the xlabel if outside
     fig.tight_layout(rect=[0.001,0.001,1,1])
@@ -70,15 +96,15 @@ Te0sEV = np.linspace(7, 21, 200)
 
 B0LineType = ["solid", "dashed", "dotted", "dash_dot"]
 # One color for each eta
-colors = cm.rainbow(np.linspace(0, 1, 5))
+colors = cm.viridis(np.linspace(0, 1, 5))
 
 # Make axes
-figNuEINScan = plt.figure(0, figsize = plt_size)
-figNuEITScan = plt.figure(1, figsize = plt_size)
-figEtaINScan = plt.figure(2, figsize = plt_size)
-figEtaITScan = plt.figure(3, figsize = plt_size)
-figEtaENScan = plt.figure(4, figsize = plt_size)
-figEtaETScan = plt.figure(5, figsize = plt_size)
+figNuEINScan = plt.figure(0, figsize = plt_size_n)
+figNuEITScan = plt.figure(1, figsize = plt_size_t)
+figEtaINScan = plt.figure(2, figsize = plt_size_n)
+figEtaITScan = plt.figure(3, figsize = plt_size_t)
+figEtaENScan = plt.figure(4, figsize = plt_size_n)
+figEtaETScan = plt.figure(5, figsize = plt_size_t)
 axNuEINScan  = figNuEINScan.add_subplot(111)
 axNuEITScan  = figNuEITScan.add_subplot(111)
 axEtaENScan  = figEtaENScan.add_subplot(111)
