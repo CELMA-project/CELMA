@@ -5,7 +5,7 @@ Class for zonalFlow plots
 """
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
 import matplotlib.pylab as plt
 import numpy as np
 import os
@@ -20,7 +20,7 @@ class PlotZonalFlow(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (10,16), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         Constructor for PlotzonalFlow
@@ -33,8 +33,6 @@ class PlotZonalFlow(PlotSuperClass):
         ----------
         *args : positional arguments
             See parent constructor for details
-        pltSize : tuple
-            The size of the plot
         **kwargs : keyword arguments
             See parent constructor for details
         """
@@ -42,9 +40,6 @@ class PlotZonalFlow(PlotSuperClass):
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the member data
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -201,7 +196,7 @@ class PlotZonalFlow(PlotSuperClass):
 
         # Create the plot
         fig, (polExBAx, angPolExBAx, shearAngPolExBAx) =\
-                plt.subplots(nrows=3, figsize=self._pltSize, sharex=True)
+                plt.subplots(nrows=3, figsize=SizeMaker.array(1,3), sharex=True)
 
         # Plot on the polExBAx
         # Steady state
