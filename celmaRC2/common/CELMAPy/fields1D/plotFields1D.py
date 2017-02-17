@@ -228,7 +228,7 @@ class PlotAnim1DParallel(PlotAnim1DSuperClass):
         # Set the spatial part of the title
         self._spatTitle = "{}$,$ {}$,$ "
         # Set the x-axis label
-        self._xlabel = self._ph.rhoTxtDict["rhoTxtLabel"]
+        self._xlabel = self._ph.zTxtDict["zTxtLabel"]
     #}}}
 
     #{{{setData
