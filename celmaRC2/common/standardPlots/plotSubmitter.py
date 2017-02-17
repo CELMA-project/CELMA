@@ -771,7 +771,6 @@ class PlotSubmitter(object):
         hyperIncluded = False
         tSlice = slice(-1,-1)
 
-
         loopOver = zip(self._dmpFolders["expand"],\
                        self._paramKeys,\
                        self._rangeJobs)
