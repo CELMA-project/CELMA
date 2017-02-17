@@ -233,7 +233,6 @@ class CollectAndCalcFields1D(CollectAndCalcFieldsSuperClass):
 
         # Collect
         var = collecter(self._collectPaths, self._varName, **collectKwargs)
-
         time = collectTime(self._collectPaths, collectKwargs["tInd"])
 
         # Process

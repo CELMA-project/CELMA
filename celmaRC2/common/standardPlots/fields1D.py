@@ -12,7 +12,8 @@ from CELMAPy.fields1D import Driver1DFields
 
 #{{{fields1DAnimation
 def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
-                      hyperIncluded=False, boussinesq=False, tSlice=None):
+                      hyperIncluded=False, boussinesq=False, tSlice=None,
+                      yInd = 16):
     #{{{docstring
     """
     Runs the standard fields1D animation
@@ -31,17 +32,19 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
         Whether or not the boussinesq approximation is used
     tSlice : [None|Slice]
         Temporal slice
+    yInd : int
+        Default is 16
     """
     #}}}
 
-    useMultiProcess     = True
+    useMultiProcess   = True
     convertToPhysical = True
 
     xSlice = None
     ySlice = None
     zSlice = None
     xInd = 0
-    yInd = 16
+    yInd = yInd
     zInd = 0
     guardSlicesAndIndicesKwargs = {\
                                    "xguards" : False ,\
