@@ -6,6 +6,8 @@ from boututils.datafile import DataFile
 import glob, os, shutil
 import numpy as np
 
+# FIMXE: rmLastTime and rmSpuriousTime suffers from DRY
+
 #{{{repairBrokenExit
 def repairBrokenExit(path, mode="rmLastTime"):
     #{{{docstring
@@ -56,11 +58,17 @@ def repairBrokenExit(path, mode="rmLastTime"):
     restartFiles = glob.glob(os.path.join(bakPath, "BOUT.restart.*"))
     restartFiles.sort()
     checkForCorruption(restartFiles)
+    maxDiff, shortestCommonLen = checkForDifferentLengths(dmpFiles)
 
+    if maxDiff != 0:
+        print("Changing mode to rmLastTime as maxDiff is not 0")
+        mode = "rmSpuriousTime"
     if mode == "repair":
         repair(newFiles, dmpFiles, restartFiles)
     elif mode == "rmLastTime":
         rmLastTime(newFiles, dmpFiles)
+    elif mode == "rmSpuriousTime":
+        rmSpuriousTime(newFiles, dmpFiles, shortestCommonLen)
     else:
         raise NotImplementedError("mode = '{}' is not implemented".format(mode))
 #}}}
@@ -77,7 +85,7 @@ def checkForCorruption(restartFiles):
     Paramters
     ---------
     restartFiles : iterable
-        Iterable containing the pahts to the restart files.
+        Iterable containing the paths to the restart files.
     """
     #}}}
     print("\nChecking for corrupted restart files by checking the field mean")
@@ -95,6 +103,41 @@ def checkForCorruption(restartFiles):
                         print("{} PASSED with a mean of {}.".format(var, mean))
 #}}}
 
+#{{{checkForDifferentLengths
+def checkForDifferentLengths(dmpFiles):
+    #{{{docstring
+    """
+    Checks that the length of the variables are the same.
+
+    Paramters
+    ---------
+    dmpFiles : iterable
+        Iterable containing the paths to the restart files.
+
+    Returns
+    -------
+    maxDiff : int
+        Maximum difference between the time indices
+    shortestCommonLen : int
+        Shortest common time indices
+    """
+    #}}}
+    print("\nChecking if the output has the same number of outputs")
+    curMax = 0
+    curMin = float("inf")
+    for d in dmpFiles:
+        print("\nChecking {}".format(d))
+        with DataFile(d) as dmp:
+            tLen = len(dmp.read("t_array"))
+            curMax = curMax if curMax > tLen else tLen
+            curMin = curMin if curMin < tLen else tLen
+
+    maxDiff           = curMax - curMin
+    shortestCommonLen = curMin
+
+    return maxDiff, shortestCommonLen
+#}}}
+
 #{{{repair
 def repair(newFiles, dmpFiles, restartFiles):
     #{{{docstring
@@ -109,11 +152,11 @@ def repair(newFiles, dmpFiles, restartFiles):
     Parameters
     ----------
     newFiles : iterable
-        Iterable containing the pahts to the new files to be created.
+        Iterable containing the paths to the new files to be created.
     dmpFiles : iterable
-        Iterable containing the pahts to the dump files.
+        Iterable containing the paths to the dump files.
     restartFiles : iterable
-        Iterable containing the pahts to the restart files.
+        Iterable containing the paths to the restart files.
     """
     #}}}
 
@@ -178,9 +221,11 @@ def rmLastTime(newFiles, dmpFiles):
     Parameters
     ----------
     newFiles : iterable
-        Iterable containing the pahts to the new files to be created.
+        Iterable containing the paths to the new files to be created.
     dmpFiles : iterable
-        Iterable containing the pahts to the dump files.
+        Iterable containing the paths to the dump files.
+    maxDiff : int
+        Maximum difference between the time indices
     """
     #}}}
     for n, d in zip(newFiles, dmpFiles):
@@ -206,6 +251,54 @@ def rmLastTime(newFiles, dmpFiles):
                 elif var == "iteration":
                     print("    Fixing 'iteration'")
                     newData = dData -1
+                else:
+                    print("    Nothing to be done for {}".format(var))
+                    newData = dData.copy()
+
+                newF.write(var, newData, info=True)
+        print("{} written".format(n))
+#}}}
+
+#{{{rmSpuriousTime
+def rmSpuriousTime(newFiles, dmpFiles, shortestCommonLen):
+    #{{{docstring
+    """
+    Will remove the suprious times in the dump files.
+
+    Parameters
+    ----------
+    newFiles : iterable
+        Iterable containing the paths to the new files to be created.
+    dmpFiles : iterable
+        Iterable containing the paths to the dump files.
+    shortestCommonLen : int
+        Shortest common time indices
+    """
+    #}}}
+    for n, d in zip(newFiles, dmpFiles):
+        print("\nRemoving spurious time {}".format(d))
+        # Open the restart file in read mode and create the restart file
+        with DataFile(n, write=True, create=True) as newF,\
+             DataFile(d) as dmp:
+            # Loop over the variables in the dmp file
+
+            # Put a 4d variable in the front
+            theList = dmp.list()
+            ind = theList.index("lnN")
+            theList[0], theList[ind] = theList[ind], theList[0]
+            for var in theList:
+                # Read the data
+                dData = dmp.read(var)
+
+                # Find 4D variables and time traces
+                if dmp.ndims(var) == 4 or dmp.ndims(var)==1:
+                    print("    Using first {} timepoints in {}".\
+                            format(shortestCommonLen, var))
+                    # Read from restart
+                    newData = dData[:shortestCommonLen,...]
+                elif var == "iteration":
+                    print("    Fixing 'iteration'")
+                    newData = shortestCommonLen - 2
                 else:
                     print("    Nothing to be done for {}".format(var))
                     newData = dData.copy()
