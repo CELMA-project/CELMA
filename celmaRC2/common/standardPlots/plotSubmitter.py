@@ -172,7 +172,13 @@ class PlotSubmitter(object):
     #}}}
 
     #{{{runBlobs
-    def runBlobs(self, modes="all", fluct="both", condition=3, plotAll=False):
+    def runBlobs(self         ,\
+                 modes="all"  ,\
+                 fluct="both" ,\
+                 condition=3  ,\
+                 varName ="n" ,\
+                 phiCont=False,\
+                 plotAll=False):
         #{{{docstring
         """
         Runs blobs.
@@ -186,6 +192,11 @@ class PlotSubmitter(object):
         condition : float
             The condition in the conditional average will be set to
             flux.std()*condition
+        varName : str
+            Variable to investigate
+            NOTE: Condition is still on the radial density flux.
+        phiCont : bool
+            If True, phi contours will be overplotted on the 2D plots.
         plotAll : bool
            If True: The individual blobs will be plotted.
         """
@@ -217,7 +228,9 @@ class PlotSubmitter(object):
                     collectPaths         ,\
                     self._plotSuperKwargs,\
                     tSlice               ,\
+                    varName              ,\
                     condition            ,\
+                    phiCont              ,\
                     plotAll              ,\
                     )
 

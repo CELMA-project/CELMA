@@ -52,6 +52,9 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
 
         # Set the axis title
         self._axTitle = "{}$,$ {}\n"
+
+        # Will toggle if setPerpPhiData is called
+        self._overplotPhi = False
     #}}}
 
     #{{{setPerpData
@@ -143,6 +146,11 @@ class PlotAnim2DPerp(PlotAnim2DSuperClass):
         perpPlane = self._perpAx.\
             contourf(self._X_RT, self._Y_RT, self._Z_RT[tInd, :, :],\
                      **self._cfKwargs)
+
+        if self._overplotPhi:
+            self._perpAx.\
+                contour(self._X_RT, self._Y_RT, self._phi[tInd, :, :],\
+                        colors = "k", alpha=0.3, **self._cKwargs)
 
         # Set rasterization order
         self._perpAx.set_rasterization_zorder(self._axRasterization)
@@ -344,6 +352,14 @@ class PlotAnim2DPar(PlotAnim2DSuperClass):
             contourf(-self._X_RZ, self._Y_RZ, self._Z_RZ_PPi[tInd, :, :],\
                      **self._cfKwargs)
 
+        if self._overplotPhi:
+            self._parAx.\
+                contour(self._X_RZ, self._Y_RZ, self._phi[tInd, :, :],\
+                        color = "k", **self._cKwargs)
+            self._parAx.\
+                contour(-self._X_RZ, self._Y_RZ, self._phiPPi[tInd, :, :],\
+                        color = "k", **self._cKwargs)
+
         # Set rasterization order
         self._parAx.set_rasterization_zorder(self._axRasterization)
         # Draw the grids
@@ -536,6 +552,12 @@ class PlotAnim2DPol(PlotAnim2DSuperClass):
                      self._Y_ZT,\
                      self._Z_ZT[tInd, :, :].transpose(),\
                      **self._cfKwargs)
+        if self._overplotPhi:
+            self._polAx.\
+                contour(self._X_ZT,\
+                        self._Y_ZT,\
+                        self._phi[tInd, :, :].transpose(),\
+                        color = "k", **self._cKwargs)
 
         # Set rasterization order
         self._polAx.set_rasterization_zorder(self._axRasterization)

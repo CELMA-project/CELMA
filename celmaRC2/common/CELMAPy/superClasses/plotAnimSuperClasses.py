@@ -460,44 +460,6 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
                     format(unitsOrNormalization)
     #}}}
 
-    #{{{_updateColorbar
-    def _updateColorbar(self, fig, plane, cBarAx, tInd):
-        #{{{docstring
-        """
-        Updates the colorbar.
-
-        Parameters
-        ----------
-        fig : Figure
-            The figure where the colorbar belongs.
-        plane : contour-like
-            The plane where the colorbar reads the data from.
-        cBarAx : Axis
-            The axis where the colorbar belongs.
-        tInd : int
-            The current time index.
-        """
-        #}}}
-
-        # Set the colorbar
-        # Clear the axis
-        # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
-        cBarAx.cla()
-        if self._fluct and self._iterableLevels:
-            # Create the ticks (11 with 0 in the center)
-            nTicks = 11
-            ticks  = np.linspace(self._vmin[tInd], self._vmax[tInd], nTicks)
-            # Enforce the center one to be 0 (without round off)
-            ticks[int((nTicks - 1)/2)] = 0
-        else:
-            ticks = None
-
-        self._cBar = fig.colorbar(plane,\
-                        cax    = cBarAx,\
-                        ticks  = ticks,\
-                        format = FuncFormatter(plotNumberFormatter))
-    #}}}
-
     #{{{setContourfArguments
     def setContourfArguments(self, vmax=None, vmin=None, levels=None):
         #{{{docstring
@@ -560,6 +522,146 @@ class PlotAnim2DSuperClass(PlotAnimSuperClass):
                                    "vmin"   : None,\
                                    "levels" : None,\
                                   })
+    #}}}
+
+    #{{{setContourArguments
+    def setContourArguments(self, vmax=None, vmin=None, levels=None):
+        #{{{docstring
+        """
+        Set extra contour keyword arguments.
+        Only used if an overplot of phi is done.
+
+        Parameters
+        ---------
+        vmax : [None|tuple]
+            Max value to give a color.
+            One for each frame if not None.
+            If None: vmin and levels must also be None
+            See getMaxMinAnimation in plot2DHelpers for a function which
+            automatically does this.
+        vmin : [None|tuple]
+            Min value to give a color.
+            One for each frame if not None.
+            If None: vmax and levels must also be None
+            See getMaxMinAnimation in plot2DHelpers for a function which
+            automatically does this.
+        levels : [None|tuple]
+            The levels to  use.
+            One for each frame if not None.
+            If None: vmax and vmin must also be None
+            See getLevelsAnimation in plot2DHelpers for a function which
+            automatically does this.
+        """
+        #}}}
+
+        # Guard
+        success = True
+        self._phiIterableLevels = True
+        if vmax is None:
+            self._phiIterableLevels = False
+            if vmin is not None and levels is not None:
+                success = False
+        elif vmin is None:
+            self._phiIterableLevels = False
+            if vmax is not None and levels is not None:
+                success = False
+        elif levels is None:
+            self._phiIterableLevels = False
+            if vmax is not None and vmin is not None:
+                success = False
+        if not(success):
+            message ="Either all or none of vmax, vmin and levels must be None"
+            raise ValueError(message)
+
+        if self._phiIterableLevels:
+            self._phiVmax   = vmax
+            self._phiVmin   = vmin
+            self._phiLevels = levels
+
+            self._cKwargs = {"vmax"   : self._phiVmax[0]  ,\
+                             "vmin"   : self._phiVmin[0]  ,\
+                             "levels" : self._phiLevels[0],\
+                             }
+        else:
+            self._cKwargs = {"vmax"   : None,\
+                             "vmin"   : None,\
+                             "levels" : None,\
+                             }
+    #}}}
+
+    #{{{setPhiData
+    def setPhiData(self, phi):
+        #{{{docstring
+        """
+        Sets the phi which will be overplotted as a contour.
+
+        Parameters
+        ----------
+        phi : array
+            A 3d array of the phi for each point in x and y for each time.
+            NOTE: Must have the dimensions as the data to be overplotted
+        """
+        #}}}
+
+        self._phi         = phi
+        self._overplotPhi = True
+    #}}}
+
+    #{{{setPhiParData
+    def setPhiParData(self, phiPPi):
+        #{{{docstring
+        """
+        Sets the phi par which will be overplotted as a contour in the
+        parallel plot.
+
+        Parameters
+        ----------
+        phi : array
+            A 3d array of the phi for each point in x and y for each time.
+            NOTE: Must have the dimensions as the data to be overplotted
+        """
+        #}}}
+
+        self._phiPPi      = phiPPi
+        self._overplotPhi = True
+    #}}}
+
+    #{{{_updateColorbar
+    def _updateColorbar(self, fig, plane, cBarAx, tInd):
+        #{{{docstring
+        """
+        Updates the colorbar.
+
+        Parameters
+        ----------
+        fig : Figure
+            The figure where the colorbar belongs.
+        plane : contour-like
+            The plane where the colorbar reads the data from.
+        cBarAx : Axis
+            The axis where the colorbar belongs.
+        tInd : int
+            The current time index.
+        """
+        #}}}
+
+        # Set the colorbar
+        # Clear the axis
+        # http://stackoverflow.com/questions/39472017/how-to-animate-the-colorbar-in-matplotlib/39596853
+        cBarAx.cla()
+        if self._fluct and self._iterableLevels:
+            # Create the ticks (11 with 0 in the center)
+            nTicks = 11
+            ticks  = np.linspace(self._vmin[tInd], self._vmax[tInd], nTicks)
+            # Enforce the center one to be 0 (without round off)
+            ticks[int((nTicks - 1)/2)] = 0
+        else:
+            ticks = None
+
+        self._cBar = fig.colorbar(plane,\
+                        cax    = cBarAx,\
+                        ticks  = ticks,\
+                        format = FuncFormatter(plotNumberFormatter))
     #}}}
 
     #{{{_setFileName

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/theBin/env python
 
 """
 Contains the blobs calculation
@@ -120,7 +120,7 @@ class CollectAndCalcBlobs(object):
                                                      maxInd    ,\
                                                      )
         # Collect the bins
-        self._perp2DBins = self._collect2DBins(self._tSlices, False, "perp")
+        self._perp2DBins = self._collect2DBins("n",self._tSlices,False,"perp")
         self._timeTraceBins, self._perp2DBinsFluct =\
                 self._getTimeTraceBins(self._perp2DBins)
 
@@ -266,8 +266,8 @@ class CollectAndCalcBlobs(object):
         timeTraceBlobs, timeTraceHoles =\
             self._extractBlobsAndHoles(self._timeTraceBins)
 
-        timeTraceBlobAvg  = self._calcAverages(timeTraceBlobs)
-        timeTraceHolesAvg = self._calcAverages(timeTraceHoles)
+        timeTraceBlobAvg  = self._calcAverages("n", timeTraceBlobs)
+        timeTraceHolesAvg = self._calcAverages("n", timeTraceHoles)
 
         return timeTraceBlobAvg ,\
                timeTraceBlobs   ,\
@@ -276,29 +276,37 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{executeCollectAndCalc2D
-    def executeCollectAndCalc2D(self, mode, fluct):
+    def executeCollectAndCalc2D(self, varName, mode, fluct, phiCont=False):
         #{{{docstring
         """
         Collect and calcs the blobs and holes for the in 2D.
 
         Parameters
         ----------
+        varName : str
+            Name of the variable to collect.
         mode : ["perp"|"par"|"pol"]
             Mode to use for 2D collection.
         fluct : bool
             Wheter or not the variables shold be fluctuating or not.
+        phiCont : bool
+            If True, phi will also be collected.
 
         Returns
         -------
         blobs2DAvg : dict
             Dictionary of the averaged blob.
             Contains the keys:
-                * "n"    - The 2D variable.
-                * "nPPi" - The 2D variable pi away from the set zInd
-                           (only when mode is "par").
-                * "time" - The corresponding time.
-                * "X"    - The X-mesh.
-                * "Y"    - The Y-mesh.
+                * varName    - The 2D variable.
+                * varNamePPi - The 2D variable pi away from the set zInd
+                               (only when mode is "par").
+                * "phi"      - The 2D variable (only when phiCont is True).
+                * "phiPPi"   - The 2D variable pi away from the set zInd
+                               (only when mode is "par" and phiCont is True).
+                * "time"     - The corresponding time.
+                * "X"        - The X-mesh.
+                * "Y"        - The Y-mesh.
+                * pos    - The position of the fixed index
         blobs2D : tuple
             Tuple containing the dictionaries used to calculate the
             averaged blob.
@@ -318,8 +326,13 @@ class CollectAndCalcBlobs(object):
                        "the execution")
             raise RuntimeError(message)
 
-        if mode != "perp":
-            bins2D = self._collect2DBins(self._tSlices, fluct, mode)
+        if phiCont:
+            # Collect phi
+            phiBins2D = self._collect2DBins("phi", self._tSlices, fluct, mode)
+            phiBlobs2D, phiHoles2D = self._extractBlobsAndHoles(phiBins2D)
+
+        if varName == "n" and mode != "perp":
+            bins2D = self._collect2DBins(varName, self._tSlices, fluct, mode)
         else:
             if fluct:
                 # Cast to 3D from 4D
@@ -333,8 +346,14 @@ class CollectAndCalcBlobs(object):
 
         blobs2D, holes2D = self._extractBlobsAndHoles(bins2D)
 
-        blobs2DAvg = self._calcAverages(blobs2D)
-        holes2DAvg = self._calcAverages(holes2D)
+        blobs2DAvg = self._calcAverages(varName, blobs2D)
+        holes2DAvg = self._calcAverages(varName, holes2D)
+
+        if phiCont:
+            phiBlobs2DAvg = self._calcAverages("phi", phiBlobs2D)
+            blobs2DAvg.update(phiBlobs2DAvg)
+            phiHoles2DAvg = self._calcAverages("phi", phiHoles2D)
+            holes2DAvg.update(holes2DAvg)
 
         return blobs2DAvg, blobs2D, holes2DAvg, holes2D
     #}}}
@@ -431,7 +450,7 @@ class CollectAndCalcBlobs(object):
     def _getWindowSize(self, contiguousIndices, pctPadding):
         #{{{docstring
         """
-        Get the window size which will define the size of one bin.
+        Get the window size which will define the size of one theBin.
 
         Parameters
         ----------
@@ -446,7 +465,7 @@ class CollectAndCalcBlobs(object):
         Returns
         -------
         windowSize : int
-            Number of indices to defining the size of one bin.
+            Number of indices to defining the size of one theBin.
         """
         #}}}
 
@@ -475,7 +494,7 @@ class CollectAndCalcBlobs(object):
             of indices, contiguous, in ascending order where the
             condition is meet.
         windowSize : int
-            Number of indices to defining the size of one bin.
+            Number of indices to defining the size of one theBin.
         maxInd : int
             Max index in time.
 
@@ -483,7 +502,7 @@ class CollectAndCalcBlobs(object):
         -------
         tSlices : tuple
             Tuple of time slices, where the individual slice is the slice
-            which will be used to collect a bin.
+            which will be used to collect a theBin.
         """
         #}}}
 
@@ -510,16 +529,18 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{_collect2DBins
-    def _collect2DBins(self, tSlices, fluct, mode):
+    def _collect2DBins(self, varName, tSlices, fluct, mode):
         #{{{docstring
         """
         Collects the bins which will be used in the average.
 
         Parameters
         ----------
+        varName : str
+            Name of the variable to collect.
         tSlices : tuple
             Tuple of time slices, where the individual slice is the slice
-            which will be used to collect a bin.
+            which will be used to collect a theBin.
         fluct : bool
             Whether or not to collect the fluctuations only.
         mode : ["perp"|"par"|"pol"]
@@ -530,18 +551,18 @@ class CollectAndCalcBlobs(object):
         tupleOfBins2D : tuple
             A tuple of the 2D bins stored as dicts with the
             keys:
-                * "n"    - A 3d array (a 2d spatial array of each time)
-                           of the collected variable.
-                * "nPPi" - The field at pi away from the varName field
-                           (only if "type" == "par")
-                * "X"    - The cartesian x mesh to the field
-                * "Y"    - The cartesian Y mesh to the field
-                * "time" - The time trace
-                * pos    - The position of the fixed index
+                * varName    - A 3d array (a 2d spatial array of each time)
+                               of the collected variable.
+                * varNamePPi - The field at pi away from the varName field
+                               (only if "type" == "par")
+                * "X"        - The cartesian x mesh to the field
+                * "Y"        - The cartesian Y mesh to the field
+                * "time"     - The time trace
+                * pos        - The position of the fixed index
         """
         #}}}
 
-        args = tuple((tSlice, fluct, mode) for tSlice in tSlices)
+        args = tuple((varName, tSlice, fluct, mode) for tSlice in tSlices)
         if self._useMultiProcess:
             # Set a max of 10 processors in order not to saturate the memory
             with Pool(10) as p:
@@ -555,16 +576,18 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{_collect2DBin
-    def _collect2DBin(self, tSlice, fluct, mode):
+    def _collect2DBin(self, varName, tSlice, fluct, mode):
         #{{{docstring
         """
         Collects the bins which will be used in the average.
 
         Parameters
         ----------
+        varName : str
+            Name of the variable to collect.
         tSlices : tuple
             Tuple of time slices, where the individual slice is the slice
-            which will be used to collect a bin.
+            which will be used to collect a theBin.
         fluct : bool
             Whether or not to collect the fluctuations only.
         mode : ["perp"|"par"|"pol"]
@@ -572,16 +595,16 @@ class CollectAndCalcBlobs(object):
 
         Returns
         -------
-        bin : dict
+        theBin : dict
             A dict with the keys:
-                * "n"    - A 3d array (a 2d spatial array of each time)
-                           of the collected variable.
-                * "nPPi" - The field at pi away from the varName field
-                           (only if "type" == "par")
-                * "X"    - The cartesian x mesh to the field
-                * "Y"    - The cartesian Y mesh to the field
-                * "time" - The time trace
-                * pos    - The position of the fixed index
+                * varName    - A 3d array (a 2d spatial array of each time)
+                               of the collected variable.
+                * varNamePPi - The field at pi away from the varName field
+                               (only if "type" == "par")
+                * "X"        - The cartesian x mesh to the field
+                * "Y"        - The cartesian Y mesh to the field
+                * "time"     - The time trace
+                * pos        - The position of the fixed index
         """
         #}}}
 
@@ -593,7 +616,6 @@ class CollectAndCalcBlobs(object):
         zInd              = self._zInd
 
         convertToPhysical = self._convertToPhysical
-        varName           = "n"
 
         # Pependicular collection
         ccf2D = CollectAndCalcFields2D(\
@@ -615,9 +637,9 @@ class CollectAndCalcBlobs(object):
             raise ValueError(message)
 
         ccf2D.setVarName(varName)
-        bin = ccf2D.executeCollectAndCalc()
+        theBin = ccf2D.executeCollectAndCalc()
 
-        return bin
+        return theBin
     #}}}
 
     #{{{_getTimeTraceBins
@@ -687,7 +709,7 @@ class CollectAndCalcBlobs(object):
     def _identifyBlobsAndHoles(self, timeTraceBins, midIndex):
         #{{{docstring
         """
-        Identifies whether the bin contains a blob or a hole.
+        Identifies whether the theBin contains a blob or a hole.
 
         Sets the blobCount and holeCount.
 
@@ -767,16 +789,18 @@ class CollectAndCalcBlobs(object):
     #}}}
 
     #{{{_calcAverages
-    def _calcAverages(self, tupleOfDictsWithBins):
+    def _calcAverages(self, varName, tupleOfDictsWithBins):
         #{{{docstring
         """
-        Returns a tuple of dict where "n" and "time" in the dicts has
+        Returns a tuple of dict where varname and "time" in the dicts has
         been replaced with averaged values.
 
         Parameters
         ----------
+        varName : str
+            The name of the variable.
         tupleOfDictsWithBins : tuple
-            Tuple of dicts, where each dict contains the keys "n" and
+            Tuple of dicts, where each dict contains the keys varName and
             "time".
 
         Returns
@@ -792,12 +816,12 @@ class CollectAndCalcBlobs(object):
             return ()
 
         binAverageDict = tupleOfDictsWithBins[0].copy()
-        sumN = np.zeros(tupleOfDictsWithBins[0]["n"].shape)
+        sumN = np.zeros(tupleOfDictsWithBins[0][varName].shape)
         for curDict in tupleOfDictsWithBins:
-            sumN += curDict["n"]
+            sumN += curDict[varName]
 
-        binAverageDict["n"]    = sumN/len(tupleOfDictsWithBins)
-        binAverageDict["time"] = self._windowTime
+        binAverageDict[varName] = sumN/len(tupleOfDictsWithBins)
+        binAverageDict["time"]  = self._windowTime
 
         return binAverageDict
     #}}}

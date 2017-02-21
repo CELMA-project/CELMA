@@ -84,6 +84,8 @@ def blob2DPlot(*args, mode=None, fluct=None):
         See getBlobDriver for details.
     mode : ["perp"|"par"|"pol"]
         The 2D mode to use.
+    phiCont : bool
+        If True, phi contours will be overplotted.
     fluct : bool
         Whether or not to use fluctuation.
     """
@@ -100,7 +102,9 @@ def getBlobDriver(dmp_folders    ,\
                   collectPaths   ,\
                   plotSuperKwargs,\
                   tSlice         ,\
+                  varName        ,\
                   condition      ,\
+                  phiCont        ,\
                   plotAll        ,\
                  ):
     #{{{docstring
@@ -139,7 +143,9 @@ def getBlobDriver(dmp_folders    ,\
                      pctPadding           ,\
                      convertToPhysical    ,\
                      plotSuperKwargs      ,\
+                     varName   = varName  ,\
                      condition = condition,\
+                     phiCont   = phiCont  ,\
                      normed    = normed   ,\
                      plotAll   = plotAll  ,\
                      # DriverSuperClass
