@@ -155,7 +155,7 @@ class CollectAndCalcAnalyticGrowthRates(object):
     def getData(self, nModes = 7):
         #{{{docstring
         """
-        Makes a DataFrame of the growth rates and angular velocities.
+        Makes a DataFrame of the growth rates and angular frequencies.
 
         NOTE:
             * Assumes singly ionization
