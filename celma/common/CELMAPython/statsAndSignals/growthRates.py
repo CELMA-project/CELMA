@@ -114,7 +114,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
     bins will be registered as a hit. A straigth line in the logarithmic
     signal is defined to be where there has been at least 4 hits.
 
-    The angular velocity is found from the phase difference of subsequent
+    The angular frequency is found from the phase difference of subsequent
     times within the time the signal is registered as a straight line.
 
     Parameters
@@ -249,7 +249,7 @@ def calcGrowthRate(modes, time, maxMode = 7, diagnose=False):
                     sigmaBs    .append(sigmaB)
                     # We will currently use indices for the start times
                     # as these are easier to deal with when finding the
-                    # angular velocity. The indices will be converted to
+                    # angular frequency. The indices will be converted to
                     # actual time in the end
                     finalStartIndices.append(startIndex)
                     finalEndIndices  .append(endIndex)
