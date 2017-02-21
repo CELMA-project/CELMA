@@ -117,7 +117,7 @@ class CollectAndCalcGrowthRates(object):
         Returns
         -------
         avgAngFreq : tuple
-            Tuple of all the calculated averaged angular velocities.
+            Tuple of all the calculated averaged angular frequencies.
             The tuple is ordered after ascending modenumber (starting at 1).
         spread : tuple
             Tuple of all the calculated spread.
@@ -149,7 +149,7 @@ class CollectAndCalcGrowthRates(object):
                ):
         #{{{docstring
         """
-        Makes a DataFrame of the growth rates and angular velocities.
+        Makes a DataFrame of the growth rates and angular frequencies.
 
         Parameters
         ----------
@@ -310,7 +310,7 @@ class CollectAndCalcGrowthRates(object):
         """
         #}}}
 
-        # Obtain the magnitudes and angular velocities
+        # Obtain the magnitudes and angular frequencies
         ccfm = CollectAndCalcFourierModes(\
                             scanPaths                            ,\
                             convertToPhysical = convertToPhysical,\
