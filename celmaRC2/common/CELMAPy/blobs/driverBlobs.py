@@ -233,7 +233,7 @@ def driverBlobTimeTraces(ccb, plotSuperKwargs, plotAll):
 #}}}
 
 #{{{get2DData
-def get2DData(ccb, mode, fluct):
+def get2DData(ccb, varName, mode, fluct, phiCont=False):
     #{{{docstring
     """
     Driver which collects the 2D slices.
@@ -244,22 +244,29 @@ def get2DData(ccb, mode, fluct):
     ----------
     cbb : CollectAndCalcBlobs
         The initialized CollectAndCalcBlobs object.
+    varName : str
+        Name of the variable to plot.
     mode : ["perp"|"par"|"pol"]
         The mode to collect.
     fluct : bool
         Whether or not the fluctuations will be collected.
+    phiCont : bool
+        If True, phi contours will be overplotted.
 
     Returns
     -------
     blobs2DAvg : dict
         Dictionary of the averaged blob.
         Contains the keys:
-            * "n"    - The 2D variable.
-            * "nPPi" - The 2D variable pi away from the set zInd
-                       (only when mode is "par").
-            * "time" - The corresponding time.
-            * "X"    - The X-mesh.
-            * "Y"    - The Y-mesh.
+            * varName    - The 2D variable.
+            * varNamePPi - The 2D variable pi away from the set zInd
+                           (only when mode is "par").
+            * "phi"      - The 2D variable (only when phiCont is True).
+            * "phiPPi"   - The 2D variable pi away from the set zInd
+                           (only when mode is "par" and phiCont is True).
+            * "time"     - The corresponding time.
+            * "X"        - The X-mesh.
+            * "Y"        - The Y-mesh.
             * pos    - The position of the fixed index
     blobs2D : tuple
         Tuple containing the dictionaries used to calculate the
@@ -276,13 +283,19 @@ def get2DData(ccb, mode, fluct):
     #}}}
 
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
-        ccb.executeCollectAndCalc2D(mode, fluct)
+        ccb.executeCollectAndCalc2D(varName, mode, fluct, phiCont)
 
     return blobs2DAvg, blobs2D, holes2DAvg, holes2D
 #}}}
 
 #{{{driverPlot2DData
-def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
+def driverPlot2DData(ccb            ,\
+                     varName        ,\
+                     mode           ,\
+                     fluct          ,\
+                     plotSuperKwargs,\
+                     plotAll        ,\
+                     phiCont=False):
     #{{{docstring
     """
     Driver which plots the 2D data.
@@ -294,6 +307,8 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
     ----------
     cbb : CollectAndCalcBlobs
         The initialized CollectAndCalcBlobs object.
+    varName : str
+        Name of the variable to plot.
     mode : ["perp"|"par"|"pol"]
         The mode to collect.
     fluct : bool
@@ -301,16 +316,17 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
     plotAll : bool
-           If True: The individual blobs will be plotted.
+       If True: The individual blobs will be plotted.
+    phiCont : bool
+        If True, phi contours will be overplotted.
     """
     #}}}
 
-    varName = "n"
     # We would like all the frames to have the same max/min
     varyMaxMin = False
 
     blobs2DAvg, blobs2D, holes2DAvg, holes2D =\
-        get2DData(ccb, mode, fluct)
+        get2DData(ccb, varName , mode, fluct, phiCont)
 
     if plotAll:
         blobsAndHoles = ((blobs2DAvg, *blobs2D), (holes2DAvg, *holes2D))
@@ -331,6 +347,7 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
                     varyMaxMin,\
                     fluct     ,\
                     ccb       ,\
+                    phiCont   ,\
                     curPSK)
             if mode == "perp":
                 plotBlob2DPerp(*args)
@@ -341,7 +358,13 @@ def driverPlot2DData(ccb, mode, fluct, plotSuperKwargs, plotAll):
 #}}}
 
 #{{{plotBlob2DPerp
-def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+def plotBlob2DPerp(blob      ,\
+                   varName   ,\
+                   varyMaxMin,\
+                   fluct     ,\
+                   ccb       ,\
+                   phiCont   ,\
+                   plotSuperKwargs):
     #{{{docstring
     """
     Performs the plotting of the blob in a 2D perp plane.
@@ -351,13 +374,12 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     blob : dict
         Dictionary with the variables to be plotted.
         Contains the keys:
-            * "n"    - The 2D variable.
-            * "nPPi" - The 2D variable pi away from the set zInd
-                       (only when mode is "par").
-            * "time" - The corresponding time.
-            * "X"    - The X-mesh.
-            * "Y"    - The Y-mesh.
-            * pos    - The position of the fixed index
+            * varName - The 2D variable.
+            * "phi"   - The 2D variable (only when phiCont is True).
+            * "time"  - The corresponding time.
+            * "X"     - The X-mesh.
+            * "Y"     - The Y-mesh.
+            * pos     - The position of the fixed index
     varName : str
         Name of the variable.
     varyMaxMin : bool
@@ -367,6 +389,8 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
         Wheter or not only the fluctuations are given as an input
     cbb : CollectAndCalcBlobs
         The initialized CollectAndCalcBlobs object.
+    phiCont : bool
+        If True, phi contours will be overplotted.
     plotSuperKwargs : dict
         Keyword arguments for the PlotSuperClass class.
     """
@@ -378,6 +402,17 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               tupleOfArrays,\
                               fluct,\
                               varyMaxMin)
+
+    if phiCont:
+        import pdb; pdb.set_trace()
+        tupleOfArrays = (blob["phi"],)
+        phiVmax, phiVmin, phiLevels =\
+                getVmaxVminLevels(plotSuperKwargs,\
+                                  tupleOfArrays  ,\
+                                  fluct          ,\
+                                  varyMaxMin     ,\
+                                  nLevels = 10   ,\
+                                  )
 
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
@@ -396,6 +431,11 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                             blob["time"][ind:ind+1,...] ,\
                             blob["zPos"]                ,\
                             varName)
+
+        if phiCont:
+            p2DPerp.setContourArguments(phiVmax, phiVmin, phiLevels)
+            p2DPerp.setPhiData(blob["phi"][ind:ind+1,...])
+
         p2DPerp.plotAndSavePerpPlane()
 
     # Make the animation
@@ -405,11 +445,20 @@ def plotBlob2DPerp(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                         blob["time"],\
                         blob["zPos"],\
                         varName)
+    if phiCont:
+        p2DPerp.setPhiData(blob["phi"])
+
     p2DPerp.plotAndSavePerpPlane()
 #}}}
 
 #{{{plotBlob2DPar
-def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+def plotBlob2DPar(blob      ,\
+                  varName   ,\
+                  varyMaxMin,\
+                  fluct     ,\
+                  ccb       ,\
+                  phiCont   ,\
+                  plotSuperKwargs):
     #{{{docstring
     """
     Performs the plotting of the blob in a 2D par plane.
@@ -419,13 +468,15 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     blob : dict
         Dictionary with the variables to be plotted.
         Contains the keys:
-            * "n"    - The 2D variable.
-            * "nPPi" - The 2D variable pi away from the set zInd
-                       (only when mode is "par").
-            * "time" - The corresponding time.
-            * "X"    - The X-mesh.
-            * "Y"    - The Y-mesh.
-            * pos    - The position of the fixed index
+            * varName    - The 2D variable.
+            * varNamePPi - The 2D variable pi away from the set zInd
+            * "phi"      - The 2D variable (only when phiCont is True).
+            * "phiPPi"   - The 2D variable pi away from the set zInd
+                           (only when phiCont is True).
+            * "time"     - The corresponding time.
+            * "X"        - The X-mesh.
+            * "Y"        - The Y-mesh.
+            * pos        - The position of the fixed index
     varName : str
         Name of the variable.
     varyMaxMin : bool
@@ -435,6 +486,8 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
         Wheter or not only the fluctuations are given as an input
     cbb : CollectAndCalcBlobs
         The initialized CollectAndCalcBlobs object.
+    phiCont : bool
+        If True, phi contours will be overplotted.
     plotSuperKwargs : dict
         Keyword arguments for the PlotSuperClass class.
     """
@@ -446,6 +499,16 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               tupleOfArrays,\
                               fluct,\
                               varyMaxMin)
+
+    if phiCont:
+        tupleOfArrays = (blob["phi"],blob["phiPPi"])
+        phiVmax, phiVmin, phiLevels =\
+                getVmaxVminLevels(plotSuperKwargs,\
+                                  tupleOfArrays  ,\
+                                  fluct          ,\
+                                  varyMaxMin     ,\
+                                  nLevels = 10   ,\
+                                  )
 
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
@@ -466,6 +529,11 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                           blob["time"][ind:ind+1,...]       ,\
                           blob["thetaPos"]                  ,\
                           varName)
+        if phiCont:
+            p2DPol.setContourArguments(phiVmax, phiVmin, phiLevels)
+            p2DPol.setPhiData   (blob["phi"][ind:ind+1,...])
+            p2DPol.setPhiParData(blob["phiPPi"][ind:ind+1,...])
+
         p2DPar.plotAndSaveParPlane()
 
     # Make the animation
@@ -476,11 +544,21 @@ def plotBlob2DPar(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                       blob["time"]       ,\
                       blob["thetaPos"]   ,\
                       varName)
+    if phiCont:
+        p2DPerp.setPhiData   (blob["phi"])
+        p2DPerp.setPhiParData(blob["phiPPi"])
+
     p2DPar.plotAndSaveParPlane()
 #}}}
 
 #{{{plotBlob2DPol
-def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
+def plotBlob2DPol(blob          ,\
+                  varName       ,\
+                  varyMaxMin    ,\
+                  fluct         ,\
+                  ccb           ,\
+                  phiCont       ,\
+                  plotSuperKwargs):
     #{{{docstring
     """
     Performs the plotting of the blob in a 2D pol plane.
@@ -490,13 +568,12 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
     blob : dict
         Dictionary with the variables to be plotted.
         Contains the keys:
-            * "n"    - The 2D variable.
-            * "nPPi" - The 2D variable pi away from the set zInd
-                       (only when mode is "pol").
-            * "time" - The corresponding time.
-            * "X"    - The X-mesh.
-            * "Y"    - The Y-mesh.
-            * pos    - The position of the fixed index
+            * varName - The 2D variable.
+            * "phi"   - The 2D variable (only when phiCont is True).
+            * "time"  - The corresponding time.
+            * "X"     - The X-mesh.
+            * "Y"     - The Y-mesh.
+            * pos     - The position of the fixed index
     varName : str
         Name of the variable.
     varyMaxMin : bool
@@ -506,6 +583,8 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
         Wheter or not only the fluctuations are given as an input
     cbb : CollectAndCalcBlobs
         The initialized CollectAndCalcBlobs object.
+    phiCont : bool
+        If True, phi contours will be overplotted.
     plotSuperKwargs : dict
         Keyword arguments for the PlotSuperClass class.
     """
@@ -517,6 +596,16 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                               tupleOfArrays,\
                               fluct,\
                               varyMaxMin)
+
+    if phiCont:
+        tupleOfArrays = (blob["phi"],blob["phiPPi"])
+        phiVmax, phiVmin, phiLevels =\
+                getVmaxVminLevels(plotSuperKwargs,\
+                                  tupleOfArrays  ,\
+                                  fluct          ,\
+                                  varyMaxMin     ,\
+                                  nLevels = 10   ,\
+                                  )
 
     # Burst the sequence into single pdfs
     indices = getBurstIndices(len(blob["time"]))
@@ -535,6 +624,10 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                           blob["time"][ind:ind+1,...] ,\
                           blob["rhoPos"]              ,\
                           varName)
+        if phiCont:
+            p2DPol.setContourArguments(phiVmax, phiVmin, phiLevels)
+            p2DPol.setPhiData(blob["phi"][ind:ind+1,...])
+
         p2DPol.plotAndSavePolPlane()
 
     # Make the animation
@@ -544,6 +637,8 @@ def plotBlob2DPol(blob, varName, varyMaxMin, fluct, ccb, plotSuperKwargs):
                       blob["time"],\
                       blob["rhoPos"],\
                       varName)
+    if phiCont:
+        p2DPerp.setPhiData(blob["phi"])
     p2DPol.plotAndSavePolPlane()
 #}}}
 
@@ -597,9 +692,11 @@ class DriverBlobs(DriverSuperClass):
                  pctPadding       ,\
                  convertToPhysical,\
                  plotSuperKwargs  ,\
+                 varName   = "n"  ,\
                  condition = 3    ,\
-                 normed = False   ,\
-                 plotAll = False  ,\
+                 phiCont   = False,\
+                 normed    = False,\
+                 plotAll   = False,\
                  **kwargs):
         #{{{docstring
         """
@@ -623,6 +720,11 @@ class DriverBlobs(DriverSuperClass):
             Whether or not to convert to physical
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        varName : str
+            Variable to check.
+            NOTE: Condition is still on the radial density flux.
+        phiCont : bool
+            If True, phi contours will be overplotted.
         condition : float
             The condition in the conditional average will be set to
             flux.std()*condition
@@ -643,8 +745,10 @@ class DriverBlobs(DriverSuperClass):
         self._slices            = slices
         self._convertToPhysical = convertToPhysical
         self._pctPadding        = pctPadding
+        self._varName           = varName
         self._condition         = condition
         self._normed            = normed
+        self._phiCont           = phiCont
         self._plotAll           = plotAll
 
         # Set the plot type
@@ -755,10 +859,12 @@ class DriverBlobs(DriverSuperClass):
         #}}}
 
         args  = (self._ccb            ,\
+                 self._varName        ,\
                  self._mode           ,\
                  self._fluct          ,\
                  self._plotSuperKwargs,\
                  self._plotAll        ,\
+                 self._phiCont        ,\
                 )
         if self._useMultiProcess:
             processes = Process(target = driverPlot2DData,\
