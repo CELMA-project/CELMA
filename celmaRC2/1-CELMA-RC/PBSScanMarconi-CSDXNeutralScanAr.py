@@ -58,4 +58,4 @@ scanNn.setCommonRunnerOptions(\
                              )
 
 # Run
-scanNn.runScan(restartTurb=3)
+scanNn.runScan(restartTurb=2)
