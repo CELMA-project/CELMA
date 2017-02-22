@@ -14,7 +14,7 @@ commonDir = os.path.abspath("./../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper
+from CELMAPy.plotHelpers import PlotHelper
 
 sigMul = 3
 scans = ("B0_0.06", "B0_0.08", "B0_0.1")
@@ -72,25 +72,106 @@ for scan in scans:
 
     scanVal.append(curScan)
 
+plt.close("all")
 
-fig, (parAx, perpAx) = plt.subplots(ncols = 2, figsize = SizeMaker.array(2,1))
-parAx.plot(scanVal, elPerTime, ls="", alpha = 0.7,\
-           marker="o", ms=10, label="$\mathrm{Electrons}$")
-parAx.plot(scanVal, ionsPerTime, ls="", alpha = 0.7,\
-           marker="d", ms=10, label="$\mathrm{Ions}$")
-perpAx.plot(scanVal, perpPerTime, "g", ls="", alpha = 0.7,\
-            marker="s", ms=10, label="$\mathrm{Perpendicular}$")
-parAx .set_ylabel(r"$[\mathrm{s}^{-1}]$")
-perpAx.set_ylabel(r"$[\mathrm{s}^{-1}]$")
-parAx .set_xlabel(r"$B [\mathrm{T}]$")
-perpAx.set_xlabel(r"$B [\mathrm{T}]$")
+# Perp values
+fig, (perpAx, parAx) = plt.subplots(ncols=2, figsize = (5,1))
+yTicks   = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
+xBarVals = tuple(range(len(perpPerTime)))
 
-parAx .set_title(r"$\mathrm{Parallel}$")
+# Find the lowest value
+lowestVal = np.min(perpPerTime)
+# Pad with 5%
+lowestVal = 0.95*lowestVal
+
+# Get the color cycler
+# http://stackoverflow.com/questions/13831549/get-matplotlib-color-cycle-state
+prop_cycler = perpAx._get_lines.prop_cycler
+# Plot
+perpRects = perpAx.barh(xBarVals                        ,\
+                        perpPerTime                     ,\
+                        left = lowestVal                ,\
+                        color=next(prop_cycler)["color"],\
+                       )
+
+# Set text
+for nr, (rect, txt) in enumerate(zip(perpRects, yTicks)):
+    width  = rect.get_width()
+    height = rect.get_y()
+    # Add 4% padding
+    x      = width*1.04 + lowestVal
+    y      = height + rect.get_height()/2
+    perpAx.text(x, y, txt, ha="left", va="center")
+
+perpAx.set_xlabel(r"$[\mathrm{s}^{-1}]$")
 perpAx.set_title(r"$\mathrm{Perpendicular}$")
 
-fig.suptitle(r"$\mathrm{Average\;particle\;flux\;per\;second}$", y=1.1)
-PlotHelper.makePlotPretty(parAx , rotation = 45)
-PlotHelper.makePlotPretty(perpAx, rotation = 45)
+perpAx.spines["top"]  .set_visible(False)
+perpAx.spines["left"] .set_visible(False)
+perpAx.spines["right"].set_visible(False)
+perpAx.get_yaxis().set_visible(False)
 
-fig.subplots_adjust(wspace=0.75)
+PlotHelper.makePlotPretty(perpAx, xbins=5, legend=False, rotation=45)
+perpAx.grid(False)
+
+
+# Par values
+xBarVals = tuple(range(len(perpPerTime)*2))
+ionXBarVals = xBarVals[1::2]
+elXBarVals  = xBarVals[0::2]
+
+# Find the lowest value
+lowestVal = np.min(perpPerTime)
+# Pad with 5%
+lowestVal = 0.95*lowestVal
+
+# Plot
+elRects = parAx.barh(elXBarVals                      ,\
+                     elPerTime                       ,\
+                     left = lowestVal                ,\
+                     color=next(prop_cycler)["color"],\
+                    )
+ionRects = parAx.barh(ionXBarVals                     ,\
+                      ionsPerTime                     ,\
+                      left = lowestVal                ,\
+                      color=next(prop_cycler)["color"],\
+                     )
+
+# Set text
+for nr, (rect, txt) in enumerate(zip(ionRects, yTicks)):
+    width  = rect.get_width()
+    height = rect.get_y()
+    # Add 4% padding
+    x      = width*1.04 + lowestVal
+    y      = height
+    parAx.text(x, y, txt, ha="left", va="center")
+
+parAx.set_xlabel(r"$[\mathrm{s}^{-1}]$")
+parAx.set_title(r"$\mathrm{Parallel}$")
+
+parAx.spines["top"]  .set_visible(False)
+parAx.spines["left"] .set_visible(False)
+parAx.spines["right"].set_visible(False)
+parAx.get_yaxis().set_visible(False)
+
+PlotHelper.makePlotPretty(parAx, xbins=5, legend=False, rotation=45)
+parAx.grid(False)
+
+# Make legend manually
+handles = (perpRects[0], ionRects[0], elRects[0])
+labels  = ("$\mathrm{Both}$"     ,\
+           "$\mathrm{Ions}$"     ,\
+           "$\mathrm{Electrons}$",\
+           )
+
+fig.legend(handles                         ,\
+           labels                          ,\
+           bbox_to_anchor=(1.25, 1.0)      ,\
+           loc="upper left"                ,\
+           borderaxespad=0.                ,\
+           bbox_transform = parAx.transAxes,\
+           )
+
+fig.suptitle(r"$\mathrm{Average\;particle\;flux\;per\;second}$", y=1.3)
+
 PlotHelper.savePlot(fig, "BScanTotalFlux.pdf")
