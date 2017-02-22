@@ -17,6 +17,7 @@ def driverZonalFlow(\
                     convertToPhysical,\
                     yInd             ,\
                     tSlice           ,\
+                    mode             ,\
                     plotSuperKwargs  ,\
                    ):
     #{{{docstring
@@ -36,72 +37,90 @@ def driverZonalFlow(\
         Fixed position in the parallel direction.
     tSlice : slice
         How the data will be sliced in time
+    mode : ["plain"|"wShear"]
+        If "plain", only the poloidal ExB should will be plotted.
+        If "wShear", only the angular frequency is plotted together with
+        its shear.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class
     """
     #}}}
 
+    # Initialize the collector
     cczf = CollectAndCalcZonalFlow(yInd, tSlice, convertToPhysical)
 
     # Calculate the steady state variable
     polExBSS = cczf.calcPoloidalExB((steadyStatePath,))
 
-    # Set rho and dx (obtained after call to calcPoloidalExB)
+    # Obtain rho (must be after calcPoloidalExB)
     rho = cczf.dh.rho
-    dx = cczf.dh.dx
 
     # Extract the steady state variable at the last time (but keep the 4d)
     sSVar = polExBSS["uExBPoloidal"][-1:,:,:,:]
-    # Expand rho in order to have a defined arithmetic operation with sSVar
-    tmp = np.expand_dims(\
-            np.expand_dims(\
-                np.expand_dims(rho, axis=0),\
-            axis=2),\
-          axis=3)
-    rho    = np.empty(sSVar.shape)
-    rho[:] = tmp
-    # Calculate the angular frequency
-    angFreqSSVar =sSVar/rho
-    # Calculate the shear
-    angFreqSSVarShear = DDX(angFreqSSVar, dx)
 
     # Calculate the poloidal ExB in the saturarted turbulence state
     polExB = cczf.calcPoloidalExB(collectPaths)
     var = polExB["uExBPoloidal"]
     # Calculate average, fluct and std
     varAvg, _, varStd = CollectAndCalcRadialProfile.calcAvgFluctStd(var)
-    # Expand rho in order to have a defined arithmetic operation with sSVar
-    rho    = np.empty(varAvg.shape)
-    rho[:] = tmp
-    # Calculate the angular frequency (the error propagation is linear)
-    angFreqVar    = var   /rho
-    angFreqVarAvg = varAvg/rho
-    angFreqVarStd = varStd/rho
 
-    # Calculate the shear
-    angFreqShearVar = DDX(angFreqVar, dx)
-    # Calculate average, fluct and std of the shear
-    angFreqShearVarAvg, _, angFreqShearVarStd =\
-            CollectAndCalcRadialProfile.calcAvgFluctStd(angFreqShearVar)
-
-    # Recast to dict
     # Remove not needed
     polExB.pop("time")
-    polExB["polExBSS"]          = sSVar            [0,:,0,0]
-    polExB["angPolExBSS"]       = angFreqSSVar      [0,:,0,0]
-    polExB["angPolExBShearSS"]  = angFreqSSVarShear [0,:,0,0]
-    polExB["polExBAvg"]         = varAvg           [0,:,0,0]
-    polExB["polExBStd"]         = varStd           [0,:,0,0]
-    polExB["angPolExBAvg"]      = angFreqVarAvg     [0,:,0,0]
-    polExB["angPolExBStd"]      = angFreqVarStd     [0,:,0,0]
-    polExB["angPolExBShearAvg"] = angFreqShearVarAvg[0,:,0,0]
-    polExB["angPolExBShearStd"] = angFreqShearVarStd[0,:,0,0]
-    polExB["rho"]               = rho              [0,:,0,0]
+    # Recast to dict
+    polExB["polExBSS"]  = sSVar [0,:,0,0]
+    polExB["polExBAvg"] = varAvg[0,:,0,0]
+    polExB["polExBStd"] = varStd[0,:,0,0]
+    polExB["rho"]       = rho
 
-    # Plot
-    prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
-    prp.setData(polExB)
-    prp.plotSaveShowZonalFlow()
+    if mode == "plain":
+        # Plot
+        prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
+        prp.setData(polExB)
+        prp.plotSaveShowZonalFlow()
+
+    elif mode == "wShear":
+        # Obtain dx
+        dx = cczf.dh.dx
+
+        # Expand rho in order to have a defined arithmetic operation with sSVar
+        tmp = np.expand_dims(\
+                np.expand_dims(\
+                    np.expand_dims(rho, axis=0),\
+                axis=2),\
+              axis=3)
+        rho    = np.empty(sSVar.shape)
+        rho[:] = tmp
+        # Calculate the angular frequency
+        angFreqSSVar =sSVar/rho
+        # Calculate the shear
+        angFreqSSVarShear = DDX(angFreqSSVar, dx)
+
+        # Expand rho in order to have a defined arithmetic operation with sSVar
+        rho    = np.empty(varAvg.shape)
+        rho[:] = tmp
+        # Calculate the angular frequency (the error propagation is linear)
+        angFreqVar    = var   /rho
+        angFreqVarAvg = varAvg/rho
+        angFreqVarStd = varStd/rho
+
+        # Calculate the shear
+        angFreqShearVar = DDX(angFreqVar, dx)
+        # Calculate average, fluct and std of the shear
+        angFreqShearVarAvg, _, angFreqShearVarStd =\
+                CollectAndCalcRadialProfile.calcAvgFluctStd(angFreqShearVar)
+
+        # Recast to dict
+        polExB["angPolExBSS"]       = angFreqSSVar      [0,:,0,0]
+        polExB["angPolExBShearSS"]  = angFreqSSVarShear [0,:,0,0]
+        polExB["angPolExBAvg"]      = angFreqVarAvg     [0,:,0,0]
+        polExB["angPolExBStd"]      = angFreqVarStd     [0,:,0,0]
+        polExB["angPolExBShearAvg"] = angFreqShearVarAvg[0,:,0,0]
+        polExB["angPolExBShearStd"] = angFreqShearVarStd[0,:,0,0]
+
+        # Plot
+        prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
+        prp.setDataWShear(polExB)
+        prp.plotSaveShowZonalFlowWShear()
 #}}}
 
 #{{{DriverZonalFlow
@@ -111,13 +130,14 @@ class DriverZonalFlow(DriverSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self                     ,\
-                 dmp_folders              ,\
-                 steadyStatePath          ,\
-                 yInd                     ,\
-                 tSlice                   ,\
-                 plotSuperKwargs          ,\
-                 convertToPhysical = True ,\
+    def __init__(self                       ,\
+                 dmp_folders                ,\
+                 steadyStatePath            ,\
+                 yInd                       ,\
+                 tSlice                     ,\
+                 plotSuperKwargs            ,\
+                 mode              = "plain",\
+                 convertToPhysical = True   ,\
                  **kwargs):
         #{{{docstring
         """
@@ -138,6 +158,10 @@ class DriverZonalFlow(DriverSuperClass):
             How the data will be sliced in time.
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
+        mode : ["plain"|"wShear"]
+            If "plain", only the poloidal ExB should will be plotted.
+            If "wShear", only the angular frequency is plotted together with
+            its shear.
         convertToPhysical : bool
             Whether or not to convert to physical units.
         **kwargs : keyword arguments
@@ -152,6 +176,7 @@ class DriverZonalFlow(DriverSuperClass):
         self._steadyStatePath  = steadyStatePath
         self._yInd             = yInd
         self._tSlice           = tSlice
+        self._mode             = mode
         self.convertToPhysical = convertToPhysical
 
         # Update the plotSuperKwargs dict
@@ -173,6 +198,7 @@ class DriverZonalFlow(DriverSuperClass):
                  self.convertToPhysical,\
                  self._yInd            ,\
                  self._tSlice          ,\
+                 self._mode            ,\
                  self._plotSuperKwargs ,\
                 )
         if self._useMultiProcess:
