@@ -6,6 +6,7 @@ Makes the plots to be used in the matrix showing the averaged blob.
 
 import pickle
 import matplotlib.pylab as plt
+import numpy as np
 from glob import glob
 from subprocess import Popen
 
@@ -20,9 +21,23 @@ from CELMAPy.plotHelpers import PlotHelper
 fluct = "-fluct" # Set to "" if no fluctuation
 blob = "blobs"
 mode = "perp"
-scan = "B0_0.08"
+scan = "B0_0.06"
 condition = "3"
 path = "../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/{}/".format(scan, condition)
+
+# Obtain the marker
+print("    Obatining marker position")
+with open(os.path.join(path, "n-radialFluxes-fluct.pickle"), "rb") as curF:
+    fig = pickle.load(curF)
+    ax = fig.get_axes()[0]
+    _, legend = ax.get_legend_handles_labels()
+    rho   = float(legend[0].replace("$","").split("=")[1].split(" ")[1])
+    theta = float(legend[0].replace("$","").split("=")[2].split(" ")[0].\
+            replace("^{\\circ},", ""))*np.pi/180
+    x     = rho*np.cos(theta)
+    y     = rho*np.sin(theta)
+
+    plt.close(fig)
 
 # Find files matching the criteria
 searchFor =\
@@ -61,6 +76,9 @@ for nr, f in enumerate(files):
     t = r"$\tau={}$".format(ax.get_title().split("=")[-1][:-1].replace("$",""))
     ax.set_title(t.replace(r"\cdot 10^{-3}", r"\mu"))
     fig.set_size_inches(2.1, 2.1)
+
+    # Add the marker
+    ax.plot(x,y,"ko", markersize = 5, alpha=0.5)
 
     fileName = os.path.join(endFolder, "{}.pdf".format(nr))
     PlotHelper.savePlot(fig, fileName)
