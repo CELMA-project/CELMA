@@ -404,7 +404,6 @@ def plotBlob2DPerp(blob      ,\
                               varyMaxMin)
 
     if phiCont:
-        import pdb; pdb.set_trace()
         tupleOfArrays = (blob["phi"],)
         phiVmax, phiVmin, phiLevels =\
                 getVmaxVminLevels(plotSuperKwargs,\

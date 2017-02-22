@@ -353,7 +353,7 @@ class CollectAndCalcBlobs(object):
             phiBlobs2DAvg = self._calcAverages("phi", phiBlobs2D)
             blobs2DAvg.update(phiBlobs2DAvg)
             phiHoles2DAvg = self._calcAverages("phi", phiHoles2D)
-            holes2DAvg.update(holes2DAvg)
+            holes2DAvg.update(phiHoles2DAvg)
 
         return blobs2DAvg, blobs2D, holes2DAvg, holes2D
     #}}}
@@ -813,7 +813,7 @@ class CollectAndCalcBlobs(object):
         # Guard if tupleOfDictsWithBins is empty (i.e. either no holes
         # or no blobs)
         if len(tupleOfDictsWithBins) == 0:
-            return ()
+            return {}
 
         binAverageDict = tupleOfDictsWithBins[0].copy()
         sumN = np.zeros(tupleOfDictsWithBins[0][varName].shape)
