@@ -3,7 +3,7 @@
 """Class for PSD plot"""
 
 from ..superClasses import PlotSuperClass
-from ..plotHelpers import plotNumberFormatter, seqCMap, seqCMap3
+from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap, seqCMap3
 from matplotlib.ticker import FuncFormatter
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,25 +16,17 @@ class PlotPSD(PlotSuperClass):
     """
 
     #{{{constructor
-    def __init__(self, *args, pltSize = (15,10), **kwargs):
+    def __init__(self, *args, **kwargs):
         #{{{docstring
         """
         This constructor:
 
         * Calls the parent constructor
-
-        Parameters
-        ----------
-        pltSize : tuple
-            The size of the plot
         """
         #}}}
 
         # Call the constructor of the parent class
         super().__init__(*args, **kwargs)
-
-        # Set the plot size
-        self._pltSize = pltSize
     #}}}
 
     #{{{setData
@@ -242,7 +234,7 @@ class PlotPSD(PlotSuperClass):
         """
 
         # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
+        fig = plt.figure(figsize = SizeMaker.standard())
         ax  = fig.add_subplot(111)
 
         keys = sorted(self._PSD.keys())
@@ -309,7 +301,7 @@ class PlotPSD(PlotSuperClass):
         """
 
         # Create the plot
-        fig = plt.figure(figsize = self._pltSize)
+        fig = plt.figure(figsize = SizeMaker.standard(s=0.45))
         ax  = fig.add_subplot(111)
 
         # Plot
@@ -341,6 +333,8 @@ class PlotPSD(PlotSuperClass):
         self._ph.makePlotPretty(ax,\
                                 xprune   = "both",\
                                 yprune   = "both",\
+                                xbins    = 5     ,\
+                                ybins    = 5     ,\
                                 legend   = False ,\
                                 rotation = 45)
 
