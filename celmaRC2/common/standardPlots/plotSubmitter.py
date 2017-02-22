@@ -216,7 +216,6 @@ class PlotSubmitter(object):
             flucts = (fluct,)
 
         for dmp_folders, key, nr in loopOver:
-
             tSlice = self._findSlices(dmp_folders, self._satTurbTSlices)
             if tSlice is None:
                 continue
