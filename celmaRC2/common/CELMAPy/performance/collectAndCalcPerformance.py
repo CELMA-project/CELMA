@@ -77,6 +77,14 @@ class CollectAndCalcPerformance(CollectAndCalcSuperClass):
             else:
                 dt=np.concatenate((dt, curDt), axis=0)
 
+        # Guard (in case broken exit occured during the run)
+        if len(dt) > len(performance["RHSevals"]):
+            print("!!!WARNING: The time series was larger than the log files")
+            dt = dt[:len(performance["RHSevals"])]
+        elif len(dt) > len(performance["RHSevals"]):
+            print("!!!WARNING: The log files was larger than the time series ")
+            performance["RHSevals"] = performance["RHSevals"][:len(dt)]
+
         # Calc RHSPrTime
         performance["RHSPrTime"] = performance.pop("RHSevals")/dt
 
