@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Class for zonalFlow plots
+Class for poloidalFlow plots
 """
 
 from ..superClasses import PlotSuperClass
@@ -12,8 +12,8 @@ import os
 
 # NOTE: May be suffering from a DRY case
 
-#{{{PlotZonalFlow
-class PlotZonalFlow(PlotSuperClass):
+#{{{PlotPoloidalFlow
+class PlotPoloidalFlow(PlotSuperClass):
     """
     Class which contains the profile and gradient data and the plotting
     configuration.
@@ -23,7 +23,7 @@ class PlotZonalFlow(PlotSuperClass):
     def __init__(self, *args, **kwargs):
         #{{{docstring
         """
-        Constructor for PlotzonalFlow
+        Constructor for PlotpoloidalFlow
 
         * Calls the parent class
         * Sets the spatial title
@@ -112,7 +112,7 @@ class PlotZonalFlow(PlotSuperClass):
                 format(**self.uc.conversionDict["u"])
 
         # Set the fileName
-        self._fileName = os.path.join(self._savePath, "zonalFlow")
+        self._fileName = os.path.join(self._savePath, "poloidalFlow")
 
         if self._extension is None:
             self._extension = "png"
@@ -200,7 +200,7 @@ class PlotZonalFlow(PlotSuperClass):
                 format(**self.uc.conversionDict["growthRate"])
 
         # Set the fileName
-        self._fileName = os.path.join(self._savePath, "zonalFlowWShear")
+        self._fileName = os.path.join(self._savePath, "poloidalFlowWShear")
 
         if self._extension is None:
             self._extension = "png"
@@ -270,8 +270,8 @@ class PlotZonalFlow(PlotSuperClass):
         self._xLabel = self._ph.rhoTxtDict["rhoTxtLabel"]
     #}}}
 
-    #{{{plotSaveShowZonalFlow
-    def plotSaveShowZonalFlow(self):
+    #{{{plotSaveShowPoloidalFlow
+    def plotSaveShowPoloidalFlow(self):
         """
         Performs the actual plotting.
 
@@ -306,6 +306,7 @@ class PlotZonalFlow(PlotSuperClass):
 
         # Set decorations
         polExBAx.set_ylabel(self._polExBLabel)
+        polExBAx.set_xlabel(self._xLabel)
 
         # Make the plot look nice
         self._ph.makePlotPretty(polExBAx, loc="best", rotation = 45)
@@ -325,8 +326,8 @@ class PlotZonalFlow(PlotSuperClass):
         plt.close(fig)
     #}}}
 
-    #{{{plotSaveShowZonalFlowWShear
-    def plotSaveShowZonalFlowWShear(self):
+    #{{{plotSaveShowPoloidalFlowWShear
+    def plotSaveShowPoloidalFlowWShear(self):
         """
         Performs the actual plotting (using with shear).
 
