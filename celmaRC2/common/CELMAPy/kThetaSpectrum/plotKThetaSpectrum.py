@@ -8,8 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-#{{{PlotMagnitudeSpectrum
-class PlotMagnitudeSpectrum(PlotSuperClass):
+#{{{PlotKThetaSpectrum
+class PlotKThetaSpectrum(PlotSuperClass):
     """
     Class which contains the magnitude spectrum data and the plotting configuration.
     """
@@ -56,7 +56,7 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, magnitudeSpectrum, varName):
+    def setData(self, kThetaSpectrum, varName):
         #{{{docstring
         """
         Sets the magnitude spectrum to be plotted.
@@ -68,7 +68,7 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
 
         Parameters
         ----------
-        magnitudeSpectrum : dict
+        kThetaSpectrum : dict
             The dictionary containing the mode spectra.
             The keys of the dict is on the form (rho,z), with a new dict
             as the value. This dict contains the following keys:
@@ -82,7 +82,7 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
         #}}}
 
         # Set the member data
-        self._mSpec   = magnitudeSpectrum
+        self._mSpec   = kThetaSpectrum
         self._varName = varName
 
         self._prepareLabels()
@@ -90,7 +90,7 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
         # Set the fileName
         self._fileName =\
             os.path.join(self._savePath,\
-                "{}-{}".format(self._varName, "magnitudeSpectrum"))
+                "{}-{}".format(self._varName, "kThetaSpectrum"))
 
         if not(self._includeErrorBars):
             self._fileName += "NoErrorBar"
@@ -142,8 +142,8 @@ class PlotMagnitudeSpectrum(PlotSuperClass):
         self._xLabel = r"$\mathrm{Mode\;number}$"
     #}}}
 
-    #{{{plotSaveShowMagnitudeSpectrum
-    def plotSaveShowMagnitudeSpectrum(self):
+    #{{{plotSaveShowKThetaSpectrum
+    def plotSaveShowKThetaSpectrum(self):
         """
         Performs the actual plotting.
         """

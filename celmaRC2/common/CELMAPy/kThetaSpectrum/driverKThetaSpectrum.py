@@ -5,12 +5,12 @@ Contains single driver and driver class for the magnitude spectrum
 """
 
 from ..superClasses import DriverPointsSuperClass
-from .collectAndCalcMagnitudeSpectrum import CollectAndCalcMagnitudeSpectrum
-from .plotMagnitudeSpectrum import PlotMagnitudeSpectrum
+from .collectAndCalcKThetaSpectrum import CollectAndCalcKThetaSpectrum
+from .plotKThetaSpectrum import PlotKThetaSpectrum
 from multiprocessing import Process
 
-#{{{driverMagnitudeSpectrum
-def driverMagnitudeSpectrum(collectPaths     ,\
+#{{{driverKThetaSpectrum
+def driverKThetaSpectrum(collectPaths     ,\
                             varName          ,\
                             convertToPhysical,\
                             indicesArgs      ,\
@@ -44,7 +44,7 @@ def driverMagnitudeSpectrum(collectPaths     ,\
     #}}}
 
     # Create collect object
-    ccms = CollectAndCalcMagnitudeSpectrum(\
+    ccms = CollectAndCalcKThetaSpectrum(\
                                 collectPaths     ,\
                                 varName          ,\
                                 convertToPhysical,\
@@ -57,15 +57,15 @@ def driverMagnitudeSpectrum(collectPaths     ,\
 
     # Plot
     for b in (True, False):
-        pfm = PlotMagnitudeSpectrum(uc                  ,\
+        pfm = PlotKThetaSpectrum(uc                  ,\
                                     includeErrorBars = b,\
                                     **plotSuperKwargs)
         pfm.setData(mSpec, varName)
-        pfm.plotSaveShowMagnitudeSpectrum()
+        pfm.plotSaveShowKThetaSpectrum()
 #}}}
 
-#{{{DriverMagnitudeSpectrum
-class DriverMagnitudeSpectrum(DriverPointsSuperClass):
+#{{{DriverKThetaSpectrum
+class DriverKThetaSpectrum(DriverPointsSuperClass):
     """
     Class for driving of the plotting of the magnitude spectrum.
     """
@@ -116,12 +116,12 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
-        plotSuperKwargs.update({"plotType"   :"magnitudeSpectrum"})
+        plotSuperKwargs.update({"plotType"   :"kThetaSpectrum"})
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{driverMagnitudeSpectrum
-    def driverMagnitudeSpectrum(self):
+    #{{{driverKThetaSpectrum
+    def driverKThetaSpectrum(self):
         #{{{docstring
         """
         Wrapper to driverFourierMode
@@ -136,9 +136,9 @@ class DriverMagnitudeSpectrum(DriverPointsSuperClass):
                  self._plotSuperKwargs ,\
                 )
         if self._useMultiProcess:
-            processes = Process(target = driverMagnitudeSpectrum, args = args)
+            processes = Process(target = driverKThetaSpectrum, args = args)
             processes.start()
         else:
-            driverMagnitudeSpectrum(*args)
+            driverKThetaSpectrum(*args)
     #}}}
 #}}}
