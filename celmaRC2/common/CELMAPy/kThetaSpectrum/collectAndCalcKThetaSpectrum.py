@@ -10,8 +10,16 @@ from ..superClasses import CollectAndCalcPointsSuperClass
 from ..collectAndCalcHelpers import timeAvg
 import numpy as np
 
-#{{{CollectAndCalcMagnitudeSpectrum
-class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
+
+
+
+# FIXME: THIS IS BEING REWRITTEN, DO NOT EXPECT TO MAKE ANY SENSE OF THIS
+
+
+
+
+#{{{CollectAndCalcKThetaSpectrum
+class CollectAndCalcKThetaSpectrum(CollectAndCalcPointsSuperClass):
     """
     Class for collecting and calculating the magnitude spectrum
     """
@@ -60,7 +68,7 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
         """
         Returns
         -------
-        magnitudeSpectrum : dict
+        kThetaSpectrum : dict
             The dictionary containing the mode spectra.
             The keys of the dict is on the form (rho,z), with a new dict
             as the value. This dict contains the following keys:
@@ -87,7 +95,7 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
                                       )
 
         # Initialize the output
-        magnitudeSpectrum = {}
+        kThetaSpectrum = {}
 
         for key in fm.keys():
             # Pop variables not needed
@@ -121,12 +129,12 @@ class CollectAndCalcMagnitudeSpectrum(CollectAndCalcPointsSuperClass):
             fm[key].pop(self._varName + "Magnitude")
 
             # Rename to mSpec
-            magnitudeSpectrum[key] = {\
+            kThetaSpectrum[key] = {\
                                       "modeAvg" : modesAvg,\
                                       "modeStd" : modesStd,\
                                       "modeNr"  : mNr     ,\
                                      }
 
-        return magnitudeSpectrum, uc
+        return kThetaSpectrum, uc
     #}}}
 #}}}

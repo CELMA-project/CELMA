@@ -25,14 +25,14 @@ from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
 from .growthRates import growthRatesPlot
-from .magnitudeSpectrum import magnitudeSpectrumPlot
+from .kThetaSpectrum import kThetaSpectrumPlot
 from .performance import performancePlot
 from .phaseShift import phaseShiftPlot
 from .posOfFluct import posOfFluctPlot
 from .PSD2D import PSD2DPlot
 from .skewKurt import skewKurtPlot
 from .totalFlux import totalFluxPlot
-from .zonalFlow import zonalFlowPlot
+from .poloidalFlow import poloidalFlowPlot
 from copy import copy
 
 #{{{PlotSubmitter
@@ -504,8 +504,8 @@ class PlotSubmitter(object):
         self.sub.submitFunction(growthRatesPlot, args=args)
     #}}}
 
-    #{{{runMagnitudeSpectrum
-    def runMagnitudeSpectrum(self):
+    #{{{runKThetaSpectrum
+    def runKThetaSpectrum(self):
         """
         Runs the magnitude spectrum
         """
@@ -528,8 +528,8 @@ class PlotSubmitter(object):
                     self._plotSuperKwargs)
 
             kwargs = {}
-            self.sub.setJobName("magnitudeSpectrum{}".format(nr))
-            self.sub.submitFunction(magnitudeSpectrumPlot, args=args, kwargs=kwargs)
+            self.sub.setJobName("kThetaSpectrum{}".format(nr))
+            self.sub.submitFunction(kThetaSpectrumPlot, args=args, kwargs=kwargs)
     #}}}
 
     #{{{runSnapShotsSameScanVal
@@ -816,10 +816,10 @@ class PlotSubmitter(object):
             self.sub.submitFunction(totalFluxPlot, args=args)
     #}}}
 
-    #{{{runZonalFlow
-    def runZonalFlow(self):
+    #{{{runPoloidalFlow
+    def runPoloidalFlow(self):
         """
-        Runs the zonal flow
+        Runs the poloidal flow
         """
         loopOver = zip(self._dmpFolders["turbulence"],\
                        self._dmpFolders["expand"],\
@@ -839,7 +839,7 @@ class PlotSubmitter(object):
                     steadyStatePath,\
                     self._plotSuperKwargs)
             kwargs = {"tSlice":tSlice}
-            self.sub.setJobName("zonalFlowSliced{}".format(nr))
-            self.sub.submitFunction(zonalFlowPlot, args=args, kwargs=kwargs)
+            self.sub.setJobName("poloidalFlowSliced{}".format(nr))
+            self.sub.submitFunction(poloidalFlowPlot, args=args, kwargs=kwargs)
     #}}}
 #}}}
