@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for the zonal flow"""
+"""Post-processor for the poloidal flow"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -8,10 +8,10 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.zonalFlow import DriverZonalFlow
+from CELMAPy.poloidalFlow import DriverPoloidalFlow
 
-#{{{zonalFlowPlot
-def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
+#{{{poloidalFlowPlot
+def poloidalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
                   tSlice = None):
     #{{{docstring
     """
@@ -35,8 +35,8 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
     yInd              = 16
     tSlice            = tSlice
 
-    dRP = DriverZonalFlow(
-                     # DriverZonalFlow
+    dRP = DriverPoloidalFlow(
+                     # DriverPoloidalFlow
                      dmp_folders                          ,\
                      steadyStatePath                      ,\
                      yInd                                 ,\
@@ -47,5 +47,5 @@ def zonalFlowPlot(dmp_folders, collectPaths, steadyStatePath, plotSuperKwargs,\
                      collectPaths  = collectPaths ,\
                      useMultiProcess = useMultiProcess,\
                           )
-    dRP.driverZonalFlow()
+    dRP.driverPoloidalFlow()
 #}}}
