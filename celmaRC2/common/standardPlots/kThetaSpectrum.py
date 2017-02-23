@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Post-processor for magnitudeSpectrum"""
+"""Post-processor for kThetaSpectrum"""
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -8,10 +8,10 @@ commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.magnitudeSpectrum import DriverMagnitudeSpectrum
+from CELMAPy.kThetaSpectrum import DriverKThetaSpectrum
 
-#{{{magnitudeSpectrumPlot
-def magnitudeSpectrumPlot(dmp_folders,\
+#{{{kThetaSpectrumPlot
+def kThetaSpectrumPlot(dmp_folders,\
                           collectPaths,\
                           steadyStatePath,\
                           plotSuperKwargs,\
@@ -53,8 +53,8 @@ def magnitudeSpectrumPlot(dmp_folders,\
                      "steadyStatePath" : steadyStatePath,\
                      }
 
-    dMS = DriverMagnitudeSpectrum(
-                     # DriverMagnitudeSpectrum
+    dMS = DriverKThetaSpectrum(
+                     # DriverKThetaSpectrum
                      dmp_folders              ,\
                      indicesArgs              ,\
                      indicesKwargs            ,\
@@ -66,5 +66,5 @@ def magnitudeSpectrumPlot(dmp_folders,\
                      collectPaths  = collectPaths ,\
                      useMultiProcess = useMultiProcess,\
                           )
-    dMS.driverMagnitudeSpectrum()
+    dMS.driverKThetaSpectrum()
 #}}}
