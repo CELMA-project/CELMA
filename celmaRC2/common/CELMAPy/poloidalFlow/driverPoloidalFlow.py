@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
-""" Contains single driver for zonal flows """
+""" Contains single driver for poloidal flows """
 
 from ..superClasses import DriverSuperClass
 from ..collectAndCalcHelpers import DDX
 from ..radialProfile import CollectAndCalcRadialProfile
-from .collectAndCalcZonalFlow import CollectAndCalcZonalFlow
-from .plotZonalFlow import PlotZonalFlow
+from .collectAndCalcPoloidalFlow import CollectAndCalcPoloidalFlow
+from .plotPoloidalFlow import PlotPoloidalFlow
 from multiprocessing import Process
 import numpy as np
 
-#{{{driverZonalFlow
-def driverZonalFlow(\
+#{{{driverPoloidalFlow
+def driverPoloidalFlow(\
                     collectPaths     ,\
                     steadyStatePath  ,\
                     convertToPhysical,\
@@ -47,7 +47,7 @@ def driverZonalFlow(\
     #}}}
 
     # Initialize the collector
-    cczf = CollectAndCalcZonalFlow(yInd, tSlice, convertToPhysical)
+    cczf = CollectAndCalcPoloidalFlow(yInd, tSlice, convertToPhysical)
 
     # Calculate the steady state variable
     polExBSS = cczf.calcPoloidalExB((steadyStatePath,))
@@ -74,9 +74,9 @@ def driverZonalFlow(\
 
     if mode == "plain":
         # Plot
-        prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
+        prp = PlotPoloidalFlow(cczf.uc, **plotSuperKwargs)
         prp.setData(polExB)
-        prp.plotSaveShowZonalFlow()
+        prp.plotSaveShowPoloidalFlow()
 
     elif mode == "wShear":
         # Obtain dx
@@ -118,15 +118,15 @@ def driverZonalFlow(\
         polExB["angPolExBShearStd"] = angFreqShearVarStd[0,:,0,0]
 
         # Plot
-        prp = PlotZonalFlow(cczf.uc, **plotSuperKwargs)
+        prp = PlotPoloidalFlow(cczf.uc, **plotSuperKwargs)
         prp.setDataWShear(polExB)
-        prp.plotSaveShowZonalFlowWShear()
+        prp.plotSaveShowPoloidalFlowWShear()
 #}}}
 
-#{{{DriverZonalFlow
-class DriverZonalFlow(DriverSuperClass):
+#{{{DriverPoloidalFlow
+class DriverPoloidalFlow(DriverSuperClass):
     """
-    Class for driving of the plotting of the zonal flows.
+    Class for driving of the plotting of the poloidal flows.
     """
 
     #{{{Constructor
@@ -181,12 +181,12 @@ class DriverZonalFlow(DriverSuperClass):
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
-        plotSuperKwargs.update({"plotType"   :"zonalFlows"})
+        plotSuperKwargs.update({"plotType"   :"poloidalFlows"})
         self._plotSuperKwargs = plotSuperKwargs
     #}}}
 
-    #{{{driverZonalFlow
-    def driverZonalFlow(self):
+    #{{{driverPoloidalFlow
+    def driverPoloidalFlow(self):
         #{{{docstring
         """
         Wrapper to driverPosOfFluct
@@ -202,9 +202,9 @@ class DriverZonalFlow(DriverSuperClass):
                  self._plotSuperKwargs ,\
                 )
         if self._useMultiProcess:
-            processes = Process(target = driverZonalFlow, args = args)
+            processes = Process(target = driverPoloidalFlow, args = args)
             processes.start()
         else:
-            driverZonalFlow(*args)
+            driverPoloidalFlow(*args)
     #}}}
 #}}}

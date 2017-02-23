@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 """
-Contains class for collecting and calculating the zonal flows
+Contains class for collecting and calculating the poloidal flows
 """
 
 from ..collectAndCalcHelpers import DimensionsHelper
 from ..calcVelocities import calcPoloidalExBConstZ
 from ..unitsConverter import UnitsConverter
 
-#{{{CollectAndCalcZonalFlow
-class CollectAndCalcZonalFlow(object):
+#{{{CollectAndCalcPoloidalFlow
+class CollectAndCalcPoloidalFlow(object):
     """
-    Class for collecting and calcuating zonal flows
+    Class for collecting and calcuating poloidal flows
     """
 
     #{{{constructor
