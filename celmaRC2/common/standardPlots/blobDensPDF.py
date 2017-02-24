@@ -9,7 +9,11 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 from CELMAPy.PDF import DriverPDF
-from .blobs import xInd, yInd, zInd
+
+# Global data without encapsulation
+xInd   = 26
+yInd   = 16
+zInd   = 0
 
 #{{{blobDensPDF
 def blobDensPDF(dmp_folders, collectPaths, plotSuperKwargs, tSlice = None):
