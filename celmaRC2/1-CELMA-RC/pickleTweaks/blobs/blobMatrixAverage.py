@@ -12,7 +12,7 @@ from subprocess import Popen
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -23,7 +23,7 @@ blob = "blobs"
 mode = "perp"
 scan = "B0_0.06"
 condition = "3"
-path = "../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/{}/".format(scan, condition)
+path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/{}/".format(scan, condition)
 
 # Obtain the marker
 print("    Obatining marker position")

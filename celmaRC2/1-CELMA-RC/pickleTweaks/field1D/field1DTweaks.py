@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweak of Boussinesq profile plots to be used in thesis.
+Tweak of profile plots to be used in thesis.
 """
 
 import pickle
@@ -11,27 +11,28 @@ from subprocess import Popen
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import PlotHelper, seqCMap3
 
-folder = "../../B1-CELMA-RC/BousCSDXMagFieldScanAr/visualizationPhysical/B0_0.1/field1D"
+folder = "../../CSDXMagFieldScanAr/visualizationPhysical/B0_0.1/field1D"
 for direction in ("radial", "parallel"):
     picklePath = os.path.join(folder,\
-                              "mainFieldsBoussinesq-{}-1D-0.pickle".format(direction))
+                              "mainFields-{}-1D-0.pickle".format(direction))
     with open(picklePath, "rb") as f:
         fig = pickle.load(f)
 
-    lnAx, phiAx, nAx, omAx, jParAx, nuiAx, uiAx, sAx, ueAx =\
+    lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx =\
             fig.get_axes()
 
     # Swap axes
-    phiAx.set_position(omAx.get_position())
-    omAx .set_position(nuiAx.get_position())
+    phiAx.set_position(omDAx.get_position())
+    sAx  .set_position(nuiAx.get_position())
 
     fig.delaxes(lnAx)
+    fig.delaxes(omDAx)
     fig.delaxes(nuiAx)
 
     # Modify title position
@@ -65,9 +66,9 @@ for direction in ("radial", "parallel"):
                  )
 
     if direction == "radial":
-        fileName = "B010RadBous.pdf"
+        fileName = "B010Rad.pdf"
     elif direction == "parallel":
-        fileName = "B010ParBous.pdf"
+        fileName = "B010Par.pdf"
 
     # Let pdfcrop do the cropping as "tigth" cuts some text
     PlotHelper.savePlot(fig, fileName, crop=False)

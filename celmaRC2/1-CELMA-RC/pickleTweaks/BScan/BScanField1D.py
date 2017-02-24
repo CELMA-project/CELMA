@@ -13,7 +13,7 @@ from subprocess import Popen
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -38,7 +38,7 @@ sD =\
 
 for direction in ("radial", "parallel"):
     for scan in scans:
-        folder = "../CSDXMagFieldScanAr/visualizationPhysical/{}/field1D".format(scan)
+        folder = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/field1D".format(scan)
         picklePath = os.path.join(folder,\
                                   "mainFields-{}-1D-0.pickle".format(direction))
         with open(picklePath, "rb") as f:
