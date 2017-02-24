@@ -10,7 +10,7 @@ import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -21,7 +21,7 @@ nys = (16, 24, 32, 42, 50)
 jPar = {}
 
 # Collect from ny scan
-path = "../CSDXNyScan/visualizationPhysical/ny_{}/field1D/mainFields-parallel-1D-0.pickle"
+path = "../../CSDXNyScan/visualizationPhysical/ny_{}/field1D/mainFields-parallel-1D-0.pickle"
 
 for ny in nys:
     with open(path.format(ny), "rb") as f:
@@ -35,7 +35,7 @@ for ny in nys:
     plt.close(fig)
 
 # Collect from fieldScan
-path = "../CSDXMagFieldScanAr/visualizationPhysical/B0_0.06/field1D/mainFields-parallel-1D-0.pickle"
+path = "../../CSDXMagFieldScanAr/visualizationPhysical/B0_0.06/field1D/mainFields-parallel-1D-0.pickle"
 with open(path, "rb") as f:
     fig = pickle.load(f)
 
