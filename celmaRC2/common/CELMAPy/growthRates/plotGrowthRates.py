@@ -15,15 +15,15 @@ class PlotGrowthRates(PlotSuperClass):
     """Class which contains the growth rates and the plotting configuration."""
 
     #{{{Static members
-    _errorbarOptions = {"color"     :"k",\
-                        "fmt"       :"o",\
-                        "markersize":7  ,\
-                        "ecolor"    :"k",\
-                        "capsize"   :7  ,\
-                        "capthick"  :3  ,\
-                        "elinewidth":3  ,\
-                        "alpha"     :0.7,\
-                        }
+    errorbarOptions = {"color"     :"k",\
+                       "fmt"       :"o",\
+                       "markersize":7  ,\
+                       "ecolor"    :"k",\
+                       "capsize"   :7  ,\
+                       "capthick"  :3  ,\
+                       "elinewidth":3  ,\
+                       "alpha"     :0.7,\
+                       }
     #}}}
 
     #{{{constructor
@@ -253,7 +253,7 @@ class PlotGrowthRates(PlotSuperClass):
                                                 pltOuterIndDict)
 
             # Update the colors legend
-            self._errorbarOptions.update({"color":color, "ecolor":color})
+            self.errorbarOptions.update({"color":color, "ecolor":color})
 
             yerr = None if self._analytic\
                     else gRDF.loc[outerInd]["growthRateStd"].values
@@ -263,7 +263,7 @@ class PlotGrowthRates(PlotSuperClass):
                 gRDF.loc[outerInd]["growthRate"].values      ,\
                 yerr       = yerr                            ,\
                 label      = label                           ,\
-                **self._errorbarOptions)
+                **self.errorbarOptions)
 
             yerr = None if self._analytic\
                     else gRDF.loc[outerInd]["angularFrequencyStd"].values
@@ -272,7 +272,7 @@ class PlotGrowthRates(PlotSuperClass):
                 gRDF.loc[outerInd]["angularFrequency"].index.values,\
                 gRDF.loc[outerInd]["angularFrequency"].values      ,\
                 yerr  = yerr                                      ,\
-                **self._errorbarOptions)
+                **self.errorbarOptions)
 
         # Set labels
         imAx.set_ylabel(self._imLabel)
@@ -287,7 +287,7 @@ class PlotGrowthRates(PlotSuperClass):
         reAx.margins(x=0.1, y=0.1)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(imAx, loc ="upper left")
+        self._ph.makePlotPretty(imAx)
         self._ph.makePlotPretty(reAx, loc ="upper left",\
                                 legend = False, rotation = 45)
 
