@@ -11,7 +11,7 @@ from scipy import stats
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -23,7 +23,7 @@ sigMul = (2,3,4)
 PDFStats={"stdDev":{key:None for key in sigMul}, "skew":None, "kurtExcess":None}
 
 scan = "B0_0.08"
-path = "../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
+path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
 fileName = os.path.join(path, "3", "n-radialFluxes-fluct.pickle")
 with open(fileName, "rb") as f:
     fig = pickle.load(f)

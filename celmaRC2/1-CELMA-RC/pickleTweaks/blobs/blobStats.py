@@ -12,7 +12,7 @@ import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -26,7 +26,7 @@ sD = {key:{"waiting":None, "pulse":None, "color":c}\
             for key, c in zip(sigmas,colors)}
 
 scan = "B0_0.08"
-path = "../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
+path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
 
 # Obtain the patches
 for key in sD.keys():

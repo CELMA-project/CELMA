@@ -12,7 +12,7 @@ from boututils.options import BOUTOptions
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -22,7 +22,7 @@ from CELMAPy.plotHelpers import (SizeMaker,\
                                  seqCMap3)
 
 # Collect from fieldScan
-path = "../CSDXMagFieldScanAr/visualizationNormalized/B0_0.06/field1D/jPar-parallel-1D-0.pickle"
+path = "../../CSDXMagFieldScanAr/visualizationNormalized/B0_0.06/field1D/jPar-parallel-1D-0.pickle"
 with open(path, "rb") as f:
     fig = pickle.load(f)
 
@@ -34,7 +34,7 @@ for ax in axes[:-1]:
 oldAx = axes[-1]
 
 # Convert to physical
-inputFileOpts = BOUTOptions("../CSDXNyScan")
+inputFileOpts = BOUTOptions("../../CSDXNyScan")
 n0  = eval(inputFileOpts.input["n0"])
 Te0 = eval(inputFileOpts.input["Te0"])*cst.e
 B0  = eval(inputFileOpts.input["B0"])
