@@ -29,18 +29,8 @@ def safeCollect(*args, **kwargs):
     """
     #}}}
 
-    try:
-        data = collect(*args, **kwargs)
-    except:
-        from boututils.datafile import DataFile
-        try:
-            for i in range(100):
-                f=DataFile(os.path.join(kwargs["path"], "BOUT.dmp.{}.nc".format(i)))
-                print(len(f.read("t_array")))
-        except:
-            pass
-        import pdb; pdb.set_trace()
-        a=1
+    data = collect(*args, **kwargs)
+
     # write = False prevents writing
     data.setflags(write=False)
 
