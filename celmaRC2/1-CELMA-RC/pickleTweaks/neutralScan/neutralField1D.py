@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweak of profile plots as a function of B.
+Tweak of profile plots as a function of nn.
 To be used in thesis.
 """
 
@@ -17,9 +17,15 @@ commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import PlotHelper, seqCMap3
+from CELMAPy.plotHelpers import PlotHelper, plotNumberFormatter, seqCMap3
 
-scans  = ("B0_0.1", "B0_0.08", "B0_0.06", "B0_0.04", "B0_0.02")
+scans  = (\
+          "nn_9.9e+20"              ,\
+          "nn_4e+19"                ,\
+          "nn_1.5e+19"              ,\
+          "nn_2.5e+18"              ,\
+          "nn_6.666666666666668e+18",\
+         )
 markers = ("*", "o", "s", "v", "^")
 ls = (\
       (0, ()),\
@@ -38,7 +44,7 @@ sD =\
 
 for direction in ("radial", "parallel"):
     for scan in scans:
-        folder = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/field1D".format(scan)
+        folder = "../../CSDXNeutralScanAr/visualizationPhysical/{}/field1D".format(scan)
         picklePath = os.path.join(folder,\
                                   "mainFields-{}-1D-0.pickle".format(direction))
         with open(picklePath, "rb") as f:
@@ -138,8 +144,9 @@ for direction in ("radial", "parallel"):
     # Manually creating the legend
     handles = []
     for scan in scans:
-        curScan = float(scan[4:])
-        label = "$B_0 = {}$".format(curScan) + r" $\mathrm{T}$"
+        curScan = float(scan[3:])
+        label = r"$n_n =$ {}".format(plotNumberFormatter(curScan, None)) +\
+                r" $\mathrm{m}^{-3}$"
         handle = mlines.Line2D([], [],\
                        color  = "k"                    ,\
                        marker = sD[scan]["n"]["marker"],\
@@ -160,8 +167,8 @@ for direction in ("radial", "parallel"):
                                     )
 
     if direction == "radial":
-        fileName = "BScanRad.pdf"
+        fileName = "nnScanRad.pdf"
     elif direction == "parallel":
-        fileName = "BScanPar.pdf"
+        fileName = "nnScanPar.pdf"
 
     PlotHelper.savePlot(fig, fileName)

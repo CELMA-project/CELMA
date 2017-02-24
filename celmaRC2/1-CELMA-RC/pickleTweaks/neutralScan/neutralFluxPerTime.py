@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Gives blobs per unit time for the B-Scan.
+Gives blobs per unit time for the nn-Scan.
 """
 
 import pickle
@@ -14,9 +14,16 @@ commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import PlotHelper
+from CELMAPy.plotHelpers import PlotHelper, plotNumberFormatter
 
-scans = ("B0_0.06", "B0_0.08", "B0_0.1")
+scans  = (\
+          "nn_9.9e+20"              ,\
+          "nn_4e+19"                ,\
+          "nn_1.5e+19"              ,\
+          "nn_2.5e+18"              ,\
+          "nn_6.666666666666668e+18",\
+         )
+
 elPerTime   = []
 ionsPerTime = []
 perpPerTime = []
@@ -44,7 +51,7 @@ def getNumber(t, ind):
 #}}}
 
 for scan in scans:
-    path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/totalFluxes/".format(scan)
+    path = "../../CSDXNeutralScanAr/visualizationPhysical/{}/totalFluxes/".format(scan)
 
     # Obtain the time
     fileName = os.path.join(path, "totalFluxes.pickle")
@@ -55,7 +62,7 @@ for scan in scans:
 
     time, _ = perpAx.get_lines()[0].get_data()
     lastT = time[-1]
-    curScan = float(scan[4:])
+    curScan = float(scan[3:])
 
     # Get the numbers from the first axis
     t = parallelAx.texts[0].get_text()
@@ -69,7 +76,7 @@ for scan in scans:
     ionsPerTime.append(totParIon/lastT)
     perpPerTime.append(totPerp/lastT)
 
-    scanVal.append(curScan)
+    scanVal.append(plotNumberFormatter(curScan, None))
 
 plt.close("all")
 
@@ -173,4 +180,4 @@ fig.legend(handles                         ,\
 
 fig.suptitle(r"$\mathrm{Average\;particle\;flux\;per\;second}$", y=1.3)
 
-PlotHelper.savePlot(fig, "BScanTotalFlux.pdf")
+PlotHelper.savePlot(fig, "nnScanTotalFlux.pdf")
