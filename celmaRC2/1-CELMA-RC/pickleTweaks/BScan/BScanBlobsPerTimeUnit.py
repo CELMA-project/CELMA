@@ -10,7 +10,7 @@ import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath("./../../common")
+commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
@@ -22,7 +22,7 @@ blobsPerTime = []
 holesPerTime = []
 scanVal = []
 for scan in scans:
-    path = "../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
+    path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
     # Obtain the counts
     fileName = os.path.join(path, str(sigMul), "counts.pickle")
     with open(fileName, "rb") as f:
@@ -48,20 +48,6 @@ for scan in scans:
 plt.close("all")
 
 fig, ax = plt.subplots(figsize = (4,1))
-
-
-# ax.plot(scanVal, blobsPerTime, "k", ls="", alpha=0.7,\
-#         marker="o", ms=10, label="$\mathrm{Blobs}$")
-# ax.plot(scanVal, holesPerTime, "gray", ls="", alpha=0.7,\
-#         marker="d", ms=10, label="$\mathrm{Holes}$")
-# ax.set_ylabel(r"$\mathrm{Average\;counts\;per\;second}$")
-# ax.set_xlabel(r"$B [\mathrm{T}]$")
-# PlotHelper.makePlotPretty(ax, rotation = 45, loc = "upper right")
-
-
-
-
-
 
 yTicks    = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
 xBarVals  = tuple(range(len(blobsPerTime)*3))
