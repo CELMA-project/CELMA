@@ -851,11 +851,23 @@ class ScanDriver(object):
             # NOTE: bout_runners are making a restart 0 folder for
             #       copied restart files, as a hack, the 0th restart
             #       folder is excluded
-            # Sort the folders
-            folders = sorted(\
-                        tuple(folder for folder in folders if\
-                            ("restart" in folder) and (folder != "restart_0"))\
-                        )
+
+            # Remove un-needed folders
+            folders = tuple(folder for folder in folders if\
+                            ("restart" in folder) and (folder != "restart_0"))
+
+            # Sort
+            # http://stackoverflow.com/questions/4836710/does-python-have-a-built-in-function-for-string-natural-sort
+            # NOTE: The lambda function returns a tuple for each element
+            #       The sorting is made from the first element in the
+            #       tuple
+            #       If the first element is equal, then the sorting
+            #       happens for in the next element, and so on.
+            digit   = re.compile(r"(\d+)")
+            folders =\
+                sorted(folders,\
+                    key=lambda el: [int(s) if s.isdigit() else s.lower()\
+                        for s in re.split(digit, el)])
 
             extraTrubulenceRuns.append(\
                    tuple(os.path.join(turboDmp, folder) for folder in folders))

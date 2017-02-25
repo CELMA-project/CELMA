@@ -29,7 +29,11 @@ def safeCollect(*args, **kwargs):
     """
     #}}}
 
-    data = collect(*args, **kwargs)
+    try:
+        data = collect(*args, **kwargs)
+    except Exception as e:
+        print("\nFailed to collect {}\n".format(kwargs["path"]))
+        raise e
 
     # write = False prevents writing
     data.setflags(write=False)
