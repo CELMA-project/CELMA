@@ -306,14 +306,22 @@ class PlotGrowthRates(PlotSuperClass):
         # Remove old legend
         leg = imAx.legend()
         leg.remove()
+
         # Put the legend outside
         handles, labels = imAx.get_legend_handles_labels()
+        # Find the leftmost ylabel
+        imAxY   = imAx.yaxis.get_label().get_position()[0]
+        reAxPos = reAx.yaxis.get_label().get_position()
+        y       = np.max(imAxY, reAxPos[0]) - 0.5
+        x       = reAxPos[1] - 0.15
+
         fig.legend(handles,\
                    labels,\
-                   bbox_to_anchor=(1.05, 1.0),\
-                   loc="upper left",\
+                   bbox_to_anchor=(x, y),\
+                   ncol=2,\
+                   loc="upper center",\
                    borderaxespad=0.,\
-                   bbox_transform = imAx.transAxes,\
+                   bbox_transform = reAx.transAxes,\
                    )
 
         if self._showPlot:

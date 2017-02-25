@@ -177,7 +177,7 @@ class PlotSubmitter(object):
                  fluct="both" ,\
                  condition=3  ,\
                  varName ="n" ,\
-                 phiCont=False,\
+                 phiCont=True ,\
                  plotAll=False):
         #{{{docstring
         """
