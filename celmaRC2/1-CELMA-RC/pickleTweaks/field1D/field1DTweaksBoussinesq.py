@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweak of Boussinesq profile plots to be used in thesis.
+Tweak of Boussinesq profile.
 """
 
 import pickle
