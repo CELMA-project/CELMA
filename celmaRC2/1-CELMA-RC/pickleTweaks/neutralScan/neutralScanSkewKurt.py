@@ -2,7 +2,6 @@
 
 """
 Tweak the skewness and kurtosis as a function of nn.
-To be used in thesis.
 """
 
 import pickle
@@ -17,14 +16,13 @@ commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, plotNumberFormatter, seqCMap3
+from CELMAPy.plotHelpers import SizeMaker, PlotHelper, seqCMap3
 
 scans  = (\
-          "nn_9.9e+20"              ,\
           "nn_4e+19"                ,\
           "nn_1.5e+19"              ,\
-          "nn_2.5e+18"              ,\
           "nn_6.666666666666668e+18",\
+          "nn_2.5e+18"              ,\
          )
 
 markers = ("*", "o", "s", "v", "^")
@@ -63,10 +61,12 @@ for scan in scans:
 fig, (sAx, kAx) = plt.subplots(nrows=2, figsize = SizeMaker.standard(w=3, a=1.5),\
                                sharex=True)
 
+# Used for conversion
+n0 = 1e19
+
 for scan in scans:
-    curScan = float(scan[3:])
-    label = r"$n_n =$ {}".format(plotNumberFormatter(curScan, None)) +\
-            r" $\mathrm{m}^{-3}$"
+    curScan = n0/(n0+float(scan[3:]))*100
+    label  = r"$d = {:d} \;\%$".format(int(curScan))
     for key in sD[scan].keys():
         if "skew" in key.lower():
             sAx.plot(xAxis, sD[scan][key],\
