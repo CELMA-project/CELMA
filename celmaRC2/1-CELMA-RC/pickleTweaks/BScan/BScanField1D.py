@@ -2,7 +2,6 @@
 
 """
 Tweak of profile plots as a function of B.
-To be used in thesis.
 """
 
 import pickle

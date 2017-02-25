@@ -14,14 +14,13 @@ commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import PlotHelper, plotNumberFormatter
+from CELMAPy.plotHelpers import PlotHelper
 
 scans  = (\
-          "nn_9.9e+20"              ,\
           "nn_4e+19"                ,\
           "nn_1.5e+19"              ,\
-          "nn_2.5e+18"              ,\
           "nn_6.666666666666668e+18",\
+          "nn_2.5e+18"              ,\
          )
 
 elPerTime   = []
@@ -76,13 +75,18 @@ for scan in scans:
     ionsPerTime.append(totParIon/lastT)
     perpPerTime.append(totPerp/lastT)
 
-    scanVal.append(plotNumberFormatter(curScan, None))
+    scanVal.append(curScan)
 
 plt.close("all")
 
 # Perp values
 fig, (perpAx, parAx) = plt.subplots(ncols=2, figsize = (5,1))
-yTicks   = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
+
+# Format the scans
+n0 = 1e19
+scanVal  = n0/(n0+np.array(scanVal))*100
+yTicks   = tuple(r"${:d} \; \%$".format(int(d)) for d in scanVal)
+
 xBarVals = tuple(range(len(perpPerTime)))
 
 # Find the lowest value
