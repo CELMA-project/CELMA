@@ -2,7 +2,6 @@
 
 """
 Tweak the skewness and kurtosis as a function of B.
-To be used in thesis.
 """
 
 import pickle

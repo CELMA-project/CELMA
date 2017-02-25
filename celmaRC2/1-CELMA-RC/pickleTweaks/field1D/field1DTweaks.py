@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweak of profile plots to be used in thesis.
+Tweak of profile plots.
 """
 
 import pickle

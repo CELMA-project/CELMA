@@ -2,7 +2,6 @@
 
 """
 Tweak profile comparison between non-Boussinesq and Boussinesq.
-To be used in thesis.
 """
 
 import pickle

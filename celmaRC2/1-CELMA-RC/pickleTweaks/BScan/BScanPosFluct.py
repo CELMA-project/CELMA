@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 """
-Tweak of profile plots as a function of B.
-To be used in thesis.
+Tweak of position of fluctuations as a function of B.
 """
 
 import pickle
