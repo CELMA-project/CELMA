@@ -80,7 +80,7 @@ minInd = np.argmin(tuple(curVal[1] for curVal in maxmin))
 current = nnAx.get_lines()[maxInd]
 parDer  = nnAx.get_lines()[minInd]
 
-currentTxt = r"$\partial_\parallel j_\parallel$"
+currentTxt = r"$\frac{1}{e}\partial_\parallel j_\parallel$"
 nnAx.text(2, 1.5e25, currentTxt, color=current.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
@@ -91,7 +91,7 @@ nnAx.text(2, 1.5e25, currentTxt, color=current.get_color(),\
 
 parTxt = (r"$-\partial_\parallel \nabla\cdot"
           r"\left(u_{i,\parallel}"
-          r"n \nabla_\perp \phi \right)$")
+          r"n \nabla_\perp \frac{\phi}{B} \right)$")
 nnAx.text(1.6, -1.75e25, parTxt, color=parDer.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
@@ -146,7 +146,7 @@ minInd = np.argmin(tuple(curVal[1] for curVal in maxmin))
 current = nnAx.get_lines()[maxInd]
 parDer  = nnAx.get_lines()[minInd]
 
-currentTxt = r"$\partial_\parallel j_\parallel$"
+currentTxt = r"$\frac{1}{e}\partial_\parallel j_\parallel$"
 normalAx.text(2, 7.5e24, currentTxt, color=current.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
@@ -157,7 +157,7 @@ normalAx.text(2, 7.5e24, currentTxt, color=current.get_color(),\
 
 parTxt = (r"$-\partial_\parallel \nabla\cdot"
           r"\left(u_{i,\parallel}"
-          r"n \nabla_\perp \phi \right)$")
+          r"n \nabla_\perp \frac{\phi}{B} \right)$")
 normalAx.text(1.6, -8e24, parTxt, color=parDer.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
