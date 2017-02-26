@@ -312,7 +312,7 @@ class PlotGrowthRates(PlotSuperClass):
         # Find the leftmost ylabel
         imAxY   = imAx.yaxis.get_label().get_position()[0]
         reAxPos = reAx.yaxis.get_label().get_position()
-        y       = np.max(imAxY, reAxPos[0]) - 0.5
+        y       = np.max((imAxY, reAxPos[0])) - 0.5
         x       = reAxPos[1] - 0.15
 
         fig.legend(handles,\

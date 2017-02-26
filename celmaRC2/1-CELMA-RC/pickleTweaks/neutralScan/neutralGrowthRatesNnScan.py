@@ -88,13 +88,18 @@ newAxes[1].set_xlabel(reAx.get_xlabel())
 PlotHelper.makePlotPretty(newAxes[0], legend = False, rotation = 45)
 PlotHelper.makePlotPretty(newAxes[1], legend = False, rotation = 45)
 
-newAxes[0].legend(handles                              ,\
-                  newLabels                            ,\
-                  bbox_to_anchor=(1.05, 1.0)           ,\
-                  loc="upper left"                     ,\
-                  borderaxespad=0.                     ,\
-                  bbox_transform = newAxes[0].transAxes,\
-                 )
+# Manually set the x and the y as the figure has different coordinates
+x = 0.4
+y = -0.4
+
+newFig.legend(handles,\
+              newLabels,\
+              bbox_to_anchor=(x, y),\
+              ncol=2,\
+              loc="upper center",\
+              borderaxespad=0.,\
+              bbox_transform = newAxes[1].transAxes,\
+              )
 
 newAxes[0].get_xaxis().set_major_locator(MaxNLocator(integer=True))
 
