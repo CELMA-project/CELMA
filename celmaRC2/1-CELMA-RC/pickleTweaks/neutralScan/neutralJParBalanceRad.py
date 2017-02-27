@@ -60,7 +60,8 @@ plt.close(fig)
 #}}}
 
 # Make new ax to plot to
-fig, (normalAx ,nnAx) = plt.subplots(ncols=2, figsize = SizeMaker.array(2,1))
+fig, (normalAx ,nnAx) = plt.subplots(ncols=2,\
+                                    figsize = SizeMaker.array(2,1, aSingle=0.5))
 size = "large"
 
 #{{{Extract and plot nn
@@ -192,7 +193,7 @@ fig.suptitle((r"$z={}\;\mathrm{{m}}\quad"
         format(plotNumberFormatter(rho,0).replace("$",""),\
                plotNumberFormatter(t,0)  .replace("$","")\
         ),
-        y = 1.1
+        y = 1.15
         )
 
 fig.subplots_adjust(wspace=0.7)

@@ -60,7 +60,8 @@ plt.close(fig)
 #}}}
 
 # Make new ax to plot to
-fig, (normalAx ,nnAx) = plt.subplots(ncols=2, figsize = SizeMaker.array(2,1))
+fig, (normalAx ,nnAx) = plt.subplots(ncols=2,\
+                                    figsize = SizeMaker.array(2,1, aSingle=0.5))
 size = "large"
 
 #{{{Extract and plot nn
@@ -92,7 +93,7 @@ nnAx.text(2, 1.5e25, currentTxt, color=current.get_color(),\
 parTxt = (r"$-\partial_\parallel \nabla\cdot"
           r"\left(u_{i,\parallel}"
           r"n \nabla_\perp \frac{\phi}{B} \right)$")
-nnAx.text(1.6, -1.75e25, parTxt, color=parDer.get_color(),\
+nnAx.text(1.6, -1.6e25, parTxt, color=parDer.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
                  "edgecolor":"none" ,\
@@ -158,7 +159,7 @@ normalAx.text(2, 7.5e24, currentTxt, color=current.get_color(),\
 parTxt = (r"$-\partial_\parallel \nabla\cdot"
           r"\left(u_{i,\parallel}"
           r"n \nabla_\perp \frac{\phi}{B} \right)$")
-normalAx.text(1.6, -8e24, parTxt, color=parDer.get_color(),\
+normalAx.text(1.6, -7.5e24, parTxt, color=parDer.get_color(),\
            va="center", ha="center", size=size,\
            bbox={"facecolor":"white",\
                  "edgecolor":"none" ,\
@@ -193,7 +194,7 @@ fig.suptitle((r"$\rho={}\;\mathrm{{m}}\quad"
         format(plotNumberFormatter(rho,0).replace("$",""),\
                plotNumberFormatter(t,0).replace("$","")\
         ),
-        y = 1.1
+        y = 1.2
         )
 fig.subplots_adjust(wspace=0.7)
 PlotHelper.savePlot(fig, "vortDBalanceNnComparePar.pdf")
