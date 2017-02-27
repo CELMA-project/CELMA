@@ -37,7 +37,7 @@ class PlotPerformance(PlotSuperClass):
     #}}}
 
     #{{{setData
-    def setData(self, performance, allFolders=False):
+    def setData(self, performance, mode):
         #{{{docstring
         """
         Sets the performance to be plotted.
@@ -60,8 +60,8 @@ class PlotPerformance(PlotSuperClass):
                 * I/O       - Percentage of time used on inupt/output
                 * SOLVER    - Percentage of time used in the solver
             The values are stored in numpy arrays.
-        allFolders : bool
-            If true, the fileName will be tagged with allFolders.
+        mode : ["init"|"expand"|"linear"|"turbulence"|"all"]
+            What part of the simulation is being plotted for.
         """
         #}}}
 
@@ -77,9 +77,7 @@ class PlotPerformance(PlotSuperClass):
         self._fileName =\
             os.path.join(self._savePath, "performance")
 
-        # Whether or not all folders has been used
-        if allFolders:
-            self._fileName += "allFolders"
+        self._fileName += "mode"
 
         if self._extension is None:
             self._extension = "png"

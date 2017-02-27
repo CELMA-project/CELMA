@@ -633,33 +633,38 @@ class PlotSubmitter(object):
     #}}}
 
     #{{{runPerformance
-    def runPerformance(self, allFolders=False):
+    def runPerformance(self):
         #{{{docstring
         """
         Runs the performance plots
-
-        Parameters
-        ----------
-        allFolders : bool
-            If "init" and "expand" should be included in the plot.
         """
         #}}}
-        loopOver = zip(self._dmpFolders["turbulence"],\
-                       self._paramKeys,\
+        loopOver = zip(self._paramKeys,\
                        self._rangeJobs)
-        for dmp_folders, key, nr in loopOver:
+        for key, nr in loopOver:
+            # Init state
+            import pdb; pdb.set_trace()
+            collectPaths = self._mergeAll[key]
+            dmp_folders  = (self._dmpFolders["init"],)
+            args = (dmp_folders, collectPaths, "init", self._plotSuperKwargs)
+            self.sub.setJobName("performanceInit{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args)
 
-            if allFolders:
-                collectPaths = self._mergeAll[key]
-                self.sub.setJobName("performanceAll{}".format(nr))
-                kwargs = {"allFolders":True}
-            else:
-                collectPaths = self._mergeFromLinear[key]
-                self.sub.setJobName("performance{}".format(nr))
-                kwargs = {"allFolders":False}
-            dmp_folders  = (dmp_folders,)
-            args = (dmp_folders, collectPaths, self._plotSuperKwargs)
-            self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
+            # Expand state
+
+#        input linear tSlice
+            # Linear state
+            self._linearTSlices
+
+#        input turb tSlice
+            # Turbulence
+            self._satTurbTSlices
+
+
+
+            # All
+            collectPaths = self._mergeAll[key]
+
     #}}}
 
     #{{{runPhaseShift

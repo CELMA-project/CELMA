@@ -10,10 +10,10 @@ from .plotPerformance import PlotPerformance
 from multiprocessing import Process
 
 #{{{driverPerformance
-def driverPerformance(collectPaths      ,\
-                      convertToPhysical ,\
-                      plotSuperKwargs   ,\
-                      allFolders = False,\
+def driverPerformance(collectPaths     ,\
+                      convertToPhysical,\
+                      mode             ,\
+                      plotSuperKwargs  ,\
                      ):
     #{{{docstring
     """
@@ -26,10 +26,10 @@ def driverPerformance(collectPaths      ,\
         The corresponind 't_array' of the paths must be in ascending order.
     convertToPhysical : bool
         Whether or not to convert to physical units.
+    mode : ["init"|"expand"|"linear"|"turbulence"|"all"]
+        What part of the simulation is being plotted for.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
-    allFolders : bool
-        If true, the fileName will be tagged with allFolders.
     """
     #}}}
 
@@ -42,7 +42,7 @@ def driverPerformance(collectPaths      ,\
     perform = ccp.executeCollectAndCalc()
 
     ptt = PlotPerformance(ccp.uc, **plotSuperKwargs)
-    ptt.setData(perform, allFolders)
+    ptt.setData(perform, mode)
     ptt.plotSaveShowPerformance()
 #}}}
 
@@ -53,12 +53,12 @@ class DriverPerformance(DriverSuperClass):
     """
 
     #{{{Constructor
-    def __init__(self              ,\
-                 dmp_folders       ,\
-                 convertToPhysical ,\
-                 plotSuperKwargs   ,\
-                 allFolders = False,\
-                 **kwargs          ):
+    def __init__(self             ,\
+                 dmp_folders      ,\
+                 convertToPhysical,\
+                 plotSuperKwargs  ,\
+                 mode             ,\
+                 **kwargs):
         #{{{docstring
         """
         This constructor:
@@ -72,8 +72,8 @@ class DriverPerformance(DriverSuperClass):
             Tuple of the dmp_folder (output from bout_runners).
         plotSuperKwargs : dict
             Keyword arguments for the plot super class.
-        allFolders : bool
-            If true, the fileName will be tagged with allFolders.
+        mode : ["init"|"expand"|"linear"|"turbulence"|"all"]
+            What part of the simulation is being plotted for.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -84,7 +84,7 @@ class DriverPerformance(DriverSuperClass):
 
         # Set the member data
         self.convertToPhysical = convertToPhysical
-        self._allFolders       = allFolders
+        self._mode             = mode
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -102,15 +102,14 @@ class DriverPerformance(DriverSuperClass):
         args =  (\
                  self._collectPaths    ,\
                  self.convertToPhysical,\
+                 self._mode            ,\
                  self._plotSuperKwargs ,\
                 )
-        kwargs = {"allFolders":self._allFolders}
         if self._useMultiProcess:
             processes =\
-                    Process(target = driverPerformance,\
-                            args = args, kwargs=kwargs)
+                    Process(target = driverPerformance, args = args)
             processes.start()
         else:
-            driverPerformance(*args, **kwargs)
+            driverPerformance(*args)
     #}}}
 #}}}
