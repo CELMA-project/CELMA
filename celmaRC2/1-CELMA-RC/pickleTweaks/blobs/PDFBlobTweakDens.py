@@ -45,16 +45,20 @@ kurtExcess = PDFStats[posKey]["kurtExcess"]
 
 # Add skewness and kurtosis to the plot
 # Get the textSize
-textPos = (0.725, 0.945)
+textPos = (0.595, 0.935)
 # Add text
 SKTxt = ax.\
         text(*textPos,\
-            "$S = {:.2f}$\n $K = {:.2f}$".\
+            "$S \;\; = {:.2f}$\n $K_E = {:.2f}$".\
             format(skew, kurtExcess),\
             transform = ax.transAxes,\
             ha="left", va="top",\
             bbox={"facecolor":"white", "alpha":0.5, "pad":5},\
             )
 SKTxt.set_fontsize(txtSize)
+
+# Resize the figure
+_, height = fig.get_size_inches()
+fig.set_size_inches((2.70, height*0.7))
 
 PlotHelper.savePlot(fig, "blobDensPDF_{}.pdf".format(scan))

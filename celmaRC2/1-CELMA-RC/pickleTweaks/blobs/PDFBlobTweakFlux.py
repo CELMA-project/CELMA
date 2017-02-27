@@ -65,7 +65,7 @@ labels  = labels [1:]
 # Have them in reverse order for better plot
 fig.legend(handles[::-1],\
            labels [::-1],\
-           bbox_to_anchor=(1.05, 1.0),\
+           bbox_to_anchor=(0.625, 0.66),\
            loc="upper left",\
            borderaxespad=0.,\
            bbox_transform = ax.transAxes,\
@@ -83,11 +83,11 @@ ax.set_xlabel(xlabel)
 
 # Add skewness and kurtosis text
 # Get the textSize
-textPos = (0.725, 0.945)
+textPos = (0.5575, 0.935)
 # Add text
 SKTxt = ax.\
         text(*textPos,\
-            "$S = {:.2f}$\n $K = {:.2f}$".\
+            "$S \;\;= \;\;{:.2f}$\n $K_E = {:.2f}$".\
             format(PDFStats["skew"], PDFStats["kurtExcess"]),\
             transform = ax.transAxes,\
             ha="left", va="top",\
@@ -95,4 +95,7 @@ SKTxt = ax.\
             )
 SKTxt.set_fontsize(txtSize)
 
+# Resize the figure
+_, height = fig.get_size_inches()
+fig.set_size_inches((2.70, height*0.7))
 PlotHelper.savePlot(fig, "blobFluxPDF_{}.pdf".format(scan))
