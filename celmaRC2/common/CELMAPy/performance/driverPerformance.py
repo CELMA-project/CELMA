@@ -14,6 +14,7 @@ def driverPerformance(collectPaths     ,\
                       convertToPhysical,\
                       mode             ,\
                       plotSuperKwargs  ,\
+                      tSlice = None    ,\
                      ):
     #{{{docstring
     """
@@ -30,6 +31,8 @@ def driverPerformance(collectPaths     ,\
         What part of the simulation is being plotted for.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    tSlice : slice
+        Use if the data should be sliced.
     """
     #}}}
 
@@ -39,7 +42,7 @@ def driverPerformance(collectPaths     ,\
                                    )
 
     # Execute the collection
-    perform = ccp.executeCollectAndCalc()
+    perform = ccp.executeCollectAndCalc(tSlice = tSlice)
 
     ptt = PlotPerformance(ccp.uc, **plotSuperKwargs)
     ptt.setData(perform, mode)
@@ -56,8 +59,9 @@ class DriverPerformance(DriverSuperClass):
     def __init__(self             ,\
                  dmp_folders      ,\
                  convertToPhysical,\
-                 plotSuperKwargs  ,\
                  mode             ,\
+                 plotSuperKwargs  ,\
+                 tSlice = None    ,\
                  **kwargs):
         #{{{docstring
         """
@@ -74,6 +78,8 @@ class DriverPerformance(DriverSuperClass):
             Keyword arguments for the plot super class.
         mode : ["init"|"expand"|"linear"|"turbulence"|"all"]
             What part of the simulation is being plotted for.
+        tSlice : slice
+            Use if the data should be sliced.
         **kwargs : keyword arguments
             See parent class for details.
         """
@@ -85,6 +91,7 @@ class DriverPerformance(DriverSuperClass):
         # Set the member data
         self.convertToPhysical = convertToPhysical
         self._mode             = mode
+        self._tSlice           = tSlice
 
         # Update the plotSuperKwargs dict
         plotSuperKwargs.update({"dmp_folders":dmp_folders})
@@ -105,11 +112,13 @@ class DriverPerformance(DriverSuperClass):
                  self._mode            ,\
                  self._plotSuperKwargs ,\
                 )
+        kwargs = {"tSlice":self._tSlice}
         if self._useMultiProcess:
             processes =\
-                    Process(target = driverPerformance, args = args)
+                    Process(target = driverPerformance,\
+                            args = args, kwargs=kwargs)
             processes.start()
         else:
-            driverPerformance(*args)
+            driverPerformance(*args, **kwargs)
     #}}}
 #}}}

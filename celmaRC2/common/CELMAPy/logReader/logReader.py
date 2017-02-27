@@ -3,6 +3,7 @@
 """Contains function which reads the log files."""
 
 from collections import OrderedDict
+from copy import copy
 from glob import glob
 import numpy as np
 import os
@@ -43,11 +44,11 @@ def getLogNumbers(path):
         raise RuntimeError("No log files found in {}".format(path))
 
     # Create the empty dict
-    data = createEmptyDict(fileNames)
+    timestep, data = getTimeStepAndEmptyDict(fileNames)
 
     for fileName in fileNames:
         # Create a temporary dataDict
-        tmpData = OrderedDict({header[0]:[]})
+        tmpData = OrderedDict([(key, []) for key in data.keys()])
         with open(fileName,"r") as f:
             # Read until the start of the log
             for line in f:
@@ -73,7 +74,14 @@ def getLogNumbers(path):
                 line = [column for column in line if column != ""]
                 for key, value in zip(tmpData.keys(), line):
                     # Cast to float
-                    tmpData[key].append(float(value))
+                    try:
+                        tmpData[key].append(float(value))
+                    except ValueError as e:
+                        if "could not convert string to float" in e.args[0]:
+                            # Occationally, the end of file is missing
+                            pass
+                        else:
+                            raise e
 
         # Cast to numpy array and add to data dict
         for key in data.keys():
@@ -84,13 +92,28 @@ def getLogNumbers(path):
                     data[key] += np.array(tmpData[key])
                 except ValueError as e:
                     if "not be broadcast together" in e.args[0]:
-                        message = ("The data is corrupted as the number of "
-                                   "outputs varies with processor number. "
-                                   "Repair by running 'repairBrokenExit'."
-                                )
-                        raise ValueError(message)
+                        message = ("WARNING!!! Mismatch in the dimensions in"
+                                   " {}.\n"
+                                   "If the data is corrupted, it can be fixed "
+                                   "by 'repairBrokenExit'. "
+                                   "However, this will not fix the logfiles.\n"
+                                   "Instead we here just recast to the "
+                                   "shortest array length.").format(path)
+                        print(message)
+
+                        dataLen = len(data[key])
+                        tmpLen  = len(tmpData[key])
+                        if dataLen > tmpLen:
+                            data[key] = data[key][:tmpLen]
+                        else:
+                            tmpData[key] = tmpData[key][:dataLen]
+
+                        data[key] += np.array(tmpData[key])
                     else:
                         raise e
+
+    # Add timestep to the data
+    data["timestep"] = np.array([timestep]*len(data[key]))
 
     # Divide by number of processors and cast to non-writeable array
     for key in data.keys():
@@ -100,8 +123,9 @@ def getLogNumbers(path):
     return dict(data)
 #}}}
 
-#{{{createEmptyDict
-def createEmptyDict(fileNames):
+#{{{getTimeStepAndEmptyDict
+def getTimeStepAndEmptyDict(fileNames):
+    #{{{docstring
     """
     Creates an empty dictionary which will be filled by the getLogNumbers
     routine.
@@ -113,32 +137,40 @@ def createEmptyDict(fileNames):
 
     Returns
     -------
+    timestep : float
+        The timestep used in the files.
     data : OrderedDict
         The empty dict to be filled
     """
+    #}}}
     with open(fileNames[0],"r") as f:
         # Get the header
         for line in f:
+            if "Option :timestep" in line:
+                timestep = float(line.split("=")[1].split(" ")[1])
             # Find the start of the timestep log
             if "Sim Time  |  RHS evals  | Wall Time |" in line:
-             line = line.replace("\n", "")
-             # First part is split by a | character...
-             header = line.split("|")
-             # ...whilst the last part is split by " "
-             headerWithSpaces = header.pop().split(" ")
-             header = [*header, *headerWithSpaces]
-             header = [head.replace(" ","") for head in header if head != ""]
-             data   = OrderedDict({header[0]:[]})
-             for head in header[0:]:
-                 data[head] = None
+                line = line.replace("\n", "")
+                # First part is split by a | character...
+                header = line.split("|")
+                # ...whilst the last part is split by " "
+                headerWithSpaces = header.pop().split(" ")
+                header = [*header, *headerWithSpaces]
+                header = [head.replace(" ","") for head in header if head != ""]
+                data   = OrderedDict({header[0]:None})
+                for head in header[0:]:
+                    data[head] = None
 
-             break
+                break
 
-    return data
+    return timestep, data
 #}}}
 
+# FIXME: If tSlice is not None, all the files will be read, and the
+#        slicing will be done at the end, that is ineffective
+
 #{{{collectiveGetLogNumbers
-def collectiveGetLogNumbers(paths):
+def collectiveGetLogNumbers(paths, tSlice=None):
     #{{{docstring
     """
     Get the merges the simulation numbers for several BOUT.log.0 files.
@@ -150,6 +182,8 @@ def collectiveGetLogNumbers(paths):
     ----------
     paths : tuple
         The path to the log files.
+    tSlice : slice
+        Use if the data should be sliced.
 
     Returns
     -------
@@ -169,7 +203,8 @@ def collectiveGetLogNumbers(paths):
     """
     #}}}
 
-    data = None
+    data      = None
+    timesteps = []
 
     for path in paths:
         curData = getLogNumbers(path)
@@ -185,6 +220,10 @@ def collectiveGetLogNumbers(paths):
                 # Remove first point in time in the current time as this
                 # is the same as the last of the previous
                 data[key]=np.concatenate((data[key], curData[key][1:]), axis=0)
+
+    if tSlice is not None:
+        for key in data.keys():
+            data[key]= data[key][tSlice]
 
     return data
 #}}}
