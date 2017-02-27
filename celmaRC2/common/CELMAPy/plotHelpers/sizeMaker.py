@@ -17,6 +17,7 @@ class SizeMaker(object):
     # \usepackage{layouts}
     # \printinunitsof{in}\prntlen{\textwidth}
     textWidth = 6.3
+    # Height/width
     # Personal opinion that this looks nicer than the golden ratio
     aspect = 0.7
     # Dots (default from matplotlib dpi = 100 for 6.8 inches)
@@ -59,16 +60,16 @@ class SizeMaker(object):
         Parameters
         ----------
         s : float
-            The scale of the width and heigth.
+            The scale of the width and height.
         w : float
             The width (in inches).
         a : float
-            The aspec ratio heigth/width.
+            The aspec ratio height/width.
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth) in inches.
+            The plot size as (width, height) in inches.
         """
         #}}}
 
@@ -87,16 +88,16 @@ class SizeMaker(object):
         Parameters
         ----------
         s : float
-            The scale of the width and heigth.
+            The scale of the width and height.
         w : float
             The width (in inches).
         a : float
-            The aspec ratio heigth/width.
+            The aspec ratio height/width.
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth) in inches.
+            The plot size as (width, height) in inches.
         """
         #}}}
 
@@ -115,14 +116,14 @@ class SizeMaker(object):
         Parameters
         ----------
         s : float
-            The scale of the width and heigth.
+            The scale of the width and height.
         w : float
             The width (in inches).
 
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth) in inches.
+            The plot size as (width, height) in inches.
         """
         #}}}
 
@@ -152,7 +153,7 @@ class SizeMaker(object):
         Returns
         -------
         plotSize : tuple
-            The plot size as (width, heigth) in inches.
+            The plot size as (width, height) in inches.
         """
         #}}}
 
