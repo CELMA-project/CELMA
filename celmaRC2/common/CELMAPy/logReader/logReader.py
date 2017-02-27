@@ -3,6 +3,7 @@
 """Contains function which reads the log files."""
 
 from collections import OrderedDict
+from glob import glob
 import numpy as np
 import os
 
@@ -10,7 +11,7 @@ import os
 def getLogNumbers(path):
     #{{{docstring
     """
-    Get the simulation numbers from the BOUT.log.0 file.
+    Get the average simulation numbers from the BOUT.log.* files.
 
     Parameters
     ----------
@@ -35,53 +36,105 @@ def getLogNumbers(path):
     """
     #}}}
 
-    fileName = os.path.join(path, "BOUT.log.0")
+    fileNames = glob(os.path.join(path, "BOUT.log.*"))
 
-    with open(fileName,"r") as f:
+    nrFiles = len(fileNames)
+    if nrFiles == 0:
+        raise RuntimeError("No log files found in {}".format(path))
+
+    # Create the empty dict
+    data = createEmptyDict(fileNames)
+
+    for fileName in fileNames:
+        # Create a temporary dataDict
+        tmpData = OrderedDict({header[0]:[]})
+        with open(fileName,"r") as f:
+            # Read until the start of the log
+            for line in f:
+                if "Sim Time  |  RHS evals  | Wall Time |" in line:
+                   break
+
+            newlineCount = 0
+            for line in f:
+                if line == "\n":
+                    if newlineCount > 0:
+                        # No more time log after this (either error or summary)
+                        break
+                    else:
+                        # First line after header is a newline
+                        newlineCount += 1
+                        continue
+
+                # Each line ends with a newline character
+                line = line.replace("\n", "")
+                # Columns separated by spaces
+                line = line.split(" ")
+                # Get the numbers, not the excess spaces
+                line = [column for column in line if column != ""]
+                for key, value in zip(tmpData.keys(), line):
+                    # Cast to float
+                    tmpData[key].append(float(value))
+
+        # Cast to numpy array and add to data dict
+        for key in data.keys():
+            if data[key] is None:
+                data[key] = np.array(tmpData[key])
+            else:
+                try:
+                    data[key] += np.array(tmpData[key])
+                except ValueError as e:
+                    if "not be broadcast together" in e.args[0]:
+                        message = ("The data is corrupted as the number of "
+                                   "outputs varies with processor number. "
+                                   "Repair by running 'repairBrokenExit'."
+                                )
+                        raise ValueError(message)
+                    else:
+                        raise e
+
+    # Divide by number of processors and cast to non-writeable array
+    for key in data.keys():
+        data[key] = data[key]/nrFiles
+        data[key].setflags(write=False)
+
+    return dict(data)
+#}}}
+
+#{{{createEmptyDict
+def createEmptyDict(fileNames):
+    """
+    Creates an empty dictionary which will be filled by the getLogNumbers
+    routine.
+
+    Parameters
+    ----------
+    fileNames : list
+        List of the file names found with glob.
+
+    Returns
+    -------
+    data : OrderedDict
+        The empty dict to be filled
+    """
+    with open(fileNames[0],"r") as f:
         # Get the header
         for line in f:
             # Find the start of the timestep log
             if "Sim Time  |  RHS evals  | Wall Time |" in line:
-               line = line.replace("\n", "")
-               # First part is split by a | character...
-               header = line.split("|")
-               # ...whilst the last part is split by " "
-               headerWithSpaces = header.pop().split(" ")
-               header = [*header, *headerWithSpaces]
-               header = [head.replace(" ","") for head in header if head != ""]
-               data   = OrderedDict({header[0]:[]})
-               for head in header[0:]:
-                   data[head]=[]
+             line = line.replace("\n", "")
+             # First part is split by a | character...
+             header = line.split("|")
+             # ...whilst the last part is split by " "
+             headerWithSpaces = header.pop().split(" ")
+             header = [*header, *headerWithSpaces]
+             header = [head.replace(" ","") for head in header if head != ""]
+             data   = OrderedDict({header[0]:[]})
+             for head in header[0:]:
+                 data[head] = None
 
-               break
+             break
 
-        newlineCount = 0
-        for line in f:
-            if line == "\n":
-                if newlineCount > 0:
-                    # No more time log after this (either error or summary)
-                    break
-                else:
-                    # First line after header is a newline
-                    newlineCount += 1
-                    continue
-
-            # Each line ends with a newline character
-            line = line.replace("\n", "")
-            # Columns separated by spaces
-            line = line.split(" ")
-            # Get the numbers, not the excess spaces
-            line = [column for column in line if column != ""]
-            for key, value in zip(data.keys(), line):
-                # Cast to float
-                data[key].append(float(value))
-
-    for key in data.keys():
-        # Cast to non-writeable array
-        data[key] = np.array(data[key])
-        data[key].setflags(write=False)
-
-    return dict(data)
+    return data
 #}}}
 
 #{{{collectiveGetLogNumbers
