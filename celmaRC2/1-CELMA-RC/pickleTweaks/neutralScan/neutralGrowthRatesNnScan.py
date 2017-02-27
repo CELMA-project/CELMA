@@ -37,7 +37,7 @@ newLabels = []
 for label in labels:
     nr = float(label.split("$")[3].replace("\cdot 10", "e").replace("^{","").replace("}",""))
     nr = n0/(n0+np.array(nr))*100
-    newLabels.append(r"$d\;=\;{:d}\%$".format(int(nr)))
+    newLabels.append(r"$d\;=\;{:d}\%$".format(int(np.ceil(nr))))
 
 # Create new fig
 newFig, newAxes = plt.subplots(nrows=2                      ,\
@@ -99,7 +99,7 @@ newFig.legend(handles,\
               loc="upper center",\
               borderaxespad=0.,\
               bbox_transform = newAxes[1].transAxes,\
-              )
+             )
 
 newAxes[0].get_xaxis().set_major_locator(MaxNLocator(integer=True))
 
