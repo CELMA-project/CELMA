@@ -183,7 +183,7 @@ class PlotTotalFlux(PlotSuperClass):
         textPos = (0.96, 0.91)
 
         # Create the plot
-        figSize = SizeMaker.array(1, 2, w = 6.3, aSingle = 0.7*0.7)
+        figSize = SizeMaker.standard(w=5, a=1)
         fig, (elIonAx, perpAx) =\
                 plt.subplots(nrows=2, figsize=figSize, sharex=True)
 
