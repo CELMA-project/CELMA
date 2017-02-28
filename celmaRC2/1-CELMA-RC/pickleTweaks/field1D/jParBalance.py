@@ -55,7 +55,7 @@ factor = omCI*n0*e*cS
 suptitle = fig.texts[0].get_text()
 
 # Make new ax to plot to
-fig, newAx = plt.subplots(figsize = SizeMaker.standard(w=4))
+fig, newAx = plt.subplots(figsize = SizeMaker.standard(w=4, a=0.5))
 
 maxmin = []
 for line in oldAx.get_lines():
