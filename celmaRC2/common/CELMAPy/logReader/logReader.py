@@ -112,13 +112,14 @@ def getLogNumbers(path):
                     else:
                         raise e
 
-    # Add timestep to the data
-    data["timestep"] = np.array([timestep]*len(data[key]))
-
     # Divide by number of processors and cast to non-writeable array
     for key in data.keys():
         data[key] = data[key]/nrFiles
         data[key].setflags(write=False)
+
+    # Add timestep to the data
+    data["timestep"] = np.array([timestep]*len(data[key]))
+    data["timestep"].setflags(write=False)
 
     return dict(data)
 #}}}
