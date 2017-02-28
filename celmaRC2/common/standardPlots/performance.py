@@ -11,7 +11,7 @@ sys.path.append(commonDir)
 from CELMAPy.performance import DriverPerformance
 
 #{{{performancePlot
-def performancePlot(dmp_folders, collectPaths, mode, plotSuperKwargs):
+def performancePlot(dmp_folders, collectPaths, mode, plotSuperKwargs, tSlice=None):
     #{{{docstring
     """
     Runs the standard performance plot
@@ -26,6 +26,8 @@ def performancePlot(dmp_folders, collectPaths, mode, plotSuperKwargs):
         What part of the simulation is being plotted for.
     plotSuperKwargs : dict
         Keyword arguments for the plot super class.
+    tSlice : slice
+        Use if the data should be sliced.
     """
     #}}}
 
@@ -38,6 +40,7 @@ def performancePlot(dmp_folders, collectPaths, mode, plotSuperKwargs):
                      convertToPhysical,\
                      mode             ,\
                      plotSuperKwargs  ,\
+                     tSlice = tSlice  ,\
                      # DriverSuperClass
                      collectPaths  = collectPaths ,\
                      useMultiProcess = useMultiProcess,\

@@ -38,10 +38,15 @@ class CollectAndCalcPerformance(CollectAndCalcSuperClass):
     #}}}
 
     #{{{executeCollectAndCalc
-    def executeCollectAndCalc(self):
+    def executeCollectAndCalc(self, tSlice=None):
         #{{{docstring
         """
         Function which collects and calculates the performance.
+
+        Parameters
+        ----------
+        tSlice : slice
+            Use if the data should be sliced.
 
         Returns
         -------
@@ -62,31 +67,11 @@ class CollectAndCalcPerformance(CollectAndCalcSuperClass):
         """
         #}}}
 
-        performance = collectiveGetLogNumbers(self._collectPaths)
-
-        # Get the dt as we would like to plot RHS evals/timestep
-        dt = None
-        for path in self._collectPaths:
-            time = collectTime((path,))
-            # Minus one as the first step will have no dt
-            curDt = np.empty(len(time)-1)
-            for i in range(len(time)-1):
-                curDt[i] = time[i+1] - time[i]
-            if dt is None:
-                dt = curDt
-            else:
-                dt=np.concatenate((dt, curDt), axis=0)
-
-        # Guard (in case broken exit occured during the run)
-        if len(dt) > len(performance["RHSevals"]):
-            print("!!!WARNING: The time series was larger than the log files")
-            dt = dt[:len(performance["RHSevals"])]
-        elif len(dt) > len(performance["RHSevals"]):
-            print("!!!WARNING: The log files was larger than the time series ")
-            performance["RHSevals"] = performance["RHSevals"][:len(dt)]
+        performance = collectiveGetLogNumbers(self._collectPaths, tSlice=tSlice)
 
         # Calc RHSPrTime
-        performance["RHSPrTime"] = performance.pop("RHSevals")/dt
+        performance["RHSPrTime"] =\
+            performance.pop("RHSevals")/performance.pop("timestep")
 
         # Rename Calc
         performance["Arithmetic"] = performance.pop("Calc")
