@@ -89,9 +89,10 @@ class PlotProfAndGradCompare(PlotSuperClass):
         self._gradLabel =\
                 self._gradLabelTemplate.\
                 format(pltVarName, **self.uc.conversionDict[self._varName])
-        self._gradAvgLabel =\
-                self._avgLabelTemplate.\
-                format(DDXPltVarName, **self.uc.conversionDict[self._varName])
+        if r"\mathrm{m}^{-3}\mathrm{m}^{-1}" in self._gradLabel:
+            self._gradLabel =\
+                self._gradLabel.replace(r"\mathrm{m}^{-3}\mathrm{m}^{-1}",\
+                                        r"\mathrm{m}^{-4}")
 
         # Set the legends
         self._varAvgLegend =\
@@ -350,7 +351,7 @@ class PlotProfAndGradCompare(PlotSuperClass):
         """
 
         # Create the plot
-        figSize = SizeMaker.standard(w=3, a=2)
+        figSize = SizeMaker.standard(w=2.5, a=1.25)
         fig, axes =\
                 plt.subplots(nrows=4, figsize=figSize, sharex=True)
         varAx, DDXVarAx, fluct1Ax, fluct2Ax = axes
@@ -382,9 +383,10 @@ class PlotProfAndGradCompare(PlotSuperClass):
         fluct2Ax.set_xlabel(self._xLabel)
 
         # Make the plot look nice
-        self._ph.makePlotPretty(fluct1Ax, loc="lower right", ybins = 6)
-        self._ph.makePlotPretty(fluct2Ax, loc="lower right",\
-                                rotation = 45, ybins = 6)
+        self._ph.makePlotPretty(varAx,    ybins = 4)
+        self._ph.makePlotPretty(DDXVarAx, ybins = 4)
+        self._ph.makePlotPretty(fluct1Ax, ybins = 4)
+        self._ph.makePlotPretty(fluct2Ax, ybins = 4, rotation = 45)
 
         # Set the title
         varAx.set_title(self._title)
