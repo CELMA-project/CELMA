@@ -77,7 +77,7 @@ class PlotPerformance(PlotSuperClass):
         self._fileName =\
             os.path.join(self._savePath, "performance")
 
-        self._fileName += "mode"
+        self._fileName += mode.capitalize()
 
         if self._extension is None:
             self._extension = "png"

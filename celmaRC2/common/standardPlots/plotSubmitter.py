@@ -454,7 +454,7 @@ class PlotSubmitter(object):
                     continue
 
             collectPaths = self._mergeFromLinear[key]
-            dmp_folders   = (dmp_folders,)
+            dmp_folders  = (dmp_folders,)
             args = (dmp_folders,\
                     collectPaths,\
                     steadyStatePath,\
@@ -639,32 +639,49 @@ class PlotSubmitter(object):
         Runs the performance plots
         """
         #}}}
-        loopOver = zip(self._paramKeys,\
-                       self._rangeJobs)
-        for key, nr in loopOver:
-            # Init state
-            import pdb; pdb.set_trace()
-            collectPaths = self._mergeAll[key]
-            dmp_folders  = (self._dmpFolders["init"],)
-            args = (dmp_folders, collectPaths, "init", self._plotSuperKwargs)
+
+        # Init
+        for init, nr in zip(self._dmpFolders["init"], self._rangeJobs):
+            dmp_folders = (init,)
+            args = (dmp_folders, dmp_folders, "init", self._plotSuperKwargs)
             self.sub.setJobName("performanceInit{}".format(nr))
             self.sub.submitFunction(performancePlot, args=args)
 
-            # Expand state
-
-#        input linear tSlice
-            # Linear state
-            self._linearTSlices
-
-#        input turb tSlice
-            # Turbulence
-            self._satTurbTSlices
+        # Expand phase
+        for init, nr in zip(self._dmpFolders["expand"], self._rangeJobs):
+            dmp_folders = (init,)
+            args = (dmp_folders, dmp_folders, "expand", self._plotSuperKwargs)
+            self.sub.setJobName("performanceExpand{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args)
 
 
+        # Linear phase
+        for key, nr in zip(self._paramKeys, self._rangeJobs):
+            collectPaths = self._mergeFromLinear[key]
 
-            # All
-            collectPaths = self._mergeAll[key]
+            tSlice = self._findSlices(collectPaths[0], self._linearTSlices)
+            if tSlice is None:
+                continue
 
+            dmp_folders  = (collectPaths[0],)
+            args = (dmp_folders, collectPaths, "linear", self._plotSuperKwargs)
+            kwargs = {"tSlice":tSlice}
+            self.sub.setJobName("performanceLinear{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
+
+        # Turbulent phase
+        for key, nr in zip(self._paramKeys, self._rangeJobs):
+            collectPaths = self._mergeFromLinear[key]
+
+            tSlice = self._findSlices(collectPaths[0], self._satTurbTSlices)
+            if tSlice is None:
+                continue
+
+            dmp_folders  = (collectPaths[0],)
+            args = (dmp_folders, collectPaths, "turbulence", self._plotSuperKwargs)
+            kwargs = {"tSlice":tSlice}
+            self.sub.setJobName("performanceTurbulence{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args, kwargs=kwargs)
     #}}}
 
     #{{{runPhaseShift
