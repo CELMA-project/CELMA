@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Plots the RHS evaluations per timestep for the B-scan.
+Plots the RHS evaluations per timestep for the Boussinesq B-scan.
 """
 
 import pickle
@@ -32,12 +32,9 @@ turbulenceStds = []
 means = (initMeans, expandMeans, linearMeans, turbulenceMeans)
 stds  = (initStds, expandStds, linearStds, turbulenceStds)
 
-data = {key:{innerKey:{"mean":None, "std":None} for innerKey in B0s}\
-        for key in modes}
-
 for B0 in B0s:
     for mode, mean, std in zip(modes, means, stds):
-        path = ("../../../1-CELMA-R/BousCSDXMagFieldScanAr/"
+        path = ("../../../B1-CELMA-RC/BousCSDXMagFieldScanAr/"
                 "visualizationPhysical/B0_{}/"
                 "performance/performance{}.pickle").format(B0,mode)
 
@@ -69,7 +66,7 @@ turbulenceXvals = xBarVals[3::lenMode]
 tickVals        = tuple(val - 0.5 for val in linearXvals)
 
 # Create the figure
-fig, ax = plt.subplots(figsize = SizeMaker.standard(s=0.5))
+fig, ax = plt.subplots(figsize = SizeMaker.standard(a=0.5, s=0.5))
 
 ax.bar(initXvals, initMeans,\
         yerr=initStds, label="Initial phase")
@@ -78,13 +75,14 @@ ax.bar(expandXvals, expandMeans,\
 ax.bar(linearXvals, linearMeans,\
         yerr=linearStds, label="Linear phase")
 ax.bar(turbulenceXvals, turbulenceMeans,\
-        yerr=turbulenceStds, label="Turbulence phase")
+        yerr=turbulenceStds, label="Turbulent phase")
 
 PlotHelper.makePlotPretty(ax)
+ax.xaxis.grid(False)
 ax.xaxis.set_ticks(tickVals)
 ax.xaxis.set_ticklabels(B0s)
 ax.set_xlabel("$B_0 [T]$")
-ax.set_ylabel("RHS iterations per time step")
+ax.set_ylabel("RHS iterations\nper time step")
 
 # Move legend outside
 handles, labels = ax.get_legend_handles_labels()
