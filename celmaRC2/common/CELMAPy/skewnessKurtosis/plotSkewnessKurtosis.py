@@ -143,7 +143,7 @@ class PlotSkewnessKurtosis(PlotSuperClass):
         """
 
         # Create the plot
-        fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4.0))
+        fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4.0, a=0.5))
 
         # Plot
         ax.plot(self._rho, self._skew,\
