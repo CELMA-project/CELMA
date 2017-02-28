@@ -301,7 +301,7 @@ class PlotPSD(PlotSuperClass):
         """
 
         # Create the plot
-        fig = plt.figure(figsize = SizeMaker.standard(s=0.45))
+        fig = plt.figure(figsize = SizeMaker.standard(w=6, a=0.3))
         ax  = fig.add_subplot(111)
 
         # Plot
