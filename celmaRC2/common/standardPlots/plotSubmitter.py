@@ -640,20 +640,20 @@ class PlotSubmitter(object):
         """
         #}}}
 
-#        # Init
-#        for init, nr in zip(self._dmpFolders["init"], self._rangeJobs):
-#            dmp_folders = (init,)
-#            args = (dmp_folders, dmp_folders, "init", self._plotSuperKwargs)
-#            self.sub.setJobName("performanceInit{}".format(nr))
-#            self.sub.submitFunction(performancePlot, args=args)
-#
-#        # Expand phase
-#        for init, nr in zip(self._dmpFolders["expand"], self._rangeJobs):
-#            dmp_folders = (init,)
-#            args = (dmp_folders, dmp_folders, "expand", self._plotSuperKwargs)
-#            self.sub.setJobName("performanceExpand{}".format(nr))
-#            self.sub.submitFunction(performancePlot, args=args)
-#
+        # Init
+        for init, nr in zip(self._dmpFolders["init"], self._rangeJobs):
+            dmp_folders = (init,)
+            args = (dmp_folders, dmp_folders, "init", self._plotSuperKwargs)
+            self.sub.setJobName("performanceInit{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args)
+
+        # Expand phase
+        for init, nr in zip(self._dmpFolders["expand"], self._rangeJobs):
+            dmp_folders = (init,)
+            args = (dmp_folders, dmp_folders, "expand", self._plotSuperKwargs)
+            self.sub.setJobName("performanceExpand{}".format(nr))
+            self.sub.submitFunction(performancePlot, args=args)
+
 
         # Linear phase
         for key, nr in zip(self._paramKeys, self._rangeJobs):
