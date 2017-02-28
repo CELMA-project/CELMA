@@ -71,7 +71,7 @@ jPar[ny]["data"] = data
 jPar[ny]["leg"]  = factorStr.format(ny*factor)
 plt.close(fig)
 
-fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4))
+fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4, a=0.5))
 
 colors = seqCMap2(np.linspace(0, 1, len(nys)))
 
@@ -84,4 +84,17 @@ for ny, color in zip(nys, colors):
 ax.set_xlabel(r"$z\;[\mathrm{m}]$")
 ax.set_ylabel(r"$j_\| \;[\mathrm{Cm}^{-2}\mathrm{s}^{-1}]$")
 PlotHelper.makePlotPretty(ax)
+
+# Move legend outside
+handles, labels = ax.get_legend_handles_labels()
+leg = ax.legend()
+leg.remove()
+fig.legend(handles,\
+           labels ,\
+           bbox_to_anchor=(1.05, 1.0),\
+           loc="upper left",\
+           borderaxespad=0.,\
+           bbox_transform = ax.transAxes,\
+           )
+
 PlotHelper.savePlot(fig, "jParRipple006.pdf")

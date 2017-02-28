@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 """
-Plots the RHS evaluations per timestep for the B-scan.
+Plots the RHS evaluations per timestep for the neutral-scan.
 """
 
 import pickle
 import matplotlib.pylab as plt
+import numpy as np
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
@@ -15,7 +16,7 @@ sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import SizeMaker, PlotHelper
 
-B0s     = (0.02, 0.04, 0.06, 0.08, 0.1)
+nns     = ("2.5e+18", "6.666666666666668e+18", "1.5e+19", "4e+19",  "9.9e+20")
 modes   = ("Init", "Expand", "Linear", "Turbulence")
 
 # Make place holders for the y-values
@@ -32,11 +33,11 @@ turbulenceStds = []
 means = (initMeans, expandMeans, linearMeans, turbulenceMeans)
 stds  = (initStds, expandStds, linearStds, turbulenceStds)
 
-for B0 in B0s:
+for nn in nns:
     for mode, mean, std in zip(modes, means, stds):
-        path = ("../../CSDXMagFieldScanAr/"
-                "visualizationPhysical/B0_{}/"
-                "performance/performance{}.pickle").format(B0,mode)
+        path = ("../../CSDXNeutralScanAr/"
+                "visualizationPhysical/nn_{}/"
+                "performance/performance{}.pickle").format(nn,mode)
 
         try:
             with open(path, "rb") as f:
@@ -56,7 +57,7 @@ for B0 in B0s:
 # Make segments
 # +1 as we would like some space between the bars
 lenMode         = len(modes)+1
-nBars           = len(B0s)*lenMode
+nBars           = len(nns)*lenMode
 xBarVals        = tuple(range(nBars))
 
 initXvals       = xBarVals[0::lenMode]
@@ -80,9 +81,13 @@ ax.bar(turbulenceXvals, turbulenceMeans,\
 PlotHelper.makePlotPretty(ax)
 ax.xaxis.grid(False)
 ax.xaxis.set_ticks(tickVals)
-ax.xaxis.set_ticklabels(B0s)
-ax.set_xlabel("$B_0 [T]$")
-ax.set_ylabel("RHS iterations\nper time step")
+
+n0 = 1e19
+nns = n0/(n0+np.array([float(nn) for nn in nns]))*100
+tickLabels = tuple(r"${:d}\%$".format(int(np.ceil(nn))) for nn in nns)
+ax.xaxis.set_ticklabels(tickLabels)
+ax.set_xlabel("$d$")
+ax.set_ylabel("RHS iterations per time step")
 
 # Move legend outside
 handles, labels = ax.get_legend_handles_labels()
@@ -97,4 +102,4 @@ fig.legend(handles,\
            bbox_transform = ax.transAxes,\
            )
 
-PlotHelper.savePlot(fig, "RHSEvalsPerTimeBScan.pdf")
+PlotHelper.savePlot(fig, "RHSEvalsPerTimeNeutralScan.pdf")
