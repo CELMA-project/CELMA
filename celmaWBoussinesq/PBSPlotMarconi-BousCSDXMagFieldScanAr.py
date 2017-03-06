@@ -12,14 +12,28 @@ sys.path.append(commonDir)
 
 from standardPlots import PlotSubmitter
 
+# INPUT
+# =============================================================================
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail  = None
+# If the queuing system uses accounts, set the account here
+# Example: "FUA11_SOLF"
+account = None
+# Usually, the queueing system has its own default queue, if not,
+# specify here
+# Example: "xfualongprod"
+queue = None
+# =============================================================================
+
 directory = "BousCSDXMagFieldScanAr"
 scanParameter = "B0"
 
 # Create the plotSubmitter
 pltSub = PlotSubmitter(directory, scanParameter, boussinesq=True)
 pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"),\
-                   mail    = "mmag@fysik.dtu.dk",\
-                   account = "FUA11_SOLF")
+                   mail    = mail,\
+                   account = account)
 pltSub.sub.setQueue("xfualongprod")
 
 # Set linear slices (found from looking at the Fourier modes)
