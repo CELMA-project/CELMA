@@ -2,10 +2,10 @@
 
 Repository for the [CELMA](https://celma-project.github.io/) code.
 
-[Repository structure](#Repository-structure)
-[Install](#Install)
-[Contribute](#Contribute)
-[Issues](#Issue)
+* [Repository structure](#Repository-structure)
+* [Install](#Install)
+* [Contribute](#Contribute)
+* [Issues](#Issue)
 
 ## Repository structure
 
