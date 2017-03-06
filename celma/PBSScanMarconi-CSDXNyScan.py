@@ -11,6 +11,17 @@ import numpy as np
 mode       = "expand"
 saveFolder = mode
 
+# INPUT
+# =============================================================================
+# If the queuing system uses accounts, set the account here
+# Example: "FUA11_SOLF"
+account = None
+# Usually, the queueing system has its own default queue, if not,
+# specify here
+# Example: "xfualongprod"
+queue = None
+# =============================================================================
+
 # Calculate the ny parameters
 ly   = 2.8
 rhos = 1.6956e-02 # Copied from logfiles
