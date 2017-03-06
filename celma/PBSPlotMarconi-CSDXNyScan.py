@@ -11,17 +11,31 @@ sys.path.append(commonDir)
 from CELMAPy.driverHelpers import PBSSubmitter
 from standardPlots import fields1DAnimation
 
+# INPUT
+# =============================================================================
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail  = None
+# If the queuing system uses accounts, set the account here
+# Example: "FUA11_SOLF"
+account = None
+# Usually, the queueing system has its own default queue, if not,
+# specify here
+# Example: "xfualongprod"
+queue = None
+# =============================================================================
+
 directory = "CSDXNyScan"
 
 # Generate the submitter
 sub = PBSSubmitter()
 sub.setNodes(nodes=1, ppn=20)
-sub.setQueue("xpresq")
+sub.setQueue(queue)
 sub.setWalltime("00:15:00")
 sub.setMisc(logPath = os.path.join(directory,"postLogs"),\
-            mail    = "mmag@fysik.dtu.dk",\
-            account = "FUA11_SOLF")
-sub.setQueue("xfualongprod")
+            mail    = mail,\
+            account = account)
+sub.setQueue(queue)
 sub.toggleSubmitOrRun()
 
 # Define plotting parameters

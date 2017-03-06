@@ -10,6 +10,17 @@ sys.path.append(commonDir)
 
 from CELMAPy.scanDriver import ScanDriver
 
+# INPUT
+# =============================================================================
+# If the queuing system uses accounts, set the account here
+# Example: "FUA11_SOLF"
+account = None
+# Usually, the queueing system has its own default queue, if not,
+# specify here
+# Example: "xfualongprod"
+queue = None
+# =============================================================================
+
 directory = "CSDXMagFieldScanAr"
 
 # Create object
@@ -46,12 +57,12 @@ scanB0.setExpandOptions(timestep      = 25       ,\
 
 # Set common runner options
 scanB0.setCommonRunnerOptions(\
-                              nproc        = 48            ,\
-                              cpy_source   = True          ,\
-                              BOUT_nodes   = 2             ,\
-                              BOUT_ppn     = 32            ,\
-                              BOUT_queue   = "xfualongprod",\
-                              BOUT_account = "FUA11_SOLF"  ,\
+                              nproc        = 48     ,\
+                              cpy_source   = True   ,\
+                              BOUT_nodes   = 2      ,\
+                              BOUT_ppn     = 32     ,\
+                              BOUT_queue   = queue  ,\
+                              BOUT_account = account,\
                              )
 
 # Run
