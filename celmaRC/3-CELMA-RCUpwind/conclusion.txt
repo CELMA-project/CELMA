@@ -1,7 +1,0 @@
-Copied from 1-CELMA-RC/
-
-- Using upwinding
-
-Results:
-========
-All failed in Naulin Solver
