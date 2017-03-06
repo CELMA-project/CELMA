@@ -1,27 +1,61 @@
-# CELMA-dev
+# CELMA
 
-Developement branch of the CELMA code, copied from revision 1130 of
-https://svn.fysik.dtu.dk/mmag/Code-developement/BOUT/
+Repository for the [CELMA](https://celma-project.github.io/) code.
 
-Current implementation works with the latest commit of BOUT++ version 3
+[Repository structure](#Repository-structure)
+[Install](#Install)
+[Contribute](#Contribute)
+[Issues](#Issue)
 
-**NOTE**:
-1. The `0.51 bug` - the perpendicular resistivity multiplied with `0.51` rather
-   than `1.0`.
-2. The `parallel bug` - Mistake in momentum density derivation spreads to
-   current and sum of momentum density equation in the code.
+## Repository structure
 
-* additionalPyScript: Additional python scripts used in the CELMA project
-* celma: Folder with the codes - Suffers from `0.51 bug` and `parallel bug`
-* celmaCurMom: CELMA codes where the current and parallel momentum is solved -
-  Suffers from `0.51 bug` and `parallel bug`
-* celmaApar: CELMA codes where the $A_\|$ is accounted for -
-  Suffers from `0.51 bug` and `parallel bug`
-* celmaRC: CELMA release candidate - Suffers from `parallel bug`
-* celmaRC2: CELMA release candidate 2
-* derivation: Derivation of operators and boundaries
-* MES: Checking if implementation is convergent
-* parameters: Calculation of typical parameters
-* toolbox: Scripts and functions which are not essential to the runs
+* `celma/`
+    * The code for solving the CELMA model.
+* `celmaWBoussinesq/`
+    * The code for solving the CELMA model using the Boussinesq approximation.
+* `common/`
+    * Common files for extra implementations (not yet included in BOUT++)
+      written in `c++` and pre- and post-proccesing functions written in `python3`.
+* `derivations/`
+    * Derivations of the numerics used in the code, namely:
+        * Boundary polynomials
+        * Own operators
+        * Collisionalities
+        * Analytic dispersion relations
+    * Mostly written using [jupyter-notebooks](http://jupyter.org/).
+* `MES/`
+    * Method of exact solutions used to verify own operators.
+* `tests/`
+    * Test used to check that the implemntations are working.
 
-Branch: master - Running and stable with latest BOUT-dev commit (BOUT++ 3)
+## Install
+
+Requirements:
+
+* The same requirements needed for [BOUT++-3.1](https://github.com/boutproject/BOUT-dev/releases/tag/v3.1)-release
+* `bout_runners.py` found [here](https://github.com/CELMA-project/CELMA/releases/download/v0.1beta/bout_runners.py)
+* For the pre- and post-processing:
+    * `python3`. [Installation guide](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/python.md)
+      for an easy installation guide
+    * `matplotlib` (version `2.0.0` has been used in the thesis).
+    * `ffmpeg` for animaions. [Installation guide](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/ffmpeg.md).
+
+Installation
+
+1. Install BOUT++ as explained in the `user_manual` of BOUT++, or in [this manual](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/BOUT-dev.md).
+   **NOTE** : The `makefiles` assumes that `BOUT++` is located in the `home`
+   directory.
+2. Copy the attached `bout_runners.py` to `<yourBOUT++Installation>/tools/pylib/bout_runners`.
+3. `make` using the `makefiles` located in `celmaRC2`.
+
+The models can be simulated in the way described in the `BOUT++`-`user_manual`.
+For more advanced jobs, such as parameter scans using supercomputers, one can
+use the `PBS<name>.py`-scripts located in `celma` and `celmaWBoussinesq`.
+
+## Contribute
+
+Contributions are more than welcome through pull requests.
+
+## Issues
+
+Bugs, issues and questions are being handled at the [issue-tracker](https://github.com/CELMA-project/CELMA/issues).
