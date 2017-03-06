@@ -9,11 +9,11 @@ import matplotlib.pylab as plt
 
 import os, sys
 # If we add to sys.path, then it must be an absolute path
-commonDir = os.path.abspath('./../../celma/common')
+commonDir = os.path.abspath('./../../common')
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPython.plotHelpers import PlotHelper
+from CELMAPy.plotHelpers import PlotHelper
 
 # Set the plot style for all plots
 titleSize = 30

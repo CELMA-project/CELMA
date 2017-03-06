@@ -12,7 +12,7 @@
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx>              // Gives field factory
 #include <bout/constants.hxx>             // Gives PI and TWOPI
-#include "../common/c/include/ownFilters.hxx"
+#include "../../common/c/include/ownFilters.hxx"
 
 class RadialLowPass : public PhysicsModel {
 public:
