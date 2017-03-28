@@ -5,7 +5,7 @@
  *  z - The azimuthal coordinate (theta)
  */
 
-#include "BCelmaRC.hxx"
+#include "celma.hxx"
 
 // Initialization and solving of the physics
 // ############################################################################
@@ -45,7 +45,6 @@ int CelmaCurMom::init(bool restarting)
     // Add a FieldGroup to communicate
     // ************************************************************************
     // NOTE: We only communicate variables we are taking derivatives of
-    // NOTE: vort is communicated when taking the laplace inversion
     comGroup.add(lnN);
     comGroup.add(n);
     comGroup.add(momDensPar);
@@ -53,6 +52,7 @@ int CelmaCurMom::init(bool restarting)
     comGroup.add(uEPar);
     comGroup.add(uIPar);
     comGroup.add(phi);
+    comGroup.add(vortD);
     // ************************************************************************
 
     // Specify BC for n and uIPar (used to set BC for jPar and momDensPar)
@@ -64,7 +64,8 @@ int CelmaCurMom::init(bool restarting)
     // Specify what values should be stored in the .dmp file
     // ************************************************************************
     // Variables to be saved repeatedly
-    SAVE_REPEAT(phi);
+    // vort and phi
+    SAVE_REPEAT2(vort, phi);
     if(saveTerms){
         // lnN terms
         SAVE_REPEAT3(lnNAdv, lnNRes, gradUEPar);
@@ -78,13 +79,14 @@ int CelmaCurMom::init(bool restarting)
         SAVE_REPEAT3(neutralEResMu, momDensParArtVisc, momDensPerpArtVisc);
         // Vorticity terms
         SAVE_REPEAT2(vortNeutral, potNeutral);
-        SAVE_REPEAT4(divParCur, divSourcePhi, vortParArtVisc, vortPerpArtVisc);
-        SAVE_REPEAT3(DDYGradPerpPhiGradPerpUI, vortAdv, vortParAdv);
+        SAVE_REPEAT3(divParCur, vortDParArtVisc, vortDPerpArtVisc);
+        SAVE_REPEAT (parDerDivUIParNGradPerpPhi);
+        SAVE_REPEAT2(vortDAdv, kinEnAdvN);
         // Helping fields
         SAVE_REPEAT2(uIPar, uEPar);
 
         if(saveDdt){
-            SAVE_REPEAT4(ddt(vort), ddt(lnN), ddt(momDensPar), ddt(jPar));
+            SAVE_REPEAT4(ddt(vortD), ddt(lnN), ddt(momDensPar), ddt(jPar));
         }
     }
     // Monitor variables to be solved for
@@ -108,7 +110,7 @@ int CelmaCurMom::init(bool restarting)
         }
     }
     // Variables to be solved for
-    SOLVE_FOR4(vort, lnN, momDensPar, jPar);
+    SOLVE_FOR4(vortD, lnN, momDensPar, jPar);
     //*************************************************************************
 
     return 0;
@@ -211,20 +213,13 @@ int CelmaCurMom::rhs(BoutReal t)
 
     // Preparation
     // ************************************************************************
+    divUIParNGradPerpPhi = ownOp->div_f_GradPerp_g(uIPar*n, phi);
+    // Set the ghost points in order to take DDY
+    ownBC.extrapolateYGhost(divUIParNGradPerpPhi);
+    // We must communicate as we will take DDY
+    mesh->communicate(divUIParNGradPerpPhi);
     // Saving gradPerpPhi for use in monitors
     gradPerpPhi = ownOp->Grad_perp(phi);
-    // Set the ghost points in order to take DDY
-    ownBC.extrapolateYGhost(gradPerpPhi.x);
-    ownBC.extrapolateYGhost(gradPerpPhi.y);
-    ownBC.extrapolateYGhost(gradPerpPhi.z);
-    // Set the ghost points in order to take gradPerp
-    ownBC.innerRhoCylinder(gradPerpPhi.x);
-    ownBC.innerRhoCylinder(gradPerpPhi.y);
-    ownBC.innerRhoCylinder(gradPerpPhi.z);
-    ownBC.extrapolateXOutGhost(gradPerpPhi.x);
-    ownBC.extrapolateXOutGhost(gradPerpPhi.y);
-    ownBC.extrapolateXOutGhost(gradPerpPhi.z);
-    mesh->communicate(gradPerpPhi);
     // ************************************************************************
 
 
@@ -232,33 +227,28 @@ int CelmaCurMom::rhs(BoutReal t)
     // ************************************************************************
     vortNeutral = - nuIN*n*vort;
     potNeutral  = - nuIN*gradPerpPhi*ownOp->Grad_perp(n);
-     // NOTE: Basic brackets => vortDAdv is normal bracket adv
-    vortAdv         = - ownOp->vortDAdv(phi, vort);
-    // NOTE: Upwinding could be used on this, but use with care as
-    //       dissipation may introduce spurious vorticity
-    vortParAdv      = - uIPar*DDY(vort);
-    DDYGradPerpPhiGradPerpUI = - ownOp->DDY(gradPerpPhi)*ownOp->Grad_perp(uIPar);
-    divSourcePhi    = - S*vort - gradPerpPhi*ownOp->Grad_perp(S);
-    divParCur       =   DDY(jPar);
-    vortParArtVisc  =   artViscParVort*D2DY2(vort);
-    vortPerpArtVisc =   artViscPerpVort*Laplace_perp(vort);
-    vortHyperVisc   = - artHyperAzVort*D4DZ4(vort);
+    vortDAdv    = - ownOp->vortDAdv(phi, vortD);
+    kinEnAdvN   = - ownOp->kinEnAdvN(phi, n);
+    parDerDivUIParNGradPerpPhi = - DDY(divUIParNGradPerpPhi);
+    divParCur                  =   DDY(jPar);
+    vortDParArtVisc  =   artViscParVortD*D2DY2(vortD);
+    vortDPerpArtVisc =   artViscPerpVortD*Laplace_perp(vortD);
+    vortDHyperVisc   = - artHyperAzVortD*D4DZ4(vortD);
 
-    ddt(vort) =
+    ddt(vortD) =
           vortNeutral
         + potNeutral
-        + vortAdv
-        + vortParAdv
+        + parDerDivUIParNGradPerpPhi
         + divParCur
-        + DDYGradPerpPhiGradPerpUI
-        + divSourcePhi
-        + vortParArtVisc
-        + vortPerpArtVisc
-        + vortHyperVisc
+        + vortDAdv
+        + kinEnAdvN
+        + vortDParArtVisc
+        + vortDPerpArtVisc
+        + vortDHyperVisc
         ;
 
     // Filtering highest modes
-    ddt(vort) = ownFilter->ownFilter(ddt(vort));
+    ddt(vortD) = ownFilter->ownFilter(ddt(vortD));
     // ************************************************************************
     return 0;
 }
@@ -335,19 +325,7 @@ void CelmaCurMom::initializeOwnObjects()
      *       The child is typecasted to the parent
      */
     ownOp = OwnOperators::createOperators();
-
-    // Create the laplace object
-    // ************************************************************************
-    // The laplace object will look in the section phiSolver in the BOUT.inp
-    // file
-    Options *phiSol_opt = options->getSection("phiSolver");
-    phiSolver = Laplacian::create(phiSol_opt);
-    // Set the coefficients manually (should also be set to this by default)
-    phiSolver->setCoefD(1.0);
-    phiSolver->setCoefC(1.0);
-    phiSolver->setCoefA(0.0);
-    // ************************************************************************
-
+    ownLapl.create(ownOp, ownBC);
     // As a small hack we find the own operator type to figure out how to
     // treat the div(ue*grad(n grad_perp phi))
     Options *ownOp = options->getSection("ownOperators");
@@ -586,7 +564,7 @@ void CelmaCurMom::setSwithces(bool &restarting)
     Options *options = Options::getRoot();
 
     Options *switches = options->getSection("switch");
-    switches->get("useHyperViscAzVort"    , useHyperViscAzVort    , false);
+    switches->get("useHyperViscAzVortD"   , useHyperViscAzVortD   , false);
     switches->get("includeNoise"          , includeNoise          , false);
     switches->get("forceAddNoise"         , forceAddNoise         , false);
     switches->get("saveDdt"               , saveDdt               , false);
@@ -624,12 +602,12 @@ void CelmaCurMom::setAndSaveViscosities()
     visc->get("artViscParLnN"     , artViscParLnN     , 0.0);
     visc->get("artViscParJpar"    , artViscParJpar    , 0.0);
     visc->get("artViscParMomDens" , artViscParMomDens , 0.0);
-    visc->get("artViscParVort"    , artViscParVort    , 0.0);
+    visc->get("artViscParVortD"   , artViscParVortD   , 0.0);
     visc->get("artViscPerpLnN"    , artViscPerpLnN    , 0.0);
     visc->get("artViscPerpJPar"   , artViscPerpJPar   , 0.0);
     visc->get("artViscPerpMomDens", artViscPerpMomDens, 0.0);
-    visc->get("artViscPerpVort"   , artViscPerpVort   , 0.0);
-    visc->get("artHyperAzVort"    , artHyperAzVort    , 0.0);
+    visc->get("artViscPerpVortD"  , artViscPerpVortD  , 0.0);
+    visc->get("artHyperAzVortD"   , artHyperAzVortD   , 0.0);
 
     // Calculate diffusion from grid size
     if (!constViscPar){
@@ -638,7 +616,7 @@ void CelmaCurMom::setAndSaveViscosities()
         artViscParLnN     *= SQ(mesh->dy(0,0));
         artViscParJpar    *= SQ(mesh->dy(0,0));
         artViscParMomDens *= SQ(mesh->dy(0,0));
-        artViscParVort    *= SQ(mesh->dy(0,0));
+        artViscParVortD   *= SQ(mesh->dy(0,0));
     }
 
     if (!constViscPerp){
@@ -649,18 +627,18 @@ void CelmaCurMom::setAndSaveViscosities()
         artViscPerpLnN     *= SQ(mesh->dx(0,0));
         artViscPerpJPar    *= SQ(mesh->dx(0,0));
         artViscPerpMomDens *= SQ(mesh->dx(0,0));
-        artViscPerpVort    *= SQ(mesh->dx(0,0));
+        artViscPerpVortD   *= SQ(mesh->dx(0,0));
     }
 
-    // Set artificial viscosities to 0 if useHyperViscAzVort is false
-    if (!useHyperViscAzVort){
-        output << "Setting artHyperAzVort = 0.0 as useHyperViscAzVort = False"
+    // Set artificial viscosities to 0 if useHyperViscAzVortD is false
+    if (!useHyperViscAzVortD){
+        output << "Setting artHyperAzVortD = 0.0 as useHyperViscAzVortD = False"
                << std::endl;
-        artHyperAzVort = 0.0;
+        artHyperAzVortD = 0.0;
     }
     if (!constViscHyper){
         // Azimuthal hyperviscosities
-        artHyperAzVort *= SQ(SQ(mesh->dz));
+        artHyperAzVortD *= SQ(SQ(mesh->dz));
     }
 
     // Print and store the variables
@@ -674,7 +652,7 @@ void CelmaCurMom::setAndSaveViscosities()
     output << "    For ln(n)    : "  << artViscPerpLnN     << std::endl;
     output << "    For j_{\\|}   : " << artViscPerpJPar    << std::endl;
     output << "    For nu_{i,\\|}: " << artViscPerpMomDens << std::endl;
-    output << "    For vort     : "  << artViscPerpVort    << std::endl;
+    output << "    For vortD    : "  << artViscPerpVortD   << std::endl;
     output << "Parallel";
     if (!constViscPar){
         output << " (SQ(mesh->dy(0,0)) = "
@@ -684,14 +662,14 @@ void CelmaCurMom::setAndSaveViscosities()
     output << "    For ln(n)    : "  << artViscParLnN     << std::endl;
     output << "    For j_{\\|}   : " << artViscParJpar    << std::endl;
     output << "    For nu_{i,\\|}: " << artViscParMomDens << std::endl;
-    output << "    For vort     : "  << artViscParVort    << std::endl;
+    output << "    For vortD    : "  << artViscParVortD   << std::endl;
     output << "Azimuthal hyperviscosity";
     if (!constViscHyper){
         output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
                   << SQ(SQ(mesh->dz)) << "):";
     }
     output << std::endl;
-    output << "    For vort    : " << artHyperAzVort << std::endl;
+    output << "    For vortD   : " << artHyperAzVortD << std::endl;
     output << "***********************************************\n" << std::endl;
 
     // Guards
@@ -699,7 +677,7 @@ void CelmaCurMom::setAndSaveViscosities()
     perpVisc.push_back(artViscPerpLnN    );
     perpVisc.push_back(artViscPerpJPar   );
     perpVisc.push_back(artViscPerpMomDens);
-    perpVisc.push_back(artViscPerpVort   );
+    perpVisc.push_back(artViscPerpVortD  );
 
     for (std::vector<BoutReal>::iterator it = perpVisc.begin();
          it != perpVisc.end();
@@ -714,7 +692,7 @@ void CelmaCurMom::setAndSaveViscosities()
     perpVisc.push_back(artViscParLnN    );
     perpVisc.push_back(artViscParJpar   );
     perpVisc.push_back(artViscParMomDens);
-    perpVisc.push_back(artViscParVort   );
+    perpVisc.push_back(artViscParVortD  );
 
     if(viscosityGuard){
         for (std::vector<BoutReal>::iterator it = perpVisc.begin();
@@ -728,10 +706,10 @@ void CelmaCurMom::setAndSaveViscosities()
     }
 
     SAVE_ONCE2(artViscParLnN, artViscParJpar);
-    SAVE_ONCE2(artViscParMomDens, artViscParVort);
+    SAVE_ONCE2(artViscParMomDens, artViscParVortD);
     SAVE_ONCE2(artViscPerpLnN, artViscPerpJPar);
-    SAVE_ONCE2(artViscPerpMomDens, artViscPerpVort);
-    SAVE_ONCE (artHyperAzVort);
+    SAVE_ONCE2(artViscPerpMomDens, artViscPerpVortD);
+    SAVE_ONCE (artHyperAzVortD);
     // ************************************************************************
 }
 // ############################################################################
@@ -764,24 +742,28 @@ void CelmaCurMom::timestepInitialization()
     ownBC.innerRhoCylinder(jPar);
     ownBC.innerRhoCylinder(momDensPar);
     ownBC.innerRhoCylinder(phi);    // Used to set BC in lapalace inversion
-    ownBC.innerRhoCylinder(vort);   // Later taken derivative of
+    ownBC.innerRhoCylinder(vortD);  // Later taken derivative of
     // The inner boundaries of phi is set in the inversion procedure
     // ************************************************************************
 
     // Preparations
     // ************************************************************************
     /* NOTE: Preparations
-     * 1. Although we are not using the Naulin solver, we still calculate
-     *    gradPerpLnN here, which requires lnN first to be communicated
-     * 2. So does vort, as it is used in the laplace inversion
-     * 3. n is need several places, so it is calculated here
-     * 4. uIPar and uEPar are also needed, and thus calculated here
+     * 1. gradPerp(lnN) is input to the NaulinSolver , thus
+     *    a) gradPerpLnN needs to be calculated...
+     *    b) ...which requires that lnN has been communicated
+     * 2. n is input to the NaulinSolver, so
+     *    a) It needs to be calculated
+     *    b) We will communicate as the derivative is needed in vortD
      *
      * Note also:
      * 1. No further derivatives is taken for GradPerp(lnN), so this is not
      *    needed to be communicated.
+     * 2. We are taking the derivative of phi in the NaulinSolver, however,
+     *    this happens in a loop, and it is communicated before taking the
+     *    derivative
      */
-    mesh->communicate(lnN, vort);
+    mesh->communicate(lnN);
     gradPerpLnN = ownOp->Grad_perp(lnN);
     n = exp(lnN);
     uIPar = momDensPar/n;           // momDensPar = n*uIPar
@@ -796,7 +778,7 @@ void CelmaCurMom::timestepInitialization()
      * 3. Filtering of higher modes is done internally with the filter flag in
      *    BOUT.inp
      */
-    phi = phiSolver->solve(vort);
+    phi = ownLapl.NaulinSolver(gradPerpLnN, n, vortD, phi, vort);
     // Filter
     phi = ownFilter->ownFilter(phi);
     // ************************************************************************
