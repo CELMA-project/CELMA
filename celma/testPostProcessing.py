@@ -22,6 +22,6 @@ pltSub = PlotSubmitter(directory, scanParameter)
 pltSub.sub.toggleSubmitOrRun()
 
 # Run the animations
-pltSub.runFields1DAnim()
+pltSub.runFields1DAnim(useMultiProcess=False)
 pltSub.runFields2DAnim(fluct=True)
 pltSub.runFields2DAnim(fluct=False)
