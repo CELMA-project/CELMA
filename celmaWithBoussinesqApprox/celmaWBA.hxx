@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __CELMARC_H__
-#define __CELMARC_H__
+#ifndef __CELMAWBA_H__
+#define __CELMAWBA_H__
 
 #include <bout/physicsmodel.hxx>
 #include <invert_laplace.hxx>     // Gives invert laplace option
@@ -20,8 +20,6 @@
 #include "../common/c/include/ownBCs.hxx"
 // Gives own operators
 #include "../common/c/include/ownOperators.hxx"
-// Gives own laplacian inversions
-#include "../common/c/include/ownLaplacianInversions.hxx"
 // Gives the noise generator
 #include "../common/c/include/noiseGenerator.hxx"
 // Gives own lowPass filter
@@ -48,12 +46,12 @@ public:
     // *****************************************************************************
     Field3D jPar, momDensPar;  // Parallel velocities
     Field3D lnN;               // Logarithm of density
-    Field3D vortD;             // Vorticity like quantity
+    Field3D vort;              // Vorticity
     // *****************************************************************************
 
     // Non-evolved stored fields
     // *****************************************************************************
-    Field3D phi, vort;      // Potential and vorticity
+    Field3D phi;      // Potential
     // *****************************************************************************
 
     // Auxiliary fields
@@ -88,28 +86,27 @@ private:
     Field3D neutralEResMu, momDensParArtVisc, momDensPerpArtVisc;
     // Vorticity fields
     Field3D vortNeutral, potNeutral;
-    Field3D parDerDivUIParNGradPerpPhi;
-    Field3D vortDAdv, kinEnAdvN;
-    Field3D divParCur, vortDParArtVisc, vortDPerpArtVisc;
-    Field3D vortDHyperVisc;
+    Field3D DDYGradPerpPhiGradPerpUI;
+    Field3D vortAdv, vortParAdv;
+    Field3D divParCur, divSourcePhi;
+    Field3D vortParArtVisc, vortPerpArtVisc, vortHyperVisc;
     // *****************************************************************************
 
     // Artificial viscosities
     // *****************************************************************************
     // Parallel aritifical viscosities
     BoutReal artViscParLnN, artViscParJpar, artViscPerpJPar;
-    BoutReal artViscParVortD;
+    BoutReal artViscParVort;
     // Perpendicular viscosities
     BoutReal artViscPerpLnN, artViscParMomDens, artViscPerpMomDens;
-    BoutReal artViscPerpVortD;
+    BoutReal artViscPerpVort;
     // Azimuthal hyperviscosities
-    BoutReal artHyperAzVortD;
+    BoutReal artHyperAzVort;
     // *****************************************************************************
 
     // Temporary fields
     // *****************************************************************************
-    Field3D divUIParNGradPerpPhi;
-    Vector3D gradPerpPhi;
+    Vector3D gradPerpPhi, sourcePhi;
     // *****************************************************************************
 
     // Geometry parameters
@@ -151,8 +148,8 @@ private:
     string ownOpType;               // Type of own operators
     BRACKET_METHOD bm;              // The bracket method
     OwnBCs ownBC;                   // Class containing methods which sets the ghost points
-    OwnLaplacianInversions ownLapl; // Class containing own laplacian
-    OwnFilters *ownFilter;          // Pointer to the filter class
+    Laplacian *phiSolver;           // Solver object for the FFT solver
+    OwnFilters *ownFilter;          // Pointer to the chosen filter class
     OwnMonitors ownMon;             // Own monitors
     int outputMonitor(BoutReal simtime, int iter, int NOUT);    // Monitors every output
     // *****************************************************************************
@@ -163,7 +160,7 @@ private:
     bool saveTerms;           // If terms should be saved
     bool includeNoise;        // Include noise
     bool forceAddNoise;       // Add noise on restart as well
-    bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
+    bool useHyperViscAzVort;  // If hyperviscosity should be used in the vorticity
     bool monitorEnergy;       // If energy should be monitored
     bool monitorParticleNumber;            // If total particle number should be monitored
     bool constViscPar;        // If the input par viscosity is the simulation viscosity

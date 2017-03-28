@@ -3,6 +3,6 @@
 HOME	= $(shell echo ~)
 BOUT_TOP	= $(HOME)/BOUT-dev
 
-SOURCEC		= BCelmaRC.cxx
+SOURCEC		= celmaWBA.cxx
 
 include $(BOUT_TOP)/make.config
