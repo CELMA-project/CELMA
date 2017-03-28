@@ -367,7 +367,7 @@ class PlotSubmitter(object):
     #}}}
 
     #{{{runFields1DAnim
-    def runFields1DAnim(self, hyperIncluded=False):
+    def runFields1DAnim(self, hyperIncluded=False, useMultiProcess=True):
         #{{{docstring
         """
         Runs the fields 1D for init and expand
@@ -376,6 +376,8 @@ class PlotSubmitter(object):
         ----------
         hyperIncluded : bool
             If hyper viscosities are used.
+        useMultiProcess : bool
+            If useMultiProcess should be used.
         """
         #}}}
 
@@ -387,8 +389,10 @@ class PlotSubmitter(object):
             collectPaths = self._mergeInitAndExpand[key]
             dmp_folders  = (dmp_folders,)
             args = (dmp_folders, collectPaths, self._plotSuperKwargs)
-            kwargs = {"hyperIncluded" : hyperIncluded,\
-                      "boussinesq"    : self._boussinesq}
+            kwargs = {"hyperIncluded"   : hyperIncluded   ,\
+                      "boussinesq"      : self._boussinesq,\
+                      "useMultiProcess" : useMultiProcess ,\
+                     }
             self.sub.setJobName("fields1D{}".format(nr))
             self.sub.submitFunction(fields1DAnimation, args=args, kwargs=kwargs)
     #}}}
