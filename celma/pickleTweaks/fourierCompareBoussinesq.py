@@ -27,7 +27,7 @@ fileName = "FFT006.pdf"
 PlotHelper.savePlot(fig, fileName)
 plt.close(fig)
 
-picklePath = "../../B1-CELMA-RC/BousCSDXMagFieldScanAr/visualizationPhysical/B0_0.06/fourierModes/n-fourierModes-rho-0.0388-z-0.7.pickle"
+picklePath = "../celmaWithBoussinesqApprox/BousCSDXMagFieldScanAr/visualizationPhysical/B0_0.06/fourierModes/n-fourierModes-rho-0.0388-z-0.7.pickle"
 with open(picklePath, "rb") as f:
     fig = pickle.load(f)
 

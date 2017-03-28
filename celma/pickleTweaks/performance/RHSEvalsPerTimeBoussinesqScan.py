@@ -34,7 +34,7 @@ stds  = (initStds, expandStds, linearStds, turbulenceStds)
 
 for B0 in B0s:
     for mode, mean, std in zip(modes, means, stds):
-        path = ("../../../B1-CELMA-RC/BousCSDXMagFieldScanAr/"
+        path = ("../celmaWithBoussinesqApprox/BousCSDXMagFieldScanAr/"
                 "visualizationPhysical/B0_{}/"
                 "performance/performance{}.pickle").format(B0,mode)
 
