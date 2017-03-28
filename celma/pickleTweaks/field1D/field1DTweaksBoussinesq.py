@@ -17,7 +17,7 @@ sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import PlotHelper, seqCMap3
 
-folder = "../../../B1-CELMA-RC/BousCSDXMagFieldScanAr/visualizationPhysical/B0_0.1/field1D"
+folder = "../celmaWithBoussinesqApprox/BousCSDXMagFieldScanAr/visualizationPhysical/B0_0.1/field1D"
 for direction in ("radial", "parallel"):
     picklePath = os.path.join(folder,\
                               "mainFieldsBoussinesq-{}-1D-0.pickle".format(direction))
