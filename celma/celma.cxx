@@ -1,4 +1,4 @@
-// *************** Simulation of CELMACURMOM *********************
+// ********************************* Celma ************************************
 /* Geometry
  *  x - The radial coordinate (rho)
  *  y - The height of the cylinder (z)
@@ -9,9 +9,9 @@
 
 // Initialization and solving of the physics
 // ############################################################################
-int CelmaCurMom::init(bool restarting)
+int Celma::init(bool restarting)
 {
-    TRACE("Halt in CelmaCurMom::init");
+    TRACE("Halt in Celma::init");
 
     // Initialize non-standard BOUT++ objects
     initializeOwnObjects();
@@ -116,9 +116,9 @@ int CelmaCurMom::init(bool restarting)
     return 0;
 }
 
-int CelmaCurMom::rhs(BoutReal t)
+int Celma::rhs(BoutReal t)
 {
-    TRACE("Halt in CelmaCurMom::rhs");
+    TRACE("Halt in Celma::rhs");
 
     timestepInitialization();
 
@@ -256,7 +256,7 @@ int CelmaCurMom::rhs(BoutReal t)
 
 // Constructor
 // ############################################################################
-CelmaCurMom::CelmaCurMom()
+Celma::Celma()
 /* FIXME: c++11 is unsupported on jess
  * :
  *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"sumKinEE", 0.0},
@@ -268,7 +268,7 @@ CelmaCurMom::CelmaCurMom()
  *     particleNumber ({{"particleNumber", 0.0}})
  */
 {
-    TRACE("Halt in CelmaCurMom::CelmaCurMom");
+    TRACE("Halt in Celma::Celma");
 
     // Non c++11 initialization
     kinE["perpKinEE"]                = 0.0;
@@ -291,9 +291,9 @@ CelmaCurMom::CelmaCurMom()
 
 // Monitor
 // ############################################################################
-int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
+int Celma::outputMonitor(BoutReal simtime, int iter, int NOUT)
 {
-    TRACE("Halt in CelmaCurMom::outputMonitor");
+    TRACE("Halt in Celma::outputMonitor");
 
     if(monitorEnergy || monitorParticleNumber){
         ownMon.calcPolAvgN(n);
@@ -312,9 +312,9 @@ int CelmaCurMom::outputMonitor(BoutReal simtime, int iter, int NOUT)
 
 // Initialization helpers
 // ############################################################################
-void CelmaCurMom::initializeOwnObjects()
+void Celma::initializeOwnObjects()
 {
-    TRACE("CelmaCurMom::initializeOwnObjects");
+    TRACE("Celma::initializeOwnObjects");
 
     // Create OwnOperators
     // ************************************************************************
@@ -349,9 +349,9 @@ void CelmaCurMom::initializeOwnObjects()
     // ************************************************************************
 }
 
-void CelmaCurMom::setAndSaveParameters()
+void Celma::setAndSaveParameters()
 {
-    TRACE("Halt in CelmaCurMom::setAndSaveParameters");
+    TRACE("Halt in Celma::setAndSaveParameters");
 
     // Load from the geometry
     // ************************************************************************
@@ -455,9 +455,9 @@ void CelmaCurMom::setAndSaveParameters()
     // ************************************************************************
 }
 
-void CelmaCurMom::printPointsPerRhoS()
+void Celma::printPointsPerRhoS()
 {
-    TRACE("Halt in CelmaCurMom::printPointsPerRhoS");
+    TRACE("Halt in Celma::printPointsPerRhoS");
 
     // Get the option (before any sections) in the BOUT.inp file
     int MXG;
@@ -521,9 +521,9 @@ void CelmaCurMom::printPointsPerRhoS()
     output << std::string(51, '*') << '\n' << std::endl;
 }
 
-void CelmaCurMom::setAndSaveSource()
+void Celma::setAndSaveSource()
 {
-    TRACE("Halt in CelmaCurMom::setAndSaveSource");
+    TRACE("Halt in Celma::setAndSaveSource");
 
     BoutReal radialWidth, radialCentre, radialSteepness;
     BoutReal parallelWidth, parallelCentre, parallelSteepness;
@@ -554,9 +554,9 @@ void CelmaCurMom::setAndSaveSource()
     // ************************************************************************
 }
 
-void CelmaCurMom::setSwithces(bool &restarting)
+void Celma::setSwithces(bool &restarting)
 {
-    TRACE("Halt in CelmaCurMom::setSwithces");
+    TRACE("Halt in Celma::setSwithces");
 
     // Get the switches
     // ************************************************************************
@@ -589,9 +589,9 @@ void CelmaCurMom::setSwithces(bool &restarting)
     // ************************************************************************
 }
 
-void CelmaCurMom::setAndSaveViscosities()
+void Celma::setAndSaveViscosities()
 {
-    TRACE("Halt in CelmaCurMom::setAndSaveViscosities");
+    TRACE("Halt in Celma::setAndSaveViscosities");
 
     // Get and save the viscosities
     // ************************************************************************
@@ -716,9 +716,9 @@ void CelmaCurMom::setAndSaveViscosities()
 
 // Timestep initialization
 // ############################################################################
-void CelmaCurMom::timestepInitialization()
+void Celma::timestepInitialization()
 {
-    TRACE("Halt in CelmaCurMom::timestepInitialization");
+    TRACE("Halt in Celma::timestepInitialization");
 
     if (includeNoise && !noiseAdded){
         /* NOTE: Positioning of includeNoise
@@ -811,4 +811,4 @@ void CelmaCurMom::timestepInitialization()
 // ############################################################################
 
 // Create a simple main() function
-BOUTMAIN(CelmaCurMom);
+BOUTMAIN(Celma);
