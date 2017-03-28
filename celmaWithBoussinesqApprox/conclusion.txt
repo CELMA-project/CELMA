@@ -1,4 +1,4 @@
-Copied from celmaRC/B1-CELMA-RC/
+Copied from celmaRC/celmaWithBoussinesqApprox/
 
 - Fixed bug in parallel momentum and current eq
 
