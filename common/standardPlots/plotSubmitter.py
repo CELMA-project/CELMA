@@ -25,7 +25,6 @@ from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
 from .growthRates import growthRatesPlot
-from .kThetaSpectrum import kThetaSpectrumPlot
 from .performance import performancePlot
 from .phaseShift import phaseShiftPlot
 from .posOfFluct import posOfFluctPlot
