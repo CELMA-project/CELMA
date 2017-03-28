@@ -27,30 +27,8 @@ plt.rc("legend", fontsize   = 12)
 plt.rc("lines",  linewidth  = 1)
 plt.rc("lines",  markersize = 1.5)
 
-# Use computer modern as default for mathtext
+# Use computer modern as default font
 plt.rc("mathtext", fontset = "cm")
-
-oldFont = {"family":plt.rcParams["font.family"],\
-           "serif":plt.rcParams["font.serif"]}
-try:
-    # WARNING: This makes it slow, but is needed in order not to get
-    #          UserWarning: findfont: Font family ['serif'] not found
-    # Requires LaTeX and dvipng and Ghostscript installed
-    plt.rc("text", usetex=True)
-
-    font = {"family":"serif", "serif": ["computer modern roman"]}
-    plt.rc("font", **font)
-
-    fig, ax = plt.subplots()
-    fileName = "tmp.png"
-    plt.savefig(fileName)
-    os.remove(fileName)
-except (RuntimeError, FileNotFoundError) as er:
-    plt.rc("text", usetex=False)
-    plt.rc("font", **oldFont)
-
-# Close all plots
-plt.close("all")
 
 # Set the colorfunc
 seqCMap   = plt.get_cmap("inferno")
