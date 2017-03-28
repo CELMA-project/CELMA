@@ -28,7 +28,7 @@ keys = ("Arithmetics"       ,\
 data = {key:{"mean":[], "std":[], "x":[]} for key in keys}
 
 for mode in modes:
-    path = ("../../../B1-CELMA-RC/BousCSDXMagFieldScanAr/"
+    path = ("../celmaWithBoussinesqApprox/BousCSDXMagFieldScanAr/"
             "visualizationPhysical/B0_{}/"
             "performance/performance{}.pickle").format(B0,mode)
 
