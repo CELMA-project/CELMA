@@ -32,6 +32,7 @@ class PBSSubmitter(object):
                           ]
 
         self._submitWithPBS = True
+        self._miscCalled    = False
     #}}}
 
     #{{{toggleSubmitOrRun
