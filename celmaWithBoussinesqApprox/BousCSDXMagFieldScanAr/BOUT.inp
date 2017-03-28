@@ -1,5 +1,5 @@
 #
-# Input file for "B1-CELMA-RC/BousCSDXMagFieldScan/"
+# Input file for "celmaWithBoussinesqApprox/BousCSDXMagFieldScan/"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)

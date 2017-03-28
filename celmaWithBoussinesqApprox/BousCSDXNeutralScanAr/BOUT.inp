@@ -1,5 +1,5 @@
 #
-# Input file for "B1-CELMA-RC/CSDXNeutralScanAr/"
+# Input file for "celmaWithBoussinesqApprox/CSDXNeutralScanAr/"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
