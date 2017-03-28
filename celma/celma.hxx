@@ -1,4 +1,4 @@
-// *************** Simulation of CelmaCurMom *********************
+// ********************************* Celma ************************************
 /* Geometry
  *  x - The radial coordinate (rho)      [nx and dx set from the grid file]
  *  y - The height of the cylinder (z)   [ny and dy set from the grid file]
@@ -31,7 +31,7 @@
 // Gives the parameters
 #include "../common/c/include/parameters.hxx"
 
-class CelmaCurMom : public PhysicsModel
+class Celma : public PhysicsModel
 {
 protected:
     int init(bool restarting);
@@ -39,7 +39,7 @@ protected:
 public:
     // Constructor
     // ############################################################################
-    CelmaCurMom();
+    Celma();
     // ############################################################################
 
     // Variable initialization
