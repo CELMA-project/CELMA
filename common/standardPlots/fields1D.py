@@ -13,7 +13,7 @@ from CELMAPy.fields1D import Driver1DFields
 #{{{fields1DAnimation
 def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
                       hyperIncluded=False, boussinesq=False, tSlice=None,
-                      yInd = 16):
+                      yInd = 16, useMultiProcess = True):
     #{{{docstring
     """
     Runs the standard fields1D animation
@@ -34,10 +34,11 @@ def fields1DAnimation(dmp_folders, collectPaths, plotSuperKwargs,\
         Temporal slice
     yInd : int
         Default is 16
+    useMultiProcess : bool
+        If useMultiProcess should be used
     """
     #}}}
 
-    useMultiProcess   = True
     convertToPhysical = True
 
     xSlice = None
