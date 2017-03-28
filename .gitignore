@@ -53,16 +53,10 @@ html/
 *.png
 *.pdf
 
-# CELMA-dev
+# CELMA
+celma/celma
+celmaWithBoussinesqApprox/celmaWithBoussinesqApprox
 visualization*/
-celma/*/celma
-celma/*/celmaSLEPc
-celmaCurMom/*/celmaCurMom
-celmaRC/*/celmaRC
-celmaRC/*/BCelmaRC
-celmaRC2/*/celmaRC
-celmaRC2/*/BCelmaRC
-celmaApar/*/celmaApar
 nx_*/
 ny_*/
 nz_*/
@@ -93,9 +87,7 @@ MES/laplaceInversion/Naulinsolver0Bndry/NaulinSolver
 MES/integrals/volumeIntegral/VolIntCyl
 MES/integrals/surfaceEdgeIntegral/SurfEdgeIntCyl
 MES/polAvg/polAvg
-implementationTests/radialLowPass/radialLowPass
-parameters/c++/params
-parameters/c++/data/input_*
+tests/radialLowPass/radialLowPass
 
 # Miscellaneous
 *delme*
