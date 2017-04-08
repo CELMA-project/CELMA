@@ -2,7 +2,7 @@
 
 """Post processing which performs MES"""
 
-from CELMAPy.plotHelpers import SizeMaker, plotNumberFormatter
+from ..plotHelpers import SizeMaker, plotNumberFormatter
 from boutdata import collect
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator, FuncFormatter
