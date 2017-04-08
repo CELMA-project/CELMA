@@ -13,7 +13,7 @@
 #include <field_factory.hxx>              // Gives field factory
 #include <bout/constants.hxx>             // Gives PI and TWOPI
 // Gives own boundaries (doing so by setting ghost points)
-#include "../../common/c/include/ownBCs.hxx"
+#include "../../../common/c/include/ownBCs.hxx"
 // Give the integrators
 #include "../../common/c/include/helpers.hxx"
 
