@@ -178,6 +178,7 @@ private:
     // Monitors
     // *****************************************************************************
     std::map<std::string, BoutReal> kinE;
+// FIXME: Remove potE
     std::map<std::string, BoutReal> potE;
     std::map<std::string, BoutReal> particleNumber;
     // *****************************************************************************

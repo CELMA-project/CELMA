@@ -174,7 +174,6 @@ private:
     // Monitors
     // *****************************************************************************
     std::map<std::string, BoutReal> kinE;
-    std::map<std::string, BoutReal> potE;
     std::map<std::string, BoutReal> particleNumber;
     // *****************************************************************************
 
