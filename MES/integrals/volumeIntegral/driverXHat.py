@@ -6,11 +6,11 @@ from bout_runners.bout_runners import basic_runner
 import numpy as np
 import sys, os
 # If we add to sys.path, then it must be an absolute path
-common_dir = os.path.abspath('./../../')
+common_dir = os.path.abspath('./../../../common')
 # Sys path is a list of system paths
 sys.path.append(common_dir)
 
-from common.python.postProcessingMESVolIntegral import perform_MES_test as postProcess
+from CELMAPy.MES import perform_MES_test_vol as postProcess
 
 # The options for the run
 # =============================================================================
