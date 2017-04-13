@@ -76,8 +76,7 @@ class OwnBCs
         void uEParSheath(Field3D &uEPar,
                       const Field3D &phi,
                       const BoutReal &Lambda,
-                      const BoutReal &phiRef = 0.0,
-                      const Field3D &profile = 1.0);
+                      const BoutReal &phiRef = 0.0);
         //! Use sheath condition to set ghost point for the current
         void jParSheath(Field3D &jPar,
                         const Field3D &uEPar,
