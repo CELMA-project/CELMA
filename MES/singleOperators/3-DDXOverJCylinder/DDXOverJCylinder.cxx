@@ -1,16 +1,16 @@
-// *************** Simulation of DDXCylinderWithJacobianOverJacobian *********************
+// *************** Simulation of DDXOverJCylinder *********************
 /* Geometry
  *  x - The radial coordinate (rho)
  *  y - The height of the cylinder (z)
  *  z - The azimuthal coordinate (theta)
  */
 
-#include "DDXCylinderWithJacobianOverJacobian.hxx"
+#include "DDXOverJCylinder.hxx"
 
 // Initialization of the physics
 // ############################################################################
-int DDXCylinderWithJacobianOverJacobian::init(bool restarting) {
-    TRACE("Halt in DDXCylinderWithJacobianOverJacobian::init");
+int DDXOverJCylinder::init(bool restarting) {
+    TRACE("Halt in DDXOverJCylinder::init");
 
     // Get the option (before any sections) in the BOUT.inp file
     Options *options = Options::getRoot();
@@ -51,7 +51,7 @@ int DDXCylinderWithJacobianOverJacobian::init(bool restarting) {
     output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
     // Calculate
-    S_num = (1/mesh->J)*DDX(mesh->J*f);
+    S_num = (1/mesh->J)*DDX(f);
 
     // Error in S
     e = S_num - S;
@@ -76,15 +76,15 @@ int DDXCylinderWithJacobianOverJacobian::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int DDXCylinderWithJacobianOverJacobian::rhs(BoutReal t) {
+int DDXOverJCylinder::rhs(BoutReal t) {
     return 0;
 }
 // ############################################################################
 
 // Create a simple main() function
-BOUTMAIN(DDXCylinderWithJacobianOverJacobian);
+BOUTMAIN(DDXOverJCylinder);
 
 // Destructor
-DDXCylinderWithJacobianOverJacobian::~DDXCylinderWithJacobianOverJacobian(){
-    TRACE("DDXCylinderWithJacobianOverJacobian::~DDXCylinderWithJacobianOverJacobian");
+DDXOverJCylinder::~DDXOverJCylinder(){
+    TRACE("DDXOverJCylinder::~DDXOverJCylinder");
 }

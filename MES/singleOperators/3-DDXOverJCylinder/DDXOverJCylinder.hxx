@@ -1,4 +1,4 @@
-// *************** Simulation of DDXCylinderWithJacobianOverJacobian *********************
+// *************** Simulation of DDXOverJCylinder *********************
 /* Geometry
  *  x - The radial coordinate (rho)      [nx and dx set from the grid file]
  *  y - The height of the cylinder (z)   [ny and dy set from the grid file]
@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __DDXCylinderWithJacobianOverJacobian_H__
-#define __DDXCylinderWithJacobianOverJacobian_H__
+#ifndef __DDXOverJCylinder_H__
+#define __DDXOverJCylinder_H__
 
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx>              // Gives field factory
@@ -18,10 +18,10 @@
 // Gives own boundaries (doing so by setting ghost points)
 #include "../../../common/c/include/ownBCs.hxx"
 
-class DDXCylinderWithJacobianOverJacobian : public PhysicsModel {
+class DDXOverJCylinder : public PhysicsModel {
 public:
     // Destructor
-    ~DDXCylinderWithJacobianOverJacobian();
+    ~DDXOverJCylinder();
 protected:
     int init(bool restarting);
     int rhs(BoutReal t);

@@ -1,5 +1,5 @@
 #
-# Input file for  "DDXCylinderWithJacobianOverJacobian/properZ"
+# Input file for  "DDXOverJCylinder/gaussianWSinAndParabola"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -43,7 +43,7 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix 
+# Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
@@ -112,7 +112,7 @@ xl = x * geom:Lx            # x in range [0,Lx]
 # The function to test
 # =============================================================================
 [f]
-function = (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)
+function = 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
 
 # Boundaries
 bndry_xin   = none                     # Manual boundary found in the code
@@ -125,6 +125,6 @@ bndry_ydown = none                     # Not used
 # The analytic solution
 # =============================================================================
 [S]
-solution = (-pi*geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/10 + geom:xl*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10) + (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10))/geom:xl
+solution = (0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))/geom:xl
 # =============================================================================
 ##############################################################################

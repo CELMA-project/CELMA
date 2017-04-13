@@ -38,7 +38,7 @@ the_vars['f'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
                 
 
 [S]
-(0.932102492359528*geom:xl*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*geom:xl*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*geom:xl*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z) + 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60))/geom:xl
+(0.932102492359528*(-0.00173611111111111*geom:xl - 0.015625*sin(z + pi/4))*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0155350415393255*sqrt(2)*pi*(geom:xl*cos(z)/60 + 1/2)^2*(sin(z) + cos(z))*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*cos(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60) + 0.0310700830786509*(geom:xl*cos(z)/60 + 1/2)*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)*cos(z))/geom:xl
 
 [f]
 0.932102492359528*(geom:xl*cos(z)/60 + 1/2)^2*exp(-0.000868055555555556*geom:xl^2 - 0.015625*geom:xl*sin(z + pi/4))*sin(sqrt(2)*pi*geom:xl*(sin(z) + cos(z))/60)
@@ -65,11 +65,11 @@ the_vars['f'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) )
 
 
 
+[S]
+0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))/geom:xl
+
 [f]
 0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
-
-[S]
-(0.923116346386636*geom:xl*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)) + 0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z)))/geom:xl
 ======================================================================================================================================
 
 
@@ -82,11 +82,11 @@ Simple x
 the_vars['f'] = sin(6*pi*(x-1)/(2*Lx))*sin((x+1)/2)
 
 
-[S]
-(geom:xl*sin(pi*(geom:xl/10 - 1/10))*cos(geom:xl/2 + 1/2)/2 + pi*geom:xl*sin(geom:xl/2 + 1/2)*cos(pi*(geom:xl/10 - 1/10))/10 + sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2))/geom:xl
-
 [f]
 sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2)
+
+[S]
+(sin(pi*(geom:xl/10 - 1/10))*cos(geom:xl/2 + 1/2)/2 + pi*sin(geom:xl/2 + 1/2)*cos(pi*(geom:xl/10 - 1/10))/10)/geom:xl
 =====================================================================================================================================
 
 
@@ -105,13 +105,11 @@ w = 30
 the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x-(c - (w/2))))))*cos(6*pi*x/(2*Lx))*sin(2*z)*(x/Lx)
 
 
-
+[S]
+(-pi*geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/300 + geom:xl*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/30 + (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30)/geom:xl
 
 [f]
 geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30
-
-[S]
-(-pi*geom:xl^2*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/300 + geom:xl^2*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/30 + geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/15)/geom:xl
 ======================================================================================================================================
 
 
@@ -130,7 +128,7 @@ the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x-(c - (w/2))))))*cos(6*pi*x/(2*Lx))*sin
 
 
 [S]
-(-pi*geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/10 + geom:xl*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10) + (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10))/geom:xl
+(-pi*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/10 + (0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10))/geom:xl
 
 [f]
 (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)

@@ -1,6 +1,6 @@
 Copied from DDXCylinder
 
-- Check that (1/J)*DDX(J*f) is working in cylinder geometry
+- Check that (1/J)*DDX(f) is working in cylinder geometry
 
 Results:
 ========
@@ -15,8 +15,8 @@ Results:
   + Error dominates at inner rho
   + S looks good
 - properZ:
-  + L2   = 1.5
-  + Linf = 1.0
+  !!! Convergence broken
+  !!! Biggest error from inner rho
   + Error dominates at inner rho
   ! NOTE: We get a blow up in S here
 - properZModified:
@@ -25,14 +25,14 @@ Results:
   + Error dominates at inner rho
   + S looks good here
 - simpleX:
-  !!! L2   = 1.16
-  !!! Linf = 0.63
+  !!! Convergence broken
+  !!! Biggest error from inner rho
   + Error dominates at inner rho
-  ! NOTE: Extremely sharp gradients close to inner rho
+
 
 Conclusion:
 ===========
-- First order convergence explained in subConvergence.ipynb
+- First order convergence explained in subConvergenceDDXOverJ.ipynb
 - Still a mystery why convergence is broken somewhere
   Checked if has something with one term being much larger than another
   Hypothesis: A workaround could be to multiply with J

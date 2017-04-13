@@ -1,4 +1,4 @@
-Copied from 0-DDXCylinder/
+Copied from 1-DDXCylinder/
 
 - Check that DDX is working in cylinder geometry with 6th order at
   two innermost point
