@@ -2,6 +2,7 @@ Copied from failedNaulinSolverSetBoundaries/
 
 - Check that Naulin Solver implementation is correct using phi=0 on the
   boundaries
+NOTE: Blow-up in the solver is observed if phi is not set to 0
 
 Results:
 ========
