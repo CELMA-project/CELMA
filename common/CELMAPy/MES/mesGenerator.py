@@ -1,4 +1,8 @@
-from CELMAPy.plotHelpers import SizeMaker
+#!/usr/bin/env python
+
+"""Post processing which performs MES"""
+
+from ..plotHelpers import SizeMaker
 
 from boutdata.mms import x, y, z
 from boutdata.mms import exprToStr
