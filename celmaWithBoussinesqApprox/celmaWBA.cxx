@@ -587,8 +587,6 @@ void CelmaWBA::setSwithces(bool &restarting)
 
     Options *switches = options->getSection("switch");
     switches->get("useHyperViscAzVort"    , useHyperViscAzVort    , false);
-    switches->get("includeNoise"          , includeNoise          , false);
-    switches->get("forceAddNoise"         , forceAddNoise         , false);
     switches->get("saveDdt"               , saveDdt               , false);
     switches->get("constViscPar"          , constViscPar          , false);
     switches->get("constViscPerp"         , constViscPerp         , false);
@@ -597,17 +595,6 @@ void CelmaWBA::setSwithces(bool &restarting)
     switches->get("monitorEnergy"         , monitorEnergy         , true );
     switches->get("monitorParticleNumber" , monitorParticleNumber , true );
     switches->get("viscosityGuard"        , viscosityGuard        , true );
-    noiseAdded = false;
-    // Decide whether noise should be added upon restart
-    if (restarting && includeNoise && !(forceAddNoise)){
-        output << "\n\n!!!!Warning!!!\n"
-               << "restarting = true, includeNoise = true, forceAddNoise = false\n"
-               << "Since forceAddNoise = false => program reset includeNoise to false"
-               << "\n\n"
-               << std::endl;
-        includeNoise = false;
-        noiseAdded = true; // For extra safety measurements
-    }
     // ************************************************************************
 }
 
@@ -741,22 +728,6 @@ void CelmaWBA::setAndSaveViscosities()
 void CelmaWBA::timestepInitialization()
 {
     TRACE("Halt in CelmaWBA::timestepInitialization");
-
-    if (includeNoise && !noiseAdded){
-        /* NOTE: Positioning of includeNoise
-         * Field is reloaded from restart files if noise is added in init
-         */
-        // Class containing the noise generators
-        // Calls the constructor with default arguments
-        NoiseGenerator noise("geom", 3);
-        // Add noise
-        //*********************************************************************
-        noise.generateRandomPhases(lnN, 1.0e-3);
-        //*********************************************************************
-
-        // Declare that the noise has been added
-        noiseAdded = true;
-    }
 
     // Manually specifying rho inner ghost points
     // ************************************************************************
