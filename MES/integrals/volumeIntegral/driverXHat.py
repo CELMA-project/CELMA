@@ -10,7 +10,7 @@ common_dir = os.path.abspath('./../../../common')
 # Sys path is a list of system paths
 sys.path.append(common_dir)
 
-from CELMAPy.MES import perform_MES_test as postProcess
+from CELMAPy.MES import perform_MES_test_vol as postProcess
 
 # The options for the run
 # =============================================================================
