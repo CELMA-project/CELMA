@@ -16,14 +16,13 @@
 #include <difops.hxx>             // Gives the diff options
 #include <vecops.hxx>             // Gives the vec diff options
 #include <map>                    // Gives std::map
+#include <float.h>                // Includes DBL_EPSILON
 // Gives own boundaries (doing so by setting ghost points)
 #include "../common/c/include/ownBCs.hxx"
 // Gives own operators
 #include "../common/c/include/ownOperators.hxx"
 // Gives own laplacian inversions
 #include "../common/c/include/ownLaplacianInversions.hxx"
-// Gives the noise generator
-#include "../common/c/include/noiseGenerator.hxx"
 // Gives own lowPass filter
 #include "../common/c/include/ownFilters.hxx"
 // Gives the monitors
@@ -161,7 +160,6 @@ private:
     // *****************************************************************************
     bool saveDdt;             // If ddt's should be saved
     bool saveTerms;           // If terms should be saved
-    bool includeNoise;        // Include noise
     bool forceAddNoise;       // Add noise on restart as well
     bool useHyperViscAzVortD; // If hyperviscosity should be used in the vorticity
     bool monitorEnergy;       // If energy should be monitored
@@ -170,11 +168,6 @@ private:
     bool constViscPerp;       // If the input perp viscosity is the simulation viscosity
     bool constViscHyper;      // If the input hyper viscosity is the simulation viscosity
     bool viscosityGuard;      // If a check should be performed for the artificial viscosity
-    // *****************************************************************************
-
-    // Runtime switches
-    // *****************************************************************************
-    bool noiseAdded;          // A check whether the noise is added or not
     // *****************************************************************************
 
     // Make a field group to communicate
