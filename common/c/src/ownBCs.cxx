@@ -234,7 +234,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
 
 /*!
  * This function will set the ghost point of uEPar according to
- * the sheath boundary condition with an optional profile
+ * the sheath boundary condition
  *
  * \param[in] uEPar   The field to set the ghost point for
  * \param[in] phi     The current potential (must contain a valid yup ghost
@@ -242,24 +242,22 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
  * \param[in] phiRef  The reference potential compared to the ground
  *                    (0 by default)
- * \param[in] profile The profile (varying along \$f\rho\$f) (1.0 by default)
  *
  * \param[out] uEPar The field after the ghost point has been set
  *
  * ## Explanation of the procedure:
  *
  * \f{eqnarray}{
- * u_{e, \|, B} = (c_s\exp(\Lambda-(\phi_{Ref} + \phi_B)/T_e))p
+ * u_{e, \|, B} = (c_s\exp(\Lambda-(\phi_{Ref} + \phi_B)/T_e))
  * \f}
  *
  * where
  *      * \f$c_s = \sqrt{\frac{T_e}{m_i}} = 1\f$ (\f$c_s\f$ is normalized)
  *      * \f$_B\f$ denotes a value at the boundary
- *      * \f$p\f$ is the profile
  * This gives
  *
  * \f{eqnarray}{
- * u_{e, \|, B} = (\exp(\Lambda-(\phi_{Ref} + \phi_B)))p
+ * u_{e, \|, B} = (\exp(\Lambda-(\phi_{Ref} + \phi_B)))
  * \f}
  *
  * We will use a 4th order boundary polynomial to interpolate to the value
@@ -281,7 +279,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * \exp(\Lambda
  *      - ((\phi_{Ref} + 5 \phi_{n} + 15 \phi_{n-1} - 5\phi_{n-2} + \phi_{n-3})
  *         /16)
- * )p
+ * )
  * \f}
  *
  * Which rearranged gives
@@ -292,7 +290,7 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  * (16/5)\exp(\Lambda
  *      - ((\phi_{Ref} + 5 \phi_{n} + 15 \phi_{n-1} - 5\phi_{n-2} + \phi_{n-3})
  *         /16)
- * )p
+ * )
  * - 3 u_{e, \|, n-1} + u_{e, \|, n-2} - (1/5)u_{e, \|, n-3}
  * \f}
  *
@@ -305,15 +303,11 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
- *
- * \warning The profile should not vary along the magnetic field
- *          line, and should only vary along \$f\rho\$f
  */
 void OwnBCs::uEParSheath(Field3D &uEPar,
                          const Field3D &phi,
                          const BoutReal &Lambda,
-                         const BoutReal &phiRef,
-                         const Field3D &profile)
+                         const BoutReal &phiRef)
 {
     TRACE("Halt in OwnBCs::uEParSheath");
 
@@ -331,11 +325,7 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
                                +      phi(xInd, firstUpperYGhost-3, zInd)
                                )/16.0
                             )
-                     /* The profile should not vary along the magnetic field,
-                      * so migth as well use the value at the ghost point
-                      */
-                     )* profile(xInd, firstUpperYGhost, zInd)
-                      * (16.0/5.0)
+                     ) * (16.0/5.0)
                     -       3.0*uEPar(xInd, firstUpperYGhost-1, zInd)
                     +           uEPar(xInd, firstUpperYGhost-2, zInd)
                     - (1.0/5.0)*uEPar(xInd, firstUpperYGhost-3, zInd)
