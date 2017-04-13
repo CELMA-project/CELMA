@@ -54,7 +54,7 @@ class CollectAndCalcEnergy(CollectAndCalcSuperClass):
             * "parKinEE"  - Time trace of parallel kinetic electron energy
             * "perpKinEI" - Time trace of perpendicular kinetic ion energy
             * "parKinEI"  - Time trace of parallel kinetic ion energy
-            * "polEE"     - Time trace of potential electron energy
+            * "potEE"     - Time trace of potential electron energy
             * "time"      - Time corresponding time
         """
         #}}}

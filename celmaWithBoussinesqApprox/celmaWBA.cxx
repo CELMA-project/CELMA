@@ -94,11 +94,6 @@ int CelmaWBA::init(bool restarting)
              ++it){
             dump.add(it->second, it->first.c_str(), 1);
         }
-        for (std::map<std::string, BoutReal>::iterator it=potE.begin();
-             it!=potE.end();
-             ++it){
-            dump.add(it->second, it->first.c_str(), 1);
-        }
     }
     if(monitorParticleNumber){
         for (std::map<std::string,BoutReal>::iterator it=particleNumber.begin();
@@ -269,12 +264,9 @@ int CelmaWBA::rhs(BoutReal t)
 CelmaWBA::CelmaWBA()
 /* FIXME: c++11 is unsupported on jess
  * :
- *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0}, {"sumKinEE", 0.0},
- *            {"perpKinEI", 0.0}, {"parKinEI", 0.0}, {"sumKinEI", 0.0},
- *            {"polAvgPerpKinEE", 0.0}, {"polAvgParKinEE", 0.0}, {"polAvgSumKinEE", 0.0},
- *            {"polAvgPerpKinEI", 0.0}, {"polAvgParKinEI", 0.0}, {"polAvgSumKinEI", 0.0}}
+ *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0},
+ *            {"perpKinEI", 0.0}, {"parKinEI", 0.0},
  *            ),
- *     potE ({{"potEE", 0.0}, {"polAvgPotEE", 0.0}}),
  *     particleNumber ({{"particleNumber", 0.0}})
  */
 {
@@ -283,18 +275,8 @@ CelmaWBA::CelmaWBA()
     // Non c++11 initialization
     kinE["perpKinEE"]                = 0.0;
     kinE["parKinEE"]                 = 0.0;
-    kinE["sumKinEE"]                 = 0.0;
     kinE["perpKinEI"]                = 0.0;
     kinE["parKinEI"]                 = 0.0;
-    kinE["sumKinEI"]                 = 0.0;
-    kinE["polAvgPerpKinEE"]          = 0.0;
-    kinE["polAvgParKinEE"]           = 0.0;
-    kinE["polAvgSumKinEE"]           = 0.0;
-    kinE["polAvgPerpKinEI"]          = 0.0;
-    kinE["polAvgParKinEI"]           = 0.0;
-    kinE["polAvgSumKinEI"]           = 0.0;
-    potE["potEE"]                    = 0.0;
-    potE["polAvgPotEE"]              = 0.0;
     particleNumber["particleNumber"] = 0.0;
 }
 // ############################################################################
@@ -305,12 +287,8 @@ int CelmaWBA::outputMonitor(BoutReal simtime, int iter, int NOUT)
 {
     TRACE("Halt in CelmaWBA::outputMonitor");
 
-    if(monitorEnergy || monitorParticleNumber){
-        ownMon.calcPolAvgN(n);
-    }
     if(monitorEnergy){
         ownMon.kinEnergy(n, gradPerpPhi, uEPar, uIPar, &kinE);
-        ownMon.potEnergy(n, &potE);
     }
     if(monitorParticleNumber){
         ownMon.numberOfParticles(n, &particleNumber);

@@ -55,7 +55,7 @@ html/
 
 # CELMA
 celma/celma
-celmaWithBoussinesqApprox/celmaWithBoussinesqApprox
+celmaWithBoussinesqApprox/celmaWBA
 visualization*/
 nx_*/
 ny_*/
