@@ -176,12 +176,12 @@ class ScanDriver(object):
 
         self._calledFunctions["mainOptions"] = True
 
-        self._scanParameters        = scanParameters
-        self._series_add            = series_add
-        self._theRunName            = theRunName
-        self._make                  = make
-        self._boutRunnersNoise      = boutRunnersNoise
-        self._restartFrom           = restartFrom
+        self._scanParameters   = scanParameters
+        self._series_add       = series_add
+        self._theRunName       = theRunName
+        self._make             = make
+        self._boutRunnersNoise = boutRunnersNoise
+        self._restartFrom      = restartFrom
     #}}}
 
     #{{{setRunTypeOptions
@@ -681,14 +681,9 @@ class ScanDriver(object):
             hyper = ("switch", "useHyperViscAzVortD",True)
         else:
             hyper = ("switch", "useHyperViscAzVort",True)
-        if not(self._boutRunnersNoise):
-            includeNoise  = True
-            forceAddNoise = True
-            add_noise     = None
-        else:
-            includeNoise  = False
-            forceAddNoise = False
-            add_noise     = self._boutRunnersNoise
+
+        add_noise = self._boutRunnersNoise
+
         try:
             # From previous outputs
             self._expandAScanPath = self._expand_dmp_folders[0]
@@ -714,10 +709,8 @@ class ScanDriver(object):
             **self._linearOptions       ,\
             # Set additional options
             additional = (
-                ("tag"   , theRunName      ,0),\
-                ("switch", "includeNoise"  , includeNoise ),\
-                ("switch", "forceAddNoise" ,forceAddNoise) ,\
-                ("switch", "saveTerms"     ,saveTerms)     ,\
+                ("tag"   , theRunName , 0),\
+                ("switch", "saveTerms", saveTerms),\
                 hyper,\
                          )               ,\
             series_add = self._series_add,\

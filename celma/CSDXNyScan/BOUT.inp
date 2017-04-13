@@ -103,8 +103,6 @@ floats = false # floats = false => output in double
 # Switches
 # =============================================================================
 [switch]
-includeNoise        = false
-forceAddNoise       = false
 useHyperViscAzVortD = true
 saveTerms           = true
 saveDdt             = true
