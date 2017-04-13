@@ -206,33 +206,6 @@ void OwnBCs::extrapolateYUp(Field3D &f)
 }
 
 /*!
- * Extrapolates to the second upper ghost point using a 4th order Newton
- * polynomial
- *
- * \param[in] f The original field
- * \param[out] f The field after extrapolating to the first upper ghost point
- *
- * \sa extrapolateYGhost
- */
-void OwnBCs::extrapolateYUpScondGhost(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::extrapolateYUp");
-
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                f(xInd, firstUpperYGhost+1, zInd) =
-                      4.0*f(xInd, firstUpperYGhost  , zInd)
-                    - 6.0*f(xInd, firstUpperYGhost-1, zInd)
-                    + 4.0*f(xInd, firstUpperYGhost-2, zInd)
-                    -     f(xInd, firstUpperYGhost-3, zInd)
-                    ;
-            }
-        }
-    }
-}
-
-/*!
  * Extrapolates to the first lower ghost point using a 4th order Newton
  * polynomial
  *
@@ -475,9 +448,6 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
- *
- *
- * \sa jParSheathProfiled
  */
 void OwnBCs::jParSheath(Field3D &jPar,
                          const Field3D &uEPar,
@@ -519,76 +489,6 @@ void OwnBCs::jParSheath(Field3D &jPar,
 }
 
 /*!
- * This function will set the ghost point of jPar according to
- * the sheath boundary condition, but with an optional profile
- *
- * \param[in] jPar    The field to set the ghost point for
- * \param[in] uEPar   The parallel electron velocity
- * \param[in] uIPar   The parallel ion velocity (must contain a valid yup
- *                    ghost point)
- * \param[in] phi     The current potential (must contain a valid yup ghost)
- * \param[in] n       The density (must contain a valid yup ghost)
- * \param[in] Lambda  \$f\ln\left(\frac{\mu}{2\pi}\right)\$f
- * \param[in] phiRef  The reference potential compared to the ground
- *                    (0 by default)
- * \param[in] profile The profile (varying along \$f\rho\$f) (1.0 by default)
- *
- * \param[out] jPar The field after the ghost point has been set
- *
- * \note Although we know \f$u_{i, \|, B}\f$ exact, we are here setting the
- *       ghost point, so we need the value at the ghost point as an input
- * \note The value of \f$u_{e, \|, B}\f$ is calculated in the code
- *
- * \warning The profile should not vary along the magnetic field
- *          line, and should only vary along \$f\rho\$f
- *
- * \sa jParSheath
- */
-void OwnBCs::jParSheathProfiled(Field3D &jPar,
-                                const Field3D &uEPar,
-                                const Field3D &uIPar,
-                                const Field3D &phi,
-                                const Field3D &n,
-                                const BoutReal &Lambda,
-                                const BoutReal &phiRef,
-                                const Field3D &profile)
-{
-    TRACE("Halt in OwnBCs::jParSheathProfiled");
-
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                jPar(xInd, firstUpperYGhost, zInd) =
-                    n(xInd, firstUpperYGhost, zInd)*(
-                       uIPar(xInd, firstUpperYGhost, zInd)
-                     - (
-                         exp(
-                               Lambda
-                             - (  phiRef
-                                + (
-                                  +  5.0*phi(xInd, firstUpperYGhost,   zInd)
-                                  + 15.0*phi(xInd, firstUpperYGhost-1, zInd)
-                                  -  5.0*phi(xInd, firstUpperYGhost-2, zInd)
-                                  +      phi(xInd, firstUpperYGhost-3, zInd)
-                                  )/16.0
-                               )
-                          /* The profile should not vary along the magnetic field,
-                           * so migth as well use the value at the ghost point
-                           */
-                          )* profile(xInd, firstUpperYGhost, zInd)
-                           * (16.0/5.0)
-                         -       3.0*uEPar(xInd, firstUpperYGhost-1, zInd)
-                         +           uEPar(xInd, firstUpperYGhost-2, zInd)
-                         - (1.0/5.0)*uEPar(xInd, firstUpperYGhost-3, zInd)
-                       )
-                    )
-                    ;
-            }
-        }
-    }
-}
-
-/*!
  * This function will set the ghost point of momDensPar according to the sheath
  * boundary condition.
  *
@@ -617,45 +517,6 @@ void OwnBCs::parDensMomSheath(Field3D &momDensPar,
                 momDensPar(xInd, firstUpperYGhost, zInd) =
                     n(xInd, firstUpperYGhost, zInd)*
                     uIPar(xInd, firstUpperYGhost, zInd);
-            }
-        }
-    }
-}
-
-/*!
- * This function will set the ghost point of momDensPar according to the sheath
- * boundary condition.
- *
- * \param[in] momDensPar The field to set the ghost point for
- * \param[in] uIPar      The parallel ion velocity
- * \param[in] n          The density
- *
- * \param[out] momDensPar The field after the ghost point has been set
- *
- * \note Although we know \f$u_{i, \|, B}\f$ exact, we are here setting the
- *       ghost point, so we need the value at the ghost point as an input
- * \note The value of \f$u_{e, \|, B}\f$ is calculated in the code
- *
- * \warning The profile should not vary along the magnetic field
- *          line, and should only vary along \$f\rho\$f
- *
- * \sa parDensMomSheath
- *
- */
-void OwnBCs::parDensMomSheathProfiled(Field3D &momDensPar,
-                                      const Field3D &uIPar,
-                                      const Field3D &n,
-                                      const Field3D &profile)
-{
-    TRACE("Halt in OwnBCs::parDensMomSheathProfiled");
-
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                momDensPar(xInd, firstUpperYGhost, zInd) =
-                    n(xInd, firstUpperYGhost, zInd)*
-                    uIPar(xInd, firstUpperYGhost, zInd)*
-                    profile(xInd, firstUpperYGhost, zInd);
             }
         }
     }
