@@ -1,5 +1,5 @@
 #
-# Input file for  "DDXCylinderWithJacobianOverJacobian/simpleX"
+# Input file for  "DDXOverJCylinder/gaussian"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -43,7 +43,7 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix 
+# Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
@@ -112,7 +112,7 @@ xl = x * geom:Lx            # x in range [0,Lx]
 # The function to test
 # =============================================================================
 [f]
-function = sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2)
+function = 0.923116346386636*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))
 
 # Boundaries
 bndry_xin   = none                     # Manual boundary found in the code
@@ -125,6 +125,6 @@ bndry_ydown = none                     # Not used
 # The analytic solution
 # =============================================================================
 [S]
-solution = (geom:xl*sin(pi*(geom:xl/10 - 1/10))*cos(geom:xl/2 + 1/2)/2 + pi*geom:xl*sin(geom:xl/2 + 1/2)*cos(pi*(geom:xl/10 - 1/10))/10 + sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2))/geom:xl
+solution = 0.923116346386636*(-0.00444444444444444*geom:xl - 0.0266666666666667*cos(z))*exp(-0.00222222222222222*geom:xl^2 - 0.0266666666666667*geom:xl*cos(z))/geom:xl
 # =============================================================================
 ##############################################################################
