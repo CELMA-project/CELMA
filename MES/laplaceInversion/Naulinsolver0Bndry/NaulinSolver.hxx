@@ -17,7 +17,7 @@
 #include <difops.hxx>                           // Gives the diff options
 #include <vecops.hxx>                           // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
-#include "../../common/c/include/ownBCs.hxx"
+#include "../../../common/c/include/ownBCs.hxx"
 // Gives own operators
 #include "../../common/c/include/ownOperators.hxx"
 // Gives own laplacian inversions

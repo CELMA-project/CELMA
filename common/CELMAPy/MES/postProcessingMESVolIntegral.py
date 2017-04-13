@@ -8,15 +8,15 @@ from matplotlib.ticker import MaxNLocator
 import numpy as np
 import os
 
-#{{{perform_MES_test
-def perform_MES_test(\
-                     paths,\
-                     extension     = 'png',\
-                     show_plot     = False,\
-                     use_dx        = False,\
-                     use_dy        = False,\
-                     use_dz        = False,\
-                     ):
+#{{{perform_MES_test_vol
+def perform_MES_test_vol(\
+                         paths,\
+                         extension     = 'png',\
+                         show_plot     = False,\
+                         use_dx        = False,\
+                         use_dy        = False,\
+                         use_dz        = False,\
+                        ):
     """Collects the data members belonging to a convergence plot"""
 
     # Figure out the directions
