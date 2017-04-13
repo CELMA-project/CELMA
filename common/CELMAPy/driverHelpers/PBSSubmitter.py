@@ -267,9 +267,9 @@ class PBSSubmitter(object):
         # If we want to be notified by mail
         if self._mail is not None:
             jobString += "#PBS -M {}\n".format(self._mail)
-        # #PBS -m abe
-        # a=aborted b=begin e=ended
-        jobString += "#PBS -m e\n"
+            # #PBS -m abe
+            # a=aborted b=begin e=ended
+            jobString += "#PBS -m e\n"
         # cd to the folder you are sending the qsub from
         jobString += "cd $PBS_O_WORKDIR\n"
 
