@@ -69,8 +69,6 @@ class OwnBCs
         void extrapolateYGhost(Field3D &f);
         //! Extrapolate to first upper ghosts
         void extrapolateYUp(Field3D &f);
-        //! Extrapolate to second upper ghosts
-        void extrapolateYUpScondGhost(Field3D &f);
 
         //! Extrapolate to first lower ghosts
         void extrapolateYDown(Field3D &f);
@@ -88,24 +86,10 @@ class OwnBCs
                         const Field3D &n,
                         const BoutReal &Lambda,
                         const BoutReal &phiRef = 0.0);
-        //! Use a profiled sheath condition to set ghost point for the current
-        void jParSheathProfiled(Field3D &jPar,
-                                const Field3D &uEPar,
-                                const Field3D &uIPar,
-                                const Field3D &phi,
-                                const Field3D &n,
-                                const BoutReal &Lambda,
-                                const BoutReal &phiRef = 0.0,
-                                const Field3D &profile = 1.0);
         //! Use sheath condition to set ghost point for the par dens mom
         void parDensMomSheath(Field3D &momDensPar,
                               const Field3D &uIPar,
                               const Field3D &n);
-        //! Profiled sheath condition to set ghost point for the par dens mom
-        void parDensMomSheathProfiled(Field3D &momDensPar,
-                                      const Field3D &uIPar,
-                                      const Field3D &n,
-                                      const Field3D &profile = 1.0);
         //! Specify the lower ghost from the Cauchy boundary condition
         void cauchyYDown(Field3D &f,
                          const BoutReal &t = 0.0,
