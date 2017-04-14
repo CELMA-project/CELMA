@@ -17,15 +17,19 @@ git filter-branch --tree-filter 'python <absPathToFilter>/.filters/clear_all_ipy
 """
 
 import os
+import shutil
 from glob import glob
-from rm_outputs_jupyter_nb import rm_outputs
+from subprocess import call
 
-# Change to the file's super path
+# Change to the file's path
 path = os.path.realpath(__file__)
 os.chdir(os.path.dirname(path))
-os.chdir("..")
 # Find all notebooks
 notebooks = glob("./**/*.ipynb", recursive=True)
 
 for nb in notebooks:
-    rm_outputs(nb)
+    nb = os.path.realpath(nb)
+    new = nb+".new"
+    call("{}/rm_outputs_jupyter_nb < {} > {}".format(path, nb, new), shell=True)
+    os.remove(nb)
+    shutil.move(new, nb)
