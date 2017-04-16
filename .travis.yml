@@ -1,4 +1,6 @@
 dist: trusty
+group: stable
+os: linux
 sudo: required
 language: cpp
 compiler: gcc
@@ -16,3 +18,5 @@ script:
   # Test the build
   - ./celma/testScan.py
   - ./celma/testPostProcessing.py
+  - ./celmaWithBoussinesqApprox/testScan.py
+  - ./celmaWithBoussinesqApprox/testPostProcessing.py

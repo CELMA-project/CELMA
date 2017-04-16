@@ -5,6 +5,7 @@
 
 # Options
 # ==============================================================================
+VERBOSE="false"          # Only set to "false" in order for travis to work
 INSTALL_CONDA="true"     # Needed for post-processing
 INSTALL_CMAKE="false"    # Needed for sundials if CMAKE is below 2.8.11
 INSTALL_FFMPEG="true"    # Needed for post-processing if x264 is not present
@@ -38,47 +39,64 @@ if [ "$OPTIMIZING" = "true" ]; then
 elif [ "$DEBUG" = "true" ]; then
     EXTRA_FLAGS="${EXTRA_FLAGS} --enable-debug --enable-checks=3 --enable-track"
 fi
+
+# Set the verbosity
+if [ "$VERBOSE" = "true" ]; then
+    STDOUT=""
+else
+    STDOUT=" > /dev/null"
+fi
 # ==============================================================================
 
 
 # Install packages needed for BOUT-dev
 # ==============================================================================
 if [ "$INSTALL_CONDA" = "true" ]; then
-    bash $CURDIR/condaInstall.sh
+    echo "Entering '$CURDIR/condaInstall.sh'"
+    bash $CURDIR/condaInstall.sh $STDOUT
 fi
 
 if [ "$INSTALL_CMAKE" = "true" ]; then
-    bash $CURDIR/cmakeInstall.sh
+    echo "Entering '$CURDIR/cmakeInstall.sh'"
+    bash $CURDIR/cmakeInstall.sh $STDOUT
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
-    bash $CURDIR/ffmpegInstall.sh
+    echo "Entering '$CURDIR/ffmpegInstall.sh'"
+    bash $CURDIR/ffmpegInstall.sh $STDOUT
 fi
 
 # Install mpi
-bash $CURDIR/mpiInstall.sh
+echo "Entering '$CURDIR/mpiInstall.sh'"
+bash $CURDIR/mpiInstall.sh $STDOUT
 
 # Install fftw
-bash $CURDIR/fftwInstall.sh
+echo "Entering '$CURDIR/fftwInstall.sh'"
+bash $CURDIR/fftwInstall.sh $STDOUT
 
 # Install hdf5
-bash $CURDIR/hdf5Install.sh
+echo "Entering '$CURDIR/hdf5Install.sh'"
+bash $CURDIR/hdf5Install.sh $STDOUT
 
 # Install netcdf
-bash $CURDIR/netcdfInstall.sh
+echo "Entering '$CURDIR/netcdfInstall.sh'"
+bash $CURDIR/netcdfInstall.sh $STDOUT
 
 if [ "$INCL_SUNDIALS" = "true" ]; then
     # Install sudials
-    bash $CURDIR/sundialsInstall.sh
+    echo "Entering '$CURDIR/sundialsInstall.sh'"
+    bash $CURDIR/sundialsInstall.sh $STDOUT
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-sundials"
 fi
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
     # Install PETSc
-    bash $CURDIR/PETScInstall.sh
+    echo "Entering '$CURDIR/PETScInstall.sh'"
+    bash $CURDIR/PETScInstall.sh $STDOUT
 
     # Install SLEPc
-    bash $CURDIR/SLEPcInstall.sh
+    echo "Entering '$CURDIR/SLEPcInstall.sh'"
+    bash $CURDIR/SLEPcInstall.sh $STDOUT
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-petsc --with-slepc"
 fi
 # ==============================================================================
