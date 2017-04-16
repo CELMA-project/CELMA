@@ -1,11 +1,17 @@
+sudo: required
 language: cpp
 compiler: gcc
 
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install cmake gfortran
+
+
 install:
   # Install BOUT++
-  - "./install/boutPPInstall.sh"
+  - ./install/boutPPInstall.sh
 
 script:
   # Test the build
-  - "./celma/testScan.py"
-  - "./celma/testPostProcessing.py"
+  - ./celma/testScan.py
+  - ./celma/testPostProcessing.py
