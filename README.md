@@ -4,6 +4,7 @@ Repository for the [CELMA](https://celma-project.github.io/) code.
 
 * [Repository structure](#repository-structure)
 * [Install](#install)
+* [Usage](#usage)
 * [Contribute](#contribute)
 * [Issues](#issue)
 
@@ -30,25 +31,16 @@ Repository for the [CELMA](https://celma-project.github.io/) code.
 
 ## Install
 
-Requirements:
+An install script can be found in [install/boutPPInstall.sh](install/boutPPInstall.sh).
+This will install the master branch of `BOUT-dev` in `$HOME`, whereas the
+dependencies will be installed in `local`.
 
-* The same requirements needed for [BOUT++-3.1](https://github.com/boutproject/BOUT-dev/releases/tag/v3.1)-release
-* `bout_runners.py` found [here](https://github.com/CELMA-project/CELMA/releases/download/v0.1beta/bout_runners.py)
-* For the pre- and post-processing:
-    * `python3`. [Installation guide](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/python.md)
-      for an easy installation guide
-    * `matplotlib` (version `2.0.0` has been used in the thesis).
-    * `ffmpeg` for animaions. [Installation guide](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/ffmpeg.md).
+**NOTE** : The `makefiles` in this repository assumes that `BOUT++` is located
+           in the `$HOME` directory.
 
-Installation
+## Usage
 
-1. Install BOUT++ as explained in the `user_manual` of BOUT++, or in [this manual](https://github.com/loeiten/usingLinux/blob/master/installationProcedures/BOUT-dev.md).
-   **NOTE** : The `makefiles` assumes that `BOUT++` is located in the `home`
-   directory.
-2. Copy the attached `bout_runners.py` to `<yourBOUT++Installation>/tools/pylib/bout_runners`.
-3. `make` using the `makefiles` located in `celmaRC2`.
-
-The models can be simulated in the way described in the `BOUT++`-`user_manual`.
+The models can be simulated in the way described in the [`BOUT++` user-manual](http://bout-dev.readthedocs.io/en/latest/).
 For more advanced jobs, such as parameter scans using supercomputers, one can
 use the `PBS<name>.py`-scripts located in `celma` and `celmaWBoussinesq`.
 

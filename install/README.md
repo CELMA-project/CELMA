@@ -5,6 +5,9 @@ together with its dependencies.
 `BOUT-dev` will be installed in `$HOME`, whereas the dependencies will be
 installed in `local`.
 
+For a costume install of `BOUT++`, see the [`BOUT++`
+user-manual](http://bout-dev.readthedocs.io/en/latest/)
+
 * [boutPPInstall.sh](boutPPInstall.sh) - Builinding and installing the
   `master`-branch of `BOUT-dev` together with its dependencies.
   The installation can be modified by altering the options flags in the script.
