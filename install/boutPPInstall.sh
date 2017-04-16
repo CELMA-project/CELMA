@@ -51,12 +51,12 @@ touch $BUILD_OUTPUT
 
 dump_output() {
    echo Tailing the last 500 lines of output:
-   tail -500 $BUILD_OUTPUT
+   tail -500 $BUILD_OUTPUT 1>&3 2>&4
 }
 error_handler() {
-  kill $PING_LOOP_PID
   echo ERROR: An error was encountered with the build.
   dump_output
+  kill $PING_LOOP_PID
   exit 1
 }
 
@@ -68,11 +68,15 @@ bash -c "while true; do echo \$(date) - building ...; sleep $PING_SLEEP; done" &
 PING_LOOP_PID=$!
 # ..............................................................................
 
+# Get stream 3 and 4 from stdout and stderr
+exec 3>&1
+exec 4>&2
 # Set the verbosity
 if [ ! "$VERBOSE" = "true" ]; then
     echo -e "\n\nRedirecting outputs to $BUILD_OUTPUT\n\n"
-    exec 1>$BUILD_OUTPUT
-    exec 2>$BUILD_OUTPUT
+    # Redirect stdout and stderr
+    exec 1>>$BUILD_OUTPUT
+    exec 2>>$BUILD_OUTPUT
 fi
 # ==============================================================================
 
@@ -80,50 +84,50 @@ fi
 # Install packages needed for BOUT-dev
 # ==============================================================================
 if [ "$INSTALL_CONDA" = "true" ]; then
-    echo "bash $CURDIR/condaInstall.sh"
+    echo "bash $CURDIR/condaInstall.sh" 1>&3 2>&4
     bash $CURDIR/condaInstall.sh
 fi
 
 if [ "$INSTALL_CMAKE" = "true" ]; then
-    echo "bash $CURDIR/cmakeInstall.sh"
+    echo "bash $CURDIR/cmakeInstall.sh" 1>&3 2>&4
     bash $CURDIR/cmakeInstall.sh
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
-    echo "bash $CURDIR/ffmpegInstall.sh"
+    echo "bash $CURDIR/ffmpegInstall.sh" 1>&3 2>&4
     bash $CURDIR/ffmpegInstall.sh
 fi
 
 # Install mpi
-echo "bash $CURDIR/mpiInstall.sh"
+echo "bash $CURDIR/mpiInstall.sh" 1>&3 2>&4
 bash $CURDIR/mpiInstall.sh
 
 # Install fftw
-echo "bash $CURDIR/fftwInstall.sh"
+echo "bash $CURDIR/fftwInstall.sh" 1>&3 2>&4
 bash $CURDIR/fftwInstall.sh
 
 # Install hdf5
-echo "bash $CURDIR/hdf5Install.sh"
+echo "bash $CURDIR/hdf5Install.sh" 1>&3 2>&4
 bash $CURDIR/hdf5Install.sh
 
 # Install netcdf
-echo "bash $CURDIR/netcdfInstall.sh"
+echo "bash $CURDIR/netcdfInstall.sh" 1>&3 2>&4
 bash $CURDIR/netcdfInstall.sh
 
 if [ "$INCL_SUNDIALS" = "true" ]; then
     # Install sudials
-    echo "bash $CURDIR/sundialsInstall.sh"
+    echo "bash $CURDIR/sundialsInstall.sh" 1>&3 2>&4
     bash $CURDIR/sundialsInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-sundials"
 fi
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
     # Install PETSc
-    echo "bash $CURDIR/PETScInstall.sh"
+    echo "bash $CURDIR/PETScInstall.sh" 1>&3 2>&4
     bash $CURDIR/PETScInstall.sh
 
     # Install SLEPc
-    echo "bash $CURDIR/SLEPcInstall.sh"
+    echo "bash $CURDIR/SLEPcInstall.sh" 1>&3 2>&4
     bash $CURDIR/SLEPcInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-petsc --with-slepc"
 fi
@@ -132,15 +136,15 @@ fi
 
 # Builiding BOUT-dev master
 # ==============================================================================
-echo -e "\n\n\nInstalling BOUT-dev\n\n\n"
+echo -e "\n\n\nInstalling BOUT-dev\n\n\n" 1>&3 2>&4
 cd $HOME
 git clone https://github.com/boutproject/BOUT-dev.git
 cd BOUT-dev
 # NOTE: Explicilty state netcdf and hdf5 in order not to mix with anaconda
 ./configure ${EXTRA_FLAGS} ${EXTRA_PACKAGES} --with-netcdf=$HOME/local --with-hdf5=$HOME/local
 make
-echo -e "\n\n\nDone installing BOUT-dev\n\n\n"
-echo -e "\n\n\nChecking installation\n\n\n"
+echo -e "\n\n\nDone installing BOUT-dev\n\n\n" 1>&3 2>&4
+echo -e "\n\n\nChecking installation\n\n\n" 1>&3 2>&4
 cd examples/bout_runners_example
 make
 python 6a-run_with_MMS_post_processing_specify_numbers.py
@@ -149,20 +153,20 @@ python 6a-run_with_MMS_post_processing_specify_numbers.py
 
 # Write what needs to be exported
 # ==============================================================================
-echo -e "\n\n\nInstallation complete.\n"
-echo -e "Make sure the following lines are present in your .bashrc:"
-echo -e "export PYTHONPATH=\"\$HOME/BOUT-dev/tools/pylib/:\$PYTHONPATH\""
-echo -e "export PATH=\"\$HOME/local/bin:\$PATH\""
-echo -e "export LD_LIBRARY_PATH=\"\$HOME/local/lib:\$LD_LIBRARY_PATH\""
+echo -e "\n\n\nInstallation complete.\n" 1>&3 2>&4
+echo -e "Make sure the following lines are present in your .bashrc:" 1>&3 2>&4
+echo -e "export PYTHONPATH=\"\$HOME/BOUT-dev/tools/pylib/:\$PYTHONPATH\"" 1>&3 2>&4
+echo -e "export PATH=\"\$HOME/local/bin:\$PATH\"" 1>&3 2>&4
+echo -e "export LD_LIBRARY_PATH=\"\$HOME/local/lib:\$LD_LIBRARY_PATH\"" 1>&3 2>&4
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
-    echo -e "export PETSC_DIR=\"\$HOME/petsc-\${PETSC_VERSION}\""
+    echo -e "export PETSC_DIR=\"\$HOME/petsc-\${PETSC_VERSION}\"" 1>&3 2>&4
     echo -e "export PETSC_ARCH=\"arch-linux2-cxx-debug\""
-    echo -e "export SLEPC_DIR=\"\$HOME/slepc-\${SLEPC_VERSION}\""
+    echo -e "export SLEPC_DIR=\"\$HOME/slepc-\${SLEPC_VERSION}\"" 1>&3 2>&4
 fi
 
 if [ "$INSTALL_CONDA" = true ]; then
-    echo -e "export PATH=\"\$HOME/anaconda3/bin:\$PATH\""
+    echo -e "export PATH=\"\$HOME/anaconda3/bin:\$PATH\"" 1>&3 2>&4
 fi
 # ==============================================================================
 
