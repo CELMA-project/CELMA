@@ -1,5 +1,7 @@
 # CELMA
 
+[![Build Status](https://travis-ci.org/CELMA-project/CELMA.svg?branch=master)](https://travis-ci.org/CELMA-project/CELMA)
+
 Repository for the [CELMA](https://celma-project.github.io/) code.
 
 * [Repository structure](#repository-structure)
