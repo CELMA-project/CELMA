@@ -10,6 +10,9 @@ mkdir -p install
 cd install
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
 bash miniconda.sh -b -p $HOME/anaconda3
+
+export PATH="$HOME/anaconda3/bin:$PATH"
+
 conda config --set always_yes yes --set changeps1 no
 # NOTE: Update before installing hdf4, as hdf-4.2.12 is needed
 conda update --all
@@ -18,5 +21,4 @@ conda install numpy scipy hdf4 netcdf4
 # Reverting to check
 conda config --set always_yes no
 
-export PATH="$HOME/anaconda3/bin:$PATH"
 echo -e "\n\n\nDone installing conda\n\n\n"
