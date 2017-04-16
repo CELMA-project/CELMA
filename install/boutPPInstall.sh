@@ -42,6 +42,7 @@ fi
 
 # Set the verbosity
 if [ "$VERBOSE" = "true" ]; then
+    # Could also have used " > /dev/stdout"
     STDOUT=""
 else
     STDOUT=" > /dev/null"
@@ -52,50 +53,50 @@ fi
 # Install packages needed for BOUT-dev
 # ==============================================================================
 if [ "$INSTALL_CONDA" = "true" ]; then
-    echo "Entering '$CURDIR/condaInstall.sh'"
+    echo "bash $CURDIR/condaInstall.sh $STDOUT"
     bash $CURDIR/condaInstall.sh $STDOUT
 fi
 
 if [ "$INSTALL_CMAKE" = "true" ]; then
-    echo "Entering '$CURDIR/cmakeInstall.sh'"
+    echo "bash $CURDIR/cmakeInstall.sh $STDOUT"
     bash $CURDIR/cmakeInstall.sh $STDOUT
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
-    echo "Entering '$CURDIR/ffmpegInstall.sh'"
+    echo "$CURDIR/ffmpegInstall.sh $STDOUT"
     bash $CURDIR/ffmpegInstall.sh $STDOUT
 fi
 
 # Install mpi
-echo "Entering '$CURDIR/mpiInstall.sh'"
+echo "bash $CURDIR/mpiInstall.sh $STDOUT"
 bash $CURDIR/mpiInstall.sh $STDOUT
 
 # Install fftw
-echo "Entering '$CURDIR/fftwInstall.sh'"
+echo "bash $CURDIR/fftwInstall.sh $STDOUT"
 bash $CURDIR/fftwInstall.sh $STDOUT
 
 # Install hdf5
-echo "Entering '$CURDIR/hdf5Install.sh'"
+echo "bash $CURDIR/hdf5Install.sh $STDOUT"
 bash $CURDIR/hdf5Install.sh $STDOUT
 
 # Install netcdf
-echo "Entering '$CURDIR/netcdfInstall.sh'"
+echo "bash $CURDIR/netcdfInstall.sh $STDOUT"
 bash $CURDIR/netcdfInstall.sh $STDOUT
 
 if [ "$INCL_SUNDIALS" = "true" ]; then
     # Install sudials
-    echo "Entering '$CURDIR/sundialsInstall.sh'"
+    echo "bash $CURDIR/sundialsInstall.sh $STDOUT"
     bash $CURDIR/sundialsInstall.sh $STDOUT
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-sundials"
 fi
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
     # Install PETSc
-    echo "Entering '$CURDIR/PETScInstall.sh'"
+    echo "bash $CURDIR/PETScInstall.sh $STDOUT"
     bash $CURDIR/PETScInstall.sh $STDOUT
 
     # Install SLEPc
-    echo "Entering '$CURDIR/SLEPcInstall.sh'"
+    echo "bash $CURDIR/SLEPcInstall.sh $STDOUT"
     bash $CURDIR/SLEPcInstall.sh $STDOUT
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-petsc --with-slepc"
 fi
