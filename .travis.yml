@@ -1,0 +1,11 @@
+language: cpp
+compiler: gcc
+
+install:
+  # Install BOUT++
+  - "./install/boutPPInstall.sh"
+
+script:
+  # Test the build
+  - "./celma/testScan.py"
+  - "./celma/testPostProcessing.py"
