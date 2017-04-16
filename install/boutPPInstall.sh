@@ -20,6 +20,8 @@ DEBUG="false"            # Good for debugging, bad for speed
 # exit on error
 set -e
 
+# FIXME
+ls -lF
 CURDIR=$PWD
 
 # Ensure paths are available when building
@@ -41,8 +43,12 @@ fi
 
 # Install packages needed for BOUT-dev
 # ==============================================================================
-if [ "$INSTALL_CMAKE" = "true" ]; then
+if [ "$INSTALL_CONDA" = "true" ]; then
     bash $CURDIR/condaInstall.sh
+fi
+
+if [ "$INSTALL_CMAKE" = "true" ]; then
+    bash $CURDIR/cmakeInstall.sh
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
