@@ -18,15 +18,15 @@
 #include <map>                // Gives std::map
 #include <vecops.hxx>         // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
-#include "../common/c/include/ownBCs.hxx"
+#include "../common/BOUTExtensions/include/ownBCs.hxx"
 // Gives own operators
-#include "../common/c/include/ownOperators.hxx"
+#include "../common/BOUTExtensions/include/ownOperators.hxx"
 // Gives own lowPass filter
-#include "../common/c/include/ownFilters.hxx"
+#include "../common/BOUTExtensions/include/ownFilters.hxx"
 // Gives the monitors
-#include "../common/c/include/ownMonitors.hxx"
+#include "../common/BOUTExtensions/include/ownMonitors.hxx"
 // Gives the parameters
-#include "../common/c/include/parameters.hxx"
+#include "../common/BOUTExtensions/include/parameters.hxx"
 
 class CelmaWBA : public PhysicsModel {
 protected:
