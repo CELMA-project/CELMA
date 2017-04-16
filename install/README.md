@@ -11,6 +11,7 @@ user-manual](http://bout-dev.readthedocs.io/en/latest/)
 * [boutPPInstall.sh](boutPPInstall.sh) - Builinding and installing the
   `master`-branch of `BOUT-dev` together with its dependencies.
   The installation can be modified by altering the options flags in the script.
+  In particular, it is recommended to set `VERBOSE="true"`
 * [cmakeInstall.sh](cmakeInstall.sh) - Builinding and installing `CMAKE`
 * [condaInstall.sh](condaInstall.sh) - Builinding and installing the `python`
   package manager
