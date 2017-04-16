@@ -20,9 +20,9 @@ DEBUG="false"            # Good for debugging, bad for speed
 # exit on error
 set -e
 
-# FIXME
-ls -lF
-CURDIR=$PWD
+# Get the path of the calling script
+# http://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
+CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Ensure paths are available when building
 export PATH="$HOME/local/bin:$PATH"
