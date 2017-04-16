@@ -15,12 +15,11 @@ class VolumeIntegral;
  * \author Michael Løiten
  * \date 2016.08.18
  */
-class Helpers
-{
-    protected:
-        int xInd; //!< x-looping index
-        int yInd; //!< y-looping index
-        int zInd; //!< z-looping index
+class Helpers {
+protected:
+  int xInd; //!< x-looping index
+  int yInd; //!< y-looping index
+  int zInd; //!< z-looping index
 };
 
 /*!
@@ -31,11 +30,10 @@ class Helpers
  * \author Michael Løiten
  * \date 2016.08.19
  */
-class PolAvg : private Helpers
-{
-    public:
-        //! Function which returns the poloidal average of a field
-        Field3D const poloidalAverage(Field3D const &f);
+class PolAvg : private Helpers {
+public:
+  //! Function which returns the poloidal average of a field
+  Field3D const poloidalAverage(Field3D const &f);
 };
 
 /*!
@@ -46,11 +44,10 @@ class PolAvg : private Helpers
  * \author Michael Løiten
  * \date 2016.08.19
  */
-class VolumeIntegral : private Helpers
-{
-    public:
-        //! Volume integral
-        BoutReal volumeIntegral(Field3D const &f);
+class VolumeIntegral : private Helpers {
+public:
+  //! Volume integral
+  BoutReal volumeIntegral(Field3D const &f);
 };
 
 #include "../src/helpers.cxx"

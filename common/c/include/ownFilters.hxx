@@ -21,35 +21,35 @@ class OwnFiltRadialLowPass;
  * \date 2016.06.08
  * \date 2016.07.09
  */
-class OwnFilters
-{
-    public:
-        // Constructor
-        OwnFilters(Options *options);
+class OwnFilters {
+public:
+  // Constructor
+  OwnFilters(Options *options);
 
-        // Destructors
-        // NOTE: New is called, so should destruct
-        // NOTE: Needs to be virtual in order for the child classes to call destruct
-        virtual ~OwnFilters();
+  // Destructors
+  // NOTE: New is called, so should destruct
+  // NOTE: Needs to be virtual in order for the child classes to call destruct
+  virtual ~OwnFilters();
 
-        // Member functions
-        //! Virtual function which is overridden by child classes
-        /* NOTE: The = 0 is needed
-         *       Tells the compiler that no function body will be given
-         *       (pure virtual)
-         */
-        virtual const Field3D ownFilter(const Field3D &var) = 0;
+  // Member functions
+  //! Virtual function which is overridden by child classes
+  /* NOTE: The = 0 is needed
+   *       Tells the compiler that no function body will be given
+   *       (pure virtual)
+   */
+  virtual const Field3D ownFilter(const Field3D &var) = 0;
 
-        //! Factory which chooses child class
-        static OwnFilters* createFilter(Options *options = NULL);
-    protected:
-        // Data members
-        //! Array containing the fourier transform
-        dcomplex *fourierArray;
-        BoutReal circumference; //!< Current circumference
-        BoutReal lambdaMin;     //!< Shortest resolved wave length at outer circumference
-        int ncz;                //!< Number of z-planes
-        int kMax;               //!< Global maximum mode number
+  //! Factory which chooses child class
+  static OwnFilters *createFilter(Options *options = NULL);
+
+protected:
+  // Data members
+  //! Array containing the fourier transform
+  dcomplex *fourierArray;
+  BoutReal circumference; //!< Current circumference
+  BoutReal lambdaMin; //!< Shortest resolved wave length at outer circumference
+  int ncz;            //!< Number of z-planes
+  int kMax;           //!< Global maximum mode number
 };
 
 // OwnFiltAllPass
@@ -66,21 +66,20 @@ class OwnFilters
  * \author Michael Løiten
  * \date 2016.07.09
  */
-class OwnFiltAllPass : public OwnFilters
-{
-    public:
-        //! Constructor does nothing
-        OwnFiltAllPass(Options *options) : OwnFilters(options){};
+class OwnFiltAllPass : public OwnFilters {
+public:
+  //! Constructor does nothing
+  OwnFiltAllPass(Options *options) : OwnFilters(options){};
 
-        //! Destructor
-        /* NOTE: {} in the end is needed
-         *       If else the compiler gives
-         *       "udefined reference to `vtable for ...'"
-         */
-        virtual ~OwnFiltAllPass(){};
+  //! Destructor
+  /* NOTE: {} in the end is needed
+   *       If else the compiler gives
+   *       "udefined reference to `vtable for ...'"
+   */
+  virtual ~OwnFiltAllPass(){};
 
-        //! OwnFiltAllPass implementation of ownFilter
-        const Field3D ownFilter(const Field3D &var);
+  //! OwnFiltAllPass implementation of ownFilter
+  const Field3D ownFilter(const Field3D &var);
 };
 
 // OwnFiltRadialLowPass
@@ -101,20 +100,19 @@ class OwnFiltAllPass : public OwnFilters
  * \author Michael Løiten
  * \date 2016.07.09
  */
-class OwnFiltRadialLowPass : public OwnFilters
-{
-    public:
-        // Constructor
-        OwnFiltRadialLowPass(Options *options);
+class OwnFiltRadialLowPass : public OwnFilters {
+public:
+  // Constructor
+  OwnFiltRadialLowPass(Options *options);
 
-        //! Destructor
-        virtual ~OwnFiltRadialLowPass(){};
+  //! Destructor
+  virtual ~OwnFiltRadialLowPass(){};
 
-        //! OwnFiltRadialLowPass implementation of ownFilter
-        const Field3D ownFilter(const Field3D &var);
+  //! OwnFiltRadialLowPass implementation of ownFilter
+  const Field3D ownFilter(const Field3D &var);
 
-    private:
-        int kMaxCurrent;        //!< Max mode at current \f$\rho\f$
+private:
+  int kMaxCurrent; //!< Max mode at current \f$\rho\f$
 };
 
 #include "../src/ownFilters.cxx"

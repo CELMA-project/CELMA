@@ -12,37 +12,35 @@
  * \param[in] BCObj Object containing own boundary conditions
  * \param[in] section Section to read the input data from
  */
-void OwnLaplacianInversions::create(OwnOperators *opObj,
-                                    OwnBCs &BCObj,
-                                    const string &section)
-{
+void OwnLaplacianInversions::create(OwnOperators *opObj, OwnBCs &BCObj,
+                                    const string &section) {
 
-    TRACE("Halt in OwnLaplacianInversions::OwnLaplacianInversions");
+  TRACE("Halt in OwnLaplacianInversions::OwnLaplacianInversions");
 
-    // Set the operator and boundary object
-    ownOp =  opObj; // Already a pointer
-    ownBC = &BCObj; // Need the address
+  // Set the operator and boundary object
+  ownOp = opObj;  // Already a pointer
+  ownBC = &BCObj; // Need the address
 
-    // Get the option (before any sections) in the BOUT.inp file
-    Options *options = Options::getRoot();
+  // Get the option (before any sections) in the BOUT.inp file
+  Options *options = Options::getRoot();
 
-    // Create the laplace object
-    // ************************************************************************
-    // The laplace object will look in the section phiSolver in the BOUT.inp
-    // file
-    Options *phiSol_opt = options->getSection(section);
-    phiSolver = Laplacian::create(phiSol_opt);
-    // Set the coefficients manually (should also be set to this by default)
-    phiSolver->setCoefD(1.0);
-    phiSolver->setCoefC(1.0);
-    phiSolver->setCoefA(0.0);
-    // Get the tolerances
-    phiSol_opt->get("atol",  atol,  1.0e-10);
-    phiSol_opt->get("rtol",  rtol,  1.0e-5);
-    phiSol_opt->get("maxit", maxit, 300);
-    // Check if the Naulin iterator should be monitored
-    phiSol_opt->get("monitor", monitor, false);
-    // ************************************************************************
+  // Create the laplace object
+  // ************************************************************************
+  // The laplace object will look in the section phiSolver in the BOUT.inp
+  // file
+  Options *phiSol_opt = options->getSection(section);
+  phiSolver = Laplacian::create(phiSol_opt);
+  // Set the coefficients manually (should also be set to this by default)
+  phiSolver->setCoefD(1.0);
+  phiSolver->setCoefC(1.0);
+  phiSolver->setCoefA(0.0);
+  // Get the tolerances
+  phiSol_opt->get("atol", atol, 1.0e-10);
+  phiSol_opt->get("rtol", rtol, 1.0e-5);
+  phiSol_opt->get("maxit", maxit, 300);
+  // Check if the Naulin iterator should be monitored
+  phiSol_opt->get("monitor", monitor, false);
+  // ************************************************************************
 }
 
 // Member function
@@ -59,7 +57,8 @@ void OwnLaplacianInversions::create(OwnOperators *opObj,
  * \return phiNext A phi which matches the tolerances
  *
  * ## Explanation of the procedure:
- * An way to invert the equation \f$\Omega^D = \nabla\cdot(n\nabla_\perp \phi)\f$
+ * An way to invert the equation \f$\Omega^D = \nabla\cdot(n\nabla_\perp
+ * \phi)\f$
  * invented by Naulin, V.
  * In an orthogonal system, we have that:
  *
@@ -124,87 +123,81 @@ void OwnLaplacianInversions::create(OwnOperators *opObj,
  * \note Needs orthogonal basis
  */
 Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
-                                             const Field3D  &n,
-                                             const Field3D  &vortD,
-                                             const Field3D  &phiInit,
-                                                   Field3D  &vort)
-{
-    TRACE("Halt in OwnLaplacianInversions::NaulinSolver");
+                                             const Field3D &n,
+                                             const Field3D &vortD,
+                                             const Field3D &phiInit,
+                                             Field3D &vort) {
+  TRACE("Halt in OwnLaplacianInversions::NaulinSolver");
 
-    curCount = 0;             // Resetting the counter
-    phiCur   = copy(phiInit); // Init phiCur (no shared memory due to copy)
+  curCount = 0;           // Resetting the counter
+  phiCur = copy(phiInit); // Init phiCur (no shared memory due to copy)
 
-    // Infinite loop
-    for(;;){
-        /* For this to work, the following fields must be communicated:
-         * 1. phiCur
-         */
-        mesh->communicate(phiCur);
-        vort = (vortD/n) - gradPerpLnN*ownOp->Grad_perp(phiCur);
-        // Solve for phi (solve takes care of the perp boundaries)
-        /* No need for a second argument here because:
-         * 1. This is a direct solver (no need for initial guess)
-         * 2. Boundaries are set through a flag
-         */
-        /* For this to work, the following fields must be communicated:
-         * 1. vort
-         */
-        mesh->communicate(vort);
-        phiNext = phiSolver->solve(vort);
+  // Infinite loop
+  for (;;) {
+    /* For this to work, the following fields must be communicated:
+     * 1. phiCur
+     */
+    mesh->communicate(phiCur);
+    vort = (vortD / n) - gradPerpLnN * ownOp->Grad_perp(phiCur);
+    // Solve for phi (solve takes care of the perp boundaries)
+    /* No need for a second argument here because:
+     * 1. This is a direct solver (no need for initial guess)
+     * 2. Boundaries are set through a flag
+     */
+    /* For this to work, the following fields must be communicated:
+     * 1. vort
+     */
+    mesh->communicate(vort);
+    phiNext = phiSolver->solve(vort);
 
-        // Calculate the errors (the true in the end means the max will be
-        // taken over all processors)
-        EAbsLInf = (abs( phiCur - phiNext)        ).max(true);
-        ERelLInf = (abs((phiCur - phiNext)/phiCur)).max(true);
+    // Calculate the errors (the true in the end means the max will be
+    // taken over all processors)
+    EAbsLInf = (abs(phiCur - phiNext)).max(true);
+    ERelLInf = (abs((phiCur - phiNext) / phiCur)).max(true);
 
-        if(EAbsLInf > atol){
-            if(ERelLInf > rtol){
-                // Solve for phi has taken care of perpendicular BC
-                // Just to be sure, we force the boundary on inner rho
-                ownBC->innerRhoCylinder(phiNext);
-                // Update phiCur (no shared memory due to copy)
-                phiCur = copy(phiNext);
-            }
-            else{
-                break; // Condition fulfilled, break out of the loop
-            }
-        }
-        else{
-            break; // Condition fulfilled, break out of the loop
-        }
-
-        // Increase the counter
-        ++curCount;
-
-        if (curCount > maxit){
-            throw BoutException("NaulinSolver reached max iterations with\n"
-                                "iterations=%d, atol=%.3e and rtol=%.3e\n"
-                                "aerr=%.3e, rerr=%.3e",
-                                curCount, atol, rtol, EAbsLInf, ERelLInf);
-        }
+    if (EAbsLInf > atol) {
+      if (ERelLInf > rtol) {
+        // Solve for phi has taken care of perpendicular BC
+        // Just to be sure, we force the boundary on inner rho
+        ownBC->innerRhoCylinder(phiNext);
+        // Update phiCur (no shared memory due to copy)
+        phiCur = copy(phiNext);
+      } else {
+        break; // Condition fulfilled, break out of the loop
+      }
+    } else {
+      break; // Condition fulfilled, break out of the loop
     }
 
-    if(monitor){
-        output << "NaulinSolver success:"<<
-                  " Iterations=" << curCount <<
-                  " abserr=" << EAbsLInf <<
-                  " relerr=" << ERelLInf <<
-                  std::endl;
-    }
+    // Increase the counter
+    ++curCount;
 
-    // Return phiNext, vort is also changed, as it is a call by
-    // reference
-    return phiNext;
- }
+    if (curCount > maxit) {
+      throw BoutException("NaulinSolver reached max iterations with\n"
+                          "iterations=%d, atol=%.3e and rtol=%.3e\n"
+                          "aerr=%.3e, rerr=%.3e",
+                          curCount, atol, rtol, EAbsLInf, ERelLInf);
+    }
+  }
+
+  if (monitor) {
+    output << "NaulinSolver success:"
+           << " Iterations=" << curCount << " abserr=" << EAbsLInf
+           << " relerr=" << ERelLInf << std::endl;
+  }
+
+  // Return phiNext, vort is also changed, as it is a call by
+  // reference
+  return phiNext;
+}
 
 // Destructor
 /*!
  * Destroys the laplace object
  */
-OwnLaplacianInversions::~OwnLaplacianInversions()
-{
-    TRACE("Halt in OwnLaplacianInversions::~OwnLaplacianInversions");
+OwnLaplacianInversions::~OwnLaplacianInversions() {
+  TRACE("Halt in OwnLaplacianInversions::~OwnLaplacianInversions");
 
-    delete phiSolver;
+  delete phiSolver;
 }
 #endif

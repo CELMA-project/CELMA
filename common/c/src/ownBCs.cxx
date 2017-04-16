@@ -12,60 +12,58 @@
  *          should only be used for the processors using the respective
  *          boundaries
  */
-OwnBCs::OwnBCs()
-{
-    TRACE("Halt in OwnBCs::OwnBCs");
+OwnBCs::OwnBCs() {
+  TRACE("Halt in OwnBCs::OwnBCs");
 
-    // Set the piIndex
-    /* NOTE: The index corresponding to pi
-     *       Since z in [0, 2 pi[, the z index corresponding to pi is
-     *       (mesh->ngz -1) / 2, where mesh->ngz - 1 is the last actual z point
-     *       (in addition there is one extra z point never used)
-     */
-    piIndex = (mesh->ngz -1)/2;
+  // Set the piIndex
+  /* NOTE: The index corresponding to pi
+   *       Since z in [0, 2 pi[, the z index corresponding to pi is
+   *       (mesh->ngz -1) / 2, where mesh->ngz - 1 is the last actual z point
+   *       (in addition there is one extra z point never used)
+   */
+  piIndex = (mesh->ngz - 1) / 2;
 
-    /* NOTE: xend
-     *       xend = index value of last inner point on this processor
-     *       xend+1 = first guard point
-     */
-    firstOuterXGhost = mesh->xend+1;
-    /* NOTE: yend
-     *       yend = index value of last inner point on this processor
-     *       yend+1 = first guard point
-     */
-    firstUpperYGhost = mesh->yend+1;
-    /* NOTE: ystart
-     *       ystart = index value of first inner point on this processor
-     *       ystart-1 = first guard point
-     */
-    firstLowerYGhost = mesh->ystart-1;
+  /* NOTE: xend
+   *       xend = index value of last inner point on this processor
+   *       xend+1 = first guard point
+   */
+  firstOuterXGhost = mesh->xend + 1;
+  /* NOTE: yend
+   *       yend = index value of last inner point on this processor
+   *       yend+1 = first guard point
+   */
+  firstUpperYGhost = mesh->yend + 1;
+  /* NOTE: ystart
+   *       ystart = index value of first inner point on this processor
+   *       ystart-1 = first guard point
+   */
+  firstLowerYGhost = mesh->ystart - 1;
 
-    /* Check that there are enough points
-     * ngy is the size of local mesh including guard cells
-     */
-    Options *switchOptions = Options::getRoot()->getSection("switch");
-    switchOptions->get("warnPoints", warnPoints, false);
-    if (mesh->ngy - 2*mesh->ystart < 4){
+  /* Check that there are enough points
+   * ngy is the size of local mesh including guard cells
+   */
+  Options *switchOptions = Options::getRoot()->getSection("switch");
+  switchOptions->get("warnPoints", warnPoints, false);
+  if (mesh->ngy - 2 * mesh->ystart < 4) {
 
-        // Create a stream which we cast to a string
-        std::ostringstream stream;
-        stream << "Not enough inner points i the y-direction\n"
-               << "The cauchy and uEPar BC needs 3 inner points in y\n"
-               << "extrapolateYUp and extrapolateYDown needs 4 inner points "
-               << "in y\n"
-               << "Currently the number of inner points is "
-               << mesh->ngy - 2*mesh->ystart;
+    // Create a stream which we cast to a string
+    std::ostringstream stream;
+    stream << "Not enough inner points i the y-direction\n"
+           << "The cauchy and uEPar BC needs 3 inner points in y\n"
+           << "extrapolateYUp and extrapolateYDown needs 4 inner points "
+           << "in y\n"
+           << "Currently the number of inner points is "
+           << mesh->ngy - 2 * mesh->ystart;
 
-        if (warnPoints){
-            output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
-        }
-        else{
-            std::string str =  stream.str();
-            // Cast the stream to a const char in order to use it in BoutException
-            const char* message = str.c_str();
-            throw BoutException(message);
-        }
+    if (warnPoints) {
+      output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
+    } else {
+      std::string str = stream.str();
+      // Cast the stream to a const char in order to use it in BoutException
+      const char *message = str.c_str();
+      throw BoutException(message);
     }
+  }
 }
 
 // Member functions
@@ -115,22 +113,21 @@ OwnBCs::OwnBCs()
  *
  * \note We are also setting the inner x-y corner points
  */
-void OwnBCs::innerRhoCylinder(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::innerRhoCylinder");
+void OwnBCs::innerRhoCylinder(Field3D &f) {
+  TRACE("Halt in OwnBCs::innerRhoCylinder");
 
-    if(mesh->firstX()) {
-        // Set the boundary for the inner y points
-        innerRhoCylinderLoop(f, mesh->ystart, mesh->yend);
-        // Do the same for the ghost points in y
-        if (mesh->firstY()){
-            innerRhoCylinderLoop(f, 0, firstLowerYGhost);
-        }
-        if (mesh->lastY()){
-            // Note that ngy starts counting from 1
-            innerRhoCylinderLoop(f, firstUpperYGhost, mesh->ngy - 1);
-        }
+  if (mesh->firstX()) {
+    // Set the boundary for the inner y points
+    innerRhoCylinderLoop(f, mesh->ystart, mesh->yend);
+    // Do the same for the ghost points in y
+    if (mesh->firstY()) {
+      innerRhoCylinderLoop(f, 0, firstLowerYGhost);
     }
+    if (mesh->lastY()) {
+      // Note that ngy starts counting from 1
+      innerRhoCylinderLoop(f, firstUpperYGhost, mesh->ngy - 1);
+    }
+  }
 }
 
 /*!
@@ -142,22 +139,20 @@ void OwnBCs::innerRhoCylinder(Field3D &f)
  *
  * \sa extrapolateYGhost
  */
-void OwnBCs::extrapolateXOutGhost(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::extrapolateXOutGhost");
+void OwnBCs::extrapolateXOutGhost(Field3D &f) {
+  TRACE("Halt in OwnBCs::extrapolateXOutGhost");
 
-    if (mesh->lastX()){
-        for(int yInd = mesh->ystart; yInd <= mesh->xend; yInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                f(firstOuterXGhost, yInd, zInd) =
-                      4.0*f(firstOuterXGhost-1, yInd, zInd)
-                    - 6.0*f(firstOuterXGhost-2, yInd, zInd)
-                    + 4.0*f(firstOuterXGhost-3, yInd, zInd)
-                    -     f(firstOuterXGhost-4, yInd, zInd)
-                    ;
-            }
-        }
+  if (mesh->lastX()) {
+    for (int yInd = mesh->ystart; yInd <= mesh->xend; yInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        f(firstOuterXGhost, yInd, zInd) =
+            4.0 * f(firstOuterXGhost - 1, yInd, zInd) -
+            6.0 * f(firstOuterXGhost - 2, yInd, zInd) +
+            4.0 * f(firstOuterXGhost - 3, yInd, zInd) -
+            f(firstOuterXGhost - 4, yInd, zInd);
+      }
     }
+  }
 }
 
 /*!
@@ -165,17 +160,17 @@ void OwnBCs::extrapolateXOutGhost(Field3D &f)
  * point using a 4th order Newton polynomial
  *
  * \param[in] f The original field
- * \param[out] f The field after extrapolating to the first upper ghost point and the first
+ * \param[out] f The field after extrapolating to the first upper ghost point
+ * and the first
  *
  * \sa extrapolateYUp
  * \sa extrapolateDown
  */
-void OwnBCs::extrapolateYGhost(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::extrapolateYGhost");
+void OwnBCs::extrapolateYGhost(Field3D &f) {
+  TRACE("Halt in OwnBCs::extrapolateYGhost");
 
-    extrapolateYUp(f);
-    extrapolateYDown(f);
+  extrapolateYUp(f);
+  extrapolateYDown(f);
 }
 
 /*!
@@ -187,22 +182,20 @@ void OwnBCs::extrapolateYGhost(Field3D &f)
  *
  * \sa extrapolateYGhost
  */
-void OwnBCs::extrapolateYUp(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::extrapolateYUp");
+void OwnBCs::extrapolateYUp(Field3D &f) {
+  TRACE("Halt in OwnBCs::extrapolateYUp");
 
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                f(xInd, firstUpperYGhost, zInd) =
-                      4.0*f(xInd, firstUpperYGhost-1, zInd)
-                    - 6.0*f(xInd, firstUpperYGhost-2, zInd)
-                    + 4.0*f(xInd, firstUpperYGhost-3, zInd)
-                    -     f(xInd, firstUpperYGhost-4, zInd)
-                    ;
-            }
-        }
+  if (mesh->lastY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        f(xInd, firstUpperYGhost, zInd) =
+            4.0 * f(xInd, firstUpperYGhost - 1, zInd) -
+            6.0 * f(xInd, firstUpperYGhost - 2, zInd) +
+            4.0 * f(xInd, firstUpperYGhost - 3, zInd) -
+            f(xInd, firstUpperYGhost - 4, zInd);
+      }
     }
+  }
 }
 
 /*!
@@ -214,22 +207,20 @@ void OwnBCs::extrapolateYUp(Field3D &f)
  *
  * \sa extrapolateYGhost
  */
-void OwnBCs::extrapolateYDown(Field3D &f)
-{
-    TRACE("Halt in OwnBCs::extrapolateYDown");
+void OwnBCs::extrapolateYDown(Field3D &f) {
+  TRACE("Halt in OwnBCs::extrapolateYDown");
 
-    if(mesh->firstY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                f(xInd, firstLowerYGhost, zInd) =
-                      4.0*f(xInd, firstLowerYGhost+1, zInd)
-                    - 6.0*f(xInd, firstLowerYGhost+2, zInd)
-                    + 4.0*f(xInd, firstLowerYGhost+3, zInd)
-                    -     f(xInd, firstLowerYGhost+4, zInd)
-                    ;
-            }
-        }
+  if (mesh->firstY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        f(xInd, firstLowerYGhost, zInd) =
+            4.0 * f(xInd, firstLowerYGhost + 1, zInd) -
+            6.0 * f(xInd, firstLowerYGhost + 2, zInd) +
+            4.0 * f(xInd, firstLowerYGhost + 3, zInd) -
+            f(xInd, firstLowerYGhost + 4, zInd);
+      }
     }
+  }
 }
 
 /*!
@@ -300,39 +291,32 @@ void OwnBCs::extrapolateYDown(Field3D &f)
  *        \f$\alpha = \pi/2\f$
  *      * \f$\Lambda = \ln(\mu/2\pi)\f$
  *      * \f$\eta_m = (\phi_{MPE} - \phi_W)/Te\f$
- *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
+ *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic
+ * presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
  */
-void OwnBCs::uEParSheath(Field3D &uEPar,
-                         const Field3D &phi,
-                         const BoutReal &Lambda,
-                         const BoutReal &phiRef)
-{
-    TRACE("Halt in OwnBCs::uEParSheath");
+void OwnBCs::uEParSheath(Field3D &uEPar, const Field3D &phi,
+                         const BoutReal &Lambda, const BoutReal &phiRef) {
+  TRACE("Halt in OwnBCs::uEParSheath");
 
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                uEPar(xInd, firstUpperYGhost, zInd) =
-                      exp(
-                            Lambda
-                          - (  phiRef
-                             + (
-                               +  5.0*phi(xInd, firstUpperYGhost,   zInd)
-                               + 15.0*phi(xInd, firstUpperYGhost-1, zInd)
-                               -  5.0*phi(xInd, firstUpperYGhost-2, zInd)
-                               +      phi(xInd, firstUpperYGhost-3, zInd)
-                               )/16.0
-                            )
-                     ) * (16.0/5.0)
-                    -       3.0*uEPar(xInd, firstUpperYGhost-1, zInd)
-                    +           uEPar(xInd, firstUpperYGhost-2, zInd)
-                    - (1.0/5.0)*uEPar(xInd, firstUpperYGhost-3, zInd)
-                    ;
-            }
-        }
+  if (mesh->lastY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        uEPar(xInd, firstUpperYGhost, zInd) =
+            exp(Lambda - (phiRef +
+                          (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
+                           15.0 * phi(xInd, firstUpperYGhost - 1, zInd) -
+                           5.0 * phi(xInd, firstUpperYGhost - 2, zInd) +
+                           phi(xInd, firstUpperYGhost - 3, zInd)) /
+                              16.0)) *
+                (16.0 / 5.0) -
+            3.0 * uEPar(xInd, firstUpperYGhost - 1, zInd) +
+            uEPar(xInd, firstUpperYGhost - 2, zInd) -
+            (1.0 / 5.0) * uEPar(xInd, firstUpperYGhost - 3, zInd);
+      }
     }
+  }
 }
 
 /*!
@@ -391,7 +375,8 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  * This gives
  *
  * \f{eqnarray}{
- * u_{e, \|, B} = (5u_{e, \|, k} + 15 u_{e, \|, k-1} - 5 u_{e, \|, k-2} + u_{e, \|, k-3})/16
+ * u_{e, \|, B} = (5u_{e, \|, k} + 15 u_{e, \|, k-1} - 5 u_{e, \|, k-2} + u_{e,
+ * \|, k-3})/16
  * =
  * \exp(\Lambda
  *      - ((\phi_{Ref} + 5 \phi_{k} + 15 \phi_{k-1} - 5\phi_{k-2} + \phi_{k-3})
@@ -435,47 +420,36 @@ void OwnBCs::uEParSheath(Field3D &uEPar,
  *        \f$\alpha = \pi/2\f$
  *      * \f$\Lambda = \ln(\mu/2\pi)\f$
  *      * \f$\eta_m = (\phi_{MPE} - \phi_W)/Te\f$
- *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic presheath
+ *      * \f$\phi_{MPE} = \phi_{CSE}\f$ since we do not have a magnetic
+ * presheath
  * 2. Eq (26) in Naulin et al PoP 15-2008
  * 3. Equation F.6 in Tiago's PhD 2007
  */
-void OwnBCs::jParSheath(Field3D &jPar,
-                         const Field3D &uEPar,
-                         const Field3D &uIPar,
-                         const Field3D &phi,
-                         const Field3D &n,
-                         const BoutReal &Lambda,
-                         const BoutReal &phiRef)
-{
-    TRACE("Halt in OwnBCs::jParSheath");
+void OwnBCs::jParSheath(Field3D &jPar, const Field3D &uEPar,
+                        const Field3D &uIPar, const Field3D &phi,
+                        const Field3D &n, const BoutReal &Lambda,
+                        const BoutReal &phiRef) {
+  TRACE("Halt in OwnBCs::jParSheath");
 
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                jPar(xInd, firstUpperYGhost, zInd) =
-                    n(xInd, firstUpperYGhost, zInd)*(
-                       uIPar(xInd, firstUpperYGhost, zInd)
-                     - (
-                         exp(
-                               Lambda
-                             - (  phiRef
-                                + (
-                                  +  5.0*phi(xInd, firstUpperYGhost,   zInd)
-                                  + 15.0*phi(xInd, firstUpperYGhost-1, zInd)
-                                  -  5.0*phi(xInd, firstUpperYGhost-2, zInd)
-                                  +      phi(xInd, firstUpperYGhost-3, zInd)
-                                  )/16.0
-                               )
-                            ) * (16.0/5.0)
-                         -       3.0*uEPar(xInd, firstUpperYGhost-1, zInd)
-                         +           uEPar(xInd, firstUpperYGhost-2, zInd)
-                         - (1.0/5.0)*uEPar(xInd, firstUpperYGhost-3, zInd)
-                       )
-                    )
-                    ;
-            }
-        }
+  if (mesh->lastY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        jPar(xInd, firstUpperYGhost, zInd) =
+            n(xInd, firstUpperYGhost, zInd) *
+            (uIPar(xInd, firstUpperYGhost, zInd) -
+             (exp(Lambda - (phiRef +
+                            (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
+                             15.0 * phi(xInd, firstUpperYGhost - 1, zInd) -
+                             5.0 * phi(xInd, firstUpperYGhost - 2, zInd) +
+                             phi(xInd, firstUpperYGhost - 3, zInd)) /
+                                16.0)) *
+                  (16.0 / 5.0) -
+              3.0 * uEPar(xInd, firstUpperYGhost - 1, zInd) +
+              uEPar(xInd, firstUpperYGhost - 2, zInd) -
+              (1.0 / 5.0) * uEPar(xInd, firstUpperYGhost - 3, zInd)));
+      }
     }
+  }
 }
 
 /*!
@@ -495,21 +469,19 @@ void OwnBCs::jParSheath(Field3D &jPar,
  * As we have sat BC's on both \f$u_{i, \|, B}\f$ and \f$n\f$, we simply need
  * to multiply them together at the ghost point
  */
-void OwnBCs::parDensMomSheath(Field3D &momDensPar,
-                              const Field3D &uIPar,
-                              const Field3D &n)
-{
-    TRACE("Halt in OwnBCs::parDensMomSheath");
+void OwnBCs::parDensMomSheath(Field3D &momDensPar, const Field3D &uIPar,
+                              const Field3D &n) {
+  TRACE("Halt in OwnBCs::parDensMomSheath");
 
-    if (mesh->lastY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                momDensPar(xInd, firstUpperYGhost, zInd) =
-                    n(xInd, firstUpperYGhost, zInd)*
-                    uIPar(xInd, firstUpperYGhost, zInd);
-            }
-        }
+  if (mesh->lastY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        momDensPar(xInd, firstUpperYGhost, zInd) =
+            n(xInd, firstUpperYGhost, zInd) *
+            uIPar(xInd, firstUpperYGhost, zInd);
+      }
     }
+  }
 }
 
 /*!
@@ -536,45 +508,42 @@ void OwnBCs::parDensMomSheath(Field3D &momDensPar,
  * \sa extrapolateYUp
  * \warning This stencil is only 1st order accurate
  */
-void OwnBCs::cauchyYDown(Field3D &f,
-                         const BoutReal &t,
-                         bool const &yUpExtrapolate)
-{
-    TRACE("Halt in OwnBCs::cauchyYDown");
+void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
+                         bool const &yUpExtrapolate) {
+  TRACE("Halt in OwnBCs::cauchyYDown");
 
-    if(mesh->firstY()){
-        for(int xInd = mesh->xstart; xInd <= mesh->xend; xInd++){
-            // Calculate the x for the current xIndex
-            /* NOTE:
-             * For a local index, globalX returns the global value between 0
-             * and 1 corresponding to that index.
-             * When evaluating the function given in the function generator,
-             * the x variable need to be in range 0-1 (even if it contains
-             * expressions like geom:xl) in order to be consistent with the
-             * rest of the code.
-             */
-            x = mesh->GlobalX(xInd);
-            for(int zInd = 0; zInd < mesh->ngz -1; zInd ++){
-                // Calculating the z value
-                z = TWOPI*zInd/(mesh->ngz-1);
-                // Calculate a and b
-                a = aBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
-                b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
-                // Set the ghost point
-                f(xInd, firstLowerYGhost, zInd) =
-                      (4.0/5.0 )*a
-                    - (3.0/4.0 )*b*mesh->dy(xInd, firstLowerYGhost)
-                    + (1.0/4.0) *f(xInd, firstLowerYGhost+2, zInd)
-                    - (1.0/20.0)*f(xInd, firstLowerYGhost+3, zInd)
-                    ;
-            }
-        }
+  if (mesh->firstY()) {
+    for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
+      // Calculate the x for the current xIndex
+      /* NOTE:
+       * For a local index, globalX returns the global value between 0
+       * and 1 corresponding to that index.
+       * When evaluating the function given in the function generator,
+       * the x variable need to be in range 0-1 (even if it contains
+       * expressions like geom:xl) in order to be consistent with the
+       * rest of the code.
+       */
+      x = mesh->GlobalX(xInd);
+      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+        // Calculating the z value
+        z = TWOPI * zInd / (mesh->ngz - 1);
+        // Calculate a and b
+        a = aBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
+        b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
+        // Set the ghost point
+        f(xInd, firstLowerYGhost, zInd) =
+            (4.0 / 5.0) * a -
+            (3.0 / 4.0) * b * mesh->dy(xInd, firstLowerYGhost) +
+            (1.0 / 4.0) * f(xInd, firstLowerYGhost + 2, zInd) -
+            (1.0 / 20.0) * f(xInd, firstLowerYGhost + 3, zInd);
+      }
     }
+  }
 
-    // Extrapolate if true
-    if(yUpExtrapolate){
-        extrapolateYUp(f);
-    }
+  // Extrapolate if true
+  if (yUpExtrapolate) {
+    extrapolateYUp(f);
+  }
 }
 
 /*!
@@ -591,13 +560,12 @@ void OwnBCs::cauchyYDown(Field3D &f,
  * \sa getBFunction
  * \sa getYValAtYDownBndry
  */
-void OwnBCs::prepareCauchy(const string &section)
-{
-    TRACE("Halt in OwnBCs::prepareCauchy");
+void OwnBCs::prepareCauchy(const string &section) {
+  TRACE("Halt in OwnBCs::prepareCauchy");
 
-    getAFunction(section);
-    getBFunction(section);
-    getYValAtYDownBndry();
+  getAFunction(section);
+  getBFunction(section);
+  getYValAtYDownBndry();
 }
 
 /*!
@@ -610,26 +578,25 @@ void OwnBCs::prepareCauchy(const string &section)
  *
  * \sa getBFunction
  */
-void OwnBCs::getAFunction(const string &section)
-{
-    TRACE("Halt in OwnBCs::getAFunction");
-    // Get the function
-    Options *varOptions = Options::getRoot()->getSection(section);
-    string bndryFuncString;
-    // Last argument in get is the default
-    varOptions->get("a", bndryFuncString, "");
-    if (bndryFuncString == ""){
-        // Create a stream which we cast to a string
-        std::ostringstream stream;
-        stream << "'a' not found in section '" << section << "' "
-               << "but is needed when setting the Cauchy BC\n";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
+void OwnBCs::getAFunction(const string &section) {
+  TRACE("Halt in OwnBCs::getAFunction");
+  // Get the function
+  Options *varOptions = Options::getRoot()->getSection(section);
+  string bndryFuncString;
+  // Last argument in get is the default
+  varOptions->get("a", bndryFuncString, "");
+  if (bndryFuncString == "") {
+    // Create a stream which we cast to a string
+    std::ostringstream stream;
+    stream << "'a' not found in section '" << section << "' "
+           << "but is needed when setting the Cauchy BC\n";
+    std::string str = stream.str();
+    // Cast the stream to a const char in order to use it in BoutException
+    const char *message = str.c_str();
 
-        throw BoutException(message);
-    }
-    aBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
+    throw BoutException(message);
+  }
+  aBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
 }
 
 /*!
@@ -642,26 +609,25 @@ void OwnBCs::getAFunction(const string &section)
  *
  * \sa getAFunction
  */
-void OwnBCs::getBFunction(const string &section)
-{
-    TRACE("Halt in OwnBCs::getBFunction");
-    // Get the function
-    Options *varOptions = Options::getRoot()->getSection(section);
-    string bndryFuncString;
-    // Last argument in get is the default
-    varOptions->get("b", bndryFuncString, "");
-    if (bndryFuncString == ""){
-        // Create a stream which we cast to a string
-        std::ostringstream stream;
-        stream << "'b' not found in section '" << section << "' "
-               << "but is needed when setting the Cauchy BC";
-        std::string str =  stream.str();
-        // Cast the stream to a const char in order to use it in BoutException
-        const char* message = str.c_str();
+void OwnBCs::getBFunction(const string &section) {
+  TRACE("Halt in OwnBCs::getBFunction");
+  // Get the function
+  Options *varOptions = Options::getRoot()->getSection(section);
+  string bndryFuncString;
+  // Last argument in get is the default
+  varOptions->get("b", bndryFuncString, "");
+  if (bndryFuncString == "") {
+    // Create a stream which we cast to a string
+    std::ostringstream stream;
+    stream << "'b' not found in section '" << section << "' "
+           << "but is needed when setting the Cauchy BC";
+    std::string str = stream.str();
+    // Cast the stream to a const char in order to use it in BoutException
+    const char *message = str.c_str();
 
-        throw BoutException(message);
-    }
-    bBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
+    throw BoutException(message);
+  }
+  bBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
 }
 
 /*!
@@ -669,21 +635,21 @@ void OwnBCs::getBFunction(const string &section)
  *
  * \param[out] yValAtYDownBndry The value of the y coordinate at the boundary
  */
-void OwnBCs::getYValAtYDownBndry()
-{
-    TRACE("Halt in OwnBCs::getYValAtYDownBndry");
-    // Get the first y value
-    if(mesh->firstY()){
-        /* NOTE:
-         * For a local index, globalY returns the global value between 0 and 1
-         * corresponding to that index.
-         * When evaluating the function given in a function generator, the y
-         * variable need to be in range 0-2*pi (even if it contains expressions
-         * like geom:yl) in order to be consistent with the rest of the code.
-         */
-        yValAtYDownBndry = PI* // 0.5*TWOPI = PI
-            (mesh->GlobalY(mesh->ystart-1) + mesh->GlobalY(mesh->ystart));
-    }
+void OwnBCs::getYValAtYDownBndry() {
+  TRACE("Halt in OwnBCs::getYValAtYDownBndry");
+  // Get the first y value
+  if (mesh->firstY()) {
+    /* NOTE:
+     * For a local index, globalY returns the global value between 0 and 1
+     * corresponding to that index.
+     * When evaluating the function given in a function generator, the y
+     * variable need to be in range 0-2*pi (even if it contains expressions
+     * like geom:yl) in order to be consistent with the rest of the code.
+     */
+    yValAtYDownBndry =
+        PI * // 0.5*TWOPI = PI
+        (mesh->GlobalY(mesh->ystart - 1) + mesh->GlobalY(mesh->ystart));
+  }
 }
 
 // Auxiliary
@@ -698,60 +664,54 @@ void OwnBCs::getYValAtYDownBndry()
  *
  * \sa innerRhoCylinder
  */
-void OwnBCs::innerRhoCylinderLoop(Field3D &f,
-                                  const int &yStart,
-                                  const int &yEnd)
-{
-    /* NOTE: Addressing "off by one" for the inner ghost points in x
-     *       The first point on the current processor is 0. Since we are doing
-     *       this procedure for all the ghost points, we must start from zero.
-     *       We will loop all the way up to (but excluding) the first inner
-     *       point. This can be achieved by using < instead of <=
-     */
-    /* NOTE: Addressing "off by one" for the y index
-     *       We want to loop over all the inner points in y. Thus, we start
-     *       on mesh->ystart, and loop until (and including) mesh->yend. We
-     *       do this by using <= instead of < in the loop
-     */
-    /* NOTE: No need for old_field and new_field
-     *       Only ghost points are dealt with on the LHS
-     *       Only inner points are dealt with on the RHS
-     */
-    /* NOTE: Addressing "off by one" for the z points
-     *       We loop up to (but not including) the pi index
-     */
-    TRACE("Halt in OwnBCs::innerRhoCylinderLoop Field3D");
+void OwnBCs::innerRhoCylinderLoop(Field3D &f, const int &yStart,
+                                  const int &yEnd) {
+  /* NOTE: Addressing "off by one" for the inner ghost points in x
+   *       The first point on the current processor is 0. Since we are doing
+   *       this procedure for all the ghost points, we must start from zero.
+   *       We will loop all the way up to (but excluding) the first inner
+   *       point. This can be achieved by using < instead of <=
+   */
+  /* NOTE: Addressing "off by one" for the y index
+   *       We want to loop over all the inner points in y. Thus, we start
+   *       on mesh->ystart, and loop until (and including) mesh->yend. We
+   *       do this by using <= instead of < in the loop
+   */
+  /* NOTE: No need for old_field and new_field
+   *       Only ghost points are dealt with on the LHS
+   *       Only inner points are dealt with on the RHS
+   */
+  /* NOTE: Addressing "off by one" for the z points
+   *       We loop up to (but not including) the pi index
+   */
+  TRACE("Halt in OwnBCs::innerRhoCylinderLoop Field3D");
 
-    // For all z indices corresponding to a theta angle below pi
-    for (int xInd = 0; xInd < mesh->xstart; xInd ++) {
-        for (int yInd = yStart; yInd <= yEnd; yInd ++) {
-            for (int zInd = 0; zInd < piIndex; zInd ++){
-                // Set the value on the ghost point
-                f(xInd, yInd, zInd) =
-                    f(2*mesh->xstart - (xInd+1),
-                              yInd,
-                              zInd + piIndex);
-            }
-        }
+  // For all z indices corresponding to a theta angle below pi
+  for (int xInd = 0; xInd < mesh->xstart; xInd++) {
+    for (int yInd = yStart; yInd <= yEnd; yInd++) {
+      for (int zInd = 0; zInd < piIndex; zInd++) {
+        // Set the value on the ghost point
+        f(xInd, yInd, zInd) =
+            f(2 * mesh->xstart - (xInd + 1), yInd, zInd + piIndex);
+      }
     }
-    /* NOTE: Addressing "off by one" for the z points
-     *        We loop up over the rest of the z points. Note however that
-     *        ngz is a number that starts counting on 1. Thus we need to
-     *        subtract by one since we count arrays starting from 0.
-     */
-    // For all z indices corresponding to a theta value including and above
-    // pi
-    for (int xInd = 0; xInd < mesh->xstart; xInd ++) {
-        for (int yInd = yStart; yInd <= yEnd; yInd ++) {
-            for (int zInd = piIndex; zInd < mesh->ngz -1; zInd ++){
-                // Set the value on the ghost point
-                f(xInd, yInd, zInd) =
-                    f(2*mesh->xstart - (xInd+1),
-                              yInd,
-                              zInd - piIndex);
-            }
-        }
+  }
+  /* NOTE: Addressing "off by one" for the z points
+   *        We loop up over the rest of the z points. Note however that
+   *        ngz is a number that starts counting on 1. Thus we need to
+   *        subtract by one since we count arrays starting from 0.
+   */
+  // For all z indices corresponding to a theta value including and above
+  // pi
+  for (int xInd = 0; xInd < mesh->xstart; xInd++) {
+    for (int yInd = yStart; yInd <= yEnd; yInd++) {
+      for (int zInd = piIndex; zInd < mesh->ngz - 1; zInd++) {
+        // Set the value on the ghost point
+        f(xInd, yInd, zInd) =
+            f(2 * mesh->xstart - (xInd + 1), yInd, zInd - piIndex);
+      }
     }
+  }
 }
 
 #endif

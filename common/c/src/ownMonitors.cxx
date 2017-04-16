@@ -71,48 +71,39 @@
  *
  * \param[out] kinE   Variable where the kinetic energy is stored
  */
-void OwnMonitors::kinEnergy(Field3D  const &n                    ,
-                            Vector3D const &gradPerpPhi          ,
-                            Field3D  const &uEPar                ,
-                            Field3D  const &uIPar                ,
-                            std::map<std::string, BoutReal> *kinE)
-{
-    TRACE("Halt in OwnMonitors::kinEnergy");
+void OwnMonitors::kinEnergy(Field3D const &n, Vector3D const &gradPerpPhi,
+                            Field3D const &uEPar, Field3D const &uIPar,
+                            std::map<std::string, BoutReal> *kinE) {
+  TRACE("Halt in OwnMonitors::kinEnergy");
 
-    // Electron energy
-    if((*kinE).count("perpKinEE")){
-        (*kinE)["perpKinEE"] =
-            volInt_.volumeIntegral(0.5*n*gradPerpPhi*gradPerpPhi);
-    }
-    else{
-        output << "'perpKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'perpKinEE' was not a key in the input 'kinE'");
-    }
-    if((*kinE).count("parKinEE")){
-        (*kinE)["parKinEE"] =
-            volInt_.volumeIntegral(0.5*n*SQ(uEPar));
-    }
-    else{
-        output << "'parKinEE' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'parKinEE' was not a key in the input 'kinE'");
-    }
+  // Electron energy
+  if ((*kinE).count("perpKinEE")) {
+    (*kinE)["perpKinEE"] =
+        volInt_.volumeIntegral(0.5 * n * gradPerpPhi * gradPerpPhi);
+  } else {
+    output << "'perpKinEE' was not a key in the input 'kinE'" << std::endl;
+    throw BoutException("'perpKinEE' was not a key in the input 'kinE'");
+  }
+  if ((*kinE).count("parKinEE")) {
+    (*kinE)["parKinEE"] = volInt_.volumeIntegral(0.5 * n * SQ(uEPar));
+  } else {
+    output << "'parKinEE' was not a key in the input 'kinE'" << std::endl;
+    throw BoutException("'parKinEE' was not a key in the input 'kinE'");
+  }
 
-    // Ion energy
-    if((*kinE).count("perpKinEI")){
-        (*kinE)["perpKinEI"] = (*kinE)["perpKinEE"];
-    }
-    else{
-        output << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
-    }
-    if((*kinE).count("parKinEI")){
-        (*kinE)["parKinEI"] =
-            volInt_.volumeIntegral(0.5*n*SQ(uIPar));
-    }
-    else{
-        output << "'parKinEI' was not a key in the input 'kinE'" << std::endl;
-        throw BoutException("'parKinEI' was not a key in the input 'kinE'");
-    }
+  // Ion energy
+  if ((*kinE).count("perpKinEI")) {
+    (*kinE)["perpKinEI"] = (*kinE)["perpKinEE"];
+  } else {
+    output << "'perpKinEI' was not a key in the input 'kinE'" << std::endl;
+    throw BoutException("'perpKinEI' was not a key in the input 'kinE'");
+  }
+  if ((*kinE).count("parKinEI")) {
+    (*kinE)["parKinEI"] = volInt_.volumeIntegral(0.5 * n * SQ(uIPar));
+  } else {
+    output << "'parKinEI' was not a key in the input 'kinE'" << std::endl;
+    throw BoutException("'parKinEI' was not a key in the input 'kinE'");
+  }
 }
 
 /*!
@@ -129,22 +120,18 @@ void OwnMonitors::kinEnergy(Field3D  const &n                    ,
  * \param[out] particleNumber  Variable where the potential electron energy is
  *                             stored
  */
-void OwnMonitors::numberOfParticles(Field3D const &n,
-                                std::map<std::string, BoutReal> *particleNumber)
-{
-    TRACE("Halt in OwnMonitors::numberOfParticles");
+void OwnMonitors::numberOfParticles(
+    Field3D const &n, std::map<std::string, BoutReal> *particleNumber) {
+  TRACE("Halt in OwnMonitors::numberOfParticles");
 
-    // The full part
-    if((*particleNumber).count("particleNumber")){
-        (*particleNumber)["particleNumber"] = volInt_.volumeIntegral(n);
-    }
-    else{
-        output
-            << "'particleNumber' was not a key in the input 'particleNumber'"
-            << std::endl;
-        throw BoutException(
-                "'particleNumber' was not a key in the input 'particleNumber'"
-                );
-    }
+  // The full part
+  if ((*particleNumber).count("particleNumber")) {
+    (*particleNumber)["particleNumber"] = volInt_.volumeIntegral(n);
+  } else {
+    output << "'particleNumber' was not a key in the input 'particleNumber'"
+           << std::endl;
+    throw BoutException(
+        "'particleNumber' was not a key in the input 'particleNumber'");
+  }
 }
 #endif

@@ -9,37 +9,39 @@
 #ifndef __RadialLowPass_H__
 #define __RadialLowPass_H__
 
-#include <bout/physicsmodel.hxx>
-#include <field_factory.hxx>              // Gives field factory
-#include <bout/constants.hxx>             // Gives PI and TWOPI
 #include "../../common/c/include/ownFilters.hxx"
+#include <bout/constants.hxx> // Gives PI and TWOPI
+#include <bout/physicsmodel.hxx>
+#include <field_factory.hxx> // Gives field factory
 
 class RadialLowPass : public PhysicsModel {
 public:
-    // Destructor
-    ~RadialLowPass();
+  // Destructor
+  ~RadialLowPass();
+
 protected:
-    int init(bool restarting);
-    int rhs(BoutReal t);
+  int init(bool restarting);
+  int rhs(BoutReal t);
+
 private:
-    // Global variable initialization
-    // ############################################################################
-    // Variables
-    // *****************************************************************************
-    Field3D unfiltered, filtered;
-    // *****************************************************************************
+  // Global variable initialization
+  // ############################################################################
+  // Variables
+  // *****************************************************************************
+  Field3D unfiltered, filtered;
+  // *****************************************************************************
 
-    // Constants
-    // *****************************************************************************
-    BoutReal Lx;        // The box dimensions
-    int nyquistMode;    // The nyquist mode
-    // *****************************************************************************
+  // Constants
+  // *****************************************************************************
+  BoutReal Lx;     // The box dimensions
+  int nyquistMode; // The nyquist mode
+  // *****************************************************************************
 
-    // Other objects
-    // *****************************************************************************
-    OwnFilters *ownFilter;  // Pointer to the filter class
-    // *****************************************************************************
-    // ############################################################################
+  // Other objects
+  // *****************************************************************************
+  OwnFilters *ownFilter; // Pointer to the filter class
+  // *****************************************************************************
+  // ############################################################################
 };
 
 #endif
