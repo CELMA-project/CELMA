@@ -9,12 +9,9 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install cmake gfortran
 
-
-install:
-  # Install BOUT++
-  - ./install/boutPPInstall.sh
-
 script:
+  # Install BOUT++ (could not redirect output under "install:")
+  - ./install/boutPPInstall.sh
   # Test the build
   - ./celma/testScan.py
   - ./celma/testPostProcessing.py
