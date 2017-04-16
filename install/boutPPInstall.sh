@@ -69,11 +69,10 @@ PING_LOOP_PID=$!
 # ..............................................................................
 
 # Set the verbosity
-if [ "$VERBOSE" = "true" ]; then
-    # Could also have used " > /dev/stdout"
-    STDOUT=""
-else
-    STDOUT=" &>> $BUILD_OUTPUT"
+if [ ! "$VERBOSE" = "true" ]; then
+    echo -e "\n\nRedirecting outputs to $BUILD_OUTPUT\n\n"
+    exec 1>$BUILD_OUTPUT
+    exec 2>$BUILD_OUTPUT
 fi
 # ==============================================================================
 
@@ -81,51 +80,51 @@ fi
 # Install packages needed for BOUT-dev
 # ==============================================================================
 if [ "$INSTALL_CONDA" = "true" ]; then
-    echo "bash $CURDIR/condaInstall.sh $STDOUT"
-    bash $CURDIR/condaInstall.sh $STDOUT
+    echo "bash $CURDIR/condaInstall.sh"
+    bash $CURDIR/condaInstall.sh
 fi
 
 if [ "$INSTALL_CMAKE" = "true" ]; then
-    echo "bash $CURDIR/cmakeInstall.sh $STDOUT"
-    bash $CURDIR/cmakeInstall.sh $STDOUT
+    echo "bash $CURDIR/cmakeInstall.sh"
+    bash $CURDIR/cmakeInstall.sh
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
-    echo "bash $CURDIR/ffmpegInstall.sh $STDOUT"
-    bash $CURDIR/ffmpegInstall.sh $STDOUT
+    echo "bash $CURDIR/ffmpegInstall.sh"
+    bash $CURDIR/ffmpegInstall.sh
 fi
 
 # Install mpi
-echo "bash $CURDIR/mpiInstall.sh $STDOUT"
-bash $CURDIR/mpiInstall.sh $STDOUT
+echo "bash $CURDIR/mpiInstall.sh"
+bash $CURDIR/mpiInstall.sh
 
 # Install fftw
-echo "bash $CURDIR/fftwInstall.sh $STDOUT"
-bash $CURDIR/fftwInstall.sh $STDOUT
+echo "bash $CURDIR/fftwInstall.sh"
+bash $CURDIR/fftwInstall.sh
 
 # Install hdf5
-echo "bash $CURDIR/hdf5Install.sh $STDOUT"
-bash $CURDIR/hdf5Install.sh $STDOUT
+echo "bash $CURDIR/hdf5Install.sh"
+bash $CURDIR/hdf5Install.sh
 
 # Install netcdf
-echo "bash $CURDIR/netcdfInstall.sh $STDOUT"
-bash $CURDIR/netcdfInstall.sh $STDOUT
+echo "bash $CURDIR/netcdfInstall.sh"
+bash $CURDIR/netcdfInstall.sh
 
 if [ "$INCL_SUNDIALS" = "true" ]; then
     # Install sudials
-    echo "bash $CURDIR/sundialsInstall.sh $STDOUT"
-    bash $CURDIR/sundialsInstall.sh $STDOUT
+    echo "bash $CURDIR/sundialsInstall.sh"
+    bash $CURDIR/sundialsInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-sundials"
 fi
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
     # Install PETSc
-    echo "bash $CURDIR/PETScInstall.sh $STDOUT"
-    bash $CURDIR/PETScInstall.sh $STDOUT
+    echo "bash $CURDIR/PETScInstall.sh"
+    bash $CURDIR/PETScInstall.sh
 
     # Install SLEPc
-    echo "bash $CURDIR/SLEPcInstall.sh $STDOUT"
-    bash $CURDIR/SLEPcInstall.sh $STDOUT
+    echo "bash $CURDIR/SLEPcInstall.sh"
+    bash $CURDIR/SLEPcInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-petsc --with-slepc"
 fi
 # ==============================================================================
