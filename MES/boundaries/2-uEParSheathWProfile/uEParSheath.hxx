@@ -9,50 +9,52 @@
 #ifndef __uEParSheath_H__
 #define __uEParSheath_H__
 
+#include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
-#include <field_factory.hxx>              // Gives field factory
-#include <bout/constants.hxx>             // Gives PI and TWOPI
-#include <derivs.hxx>                     // Gives the derivatives
-#include <difops.hxx>                     // Gives the diff options
-#include <vecops.hxx>                     // Gives the vec diff options
+#include <derivs.hxx>        // Gives the derivatives
+#include <difops.hxx>        // Gives the diff options
+#include <field_factory.hxx> // Gives field factory
+#include <vecops.hxx>        // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
 #include "../../../common/c/include/ownBCs.hxx"
 
 class UeSheath : public PhysicsModel {
 public:
-    // Destructor
-    ~UeSheath();
+  // Destructor
+  ~UeSheath();
+
 protected:
-    int init(bool restarting);
-    int rhs(BoutReal t);
+  int init(bool restarting);
+  int rhs(BoutReal t);
+
 private:
-    // Global variable initialization
-    // ############################################################################
-    // Variables
-    // *****************************************************************************
-    Field3D uEParOrigin, uEParWBC;
-    Field3D phi;
-    Field3D profile;
-    Field3D e;
-    // *****************************************************************************
+  // Global variable initialization
+  // ############################################################################
+  // Variables
+  // *****************************************************************************
+  Field3D uEParOrigin, uEParWBC;
+  Field3D phi;
+  Field3D profile;
+  Field3D e;
+  // *****************************************************************************
 
-    // Constants
-    // *****************************************************************************
-    BoutReal Lx, Ly;    // The box dimensions
-    BoutReal Lambda;    // log(sqrt(mu/(2.0*pi)))
-    BoutReal phiRef;    // Reference potential
-    // *****************************************************************************
+  // Constants
+  // *****************************************************************************
+  BoutReal Lx, Ly; // The box dimensions
+  BoutReal Lambda; // log(sqrt(mu/(2.0*pi)))
+  BoutReal phiRef; // Reference potential
+  // *****************************************************************************
 
-    // Make a field group to communicate
-    // *****************************************************************************
-    FieldGroup com_group;
-    // *****************************************************************************
+  // Make a field group to communicate
+  // *****************************************************************************
+  FieldGroup com_group;
+  // *****************************************************************************
 
-    // Other objects
-    // *****************************************************************************
-    OwnBCs ownBC;           // Class containing methods which sets the ghost points
-    // *****************************************************************************
-    // ############################################################################
+  // Other objects
+  // *****************************************************************************
+  OwnBCs ownBC; // Class containing methods which sets the ghost points
+  // *****************************************************************************
+  // ############################################################################
 };
 
 #endif

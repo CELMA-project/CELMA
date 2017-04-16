@@ -1,9 +1,9 @@
 #ifndef __OWNOPERATORS_H__
 #define __OWNOPERATORS_H__
 
+#include "ownBCs.hxx"         // Gives inner rho boundaries
 #include <bout.hxx>           // Includes all necessary classes and types
 #include <bout/constants.hxx> // Gives PI and TWOPI
-#include "ownBCs.hxx"         // Gives inner rho boundaries
 
 class OwnOperators;
 class OwnOpBasicBrackets;
@@ -24,63 +24,63 @@ class OwnOpBasicBrackets;
  * \author Michael Løiten
  * \date 2016.12.04
  */
-class OwnOperators
-{
-    private:
-        // Data members
-        /*! If a warning is given rather than throwing an error if
-         *  insufficient number of points is found
-         */
-        bool warnPoints;
-    protected:
-        // Data members
-        FieldGenerator *bndryFuncGen;
-        Field2D J ;    //!< The Jacobian
-        Field2D J2;    //!< The Jacobian raised to power 2
-        Field2D invJ ; //!< The inverse of the Jacobian
+class OwnOperators {
+private:
+  // Data members
+  /*! If a warning is given rather than throwing an error if
+   *  insufficient number of points is found
+   */
+  bool warnPoints;
 
-        int xInd; //!< x-index
-        int yInd; //!< y-index
-        int zInd; //!< z-index
-    public:
-        // Constructors
-        OwnOperators();
+protected:
+  // Data members
+  FieldGenerator *bndryFuncGen;
+  Field2D J;    //!< The Jacobian
+  Field2D J2;   //!< The Jacobian raised to power 2
+  Field2D invJ; //!< The inverse of the Jacobian
 
-        // Destructors
-        // NOTE: New is called, so should destruct
-        // NOTE: Needs to be virtual in order for the child classes to call destruct
-        virtual ~OwnOperators(){};
+  int xInd; //!< x-index
+  int yInd; //!< y-index
+  int zInd; //!< z-index
+public:
+  // Constructors
+  OwnOperators();
 
-        // Member functions
-        //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
-        Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
-        //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry
-        Vector3D Grad_perp(const Field3D &f);
-        //! Operator for \f$\partial_z \mathbf{v}\f$ in cylinder geometry
-        Vector3D DDY(const Vector3D &f);
+  // Destructors
+  // NOTE: New is called, so should destruct
+  // NOTE: Needs to be virtual in order for the child classes to call destruct
+  virtual ~OwnOperators(){};
 
-        /* NOTE: Child classes can have new memberfunctions...
-         *       which are not declared in the parent class.
-         *       Pure virtual functions (has an = 0.0 in the end of the
-         *       declaration) are used for functions which MUST be
-         *       implemented
-         *       If no default implementation is given, the declaration can end
-         *       with an empty function body {}
-         */
-        /*! Operator for
-         * \f$\nabla\cdot(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
-         * (only used in the simpleStupid implementation)
-         */
-        //! Operator for \f$\{\phi, \Omega^D\}\f$
-        virtual Field3D vortDAdv (const Field3D &phi, const Field3D &vortD) = 0;
-        /*! Operator for
-         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
-         * (only used in 2Brackets)
-         */
-        virtual Field3D kinEnAdvN(const Field3D &phi, const Field3D &n) = 0;
+  // Member functions
+  //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
+  Field3D div_f_GradPerp_g(const Field3D &f, const Field3D &g);
+  //! Operator for \f$\nabla_\perp f\f$ in cylinder geometry
+  Vector3D Grad_perp(const Field3D &f);
+  //! Operator for \f$\partial_z \mathbf{v}\f$ in cylinder geometry
+  Vector3D DDY(const Vector3D &f);
 
-        //! Factory which chooses child class
-        static OwnOperators* createOperators(Options *options = NULL);
+  /* NOTE: Child classes can have new memberfunctions...
+   *       which are not declared in the parent class.
+   *       Pure virtual functions (has an = 0.0 in the end of the
+   *       declaration) are used for functions which MUST be
+   *       implemented
+   *       If no default implementation is given, the declaration can end
+   *       with an empty function body {}
+   */
+  /*! Operator for
+   * \f$\nabla\cdot(\mathbf{u}_e \cdot \nabla[n\nabla_\perp \phi])\f$
+   * (only used in the simpleStupid implementation)
+   */
+  //! Operator for \f$\{\phi, \Omega^D\}\f$
+  virtual Field3D vortDAdv(const Field3D &phi, const Field3D &vortD) = 0;
+  /*! Operator for
+   * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+   * (only used in 2Brackets)
+   */
+  virtual Field3D kinEnAdvN(const Field3D &phi, const Field3D &n) = 0;
+
+  //! Factory which chooses child class
+  static OwnOperators *createOperators(Options *options = NULL);
 };
 
 // OwnOpBasicBrackets
@@ -110,36 +110,36 @@ class OwnOperators
  * Inherit from OwnOperators through public inheritance.
  *
  * \note An alternative derivation is given in appendix B of
- *       P. Popovich, M. Umansky, T. A. Carter, and B. Friedman - Phys. Plasmas 17, 102107 2010
+ *       P. Popovich, M. Umansky, T. A. Carter, and B. Friedman - Phys. Plasmas
+ * 17, 102107 2010
  *
  * \author Michael Løiten
  * \date 2016.07.23
  */
-class OwnOpBasicBrackets : public OwnOperators
-{
-    private:
-        BRACKET_METHOD bm;  //!< The bracket method
-        Field3D DDXPhi;     //!< \f$\partial_\rho \phi\f$
-        OwnBCs ownBC;       //!< Needed for setting the inner rho
-        int ghostIndX;      //!< Index for first outer ghostpoint in x
-    public:
-        // Constructors
-        OwnOpBasicBrackets();
+class OwnOpBasicBrackets : public OwnOperators {
+private:
+  BRACKET_METHOD bm; //!< The bracket method
+  Field3D DDXPhi;    //!< \f$\partial_\rho \phi\f$
+  OwnBCs ownBC;      //!< Needed for setting the inner rho
+  int ghostIndX;     //!< Index for first outer ghostpoint in x
+public:
+  // Constructors
+  OwnOpBasicBrackets();
 
-        //! Operator for \f$\{\phi, \Omega^D\}\f$
-        Field3D vortDAdv (const Field3D &phi, const Field3D &vortD);
-        /*! Operator for
-         * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
-         * (only used in 2Brackets)
-         */
-        Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
+  //! Operator for \f$\{\phi, \Omega^D\}\f$
+  Field3D vortDAdv(const Field3D &phi, const Field3D &vortD);
+  /*! Operator for
+   * \f$\frac{1}{J2}\{\mathbf{u}_E\cdot\mathbf{u}_E, n\} \f$
+   * (only used in 2Brackets)
+   */
+  Field3D kinEnAdvN(const Field3D &phi, const Field3D &n);
 
-        //! Destructor
-        /* NOTE: {} in the end is needed
-         *       If else the compiler gives
-         *       "udefined reference to `vtable for ...'"
-         */
-        virtual ~OwnOpBasicBrackets(){};
+  //! Destructor
+  /* NOTE: {} in the end is needed
+   *       If else the compiler gives
+   *       "udefined reference to `vtable for ...'"
+   */
+  virtual ~OwnOpBasicBrackets(){};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file
