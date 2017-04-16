@@ -6,7 +6,7 @@
 # Options
 # ==============================================================================
 INSTALL_CONDA="true"     # Needed for post-processing
-INSTALL_CMAKE="true"     # Needed for sundials if CMAKE is below 2.8.11
+INSTALL_CMAKE="false"    # Needed for sundials if CMAKE is below 2.8.11
 INSTALL_FFMPEG="true"    # Needed for post-processing if x264 is not present
 INCL_SUNDIALS="true"     # The preferred time solver
 INCL_PETSC_SLEPC="false" # Only needed for fancy features
@@ -20,9 +20,9 @@ DEBUG="false"            # Good for debugging, bad for speed
 # exit on error
 set -e
 
-# FIXME
-ls -lF
-CURDIR=$PWD
+# Get the path of the calling script
+# http://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
+CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Ensure paths are available when building
 export PATH="$HOME/local/bin:$PATH"
