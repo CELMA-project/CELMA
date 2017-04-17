@@ -28,6 +28,7 @@ CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Ensure paths are available when building
 export PATH="$HOME/local/bin:$PATH"
 export LD_LIBRARY_PATH=$HOME/local/lib:$LD_LIBRARY_PATH
+export PYTHONPATH="$HOME/BOUT-dev/tools/pylib/:$PYTHONPATH"
 
 # Extra packages and flags for BOUT-dev
 EXTRA_PACKAGES=""
@@ -84,51 +85,51 @@ fi
 # Install packages needed for BOUT-dev
 # ==============================================================================
 if [ "$INSTALL_CONDA" = "true" ]; then
-    echo "bash $CURDIR/condaInstall.sh" 1>&3 2>&4
-    bash $CURDIR/condaInstall.sh
+    echo ". $CURDIR/condaInstall.sh" 1>&3 2>&4
+    . $CURDIR/condaInstall.sh
 fi
 
 if [ "$INSTALL_CMAKE" = "true" ]; then
-    echo "bash $CURDIR/cmakeInstall.sh" 1>&3 2>&4
-    bash $CURDIR/cmakeInstall.sh
+    echo ". $CURDIR/cmakeInstall.sh" 1>&3 2>&4
+    . $CURDIR/cmakeInstall.sh
 fi
 
 if [ "$INSTALL_FFMPEG" = "true" ]; then
-    echo "bash $CURDIR/ffmpegInstall.sh" 1>&3 2>&4
-    bash $CURDIR/ffmpegInstall.sh
+    echo ". $CURDIR/ffmpegInstall.sh" 1>&3 2>&4
+    . $CURDIR/ffmpegInstall.sh
 fi
 
 # Install mpi
-echo "bash $CURDIR/mpiInstall.sh" 1>&3 2>&4
-bash $CURDIR/mpiInstall.sh
+echo ". $CURDIR/mpiInstall.sh" 1>&3 2>&4
+. $CURDIR/mpiInstall.sh
 
 # Install fftw
-echo "bash $CURDIR/fftwInstall.sh" 1>&3 2>&4
-bash $CURDIR/fftwInstall.sh
+echo ". $CURDIR/fftwInstall.sh" 1>&3 2>&4
+. $CURDIR/fftwInstall.sh
 
 # Install hdf5
-echo "bash $CURDIR/hdf5Install.sh" 1>&3 2>&4
-bash $CURDIR/hdf5Install.sh
+echo ". $CURDIR/hdf5Install.sh" 1>&3 2>&4
+. $CURDIR/hdf5Install.sh
 
 # Install netcdf
-echo "bash $CURDIR/netcdfInstall.sh" 1>&3 2>&4
-bash $CURDIR/netcdfInstall.sh
+echo ". $CURDIR/netcdfInstall.sh" 1>&3 2>&4
+. $CURDIR/netcdfInstall.sh
 
 if [ "$INCL_SUNDIALS" = "true" ]; then
     # Install sudials
-    echo "bash $CURDIR/sundialsInstall.sh" 1>&3 2>&4
-    bash $CURDIR/sundialsInstall.sh
+    echo ". $CURDIR/sundialsInstall.sh" 1>&3 2>&4
+    . $CURDIR/sundialsInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-sundials"
 fi
 
 if [ "$INCL_PETSC_SLEPC" = true ]; then
     # Install PETSc
-    echo "bash $CURDIR/PETScInstall.sh" 1>&3 2>&4
-    bash $CURDIR/PETScInstall.sh
+    echo ". $CURDIR/PETScInstall.sh" 1>&3 2>&4
+    . $CURDIR/PETScInstall.sh
 
     # Install SLEPc
-    echo "bash $CURDIR/SLEPcInstall.sh" 1>&3 2>&4
-    bash $CURDIR/SLEPcInstall.sh
+    echo ". $CURDIR/SLEPcInstall.sh" 1>&3 2>&4
+    . $CURDIR/SLEPcInstall.sh
     EXTRA_PACKAGES="${EXTRA_PACKAGES} --with-petsc --with-slepc"
 fi
 # ==============================================================================
@@ -173,11 +174,6 @@ fi
 
 # Termination of travis workaround
 # ==============================================================================
-# The build finished without returning an error so dump a tail of the output
-if [ ! "$VERBOSE" = "true" ]; then
-    dump_output
-fi
-
-# nicely terminate the ping output loop
+# Nicely terminate the ping output loop
 kill $PING_LOOP_PID
 # ==============================================================================
