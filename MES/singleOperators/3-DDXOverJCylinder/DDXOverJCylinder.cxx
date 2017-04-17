@@ -51,7 +51,7 @@ int DDXOverJCylinder::init(bool restarting) {
   output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
   // Calculate
-  S_num = (1 / mesh->J) * DDX(f);
+  S_num = (1 / mesh->coordinates()->J) * DDX(f);
 
   // Error in S
   e = S_num - S;

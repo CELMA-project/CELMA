@@ -64,7 +64,7 @@ int JTimesDivPerp::init(bool restarting) {
   output << "\n\n\n\n\n\n\nNow running test" << std::endl;
 
   // Calculate
-  S_num = mesh->J * Div(f);
+  S_num = mesh->coordinates()->J * Div(f);
 
   // Error in phi
   e = S_num - S;

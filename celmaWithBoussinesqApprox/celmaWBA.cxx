@@ -32,7 +32,7 @@ int CelmaWBA::init(bool restarting) {
                                       CELL_CENTRE, 0);
 
   // The metric coefficient (needed in front of the arakawa bracket)
-  invJ = (1.0 / mesh->J);
+  invJ = (1.0 / mesh->coordinates()->J);
   // ************************************************************************
 
   // Specifying the brackets to the arakawa scheme
@@ -420,9 +420,9 @@ void CelmaWBA::printPointsPerRhoS() {
   }
 
   // dx = Lx/(nx-2*MXG) => nx = (Lx/dx) + 2*MXG
-  pointsPerRhoSRadially = ((Lx / mesh->dx(0, 0)) + 2 * MXG) / Lx;
+  pointsPerRhoSRadially = ((Lx / mesh->coordinates()->dx(0, 0)) + 2 * MXG) / Lx;
   // dy = Ly/ny => ny = Ly/dy => ny/Ly = 1/dy
-  pointsPerRhoSParallely = 1.0 / mesh->dy(0, 0);
+  pointsPerRhoSParallely = 1.0 / mesh->coordinates()->dy(0, 0);
   // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
   pointsPerRhoSAzimuthally = (mesh->ngz - 1) / (2.0 * PI * Lx);
 
@@ -542,10 +542,10 @@ void CelmaWBA::setAndSaveViscosities() {
   if (!constViscPar) {
     // SQ is squaring the expression
     // dx and dy are Field2D (0th index is ghost, but gives no problems)
-    artViscParLnN *= SQ(mesh->dy(0, 0));
-    artViscParJpar *= SQ(mesh->dy(0, 0));
-    artViscParMomDens *= SQ(mesh->dy(0, 0));
-    artViscParVort *= SQ(mesh->dy(0, 0));
+    artViscParLnN *= SQ(mesh->coordinates()->dy(0, 0));
+    artViscParJpar *= SQ(mesh->coordinates()->dy(0, 0));
+    artViscParMomDens *= SQ(mesh->coordinates()->dy(0, 0));
+    artViscParVort *= SQ(mesh->coordinates()->dy(0, 0));
   }
 
   if (!constViscPerp) {
@@ -553,10 +553,10 @@ void CelmaWBA::setAndSaveViscosities() {
     /* NOTE: Chosen independent of dz
      *       This makes artVisc constant when expanding restarts
      */
-    artViscPerpLnN *= SQ(mesh->dx(0, 0));
-    artViscPerpJPar *= SQ(mesh->dx(0, 0));
-    artViscPerpMomDens *= SQ(mesh->dx(0, 0));
-    artViscPerpVort *= SQ(mesh->dx(0, 0));
+    artViscPerpLnN *= SQ(mesh->coordinates()->dx(0, 0));
+    artViscPerpJPar *= SQ(mesh->coordinates()->dx(0, 0));
+    artViscPerpMomDens *= SQ(mesh->coordinates()->dx(0, 0));
+    artViscPerpVort *= SQ(mesh->coordinates()->dx(0, 0));
   }
 
   // Set artificial viscosities to 0 if useHyperViscAzVort is false
@@ -567,7 +567,7 @@ void CelmaWBA::setAndSaveViscosities() {
   }
   if (!constViscHyper) {
     // Azimuthal hyperviscosities
-    artHyperAzVort *= SQ(SQ(mesh->dz));
+    artHyperAzVort *= SQ(SQ(mesh->coordinates()->dz));
   }
 
   // Print and store the variables
@@ -575,7 +575,7 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "***********************************************" << std::endl;
   output << "Perpendicular";
   if (!constViscPerp) {
-    output << " (SQ(mesh->dx(0,0)) = " << SQ(mesh->dx(0, 0)) << "):";
+    output << " (SQ(mesh->coordinates()->dx(0,0)) = " << SQ(mesh->coordinates()->dx(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscPerpLnN << std::endl;
@@ -584,7 +584,7 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "    For vort     : " << artViscPerpVort << std::endl;
   output << "Parallel";
   if (!constViscPar) {
-    output << " (SQ(mesh->dy(0,0)) = " << SQ(mesh->dy(0, 0)) << "):";
+    output << " (SQ(mesh->coordinates()->dy(0,0)) = " << SQ(mesh->coordinates()->dy(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscParLnN << std::endl;
@@ -593,8 +593,8 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "    For vort     : " << artViscParVort << std::endl;
   output << "Azimuthal hyperviscosity";
   if (!constViscHyper) {
-    output << "Azimuthal hyperviscosity (SQ(SQ(mesh->dz)) = "
-           << SQ(SQ(mesh->dz)) << "):";
+    output << "Azimuthal hyperviscosity (SQ(SQ(mesh->coordinates()->dz)) = "
+           << SQ(SQ(mesh->coordinates()->dz)) << "):";
   }
   output << std::endl;
   output << "    For vort    : " << artHyperAzVort << std::endl;

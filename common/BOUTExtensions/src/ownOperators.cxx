@@ -20,9 +20,9 @@ OwnOperators::OwnOperators() {
 
   // Calculate the powers of the Jacobian
   // ************************************************************************
-  J = mesh->J;
-  J2 = mesh->J ^ (2.0);
-  invJ = 1.0 / (mesh->J);
+  J = mesh->coordinates()->J;
+  J2 = mesh->coordinates()->J ^ (2.0);
+  invJ = 1.0 / (mesh->coordinates()->J);
   // ************************************************************************
 }
 
