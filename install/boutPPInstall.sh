@@ -8,7 +8,7 @@
 VERBOSE="false"          # Only set to "false" in order for travis to work
 INSTALL_CONDA="true"     # Needed for post-processing
 INSTALL_CMAKE="false"    # Needed for sundials if CMAKE is below 2.8.11
-INSTALL_FFMPEG="true"    # Needed for post-processing if x264 is not present
+INSTALL_FFMPEG="false"   # Needed for post-processing if x264 is not present
 INCL_SUNDIALS="true"     # The preferred time solver
 INCL_PETSC_SLEPC="false" # Only needed for fancy features
 OPTIMIZING="true"        # Good for speed

@@ -17,7 +17,7 @@ conda config --set always_yes yes --set changeps1 no
 # NOTE: Update before installing hdf4, as hdf-4.2.12 is needed
 conda update --all
 # Install hdf4 to avoid "WARNING: netcdf4-python module not found"
-conda install numpy scipy hdf4 netcdf4 matplotlib sympy
+conda install numpy scipy hdf4 netcdf4 matplotlib sympy pandas
 # Reverting to check
 conda config --set always_yes no
 
