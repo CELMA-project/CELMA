@@ -533,7 +533,7 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
         // Set the ghost point
         f(xInd, firstLowerYGhost, zInd) =
             (4.0 / 5.0) * a -
-            (3.0 / 4.0) * b * mesh->dy(xInd, firstLowerYGhost) +
+            (3.0 / 4.0) * b * mesh->coordinates()->dy(xInd, firstLowerYGhost) +
             (1.0 / 4.0) * f(xInd, firstLowerYGhost + 2, zInd) -
             (1.0 / 20.0) * f(xInd, firstLowerYGhost + 3, zInd);
       }
