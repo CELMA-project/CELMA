@@ -6,11 +6,16 @@ language: cpp
 compiler: gcc
 
 before_install:
+  # * trusty does not have ffmpeg in the software repository, and must be added
+  #   manually
+  - sudo add-apt-repository -y ppa:mc3man/trusty-media
   - sudo apt-get update -qq
-  # CMAKE can be manually installed through boutPPInstall.sh
-  # gfortran is usually installed on the clusters, if not it can be
-  # installed through gccLocalInstall.sh
-  - sudo apt-get install cmake gfortran
+  # * CMAKE can be manually installed through boutPPInstall.sh
+  # * gfortran is usually installed on the clusters, if not it can be
+  #   installed through gccLocalInstall.sh
+  # * ffmpeg is installed through sudo as the build takes time, can also be
+  #   installed through gccLocalInstall.sh
+  - sudo apt-get install -qq cmake gfortran ffmpeg
 
 install:
   - . ./install/boutPPInstall.sh
