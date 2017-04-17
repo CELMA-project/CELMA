@@ -10,11 +10,11 @@ before_install:
   - sudo apt-get install cmake gfortran
 
 install:
-  - ./install/boutPPInstall.sh
+  - . ./install/boutPPInstall.sh
 
 script:
   # Test the build
-  - ./celma/testScan.py
-  - ./celma/testPostProcessing.py
-  - ./celmaWithBoussinesqApprox/testScan.py
-  - ./celmaWithBoussinesqApprox/testPostProcessing.py
+  - . ./celma/testScan.py
+  - . ./celma/testPostProcessing.py
+  - . ./celmaWithBoussinesqApprox/testScan.py
+  - . ./celmaWithBoussinesqApprox/testPostProcessing.py
