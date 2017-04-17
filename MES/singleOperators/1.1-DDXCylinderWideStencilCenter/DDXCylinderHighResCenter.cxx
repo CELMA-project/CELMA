@@ -123,7 +123,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 1, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 2, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 3, yInd, zInd)) /
-            mesh->dx(xInd, yInd);
+            mesh->coordinates()->dx(xInd, yInd);
         // Second point
         // Use a seven point stencil
         result(xInd + 1, yInd, zInd) =
@@ -136,7 +136,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 2, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 3, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 4, yInd, zInd)) /
-            mesh->dx(xInd + 1, yInd);
+            mesh->coordinates()->dx(xInd + 1, yInd);
       }
     }
     /* NOTE: Addressing "off by one" for the z points
@@ -161,7 +161,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 1, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 2, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 3, yInd, zInd)) /
-            mesh->dx(xInd, yInd);
+            mesh->coordinates()->dx(xInd, yInd);
         // Second point
         // Use a seven point stencil
         result(xInd + 1, yInd, zInd) =
@@ -174,7 +174,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 2, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 3, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 4, yInd, zInd)) /
-            mesh->dx(xInd + 1, yInd);
+            mesh->coordinates()->dx(xInd + 1, yInd);
       }
     }
   }

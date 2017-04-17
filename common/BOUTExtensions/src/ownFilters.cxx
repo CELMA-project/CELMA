@@ -131,7 +131,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
    * the origin of the cylinder) to the first inner point, located dx/2 away.
    * Thus:
    */
-  BoutReal outerRho = (mesh->GlobalNx - 2 * MXG - 0.5) * mesh->dx(0, 0);
+  BoutReal outerRho = (mesh->GlobalNx - 2 * MXG - 0.5) * mesh->coordinates()->dx(0, 0);
   BoutReal outerCircumference = TWOPI * outerRho;
 
   // Calculate the corresponding minimum resolvable wavelength
@@ -143,7 +143,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
   options->get("throwWarning", throwWarning, true);
 
   circumference =
-      TWOPI * mesh->J(mesh->xstart, 0); // Lowest circumference (inner point)
+      TWOPI * mesh->coordinates()->J(mesh->xstart, 0); // Lowest circumference (inner point)
   kMaxCurrent = int(floor(circumference / lambdaMin));
   if (kMaxCurrent <= 0) {
     if (throwWarning) {
@@ -185,7 +185,7 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
 
   for (int xInd = 0; xInd < mesh->ngx; xInd++) {
     // Set the current kMax (J = rho in cylinder coordinates)
-    circumference = TWOPI * mesh->J(xInd, 0);
+    circumference = TWOPI * mesh->coordinates()->J(xInd, 0);
     // Abs since the inner ghost point of the Jacobian can be negative
     kMaxCurrent = int(abs(floor(circumference / lambdaMin)));
     for (int yInd = 0; yInd < mesh->ngy; yInd++) {
