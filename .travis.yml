@@ -7,14 +7,26 @@ compiler: gcc
 
 before_install:
   - sudo apt-get update -qq
+  # CMAKE can be manually installed through boutPPInstall.sh
+  # gfortran is usually installed on the clusters, if not it can be
+  # installed through gccLocalInstall.sh
   - sudo apt-get install cmake gfortran
 
 install:
   - . ./install/boutPPInstall.sh
 
+before_script:
+  # Redirect stdout and stderr back to 1 and 2
+  - exec 1> /dev/tty
+  - exec 2> /dev/tty
+  # TRAVIS_BUILD_DIR is the directory of the build
+  - cd $TRAVIS_BUILD_DIR
+
 script:
   # Test the build
-  - . ./celma/testScan.py
-  - . ./celma/testPostProcessing.py
-  - . ./celmaWithBoussinesqApprox/testScan.py
-  - . ./celmaWithBoussinesqApprox/testPostProcessing.py
+  - cd celma
+  - python testScan.py
+  - python testPostProcessing.py
+  - cd ../celmaWithBoussinesqApprox
+  - python testScan.py
+  - python testPostProcessing.py
