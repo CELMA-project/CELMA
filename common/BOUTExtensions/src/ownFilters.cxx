@@ -19,7 +19,7 @@
 OwnFilters::OwnFilters(Options *options) {
   TRACE("Halt in OwnFilters::OwnFilters");
 
-  ncz = mesh->LocalNz - 1;
+  ncz = mesh->LocalNz;
 
   // Calculate the kMax from the Nyquist sampling theorem
   kMax = int(ncz / 2.0);

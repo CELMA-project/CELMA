@@ -30,13 +30,13 @@ Field3D const PolAvg::poloidalAverage(const Field3D &f) {
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
       // Find the average
       avg = 0.0;
-      for (zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
+      for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         avg += f(xInd, yInd, zInd);
       }
-      avg /= (mesh->LocalNz - 1);
+      avg /= mesh->LocalNz;
 
       // Fill the poloidal points with the average
-      for (zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
+      for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         result(xInd, yInd, zInd) = avg;
       }
     }
@@ -72,22 +72,10 @@ BoutReal VolumeIntegral::volumeIntegral(Field3D const &f) {
   BoutReal result = 0.0;
   BoutReal localResult = 0.0;
 
-  /* NOTE: Addressing "off by one" looping over the local range
-   *       We want to loop starting from (and including) mesh->@start to (and
-   *       including) the mesh->@end.
-   *       mesh->@end is included by using <= insted of <
-   */
-  /* NOTE: Addressing "off by one" looping over the z indices
-   *       The z plane includes one extra plane which is unused. To account
-   *       for this, we subtract by one in the loop. mesh->LocalNz is the number
-   *       of z planes (counting from 1). That is, it is the same as MZ in
-   *       the input file. To account for the counting from 0, we simply use
-   *       < instead of <= in the loop.
-   */
   // We loop over the processor domain
   for (xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
-      for (zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
+      for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         localResult += f(xInd, yInd, zInd) * mesh->coordinates()->J(xInd, yInd) *
                        mesh->coordinates()->dx(xInd, yInd) * mesh->coordinates()->dy(xInd, yInd) * mesh->coordinates()->dz;
       }
