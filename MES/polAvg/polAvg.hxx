@@ -13,9 +13,9 @@
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx> // Gives field factory
 // Gives own boundaries (doing so by setting ghost points)
-#include "../common/c/include/ownBCs.hxx"
+#include "../../common/BOUTExtensions/include/ownBCs.hxx"
 // Give the integrators
-#include "../common/c/include/helpers.hxx"
+#include "../../common/BOUTExtensions/include/helpers.hxx"
 
 class PolAvgTest : public PhysicsModel {
 public:
