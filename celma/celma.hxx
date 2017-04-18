@@ -83,6 +83,7 @@ private:
   Field3D neutralERes, neutralIRes;
   Field3D jParParArtVisc, jParPerpArtVisc;
   // momDensPar fields
+  Field3D tmp;
   Field3D momDensAdv, uIFluxAdv, elPressure, densDiffusion;
   Field3D neutralEResMu, momDensParArtVisc, momDensPerpArtVisc;
   // Vorticity fields

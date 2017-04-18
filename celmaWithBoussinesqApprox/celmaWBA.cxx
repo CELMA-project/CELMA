@@ -424,7 +424,7 @@ void CelmaWBA::printPointsPerRhoS() {
   // dy = Ly/ny => ny = Ly/dy => ny/Ly = 1/dy
   pointsPerRhoSParallely = 1.0 / mesh->coordinates()->dy(0, 0);
   // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
-  pointsPerRhoSAzimuthally = (mesh->LocalNz - 1) / (2.0 * PI * Lx);
+  pointsPerRhoSAzimuthally = (mesh->LocalNz) / (2.0 * PI * Lx);
 
   root->getSection("geom")->get("minPointsPerRhoSXZ", minPointsPerRhoSXZ, 3.0);
   root->getSection("geom")->get("minPointsPerRhoSY", minPointsPerRhoSY, 1.0e-1);
@@ -437,7 +437,7 @@ void CelmaWBA::printPointsPerRhoS() {
            << "Current value is " << pointsPerRhoSRadially << "\n\n";
     throwError = true;
   }
-  if (mesh->LocalNz > 3 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ) {
+  if (mesh->LocalNz > 2 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ) {
     stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
            << "Limit is         " << minPointsPerRhoSXZ << "\n"
            << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
