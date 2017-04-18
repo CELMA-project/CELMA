@@ -3,6 +3,7 @@
 
 #include <bout.hxx>
 #include <fft.hxx>
+#include <bout/constants.hxx> // Gives PI and TWOPI
 
 class OwnFilters;
 class OwnFiltAllPass;
