@@ -19,7 +19,7 @@
 OwnFilters::OwnFilters(Options *options) {
   TRACE("Halt in OwnFilters::OwnFilters");
 
-  ncz = mesh->ngz - 1;
+  ncz = mesh->LocalNz - 1;
 
   // Calculate the kMax from the Nyquist sampling theorem
   kMax = int(ncz / 2.0);
@@ -183,12 +183,12 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
 
   result.allocate();
 
-  for (int xInd = 0; xInd < mesh->ngx; xInd++) {
+  for (int xInd = 0; xInd < mesh->LocalNx; xInd++) {
     // Set the current kMax (J = rho in cylinder coordinates)
     circumference = TWOPI * mesh->coordinates()->J(xInd, 0);
     // Abs since the inner ghost point of the Jacobian can be negative
     kMaxCurrent = int(abs(floor(circumference / lambdaMin)));
-    for (int yInd = 0; yInd < mesh->ngy; yInd++) {
+    for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {
       // Take the FFT for a given radius at a given parallel plane
       rfft(&(var(xInd, yInd, 0)), ncz, fourierArray);
 
