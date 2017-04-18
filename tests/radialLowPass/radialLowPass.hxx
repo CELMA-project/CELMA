@@ -9,7 +9,7 @@
 #ifndef __RadialLowPass_H__
 #define __RadialLowPass_H__
 
-#include "../../common/c/include/ownFilters.hxx"
+#include "../../common/BOUTExtensions/include/ownFilters.hxx"
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
 #include <field_factory.hxx> // Gives field factory
