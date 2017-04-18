@@ -152,8 +152,8 @@ Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
 
     // Calculate the errors (the true in the end means the max will be
     // taken over all processors)
-    EAbsLInf = (abs(phiCur - phiNext)).max(true);
-    ERelLInf = (abs((phiCur - phiNext) / phiCur)).max(true);
+    EAbsLInf = max(abs(phiCur - phiNext), true);
+    ERelLInf = max(abs((phiCur - phiNext) / phiCur), true);
 
     if (EAbsLInf > atol) {
       if (ERelLInf > rtol) {

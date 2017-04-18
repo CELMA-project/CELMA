@@ -37,12 +37,12 @@ int RadialLowPass::init(bool restarting) {
    *       As the offset mode is the first mode on the positive frequencies,
    *       the Nyquist mode is the first mode on the negative frequencies
    */
-  nyquistMode = int((mesh->ngz - 1) / 2.0);
+  nyquistMode = int((mesh->LocalNz - 1) / 2.0);
 
   for (int mode = 1; mode <= nyquistMode; mode++) {
-    for (int xInd = 0; xInd < mesh->ngx; xInd++) {
-      for (int yInd = 0; yInd < mesh->ngy; yInd++) {
-        for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+    for (int xInd = 0; xInd < mesh->LocalNx; xInd++) {
+      for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {
+        for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
           unfiltered(xInd, yInd, zInd) +=
               cos((TWOPI * mode / TWOPI) * zInd * (mesh->coordinates()->dz));
         }

@@ -21,7 +21,7 @@ OwnOperators::OwnOperators() {
   // Calculate the powers of the Jacobian
   // ************************************************************************
   J = mesh->coordinates()->J;
-  J2 = mesh->coordinates()->J ^ (2.0);
+  J2 = pow(mesh->coordinates()->J, (2.0));
   invJ = 1.0 / (mesh->coordinates()->J);
   // ************************************************************************
 }
@@ -204,7 +204,7 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
     ghostIndX = mesh->xend + 1;
     // Newton polynomial of fourth order (including boundary) evaluated at ghost
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
-      for (zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         DDXPhi(ghostIndX, yInd, zInd) =
             -DDXPhi(ghostIndX - 4, yInd, zInd) +
             4.0 * DDXPhi(ghostIndX - 3, yInd, zInd) -
@@ -218,7 +218,7 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
   mesh->communicate(DDXPhi);
 
   result =
-      bracket(((DDXPhi) ^ (2.0)) + ((invJ * DDZ(phi, true)) ^ (2.0)), n, bm);
+      bracket( pow(DDXPhi, 2.0) + pow(invJ * DDZ(phi, true), 2.0), n, bm);
 
   // Multiply with B/2
   return 0.5 * invJ * result;

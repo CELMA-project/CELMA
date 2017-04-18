@@ -18,10 +18,10 @@ OwnBCs::OwnBCs() {
   // Set the piIndex
   /* NOTE: The index corresponding to pi
    *       Since z in [0, 2 pi[, the z index corresponding to pi is
-   *       (mesh->ngz -1) / 2, where mesh->ngz - 1 is the last actual z point
+   *       (mesh->LocalNz -1) / 2, where mesh->LocalNz - 1 is the last actual z point
    *       (in addition there is one extra z point never used)
    */
-  piIndex = (mesh->ngz - 1) / 2;
+  piIndex = (mesh->LocalNz - 1) / 2;
 
   /* NOTE: xend
    *       xend = index value of last inner point on this processor
@@ -40,11 +40,11 @@ OwnBCs::OwnBCs() {
   firstLowerYGhost = mesh->ystart - 1;
 
   /* Check that there are enough points
-   * ngy is the size of local mesh including guard cells
+   * LocalNy is the size of local mesh including guard cells
    */
   Options *switchOptions = Options::getRoot()->getSection("switch");
   switchOptions->get("warnPoints", warnPoints, false);
-  if (mesh->ngy - 2 * mesh->ystart < 4) {
+  if (mesh->LocalNy - 2 * mesh->ystart < 4) {
 
     // Create a stream which we cast to a string
     std::ostringstream stream;
@@ -53,7 +53,7 @@ OwnBCs::OwnBCs() {
            << "extrapolateYUp and extrapolateYDown needs 4 inner points "
            << "in y\n"
            << "Currently the number of inner points is "
-           << mesh->ngy - 2 * mesh->ystart;
+           << mesh->LocalNy - 2 * mesh->ystart;
 
     if (warnPoints) {
       output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
@@ -91,7 +91,7 @@ OwnBCs::OwnBCs() {
  *
  * ~~~{.cpp}
  * corresponding_xIndex = (2*mesh->xstart) - (current_ghost_xIndex + 1)
- * corresponding_zIndex = current_ghost_zIndex + (mesh->ngz -1)/2
+ * corresponding_zIndex = current_ghost_zIndex + (mesh->LocalNz -1)/2
  * ~~~
  *
  * where `x` maps to \f$\rho\f$, and z maps to \f$\theta\f$.
@@ -106,7 +106,7 @@ OwnBCs::OwnBCs() {
  *
  * ~~~{.cpp}
  * corresponding_xIndex = (2*mesh->xstart) - (current_ghost_xIndex + 1)
- * corresponding_zIndex = current_ghost_yIndex - (mesh->ngz -1)/2
+ * corresponding_zIndex = current_ghost_yIndex - (mesh->LocalNz -1)/2
  * ~~~
  *
  * \sa innerRhoCylinderLoop
@@ -124,8 +124,8 @@ void OwnBCs::innerRhoCylinder(Field3D &f) {
       innerRhoCylinderLoop(f, 0, firstLowerYGhost);
     }
     if (mesh->lastY()) {
-      // Note that ngy starts counting from 1
-      innerRhoCylinderLoop(f, firstUpperYGhost, mesh->ngy - 1);
+      // Note that LocalNy starts counting from 1
+      innerRhoCylinderLoop(f, firstUpperYGhost, mesh->LocalNy - 1);
     }
   }
 }
@@ -144,7 +144,7 @@ void OwnBCs::extrapolateXOutGhost(Field3D &f) {
 
   if (mesh->lastX()) {
     for (int yInd = mesh->ystart; yInd <= mesh->xend; yInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         f(firstOuterXGhost, yInd, zInd) =
             4.0 * f(firstOuterXGhost - 1, yInd, zInd) -
             6.0 * f(firstOuterXGhost - 2, yInd, zInd) +
@@ -187,7 +187,7 @@ void OwnBCs::extrapolateYUp(Field3D &f) {
 
   if (mesh->lastY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         f(xInd, firstUpperYGhost, zInd) =
             4.0 * f(xInd, firstUpperYGhost - 1, zInd) -
             6.0 * f(xInd, firstUpperYGhost - 2, zInd) +
@@ -212,7 +212,7 @@ void OwnBCs::extrapolateYDown(Field3D &f) {
 
   if (mesh->firstY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         f(xInd, firstLowerYGhost, zInd) =
             4.0 * f(xInd, firstLowerYGhost + 1, zInd) -
             6.0 * f(xInd, firstLowerYGhost + 2, zInd) +
@@ -302,7 +302,7 @@ void OwnBCs::uEParSheath(Field3D &uEPar, const Field3D &phi,
 
   if (mesh->lastY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         uEPar(xInd, firstUpperYGhost, zInd) =
             exp(Lambda - (phiRef +
                           (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
@@ -433,7 +433,7 @@ void OwnBCs::jParSheath(Field3D &jPar, const Field3D &uEPar,
 
   if (mesh->lastY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         jPar(xInd, firstUpperYGhost, zInd) =
             n(xInd, firstUpperYGhost, zInd) *
             (uIPar(xInd, firstUpperYGhost, zInd) -
@@ -475,7 +475,7 @@ void OwnBCs::parDensMomSheath(Field3D &momDensPar, const Field3D &uIPar,
 
   if (mesh->lastY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         momDensPar(xInd, firstUpperYGhost, zInd) =
             n(xInd, firstUpperYGhost, zInd) *
             uIPar(xInd, firstUpperYGhost, zInd);
@@ -524,9 +524,9 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
        * rest of the code.
        */
       x = mesh->GlobalX(xInd);
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         // Calculating the z value
-        z = TWOPI * zInd / (mesh->ngz - 1);
+        z = TWOPI * zInd / (mesh->LocalNz - 1);
         // Calculate a and b
         a = aBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
         b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
@@ -698,14 +698,14 @@ void OwnBCs::innerRhoCylinderLoop(Field3D &f, const int &yStart,
   }
   /* NOTE: Addressing "off by one" for the z points
    *        We loop up over the rest of the z points. Note however that
-   *        ngz is a number that starts counting on 1. Thus we need to
+   *        LocalNz is a number that starts counting on 1. Thus we need to
    *        subtract by one since we count arrays starting from 0.
    */
   // For all z indices corresponding to a theta value including and above
   // pi
   for (int xInd = 0; xInd < mesh->xstart; xInd++) {
     for (int yInd = yStart; yInd <= yEnd; yInd++) {
-      for (int zInd = piIndex; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = piIndex; zInd < mesh->LocalNz - 1; zInd++) {
         // Set the value on the ghost point
         f(xInd, yInd, zInd) =
             f(2 * mesh->xstart - (xInd + 1), yInd, zInd - piIndex);
