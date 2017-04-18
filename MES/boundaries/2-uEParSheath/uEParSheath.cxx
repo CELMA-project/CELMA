@@ -37,9 +37,6 @@ int UeSheath::init(bool restarting) {
   // phi
   phi = FieldFactory::get()->create3D("phi:function", Options::getRoot(), mesh,
                                       CELL_CENTRE, 0);
-  // profile
-  profile = FieldFactory::get()->create3D(
-      "dampProf:profile", Options::getRoot(), mesh, CELL_CENTRE, 0);
   // ************************************************************************
 
   // Add a FieldGroup to communicate
@@ -57,7 +54,7 @@ int UeSheath::init(bool restarting) {
   uEParWBC = copy(uEParOrigin);
 
   // Extrapolate
-  ownBC.uEParSheath(uEParWBC, phi, Lambda, phiRef, profile);
+  ownBC.uEParSheath(uEParWBC, phi, Lambda, phiRef);
 
   // Error in S
   e = uEParWBC - uEParOrigin;
@@ -65,7 +62,7 @@ int UeSheath::init(bool restarting) {
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
   SAVE_ONCE2(uEParWBC, uEParOrigin);
-  SAVE_ONCE2(phi, profile);
+  SAVE_ONCE (phi);
   SAVE_ONCE(e);
 
   // Finalize

@@ -1,5 +1,5 @@
 #
-# Input file for  "uEParSheath/gaussianWSinAndParabola"
+# Input file for  "uEParSheath/noYDepInProf"
 #
 # x - The radial coordinate (rho)
 # y - The height of the cylinder (z)
@@ -44,7 +44,7 @@ J = geom:xl
 # Puts the boundaries half a step outside the last gridpoints
 symmetricGlobalY=true
 symmetricGlobalX=true
-# Position of the separatrix 
+# Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
@@ -121,24 +121,18 @@ Lambda = log(sqrt(mu/(2.0*pi)))
 phiRef = 3.5
 # =============================================================================
 
-# Damping profile
-# =============================================================================
-[dampProf]
-profile  = sin(pi*geom:xl/15 + pi*y/150)^2
-# =============================================================================
-
 # The functions to test
 # =============================================================================
 # *****************************************************************************
 [uEPar]
-function = 0.915025564196348*exp(-7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15 + pi*y/150)^2/sqrt(pi)
+function = 0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15)^2/sqrt(pi)
 
 # Boundaries found in the code
 # *****************************************************************************
 
 # *****************************************************************************
 [phi]
-function = 7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60)
+function = sin(sqrt(2)*pi*(geom:xl + y)/60)
 # *****************************************************************************
 # =============================================================================
 ##############################################################################
