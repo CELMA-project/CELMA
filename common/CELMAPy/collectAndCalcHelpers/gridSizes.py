@@ -46,7 +46,7 @@ def getGridSizes(path, coordinate, varName="lnN", includeGhost=False):
                 coordinateSize += 2*int(f.read("MYG"))
         elif coordinate == "z":
             # nz
-            coordinateSize = (f.size(varName)[3]) - 1
+            coordinateSize = (f.size(varName)[3])
         elif coordinate == "z":
             coordinateSize = (f.size(varName)[0])
         else:
