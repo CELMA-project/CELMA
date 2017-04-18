@@ -158,7 +158,9 @@ int CelmaWBA::rhs(BoutReal t) {
   // ************************************************************************
   momDensAdv = -invJ * bracket(phi, momDensPar, bm);
   // UIParAdv calculated above
-  uIFluxAdv = -Vpar_Grad_par(uIPar, n * uEPar);
+  tmp = n * uEPar;
+  mesh->communicate(tmp);
+  uIFluxAdv = -Vpar_Grad_par(uIPar, tmp);
   elPressure = -DDY(n);
   densDiffusion = nuEI * (uIPar / mu) * Laplace_perp(n);
   // neutralIRes calculated above
