@@ -32,6 +32,6 @@ script:
   - cd celma
   - python testScan.py
   - python testPostProcessing.py
-  - cd ../celmaWithBoussinesqApprox
-  - python testScan.py
-  - python testPostProcessing.py
+  # - cd ../celmaWithBoussinesqApprox
+  # - python testScan.py
+  # - python testPostProcessing.py
