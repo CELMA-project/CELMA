@@ -100,10 +100,10 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
 
   /* NOTE: The index corresponding to pi
    *       Since z in [0, 2 pi[, the z index corresponding to pi is
-   *       (mesh->ngz -1) / 2, where mesh->ngz - 1 is the last actual z point
+   *       (mesh->LocalNz -1) / 2, where mesh->LocalNz - 1 is the last actual z point
    *       (in addition there is one extra z point never used)
    */
-  int piIndex = (mesh->ngz - 1) / 2;
+  int piIndex = (mesh->LocalNz - 1) / 2;
 
   if (mesh->firstX()) {
     // For all z indices corresponding to a theta angle below pi
@@ -141,13 +141,13 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
     }
     /* NOTE: Addressing "off by one" for the z points
      *        We loop up over the rest of the z points. Note however that
-     *        ngz is a number that starts counting on 1. Thus we need to
+     *        LocalNz is a number that starts counting on 1. Thus we need to
      *        subtract by one since we count arrays starting from 0.
      */
     // For all z indices corresponding to a theta value including and above
     // pi
     for (int yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
-      for (int zInd = piIndex; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = piIndex; zInd < mesh->LocalNz - 1; zInd++) {
         // First point
         // Use a seven point stencil
         result(xInd, yInd, zInd) =

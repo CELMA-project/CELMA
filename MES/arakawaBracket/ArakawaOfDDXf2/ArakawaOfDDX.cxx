@@ -71,7 +71,7 @@ int ArakawaOfDDX::init(bool restarting) {
     int ghostIndX = mesh->xend + 1;
     // Newton polynomial of fourth order (including boundary) evaluated at ghost
     for (int yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
-      for (int zInd = 0; zInd < mesh->ngz - 1; zInd++) {
+      for (int zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
         DDXPhi(ghostIndX, yInd, zInd) =
             -DDXPhi(ghostIndX - 4, yInd, zInd) +
             4.0 * DDXPhi(ghostIndX - 3, yInd, zInd) -
@@ -85,7 +85,7 @@ int ArakawaOfDDX::init(bool restarting) {
   mesh->communicate(DDXPhi);
 
   // Calculate
-  S_num = bracket(((DDXPhi) ^ (2.0)), n, bm);
+  S_num = bracket(pow(DDXPhi, 2.0), n, bm);
 
   // Error in S
   e = S_num - S;

@@ -17,11 +17,11 @@
 #include <invert_laplace.hxx> // Gives invert laplace option
 #include <vecops.hxx>         // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
-#include "../../../common/c/include/ownBCs.hxx"
+#include "../../../common/BOUTExtensions/include/ownBCs.hxx"
 // Gives own operators
-#include "../../common/c/include/ownOperators.hxx"
+#include "../../../common/BOUTExtensions/include/ownOperators.hxx"
 // Gives own laplacian inversions
-#include "../../common/c/include/ownLaplacianInversions.hxx"
+#include "../../../common/BOUTExtensions/include/ownLaplacianInversions.hxx"
 
 class NaulinSolver : public PhysicsModel {
 protected:

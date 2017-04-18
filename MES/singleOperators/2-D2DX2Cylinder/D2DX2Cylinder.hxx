@@ -16,7 +16,7 @@
 #include <field_factory.hxx> // Gives field factory
 #include <vecops.hxx>        // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
-#include "../../../common/c/include/ownBCs.hxx"
+#include "../../../common/BOUTExtensions/include/ownBCs.hxx"
 
 class D2DX2Cylinder : public PhysicsModel {
 public:
