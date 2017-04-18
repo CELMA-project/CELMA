@@ -90,6 +90,7 @@ Field3D OwnOperators::div_f_GradPerp_g(const Field3D &f, const Field3D &g) {
   TRACE("Halt in OwnOperators::div_f_GradPerp_g");
 
   Field3D result;
+  result = 0;
 
   result = f * D2DX2(g) + (f / J) * DDX(g) + (f / J2) * D2DZ2(g) +
            DDX(f) * DDX(g) + (1 / J2) * DDZ(f) * DDZ(g);
@@ -204,7 +205,7 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
     ghostIndX = mesh->xend + 1;
     // Newton polynomial of fourth order (including boundary) evaluated at ghost
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
-      for (zInd = 0; zInd < mesh->LocalNz - 1; zInd++) {
+      for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         DDXPhi(ghostIndX, yInd, zInd) =
             -DDXPhi(ghostIndX - 4, yInd, zInd) +
             4.0 * DDXPhi(ghostIndX - 3, yInd, zInd) -
