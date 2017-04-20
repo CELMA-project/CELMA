@@ -12,8 +12,11 @@ Both folders contains the files
 * `ownBCs` - Contains boundary conditions.
   Specifically:
     * "Boundaries" treating the singularity at the cylinder axis.
-* `ownFilters` -
-* `ownLaplacianInversions` -
-* `ownMonitors` -
-* `ownOperators` -
-* `parameters` -
+* `ownFilters` - Contain different spectral filters.
+* `ownLaplacianInversions` - Contains the `NaulinSolver` laplacian inversion .
+* `ownMonitors` - Contains monitors like the energy and particle number.
+* `ownOperators` - Contains differencing operators like `div_f_GradPerp_g` and
+  `Grad_perp`.
+* `parameters` - Contains a class which handles the conversion from physical
+  units to normalized quantites. This class also calculates the collisionalites
+  and viscosities.
