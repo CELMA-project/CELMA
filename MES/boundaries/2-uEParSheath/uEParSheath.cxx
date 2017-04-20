@@ -48,16 +48,8 @@ int UeSheath::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
-
   // Copy
   uEParWBC = copy(uEParOrigin);
-
-  // Extrapolate
-  ownBC.uEParSheath(uEParWBC, phi, Lambda, phiRef);
-
-  // Error in S
-  e = uEParWBC - uEParOrigin;
 
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
@@ -65,22 +57,24 @@ int UeSheath::init(bool restarting) {
   SAVE_ONCE (phi);
   SAVE_ONCE(e);
 
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
-
   return 0;
 }
 // ############################################################################
 
 // Solving the equations
 // ############################################################################
-int UeSheath::rhs(BoutReal t) { return 0; }
+int UeSheath::rhs(BoutReal t) {
+
+ TRACE("UeSheath::rhs");
+
+  // Extrapolate
+  ownBC.uEParSheath(uEParWBC, phi, Lambda, phiRef);
+
+  // Error in S
+  e = uEParWBC - uEParOrigin;
+
+    return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

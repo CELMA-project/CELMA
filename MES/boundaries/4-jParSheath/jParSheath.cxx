@@ -57,15 +57,7 @@ int JParSheath::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
-
   jParWBC = copy(jParOrigin);
-
-  // Extrapolate
-  ownBC.jParSheath(jParWBC, uEPar, uIPar, phi, n, Lambda, phiRef);
-
-  // Error in S
-  e = jParWBC - jParOrigin;
 
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
@@ -73,22 +65,23 @@ int JParSheath::init(bool restarting) {
   SAVE_ONCE4(uIPar, uEPar, phi, n);
   SAVE_ONCE(e);
 
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
-
   return 0;
 }
 // ############################################################################
 
 // Solving the equations
 // ############################################################################
-int JParSheath::rhs(BoutReal t) { return 0; }
+int JParSheath::rhs(BoutReal t) {
+
+TRACE("JParSheath::rhs");
+
+  // Extrapolate
+  ownBC.jParSheath(jParWBC, uEPar, uIPar, phi, n, Lambda, phiRef);
+
+  // Error in S
+  e = jParWBC - jParOrigin;
+
+    return 0; }
 // ############################################################################
 
 // Create a simple main() function
