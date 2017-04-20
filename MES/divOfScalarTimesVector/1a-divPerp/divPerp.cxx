@@ -61,27 +61,10 @@ int DivPerp::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
-
-  // Calculate
-  S_num = Div(f);
-
-  // Error in phi
-  e = S_num - S;
-
   // Save the variables
   SAVE_ONCE(Lx);
   SAVE_ONCE3(f, S, S_num);
   SAVE_ONCE(e);
-
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
 
   return 0;
 }
@@ -89,7 +72,17 @@ int DivPerp::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int DivPerp::rhs(BoutReal t) { return 0; }
+int DivPerp::rhs(BoutReal t) {
+
+ TRACE("DivPerp::rhs");
+
+   // Calculate
+  S_num = Div(f);
+
+  // Error in phi
+  e = S_num - S;
+
+    return 0; }
 // ############################################################################
 
 // Create a simple main() function

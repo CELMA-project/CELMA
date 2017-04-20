@@ -10,7 +10,7 @@
 // Initialization of the physics
 // ############################################################################
 int ArakawaOfDDX::init(bool restarting) {
-  TRACE("Halt in ArakawaOfDDXf2::init");
+  TRACE("Halt in ArakawaOfDDX::init");
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -84,25 +84,10 @@ int ArakawaOfDDX::init(bool restarting) {
   // Communicate before taking new derivative
   mesh->communicate(DDXPhi);
 
-  // Calculate
-  S_num = bracket(pow(DDXPhi, 2.0), n, bm);
-
-  // Error in S
-  e = S_num - S;
-
   // Save the variables
   SAVE_ONCE(Lx);
   SAVE_ONCE4(phi, n, S, S_num);
   SAVE_ONCE(e);
-
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
 
   return 0;
 }
@@ -110,11 +95,21 @@ int ArakawaOfDDX::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int ArakawaOfDDX::rhs(BoutReal t) { return 0; }
+int ArakawaOfDDX::rhs(BoutReal t) {
+
+TRACE("ArakawaOfDDX::rhs");
+
+  // Calculate
+  S_num = bracket(pow(DDXPhi, 2.0), n, bm);
+
+  // Error in S
+  e = S_num - S;
+
+    return 0; }
 // ############################################################################
 
 // Create a simple main() function
 BOUTMAIN(ArakawaOfDDX);
 
 // Destructor
-ArakawaOfDDX::~ArakawaOfDDX() { TRACE("ArakawaOfDDXf2::~ArakawaOfDDXf2"); }
+ArakawaOfDDX::~ArakawaOfDDX() { TRACE("ArakawaOfDDX::~ArakawaOfDDXf2"); }
