@@ -54,7 +54,7 @@ int CauchyBC::init(bool restarting) {
 // ############################################################################
 int CauchyBC::rhs(BoutReal t) {
 
- TRACE("CauchyBC::rhs");
+  TRACE("CauchyBC::rhs");
 
   // Prepare cauchy
   ownBC.prepareCauchy("f");
@@ -63,8 +63,7 @@ int CauchyBC::rhs(BoutReal t) {
   // Error in S
   e = fCauchy - fOrigin;
 
-
-    return 0;
+  return 0;
 }
 // ############################################################################
 

@@ -61,7 +61,7 @@ int D2DX2Cylinder::init(bool restarting) {
 // ############################################################################
 int D2DX2Cylinder::rhs(BoutReal t) {
 
- TRACE("D2DX2Cylinder::rhs");
+  TRACE("D2DX2Cylinder::rhs");
 
   // Calculate
   S_num = D2DX2(f);
@@ -69,7 +69,7 @@ int D2DX2Cylinder::rhs(BoutReal t) {
   // Error in S
   e = S_num - S;
 
-    return 0;
+  return 0;
 }
 // ############################################################################
 

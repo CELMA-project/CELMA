@@ -48,7 +48,6 @@ int DDXOverJCylinder::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-
   // Save the variables
   SAVE_ONCE(Lx);
   SAVE_ONCE3(f, S, S_num);
@@ -69,7 +68,8 @@ int DDXOverJCylinder::rhs(BoutReal t) {
 
   // Error in S
   e = S_num - S;
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

@@ -60,7 +60,7 @@ int PolAvgTest::init(bool restarting) {
 // ############################################################################
 int PolAvgTest::rhs(BoutReal t) {
 
-TRACE("PolAvgTest::rhs");
+  TRACE("PolAvgTest::rhs");
 
   // Calculate the integral
   S_num = avg.poloidalAverage(f);
@@ -68,7 +68,8 @@ TRACE("PolAvgTest::rhs");
   // Error in S
   e = S_num - S;
 
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

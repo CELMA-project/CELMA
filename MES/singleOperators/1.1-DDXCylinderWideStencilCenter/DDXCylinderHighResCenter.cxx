@@ -70,7 +70,7 @@ int DDXCylinderHighResCenter::rhs(BoutReal t) {
 
   // Error in S
   e = S_num - S;
-    return 0;
+  return 0;
 }
 // ############################################################################
 

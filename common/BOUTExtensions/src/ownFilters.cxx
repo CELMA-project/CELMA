@@ -131,7 +131,8 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
    * the origin of the cylinder) to the first inner point, located dx/2 away.
    * Thus:
    */
-  BoutReal outerRho = (mesh->GlobalNx - 2 * MXG - 0.5) * mesh->coordinates()->dx(0, 0);
+  BoutReal outerRho =
+      (mesh->GlobalNx - 2 * MXG - 0.5) * mesh->coordinates()->dx(0, 0);
   BoutReal outerCircumference = TWOPI * outerRho;
 
   // Calculate the corresponding minimum resolvable wavelength
@@ -142,8 +143,9 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
   bool throwWarning;
   options->get("throwWarning", throwWarning, true);
 
-  circumference =
-      TWOPI * mesh->coordinates()->J(mesh->xstart, 0); // Lowest circumference (inner point)
+  circumference = TWOPI *
+                  mesh->coordinates()->J(
+                      mesh->xstart, 0); // Lowest circumference (inner point)
   kMaxCurrent = int(floor(circumference / lambdaMin));
   if (kMaxCurrent <= 0) {
     if (throwWarning) {

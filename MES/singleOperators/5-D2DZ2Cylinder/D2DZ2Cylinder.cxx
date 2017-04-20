@@ -61,14 +61,15 @@ int DDZCylinder::init(bool restarting) {
 // ############################################################################
 int DDZCylinder::rhs(BoutReal t) {
 
- TRACE("DDZCylinder::~DDZCylinder");
+  TRACE("DDZCylinder::~DDZCylinder");
 
-   // Calculate
+  // Calculate
   S_num = D2DZ2(f);
 
   // Error in S
   e = S_num - S;
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

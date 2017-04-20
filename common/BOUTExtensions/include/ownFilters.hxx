@@ -2,8 +2,8 @@
 #define __OWNFILTERS_H__
 
 #include <bout.hxx>
-#include <fft.hxx>
 #include <bout/constants.hxx> // Gives PI and TWOPI
+#include <fft.hxx>
 
 class OwnFilters;
 class OwnFiltAllPass;
