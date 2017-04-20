@@ -74,15 +74,16 @@ int DivPerp::init(bool restarting) {
 // ############################################################################
 int DivPerp::rhs(BoutReal t) {
 
- TRACE("DivPerp::rhs");
+  TRACE("DivPerp::rhs");
 
-   // Calculate
+  // Calculate
   S_num = Div(f);
 
   // Error in phi
   e = S_num - S;
 
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

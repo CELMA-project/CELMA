@@ -54,7 +54,7 @@ int UeSheath::init(bool restarting) {
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
   SAVE_ONCE2(uEParWBC, uEParOrigin);
-  SAVE_ONCE (phi);
+  SAVE_ONCE(phi);
   SAVE_ONCE(e);
 
   return 0;
@@ -65,7 +65,7 @@ int UeSheath::init(bool restarting) {
 // ############################################################################
 int UeSheath::rhs(BoutReal t) {
 
- TRACE("UeSheath::rhs");
+  TRACE("UeSheath::rhs");
 
   // Extrapolate
   ownBC.uEParSheath(uEParWBC, phi, Lambda, phiRef);
@@ -73,7 +73,7 @@ int UeSheath::rhs(BoutReal t) {
   // Error in S
   e = uEParWBC - uEParOrigin;
 
-    return 0;
+  return 0;
 }
 // ############################################################################
 

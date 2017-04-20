@@ -79,7 +79,7 @@ int JTimesDivSource::rhs(BoutReal t) {
   // Error in phi
   e = S_num - S;
 
-    return 0;
+  return 0;
 }
 // ############################################################################
 

@@ -577,7 +577,8 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "***********************************************" << std::endl;
   output << "Perpendicular";
   if (!constViscPerp) {
-    output << " (SQ(mesh->coordinates()->dx(0,0)) = " << SQ(mesh->coordinates()->dx(0, 0)) << "):";
+    output << " (SQ(mesh->coordinates()->dx(0,0)) = "
+           << SQ(mesh->coordinates()->dx(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscPerpLnN << std::endl;
@@ -586,7 +587,8 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "    For vort     : " << artViscPerpVort << std::endl;
   output << "Parallel";
   if (!constViscPar) {
-    output << " (SQ(mesh->coordinates()->dy(0,0)) = " << SQ(mesh->coordinates()->dy(0, 0)) << "):";
+    output << " (SQ(mesh->coordinates()->dy(0,0)) = "
+           << SQ(mesh->coordinates()->dy(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscParLnN << std::endl;

@@ -74,7 +74,7 @@ int JTimesDivPerp::init(bool restarting) {
 // ############################################################################
 int JTimesDivPerp::rhs(BoutReal t) {
 
- TRACE("JTimesDivPerp::rhs");
+  TRACE("JTimesDivPerp::rhs");
 
   // Calculate
   S_num = mesh->coordinates()->J * Div(f);
@@ -82,7 +82,8 @@ int JTimesDivPerp::rhs(BoutReal t) {
   // Error in phi
   e = S_num - S;
 
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

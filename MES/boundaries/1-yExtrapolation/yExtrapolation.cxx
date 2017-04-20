@@ -54,7 +54,7 @@ int YExtrapolation::init(bool restarting) {
 // ############################################################################
 int YExtrapolation::rhs(BoutReal t) {
 
-TRACE("YExtrapolation::rhs");
+  TRACE("YExtrapolation::rhs");
 
   // Extrapolate
   ownBC.extrapolateYUp(fExtrapolate);
@@ -62,7 +62,7 @@ TRACE("YExtrapolation::rhs");
 
   // Error in S
   e = fExtrapolate - fOrigin;
-    return 0;
+  return 0;
 }
 // ############################################################################
 

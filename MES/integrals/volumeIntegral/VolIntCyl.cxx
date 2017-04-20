@@ -69,7 +69,7 @@ int VolIntCyl::init(bool restarting) {
 // ############################################################################
 int VolIntCyl::rhs(BoutReal t) {
 
-TRACE("VolIntCyl::rhs");
+  TRACE("VolIntCyl::rhs");
 
   // Calculate the integral
   S_num = volInt.volumeIntegral(f);
@@ -77,8 +77,8 @@ TRACE("VolIntCyl::rhs");
   // Error in S
   e = S_num - S;
 
-
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

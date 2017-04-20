@@ -76,8 +76,10 @@ BoutReal VolumeIntegral::volumeIntegral(Field3D const &f) {
   for (xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
       for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
-        localResult += f(xInd, yInd, zInd) * mesh->coordinates()->J(xInd, yInd) *
-                       mesh->coordinates()->dx(xInd, yInd) * mesh->coordinates()->dy(xInd, yInd) * mesh->coordinates()->dz;
+        localResult +=
+            f(xInd, yInd, zInd) * mesh->coordinates()->J(xInd, yInd) *
+            mesh->coordinates()->dx(xInd, yInd) *
+            mesh->coordinates()->dy(xInd, yInd) * mesh->coordinates()->dz;
       }
     }
   }
