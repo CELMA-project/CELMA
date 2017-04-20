@@ -32,17 +32,17 @@ int JParSheath::init(bool restarting) {
   // Obtain the fields
   // ************************************************************************
   // uEPar
-  uEPar = FieldFactory::get()->create3D(
-      "uEPar:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+  uEPar = FieldFactory::get()->create3D("uEPar:function", Options::getRoot(),
+                                        mesh, CELL_CENTRE, 0);
   // uIPar
-  uIPar = FieldFactory::get()->create3D(
-      "uIPar:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+  uIPar = FieldFactory::get()->create3D("uIPar:function", Options::getRoot(),
+                                        mesh, CELL_CENTRE, 0);
   // phi
   phi = FieldFactory::get()->create3D("phi:function", Options::getRoot(), mesh,
                                       CELL_CENTRE, 0);
   // n
-  n = FieldFactory::get()->create3D(
-      "n:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
+  n = FieldFactory::get()->create3D("n:function", Options::getRoot(), mesh,
+                                    CELL_CENTRE, 0);
   // jParOrigin
   jParOrigin = FieldFactory::get()->create3D(
       "jPar:function", Options::getRoot(), mesh, CELL_CENTRE, 0);
@@ -73,7 +73,7 @@ int JParSheath::init(bool restarting) {
 // ############################################################################
 int JParSheath::rhs(BoutReal t) {
 
-TRACE("JParSheath::rhs");
+  TRACE("JParSheath::rhs");
 
   // Extrapolate
   ownBC.jParSheath(jParWBC, uEPar, uIPar, phi, n, Lambda, phiRef);
@@ -81,7 +81,8 @@ TRACE("JParSheath::rhs");
   // Error in S
   e = jParWBC - jParOrigin;
 
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

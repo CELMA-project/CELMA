@@ -61,14 +61,14 @@ int DDXCylinder::init(bool restarting) {
 // ############################################################################
 int DDXCylinder::rhs(BoutReal t) {
 
-TRACE("DDXCylinder::rhs");
+  TRACE("DDXCylinder::rhs");
 
   // Calculate
   S_num = DDX(f);
 
   // Error in S
   e = S_num - S;
-    return 0;
+  return 0;
 }
 // ############################################################################
 

@@ -94,7 +94,7 @@ int NaulinSolver::rhs(BoutReal t) {
   // Error in phi
   e = phi - phi_num;
 
-    return 0;
+  return 0;
 }
 // ############################################################################
 

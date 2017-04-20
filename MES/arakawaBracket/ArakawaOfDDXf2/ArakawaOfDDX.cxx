@@ -97,7 +97,7 @@ int ArakawaOfDDX::init(bool restarting) {
 // ############################################################################
 int ArakawaOfDDX::rhs(BoutReal t) {
 
-TRACE("ArakawaOfDDX::rhs");
+  TRACE("ArakawaOfDDX::rhs");
 
   // Calculate
   S_num = bracket(pow(DDXPhi, 2.0), n, bm);
@@ -105,7 +105,8 @@ TRACE("ArakawaOfDDX::rhs");
   // Error in S
   e = S_num - S;
 
-    return 0; }
+  return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

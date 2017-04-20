@@ -218,8 +218,7 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
   // Communicate before taking new derivative
   mesh->communicate(DDXPhi);
 
-  result =
-      bracket( pow(DDXPhi, 2.0) + pow(invJ * DDZ(phi, true), 2.0), n, bm);
+  result = bracket(pow(DDXPhi, 2.0) + pow(invJ * DDZ(phi, true), 2.0), n, bm);
 
   // Multiply with B/2
   return 0.5 * invJ * result;

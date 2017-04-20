@@ -70,7 +70,7 @@ int DivSource::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DivSource::rhs(BoutReal t) {
- TRACE("DivSource::rhs");
+  TRACE("DivSource::rhs");
 
   // Calculate
   S_num = ownOp->div_f_GradPerp_g(S_n, phi);
@@ -78,7 +78,7 @@ int DivSource::rhs(BoutReal t) {
   // Error in phi
   e = S_num - S;
 
-    return 0;
+  return 0;
 }
 // ############################################################################
 
