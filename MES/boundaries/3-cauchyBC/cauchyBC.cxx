@@ -38,30 +38,13 @@ int CauchyBC::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
-
   // Copy ensures that the two doesn't share memory
   fCauchy = copy(fOrigin);
-  // Prepare cauchy
-  ownBC.prepareCauchy("f");
-  ownBC.cauchyYDown(fCauchy);
-
-  // Error in S
-  e = fCauchy - fOrigin;
 
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
   SAVE_ONCE2(fCauchy, fOrigin);
   SAVE_ONCE(e);
-
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
 
   return 0;
 }
@@ -69,7 +52,20 @@ int CauchyBC::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int CauchyBC::rhs(BoutReal t) { return 0; }
+int CauchyBC::rhs(BoutReal t) {
+
+ TRACE("CauchyBC::rhs");
+
+  // Prepare cauchy
+  ownBC.prepareCauchy("f");
+  ownBC.cauchyYDown(fCauchy);
+
+  // Error in S
+  e = fCauchy - fOrigin;
+
+
+    return 0;
+}
 // ############################################################################
 
 // Create a simple main() function

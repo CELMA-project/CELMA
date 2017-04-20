@@ -70,7 +70,22 @@ int NaulinSolver::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
+  // Save the variables
+  SAVE_ONCE(Lx);
+  SAVE_ONCE2(vortD, vort);
+  SAVE_ONCE(n);
+  SAVE_ONCE2(phi, phi_num);
+  SAVE_ONCE(e);
+
+  return 0;
+}
+// ############################################################################
+
+// Solving the equations
+// ############################################################################
+int NaulinSolver::rhs(BoutReal t) {
+
+  TRACE("Halt in NaulinSolver::rhs");
 
   // Call the solver
   // phi_num and vort are output
@@ -79,29 +94,8 @@ int NaulinSolver::init(bool restarting) {
   // Error in phi
   e = phi - phi_num;
 
-  // Save the variables
-  SAVE_ONCE(Lx);
-  SAVE_ONCE2(vortD, vort);
-  SAVE_ONCE(n);
-  SAVE_ONCE2(phi, phi_num);
-  SAVE_ONCE(e);
-
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
-
-  return 0;
+    return 0;
 }
-// ############################################################################
-
-// Solving the equations
-// ############################################################################
-int NaulinSolver::rhs(BoutReal t) { return 0; }
 // ############################################################################
 
 // Create a simple main() function

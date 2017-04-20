@@ -38,30 +38,13 @@ int YExtrapolation::init(bool restarting) {
   // Communicate before taking derivatives
   mesh->communicate(com_group);
 
-  output << "\n\n\n\n\n\n\nNow running test" << std::endl;
-
   // Copy ensures that the two doesn't share memory
   fExtrapolate = copy(fOrigin);
-  // Extrapolate
-  ownBC.extrapolateYUp(fExtrapolate);
-  ownBC.extrapolateYDown(fExtrapolate);
-
-  // Error in S
-  e = fExtrapolate - fOrigin;
 
   // Save the variables
   SAVE_ONCE2(Lx, Ly);
   SAVE_ONCE2(fExtrapolate, fOrigin);
   SAVE_ONCE(e);
-
-  // Finalize
-  dump.write();
-  dump.close();
-
-  output << "\nFinished running test, now quitting\n\n\n\n\n\n" << std::endl;
-
-  // Wait for all processors to write data
-  MPI_Barrier(BoutComm::get());
 
   return 0;
 }
@@ -69,7 +52,18 @@ int YExtrapolation::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int YExtrapolation::rhs(BoutReal t) { return 0; }
+int YExtrapolation::rhs(BoutReal t) {
+
+TRACE("YExtrapolation::rhs");
+
+  // Extrapolate
+  ownBC.extrapolateYUp(fExtrapolate);
+  ownBC.extrapolateYDown(fExtrapolate);
+
+  // Error in S
+  e = fExtrapolate - fOrigin;
+    return 0;
+}
 // ############################################################################
 
 // Create a simple main() function
