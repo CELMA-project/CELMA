@@ -214,22 +214,13 @@ int Celma::rhs(BoutReal t) {
 // Constructor
 // ############################################################################
 Celma::Celma()
-/* FIXME: c++11 is unsupported on jess
- * :
- *     kinE ({{"perpKinEE", 0.0}, {"parKinEE", 0.0},
- *            {"perpKinEI", 0.0}, {"parKinEI", 0.0},
- *            ),
- *     particleNumber ({{"particleNumber", 0.0}})
- */
-{
-  TRACE("Halt in Celma::Celma");
+    : kinE{{"perpKinEE", 0.0},
+           {"parKinEE", 0.0},
+           {"perpKinEI", 0.0},
+           {"parKinEI", 0.0}},
 
-  // Non c++11 initialization
-  kinE["perpKinEE"] = 0.0;
-  kinE["parKinEE"] = 0.0;
-  kinE["perpKinEI"] = 0.0;
-  kinE["parKinEI"] = 0.0;
-  particleNumber["particleNumber"] = 0.0;
+      particleNumber{{"particleNumber", 0.0}} {
+  TRACE("Halt in Celma::Celma");
 }
 // ############################################################################
 
