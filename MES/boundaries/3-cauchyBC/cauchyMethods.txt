@@ -1,3 +1,4 @@
+This file contains all stencils derived in ../../derivations/boundaries/cauchyBC
 
                     /* Taylor4thOrder -> First order as well
                 f(xInd, firstLowerYGhost, zInd) =
