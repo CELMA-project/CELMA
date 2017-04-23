@@ -10,6 +10,5 @@ Results:
 
 Conclusion:
 ===========
-For some reason: All trials here (see cauchyMethods.txt and
-derivations/bounadries/) have given 1st order convergence.
+For some reason: All trials here have given 1st order convergence.
 Proceed with care

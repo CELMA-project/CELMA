@@ -531,10 +531,18 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
         b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
         // Set the ghost point
         f(xInd, firstLowerYGhost, zInd) =
-            (4.0 / 5.0) * a -
-            (3.0 / 4.0) * b * mesh->coordinates()->dy(xInd, firstLowerYGhost) +
-            (1.0 / 4.0) * f(xInd, firstLowerYGhost + 2, zInd) -
-            (1.0 / 20.0) * f(xInd, firstLowerYGhost + 3, zInd);
+            (1.0 / (120.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) -
+                    115.0)) *
+            (-15.0 * (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) +
+                      7.0) *
+                 f(xInd, firstLowerYGhost + 1, zInd) +
+             15.0 *
+                 (8.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) - 1.0) *
+                 f(xInd, firstLowerYGhost + 2, zInd) -
+             (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) - 5.0) *
+                 f(xInd, firstLowerYGhost + 3, zInd) +
+             (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost)) *
+                 (16.0 * a + 5.0 * b));
       }
     }
   }
@@ -562,6 +570,9 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
 void OwnBCs::prepareCauchy(const string &section) {
   TRACE("Halt in OwnBCs::prepareCauchy");
 
+  output << "\n\n\n!!!WARNING: Only first order convergence found with "
+            "CauchyBC!!!\n\n\n"
+         << std::endl;
   getAFunction(section);
   getBFunction(section);
   getYValAtYDownBndry();
