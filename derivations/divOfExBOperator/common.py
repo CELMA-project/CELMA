@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Common files for all coordinate systems"""
+"""Contains common variables and functions for all coordinate systems"""
 
 from collections import OrderedDict
 from IPython.display import display
