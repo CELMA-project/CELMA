@@ -1,5 +1,5 @@
 # boundaries
 
-**NOTE**: This folder is under reconstruction.
-
-  cauchyBCTaylor4thOrder.ipynb <-- looks like this fellah is trying to derive Robin BCs
+* [cauchyBC](cauchyBC) - Derivation of the Cauchy boundary condition.
+* [ghostPointExtrapolation](ghostPointExtrapolation) - Calculating the value of
+  the ghost point based on the value at the boundary condition.
