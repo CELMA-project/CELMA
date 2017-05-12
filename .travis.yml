@@ -33,9 +33,9 @@ script:
   - python testScan.py
   - python testPostProcessing.py
   # Check that celma with the Boussinesq approximation is working
-  # - cd ../celmaWithBoussinesqApprox
-  # - python testScan.py
-  # - python testPostProcessing.py
+  - cd ../celmaWithBoussinesqApprox
+  - python testScan.py
+  - python testPostProcessing.py
   # Check that the MES is working
   - cd $TRAVIS_BUILD_DIR/MES/singleOperators/1-DDXCylinder
   - python driverGaussianWSinAndParabola.py
