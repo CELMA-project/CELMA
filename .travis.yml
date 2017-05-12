@@ -1,4 +1,4 @@
-dist: precise
+dist: trusty
 group: stable
 os: linux
 sudo: required
@@ -6,6 +6,10 @@ language: cpp
 compiler: gcc
 
 before_install:
+  # * trusty does not have ffmpeg in the software repository, and must be added
+  #   manually
+  - sudo add-apt-repository -y ppa:mc3man/trusty-media
+  - sudo apt-get update -qq
   # * CMAKE can be manually installed through boutPPInstall.sh
   # * gfortran is usually installed on the clusters, if not it can be
   #   installed through gccLocalInstall.sh
