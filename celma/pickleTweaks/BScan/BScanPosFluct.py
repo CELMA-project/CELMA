@@ -45,7 +45,7 @@ for scan in scans:
     # Set legend to ylabel
     handles, labels = ax.get_legend_handles_labels()
     yLabel = labels[0]
-    xLabel = ax.get_xlabel()
+    xLabel = fig.get_axes()[3].get_xlabel()
 
     plt.close(fig)
 
