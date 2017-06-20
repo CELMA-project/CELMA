@@ -30,17 +30,26 @@ def getNumber(t, ind):
     Parameters
     ----------
     t : str
-        String to extract the number from
+        String to extract the number from (this is typically from the
+        legend of the figure)
     ind : int
         Index to investigate after the first split.
+        (The legend contains several elements)
+
+    Returns
+    -------
+    val : float
+        The value extracted from the text
     """
 
-    return eval(t.split("=")[ind].split(";")[0].replace("$","") .\
+    val =  eval(t.split("=")[ind].split(";")[0].replace("$","") .\
                                                 replace("\\","").\
                                                 replace("{","") .\
                                                 replace("}","") .\
                                                 replace("cdot 10^","e").
                                                 replace("cdot","*"))
+
+    return val
 #}}}
 
 for scan in scans:
