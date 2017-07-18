@@ -308,6 +308,7 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
                     format(pltVarName, **self.uc.conversionDict[key])
             else:
                 legend = "${}$".format(pltVarName)
+
             # Do the plot
             self._lines.append(\
                         ax.plot(self._X,\
@@ -389,6 +390,10 @@ class PlotAnim1DSuperClass(PlotAnimSuperClass):
         """
         colorSpace = np.arange(len(self._vars))
         self._colors = self._cmap(np.linspace(0, 1, len(colorSpace)))
+        # Cast to avoid a.any() or a.all() bug, see
+        # https://github.com/matplotlib/matplotlib/issues/8750
+        # for details
+        self._colors = tuple(tuple(c) for c in self._colors)
     #}}}
 #}}}
 
