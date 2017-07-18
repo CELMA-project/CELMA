@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 """
-Gives blobs per unit time for the B-Scan.
+Gives the average particle flux for the B-Scan.
+
+The average flux is found from the particle flux time trace integrated
+over time (this number is given in the figure legend), divided by the
+last timepoint in the particle flux time trace.
 """
 
 import pickle
@@ -180,6 +184,6 @@ fig.legend(handles                         ,\
            bbox_transform = parAx.transAxes,\
            )
 
-fig.suptitle(r"$\mathrm{Average\;particle\;flux\;per\;second}$", y=1.3)
+fig.suptitle(r"$\mathrm{Average\;particle\;flux}$", y=1.3)
 
 PlotHelper.savePlot(fig, "BScanTotalFlux.pdf")
