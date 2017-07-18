@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 """
-Gives blobs per unit time for the nn-Scan.
+Gives the average particle flux for the nn-Scan.
+
+The average flux is found from the particle flux time trace integrated
+over time (this number is given in the figure legend), divided by the
+last timepoint in the particle flux time trace.
 """
 
 import pickle
@@ -36,17 +40,26 @@ def getNumber(t, ind):
     Parameters
     ----------
     t : str
-        String to extract the number from
+        String to extract the number from (this is typically from the
+        legend of the figure)
     ind : int
         Index to investigate after the first split.
+        (The legend contains several elements)
+
+    Returns
+    -------
+    val : float
+        The value extracted from the text
     """
 
-    return eval(t.split("=")[ind].split(";")[0].replace("$","") .\
+    val =  eval(t.split("=")[ind].split(";")[0].replace("$","") .\
                                                 replace("\\","").\
                                                 replace("{","") .\
                                                 replace("}","") .\
                                                 replace("cdot 10^","e").
                                                 replace("cdot","*"))
+
+    return val
 #}}}
 
 for scan in scans:
@@ -182,6 +195,6 @@ fig.legend(handles                         ,\
            bbox_transform = parAx.transAxes,\
            )
 
-fig.suptitle(r"$\mathrm{Average\;particle\;flux\;per\;second}$", y=1.3)
+fig.suptitle(r"$\mathrm{Average\;particle\;flux}$", y=1.3)
 
 PlotHelper.savePlot(fig, "nnScanTotalFlux.pdf")
