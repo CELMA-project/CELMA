@@ -230,6 +230,7 @@ class ScanDriver(object):
                                BOUT_ppn     = 16  ,\
                                BOUT_queue   = None,\
                                BOUT_account = None,\
+                               BOUT_mail    = None,\
             ):
         #{{{docstring
         """
@@ -253,6 +254,8 @@ class ScanDriver(object):
         BOUT_account : [None|str]
             Account number to use for the runs (only used when the
             runner is PBS_runner)
+        BOUT_mail : [None|str]
+            Mail address to notify when a BOUT job has finished
         """
         #}}}
 
@@ -269,6 +272,7 @@ class ScanDriver(object):
             self._commonRunnerOptions["BOUT_ppn"  ]   = BOUT_ppn
             self._commonRunnerOptions["BOUT_queue"]   = BOUT_queue
             self._commonRunnerOptions["BOUT_account"] = BOUT_account
+            self._commonRunnerOptions["BOUT_mail"]    = BOUT_mail
     #}}}
 
     #{{{setInitOptions
