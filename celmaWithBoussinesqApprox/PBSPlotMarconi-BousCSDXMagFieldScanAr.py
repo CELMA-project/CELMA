@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
-"""Driver which plots the results of the simulations."""
+"""
+Driver which plots the results of the simulations.
+
+**NOTE:** This driver has unfilled fields marked with FIXME
+"""
 
 import numpy as np
 
@@ -34,7 +38,7 @@ pltSub = PlotSubmitter(directory, scanParameter, boussinesq=True)
 pltSub.sub.setMisc(logPath = os.path.join(directory,"postLogs"),\
                    mail    = mail,\
                    account = account)
-pltSub.sub.setQueue("xfualongprod")
+pltSub.sub.setQueue(queue)
 
 # Set linear slices (found from looking at the Fourier modes)
 # FIXME:

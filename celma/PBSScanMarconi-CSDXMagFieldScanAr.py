@@ -19,6 +19,9 @@ account = None
 # specify here
 # Example: "xfualongprod"
 queue = None
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail = None
 # =============================================================================
 
 directory = "CSDXMagFieldScanAr"
@@ -63,6 +66,7 @@ scanB0.setCommonRunnerOptions(\
                               BOUT_ppn     = 32     ,\
                               BOUT_queue   = queue  ,\
                               BOUT_account = account,\
+                              BOUT_mail    = mail   ,\
                              )
 
 # Run
