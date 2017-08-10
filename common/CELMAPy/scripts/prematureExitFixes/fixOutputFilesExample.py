@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Example on how to fix output files of premature exit runs.
+Example script which fixes output files of premature exit runs.
 Run this in case some of the processors wrote a timestep, others didn't.
 
 **NOTE**: DO NOT RUN THIS unless tere is a problem.

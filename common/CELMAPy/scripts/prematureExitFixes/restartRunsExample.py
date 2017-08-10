@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Driver which continues run after premature exit.
+Example driver which continues run after premature exit.
 
 In this example the cluster terminated prematurely in the initialization
 phase.

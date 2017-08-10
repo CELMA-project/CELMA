@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Example which fixes the log files after premature exit.
+Example script which fixes the log files after premature exit.
 To be run after restartRunsExample.py
 
 **NOTE**: DO NOT RUN THIS unless tere is a problem.
