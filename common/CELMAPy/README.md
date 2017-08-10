@@ -32,6 +32,7 @@ plotX.py            # The plotting routine
 [radialProfile](radialProfile) - Procedures which collects and plots the comparison between steady state and turbulence profiles
 [repairBrokenExit](repairBrokenExit) - Procedure which repairs the dump file if they are exited badly (for example the cluster stops the job in the middle of a write)
 [scanDriver](scanDriver) - The driver used for running scans with `bout_runners`
+[scripts](scripts) - Contains non-callable scripts
 [skewnessKurtosis](skewnessKurtosis) - Procedures which collects and plots the poloidal skewness and kurtosis as a function of radius
 [superClasses](superClasses) - Contains all the parent classes (note that this is maybe not the best structure)
 [timeTrace](timeTrace) - Procedures which collects and plots a single time trace

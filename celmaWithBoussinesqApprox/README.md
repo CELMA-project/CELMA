@@ -2,6 +2,9 @@
 
 The folder containing the `celma` code, where the Boussinesq
 approximation has been used.
+**NOTE**: If the run exits prematurely, see
+[../common/CELMAPy/scripts/prematureExitFixes](../common/CELMAPy/scripts/prematureExitFixes)
+for common fixes.
 
 ## The model
 * [BousCSDXMagFieldScanAr](BousCSDXMagFieldScanAr) - Contains the

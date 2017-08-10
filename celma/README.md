@@ -1,6 +1,9 @@
 # celma
 
 The folder containing the `celma` code.
+**NOTE**: If the run exits prematurely, see
+[../common/CELMAPy/scripts/prematureExitFixes](../common/CELMAPy/scripts/prematureExitFixes)
+for common fixes.
 
 ## The model
 * [CSDXMagFieldScanAr](CSDXMagFieldScanAr) - Contains the `BOUT.inp` file used
@@ -39,9 +42,6 @@ These scripts are made for doing the post processing on a super computer:
   used to create the plots given in the
   [thesis](https://github.com/CELMA-project/dissertation/releases/latest).
   **NOTE:** These are to be run *after* the simulations are done.
-* [brokenExitExample.py](brokenExitExample.py) - Example on how to repair
-  simulations where the `*.dmp.*`-files have been corrupted due to for example
-  premature exit during the flush stage of writing.
 * [testPostProcessing.py](testPostProcessing.py) - To be run after
   [testScan.py](testScan.py). Checks that the system has been sucessfully built
   for the included post-processing.
