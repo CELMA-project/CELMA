@@ -35,10 +35,7 @@ for f in allFiles:
     # Clean folders marked with BAK
     if "BAK" not in str(dst):
         # Make the paths
-        newPath = pathlib.Path(*dst.parts[:-1])
-        if not os.path.exists(str(newPath)):
-            newPath.mkdir(parents = True)
-
+        pathlib.Path(*dst.parts[:-1]).mkdir(parents = True, exist_ok=True)
         shutil.copy2(str(f), str(dst))
 
 # Compress and remove the folder
