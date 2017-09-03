@@ -4,17 +4,26 @@
 
 import pathlib
 
-allFiles = list(pathlib.Path(".").glob("**/*"))
-for file in allFiles:
-    try:
-        with open(file, "r") as f:
-            lines = f.readlines()
-        with open(file, "w") as f:
-            for l in lines:
-                f.write(l)
-    except UnicodeDecodeError:
-        with open(file, "rb") as f:
-            lines = f.readlines()
-        with open(file, "wb") as f:
-            for l in lines:
-                f.write(l)
+def refreshDates():
+    """Opens and saves all files recursively"""
+
+    allFiles = list(pathlib.Path(".").glob("**/*"))
+    for path in allFiles:
+        if not path.is_file():
+            continue
+        path = str(path)
+        try:
+            with open(path, "r") as f:
+                lines = f.readlines()
+            with open(path, "w") as f:
+                for l in lines:
+                    f.write(l)
+        except UnicodeDecodeError:
+            with open(path, "rb") as f:
+                lines = f.readlines()
+            with open(path, "wb") as f:
+                for l in lines:
+                    f.write(l)
+
+if __name__ == "__main__":
+    refreshDates()
