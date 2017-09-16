@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-"""Refresh dates of files to prevent automatic deletion  by cluster"""
+"""Refresh dates of files to prevent automatic deletion by cluster"""
 
 import pathlib
 
@@ -19,11 +17,15 @@ def refreshDates():
                 for l in lines:
                     f.write(l)
         except UnicodeDecodeError:
-            with open(path, "rb") as f:
-                lines = f.readlines()
-            with open(path, "wb") as f:
-                for l in lines:
-                    f.write(l)
+            try:
+                with open(path, "rb") as f:
+                    lines = f.readlines()
+                with open(path, "wb") as f:
+                    for l in lines:
+                        f.write(l)
+            except PermissionError:
+                print("Permission denied for {}".format(path))
+
 
 if __name__ == "__main__":
     refreshDates()
