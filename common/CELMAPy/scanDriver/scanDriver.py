@@ -5,10 +5,7 @@ Contains the restartFromFunc and ScanDriver
 """
 
 from bout_runners import basic_runner, PBS_runner
-import inspect
-import os
-import pickle
-import re
+import inspect, os, pickle, re, pathlib
 
 # NOTE: Smells of code duplication in the "call" functions
 
@@ -435,7 +432,10 @@ class ScanDriver(object):
     #}}}
 
     #{{{runScan
-    def runScan(self, boussinesq=False, restartTurb=None):
+    def runScan(self,\
+                boussinesq=False,\
+                restartTurb=None,\
+                checkForEmptyRestarts=True):
         """
         Calls the drivers used for running scans
 
@@ -445,6 +445,11 @@ class ScanDriver(object):
             Whether or not boussinesq approximation is used
         restartTurb : [None|int]
             Number of times to restart the trubulence runs
+        checkForEmptyRestarts : bool
+            If True, the fuction will search for folders which contains
+            *.restart.*-files without *.dmp.*-files (with exception of
+            the restart_0 folder). The function will start running the
+            simulation of these folders without any queue dependecy.
         """
 
         # Set boussinesq and restart turb
@@ -502,6 +507,16 @@ class ScanDriver(object):
         self._dmpFoldersDictPath =\
                 os.path.join(self._directory, "dmpFoldersDict.pickle")
 
+        if checkForEmptyRestarts:
+            self._emptyRestarts = self._searchForEmptyRestarts()
+
+# FIXME: Have a flag in input which checks for restart without dumps
+# FIXME: Print that need to run again in order to get dmpFolderDict straigth
+# FIXME: This will not have any restarts to run from, skip if finds restart witout dump
+# FIXME: Need the dmp_folders first, so must run through and get the warnings
+# FIXME: In reverse order: move the root restart files to own folder.
+#        This must NOT be called restart as this will be searched for,
+#        call it rather root_rst_files
         # Call the runners
         if self.runInit:
             self._callInitRunner()
@@ -512,6 +527,7 @@ class ScanDriver(object):
 
         self._restart = "overwrite"
 
+# FIXME: If finds restart without dmp: reverse the order of these
         if self.runExpand:
             self._callExpandRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -526,16 +542,64 @@ class ScanDriver(object):
             dmpFoldersDict["linear"] = self._linear_dmp_folders
             self._pickleDmpFoldersDict(dmpFoldersDict)
 
+# Idea: Could move restart_0 to rst_from_linear and restart files in
+#       root to restart_last_restart_files
+#       In this way: Could start running in the restart folder without
+#       hasle
         if self.runTurb:
             self._callTurboRunner()
             # Load the dmpFolders pickle, update it and save it
             dmpFoldersDict = self._getDmpFolderDict()
             dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
             self._pickleDmpFoldersDict(dmpFoldersDict)
+# FIXME: END
 
+# FIXME: Need the self._turbo_dmp_folders in order do run this
         if self._restartTurb is not None:
             # NOTE: dmpFolders are treated internally in this function
             self._callExtraTurboRunner()
+    #}}}
+
+    #{{{_searchForEmptyRestarts
+    def _searchForEmptyRestarts():
+        """
+        Searches for folder containing *.restart.* files without *.dmp.* files.
+
+        Also moves restart_0 folders to rst_BAK_*
+
+        Returns
+        -------
+        onlyRestart : set
+            A set of all folders containing *.restart.*, but no *.dmp.* files.
+        """
+
+        restartFiles = list(pathlib.Path(self._directory).glob("**/*.restart.*"))
+        dmpFiles = list(pathlib.Path(self._directory).glob("**/*.dmp.*"))
+
+        # .parents[0] is the directory holding the file
+        # https://stackoverflow.com/questions/35490148/how-to-get-folder-name-in-which-given-file-resides-from-pathlib-path
+        restartFolders = set(f.parents[0] for f in restartFiles)
+        dmpFolders = set(f.parents[0] for f in dmpFiles)
+
+        # Non-symmetric difference
+        # https://stackoverflow.com/questions/3462143/get-difference-between-two-lists
+        onlyRestart = restartFolders - dmpFolders
+
+        # Extraxt restart_0 and rst_BAK_* folders
+        restart0Folders = set(e for e in onlyRestart if "restart_0" in str(e))
+        rstFolders = set(e for e in onlyRestart if "rst_BAK" in str(e))
+        onlyRestart -= restart0Folders
+        onlyRestart -= rstFolders
+
+        # Move restart_0 folders to rst_BAK_*
+        for f in restart0Folders:
+            # Check the number of rst_BAK_* folders already present
+            rstBakFolders = list(pathlib.Path(f.parents[0]).glob("**/rst_BAK*"))
+            newRstBakFolder =\
+                f.parents[0].joinpath("rst_BAK_{}".format(len(curRstBak)))
+            shutil.move(str(f), newRstBakFolder)
+
+        return onlyRestart
     #}}}
 
     #{{{_getDmpFolderDict
@@ -825,6 +889,7 @@ class ScanDriver(object):
             **self._turbulenceOptions,\
             restart    = "overwrite" ,\
             additional = (
+# FIXME: tag
                 ("tag"   , theRunName , 0        ),\
                 ("switch", "saveTerms", saveTerms),\
                 hyper,\
@@ -836,7 +901,7 @@ class ScanDriver(object):
             **self._commonRunnerOptions  ,\
                         )
 
-        # Check if runs has already been performed
+        # Check if runs have already been performed
         # Number of restart folders = nrf
         nrf = []
         # Placeholder for the dmp folders
@@ -883,16 +948,38 @@ class ScanDriver(object):
                        "simulations.")
             raise RuntimeError(message)
 
+# FIXME: Next step: Find out what self._restartTurb and nrf is
         # Update the restart number
         self._restartTurb -= nrf[0]
 
         for nr in range(self._restartTurb):
+# FIXME: Actually: Maybe the best would be to crawl through the folders,
+# and check for folders with only restart (no dmp), can read from those
+# if linear, turb or similar
+# NOT restart_0 folders!
+# !!! In init, expand, linear and turb: restart_0 NOT superfluous!
+# !!! In init, expand and linear: restart files in root ARE superfluous? Well, files are first copied to restart_0
+# ? Will restart start if restart_0 is populated? If so, no extra logic needed (at least not in expand and linear)...but problem if starts the preceding first, and make dependencies from that
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! If root restart files does not exist: will copy from preceding root folder => must run the restart files in reverse!!!
+# Latest turbulence is the latest, usually: Will not need to restart this, as this will append the total amount of runs
+# TODO: Up an including linear: Only extra logic needed: reverse order
+
+
+# NOTE: Hypothesis: nrf could be 0 or neg, in that case, no new run
+#       would be performed, must be checked
+
+# NOTE: nr will start on 0, will refer to restart_0? check
+# NOTE: Potential problem: dmp_folders are given after the run has been
+#       given...however, do not believe this would be a problem here, as
+#       turbo_dmp_folders are input
+# FIXME: appropriate to add check-logic here?
+#        NOTE: calling bout_runners, but created above
             turbo_dmp_folders, self._turbo_PBS_ids =\
                 self._turboRun.execute_runs(\
                     # Declare dependencies
                     job_dependencies = self._turbo_PBS_ids,\
                     # Below are the kwargs given to the
-                    # restartFromFunc
+                    # restartFromFunc through bout_runners
                     aScanPath      = self._linearAScanPath,\
                     scanParameters = self._scanParameters ,\
                                             )
