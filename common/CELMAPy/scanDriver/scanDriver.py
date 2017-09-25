@@ -507,16 +507,6 @@ class ScanDriver(object):
         self._dmpFoldersDictPath =\
                 os.path.join(self._directory, "dmpFoldersDict.pickle")
 
-        if checkForEmptyRestarts:
-            self._emptyRestarts = self._searchForEmptyRestarts()
-
-# FIXME: Have a flag in input which checks for restart without dumps
-# FIXME: Print that need to run again in order to get dmpFolderDict straigth
-# FIXME: This will not have any restarts to run from, skip if finds restart witout dump
-# FIXME: Need the dmp_folders first, so must run through and get the warnings
-# FIXME: In reverse order: move the root restart files to own folder.
-#        This must NOT be called restart as this will be searched for,
-#        call it rather root_rst_files
         # Call the runners
         if self.runInit:
             self._callInitRunner()
@@ -527,7 +517,67 @@ class ScanDriver(object):
 
         self._restart = "overwrite"
 
-# FIXME: If finds restart without dmp: reverse the order of these
+        if checkForEmptyRestarts:
+            self._emptyRestarts = self._searchForEmptyRestarts()
+
+            if len(self._emptyRestarts) != 0:
+                print("'runScan' called with 'checkForEmptyRestarts', rerun "\
+                      "the driver in order to fix 'dmpFoldersDict.pickle'")
+
+
+# FIXME: Test me
+                if self.runTurb:
+                    # Move the root restart files to root_rst_files
+                    turboRoot = [e for e in self._emptyRestarts if \
+                                 "turbulentPhase1" in e]
+                    self._moveRootRestart(turboRoot)
+                    # Run the simulation
+                    self._linear_PBS_ids = None
+                    self._callTurboRunner()
+                if self.runLin:
+                    linearRoot = [e for e in self._emptyRestarts if \
+                                  "linearPhase1" in e]
+                    self._moveRootRestart(linearRoot)
+# FIXME: In reverse order: move the root restart files to own folder.
+#        This must NOT be called restart as this will be searched for,
+#        call it rather root_rst_files
+                    self._expand_PBS_ids = None
+                    self._callLinearRunner()
+                if self.runExpand:
+                    expandRoot = [e for e in self._emptyRestarts if \
+                                  "expand" in str(e)]
+                    self._moveRootRestart(linearRoot)
+                    self._init_PBS_ids = None
+                    self._callExpandRunner()
+
+# FIXME: Need own logic here
+                if self._restartTurb is not None:
+                    # NOTE: dmpFolders are treated internally in this function
+                    self._callExtraTurboRunner()
+
+
+#{{{_moveRootRestart
+def _moveRootRestart(rootFolder):
+    """
+    Moves the restart files in a root folder to root_rst_files
+
+    Parameters
+    ----------
+    rootFolder : list
+        List containing the folder to move the *.restart.* files feom
+    """
+
+    import pdb; pdb.set_trace()
+# FIXME: Verify that more than just the root folder...actually. This is
+#        just the root folder. Should probably glob for *restart*-files
+    rootFolder = rootFolder[0] if len(rootFolder) != 0 else None
+    rootRstFolder = rootFolder.parents[0].joinpath("root_rst_files")
+    os.makedirs(str(newRstBakFolder))
+    shutil.move(str(f), str(newRstBakFolder))
+#}}}
+
+
+
         if self.runExpand:
             self._callExpandRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -542,10 +592,6 @@ class ScanDriver(object):
             dmpFoldersDict["linear"] = self._linear_dmp_folders
             self._pickleDmpFoldersDict(dmpFoldersDict)
 
-# Idea: Could move restart_0 to rst_from_linear and restart files in
-#       root to restart_last_restart_files
-#       In this way: Could start running in the restart folder without
-#       hasle
         if self.runTurb:
             self._callTurboRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -554,6 +600,11 @@ class ScanDriver(object):
             self._pickleDmpFoldersDict(dmpFoldersDict)
 # FIXME: END
 
+
+# Idea: Could move restart_0 to rst_from_linear and restart files in
+#       root to restart_last_restart_files
+#       In this way: Could start running in the restart folder without
+#       hasle
 # FIXME: Need the self._turbo_dmp_folders in order do run this
         if self._restartTurb is not None:
             # NOTE: dmpFolders are treated internally in this function
@@ -597,7 +648,8 @@ class ScanDriver(object):
             rstBakFolders = list(pathlib.Path(f.parents[0]).glob("**/rst_BAK*"))
             newRstBakFolder =\
                 f.parents[0].joinpath("rst_BAK_{}".format(len(curRstBak)))
-            shutil.move(str(f), newRstBakFolder)
+            os.makedirs(str(newRstBakFolder))
+            shutil.move(str(f), str(newRstBakFolder))
 
         return onlyRestart
     #}}}
