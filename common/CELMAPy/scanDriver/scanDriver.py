@@ -5,7 +5,7 @@ Contains the restartFromFunc and ScanDriver
 """
 
 from bout_runners import basic_runner, PBS_runner
-import inspect, os, pickle, re, pathlib
+import inspect, os, pickle, re, pathlib, shutil
 
 # NOTE: Smells of code duplication in the "call" functions
 
@@ -546,7 +546,7 @@ class ScanDriver(object):
                 if self.runExpand:
                     expandRoot = [e for e in self._emptyRestarts if \
                                   "expand" in str(e)]
-                    self._moveRootRestart(linearRoot)
+                    self._moveRootRestart(expandRoot)
                     self._init_PBS_ids = None
                     self._callExpandRunner()
 
@@ -598,7 +598,7 @@ class ScanDriver(object):
     #}}}
 
     #{{{_searchForEmptyRestarts
-    def _searchForEmptyRestarts():
+    def _searchForEmptyRestarts(self):
         """
         Searches for folder containing *.restart.* files without *.dmp.* files.
 
@@ -631,7 +631,7 @@ class ScanDriver(object):
         # Move restart_0 folders to rst_BAK_*
         for f in restart0Folders:
             # Check the number of rst_BAK_* folders already present
-            rstBakFolders = list(pathlib.Path(f.parents[0]).glob("**/rst_BAK*"))
+            curRstBak = list(pathlib.Path(f.parents[0]).glob("**/rst_BAK*"))
             newRstBakFolder =\
                 f.parents[0].joinpath("rst_BAK_{}".format(len(curRstBak)))
             os.makedirs(str(newRstBakFolder))
