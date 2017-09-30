@@ -555,6 +555,7 @@ class ScanDriver(object):
 
         * The simulations are performed in chronological order
         * The simulations are performed with dependencies
+        * The dmpFoldersDict is updated normally
         """
 
         if self.runExpand:
@@ -615,20 +616,23 @@ class ScanDriver(object):
         # https://stackoverflow.com/questions/3462143/get-difference-between-two-lists
         onlyRestart = restartFolders - dmpFolders
 
-        # Extraxt restart_0 and rst_BAK_* folders
+        # Extraxt restart_0, rst_BAK_* and root_rst_files folders
         restart0Folders = set(e for e in onlyRestart if "restart_0" in str(e))
-        rstFolders = set(e for e in onlyRestart if "rst_BAK" in str(e))
+        rstBAKFolders = set(e for e in onlyRestart if "rst_BAK" in str(e))
+        rootRstFiles = set(e for e in onlyRestart if "root_rst_files" in str(e))
         onlyRestart -= restart0Folders
-        onlyRestart -= rstFolders
+        onlyRestart -= rstBAKFolders
+        onlyRestart -= rootRstFiles
 
         # Move restart_0 folders to rst_BAK_*
         for f in restart0Folders:
             # Check the number of rst_BAK_* folders already present
-            curRstBak = list(pathlib.Path(f.parents[0]).glob("**/rst_BAK*"))
+            curRstBak = list(pathlib.Path(f.parents[0]).glob("rst_BAK*"))
+            curRstBak = [e for e in curRstBak if e.is_dir()]
             newRstBakFolder =\
                 f.parents[0].joinpath("rst_BAK_{}".format(len(curRstBak)))
             os.makedirs(str(newRstBakFolder))
-            shutil.move(str(f), str(newRstBakFolder))
+            f.rename(newRstBakFolder)
 
         return onlyRestart
     #}}}
@@ -640,6 +644,7 @@ class ScanDriver(object):
 
         * The simulations are performed in reverse order
         * The simulations are performed without dependencies
+        * The dmpFoldersDict is not updated
         """
 
         print(("Found the following folders with *.restart.* files"
@@ -648,35 +653,48 @@ class ScanDriver(object):
             print("   * {}".format(f))
         print("\n'runScan' called with 'checkForEmptyRestarts', rerun "\
               "the driver in order to fix 'dmpFoldersDict.pickle'")
-# FIXME: Test me
-        import pdb; pdb.set_trace()
-# FIXME: Test me
         if self.runTurb:
             # Move the root restart files to root_rst_files
-            turboRoot = [e for e in self._emptyRestarts if \
+            turboRoots = [e for e in self._emptyRestarts if \
                          "turbulentPhase1" in str(e)]
-            self._moveRootRestart(turboRoot)
-            # Run the simulation
-            self._linear_PBS_ids = None
-            self._callTurboRunner()
+            if len(turboRoots) != 0:
+                self._moveRootRestart(turboRoot)
+                self._linear_PBS_ids = None
+                # Run the simulation
+                self._callTurboRunner()
         if self.runLin:
-            linearRoot = [e for e in self._emptyRestarts if \
+            linearRoots = [e for e in self._emptyRestarts if \
                           "linearPhase1" in str(e)]
-            self._moveRootRestart(linearRoot)
-# FIXME: In reverse order: move the root restart files to own folder.
-#        This must NOT be called restart as this will be searched for,
-#        call it rather root_rst_files
-            self._expand_PBS_ids = None
-            self._callLinearRunner()
+            if len(linearRoots) != 0:
+# FIXME
+                import pdb; pdb.set_trace()
+                # Set expand_dmp_folders (used in _callLinearRunner)
+                # FIND THE TIME FOR EXPAND
+# FIXME: YOU ARE HERE: GUESS THE EXPAND, YOU CAN ASSUME THAT IT RESIDES
+# IN THE PROJECT FOLDER, CHECK THE OPTIONS IN THE NAME
+# DIFF THE PATH NAME, ONLY SCAN SHOULD VARY
+# THROW ERROR IF DIFFERENT SWITCHES ARE FOUND
+                self._expand_dmp_folders = tuple()
+                a = 'CSDXMagFieldScanAr/nout_2_timestep_25/nz_256/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0'
+                print(linearRoots)
+# FIXME
+                self._moveRootRestart(linearRoots)
+                self._expand_PBS_ids = None
+                self._callLinearRunner()
         if self.runExpand:
-            expandRoot = [e for e in self._emptyRestarts if \
+            expandRoots = [e for e in self._emptyRestarts if \
                           "expand" in str(e)]
-            self._moveRootRestart(expandRoot)
-            self._init_PBS_ids = None
-            self._callExpandRunner()
+            if len(expandRoots) != 0:
+                self._moveRootRestart(expandRoots)
+                self._init_PBS_ids = None
+                self._callExpandRunner()
+
+
 # FIXME: Need own logic here
 # FIXME: Question? Would need own logic on init run, or all subsequent
 #        runs?
+# FIXME: Fails as no self._turbo_dmp_folders
+        import pdb; pdb.set_trace()
         if self._restartTurb is not None:
             # NOTE: dmpFolders are treated internally in this function
             self._callExtraTurboRunner()
@@ -704,23 +722,27 @@ class ScanDriver(object):
     #}}}
 
     #{{{_moveRootRestart
-    def _moveRootRestart(rootFolder):
+    def _moveRootRestart(self, rootFolders):
         """
         Moves the restart files in a root folder to root_rst_files
 
         Parameters
         ----------
-        rootFolder : list
-            List containing the folder to move the *.restart.* files feom
+        rootFolders : list
+            List containing the folders to move the *.restart.* files from
         """
 
-        import pdb; pdb.set_trace()
-    # FIXME: Verify that more than just the root folder...actually. This is
-    #        just the root folder. Should probably glob for *restart*-files
-        rootFolder = rootFolder[0] if len(rootFolder) != 0 else None
-        rootRstFolder = rootFolder.parents[0].joinpath("root_rst_files")
-        os.makedirs(str(newRstBakFolder))
-        shutil.move(str(f), str(newRstBakFolder))
+        for root in rootFolders:
+            # Find all files
+            content = root.glob("*")
+            files = tuple(e for e in content if e.is_file())
+
+            # Create new folder
+            rootRstFolder = root.joinpath("root_rst_files")
+            os.makedirs(str(rootRstFolder))
+
+            for f in files:
+                shutil.move(str(f), str(rootRstFolder))
     #}}}
 
     #{{{_pickleDmpFoldersDict
@@ -854,6 +876,7 @@ class ScanDriver(object):
 
         try:
             # From previous outputs
+            import pdb; pdb.set_trace()
             self._expandAScanPath = self._expand_dmp_folders[0]
         except AttributeError as er:
             if "has no attribute" in er.args[0]:
