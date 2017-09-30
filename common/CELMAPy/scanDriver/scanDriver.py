@@ -460,34 +460,8 @@ class ScanDriver(object):
             message = "self.setMainOptions must be called prior to a run"
             raise ValueError(message)
 
-        keysToBeCalled = []
-
-        for key, val in self._calledFunctions.items():
-            if val is not(None):
-                if val:
-                    print("{:<25} has been called".format(key))
-                else:
-                    keysToBeCalled.append(key)
-                    print("{:<25} has NOT been called (using defaults)".\
-                          format(key))
-
-        # Set default runner options if not set
-        for key in keysToBeCalled:
-            # Call the function from their names
-            getattr(self, "set{}".format(key[0].upper()+key[1:]))()
-
-        if self._runner == basic_runner:
-            # Remove PBS option
-            members = tuple(member for member in dir(self) if "PBS" in member)
-            for member in members:
-                setattr(self, member, {})
-
-        # Make dictionary to variables
-        for (flag, value) in self._runOptions.items():
-            setattr(self, flag, value)
-
-        # Update dicts
-        self._commonRunnerOptions["directory"] = self._directory
+        # Set default options for unset values
+        self._setNotCalledToDefault()
 
         # Check that no troubles running with restart from
         if self._restartFrom is not None:
@@ -517,73 +491,82 @@ class ScanDriver(object):
 
         self._restart = "overwrite"
 
-        if checkForEmptyRestarts:
+        if not checkForEmptyRestarts:
+            self._normalRun()
+        else:
             self._emptyRestarts = self._searchForEmptyRestarts()
 
             if len(self._emptyRestarts) != 0:
-                print("'runScan' called with 'checkForEmptyRestarts', rerun "\
-                      "the driver in order to fix 'dmpFoldersDict.pickle'")
-# FIXME: Test me
-                import pdb; pdb.set_trace()
-# FIXME: Test me
-                if self.runTurb:
-                    # Move the root restart files to root_rst_files
-                    turboRoot = [e for e in self._emptyRestarts if \
-                                 "turbulentPhase1" in str(e)]
-                    self._moveRootRestart(turboRoot)
-                    # Run the simulation
-                    self._linear_PBS_ids = None
-                    self._callTurboRunner()
-                if self.runLin:
-                    linearRoot = [e for e in self._emptyRestarts if \
-                                  "linearPhase1" in str(e)]
-                    self._moveRootRestart(linearRoot)
-# FIXME: In reverse order: move the root restart files to own folder.
-#        This must NOT be called restart as this will be searched for,
-#        call it rather root_rst_files
-                    self._expand_PBS_ids = None
-                    self._callLinearRunner()
-                if self.runExpand:
-                    expandRoot = [e for e in self._emptyRestarts if \
-                                  "expand" in str(e)]
-                    self._moveRootRestart(expandRoot)
-                    self._init_PBS_ids = None
-                    self._callExpandRunner()
+                self._runOnlyFromRestart()
+    #}}}
 
+    #{{{_setNotCalledToDefault
+    def _setNotCalledToDefault(self):
+        """
+        Sets non-called options to default values.
 
+        Will also print the status of the options.
+        """
 
+        keysToBeCalled = []
 
+        for key, val in self._calledFunctions.items():
+            if val is not(None):
+                if val:
+                    print("{:<25} has been called".format(key))
+                else:
+                    keysToBeCalled.append(key)
+                    print("{:<25} has NOT been called (using defaults)".\
+                          format(key))
 
+        # Set default runner options if not set
+        for key in keysToBeCalled:
+            # Call the function from their names
+            getattr(self, "set{}".format(key[0].upper()+key[1:]))()
 
+        if self._runner == basic_runner:
+            # Remove PBS option
+            members = tuple(member for member in dir(self) if "PBS" in member)
+            for member in members:
+                setattr(self, member, {})
 
+        # Make dictionary to variables
+        for (flag, value) in self._runOptions.items():
+            setattr(self, flag, value)
 
-# FIXME: Need own logic here
-# FIXME: Question? Would need own logic on init run, or all subsequent
-#        runs?
-                if self._restartTurb is not None:
-                    # NOTE: dmpFolders are treated internally in this function
-                    self._callExtraTurboRunner()
-        else:
-            if self.runExpand:
-                self._callExpandRunner()
-                # Load the dmpFolders pickle, update it and save it
-                dmpFoldersDict = self._getDmpFolderDict()
-                dmpFoldersDict["expand"] = self._expand_dmp_folders
-                self._pickleDmpFoldersDict(dmpFoldersDict)
+        # Update dicts
+        self._commonRunnerOptions["directory"] = self._directory
+    #}}}
 
-            if self.runLin:
-                self._callLinearRunner()
-                # Load the dmpFolders pickle, update it and save it
-                dmpFoldersDict = self._getDmpFolderDict()
-                dmpFoldersDict["linear"] = self._linear_dmp_folders
-                self._pickleDmpFoldersDict(dmpFoldersDict)
+    #{{{_normalRun
+    def _normalRun(self):
+        """
+        Normal run procedure (as opposed to _runOnlyFromRestart)
 
-            if self.runTurb:
-                self._callTurboRunner()
-                # Load the dmpFolders pickle, update it and save it
-                dmpFoldersDict = self._getDmpFolderDict()
-                dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
-                self._pickleDmpFoldersDict(dmpFoldersDict)
+        * The simulations are performed in chronological order
+        * The simulations are performed with dependencies
+        """
+
+        if self.runExpand:
+            self._callExpandRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["expand"] = self._expand_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
+
+        if self.runLin:
+            self._callLinearRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["linear"] = self._linear_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
+
+        if self.runTurb:
+            self._callTurboRunner()
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
+            self._pickleDmpFoldersDict(dmpFoldersDict)
 # FIXME: END
 
 
@@ -638,6 +621,51 @@ class ScanDriver(object):
             shutil.move(str(f), str(newRstBakFolder))
 
         return onlyRestart
+    #}}}
+
+    #{{{_runOnlyFromRestart
+    def _runOnlyFromRestart(self):
+        """
+        Run procedure which runs from 'empty restart' (as opposed to _normalRun)
+
+        * The simulations are performed in reverse order
+        * The simulations are performed without dependencies
+        """
+
+        print("'runScan' called with 'checkForEmptyRestarts', rerun "\
+              "the driver in order to fix 'dmpFoldersDict.pickle'")
+# FIXME: Test me
+        import pdb; pdb.set_trace()
+# FIXME: Test me
+        if self.runTurb:
+            # Move the root restart files to root_rst_files
+            turboRoot = [e for e in self._emptyRestarts if \
+                         "turbulentPhase1" in str(e)]
+            self._moveRootRestart(turboRoot)
+            # Run the simulation
+            self._linear_PBS_ids = None
+            self._callTurboRunner()
+        if self.runLin:
+            linearRoot = [e for e in self._emptyRestarts if \
+                          "linearPhase1" in str(e)]
+            self._moveRootRestart(linearRoot)
+# FIXME: In reverse order: move the root restart files to own folder.
+#        This must NOT be called restart as this will be searched for,
+#        call it rather root_rst_files
+            self._expand_PBS_ids = None
+            self._callLinearRunner()
+        if self.runExpand:
+            expandRoot = [e for e in self._emptyRestarts if \
+                          "expand" in str(e)]
+            self._moveRootRestart(expandRoot)
+            self._init_PBS_ids = None
+            self._callExpandRunner()
+# FIXME: Need own logic here
+# FIXME: Question? Would need own logic on init run, or all subsequent
+#        runs?
+        if self._restartTurb is not None:
+            # NOTE: dmpFolders are treated internally in this function
+            self._callExtraTurboRunner()
     #}}}
 
     #{{{_getDmpFolderDict
