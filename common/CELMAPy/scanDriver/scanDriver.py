@@ -482,6 +482,12 @@ class ScanDriver(object):
                 os.path.join(self._directory, "dmpFoldersDict.pickle")
 
         # Call the runners
+# FIXME: DELME
+        print("HOHOH")
+        print("HOHOH")
+        print("HOHOH")
+        print("HOHOH")
+# FIXME: DELME
         if self.runInit:
             self._callInitRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -491,13 +497,16 @@ class ScanDriver(object):
 
         self._restart = "overwrite"
 
-        if not checkForEmptyRestarts:
+        # Find the empty restarts, set to "set()" if switched off
+        if checkForEmptyRestarts:
+            self._emptyRestarts = self._searchForEmptyRestarts()
+        else:
+            self._emptyRestarts = set()
+
+        if len(self._emptyRestarts) == 0:
             self._normalRun()
         else:
-            self._emptyRestarts = self._searchForEmptyRestarts()
-
-            if len(self._emptyRestarts) != 0:
-                self._runOnlyFromRestart()
+            self._runOnlyFromRestart()
     #}}}
 
     #{{{_setNotCalledToDefault
@@ -632,7 +641,11 @@ class ScanDriver(object):
         * The simulations are performed without dependencies
         """
 
-        print("'runScan' called with 'checkForEmptyRestarts', rerun "\
+        print(("Found the following folders with *.restart.* files"
+               " without *.dmp.* files:"))
+        for f in self._emptyRestarts:
+            print("   * {}".format(f))
+        print("\n'runScan' called with 'checkForEmptyRestarts', rerun "\
               "the driver in order to fix 'dmpFoldersDict.pickle'")
 # FIXME: Test me
         import pdb; pdb.set_trace()
@@ -988,57 +1001,12 @@ class ScanDriver(object):
                         )
 
         # Check if runs have already been performed
-        # Number of restart folders = nrf
-        nrf = []
-        # Placeholder for the dmp folders
-        extraTrubulenceRuns = []
-        for turboDmp in self._turbo_dmp_folders:
-            # Find the folders
-            folders = tuple(folder for folder in os.listdir(turboDmp) if
-                            os.path.isdir(os.path.join(turboDmp, folder)))
-            # NOTE: bout_runners is making a restart 0 folder for
-            #       copied restart files, as a hack, the 0th restart
-            #       folder is excluded
+        restartNumber = _getNumberOfPerformedRestarts()
 
-            # Remove un-needed folders
-            folders = tuple(folder for folder in folders if\
-                            ("restart" in folder) and (folder != "restart_0"))
-
-            # Sort
-            # http://stackoverflow.com/questions/4836710/does-python-have-a-built-in-function-for-string-natural-sort
-            # NOTE: The lambda function returns a tuple for each element
-            #       The sorting is made from the first element in the
-            #       tuple
-            #       If the first element is equal, then the sorting
-            #       happens for in the next element, and so on.
-            digit   = re.compile(r"(\d+)")
-            folders =\
-                sorted(folders,\
-                    key=lambda el: [int(s) if s.isdigit() else s.lower()\
-                        for s in re.split(digit, el)])
-
-            extraTrubulenceRuns.append(\
-                   tuple(os.path.join(turboDmp, folder) for folder in folders))
-
-            nrf.append(len(folders))
-
-        # Load the dmpFolders pickle, update it and save it
-        dmpFoldersDict = self._getDmpFolderDict()
-        dmpFoldersDict["extraTurbulence"] = tuple(extraTrubulenceRuns)
-        self._pickleDmpFoldersDict(dmpFoldersDict)
-
-        if nrf.count(nrf[0]) != len(nrf):
-            message = ("The dmp folders did not have an equal number of "
-                       "restarts. The restart counter remains ambigous. "
-                       "Fix by manually restarting missing restart "
-                       "simulations.")
-            raise RuntimeError(message)
-
-# FIXME: Next step: Find out what self._restartTurb and nrf is
         # Update the restart number
-        self._restartTurb -= nrf[0]
+        additionalRestartsNeeded = self._restartTurb - restartNumber
 
-        for nr in range(self._restartTurb):
+        for nr in range(additionalRestartsNeeded):
 # FIXME: Actually: Maybe the best would be to crawl through the folders,
 # and check for folders with only restart (no dmp), can read from those
 # if linear, turb or similar
@@ -1051,7 +1019,7 @@ class ScanDriver(object):
 # TODO: Up an including linear: Only extra logic needed: reverse order
 
 
-# NOTE: Hypothesis: nrf could be 0 or neg, in that case, no new run
+# NOTE: Hypothesis: numberOfRestartFolders could be 0 or neg, in that case, no new run
 #       would be performed, must be checked
 
 # NOTE: nr will start on 0, will refer to restart_0? check
@@ -1085,5 +1053,68 @@ class ScanDriver(object):
             dmpFoldersDict["extraTurbulence"] =\
                 tuple(dmpFoldersDict["extraTurbulence"])
             self._pickleDmpFoldersDict(dmpFoldersDict)
+    #}}}
+
+    #{{{_getNumberOfPerformedRestarts
+    def _getNumberOfPerformedRestarts(self):
+        """
+        Will return the number of performed restarts.
+
+        Also checks that the scans has an equal amount of restarts
+
+        Returns
+        -------
+        restartNumber : int
+            The number of already performed restarts.
+        """
+
+        numberOfRestartFolders = []
+        # Placeholder for the dmp folders
+        extraTrubulenceRuns = []
+        for turboDmp in self._turbo_dmp_folders:
+            # Find the folders
+            folders = tuple(folder for folder in os.listdir(turboDmp) if
+                            os.path.isdir(os.path.join(turboDmp, folder)))
+            # NOTE: bout_runners is making a restart 0 folder for
+            #       copied restart files, as a hack, the 0th restart
+            #       folder is excluded
+
+            # Remove un-needed folders
+            folders = tuple(folder for folder in folders if\
+                            ("restart" in folder) and (folder != "restart_0"))
+
+            # Sort
+            # http://stackoverflow.com/questions/4836710/does-python-have-a-built-in-function-for-string-natural-sort
+            # NOTE: The lambda function returns a tuple for each element
+            #       The sorting is made from the first element in the
+            #       tuple
+            #       If the first element is equal, then the sorting
+            #       happens for in the next element, and so on.
+            digit   = re.compile(r"(\d+)")
+            folders =\
+                sorted(folders,\
+                    key=lambda el: [int(s) if s.isdigit() else s.lower()\
+                        for s in re.split(digit, el)])
+
+            extraTrubulenceRuns.append(\
+                   tuple(os.path.join(turboDmp, folder) for folder in folders))
+
+            numberOfRestartFolders.append(len(folders))
+
+        # Load the dmpFolders pickle, update it and save it
+        dmpFoldersDict = self._getDmpFolderDict()
+        dmpFoldersDict["extraTurbulence"] = tuple(extraTrubulenceRuns)
+        self._pickleDmpFoldersDict(dmpFoldersDict)
+
+        if numberOfRestartFolders.count(numberOfRestartFolders[0]) != len(numberOfRestartFolders):
+            message = ("The dmp folders did not have an equal number of "
+                       "restarts. The restart counter remains ambigous. "
+                       "Fix by manually restarting missing restart "
+                       "simulations.")
+            raise RuntimeError(message)
+
+        restartNumber = numberOfRestartFolders[0]
+
+        return restartNumber
     #}}}
 #}}}
