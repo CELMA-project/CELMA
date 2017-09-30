@@ -523,20 +523,20 @@ class ScanDriver(object):
             if len(self._emptyRestarts) != 0:
                 print("'runScan' called with 'checkForEmptyRestarts', rerun "\
                       "the driver in order to fix 'dmpFoldersDict.pickle'")
-
-
+# FIXME: Test me
+                import pdb; pdb.set_trace()
 # FIXME: Test me
                 if self.runTurb:
                     # Move the root restart files to root_rst_files
                     turboRoot = [e for e in self._emptyRestarts if \
-                                 "turbulentPhase1" in e]
+                                 "turbulentPhase1" in str(e)]
                     self._moveRootRestart(turboRoot)
                     # Run the simulation
                     self._linear_PBS_ids = None
                     self._callTurboRunner()
                 if self.runLin:
                     linearRoot = [e for e in self._emptyRestarts if \
-                                  "linearPhase1" in e]
+                                  "linearPhase1" in str(e)]
                     self._moveRootRestart(linearRoot)
 # FIXME: In reverse order: move the root restart files to own folder.
 #        This must NOT be called restart as this will be searched for,
@@ -550,54 +550,40 @@ class ScanDriver(object):
                     self._init_PBS_ids = None
                     self._callExpandRunner()
 
+
+
+
+
+
+
+
 # FIXME: Need own logic here
+# FIXME: Question? Would need own logic on init run, or all subsequent
+#        runs?
                 if self._restartTurb is not None:
                     # NOTE: dmpFolders are treated internally in this function
                     self._callExtraTurboRunner()
+        else:
+            if self.runExpand:
+                self._callExpandRunner()
+                # Load the dmpFolders pickle, update it and save it
+                dmpFoldersDict = self._getDmpFolderDict()
+                dmpFoldersDict["expand"] = self._expand_dmp_folders
+                self._pickleDmpFoldersDict(dmpFoldersDict)
 
+            if self.runLin:
+                self._callLinearRunner()
+                # Load the dmpFolders pickle, update it and save it
+                dmpFoldersDict = self._getDmpFolderDict()
+                dmpFoldersDict["linear"] = self._linear_dmp_folders
+                self._pickleDmpFoldersDict(dmpFoldersDict)
 
-#{{{_moveRootRestart
-def _moveRootRestart(rootFolder):
-    """
-    Moves the restart files in a root folder to root_rst_files
-
-    Parameters
-    ----------
-    rootFolder : list
-        List containing the folder to move the *.restart.* files feom
-    """
-
-    import pdb; pdb.set_trace()
-# FIXME: Verify that more than just the root folder...actually. This is
-#        just the root folder. Should probably glob for *restart*-files
-    rootFolder = rootFolder[0] if len(rootFolder) != 0 else None
-    rootRstFolder = rootFolder.parents[0].joinpath("root_rst_files")
-    os.makedirs(str(newRstBakFolder))
-    shutil.move(str(f), str(newRstBakFolder))
-#}}}
-
-
-
-        if self.runExpand:
-            self._callExpandRunner()
-            # Load the dmpFolders pickle, update it and save it
-            dmpFoldersDict = self._getDmpFolderDict()
-            dmpFoldersDict["expand"] = self._expand_dmp_folders
-            self._pickleDmpFoldersDict(dmpFoldersDict)
-
-        if self.runLin:
-            self._callLinearRunner()
-            # Load the dmpFolders pickle, update it and save it
-            dmpFoldersDict = self._getDmpFolderDict()
-            dmpFoldersDict["linear"] = self._linear_dmp_folders
-            self._pickleDmpFoldersDict(dmpFoldersDict)
-
-        if self.runTurb:
-            self._callTurboRunner()
-            # Load the dmpFolders pickle, update it and save it
-            dmpFoldersDict = self._getDmpFolderDict()
-            dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
-            self._pickleDmpFoldersDict(dmpFoldersDict)
+            if self.runTurb:
+                self._callTurboRunner()
+                # Load the dmpFolders pickle, update it and save it
+                dmpFoldersDict = self._getDmpFolderDict()
+                dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
+                self._pickleDmpFoldersDict(dmpFoldersDict)
 # FIXME: END
 
 
@@ -673,6 +659,26 @@ def _moveRootRestart(rootFolder):
                              }
 
         return dmpFoldersDict
+    #}}}
+
+    #{{{_moveRootRestart
+    def _moveRootRestart(rootFolder):
+        """
+        Moves the restart files in a root folder to root_rst_files
+
+        Parameters
+        ----------
+        rootFolder : list
+            List containing the folder to move the *.restart.* files feom
+        """
+
+        import pdb; pdb.set_trace()
+    # FIXME: Verify that more than just the root folder...actually. This is
+    #        just the root folder. Should probably glob for *restart*-files
+        rootFolder = rootFolder[0] if len(rootFolder) != 0 else None
+        rootRstFolder = rootFolder.parents[0].joinpath("root_rst_files")
+        os.makedirs(str(newRstBakFolder))
+        shutil.move(str(f), str(newRstBakFolder))
     #}}}
 
     #{{{_pickleDmpFoldersDict
