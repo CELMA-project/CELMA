@@ -482,12 +482,6 @@ class ScanDriver(object):
                 os.path.join(self._directory, "dmpFoldersDict.pickle")
 
         # Call the runners
-# FIXME: DELME
-        print("HOHOH")
-        print("HOHOH")
-        print("HOHOH")
-        print("HOHOH")
-# FIXME: DELME
         if self.runInit:
             self._callInitRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -503,6 +497,13 @@ class ScanDriver(object):
         else:
             self._emptyRestarts = set()
 
+        # YOU ARE HERE:
+        # TESTS: - One emptyRestart in expand
+        #        - Two in lin
+        #        - One expand, one lin
+        #        - Just turb
+        #        - The whole range [with one restart] (one)
+        #        - One of the restarts missing (with 2 restarts)
         if len(self._emptyRestarts) == 0:
             self._normalRun()
         else:
@@ -1001,7 +1002,7 @@ class ScanDriver(object):
                         )
 
         # Check if runs have already been performed
-        restartNumber = _getNumberOfPerformedRestarts()
+        restartNumber = self._getNumberOfPerformedRestarts()
 
         # Update the restart number
         additionalRestartsNeeded = self._restartTurb - restartNumber
