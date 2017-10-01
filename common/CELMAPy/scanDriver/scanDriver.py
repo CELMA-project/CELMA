@@ -5,7 +5,7 @@ Contains the restartFromFunc and ScanDriver
 """
 
 from bout_runners import basic_runner, PBS_runner
-import inspect, os, pickle, re, pathlib, shutil
+import inspect, os, pickle, re, pathlib, shutil, difflib
 
 # NOTE: Smells of code duplication in the "call" functions
 
@@ -507,6 +507,8 @@ class ScanDriver(object):
         if len(self._emptyRestarts) == 0:
             self._normalRun()
         else:
+            # Find the project root
+            self._projectRoot = list(list(self._emptyRestarts)[0].parents)[-2]
             self._runOnlyFromRestart()
     #}}}
 
@@ -658,6 +660,7 @@ class ScanDriver(object):
             turboRoots = [e for e in self._emptyRestarts if \
                          "turbulentPhase1" in str(e)]
             if len(turboRoots) != 0:
+                self._linear_dmp_folders = self._findPreviousFolders("linear")
                 self._moveRootRestart(turboRoot)
                 self._linear_PBS_ids = None
                 # Run the simulation
@@ -666,18 +669,7 @@ class ScanDriver(object):
             linearRoots = [e for e in self._emptyRestarts if \
                           "linearPhase1" in str(e)]
             if len(linearRoots) != 0:
-# FIXME
-                import pdb; pdb.set_trace()
-                # Set expand_dmp_folders (used in _callLinearRunner)
-                # FIND THE TIME FOR EXPAND
-# FIXME: YOU ARE HERE: GUESS THE EXPAND, YOU CAN ASSUME THAT IT RESIDES
-# IN THE PROJECT FOLDER, CHECK THE OPTIONS IN THE NAME
-# DIFF THE PATH NAME, ONLY SCAN SHOULD VARY
-# THROW ERROR IF DIFFERENT SWITCHES ARE FOUND
-                self._expand_dmp_folders = tuple()
-                a = 'CSDXMagFieldScanAr/nout_2_timestep_25/nz_256/geom_Lx_7.8633_geom_Ly_275.2144_input_B0_0.1_ownFilters_type_none_switch_useHyperViscAzVortD_False_tag_CSDXMagFieldScanAr-1-expand_0'
-                print(linearRoots)
-# FIXME
+                self._expand_dmp_folders = self._findPreviousFolders("expand")
                 self._moveRootRestart(linearRoots)
                 self._expand_PBS_ids = None
                 self._callLinearRunner()
@@ -685,10 +677,10 @@ class ScanDriver(object):
             expandRoots = [e for e in self._emptyRestarts if \
                           "expand" in str(e)]
             if len(expandRoots) != 0:
+                # self._init_dmp_folders found in runScan
                 self._moveRootRestart(expandRoots)
                 self._init_PBS_ids = None
                 self._callExpandRunner()
-
 
 # FIXME: Need own logic here
 # FIXME: Question? Would need own logic on init run, or all subsequent
@@ -753,6 +745,87 @@ class ScanDriver(object):
 
         with open(self._dmpFoldersDictPath, "wb") as f:
             pickle.dump(dmpFoldersDict, f)
+    #}}}
+
+    #{{{_findPreviousFolders
+    def _findPreviousFolders(self, folderName):
+        """
+        Finds the dmp folders from where we are restarting from
+
+        Parameters
+        ----------
+        folderName : str
+            Folder name to search for, like for example 'expand'
+
+        Returns
+        -------
+        previousFolders : tuple
+            Tuple of the previous dmp folders
+        """
+        # Search for all different "expand" folders
+        expandFolders = tuple(projectRoot.glob("**/*expand*/*"))
+        expandFolders = tuple(set(e.parents[0] for e in expandFolders))
+        # Ensure that only scanParameter is changing
+        for ef in expandFolders:
+            self._checkOnlyScanParametersVaries(str(expandFolders[0]), str(ef))
+
+        previousFolders = tuple(str(e) for e in expandFolders)
+
+        return previousFolders
+    #}}}
+
+    #{{{_checkOnlyScanParametersVaries
+    def _checkOnlyScanParametersVaries(self, a, b):
+        """
+        Asserts that only the scan parameter varies in a folder.
+
+        Throws an error if other elements, such as switches varies.
+
+        Parameters
+        ----------
+        a : str
+            One of the paths to be compared
+        b : str
+            The other path to be compared
+        """
+
+        # Find the difference between two strings
+        # a = "foo_bar" b = "foo_baz" => ['  f  o  o  ', '  b  a- r+ z']
+        # https://stackoverflow.com/questions/17904097/python-difference-between-two-strings
+        splittedText = "".join(difflib.ndiff(a, b)).split("_")
+        # Make a diff-like split of the elements (nested list comprehension)
+        # => (('  f', '  o', '  o', '  '), ('  b', '  a', '- r', '+ z'))
+        # https://stackoverflow.com/questions/9475241/split-string-every-nth-character
+        chunkedComparison = tuple(tuple(e[i:i+3] for i in range(0, len(e), 3))\
+                                  for e in splittedText)
+
+        onlyDiffs = []
+        for e in chunkedComparison:
+            # If there is no difference, combine the subelement
+            # => "foo"
+            # else, keep to subelement
+            # ('  b', '  a', '- r', '+ z')
+            if all(char[0] == " " for char in e):
+                onlyDiffs.append("".join(e).replace(" ", ""))
+            else:
+                onlyDiffs.append(e)
+
+        # If there is a diff, and the previous element was not in scanParameters
+        # success will be false
+        success = True
+        for i in range(len(onlyDiffs)):
+        if type(onlyDiffs[i]) is not str:
+          if i == 0:
+              success = False
+          if onlyDiffs[i-1] not in self._scanParameters:
+              success = False
+
+        if not success:
+            message =\
+                ("Could not run in empty restart mode as folders belonging to"
+                "different scans were found in the same folder, for example"
+                "\n{}and\n{}").format(a, b)
+            raise RuntimeError(message)
     #}}}
 
     #{{{_callInitRunner
