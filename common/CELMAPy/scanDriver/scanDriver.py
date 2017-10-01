@@ -661,7 +661,7 @@ class ScanDriver(object):
                          "turbulentPhase1" in str(e)]
             if len(turboRoots) != 0:
                 self._linear_dmp_folders = self._findPreviousFolders("linear")
-                self._moveRootRestart(turboRoot)
+                self._moveRootRestart(turboRoots)
                 self._linear_PBS_ids = None
                 # Run the simulation
                 self._callTurboRunner()
@@ -763,7 +763,7 @@ class ScanDriver(object):
             Tuple of the previous dmp folders
         """
         # Search for all different "expand" folders
-        expandFolders = tuple(projectRoot.glob("**/*expand*/*"))
+        expandFolders = tuple(self._projectRoot.glob("**/*expand*/*"))
         expandFolders = tuple(set(e.parents[0] for e in expandFolders))
         # Ensure that only scanParameter is changing
         for ef in expandFolders:
@@ -814,11 +814,11 @@ class ScanDriver(object):
         # success will be false
         success = True
         for i in range(len(onlyDiffs)):
-        if type(onlyDiffs[i]) is not str:
-          if i == 0:
-              success = False
-          if onlyDiffs[i-1] not in self._scanParameters:
-              success = False
+            if type(onlyDiffs[i]) is not str:
+                if i == 0:
+                    success = False
+                if onlyDiffs[i-1] not in self._scanParameters:
+                    success = False
 
         if not success:
             message =\
