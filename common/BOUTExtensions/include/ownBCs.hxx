@@ -42,8 +42,8 @@ private:
    * input, and returns the function evaluated in the given point in
    * time-space
    */
-  FieldGenerator *aBndryFuncGen;
-  FieldGenerator *bBndryFuncGen;
+  std::shared_ptr<FieldGenerator> aBndryFuncGen;
+  std::shared_ptr<FieldGenerator> bBndryFuncGen;
   /**@}*/
   BoutReal a; //!< The current a value
   BoutReal b; //!< The current b value
