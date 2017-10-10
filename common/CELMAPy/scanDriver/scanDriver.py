@@ -887,7 +887,7 @@ class ScanDriver(object):
         self._restartTurb -= nrf[0]
 
         # Set the dependencies
-        job_dependencies = self._turbo_PBS_ids.copy()
+        job_dependencies = self._turbo_PBS_ids
         for nr in range(self._restartTurb):
             # NOTE: The for-loop is reusing the created self._turboRun
             #       object. This means that the self._PBS_id of
@@ -907,7 +907,7 @@ class ScanDriver(object):
                     scanParameters = self._scanParameters ,\
                                             )
             # Reset the dependencies
-            job_dependencies = self._turbo_PBS_ids.copy()
+            job_dependencies = self._turbo_PBS_ids
 
             # Load the dmpFolders pickle, update it and save it
             dmpFoldersDict = self._getDmpFolderDict()
