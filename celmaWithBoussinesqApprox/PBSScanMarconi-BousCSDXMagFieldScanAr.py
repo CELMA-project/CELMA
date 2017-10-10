@@ -70,4 +70,4 @@ scanB0.setCommonRunnerOptions(\
                              )
 
 # Run
-scanB0.runScan(restartTurb=3, boussinesq = True)
+scanB0.runScan(restartTurb=14, boussinesq = True)

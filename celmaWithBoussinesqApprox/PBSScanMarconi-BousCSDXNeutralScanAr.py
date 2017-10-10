@@ -73,4 +73,4 @@ scanNn.setCommonRunnerOptions(\
                              )
 
 # Run
-scanNn.runScan(restartTurb=3, boussinesq = True)
+scanNn.runScan(restartTurb=14, boussinesq = True)
