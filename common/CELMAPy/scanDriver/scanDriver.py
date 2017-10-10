@@ -845,7 +845,7 @@ class ScanDriver(object):
             # Find the folders
             folders = tuple(folder for folder in os.listdir(turboDmp) if
                             os.path.isdir(os.path.join(turboDmp, folder)))
-            # NOTE: bout_runners are making a restart 0 folder for
+            # NOTE: bout_runners is making a restart 0 folder for
             #       copied restart files, as a hack, the 0th restart
             #       folder is excluded
 
