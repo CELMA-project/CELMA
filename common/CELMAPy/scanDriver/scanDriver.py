@@ -886,16 +886,28 @@ class ScanDriver(object):
         # Update the restart number
         self._restartTurb -= nrf[0]
 
+        # Set the dependencies
+        job_dependencies = self._turbo_PBS_ids.copy()
         for nr in range(self._restartTurb):
+            # NOTE: The for-loop is reusing the created self._turboRun
+            #       object. This means that the self._PBS_id of
+            #       bout_runners is not being reset to [].
+            #       Instead of creating a new object, we will manually
+            #       reset the PBS_ids here.
+            self._turboRun._PBS_id = []
+
+            # Execute the runs
             turbo_dmp_folders, self._turbo_PBS_ids =\
                 self._turboRun.execute_runs(\
                     # Declare dependencies
-                    job_dependencies = self._turbo_PBS_ids,\
+                    job_dependencies = job_dependencies,\
                     # Below are the kwargs given to the
                     # restartFromFunc
                     aScanPath      = self._linearAScanPath,\
                     scanParameters = self._scanParameters ,\
                                             )
+            # Reset the dependencies
+            job_dependencies = self._turbo_PBS_ids.copy()
 
             # Load the dmpFolders pickle, update it and save it
             dmpFoldersDict = self._getDmpFolderDict()
