@@ -510,7 +510,7 @@ class PlotSubmitter(object):
     #{{{runKThetaSpectrum
     def runKThetaSpectrum(self):
         """
-        Runs the magnitude spectrum
+        Runs the k-theta spectrum
         """
 
         loopOver = zip(self._dmpFolders["turbulence"],\
