@@ -24,7 +24,6 @@ from .fields2D import fields2DAnimation
 from .fourierModes import fourierModesPlot
 from .growthRates import growthRatesPlot
 from .energy import energyPlot
-from .growthRates import growthRatesPlot
 from .performance import performancePlot
 from .phaseShift import phaseShiftPlot
 from .posOfFluct import posOfFluctPlot
@@ -505,34 +504,6 @@ class PlotSubmitter(object):
                 )
         self.sub.setJobName("growthRates")
         self.sub.submitFunction(growthRatesPlot, args=args)
-    #}}}
-
-    #{{{runKThetaSpectrum
-    def runKThetaSpectrum(self):
-        """
-        Runs the magnitude spectrum
-        """
-
-        loopOver = zip(self._dmpFolders["turbulence"],\
-                       self._dmpFolders["expand"],\
-                       self._paramKeys,\
-                       self._rangeJobs)
-        for dmp_folders, steadyStatePath, key, nr in loopOver:
-
-            tSlice = self._findSlices(dmp_folders, self._linearTSlices)
-            if tSlice is None:
-                continue
-
-            collectPaths = self._mergeFromLinear[key]
-            dmp_folders   = (dmp_folders,)
-            args = (dmp_folders,\
-                    collectPaths,\
-                    steadyStatePath,\
-                    self._plotSuperKwargs)
-
-            kwargs = {}
-            self.sub.setJobName("kThetaSpectrum{}".format(nr))
-            self.sub.submitFunction(kThetaSpectrumPlot, args=args, kwargs=kwargs)
     #}}}
 
     #{{{runSnapShotsSameScanVal
