@@ -20,7 +20,7 @@ mkdir -p examples
 cd ..
 mkdir -p install
 cd install
-https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_MAJOR_MINOR}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz
+wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_MAJOR_MINOR}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz
 tar -xzvf hdf5-${HDF5_VERSION}.tar.gz
 cd hdf5-${HDF5_VERSION}
 # : is the no-op command
