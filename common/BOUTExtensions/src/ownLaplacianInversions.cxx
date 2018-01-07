@@ -153,7 +153,14 @@ Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
     // Calculate the errors (the true in the end means the max will be
     // taken over all processors)
     EAbsLInf = max(abs(phiCur - phiNext), true);
-    ERelLInf = max(abs((phiCur - phiNext) / phiCur), true);
+    try{
+      ERelLInf = max(abs((phiCur - phiNext) / phiCur), true);
+    } catch (BoutException &e) {
+      output << "!!! WARNING: Division by zero caugth in ERelLInf, setting to "
+             << "rtol + 1."
+             << endl;
+      ERelLInf = rtol + 1;
+    }
 
     if (EAbsLInf > atol) {
       if (ERelLInf > rtol) {
@@ -201,3 +208,4 @@ OwnLaplacianInversions::~OwnLaplacianInversions() {
   delete phiSolver;
 }
 #endif
+
