@@ -14,7 +14,7 @@ from sympy.utilities.lambdify import lambdify
 
 import numpy as np
 
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import MaxNLocator
