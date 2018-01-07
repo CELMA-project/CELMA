@@ -11,6 +11,7 @@ INSTALL_CMAKE="false"    # Needed for sundials if CMAKE is below 2.8.11
 INSTALL_FFMPEG="false"   # Needed for post-processing if x264 is not present
 INCL_SUNDIALS="true"     # The preferred time solver
 INCL_PETSC_SLEPC="false" # Only needed for fancy features
+UPDATE_EXISTING="true"   # Will checkout master and pull if BOUT-dev exsits
 OPTIMIZING="true"        # Good for speed
 DEBUG="false"            # Good for debugging, bad for speed
 # ==============================================================================
@@ -139,8 +140,17 @@ fi
 # ==============================================================================
 echo -e "\n\n\nInstalling BOUT-dev\n\n\n" 1>&3 2>&4
 cd $HOME
-git clone https://github.com/boutproject/BOUT-dev.git
-cd BOUT-dev
+if [ -d "BOUT-dev" ]
+then
+    if [ "$UPDATE_EXISTING" = true ]; then
+        cd BOUT-dev
+        git checkout master
+        git pull
+    fi
+else
+    git clone https://github.com/boutproject/BOUT-dev.git
+    cd BOUT-dev
+fi
 # NOTE: Explicilty state netcdf and hdf5 in order not to mix with anaconda
 ./configure ${EXTRA_FLAGS} ${EXTRA_PACKAGES} --with-netcdf=$HOME/local --with-hdf5=$HOME/local
 make
@@ -177,3 +187,4 @@ fi
 # Nicely terminate the ping output loop
 kill $PING_LOOP_PID
 # ==============================================================================
+
