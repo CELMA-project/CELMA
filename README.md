@@ -2,6 +2,11 @@
 
 [![Build Status](https://travis-ci.org/CELMA-project/CELMA.svg?branch=master)](https://travis-ci.org/CELMA-project/CELMA)
 
+> **NOTE**: This repo is currently undergoing heavy refactorings and 
+enhancements.
+Refer to [releases](https://github.com/CELMA-project/CELMA/releases) for more
+stable code
+
 Repository for the [CELMA](https://celma-project.github.io/) code.
 
 * [Repository structure](#repository-structure)
