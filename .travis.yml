@@ -6,10 +6,13 @@ language: cpp
 compiler: gcc
 
 before_install:
+  - sudo apt-get install -qq cmake gfortran
   - sudo apt-get install -qq mpich libmpich-dev
-  - sudo apt-get install -qq libfftw3-dev libnetcdf-dev libnetcdf-cxx-legacy-dev
-  - sudo apt-get install -qq cmake gfortran ffmpeg
-
+  - sudo apt-get install -qq libfftw3-dev
+  - sudo apt-get install -qq libnetcdf-dev libnetcdf-cxx-legacy-dev libhdf5-serial-dev libhdf4g-dev
+  - sudo apt-get install -qq ffmpeg
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so.10.1.0 /usr/lib/x86_64-linux-gnu/libhdf5.so
+  - sudo ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial_hl.so.10.0.2 /usr/lib/x86_64-linux-gnu/libhdf5_hl.so
 
 install:
   - . ./install/install_conda.sh
