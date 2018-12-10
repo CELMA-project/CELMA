@@ -22,6 +22,7 @@ install:
 # TODO: Make new tests
 script:
   # Check that celma is working
+  - cd $TRAVIS_BUILD_DIR
   - cd celma
 #  - python testScan.py
 #  - python testPostProcessing.py
