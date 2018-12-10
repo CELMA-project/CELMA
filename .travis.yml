@@ -20,9 +20,9 @@ install:
   - bout_install -c $TRAVIS_BUILD_DIR/install/travis_install.ini
 
 # TODO: Make new tests
-#script:
-#  # Check that celma is working
-#  - cd celma
+script:
+  # Check that celma is working
+  - cd celma
 #  - python testScan.py
 #  - python testPostProcessing.py
 #  # Check that celma with the Boussinesq approximation is working
