@@ -435,7 +435,10 @@ class ScanDriver(object):
     #}}}
 
     #{{{runScan
-    def runScan(self, boussinesq=False, restartTurb=None):
+    def runScan(self,\
+                boussinesq=False,\
+                restartTurb=None,\
+                checkForEmptyRestarts=True):
         """
         Calls the drivers used for running scans
 
@@ -445,6 +448,11 @@ class ScanDriver(object):
             Whether or not boussinesq approximation is used
         restartTurb : [None|int]
             Number of times to restart the trubulence runs
+        checkForEmptyRestarts : bool
+            If True, the fuction will search for folders which contains
+            *.restart.*-files without *.dmp.*-files (with exception of
+            the restart_0 folder). The function will start running the
+            simulation of these folders without any queue dependecy.
         """
 
         # Set boussinesq and restart turb
@@ -455,34 +463,8 @@ class ScanDriver(object):
             message = "self.setMainOptions must be called prior to a run"
             raise ValueError(message)
 
-        keysToBeCalled = []
-
-        for key, val in self._calledFunctions.items():
-            if val is not(None):
-                if val:
-                    print("{:<25} has been called".format(key))
-                else:
-                    keysToBeCalled.append(key)
-                    print("{:<25} has NOT been called (using defaults)".\
-                          format(key))
-
-        # Set default runner options if not set
-        for key in keysToBeCalled:
-            # Call the function from their names
-            getattr(self, "set{}".format(key[0].upper()+key[1:]))()
-
-        if self._runner == basic_runner:
-            # Remove PBS option
-            members = tuple(member for member in dir(self) if "PBS" in member)
-            for member in members:
-                setattr(self, member, {})
-
-        # Make dictionary to variables
-        for (flag, value) in self._runOptions.items():
-            setattr(self, flag, value)
-
-        # Update dicts
-        self._commonRunnerOptions["directory"] = self._directory
+        # Set default options for unset values
+        self._setNotCalledToDefault()
 
         # Check that no troubles running with restart from
         if self._restartFrom is not None:
@@ -512,6 +494,75 @@ class ScanDriver(object):
 
         self._restart = "overwrite"
 
+        # Find the empty restarts, set to "set()" if switched off
+        if checkForEmptyRestarts:
+            self._emptyRestarts = self._searchForEmptyRestarts()
+        else:
+            self._emptyRestarts = set()
+
+        # YOU ARE HERE:
+        # TESTS: - One emptyRestart in expand
+        #        - Two in lin
+        #        - One expand, one lin
+        #        - Just turb
+        #        - The whole range [with one restart] (one)
+        #        - One of the restarts missing (with 2 restarts)
+        if len(self._emptyRestarts) == 0:
+            self._normalRun()
+        else:
+            # Find the project root
+            self._projectRoot = list(list(self._emptyRestarts)[0].parents)[-2]
+            self._runOnlyFromRestart()
+    #}}}
+
+    #{{{_setNotCalledToDefault
+    def _setNotCalledToDefault(self):
+        """
+        Sets non-called options to default values.
+
+        Will also print the status of the options.
+        """
+
+        keysToBeCalled = []
+
+        for key, val in self._calledFunctions.items():
+            if val is not(None):
+                if val:
+                    print("{:<25} has been called".format(key))
+                else:
+                    keysToBeCalled.append(key)
+                    print("{:<25} has NOT been called (using defaults)".\
+                          format(key))
+
+        # Set default runner options if not set
+        for key in keysToBeCalled:
+            # Call the function from their names
+            getattr(self, "set{}".format(key[0].upper()+key[1:]))()
+
+        if self._runner == basic_runner:
+            # Remove PBS option
+            members = tuple(member for member in dir(self) if "PBS" in member)
+            for member in members:
+                setattr(self, member, {})
+
+        # Make dictionary to variables
+        for (flag, value) in self._runOptions.items():
+            setattr(self, flag, value)
+
+        # Update dicts
+        self._commonRunnerOptions["directory"] = self._directory
+    #}}}
+
+    #{{{_normalRun
+    def _normalRun(self):
+        """
+        Normal run procedure (as opposed to _runOnlyFromRestart)
+
+        * The simulations are performed in chronological order
+        * The simulations are performed with dependencies
+        * The dmpFoldersDict is updated normally
+        """
+
         if self.runExpand:
             self._callExpandRunner()
             # Load the dmpFolders pickle, update it and save it
@@ -532,7 +583,113 @@ class ScanDriver(object):
             dmpFoldersDict = self._getDmpFolderDict()
             dmpFoldersDict["turbulence"] = self._turbo_dmp_folders
             self._pickleDmpFoldersDict(dmpFoldersDict)
+# FIXME: END
 
+
+# Idea: Could move restart_0 to rst_from_linear and restart files in
+#       root to restart_last_restart_files
+#       In this way: Could start running in the restart folder without
+#       hasle
+# FIXME: Need the self._turbo_dmp_folders in order do run this
+        if self._restartTurb is not None:
+            # NOTE: dmpFolders are treated internally in this function
+            self._callExtraTurboRunner()
+    #}}}
+
+    #{{{_searchForEmptyRestarts
+    def _searchForEmptyRestarts(self):
+        """
+        Searches for folder containing *.restart.* files without *.dmp.* files.
+
+        Also moves restart_0 folders to rst_BAK_*
+
+        Returns
+        -------
+        onlyRestart : set
+            A set of all folders containing *.restart.*, but no *.dmp.* files.
+        """
+
+        restartFiles = list(pathlib.Path(self._directory).glob("**/*.restart.*"))
+        dmpFiles = list(pathlib.Path(self._directory).glob("**/*.dmp.*"))
+
+        # .parents[0] is the directory holding the file
+        # https://stackoverflow.com/questions/35490148/how-to-get-folder-name-in-which-given-file-resides-from-pathlib-path
+        restartFolders = set(f.parents[0] for f in restartFiles)
+        dmpFolders = set(f.parents[0] for f in dmpFiles)
+
+        # Non-symmetric difference
+        # https://stackoverflow.com/questions/3462143/get-difference-between-two-lists
+        onlyRestart = restartFolders - dmpFolders
+
+        # Extraxt restart_0, rst_BAK_* and root_rst_files folders
+        restart0Folders = set(e for e in onlyRestart if "restart_0" in str(e))
+        rstBAKFolders = set(e for e in onlyRestart if "rst_BAK" in str(e))
+        rootRstFiles = set(e for e in onlyRestart if "root_rst_files" in str(e))
+        onlyRestart -= restart0Folders
+        onlyRestart -= rstBAKFolders
+        onlyRestart -= rootRstFiles
+
+        # Move restart_0 folders to rst_BAK_*
+        for f in restart0Folders:
+            # Check the number of rst_BAK_* folders already present
+            curRstBak = list(pathlib.Path(f.parents[0]).glob("rst_BAK*"))
+            curRstBak = [e for e in curRstBak if e.is_dir()]
+            newRstBakFolder =\
+                f.parents[0].joinpath("rst_BAK_{}".format(len(curRstBak)))
+            os.makedirs(str(newRstBakFolder))
+            f.rename(newRstBakFolder)
+
+        return onlyRestart
+    #}}}
+
+    #{{{_runOnlyFromRestart
+    def _runOnlyFromRestart(self):
+        """
+        Run procedure which runs from 'empty restart' (as opposed to _normalRun)
+
+        * The simulations are performed in reverse order
+        * The simulations are performed without dependencies
+        * The dmpFoldersDict is not updated
+        """
+
+        print(("Found the following folders with *.restart.* files"
+               " without *.dmp.* files:"))
+        for f in self._emptyRestarts:
+            print("   * {}".format(f))
+        print("\n'runScan' called with 'checkForEmptyRestarts', rerun "\
+              "the driver in order to fix 'dmpFoldersDict.pickle'")
+        if self.runTurb:
+            # Move the root restart files to root_rst_files
+            turboRoots = [e for e in self._emptyRestarts if \
+                         "turbulentPhase1" in str(e)]
+            if len(turboRoots) != 0:
+                self._linear_dmp_folders = self._findPreviousFolders("linear")
+                self._moveRootRestart(turboRoots)
+                self._linear_PBS_ids = None
+                # Run the simulation
+                self._callTurboRunner()
+        if self.runLin:
+            linearRoots = [e for e in self._emptyRestarts if \
+                          "linearPhase1" in str(e)]
+            if len(linearRoots) != 0:
+                self._expand_dmp_folders = self._findPreviousFolders("expand")
+                self._moveRootRestart(linearRoots)
+                self._expand_PBS_ids = None
+                self._callLinearRunner()
+        if self.runExpand:
+            expandRoots = [e for e in self._emptyRestarts if \
+                          "expand" in str(e)]
+            if len(expandRoots) != 0:
+                # self._init_dmp_folders found in runScan
+                self._moveRootRestart(expandRoots)
+                self._init_PBS_ids = None
+                self._callExpandRunner()
+
+# FIXME: Need own logic here
+# FIXME: Question? Would need own logic on init run, or all subsequent
+#        runs?
+# FIXME: Fails as no self._turbo_dmp_folders
+        import pdb; pdb.set_trace()
         if self._restartTurb is not None:
             # NOTE: dmpFolders are treated internally in this function
             self._callExtraTurboRunner()
@@ -559,6 +716,30 @@ class ScanDriver(object):
         return dmpFoldersDict
     #}}}
 
+    #{{{_moveRootRestart
+    def _moveRootRestart(self, rootFolders):
+        """
+        Moves the restart files in a root folder to root_rst_files
+
+        Parameters
+        ----------
+        rootFolders : list
+            List containing the folders to move the *.restart.* files from
+        """
+
+        for root in rootFolders:
+            # Find all files
+            content = root.glob("*")
+            files = tuple(e for e in content if e.is_file())
+
+            # Create new folder
+            rootRstFolder = root.joinpath("root_rst_files")
+            os.makedirs(str(rootRstFolder))
+
+            for f in files:
+                shutil.move(str(f), str(rootRstFolder))
+    #}}}
+
     #{{{_pickleDmpFoldersDict
     def _pickleDmpFoldersDict(self, dmpFoldersDict):
         """
@@ -567,6 +748,87 @@ class ScanDriver(object):
 
         with open(self._dmpFoldersDictPath, "wb") as f:
             pickle.dump(dmpFoldersDict, f)
+    #}}}
+
+    #{{{_findPreviousFolders
+    def _findPreviousFolders(self, folderName):
+        """
+        Finds the dmp folders from where we are restarting from
+
+        Parameters
+        ----------
+        folderName : str
+            Folder name to search for, like for example 'expand'
+
+        Returns
+        -------
+        previousFolders : tuple
+            Tuple of the previous dmp folders
+        """
+        # Search for all different "expand" folders
+        expandFolders = tuple(self._projectRoot.glob("**/*expand*/*"))
+        expandFolders = tuple(set(e.parents[0] for e in expandFolders))
+        # Ensure that only scanParameter is changing
+        for ef in expandFolders:
+            self._checkOnlyScanParametersVaries(str(expandFolders[0]), str(ef))
+
+        previousFolders = tuple(str(e) for e in expandFolders)
+
+        return previousFolders
+    #}}}
+
+    #{{{_checkOnlyScanParametersVaries
+    def _checkOnlyScanParametersVaries(self, a, b):
+        """
+        Asserts that only the scan parameter varies in a folder.
+
+        Throws an error if other elements, such as switches varies.
+
+        Parameters
+        ----------
+        a : str
+            One of the paths to be compared
+        b : str
+            The other path to be compared
+        """
+
+        # Find the difference between two strings
+        # a = "foo_bar" b = "foo_baz" => ['  f  o  o  ', '  b  a- r+ z']
+        # https://stackoverflow.com/questions/17904097/python-difference-between-two-strings
+        splittedText = "".join(difflib.ndiff(a, b)).split("_")
+        # Make a diff-like split of the elements (nested list comprehension)
+        # => (('  f', '  o', '  o', '  '), ('  b', '  a', '- r', '+ z'))
+        # https://stackoverflow.com/questions/9475241/split-string-every-nth-character
+        chunkedComparison = tuple(tuple(e[i:i+3] for i in range(0, len(e), 3))\
+                                  for e in splittedText)
+
+        onlyDiffs = []
+        for e in chunkedComparison:
+            # If there is no difference, combine the subelement
+            # => "foo"
+            # else, keep to subelement
+            # ('  b', '  a', '- r', '+ z')
+            if all(char[0] == " " for char in e):
+                onlyDiffs.append("".join(e).replace(" ", ""))
+            else:
+                onlyDiffs.append(e)
+
+        # If there is a diff, and the previous element was not in scanParameters
+        # success will be false
+        success = True
+        for i in range(len(onlyDiffs)):
+            if type(onlyDiffs[i]) is not str:
+                if i == 0:
+                    success = False
+                if onlyDiffs[i-1] not in self._scanParameters:
+                    success = False
+
+        if not success:
+            message =\
+                ("Could not run in empty restart mode as folders belonging to"
+                "different scans were found in the same folder, for example"
+                "\n{}and\n{}").format(a, b)
+            raise RuntimeError(message)
     #}}}
 
     #{{{_callInitRunner
@@ -690,6 +952,7 @@ class ScanDriver(object):
 
         try:
             # From previous outputs
+            import pdb; pdb.set_trace()
             self._expandAScanPath = self._expand_dmp_folders[0]
         except AttributeError as er:
             if "has no attribute" in er.args[0]:
@@ -825,6 +1088,7 @@ class ScanDriver(object):
             **self._turbulenceOptions,\
             restart    = "overwrite" ,\
             additional = (
+# FIXME: tag
                 ("tag"   , theRunName , 0        ),\
                 ("switch", "saveTerms", saveTerms),\
                 hyper,\
@@ -836,9 +1100,75 @@ class ScanDriver(object):
             **self._commonRunnerOptions  ,\
                         )
 
-        # Check if runs has already been performed
-        # Number of restart folders = nrf
-        nrf = []
+        # Check if runs have already been performed
+        restartNumber = self._getNumberOfPerformedRestarts()
+
+        # Update the restart number
+        additionalRestartsNeeded = self._restartTurb - restartNumber
+
+        for nr in range(additionalRestartsNeeded):
+# FIXME: Actually: Maybe the best would be to crawl through the folders,
+# and check for folders with only restart (no dmp), can read from those
+# if linear, turb or similar
+# NOT restart_0 folders!
+# !!! In init, expand, linear and turb: restart_0 NOT superfluous!
+# !!! In init, expand and linear: restart files in root ARE superfluous? Well, files are first copied to restart_0
+# ? Will restart start if restart_0 is populated? If so, no extra logic needed (at least not in expand and linear)...but problem if starts the preceding first, and make dependencies from that
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! If root restart files does not exist: will copy from preceding root folder => must run the restart files in reverse!!!
+# Latest turbulence is the latest, usually: Will not need to restart this, as this will append the total amount of runs
+# TODO: Up an including linear: Only extra logic needed: reverse order
+
+
+# NOTE: Hypothesis: numberOfRestartFolders could be 0 or neg, in that case, no new run
+#       would be performed, must be checked
+
+# NOTE: nr will start on 0, will refer to restart_0? check
+# NOTE: Potential problem: dmp_folders are given after the run has been
+#       given...however, do not believe this would be a problem here, as
+#       turbo_dmp_folders are input
+# FIXME: appropriate to add check-logic here?
+#        NOTE: calling bout_runners, but created above
+            turbo_dmp_folders, self._turbo_PBS_ids =\
+                self._turboRun.execute_runs(\
+                    # Declare dependencies
+                    job_dependencies = self._turbo_PBS_ids,\
+                    # Below are the kwargs given to the
+                    # restartFromFunc through bout_runners
+                    aScanPath      = self._linearAScanPath,\
+                    scanParameters = self._scanParameters ,\
+                                            )
+
+            # Load the dmpFolders pickle, update it and save it
+            dmpFoldersDict = self._getDmpFolderDict()
+            dmpFoldersDict["extraTurbulence"] =\
+                list(dmpFoldersDict["extraTurbulence"])
+            for dmpNr in range(len(turbo_dmp_folders)):
+                dmpFoldersDict["extraTurbulence"][dmpNr] =\
+                    list(dmpFoldersDict["extraTurbulence"][dmpNr])
+                dmpFoldersDict["extraTurbulence"][dmpNr].\
+                    append(turbo_dmp_folders[dmpNr])
+                dmpFoldersDict["extraTurbulence"][dmpNr] =\
+                    tuple(dmpFoldersDict["extraTurbulence"][dmpNr])
+
+            dmpFoldersDict["extraTurbulence"] =\
+                tuple(dmpFoldersDict["extraTurbulence"])
+            self._pickleDmpFoldersDict(dmpFoldersDict)
+    #}}}
+
+    #{{{_getNumberOfPerformedRestarts
+    def _getNumberOfPerformedRestarts(self):
+        """
+        Will return the number of performed restarts.
+
+        Also checks that the scans has an equal amount of restarts
+
+        Returns
+        -------
+        restartNumber : int
+            The number of already performed restarts.
+        """
+
+        numberOfRestartFolders = []
         # Placeholder for the dmp folders
         extraTrubulenceRuns = []
         for turboDmp in self._turbo_dmp_folders:
@@ -869,60 +1199,22 @@ class ScanDriver(object):
             extraTrubulenceRuns.append(\
                    tuple(os.path.join(turboDmp, folder) for folder in folders))
 
-            nrf.append(len(folders))
+            numberOfRestartFolders.append(len(folders))
 
         # Load the dmpFolders pickle, update it and save it
         dmpFoldersDict = self._getDmpFolderDict()
         dmpFoldersDict["extraTurbulence"] = tuple(extraTrubulenceRuns)
         self._pickleDmpFoldersDict(dmpFoldersDict)
 
-        if nrf.count(nrf[0]) != len(nrf):
+        if numberOfRestartFolders.count(numberOfRestartFolders[0]) != len(numberOfRestartFolders):
             message = ("The dmp folders did not have an equal number of "
                        "restarts. The restart counter remains ambigous. "
                        "Fix by manually restarting missing restart "
                        "simulations.")
             raise RuntimeError(message)
 
-        # Update the restart number
-        self._restartTurb -= nrf[0]
+        restartNumber = numberOfRestartFolders[0]
 
-        # Set the dependencies
-        job_dependencies = self._turbo_PBS_ids
-        for nr in range(self._restartTurb):
-            # NOTE: The for-loop is reusing the created self._turboRun
-            #       object. This means that the self._PBS_id of
-            #       bout_runners is not being reset to [].
-            #       Instead of creating a new object, we will manually
-            #       reset the PBS_ids here.
-            self._turboRun._PBS_id = []
-
-            # Execute the runs
-            turbo_dmp_folders, self._turbo_PBS_ids =\
-                self._turboRun.execute_runs(\
-                    # Declare dependencies
-                    job_dependencies = job_dependencies,\
-                    # Below are the kwargs given to the
-                    # restartFromFunc
-                    aScanPath      = self._linearAScanPath,\
-                    scanParameters = self._scanParameters ,\
-                                            )
-            # Reset the dependencies
-            job_dependencies = self._turbo_PBS_ids
-
-            # Load the dmpFolders pickle, update it and save it
-            dmpFoldersDict = self._getDmpFolderDict()
-            dmpFoldersDict["extraTurbulence"] =\
-                list(dmpFoldersDict["extraTurbulence"])
-            for dmpNr in range(len(turbo_dmp_folders)):
-                dmpFoldersDict["extraTurbulence"][dmpNr] =\
-                    list(dmpFoldersDict["extraTurbulence"][dmpNr])
-                dmpFoldersDict["extraTurbulence"][dmpNr].\
-                    append(turbo_dmp_folders[dmpNr])
-                dmpFoldersDict["extraTurbulence"][dmpNr] =\
-                    tuple(dmpFoldersDict["extraTurbulence"][dmpNr])
-
-            dmpFoldersDict["extraTurbulence"] =\
-                tuple(dmpFoldersDict["extraTurbulence"])
-            self._pickleDmpFoldersDict(dmpFoldersDict)
+        return restartNumber
     #}}}
 #}}}
