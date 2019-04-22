@@ -173,7 +173,7 @@ class Driver1DFields(DriverPlotFieldsSuperClass):
 
         # Recast to tuple
         Driver1DFields._fieldPlotTypes =\
-                tuple(set(Driver1DFields._fieldPlotTypes))
+                tuple(sorted(set(Driver1DFields._fieldPlotTypes)))
 
         # Set member data
         self._hyperIncluded = hyperIncluded

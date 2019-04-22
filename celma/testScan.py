@@ -9,10 +9,7 @@ commonDir = os.path.abspath("./../common")
 sys.path.append(commonDir)
 
 from CELMAPy.scanDriver import ScanDriver
-from CELMAPy.driverHelpers import pathMerger
 from bout_runners import basic_runner
-from standardPlots import fields1DAnimation
-import pickle
 
 directory = "CSDXMagFieldScanAr"
 

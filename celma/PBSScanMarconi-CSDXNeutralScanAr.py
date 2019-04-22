@@ -20,6 +20,9 @@ account = None
 # specify here
 # Example: "xfualongprod"
 queue = None
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail = None
 # =============================================================================
 
 directory = "CSDXNeutralScanAr"
@@ -66,7 +69,8 @@ scanNn.setCommonRunnerOptions(\
                               BOUT_ppn     = 36     ,\
                               BOUT_queue   = queue  ,\
                               BOUT_account = account,\
+                              BOUT_mail    = mail   ,\
                              )
 
 # Run
-scanNn.runScan(restartTurb=2)
+scanNn.runScan(restartTurb=14)

@@ -230,6 +230,7 @@ class ScanDriver(object):
                                BOUT_ppn     = 16  ,\
                                BOUT_queue   = None,\
                                BOUT_account = None,\
+                               BOUT_mail    = None,\
             ):
         #{{{docstring
         """
@@ -253,6 +254,8 @@ class ScanDriver(object):
         BOUT_account : [None|str]
             Account number to use for the runs (only used when the
             runner is PBS_runner)
+        BOUT_mail : [None|str]
+            Mail address to notify when a BOUT job has finished
         """
         #}}}
 
@@ -269,6 +272,7 @@ class ScanDriver(object):
             self._commonRunnerOptions["BOUT_ppn"  ]   = BOUT_ppn
             self._commonRunnerOptions["BOUT_queue"]   = BOUT_queue
             self._commonRunnerOptions["BOUT_account"] = BOUT_account
+            self._commonRunnerOptions["BOUT_mail"]    = BOUT_mail
     #}}}
 
     #{{{setInitOptions
@@ -355,7 +359,7 @@ class ScanDriver(object):
     #{{{setLinearOptions
     def setLinearOptions(self                              ,\
                          timestep              = 1         ,\
-                         nout                  = 1000      ,\
+                         nout                  = 200       ,\
                          BOUT_walltime         = "72:00:00",\
                         ):
         #{{{docstring
@@ -394,7 +398,7 @@ class ScanDriver(object):
     #{{{setTurbulenceOptions
     def setTurbulenceOptions(self                      ,\
                              timestep      = 1         ,\
-                             nout          = 5000      ,\
+                             nout          = 250       ,\
                              BOUT_walltime = "72:00:00",\
             ):
         #{{{docstring
@@ -841,7 +845,7 @@ class ScanDriver(object):
             # Find the folders
             folders = tuple(folder for folder in os.listdir(turboDmp) if
                             os.path.isdir(os.path.join(turboDmp, folder)))
-            # NOTE: bout_runners are making a restart 0 folder for
+            # NOTE: bout_runners is making a restart 0 folder for
             #       copied restart files, as a hack, the 0th restart
             #       folder is excluded
 
@@ -882,16 +886,28 @@ class ScanDriver(object):
         # Update the restart number
         self._restartTurb -= nrf[0]
 
+        # Set the dependencies
+        job_dependencies = self._turbo_PBS_ids
         for nr in range(self._restartTurb):
+            # NOTE: The for-loop is reusing the created self._turboRun
+            #       object. This means that the self._PBS_id of
+            #       bout_runners is not being reset to [].
+            #       Instead of creating a new object, we will manually
+            #       reset the PBS_ids here.
+            self._turboRun._PBS_id = []
+
+            # Execute the runs
             turbo_dmp_folders, self._turbo_PBS_ids =\
                 self._turboRun.execute_runs(\
                     # Declare dependencies
-                    job_dependencies = self._turbo_PBS_ids,\
+                    job_dependencies = job_dependencies,\
                     # Below are the kwargs given to the
                     # restartFromFunc
                     aScanPath      = self._linearAScanPath,\
                     scanParameters = self._scanParameters ,\
                                             )
+            # Reset the dependencies
+            job_dependencies = self._turbo_PBS_ids
 
             # Load the dmpFolders pickle, update it and save it
             dmpFoldersDict = self._getDmpFolderDict()

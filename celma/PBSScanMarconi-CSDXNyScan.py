@@ -20,6 +20,9 @@ account = None
 # specify here
 # Example: "xfualongprod"
 queue = None
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail = None
 # =============================================================================
 
 # Calculate the ny parameters
@@ -30,10 +33,11 @@ ratios = np.linspace(0.0975,0.3,5)
 nys  = tuple(int(ny) for ny in ratios*(ly/rhos))
 
 PBSOptions = {\
-              "BOUT_walltime" : "72:00:00"    ,\
-              "BOUT_queue"    : "xfualongprod",\
-              "BOUT_account"  : "FUA11_SOLF"  ,\
-              "BOUT_ppn"      : 36            ,\
+              "BOUT_walltime" : "72:00:00",\
+              "BOUT_queue"    : queue     ,\
+              "BOUT_account"  : account   ,\
+              "BOUT_mail"     : mail      ,\
+              "BOUT_ppn"      : 36        ,\
              }
 
 nproc = 16

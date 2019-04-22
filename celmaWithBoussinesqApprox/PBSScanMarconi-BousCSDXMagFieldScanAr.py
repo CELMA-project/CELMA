@@ -19,6 +19,9 @@ account = None
 # specify here
 # Example: "xfualongprod"
 queue = None
+# If you would like a mail on finished job enter your mail here
+# Example: "john@doe.com"
+mail = None
 # =============================================================================
 
 directory = "BousCSDXMagFieldScanAr"
@@ -57,13 +60,14 @@ scanB0.setExpandOptions(timestep      = 25       ,\
 
 # Set common runner options
 scanB0.setCommonRunnerOptions(\
-                              nproc        = 48            ,\
-                              cpy_source   = True          ,\
-                              BOUT_nodes   = 2             ,\
-                              BOUT_ppn     = 36            ,\
-                              BOUT_queue   = "xfualongprod",\
-                              BOUT_account = "FUA11_SOLF"  ,\
+                              nproc        = 48     ,\
+                              cpy_source   = True   ,\
+                              BOUT_nodes   = 2      ,\
+                              BOUT_ppn     = 36     ,\
+                              BOUT_queue   = queue  ,\
+                              BOUT_account = account,\
+                              BOUT_mail    = mail   ,\
                              )
 
 # Run
-scanB0.runScan(restartTurb=3, boussinesq = True)
+scanB0.runScan(restartTurb=14, boussinesq = True)
