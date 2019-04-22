@@ -5,7 +5,10 @@ Contains the restartFromFunc and ScanDriver
 """
 
 from bout_runners import basic_runner, PBS_runner
-import inspect, os, pickle, re, pathlib, shutil, difflib
+import inspect
+import os
+import pickle
+import re
 
 # NOTE: Smells of code duplication in the "call" functions
 
@@ -356,7 +359,7 @@ class ScanDriver(object):
     #{{{setLinearOptions
     def setLinearOptions(self                              ,\
                          timestep              = 1         ,\
-                         nout                  = 1000      ,\
+                         nout                  = 200       ,\
                          BOUT_walltime         = "72:00:00",\
                         ):
         #{{{docstring
@@ -395,7 +398,7 @@ class ScanDriver(object):
     #{{{setTurbulenceOptions
     def setTurbulenceOptions(self                      ,\
                              timestep      = 1         ,\
-                             nout          = 5000      ,\
+                             nout          = 250       ,\
                              BOUT_walltime = "72:00:00",\
             ):
         #{{{docstring

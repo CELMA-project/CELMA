@@ -142,7 +142,7 @@ void OwnBCs::extrapolateXOutGhost(Field3D &f) {
   TRACE("Halt in OwnBCs::extrapolateXOutGhost");
 
   if (mesh->lastX()) {
-    for (int yInd = mesh->ystart; yInd <= mesh->xend; yInd++) {
+    for (int yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
       for (int zInd = 0; zInd < mesh->LocalNz; zInd++) {
         f(firstOuterXGhost, yInd, zInd) =
             4.0 * f(firstOuterXGhost - 1, yInd, zInd) -
@@ -720,3 +720,4 @@ void OwnBCs::innerRhoCylinderLoop(Field3D &f, const int &yStart,
 }
 
 #endif
+

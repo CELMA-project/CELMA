@@ -8,7 +8,7 @@ from ..superClasses import PlotAnim2DSuperClass
 from ..plotHelpers import SizeMaker, plotNumberFormatter
 from matplotlib.gridspec import GridSpec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import numpy as np
 
 #{{{PlotAnim2DPerp

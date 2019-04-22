@@ -4,7 +4,7 @@
 
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap3
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 

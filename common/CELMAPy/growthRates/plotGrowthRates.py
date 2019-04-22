@@ -7,7 +7,7 @@ Contains class to plot the growth rates
 from ..superClasses import PlotSuperClass
 from ..plotHelpers import SizeMaker, plotNumberFormatter, seqCMap2, seqCMap3
 import numpy as np
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import os
 
 #{{{PlotGrowthRates

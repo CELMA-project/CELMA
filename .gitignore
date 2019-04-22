@@ -60,10 +60,12 @@ html/
 
 #BOUT
 *.log*
+*.err*
 *log.*
 *.nc
 *.png
 *.pdf
+*.zip
 
 # CELMA
 visualization*/
@@ -80,3 +82,5 @@ nout*/
 *.pickle
 *.avi
 *.mp4
+.idea
+

@@ -202,7 +202,6 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
 
       // Reverse FFT
       irfft(fourierArray, ncz, &(result(xInd, yInd, 0)));
-      result(xInd, yInd, ncz) = result(xInd, yInd, 0);
     }
   }
 
@@ -212,3 +211,4 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
 }
 
 #endif
+

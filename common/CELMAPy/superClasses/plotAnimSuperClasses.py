@@ -15,7 +15,7 @@ from matplotlib.ticker import FuncFormatter
 from glob import glob
 import numpy as np
 import matplotlib.animation as animation
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import os
 
 #{{{PlotAnimSuperClass
