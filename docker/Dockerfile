@@ -30,7 +30,7 @@ RUN bout_install -a
 # Dependencies which requires packages installed by bout_install
 RUN pip3 install h5py netcdf4
 # Nice to have packages
-RUN pip3 install pytest ipython
+RUN pip3 install pytest ipython python-dotenv
 
 # Set environment variables
 ENV PATH="/root/local/bin:${PATH}"
