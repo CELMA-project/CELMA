@@ -82,5 +82,11 @@ nout*/
 *.pickle
 *.avi
 *.mp4
+.gitconfig
+
+# pyCharm
 .idea
 
+# Vscode
+.devcontainer/
+.vscode*/
