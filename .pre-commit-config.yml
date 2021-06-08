@@ -1,0 +1,59 @@
+# NOTE: The versions can be updated by calling
+#        pre-commit autoupdate
+repos:
+  - repo: https://github.com/psf/black
+    rev: 21.4b2
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.0
+    hooks:
+      - id: bandit
+        args: [--configfile=.bandit.yaml]
+
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.1
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-docstrings
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  # NOTE: MonkeyType can automatically annotate
+  #       monkeytype run `which pytest`
+  #       for i in $(monkeytype list-modules); do
+  #           monkeytype apply "$i"
+  #       done
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.812
+    hooks:
+      - id: mypy
+        exclude: ^docs/conf.py
+
+  - repo: https://github.com/prettier/pre-commit
+    rev: 57f39166b5a5a504d6808b87ab98d41ebf095b46
+    hooks:
+      - id: prettier
+        args: [--prose-wrap=always, --print-width=88]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.8.0
+    hooks:
+      - id: isort
+
+  # NOTE: pylint must be run on local repo
+  # https://github.com/pre-commit/pre-commit-hooks/issues/157
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]

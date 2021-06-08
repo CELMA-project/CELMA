@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  # Run each time we push and pull requests
+  push:
+  pull_request:
+  # Cron job
+  # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows#scheduled-events-schedule
+  schedule:
+    # https://crontab.guru/#0_0_1_*_*
+    - cron: "0 0 1 * *"
+
+jobs:
+  test:
+    container: loeiten/celma_env:latest
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build CELMA
+        run: |
+          cd celma
+          make
