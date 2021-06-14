@@ -20,11 +20,13 @@ repos:
           - flake8-bugbear
           - flake8-docstrings
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
+-   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: check-added-large-files
 
   # NOTE: MonkeyType can automatically annotate
   #       monkeytype run `which pytest`
@@ -57,3 +59,13 @@ repos:
         entry: pylint
         language: system
         types: [python]
+
+-   repo: https://gitlab.com/daverona/pre-commit/cpp
+    rev: 0.8.0
+    hooks:
+    -   id: clang-format
+        args: ["-style=LLVM"]
+    -   id: cpplint
+        args: ["--filter=-legal/copyright,-build/include_order"]
+    -   id: cppcheck
+        args: ["--inline-suppr", "--library=boost"]
