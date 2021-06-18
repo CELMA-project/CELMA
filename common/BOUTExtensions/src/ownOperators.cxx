@@ -4,6 +4,7 @@
 #include "../include/ownOperators.hxx"
 #include <fft.hxx>           //Includes the FFT
 #include <interpolation.hxx> //Includes the interpolation
+#include <string>
 
 // OwnOperators
 
@@ -18,11 +19,12 @@
 OwnOperators::OwnOperators() {
   TRACE("Halt in OwnOperators::OwnOperators");
 
+  Coordinates *coord = mesh->getCoordinates();
   // Calculate the powers of the Jacobian
   // ************************************************************************
-  J = mesh->coordinates()->J;
-  J2 = pow(mesh->coordinates()->J, (2.0));
-  invJ = 1.0 / (mesh->coordinates()->J);
+  J = coord->J;
+  J2 = pow(coord->J, (2.0));
+  invJ = 1.0 / (coord->J);
   // ************************************************************************
 }
 
@@ -37,7 +39,7 @@ OwnOperators *OwnOperators::createOperators(Options *options) {
     options = Options::getRoot()->getSection("ownOperators");
   }
 
-  string type;
+  std::string type;
   options->get("type", type, "BasicBrackets");
 
   if (lowercase(type) == lowercase("BasicBrackets")) {
@@ -218,7 +220,7 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
   // Communicate before taking new derivative
   mesh->communicate(DDXPhi);
 
-  result = bracket(pow(DDXPhi, 2.0) + pow(invJ * DDZ(phi, true), 2.0), n, bm);
+  result = bracket(pow(DDXPhi, 2.0) + pow(invJ * DDZ(phi), 2.0), n, bm);
 
   // Multiply with B/2
   return 0.5 * invJ * result;

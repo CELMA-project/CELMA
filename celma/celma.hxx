@@ -17,6 +17,7 @@
 #include <invert_laplace.hxx> // Gives invert laplace option
 #include <map>                // Gives std::map
 #include <vecops.hxx>         // Gives the vec diff options
+#include <string>
 // Gives own boundaries (doing so by setting ghost points)
 #include "../common/BOUTExtensions/include/ownBCs.hxx"
 // Gives own operators
@@ -148,7 +149,7 @@ private:
 
   // Additional methods and solvers
   // *****************************************************************************
-  string ownOpType;  // Type of own operators
+  std::string ownOpType;  // Type of own operators
   BRACKET_METHOD bm; // The bracket method
   OwnBCs ownBC;      // Class containing methods which sets the ghost points
   OwnLaplacianInversions ownLapl; // Class containing own laplacian

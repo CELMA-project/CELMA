@@ -4,6 +4,7 @@
 #include "ownBCs.hxx"       // Must know about the boundary conditions
 #include "ownOperators.hxx" // Must know about the operators class
 #include <bout.hxx>         // Includes all necessary classes and types
+#include <string>
 
 /*!
  * \class OwnLaplacianInversions
@@ -46,7 +47,7 @@ public:
   // Member functions
   //! Alternative to a constructor
   void create(OwnOperators *opObj, OwnBCs &BCObj,
-              const string &section = "phiSolver");
+              const std::string &section = "phiSolver");
   //! The NaulinSolver
   Field3D NaulinSolver(const Vector3D &gradPerpLnN, const Field3D &n,
                        const Field3D &vortD, const Field3D &phiInit,

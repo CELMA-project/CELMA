@@ -12,6 +12,7 @@ on:
 
 jobs:
   test:
+    runs-on: ubuntu-latest
     container: loeiten/celma_env:latest
     strategy:
       fail-fast: true

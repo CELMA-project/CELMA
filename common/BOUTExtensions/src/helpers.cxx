@@ -72,14 +72,16 @@ BoutReal VolumeIntegral::volumeIntegral(Field3D const &f) {
   BoutReal result = 0.0;
   BoutReal localResult = 0.0;
 
+  Coordinates *coord = mesh->getCoordinates();
+
   // We loop over the processor domain
   for (xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
     for (yInd = mesh->ystart; yInd <= mesh->yend; yInd++) {
       for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         localResult +=
-            f(xInd, yInd, zInd) * mesh->coordinates()->J(xInd, yInd) *
-            mesh->coordinates()->dx(xInd, yInd) *
-            mesh->coordinates()->dy(xInd, yInd) * mesh->coordinates()->dz;
+            f(xInd, yInd, zInd) * coord->J(xInd, yInd) *
+            coord->dx(xInd, yInd) *
+            coord->dy(xInd, yInd) * coord->dz;
       }
     }
   }
