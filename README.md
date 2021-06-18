@@ -1,6 +1,7 @@
 # CELMA
 
 [![Build Status](https://travis-ci.org/CELMA-project/CELMA.svg?branch=master)](https://travis-ci.org/CELMA-project/CELMA)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA?ref=badge_shield)
 
 > **NOTE**: This repo is currently undergoing heavy refactorings and 
 enhancements.
@@ -58,3 +59,7 @@ Contributions are more than welcome through pull requests.
 ## Issues
 
 Bugs, issues and questions are being handled at the [issue-tracker](https://github.com/CELMA-project/CELMA/issues).
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA?ref=badge_large)
