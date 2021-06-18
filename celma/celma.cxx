@@ -25,6 +25,8 @@ int Celma::init(bool restarting) {
   // Set and save the viscosities
   setAndSaveViscosities();
 
+  Coordinates *coord = mesh->getCoordinates();
+
   // Additional fields
   // ************************************************************************
   // The initial potential (obtained from the input)
@@ -32,7 +34,7 @@ int Celma::init(bool restarting) {
                                       CELL_CENTRE, 0);
 
   // The metric coefficient (needed in front of the arakawa bracket)
-  invJ = (1.0 / mesh->coordinates()->J);
+  invJ = (1.0 / coord->J);
   // ************************************************************************
 
   // Specifying the brackets to the arakawa scheme
@@ -383,6 +385,7 @@ void Celma::printPointsPerRhoS() {
   BoutReal pointsPerRhoSAzimuthally;
   BoutReal minPointsPerRhoSXZ;
   BoutReal minPointsPerRhoSY;
+  Coordinates *coord = mesh->getCoordinates();
 
   Options *root = Options::getRoot();
   root->get("MXG", MXG, 0);
@@ -392,9 +395,9 @@ void Celma::printPointsPerRhoS() {
   }
 
   // dx = Lx/(nx-2*MXG) => nx = (Lx/dx) + 2*MXG
-  pointsPerRhoSRadially = ((Lx / mesh->coordinates()->dx(0, 0)) + 2 * MXG) / Lx;
+  pointsPerRhoSRadially = ((Lx / coord->dx(0, 0)) + 2 * MXG) / Lx;
   // dy = Ly/ny => ny = Ly/dy => ny/Ly = 1/dy
-  pointsPerRhoSParallely = 1.0 / mesh->coordinates()->dy(0, 0);
+  pointsPerRhoSParallely = 1.0 / coord->dy(0, 0);
   // O=2*pi*r, so on edge nz/rho_s = nz/(2*pi*Lx)
   pointsPerRhoSAzimuthally = (mesh->LocalNz) / (2.0 * PI * Lx);
 
@@ -494,6 +497,8 @@ void Celma::setSwithces(bool &restarting) {
 void Celma::setAndSaveViscosities() {
   TRACE("Halt in Celma::setAndSaveViscosities");
 
+  Coordinates *coord = mesh->getCoordinates();
+
   // Get and save the viscosities
   // ************************************************************************
   // Get the option (before any sections) in the BOUT.inp file
@@ -514,10 +519,10 @@ void Celma::setAndSaveViscosities() {
   if (!constViscPar) {
     // SQ is squaring the expression
     // dx and dy are Field2D (0th index is ghost, but gives no problems)
-    artViscParLnN *= SQ(mesh->coordinates()->dy(0, 0));
-    artViscParJpar *= SQ(mesh->coordinates()->dy(0, 0));
-    artViscParMomDens *= SQ(mesh->coordinates()->dy(0, 0));
-    artViscParVortD *= SQ(mesh->coordinates()->dy(0, 0));
+    artViscParLnN *= SQ(coord->dy(0, 0));
+    artViscParJpar *= SQ(coord->dy(0, 0));
+    artViscParMomDens *= SQ(coord->dy(0, 0));
+    artViscParVortD *= SQ(coord->dy(0, 0));
   }
 
   if (!constViscPerp) {
@@ -525,10 +530,10 @@ void Celma::setAndSaveViscosities() {
     /* NOTE: Chosen independent of dz
      *       This makes artVisc constant when expanding restarts
      */
-    artViscPerpLnN *= SQ(mesh->coordinates()->dx(0, 0));
-    artViscPerpJPar *= SQ(mesh->coordinates()->dx(0, 0));
-    artViscPerpMomDens *= SQ(mesh->coordinates()->dx(0, 0));
-    artViscPerpVortD *= SQ(mesh->coordinates()->dx(0, 0));
+    artViscPerpLnN *= SQ(coord->dx(0, 0));
+    artViscPerpJPar *= SQ(coord->dx(0, 0));
+    artViscPerpMomDens *= SQ(coord->dx(0, 0));
+    artViscPerpVortD *= SQ(coord->dx(0, 0));
   }
 
   // Set artificial viscosities to 0 if useHyperViscAzVortD is false
@@ -539,7 +544,7 @@ void Celma::setAndSaveViscosities() {
   }
   if (!constViscHyper) {
     // Azimuthal hyperviscosities
-    artHyperAzVortD *= SQ(SQ(mesh->coordinates()->dz));
+    artHyperAzVortD *= SQ(SQ(coord->dz));
   }
 
   // Print and store the variables
@@ -547,8 +552,8 @@ void Celma::setAndSaveViscosities() {
   output << "***********************************************" << std::endl;
   output << "Perpendicular";
   if (!constViscPerp) {
-    output << " (SQ(mesh->coordinates()->dx(0,0)) = "
-           << SQ(mesh->coordinates()->dx(0, 0)) << "):";
+    output << " (SQ(coord->dx(0,0)) = "
+           << SQ(coord->dx(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscPerpLnN << std::endl;
@@ -557,8 +562,8 @@ void Celma::setAndSaveViscosities() {
   output << "    For vortD    : " << artViscPerpVortD << std::endl;
   output << "Parallel";
   if (!constViscPar) {
-    output << " (SQ(mesh->coordinates()->dy(0,0)) = "
-           << SQ(mesh->coordinates()->dy(0, 0)) << "):";
+    output << " (SQ(coord->dy(0,0)) = "
+           << SQ(coord->dy(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscParLnN << std::endl;
@@ -567,8 +572,8 @@ void Celma::setAndSaveViscosities() {
   output << "    For vortD    : " << artViscParVortD << std::endl;
   output << "Azimuthal hyperviscosity";
   if (!constViscHyper) {
-    output << "Azimuthal hyperviscosity (SQ(SQ(mesh->coordinates()->dz)) = "
-           << SQ(SQ(mesh->coordinates()->dz)) << "):";
+    output << "Azimuthal hyperviscosity (SQ(SQ(coord->dz)) = "
+           << SQ(SQ(coord->dz)) << "):";
   }
   output << std::endl;
   output << "    For vortD   : " << artHyperAzVortD << std::endl;

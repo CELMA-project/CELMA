@@ -2,6 +2,7 @@
 #define __OWNFILTERS_CXX__
 
 #include "../include/ownFilters.hxx"
+#include <string>
 
 // OwnFilters
 
@@ -45,7 +46,7 @@ OwnFilters *OwnFilters::createFilter(Options *options) {
     options = Options::getRoot()->getSection("ownFilters");
   }
 
-  string type;
+  std::string type;
   options->get("type", type, "none");
 
   if (lowercase(type) == lowercase("none")) {
@@ -123,6 +124,8 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
   options = Options::getRoot();
   options->get("MXG", MXG, 2);
 
+  Coordinates *coord = mesh->getCoordinates();
+
   /* NOTE: outerRho
    * GlobalNx includes the ghost points and counts from one
    * The length made up by the inner points is therefore
@@ -132,7 +135,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
    * Thus:
    */
   BoutReal outerRho =
-      (mesh->GlobalNx - 2 * MXG - 0.5) * mesh->coordinates()->dx(0, 0);
+      (mesh->GlobalNx - 2 * MXG - 0.5) * coord->dx(0, 0);
   BoutReal outerCircumference = TWOPI * outerRho;
 
   // Calculate the corresponding minimum resolvable wavelength
@@ -144,7 +147,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
   options->get("throwWarning", throwWarning, true);
 
   circumference = TWOPI *
-                  mesh->coordinates()->J(
+                  coord->J(
                       mesh->xstart, 0); // Lowest circumference (inner point)
   kMaxCurrent = int(floor(circumference / lambdaMin));
   if (kMaxCurrent <= 0) {
@@ -183,11 +186,12 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
     return var;
   }
 
+  Coordinates *coord = mesh->getCoordinates();
   result.allocate();
 
   for (int xInd = 0; xInd < mesh->LocalNx; xInd++) {
     // Set the current kMax (J = rho in cylinder coordinates)
-    circumference = TWOPI * mesh->coordinates()->J(xInd, 0);
+    circumference = TWOPI * coord->J(xInd, 0);
     // Abs since the inner ghost point of the Jacobian can be negative
     kMaxCurrent = int(abs(floor(circumference / lambdaMin)));
     for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {

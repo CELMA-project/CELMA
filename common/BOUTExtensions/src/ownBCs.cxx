@@ -2,6 +2,7 @@
 #define __OWNBCS_CXX__
 
 #include "../include/ownBCs.hxx"
+#include <string>
 
 /*!
  * \brief Constructor
@@ -510,7 +511,7 @@ void OwnBCs::parDensMomSheath(Field3D &momDensPar, const Field3D &uIPar,
 void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
                          bool const &yUpExtrapolate) {
   TRACE("Halt in OwnBCs::cauchyYDown");
-
+  Coordinates *coord = mesh->getCoordinates();
   if (mesh->firstY()) {
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
       // Calculate the x for the current xIndex
@@ -531,17 +532,17 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
         b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
         // Set the ghost point
         f(xInd, firstLowerYGhost, zInd) =
-            (1.0 / (120.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) -
+            (1.0 / (120.0 * coord->dy(xInd, firstLowerYGhost) -
                     115.0)) *
-            (-15.0 * (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) +
+            (-15.0 * (24.0 * coord->dy(xInd, firstLowerYGhost) +
                       7.0) *
                  f(xInd, firstLowerYGhost + 1, zInd) +
              15.0 *
-                 (8.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) - 1.0) *
+                 (8.0 * coord->dy(xInd, firstLowerYGhost) - 1.0) *
                  f(xInd, firstLowerYGhost + 2, zInd) -
-             (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost) - 5.0) *
+             (24.0 * coord->dy(xInd, firstLowerYGhost) - 5.0) *
                  f(xInd, firstLowerYGhost + 3, zInd) +
-             (24.0 * mesh->coordinates()->dy(xInd, firstLowerYGhost)) *
+             (24.0 * coord->dy(xInd, firstLowerYGhost)) *
                  (16.0 * a + 5.0 * b));
       }
     }
@@ -567,7 +568,7 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
  * \sa getBFunction
  * \sa getYValAtYDownBndry
  */
-void OwnBCs::prepareCauchy(const string &section) {
+void OwnBCs::prepareCauchy(const std::string &section) {
   TRACE("Halt in OwnBCs::prepareCauchy");
 
   output << "\n\n\n!!!WARNING: Only first order convergence found with "
@@ -588,11 +589,11 @@ void OwnBCs::prepareCauchy(const string &section) {
  *
  * \sa getBFunction
  */
-void OwnBCs::getAFunction(const string &section) {
+void OwnBCs::getAFunction(const std::string &section) {
   TRACE("Halt in OwnBCs::getAFunction");
   // Get the function
   Options *varOptions = Options::getRoot()->getSection(section);
-  string bndryFuncString;
+  std::string bndryFuncString;
   // Last argument in get is the default
   varOptions->get("a", bndryFuncString, "");
   if (bndryFuncString == "") {
@@ -619,11 +620,11 @@ void OwnBCs::getAFunction(const string &section) {
  *
  * \sa getAFunction
  */
-void OwnBCs::getBFunction(const string &section) {
+void OwnBCs::getBFunction(const std::string &section) {
   TRACE("Halt in OwnBCs::getBFunction");
   // Get the function
   Options *varOptions = Options::getRoot()->getSection(section);
-  string bndryFuncString;
+  std::string bndryFuncString;
   // Last argument in get is the default
   varOptions->get("b", bndryFuncString, "");
   if (bndryFuncString == "") {

@@ -3,6 +3,7 @@
 
 #include <bout.hxx>           // Includes all necessary classes and types
 #include <bout/constants.hxx> // Gives PI and TWOPI
+#include <string>
 
 /*!
  * \class OwnBCs
@@ -85,10 +86,10 @@ public:
                    bool const &yUpExtrapolate = true);
   /**@{*/
   //! Wrapper which initialize Cauchy
-  void prepareCauchy(const string &section);
+  void prepareCauchy(const std::string &section);
   //! Specify the lower ghost from the Cauchy boundary condition
-  void getAFunction(const string &section);
-  void getBFunction(const string &section);
+  void getAFunction(const std::string &section);
+  void getBFunction(const std::string &section);
   /**@}*/
   //! Get the value of y at the boundary
   void getYValAtYDownBndry();

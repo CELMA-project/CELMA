@@ -2,6 +2,7 @@
 #define __OWNLAPLACIANINVERSIONS_CXX__
 
 #include "../include/ownLaplacianInversions.hxx"
+#include <string>
 
 /*!
  * This function is used instead of a constructor as a OwnOperators and a
@@ -13,7 +14,7 @@
  * \param[in] section Section to read the input data from
  */
 void OwnLaplacianInversions::create(OwnOperators *opObj, OwnBCs &BCObj,
-                                    const string &section) {
+                                    const std::string &section) {
 
   TRACE("Halt in OwnLaplacianInversions::OwnLaplacianInversions");
 
