@@ -30,3 +30,8 @@ jobs:
         run: |
           cd celma
           make
+
+      - name: Build CELMA with Boussinesq approximation
+        run: |
+          cd ../celmaWithBoussinesqApprox
+          make
