@@ -18,8 +18,8 @@
  */
 class Parameters {
 private:
-  BoutReal const length_; //<! Cylinder length [m]
   BoutReal const radius_; //<! Plasma radius [m]
+  BoutReal const length_; //<! Cylinder length [m]
   BoutReal const n0_;     //<! Density normalization [m^-3]
   BoutReal const Te0_;    //<! Electron temperature [eV]
   BoutReal const Ti0_;    //<! Ion temperature [eV]
@@ -97,9 +97,15 @@ private:
 
 public:
   // Constructor
-  Parameters(BoutReal const &radius, BoutReal const &length, BoutReal const &n0,
-             BoutReal const &Te0, BoutReal const &Ti0, BoutReal const &B0,
-             BoutReal const &S, BoutReal const &nn, std::string const gas = "H",
+  Parameters(BoutReal const &radius,
+             BoutReal const &length, 
+             BoutReal const &n0,
+             BoutReal const &Te0, 
+             BoutReal const &Ti0, 
+             BoutReal const &B0,
+             BoutReal const &S, 
+             BoutReal const &nn, 
+             std::string const gas = "H",
              bool const warningForException = false);
 
   //! Prints the table

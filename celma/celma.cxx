@@ -12,6 +12,9 @@
 int Celma::init(bool restarting) {
   TRACE("Halt in Celma::init");
 
+  // Not used in the init
+  (void)restarting;
+
   // Initialize non-standard BOUT++ objects
   initializeOwnObjects();
   // Set the input
@@ -21,7 +24,7 @@ int Celma::init(bool restarting) {
   // Set the source
   setAndSaveSource();
   // Set the switches
-  setSwithces(restarting);
+  setSwithces();
   // Set and save the viscosities
   setAndSaveViscosities();
 
@@ -112,6 +115,7 @@ int Celma::init(bool restarting) {
 
 int Celma::rhs(BoutReal t) {
   TRACE("Halt in Celma::rhs");
+  (void)t;  // We are not using t in this simulation
 
   timestepInitialization();
 
@@ -231,6 +235,11 @@ Celma::Celma()
 int Celma::outputMonitor(BoutReal simtime, int iter, int NOUT) {
   TRACE("Halt in Celma::outputMonitor");
 
+  // We do not need the input in this simulation
+  (void)simtime;
+  (void)iter;
+  (void)NOUT;
+
   if (monitorEnergy) {
     ownMon.kinEnergy(n, gradPerpPhi, uEPar, uIPar, &kinE);
   }
@@ -331,12 +340,12 @@ void Celma::setAndSaveParameters() {
 
   // Check that Lx and LxParams is the same up until the fourt decimal point
   // ************************************************************************
-  std::ostringstream stream;
+  std::ostringstream message;
   int precision = 4;
   bool throwError = false;
   if ((fabs(round(LxParam * 1e4) / 1e4 - round(Lx * 1e4) / 1e4)) >
       DBL_EPSILON) {
-    stream << "Mismatch between 'Lx' calculated from 'radius' "
+    message << "Mismatch between 'Lx' calculated from 'radius' "
            << "and input 'Lx'\n"
            << "Calculated = " << std::fixed << std::setprecision(precision)
            << round(LxParam * 1e4) / 1e4 << "\n"
@@ -346,7 +355,7 @@ void Celma::setAndSaveParameters() {
   }
   if ((fabs(round(LyParam * 1e4) / 1e4 - round(Ly * 1e4) / 1e4)) >
       DBL_EPSILON) {
-    stream << "Mismatch between 'Ly' calculated from 'length' "
+    message << "Mismatch between 'Ly' calculated from 'length' "
            << "and input 'Ly'\n"
            << "Calculated = " << std::fixed << std::setprecision(precision)
            << round(LyParam * 1e4) / 1e4 << "\n"
@@ -355,10 +364,7 @@ void Celma::setAndSaveParameters() {
     throwError = true;
   }
   if (throwError) {
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
   // ************************************************************************
 
@@ -404,31 +410,28 @@ void Celma::printPointsPerRhoS() {
   root->getSection("geom")->get("minPointsPerRhoSXZ", minPointsPerRhoSXZ, 3.0);
   root->getSection("geom")->get("minPointsPerRhoSY", minPointsPerRhoSY, 1.0e-1);
 
-  std::ostringstream stream;
+  std::ostringstream message;
   bool throwError = false;
   if (pointsPerRhoSRadially < minPointsPerRhoSXZ) {
-    stream << "Minimum points per rhoS not fulfilled in x.\n"
+    message << "Minimum points per rhoS not fulfilled in x.\n"
            << "Limit is         " << minPointsPerRhoSXZ << "\n"
            << "Current value is " << pointsPerRhoSRadially << "\n\n";
     throwError = true;
   }
   if (mesh->LocalNz > 2 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ) {
-    stream << "Minimum points per rhoS not fulfilled on outer circumference.\n"
+    message << "Minimum points per rhoS not fulfilled on outer circumference.\n"
            << "Limit is         " << minPointsPerRhoSXZ << "\n"
            << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
     throwError = true;
   }
   if (pointsPerRhoSParallely < minPointsPerRhoSY) {
-    stream << "Minimum points per rhoS not fulfilled in y.\n"
+    message << "Minimum points per rhoS not fulfilled in y.\n"
            << "Limit is         " << minPointsPerRhoSY << "\n"
            << "Current value is " << pointsPerRhoSParallely << "\n\n";
     throwError = true;
   }
   if (throwError) {
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
 
   output << '\n' << std::string(51, '*') << std::endl;
@@ -473,7 +476,7 @@ void Celma::setAndSaveSource() {
   // ************************************************************************
 }
 
-void Celma::setSwithces(bool &restarting) {
+void Celma::setSwithces() {
   TRACE("Halt in Celma::setSwithces");
 
   // Get the switches

@@ -47,16 +47,12 @@ OwnOperators *OwnOperators::createOperators(Options *options) {
     return new OwnOpBasicBrackets();
   } else {
     // Create a stream which we cast to a string
-    std::ostringstream stream;
-    stream << "OwnOperators '" << type << "' not implemented\n"
+    std::ostringstream message;
+    message << "OwnOperators '" << type << "' not implemented\n"
            << "Available operators:\n"
            << "BasicBrackets - Consistent implementation using brackets "
               "with basic Arakawa.\n";
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
 }
 
