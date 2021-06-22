@@ -47,21 +47,18 @@ OwnBCs::OwnBCs() {
   if (mesh->LocalNy - 2 * mesh->ystart < 4) {
 
     // Create a stream which we cast to a string
-    std::ostringstream stream;
-    stream << "Not enough inner points i the y-direction\n"
+    std::ostringstream message;
+    message << "Not enough inner points i the y-direction\n"
            << "The cauchy and uEPar BC needs 3 inner points in y\n"
            << "extrapolateYUp and extrapolateYDown needs 4 inner points "
            << "in y\n"
            << "Currently the number of inner points is "
-           << mesh->LocalNy - 2 * mesh->ystart;
+           << mesh->LocalNy - 2 * mesh->ystart << "\n";
 
     if (warnPoints) {
-      output << "\n\n!!! WARNING\n" << stream.str() << "\n\n" << std::endl;
+      output << "\n\n!!! WARNING\n" << message.str() << "\n\n" << std::endl;
     } else {
-      std::string str = stream.str();
-      // Cast the stream to a const char in order to use it in BoutException
-      const char *message = str.c_str();
-      throw BoutException(message);
+      throw BoutException(message.str());
     }
   }
 }
@@ -598,14 +595,10 @@ void OwnBCs::getAFunction(const std::string &section) {
   varOptions->get("a", bndryFuncString, "");
   if (bndryFuncString == "") {
     // Create a stream which we cast to a string
-    std::ostringstream stream;
-    stream << "'a' not found in section '" << section << "' "
+    std::ostringstream message;
+    message << "'a' not found in section '" << section << "' "
            << "but is needed when setting the Cauchy BC\n";
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
   aBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
 }
@@ -629,14 +622,10 @@ void OwnBCs::getBFunction(const std::string &section) {
   varOptions->get("b", bndryFuncString, "");
   if (bndryFuncString == "") {
     // Create a stream which we cast to a string
-    std::ostringstream stream;
-    stream << "'b' not found in section '" << section << "' "
-           << "but is needed when setting the Cauchy BC";
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-
-    throw BoutException(message);
+    std::ostringstream message;
+    message << "'b' not found in section '" << section << "' "
+           << "but is needed when setting the Cauchy BC\n";
+    throw BoutException(message.str());
   }
   bBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
 }

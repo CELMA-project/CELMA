@@ -25,7 +25,7 @@ class OwnFiltRadialLowPass;
 class OwnFilters {
 public:
   // Constructor
-  OwnFilters(Options *options);
+  OwnFilters();
 
   // Destructors
   // NOTE: New is called, so should destruct
@@ -70,7 +70,7 @@ protected:
 class OwnFiltAllPass : public OwnFilters {
 public:
   //! Constructor does nothing
-  OwnFiltAllPass(Options *options) : OwnFilters(options){};
+  OwnFiltAllPass(){};
 
   //! Destructor
   /* NOTE: {} in the end is needed

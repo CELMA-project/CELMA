@@ -194,7 +194,7 @@ private:
   void setAndSaveParameters();
   void printPointsPerRhoS();
   void setAndSaveSource();
-  void setSwithces(bool &restarting);
+  void setSwithces();
   void setAndSaveViscosities();
   // *****************************************************************************
 

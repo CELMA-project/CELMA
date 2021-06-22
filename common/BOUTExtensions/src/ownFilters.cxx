@@ -14,10 +14,8 @@
  * a given mode number k is properly resolved with 2*k points. In addition, in
  * order not to get aliasing from non-linear wave coupling, Orzsag 2/3 rule is
  * used.
- *
- * \param[in] *options Pointer to options parser
  */
-OwnFilters::OwnFilters(Options *options) {
+OwnFilters::OwnFilters() {
   TRACE("Halt in OwnFilters::OwnFilters");
 
   ncz = mesh->LocalNz;
@@ -51,22 +49,18 @@ OwnFilters *OwnFilters::createFilter(Options *options) {
 
   if (lowercase(type) == lowercase("none")) {
     output << "Filter type set to 'none'" << std::endl;
-    return new OwnFiltAllPass(options);
+    return new OwnFiltAllPass();
   } else if (lowercase(type) == lowercase("radialLowPass")) {
     output << "Filter type set to 'radialLowPass'" << std::endl;
     return new OwnFiltRadialLowPass(options);
   } else {
     // Create a stream which we cast to a string
-    std::ostringstream stream;
-    stream << "Filtertype '" << type << "' not implemented\n"
+    std::ostringstream message;
+    message << "Filtertype '" << type << "' not implemented\n"
            << "Available filters:\n"
            << "none          - No filtering will be performed\n"
            << "radialLowPass - Filtering dependant on rho\n";
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
 }
 
@@ -115,8 +109,7 @@ const Field3D OwnFiltAllPass::ownFilter(const Field3D &var) {
  *       circumference
  * \warning Only works on grid equidistant in \f$\rho\f$
  */
-OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options)
-    : OwnFilters(options) {
+OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options){
   TRACE("Halt in OwnFiltRadialLowPass::OwnFiltRadialLowPass");
 
   // Get MXG

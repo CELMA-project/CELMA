@@ -22,14 +22,31 @@
  * outside
  *                   the drift approximation.
  */
-Parameters::Parameters(BoutReal const &radius, BoutReal const &length,
-                       BoutReal const &n0, BoutReal const &Te0,
-                       BoutReal const &Ti0, BoutReal const &B0,
-                       BoutReal const &S, BoutReal const &nn,
-                       std::string const gas, bool const warningForException)
-    : radius_(radius), length_(length), n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0),
-      S_(S), nn_(nn), warn_(warningForException), gas_(gas), separatorLen(57),
-      separator(' '), nameWidth(23), numberWidth(15), unitsWidth(16),
+Parameters::Parameters(BoutReal const &radius, 
+                       BoutReal const &length,
+                       BoutReal const &n0, 
+                       BoutReal const &Te0,
+                       BoutReal const &Ti0, 
+                       BoutReal const &B0,
+                       BoutReal const &S, 
+                       BoutReal const &nn,
+                       std::string const gas, 
+                       bool const warningForException)
+    : radius_(radius), 
+      length_(length), 
+      n0_(n0), 
+      Te0_(Te0), 
+      Ti0_(Ti0), 
+      B0_(B0),
+      S_(S), 
+      nn_(nn), 
+      gas_(gas), 
+      warn_(warningForException), 
+      separatorLen(57),
+      separator(' '), 
+      nameWidth(23), 
+      numberWidth(15), 
+      unitsWidth(16),
       precision(4) {
   TRACE("Parameters::Parameters");
 
@@ -53,40 +70,34 @@ Parameters::Parameters(BoutReal const &radius, BoutReal const &length,
     mi = 39.948 * u;
     // Guard
     bool allPass = true;
-    std::ostringstream stream;
+    std::ostringstream message;
     if (Te0_ < 0.1 || Te0_ > 10) {
-      stream << "Cross section for electron-neutral collision only "
+      message << "Cross section for electron-neutral collision only "
              << "valid in range 0.1-10eV.\n";
       allPass = false;
     }
     if (Ti0_ < 0.1 || Ti0_ > 10) {
-      stream << "Cross section for ion-neutral collision only "
+      message << "Cross section for ion-neutral collision only "
              << "valid in range 0.1-10eV.\n";
       allPass = false;
     }
     // Throw error or warning
     if (!allPass) {
-      std::string str = stream.str();
-      // Cast the stream to a const char in order to use it in BoutException
-      const char *message = str.c_str();
       std::string newlines = "\n\n\n";
       std::string exclamation(80, '!');
       if (warn_) {
-        output << newlines << exclamation << "\nWARNING: " << message
+        output << newlines << exclamation << "\nWARNING: " << message.str()
                << exclamation << newlines << std::endl;
       } else {
-        throw BoutException(message);
+        throw BoutException(message.str());
       }
     }
   } else {
-    std::ostringstream stream;
-    stream << "The current gases are implemented:"
+    std::ostringstream message;
+    message << "The current gases are implemented:"
            << "\nH\nAr\n"
            << "You specified " << gas_ << std::endl;
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
-    throw BoutException(message);
+    throw BoutException(message.str());
   }
 
   // Recalculate the temperatures to joules
@@ -224,25 +235,22 @@ Parameters::Parameters(BoutReal const &radius, BoutReal const &length,
 
   // Guard
   bool allPass = true;
-  std::ostringstream stream;
+  std::ostringstream message;
   if (coloumbLog <= 1.0) {
     // Huba, J.D. - NRL PLASMA FORMULARY 2013
-    stream << "Coloumb Logarithm under 1.0. Theory fails.\n";
+    message << "Coloumb Logarithm under 1.0. Theory fails.\n";
     allPass = false;
   }
 
   // Throw error or warning
   if (!allPass) {
-    std::string str = stream.str();
-    // Cast the stream to a const char in order to use it in BoutException
-    const char *message = str.c_str();
     std::string newlines = "\n\n\n";
     std::string exclamation(80, '!');
     if (warn_) {
-      output << newlines << exclamation << "\nWARNING: " << message
+      output << newlines << exclamation << "\nWARNING: " << message.str()
              << exclamation << newlines << std::endl;
     } else {
-      throw BoutException(message);
+      throw BoutException(message.str());
     }
   }
 }
