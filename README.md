@@ -63,4 +63,7 @@ Bugs, issues and questions are being handled at the [issue-tracker](https://gith
 
 
 ## License
+
+`CELMA` is licensed under the MIT license, see [LICENSE](LICENSE).
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FCELMA-project%2FCELMA?ref=badge_large)
