@@ -32,7 +32,7 @@ MODELS = {
     ),
 }
 MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
-RUN = ("nout=5", "timestep=1e-6")
+RUN = ("nout=10", "timestep=1e-2")
 RTOL = 1.0e-6
 NOISE = 1.0e-10
 RECORDED = Path("recorded-reference.json")
