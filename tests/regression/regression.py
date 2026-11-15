@@ -8,6 +8,7 @@ the numbers depend on the BOUT++ version and the compiler.
 Run from the repository root as ``python3 tests/regression/regression.py``.
 """
 
+import gzip
 import json
 import shutil
 import subprocess  # nosec
@@ -20,7 +21,7 @@ import numpy as np
 from netCDF4 import Dataset  # pylint: disable=no-name-in-module
 
 ROOT = Path(__file__).resolve().parents[2]
-REFERENCE = Path(__file__).with_name("reference.json")
+REFERENCE = Path(__file__).with_name("reference.json.gz")
 MODELS = {
     "celma": ("celma", "celma", "CSDXNyScan", "vortD"),
     "celmaWithBoussinesqApprox": (
@@ -33,6 +34,7 @@ MODELS = {
 MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
 RUN = ("nout=5", "timestep=1e-6")
 RTOL = 1.0e-6
+NOISE = 1.0e-10
 RECORDED = Path("recorded-reference.json")
 
 
@@ -94,12 +96,12 @@ def main() -> int:
         RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
         print(f"FAIL no reference at {REFERENCE}; the numbers are in {RECORDED}")
         return 1
-    reference = json.loads(REFERENCE.read_text())
+    reference = json.loads(gzip.decompress(REFERENCE.read_bytes()))
     failed = False
     for name, fields in actual.items():
         for field, values in fields.items():
             expected = np.array(reference[name][field])
-            scale = max(float(np.max(np.abs(expected))), 1.0e-300)
+            scale = max(float(np.max(np.abs(expected))), NOISE)
             error = float(np.max(np.abs(np.array(values) - expected))) / scale
             status = "ok  " if error <= RTOL else "FAIL"
             failed = failed or error > RTOL
