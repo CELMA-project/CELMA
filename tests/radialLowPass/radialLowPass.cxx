@@ -64,10 +64,7 @@ int RadialLowPass::init(bool restarting) {
   SAVE_ONCE(Lx);
   SAVE_ONCE2(unfiltered, filtered);
 
-  // Finalize
-  dump.write();
-  dump.close();
-
+  // The solver writes the file after init, so it must stay open
   output << "\nFinished, now quitting\n\n\n\n\n\n" << std::endl;
 
   // Wait for all processors to write data

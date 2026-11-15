@@ -14,24 +14,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: loeiten/celma_env:latest
-    strategy:
-      fail-fast: true
+    env:
+      # Container jobs set HOME to /github/home, the makefiles look in $HOME
+      HOME: /root
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Build CELMA
+      - name: Build every target
         run: |
-          cd celma
-          make
+          set -e
+          for makefile in $(find . -name makefile | sort); do
+            echo "::group::$makefile"
+            make -C "$(dirname "$makefile")"
+            echo "::endgroup::"
+          done
 
-      - name: Build CELMA with Boussinesq approximation
+      - name: Filter test
         run: |
-          cd ../celmaWithBoussinesqApprox
-          make
+          set -e
+          cd tests/radialLowPass
+          ./radialLowPass -d data
+
+      - name: Regression test of the models
+        run: python3 tests/regression/regression.py
