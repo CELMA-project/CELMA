@@ -30,7 +30,7 @@ MODELS = {
         "vort",
     ),
 }
-MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=16")
+MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
 RUN = ("nout=5", "timestep=1e-6")
 RTOL = 1.0e-6
 
