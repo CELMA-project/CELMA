@@ -44,3 +44,11 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
             python3 tests/regression/regression.py
+
+      - name: Keep the recorded numbers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-reference
+          path: recorded-reference.json
+          if-no-files-found: ignore

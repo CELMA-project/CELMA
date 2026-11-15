@@ -33,6 +33,7 @@ MODELS = {
 MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
 RUN = ("nout=5", "timestep=1e-6")
 RTOL = 1.0e-6
+RECORDED = Path("recorded-reference.json")
 
 
 def run_model(name: str, workdir: Path) -> Dict[str, List[float]]:
@@ -90,10 +91,8 @@ def main() -> int:
                 print(f"FAIL {name} {field}: not finite")
                 return 1
     if not REFERENCE.exists():
-        print(f"FAIL no reference at {REFERENCE}; the numbers follow")
-        print("REFERENCE-BEGIN")
-        print(json.dumps(actual))
-        print("REFERENCE-END")
+        RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
+        print(f"FAIL no reference at {REFERENCE}; the numbers are in {RECORDED}")
         return 1
     reference = json.loads(REFERENCE.read_text())
     failed = False
