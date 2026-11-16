@@ -62,7 +62,7 @@ def run_model(name: str, workdir: Path) -> Dict[str, List[float]]:
     source = ROOT / directory
     shutil.copy(source / case / "BOUT.inp", workdir / "BOUT.inp")
     command = [str(source / executable), "-d", str(workdir), *MESH, *RUN]
-    subprocess.run(command, cwd=source, check=True)  # nosec
+    subprocess.run(command, cwd=source, check=True, timeout=1800)  # nosec
     wanted = ["ddt(" + v + ")" for v in (vorticity, "lnN", "momDensPar", "jPar")]
     wanted += [vorticity, "lnN", "momDensPar", "jPar"]
     fields = {}

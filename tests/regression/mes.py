@@ -46,7 +46,7 @@ def read_int(text: str, key: str, default: int) -> int:
     int
         The value.
     """
-    match = re.search(rf"^{key}\s*=\s*(\d+)(?:\s*\^\s*(\d+))?", text, re.M)
+    match = re.search(rf"^\s*{key}\s*=\s*(\d+)(?:\s*\^\s*(\d+))?", text, re.M)
     if not match:
         return default
     base, power = int(match.group(1)), match.group(2)
@@ -108,6 +108,7 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
+            timeout=600,
         )
         dump = Path(tmp) / "BOUT.dmp.0.nc"
         if done.returncode != 0 or not dump.exists():
@@ -139,7 +140,7 @@ def main() -> int:
             if (new is None) != (old is None):
                 failed.append(name)
             elif new is not None and old is not None:
-                if abs(new - old) > RTOL * max(abs(old), NOISE):
+                if not abs(new - old) <= RTOL * max(abs(old), NOISE):
                     failed.append(name)
     for name in sorted(set(failed)):
         print(f"FAIL {name}: {actual.get(name)} against {reference.get(name)}")
