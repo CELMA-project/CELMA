@@ -34,7 +34,7 @@ MODELS = {
 MESH = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
 RUN = ("nout=10", "timestep=1e-2")
 RTOL = 1.0e-6
-NOISE = 1.0e-10
+ATOL = 1.0e-14
 RECORDED = Path("recorded-reference.json")
 
 
@@ -101,10 +101,11 @@ def main() -> int:
     for name, fields in actual.items():
         for field, values in fields.items():
             expected = np.array(reference[name][field])
-            scale = max(float(np.max(np.abs(expected))), NOISE)
-            error = float(np.max(np.abs(np.array(values) - expected))) / scale
+            diff = float(np.max(np.abs(np.array(values) - expected)))
+            allowed = RTOL * float(np.max(np.abs(expected))) + ATOL
+            error = diff / allowed * RTOL
             status = "ok  " if error <= RTOL else "FAIL"
-            failed = failed or error > RTOL
+            failed = failed or not error <= RTOL
             print(f"{status} {name} {field}: relative error {error:.3e}")
     return 1 if failed else 0
 

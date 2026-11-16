@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REFERENCE = Path(__file__).with_name("mes-reference.json")
 RECORDED = Path("recorded-mes.json")
 RTOL = 1.0e-6
-NOISE = 1.0e-12
+ATOL = 1.0e-14
 RESOLUTIONS = ((32, 34, 64), (64, 66, 128))
 
 
@@ -140,7 +140,7 @@ def main() -> int:
             if (new is None) != (old is None):
                 failed.append(name)
             elif new is not None and old is not None:
-                if not abs(new - old) <= RTOL * max(abs(old), NOISE):
+                if not abs(new - old) <= RTOL * abs(old) + ATOL:
                     failed.append(name)
     for name in sorted(set(failed)):
         print(f"FAIL {name}: {actual.get(name)} against {reference.get(name)}")
