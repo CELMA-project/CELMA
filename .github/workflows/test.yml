@@ -45,10 +45,17 @@ jobs:
           docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
             python3 tests/regression/regression.py
 
-      - name: Keep the recorded numbers
+      - name: Operator errors of the method of exact solutions cases
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
+            python3 tests/regression/mes.py
+
+      - name: Keep the numbers of this run
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: recorded-reference
-          path: recorded-reference.json
+          name: recorded-numbers
+          path: |
+            recorded-reference.json
+            recorded-mes.json
           if-no-files-found: ignore

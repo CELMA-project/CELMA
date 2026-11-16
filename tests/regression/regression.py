@@ -92,8 +92,8 @@ def main() -> int:
             if not np.all(np.isfinite(values)):
                 print(f"FAIL {name} {field}: not finite")
                 return 1
+    RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
     if not REFERENCE.exists():
-        RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
         print(f"FAIL no reference at {REFERENCE}; the numbers are in {RECORDED}")
         return 1
     reference = json.loads(gzip.decompress(REFERENCE.read_bytes()))
