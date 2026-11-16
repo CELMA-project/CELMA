@@ -60,7 +60,6 @@ int DDXCylinder::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DDXCylinder::rhs(BoutReal t) {
-
   TRACE("DDXCylinder::rhs");
 
   // Calculate

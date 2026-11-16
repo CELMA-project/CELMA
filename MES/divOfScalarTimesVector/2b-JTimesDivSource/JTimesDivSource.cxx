@@ -70,7 +70,6 @@ int JTimesDivSource::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int JTimesDivSource::rhs(BoutReal t) {
-
   TRACE("JTimesDivSource::rhs");
 
   // Calculate

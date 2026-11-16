@@ -6,6 +6,9 @@
  */
 
 #include "celmaWBA.hxx"
+#include <map>
+#include <string>
+#include <vector>
 
 // Initialization and solving of the physics
 // ############################################################################

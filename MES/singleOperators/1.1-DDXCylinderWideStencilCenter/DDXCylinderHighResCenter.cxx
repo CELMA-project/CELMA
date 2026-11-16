@@ -62,7 +62,6 @@ int DDXCylinderHighResCenter::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DDXCylinderHighResCenter::rhs(BoutReal t) {
-
   TRACE("DDXCylHighResCenter::rhs");
 
   // Calculate

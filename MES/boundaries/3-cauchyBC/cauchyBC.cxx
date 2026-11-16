@@ -6,6 +6,7 @@
  */
 
 #include "cauchyBC.hxx"
+#include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
@@ -53,7 +54,6 @@ int CauchyBC::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int CauchyBC::rhs(BoutReal t) {
-
   TRACE("CauchyBC::rhs");
 
   // Prepare cauchy

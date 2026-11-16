@@ -2,6 +2,7 @@
 #define __OWNFILTERS_CXX__
 
 #include "../include/ownFilters.hxx"
+#include <iostream>
 #include <string>
 
 // OwnFilters
@@ -21,13 +22,13 @@ OwnFilters::OwnFilters() {
   ncz = mesh->LocalNz;
 
   // Calculate the kMax from the Nyquist sampling theorem
-  kMax = int(ncz / 2.0);
+  kMax = static_cast<int>(ncz / 2.0);
 
   // Use the Orzag's 2/3 rule
   /* NOTE: Floor selects the closest lower number.
    *       This ensures that we do not get one spurious mode.
    */
-  kMax = int(floor((2.0 / 3.0) * kMax));
+  kMax = static_cast<int>(floor((2.0 / 3.0) * kMax));
 
   // Allocate fourierArray
   fourierArray = new dcomplex[ncz / 2 + 1];
@@ -140,7 +141,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) {
 
   circumference =
       TWOPI * coord->J(mesh->xstart, 0); // Lowest circumference (inner point)
-  kMaxCurrent = int(floor(circumference / lambdaMin));
+  kMaxCurrent = static_cast<int>(floor(circumference / lambdaMin));
   if (kMaxCurrent <= 0) {
     if (throwWarning) {
       std::cout << "WARNING: At inner rho, kMax = circumference/lambdaMin = "
@@ -184,7 +185,7 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
     // Set the current kMax (J = rho in cylinder coordinates)
     circumference = TWOPI * coord->J(xInd, 0);
     // Abs since the inner ghost point of the Jacobian can be negative
-    kMaxCurrent = int(abs(floor(circumference / lambdaMin)));
+    kMaxCurrent = static_cast<int>(abs(floor(circumference / lambdaMin)));
     for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {
       // Take the FFT for a given radius at a given parallel plane
       rfft(&(var(xInd, yInd, 0)), ncz, fourierArray);

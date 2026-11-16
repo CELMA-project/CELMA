@@ -2,6 +2,7 @@
 #define __PARAMETERS_CXX__
 
 #include "../include/parameters.hxx"
+#include <string>
 
 // FIXME: This constructor is long. Should be refactored!
 /*!
@@ -425,7 +426,6 @@ BoutReal Parameters::getNuENNorm() const {
  * \param[out] nuIN The normalized version of nuIN
  */
 BoutReal Parameters::getNuINNorm() const {
-
   TRACE("Parameters::getNuIN");
   return nuINNorm;
 }
@@ -496,7 +496,6 @@ BoutReal Parameters::getRhoS() const {
  * \param[out] eta0INorm The normalized viscosity coefficient
  */
 BoutReal Parameters::getEta0INorm() const {
-
   TRACE("Parameters::getEta0I");
   return eta0INorm;
 }
@@ -507,7 +506,6 @@ BoutReal Parameters::getEta0INorm() const {
  * \param[out] eta0ENorm The normalized viscosity coefficient
  */
 BoutReal Parameters::getEta0ENorm() const {
-
   TRACE("Parameters::getEta0E");
   return eta0ENorm;
 }

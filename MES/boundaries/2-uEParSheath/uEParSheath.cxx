@@ -6,6 +6,7 @@
  */
 
 #include "uEParSheath.hxx"
+#include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
@@ -64,7 +65,6 @@ int UeSheath::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int UeSheath::rhs(BoutReal t) {
-
   TRACE("UeSheath::rhs");
 
   // Extrapolate

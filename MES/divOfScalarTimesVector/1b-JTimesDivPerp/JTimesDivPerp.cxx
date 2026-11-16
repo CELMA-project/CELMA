@@ -73,7 +73,6 @@ int JTimesDivPerp::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int JTimesDivPerp::rhs(BoutReal t) {
-
   TRACE("JTimesDivPerp::rhs");
 
   // Calculate

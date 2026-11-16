@@ -60,7 +60,6 @@ int D2DX2Cylinder::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int D2DX2Cylinder::rhs(BoutReal t) {
-
   TRACE("D2DX2Cylinder::rhs");
 
   // Calculate

@@ -60,7 +60,6 @@ int DDXOverJCylinder::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DDXOverJCylinder::rhs(BoutReal t) {
-
   TRACE("DDXOverJCylinder::rhs");
 
   // Calculate

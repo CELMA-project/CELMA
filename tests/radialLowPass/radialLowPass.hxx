@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __RadialLowPass_H__
-#define __RadialLowPass_H__
+#ifndef TESTS_RADIALLOWPASS_RADIALLOWPASS_HXX_
+#define TESTS_RADIALLOWPASS_RADIALLOWPASS_HXX_
 
 #include "../../common/BOUTExtensions/include/ownFilters.hxx"
 #include <bout/constants.hxx> // Gives PI and TWOPI
@@ -44,4 +44,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // TESTS_RADIALLOWPASS_RADIALLOWPASS_HXX_

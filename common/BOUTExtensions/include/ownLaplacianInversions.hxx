@@ -1,5 +1,5 @@
-#ifndef __OWNLAPLACIANINVERSIONS_H__
-#define __OWNLAPLACIANINVERSIONS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_OWNLAPLACIANINVERSIONS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_OWNLAPLACIANINVERSIONS_HXX_
 
 #include "ownBCs.hxx"       // Must know about the boundary conditions
 #include "ownOperators.hxx" // Must know about the operators class
@@ -54,7 +54,9 @@ public:
                        Field3D &vort);
 };
 
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
 // Function bodies of the non-inlined functions are located in the .cxx file
-#include "../src/ownLaplacianInversions.cxx"
+#include "../src/ownLaplacianInversions.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_OWNLAPLACIANINVERSIONS_HXX_

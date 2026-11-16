@@ -59,7 +59,6 @@ int PolAvgTest::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int PolAvgTest::rhs(BoutReal t) {
-
   TRACE("PolAvgTest::rhs");
 
   // Calculate the integral

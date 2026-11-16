@@ -6,6 +6,7 @@
  */
 
 #include "yExtrapolation.hxx"
+#include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
@@ -53,7 +54,6 @@ int YExtrapolation::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int YExtrapolation::rhs(BoutReal t) {
-
   TRACE("YExtrapolation::rhs");
 
   // Extrapolate

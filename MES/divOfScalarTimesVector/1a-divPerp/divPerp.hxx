@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __DivPerp_H__
-#define __DivPerp_H__
+#ifndef MES_DIVOFSCALARTIMESVECTOR_1A_DIVPERP_DIVPERP_HXX_
+#define MES_DIVOFSCALARTIMESVECTOR_1A_DIVPERP_DIVPERP_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -54,4 +54,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_DIVOFSCALARTIMESVECTOR_1A_DIVPERP_DIVPERP_HXX_

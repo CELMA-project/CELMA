@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __JTimesDivSource_H__
-#define __JTimesDivSource_H__
+#ifndef MES_DIVOFSCALARTIMESVECTOR_2B_JTIMESDIVSOURCE_JTIMESDIVSOURCE_HXX_
+#define MES_DIVOFSCALARTIMESVECTOR_2B_JTIMESDIVSOURCE_JTIMESDIVSOURCE_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -57,4 +57,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_DIVOFSCALARTIMESVECTOR_2B_JTIMESDIVSOURCE_JTIMESDIVSOURCE_HXX_

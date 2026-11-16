@@ -2,6 +2,7 @@
 #define __OWNLAPLACIANINVERSIONS_CXX__
 
 #include "../include/ownLaplacianInversions.hxx"
+#include <algorithm>
 #include <string>
 
 /*!
@@ -15,7 +16,6 @@
  */
 void OwnLaplacianInversions::create(OwnOperators *opObj, OwnBCs &BCObj,
                                     const std::string &section) {
-
   TRACE("Halt in OwnLaplacianInversions::OwnLaplacianInversions");
 
   // Set the operator and boundary object

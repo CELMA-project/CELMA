@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __DivSource_H__
-#define __DivSource_H__
+#ifndef MES_DIVOFSCALARTIMESVECTOR_2A_DIVSOURCE_DIVSOURCE_HXX_
+#define MES_DIVOFSCALARTIMESVECTOR_2A_DIVSOURCE_DIVSOURCE_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -57,4 +57,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_DIVOFSCALARTIMESVECTOR_2A_DIVSOURCE_DIVSOURCE_HXX_
