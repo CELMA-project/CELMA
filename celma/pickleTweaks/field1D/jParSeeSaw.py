@@ -11,6 +11,7 @@ import scipy.constants as cst
 from boututils.options import BOUTOptions
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -24,21 +25,21 @@ jPar = {}
 
 # Convert to physical
 inputFileOpts = BOUTOptions("../../CSDXNyScan")
-Lz  = eval(inputFileOpts.input["length"])
-Te0 = eval(inputFileOpts.input["Te0"])*cst.e
-B0  = eval(inputFileOpts.input["B0"])
+Lz = eval(inputFileOpts.input["length"])
+Te0 = eval(inputFileOpts.input["Te0"]) * cst.e
+B0 = eval(inputFileOpts.input["B0"])
 if inputFileOpts.input["gas"] != "Ar":
     raise ValueError("This routine is only made for Ar gas")
 
-mi  = 39.948*cst.u
-e   = cst.e
+mi = 39.948 * cst.u
+e = cst.e
 
-omCI = e*B0/mi
-cS   = np.sqrt(Te0/mi)
-rhoS = cS/omCI
+omCI = e * B0 / mi
+cS = np.sqrt(Te0 / mi)
+rhoS = cS / omCI
 
 # Make the factors
-factor = rhoS/Lz
+factor = rhoS / Lz
 factorStr = r"$f = {:.2f}$"
 
 # Collect from ny scan
@@ -52,7 +53,7 @@ for ny in nys:
 
     jParAx = fig.get_axes()[4]
     jPar[ny]["data"] = jParAx.get_lines()[0].get_data()
-    jPar[ny]["leg"]  = factorStr.format(ny*factor)
+    jPar[ny]["leg"] = factorStr.format(ny * factor)
     plt.close(fig)
 
 # Collect from fieldScan
@@ -61,25 +62,28 @@ with open(path, "rb") as f:
     fig = pickle.load(f)
 
 jParAx = fig.get_axes()[4]
-data   = jParAx.get_lines()[0].get_data()
+data = jParAx.get_lines()[0].get_data()
 ny = len(data[0])
 nys = list(nys)
 nys.append(ny)
 nys = tuple(nys)
 jPar[ny] = {}
 jPar[ny]["data"] = data
-jPar[ny]["leg"]  = factorStr.format(ny*factor)
+jPar[ny]["leg"] = factorStr.format(ny * factor)
 plt.close(fig)
 
-fig, ax = plt.subplots(figsize = SizeMaker.standard(w=4, a=0.5))
+fig, ax = plt.subplots(figsize=SizeMaker.standard(w=4, a=0.5))
 
 colors = seqCMap2(np.linspace(0, 1, len(nys)))
 
 for ny, color in zip(nys, colors):
-    ax.plot(jPar[ny]["data"][0], jPar[ny]["data"][1],\
-            label = jPar[ny]["leg"], alpha =0.7,\
-            color = color
-            )
+    ax.plot(
+        jPar[ny]["data"][0],
+        jPar[ny]["data"][1],
+        label=jPar[ny]["leg"],
+        alpha=0.7,
+        color=color,
+    )
 
 ax.set_xlabel(r"$z\;[\mathrm{m}]$")
 ax.set_ylabel(r"$j_\| \;[\mathrm{Cm}^{-2}\mathrm{s}^{-1}]$")
@@ -89,12 +93,13 @@ PlotHelper.makePlotPretty(ax)
 handles, labels = ax.get_legend_handles_labels()
 leg = ax.legend()
 leg.remove()
-fig.legend(handles,\
-           labels ,\
-           bbox_to_anchor=(1.05, 1.0),\
-           loc="upper left",\
-           borderaxespad=0.,\
-           bbox_transform = ax.transAxes,\
-           )
+fig.legend(
+    handles,
+    labels,
+    bbox_to_anchor=(1.05, 1.0),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=ax.transAxes,
+)
 
 PlotHelper.savePlot(fig, "jParRipple006.pdf")

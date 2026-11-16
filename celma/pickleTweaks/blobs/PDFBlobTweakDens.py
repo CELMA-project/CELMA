@@ -9,6 +9,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -40,25 +41,25 @@ with open(fileName, "rb") as f:
     PDFStats = pickle.load(f)
 
 posKey = list(PDFStats.keys())[0]
-skew       = PDFStats[posKey]["skew"]
+skew = PDFStats[posKey]["skew"]
 kurtExcess = PDFStats[posKey]["kurtExcess"]
 
 # Add skewness and kurtosis to the plot
 # Get the textSize
 textPos = (0.595, 0.935)
 # Add text
-SKTxt = ax.\
-        text(*textPos,\
-            "$S \;\; = {:.2f}$\n $K_E = {:.2f}$".\
-            format(skew, kurtExcess),\
-            transform = ax.transAxes,\
-            ha="left", va="top",\
-            bbox={"facecolor":"white", "alpha":0.5, "pad":5},\
-            )
+SKTxt = ax.text(
+    *textPos,
+    "$S \;\; = {:.2f}$\n $K_E = {:.2f}$".format(skew, kurtExcess),
+    transform=ax.transAxes,
+    ha="left",
+    va="top",
+    bbox={"facecolor": "white", "alpha": 0.5, "pad": 5},
+)
 SKTxt.set_fontsize(txtSize)
 
 # Resize the figure
 _, height = fig.get_size_inches()
-fig.set_size_inches((2.70, height*0.7))
+fig.set_size_inches((2.70, height * 0.7))
 
 PlotHelper.savePlot(fig, "blobDensPDF_{}.pdf".format(scan))

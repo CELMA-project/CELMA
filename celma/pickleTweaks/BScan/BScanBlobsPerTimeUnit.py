@@ -9,6 +9,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -37,67 +38,71 @@ for scan in scans:
     time, _ = ax.get_lines()[0].get_data()
     lastT = time[-1]
     curScan = float(scan[4:])
-    blobs   = counts.blobs
-    holes   = counts.holes
-    blobsPerTime.append(blobs/lastT)
-    holesPerTime.append(holes/lastT)
+    blobs = counts.blobs
+    holes = counts.holes
+    blobsPerTime.append(blobs / lastT)
+    holesPerTime.append(holes / lastT)
     scanVal.append(curScan)
 
     print("Found {} blobs and {} holes for {}".format(blobs, holes, scan))
 
 plt.close("all")
 
-fig, ax = plt.subplots(figsize = (4,1))
+fig, ax = plt.subplots(figsize=(4, 1))
 
-yTicks    = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
-xBarVals  = tuple(range(len(blobsPerTime)*3))
+yTicks = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
+xBarVals = tuple(range(len(blobsPerTime) * 3))
 blobsVals = xBarVals[0::3]
 holesVals = xBarVals[1::3]
 spaceVals = xBarVals[2::3]
 
 # Find the lowest value
-lowestVal = np.min(holesPerTime if np.min(holesPerTime) < np.min(blobsPerTime)\
-                                else blobsPerTime)
+lowestVal = np.min(
+    holesPerTime if np.min(holesPerTime) < np.min(blobsPerTime) else blobsPerTime
+)
 # Pad with 5%
-lowestVal = 0.95*lowestVal
+lowestVal = 0.95 * lowestVal
 
 # Get the color cycler
 # http://stackoverflow.com/questions/13831549/get-matplotlib-color-cycle-state
 prop_cycler = ax._get_lines.prop_cycler
 # Plot
-blobRects = ax.barh(blobsVals       ,\
-                    blobsPerTime    ,\
-                    left = lowestVal,\
-                    color="black"   ,\
-                   )
+blobRects = ax.barh(
+    blobsVals,
+    blobsPerTime,
+    left=lowestVal,
+    color="black",
+)
 
-holeRects = ax.barh(holesVals        ,\
-                    holesPerTime     ,\
-                    left = lowestVal ,\
-                    color="white"    ,\
-                    edgecolor="black",\
-                   )
+holeRects = ax.barh(
+    holesVals,
+    holesPerTime,
+    left=lowestVal,
+    color="white",
+    edgecolor="black",
+)
 
 # Add space
-ax.barh(spaceVals       ,\
-        blobsPerTime    ,\
-        left = lowestVal,\
-        color="white"   ,\
-       )
+ax.barh(
+    spaceVals,
+    blobsPerTime,
+    left=lowestVal,
+    color="white",
+)
 
 # Set text
 for nr, (rect, txt) in enumerate(zip(holeRects, yTicks)):
-    width  = rect.get_width()
+    width = rect.get_width()
     height = rect.get_y()
     # Add 4% padding
-    x      = 0
-    y      = height
+    x = 0
+    y = height
     ax.text(x, y, txt, ha="center", va="center")
 
 ax.set_xlabel(r"$[\mathrm{s}^{-1}]$")
 
-ax.spines["top"]  .set_visible(False)
-ax.spines["left"] .set_visible(False)
+ax.spines["top"].set_visible(False)
+ax.spines["left"].set_visible(False)
 ax.spines["right"].set_visible(False)
 ax.get_yaxis().set_visible(False)
 
@@ -106,17 +111,19 @@ ax.grid(False)
 
 # Make legend manually
 handles = (holeRects[0], blobRects[0])
-labels  = ("$\mathrm{Holes}$",\
-           "$\mathrm{Blobs}$",\
-           )
+labels = (
+    "$\mathrm{Holes}$",
+    "$\mathrm{Blobs}$",
+)
 
 fig.suptitle(r"$\mathrm{Average\;blobs\;and\;holes\;per\;second}$", y=1.1)
-fig.legend(handles                      ,\
-           labels                       ,\
-           bbox_to_anchor=(1.02, 1.0)   ,\
-           loc="upper left"             ,\
-           borderaxespad=0.             ,\
-           bbox_transform = ax.transAxes,\
-           )
+fig.legend(
+    handles,
+    labels,
+    bbox_to_anchor=(1.02, 1.0),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=ax.transAxes,
+)
 
 PlotHelper.savePlot(fig, "BScanBlobCount.pdf")

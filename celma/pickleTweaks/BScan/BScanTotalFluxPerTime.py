@@ -13,6 +13,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -21,12 +22,13 @@ sys.path.append(commonDir)
 from CELMAPy.plotHelpers import PlotHelper
 
 scans = ("B0_0.06", "B0_0.08", "B0_0.1")
-elPerTime   = []
+elPerTime = []
 ionsPerTime = []
 perpPerTime = []
-scanVal     = []
+scanVal = []
 
-#{{{getNumber
+
+# {{{getNumber
 def getNumber(t, ind):
     """
     Retruns the string in the total fluxes.
@@ -46,15 +48,21 @@ def getNumber(t, ind):
         The value extracted from the text
     """
 
-    val =  eval(t.split("=")[ind].split(";")[0].replace("$","") .\
-                                                replace("\\","").\
-                                                replace("{","") .\
-                                                replace("}","") .\
-                                                replace("cdot 10^","e").
-                                                replace("cdot","*"))
+    val = eval(
+        t.split("=")[ind]
+        .split(";")[0]
+        .replace("$", "")
+        .replace("\\", "")
+        .replace("{", "")
+        .replace("}", "")
+        .replace("cdot 10^", "e")
+        .replace("cdot", "*")
+    )
 
     return val
-#}}}
+
+
+# }}}
 
 for scan in scans:
     path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/totalFluxes/".format(scan)
@@ -72,54 +80,55 @@ for scan in scans:
 
     # Get the numbers from the first axis
     t = parallelAx.texts[0].get_text()
-    totParEl  = getNumber(t, ind = 1)
-    totParIon = getNumber(t, ind = 2)
+    totParEl = getNumber(t, ind=1)
+    totParIon = getNumber(t, ind=2)
 
     t = perpAx.texts[0].get_text()
-    totPerp = getNumber(t, ind = 1)
+    totPerp = getNumber(t, ind=1)
 
-    elPerTime  .append(totParEl/lastT)
-    ionsPerTime.append(totParIon/lastT)
-    perpPerTime.append(totPerp/lastT)
+    elPerTime.append(totParEl / lastT)
+    ionsPerTime.append(totParIon / lastT)
+    perpPerTime.append(totPerp / lastT)
 
     scanVal.append(curScan)
 
 plt.close("all")
 
 # Perp values
-fig, (perpAx, parAx) = plt.subplots(ncols=2, figsize = (5,1))
-yTicks   = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
+fig, (perpAx, parAx) = plt.subplots(ncols=2, figsize=(5, 1))
+yTicks = tuple(r"${}\; \mathrm{{T}}$".format(B) for B in scanVal)
 xBarVals = tuple(range(len(perpPerTime)))
 
 # Find the lowest value
 lowestVal = np.min(perpPerTime)
 # Pad with 5%
-lowestVal = 0.95*lowestVal
+lowestVal = 0.95 * lowestVal
 
 # Get the color cycler
 # http://stackoverflow.com/questions/13831549/get-matplotlib-color-cycle-state
 prop_cycler = perpAx._get_lines.prop_cycler
 # Plot
-perpRects = perpAx.barh(xBarVals                        ,\
-                        perpPerTime                     ,\
-                        left = lowestVal                ,\
-                        color=next(prop_cycler)["color"],\
-                       )
+perpRects = perpAx.barh(
+    xBarVals,
+    perpPerTime,
+    left=lowestVal,
+    color=next(prop_cycler)["color"],
+)
 
 # Set text
 for nr, (rect, txt) in enumerate(zip(perpRects, yTicks)):
-    width  = rect.get_width()
+    width = rect.get_width()
     height = rect.get_y()
     # Add 4% padding
-    x      = width*1.04 + lowestVal
-    y      = height + rect.get_height()/2
+    x = width * 1.04 + lowestVal
+    y = height + rect.get_height() / 2
     perpAx.text(x, y, txt, ha="left", va="center")
 
 perpAx.set_xlabel(r"$[\mathrm{s}^{-1}]$")
 perpAx.set_title(r"$\mathrm{Perpendicular}$")
 
-perpAx.spines["top"]  .set_visible(False)
-perpAx.spines["left"] .set_visible(False)
+perpAx.spines["top"].set_visible(False)
+perpAx.spines["left"].set_visible(False)
 perpAx.spines["right"].set_visible(False)
 perpAx.get_yaxis().set_visible(False)
 
@@ -128,41 +137,43 @@ perpAx.grid(False)
 
 
 # Par values
-xBarVals = tuple(range(len(perpPerTime)*2))
+xBarVals = tuple(range(len(perpPerTime) * 2))
 ionXBarVals = xBarVals[1::2]
-elXBarVals  = xBarVals[0::2]
+elXBarVals = xBarVals[0::2]
 
 # Find the lowest value
 lowestVal = np.min(perpPerTime)
 # Pad with 5%
-lowestVal = 0.95*lowestVal
+lowestVal = 0.95 * lowestVal
 
 # Plot
-elRects = parAx.barh(elXBarVals                      ,\
-                     elPerTime                       ,\
-                     left = lowestVal                ,\
-                     color=next(prop_cycler)["color"],\
-                    )
-ionRects = parAx.barh(ionXBarVals                     ,\
-                      ionsPerTime                     ,\
-                      left = lowestVal                ,\
-                      color=next(prop_cycler)["color"],\
-                     )
+elRects = parAx.barh(
+    elXBarVals,
+    elPerTime,
+    left=lowestVal,
+    color=next(prop_cycler)["color"],
+)
+ionRects = parAx.barh(
+    ionXBarVals,
+    ionsPerTime,
+    left=lowestVal,
+    color=next(prop_cycler)["color"],
+)
 
 # Set text
 for nr, (rect, txt) in enumerate(zip(ionRects, yTicks)):
-    width  = rect.get_width()
+    width = rect.get_width()
     height = rect.get_y()
     # Add 4% padding
-    x      = width*1.04 + lowestVal
-    y      = height
+    x = width * 1.04 + lowestVal
+    y = height
     parAx.text(x, y, txt, ha="left", va="center")
 
 parAx.set_xlabel(r"$[\mathrm{s}^{-1}]$")
 parAx.set_title(r"$\mathrm{Parallel}$")
 
-parAx.spines["top"]  .set_visible(False)
-parAx.spines["left"] .set_visible(False)
+parAx.spines["top"].set_visible(False)
+parAx.spines["left"].set_visible(False)
 parAx.spines["right"].set_visible(False)
 parAx.get_yaxis().set_visible(False)
 
@@ -171,18 +182,20 @@ parAx.grid(False)
 
 # Make legend manually
 handles = (perpRects[0], ionRects[0], elRects[0])
-labels  = ("$\mathrm{Both}$"     ,\
-           "$\mathrm{Ions}$"     ,\
-           "$\mathrm{Electrons}$",\
-           )
+labels = (
+    "$\mathrm{Both}$",
+    "$\mathrm{Ions}$",
+    "$\mathrm{Electrons}$",
+)
 
-fig.legend(handles                         ,\
-           labels                          ,\
-           bbox_to_anchor=(1.25, 1.0)      ,\
-           loc="upper left"                ,\
-           borderaxespad=0.                ,\
-           bbox_transform = parAx.transAxes,\
-           )
+fig.legend(
+    handles,
+    labels,
+    bbox_to_anchor=(1.25, 1.0),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=parAx.transAxes,
+)
 
 fig.suptitle(r"$\mathrm{Average\;particle\;flux}$", y=1.3)
 

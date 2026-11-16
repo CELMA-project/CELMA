@@ -8,26 +8,31 @@ from sympy import symbols
 from sympy import Eq, Derivative
 from sympy import sin, cos, atan, sqrt
 
-x, y, z = symbols('x, y, z', real=True)
-rho = symbols('rho', positive=True)
-theta = symbols('theta', real=True)
+x, y, z = symbols("x, y, z", real=True)
+rho = symbols("rho", positive=True)
+theta = symbols("theta", real=True)
 cartCoord = [x, y, z]
 # Using the Clebsch system B = e^3 x e^1 (the order is important)
-cylCoord  = [rho, z, theta]
+cylCoord = [rho, z, theta]
 
-cartMap = OrderedDict([
-            (x, rho*cos(theta)),
-            (y, rho*sin(theta)),
-            (z, z),
-            ])
+cartMap = OrderedDict(
+    [
+        (x, rho * cos(theta)),
+        (y, rho * sin(theta)),
+        (z, z),
+    ]
+)
 
-cylMap = OrderedDict([
-            (rho,   sqrt(x**2 + y**2)),
-            (z,     z),
-            (theta, atan(y/x)),
-            ])
+cylMap = OrderedDict(
+    [
+        (rho, sqrt(x**2 + y**2)),
+        (z, z),
+        (theta, atan(y / x)),
+    ]
+)
 
-#{{{poisson
+
+# {{{poisson
 def poisson(a, b):
     """
     Poisson bracket in cylinder geometry
@@ -35,24 +40,30 @@ def poisson(a, b):
     NOTE: This is derived for the Clebsch system
     """
 
-    return Derivative(a, theta)*Derivative(b, rho) - Derivative(a, rho)*Derivative(b, theta)
-#}}}
+    return Derivative(a, theta) * Derivative(b, rho) - Derivative(a, rho) * Derivative(
+        b, theta
+    )
 
-#{{{displayVec
+
+# }}}
+
+
+# {{{displayVec
 def displayVec(v, LHS=None):
     """Displays the vector nicely in a notebook"""
 
     if LHS == None:
-        LHS = 'v'
-    if type(v).__name__ == 'ClebschVec':
+        LHS = "v"
+    if type(v).__name__ == "ClebschVec":
         if v.covariant:
-            binder = '_'
+            binder = "_"
         else:
-            binder = '^'
+            binder = "^"
     else:
-        binder = '_'
+        binder = "_"
 
     for coord in cylCoord:
-        display(Eq(symbols(LHS + binder + str(coord)),\
-                           v.__getattribute__(str(coord))))
-#}}}
+        display(Eq(symbols(LHS + binder + str(coord)), v.__getattribute__(str(coord))))
+
+
+# }}}

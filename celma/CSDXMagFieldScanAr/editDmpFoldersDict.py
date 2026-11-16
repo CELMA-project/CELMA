@@ -26,4 +26,4 @@ for nr in range(len(dmpFolders["turbulence"])):
 dmpFolders["turbulence"] = tuple(dmpFolders["turbulence"])
 
 with open("dmpFoldersDict.pickle", "wb") as f:
-    pickle.dump(dmpFolders,f)
+    pickle.dump(dmpFolders, f)

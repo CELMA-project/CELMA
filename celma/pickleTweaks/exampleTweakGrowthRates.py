@@ -8,6 +8,7 @@ import pickle
 import matplotlib.pylab as plt
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../common")
 # Sys path is a list of system paths
@@ -35,13 +36,14 @@ leg = axUp.legend()
 # Remove old legend
 leg.remove()
 
-fig.legend(handles,\
-           labels,\
-           bbox_to_anchor=(1.05, 1.0),\
-           loc="upper left",\
-           borderaxespad=0.,\
-           bbox_transform = axUp.transAxes,\
-           )
+fig.legend(
+    handles,
+    labels,
+    bbox_to_anchor=(1.05, 1.0),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=axUp.transAxes,
+)
 
 # Tweak the size a bit
 fig.set_figwidth(2.0)

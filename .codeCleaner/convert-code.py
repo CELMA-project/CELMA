@@ -8,6 +8,7 @@ from glob import glob
 from subprocess import call
 from os.path import expanduser
 
+
 def convert(path):
     """
     Converts the code using the binary specified in the input path
@@ -15,11 +16,12 @@ def convert(path):
 
     extension = ("*.cxx", "*.hxx")
     for ex in extension:
-        files = glob("./../**/"+ex, recursive = True)
+        files = glob("./../**/" + ex, recursive=True)
         for f in files:
             cmd = "python {} -r {}".format(path, f)
             print(cmd)
             call(cmd.split())
+
 
 if __name__ == "__main__":
     home = expanduser("~")

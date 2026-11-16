@@ -12,6 +12,7 @@ import numpy as np
 from matplotlib.pylab import MaxNLocator
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -35,71 +36,68 @@ handles, labels = imAx.get_legend_handles_labels()
 
 newLabels = []
 for label in labels:
-    nr = float(label.split("$")[3].replace("\cdot 10", "e").replace("^{","").replace("}",""))
-    nr = n0/(n0+np.array(nr))*100
+    nr = float(
+        label.split("$")[3].replace("\cdot 10", "e").replace("^{", "").replace("}", "")
+    )
+    nr = n0 / (n0 + np.array(nr)) * 100
     newLabels.append(r"$d\;=\;{:d}\%$".format(int(np.ceil(nr))))
 
 # Create new fig
-newFig, newAxes = plt.subplots(nrows=2                      ,\
-                               figsize=fig.get_size_inches(),\
-                               sharex=True)
+newFig, newAxes = plt.subplots(nrows=2, figsize=fig.get_size_inches(), sharex=True)
 
 # Obtain the errobarOptions
 errorbarOptions = PlotGrowthRates.errorbarOptions
-errorbarOptions.pop("color" )
+errorbarOptions.pop("color")
 errorbarOptions.pop("ecolor")
 
 for ax, newAx in zip(axes, newAxes):
     lines = ax.get_lines()
-    meanLines  = lines[0::3]
+    meanLines = lines[0::3]
     yDownLines = lines[1::3]
-    yUpLines   = lines[2::3]
+    yUpLines = lines[2::3]
 
     x = meanLines[0].get_xdata()
 
-    meanY  = []
+    meanY = []
     yDownY = []
-    yUpY   = []
+    yUpY = []
     colors = []
 
     for mean, yDown, yUp in zip(meanLines, yDownLines, yUpLines):
-        meanY .append(mean .get_ydata())
+        meanY.append(mean.get_ydata())
         yDownY.append(yDown.get_ydata())
-        yUpY  .append(yUp  .get_ydata())
+        yUpY.append(yUp.get_ydata())
 
-        colors.append(mean .get_color())
+        colors.append(mean.get_color())
 
     for y, yDown, yUp, color in zip(meanY, yDownY, yUpY, colors):
         yDown = np.array(yDown) - np.array(y)
-        yUp   = np.array(y) - np.array(yUp)
-        yerr  = (np.array(yDown), np.array(yUp))
+        yUp = np.array(y) - np.array(yUp)
+        yerr = (np.array(yDown), np.array(yUp))
 
         # Replot
-        newAx.errorbar(x                ,\
-                       y                ,\
-                       color = color    ,\
-                       yerr  = yerr     ,\
-                       **errorbarOptions)
+        newAx.errorbar(x, y, color=color, yerr=yerr, **errorbarOptions)
 
         newAx.set_ylabel(ax.get_ylabel())
 
-newAxes[0].set_title (fig.texts[0].get_text())
+newAxes[0].set_title(fig.texts[0].get_text())
 newAxes[1].set_xlabel(reAx.get_xlabel())
-PlotHelper.makePlotPretty(newAxes[0], legend = False, rotation = 45)
-PlotHelper.makePlotPretty(newAxes[1], legend = False, rotation = 45)
+PlotHelper.makePlotPretty(newAxes[0], legend=False, rotation=45)
+PlotHelper.makePlotPretty(newAxes[1], legend=False, rotation=45)
 
 # Manually set the x and the y as the figure has different coordinates
 x = 0.4
 y = -0.4
 
-newFig.legend(handles,\
-              newLabels,\
-              bbox_to_anchor=(x, y),\
-              ncol=2,\
-              loc="upper center",\
-              borderaxespad=0.,\
-              bbox_transform = newAxes[1].transAxes,\
-             )
+newFig.legend(
+    handles,
+    newLabels,
+    bbox_to_anchor=(x, y),
+    ncol=2,
+    loc="upper center",
+    borderaxespad=0.0,
+    bbox_transform=newAxes[1].transAxes,
+)
 
 newAxes[0].get_xaxis().set_major_locator(MaxNLocator(integer=True))
 

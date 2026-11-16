@@ -70,7 +70,7 @@ def repair_corrupted(filename):
                 print(line, end="")
             else:
                 # Add the missing double quote (last character is a newline)
-                print(match.group(0)[:-1] + "\"")
+                print(match.group(0)[:-1] + '"')
     print("done")
 
 
@@ -79,12 +79,12 @@ if __name__ == "__main__":
     # (excluding the filename)
     filename = " ".join(sys.argv[1:])
     try:
-        with io.open(filename, 'r', encoding='utf8') as f:
+        with io.open(filename, "r", encoding="utf8") as f:
             nb = read(f, as_version=NO_CONVERT)
     except Exception as e:
         if "Notebook does not appear to be JSON" in e.args[0]:
             repair_corrupted(filename)
-            with io.open(filename, 'r', encoding='utf8') as f:
+            with io.open(filename, "r", encoding="utf8") as f:
                 nb = read(f, as_version=NO_CONVERT)
         else:
             raise e
