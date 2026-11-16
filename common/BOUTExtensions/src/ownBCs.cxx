@@ -710,4 +710,3 @@ void OwnBCs::innerRhoCylinderLoop(Field3D &f, const int &yStart,
 }
 
 #endif
-

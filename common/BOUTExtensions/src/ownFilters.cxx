@@ -208,4 +208,3 @@ const Field3D OwnFiltRadialLowPass::ownFilter(const Field3D &var) {
 }
 
 #endif
-

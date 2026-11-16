@@ -209,4 +209,3 @@ OwnLaplacianInversions::~OwnLaplacianInversions() {
   delete phiSolver;
 }
 #endif
-
