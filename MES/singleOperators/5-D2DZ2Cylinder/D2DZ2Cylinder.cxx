@@ -60,7 +60,7 @@ int D2DZ2Cylinder::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int D2DZ2Cylinder::rhs(BoutReal t) {
-  TRACE("D2DZ2Cylinder::~D2DZ2Cylinder");
+  TRACE("D2DZ2Cylinder::rhs");
 
   // Calculate
   S_num = D2DZ2(f);
