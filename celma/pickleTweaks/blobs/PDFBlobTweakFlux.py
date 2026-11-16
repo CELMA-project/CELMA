@@ -11,6 +11,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -43,7 +44,7 @@ time, PDFLine = l.get_data()
 PDFLim = ax.get_ylim()
 
 # Set the label colors
-colors = seqCMap2(np.linspace(0.25,0.75,3))
+colors = seqCMap2(np.linspace(0.25, 0.75, 3))
 
 # Obtain the PDF Stats
 fileName = os.path.join(path, "3", "PDFStats.pickle")
@@ -53,23 +54,24 @@ with open(fileName, "rb") as f:
 # Add lines to axis
 stdDevKeys = sorted(PDFStats["stdDev"].keys())
 for stdKey, color in zip(stdDevKeys, colors):
-    std = (PDFStats["stdDev"][stdKey],)*2
+    std = (PDFStats["stdDev"][stdKey],) * 2
     label = r"${}\sigma$".format(stdKey)
-    ax.plot(std, PDFLim, alpha = 0.7, lw=2, label=label, color=color)
+    ax.plot(std, PDFLim, alpha=0.7, lw=2, label=label, color=color)
 
 # Move legend outside
 handles, labels = ax.get_legend_handles_labels()
 # Remove handle and label deleted in the legend at the same time
 handles = handles[1:]
-labels  = labels [1:]
+labels = labels[1:]
 # Have them in reverse order for better plot
-fig.legend(handles[::-1],\
-           labels [::-1],\
-           bbox_to_anchor=(0.625, 0.66),\
-           loc="upper left",\
-           borderaxespad=0.,\
-           bbox_transform = ax.transAxes,\
-           )
+fig.legend(
+    handles[::-1],
+    labels[::-1],
+    bbox_to_anchor=(0.625, 0.66),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=ax.transAxes,
+)
 
 # Fix labels
 old = r"u_{E\times B,\rho}}"
@@ -85,17 +87,19 @@ ax.set_xlabel(xlabel)
 # Get the textSize
 textPos = (0.5575, 0.935)
 # Add text
-SKTxt = ax.\
-        text(*textPos,\
-            "$S \;\;= \;\;{:.2f}$\n $K_E = {:.2f}$".\
-            format(PDFStats["skew"], PDFStats["kurtExcess"]),\
-            transform = ax.transAxes,\
-            ha="left", va="top",\
-            bbox={"facecolor":"white", "alpha":0.5, "pad":5},\
-            )
+SKTxt = ax.text(
+    *textPos,
+    "$S \;\;= \;\;{:.2f}$\n $K_E = {:.2f}$".format(
+        PDFStats["skew"], PDFStats["kurtExcess"]
+    ),
+    transform=ax.transAxes,
+    ha="left",
+    va="top",
+    bbox={"facecolor": "white", "alpha": 0.5, "pad": 5},
+)
 SKTxt.set_fontsize(txtSize)
 
 # Resize the figure
 _, height = fig.get_size_inches()
-fig.set_size_inches((2.70, height*0.7))
+fig.set_size_inches((2.70, height * 0.7))
 PlotHelper.savePlot(fig, "blobFluxPDF_{}.pdf".format(scan))

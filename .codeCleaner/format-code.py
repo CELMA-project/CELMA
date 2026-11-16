@@ -16,7 +16,7 @@ if path is None:
 
 extension = ("*.cxx", "*.hxx")
 for ex in extension:
-    files = glob("./../**/"+ex, recursive = True)
+    files = glob("./../**/" + ex, recursive=True)
     for f in files:
         cmd = "clang-format -style=file {}".format(f)
         print(cmd)

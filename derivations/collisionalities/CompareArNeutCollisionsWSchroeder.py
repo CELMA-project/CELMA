@@ -12,9 +12,10 @@ magnitudes.
 import numpy as np
 import scipy.constants as cst
 
-#{{{crossSecArCELowEn
+
+# {{{crossSecArCELowEn
 def crossSecArCELowEn(TiEV):
-    #{{{docstring
+    # {{{docstring
     """
     Calculates the cross section for charge exchange in Argon for low
     energies.
@@ -33,13 +34,16 @@ def crossSecArCELowEn(TiEV):
     crossSecArCE : float
         Cross section for charge exchange in Ar measured in m^2
     """
-    #}}}
-    return 4.8e-19*(1+0.14*np.log(1/TiEV))**2.0
-#}}}
+    # }}}
+    return 4.8e-19 * (1 + 0.14 * np.log(1 / TiEV)) ** 2.0
 
-#{{{nuINCELowEn
+
+# }}}
+
+
+# {{{nuINCELowEn
 def nuINCELowEn(nn, Ti):
-    #{{{docstring
+    # {{{docstring
     """
     Calculated the charge exchange collision frequency for Ar at low
     energies.
@@ -59,15 +63,23 @@ def nuINCELowEn(nn, Ti):
     nuINCE : float
         The charge exchange collision frequency for Ar measured in s^-1
     """
-    #}}}
-    mi = 39.948*cst.m_u
-    nuINCE = (8*np.sqrt(2)/3)*(nn/np.sqrt(np.pi))*(np.sqrt(Ti/mi))*crossSecArCELowEn(Ti/cst.eV)
+    # }}}
+    mi = 39.948 * cst.m_u
+    nuINCE = (
+        (8 * np.sqrt(2) / 3)
+        * (nn / np.sqrt(np.pi))
+        * (np.sqrt(Ti / mi))
+        * crossSecArCELowEn(Ti / cst.eV)
+    )
     return nuINCE
-#}}}
 
-#{{{nuINTotLowEn
+
+# }}}
+
+
+# {{{nuINTotLowEn
 def nuINTotLowEn(nn, Ti):
-    #{{{docstring
+    # {{{docstring
     """
     Calculates the total ion-neutral collision frequencies for Ar at low
     energies.
@@ -92,23 +104,25 @@ def nuINTotLowEn(nn, Ti):
         The total ion-neutral collision frequencies for Ar measured in
         s^-1
     """
-    #}}}
+    # }}}
 
-    return 2.0*nuINCELowEn(nn, Ti)
-#}}}
+    return 2.0 * nuINCELowEn(nn, Ti)
+
+
+# }}}
 
 if __name__ == "__main__":
     # Reference density used in page 65 in Shroeder, C. - Ph.D. Thesis, 2003
     nn = 2.5e19
 
     # Reference temperature used in page 65 in Shroeder, C. - Ph.D. Thesis, 2003
-    TiRoom = 273*cst.Boltzmann
+    TiRoom = 273 * cst.Boltzmann
 
     # Collision frequency used in page 65 in Shroeder, C. - Ph.D. Thesis, 2003
     nuINS = 6e4
 
     nuINTot = nuINTotLowEn(nn, TiRoom)
-    message = ("Our frequency: {}, Shroeder, C. frequency {}\nSchroeder is a "
-               "factor {} larger").\
-                format(nuINTot, nuINS, nuINS/nuINTot)
+    message = (
+        "Our frequency: {}, Shroeder, C. frequency {}\nSchroeder is a factor {} larger"
+    ).format(nuINTot, nuINS, nuINS / nuINTot)
     print(message)

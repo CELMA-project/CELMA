@@ -10,6 +10,7 @@ import numpy as np
 from subprocess import Popen
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -19,17 +20,15 @@ from CELMAPy.plotHelpers import PlotHelper, seqCMap3
 
 folder = "../../CSDXMagFieldScanAr/visualizationPhysical/B0_0.1/field1D"
 for direction in ("radial", "parallel"):
-    picklePath = os.path.join(folder,\
-                              "mainFields-{}-1D-0.pickle".format(direction))
+    picklePath = os.path.join(folder, "mainFields-{}-1D-0.pickle".format(direction))
     with open(picklePath, "rb") as f:
         fig = pickle.load(f)
 
-    lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx =\
-            fig.get_axes()
+    lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx = fig.get_axes()
 
     # Swap axes
     phiAx.set_position(omDAx.get_position())
-    sAx  .set_position(nuiAx.get_position())
+    sAx.set_position(nuiAx.get_position())
 
     fig.delaxes(lnAx)
     fig.delaxes(omDAx)
@@ -60,10 +59,11 @@ for direction in ("radial", "parallel"):
         leg = ax.legend()
         # Remake legend
         leg.remove()
-        ax.legend(handles         ,\
-                  labels          ,\
-                  loc="upper left",\
-                 )
+        ax.legend(
+            handles,
+            labels,
+            loc="upper left",
+        )
 
     if direction == "radial":
         fileName = "B010Rad.pdf"

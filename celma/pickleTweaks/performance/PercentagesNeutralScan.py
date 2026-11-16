@@ -8,6 +8,7 @@ import pickle
 import matplotlib.pylab as plt
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -15,33 +16,41 @@ sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import SizeMaker, PlotHelper
 
-B0     = 0.06
-nn     = 1.5e+19
-modes  = ("Init", "Expand", "Linear", "Turbulence")
+B0 = 0.06
+nn = 1.5e19
+modes = ("Init", "Expand", "Linear", "Turbulence")
 
 # Make place holders for the data
-keys = ("Arithmetics"       ,\
-        "Communication"     ,\
-        "Input/output"      ,\
-        "Laplace inversions",\
-        "Time solver"       )
+keys = (
+    "Arithmetics",
+    "Communication",
+    "Input/output",
+    "Laplace inversions",
+    "Time solver",
+)
 
-data = {key:{"mean":[], "std":[], "x":[]} for key in keys}
+data = {key: {"mean": [], "std": [], "x": []} for key in keys}
 
 for mode in modes:
-    path = ("../../CSDXNeutralScanAr/"
-            "visualizationPhysical/nn_{}/"
-            "performance/performance{}.pickle").format(nn,mode)
+    path = (
+        "../../CSDXNeutralScanAr/"
+        "visualizationPhysical/nn_{}/"
+        "performance/performance{}.pickle"
+    ).format(nn, mode)
 
     with open(path, "rb") as f:
         fig = pickle.load(f)
 
     axDown = fig.get_axes()[1]
-    lines   = axDown.get_lines()
+    lines = axDown.get_lines()
     for l in lines:
-        label = l.get_label().replace("$","").\
-                    replace(r"\mathrm{","").replace("}","").\
-                    replace(r"\quad ","")
+        label = (
+            l.get_label()
+            .replace("$", "")
+            .replace(r"\mathrm{", "")
+            .replace("}", "")
+            .replace(r"\quad ", "")
+        )
 
         yData = l.get_data()[1]
 
@@ -50,7 +59,7 @@ for mode in modes:
         mean = yData.mean()
         if mean < 1:
             mean = 1
-            std  = 0
+            std = 0
         else:
             std = yData.std()
 
@@ -61,20 +70,20 @@ for mode in modes:
 
 # Make segments
 # +3 as we would like some space between the bars
-lenKeys  = len(keys)+5
-nBars    = len(modes)*lenKeys
+lenKeys = len(keys) + 5
+nBars = len(modes) * lenKeys
 xBarVals = tuple(range(nBars))
 
-data["Arithmetics"       ]["x"] = xBarVals[0::lenKeys]
-data["Communication"     ]["x"] = xBarVals[1::lenKeys]
-data["Input/output"      ]["x"] = xBarVals[2::lenKeys]
+data["Arithmetics"]["x"] = xBarVals[0::lenKeys]
+data["Communication"]["x"] = xBarVals[1::lenKeys]
+data["Input/output"]["x"] = xBarVals[2::lenKeys]
 data["Laplace inversions"]["x"] = xBarVals[3::lenKeys]
-data["Time solver"       ]["x"] = xBarVals[4::lenKeys]
+data["Time solver"]["x"] = xBarVals[4::lenKeys]
 
-tickVals= data["Input/output"]["x"]
+tickVals = data["Input/output"]["x"]
 
 # Create the figure
-fig, ax = plt.subplots(figsize = SizeMaker.standard(a=0.5, s=0.5))
+fig, ax = plt.subplots(figsize=SizeMaker.standard(a=0.5, s=0.5))
 
 for key in keys:
     d = data[key]
@@ -83,7 +92,9 @@ for key in keys:
 PlotHelper.makePlotPretty(ax)
 ax.xaxis.grid(False)
 ax.xaxis.set_ticks(tickVals)
-ax.xaxis.set_ticklabels(("Initial\nphase", "Expand\nphase", "Linear\nphase", "Turbulent\nphase"))
+ax.xaxis.set_ticklabels(
+    ("Initial\nphase", "Expand\nphase", "Linear\nphase", "Turbulent\nphase")
+)
 ax.set_ylabel("$\%$")
 
 # Move legend outside
@@ -92,12 +103,15 @@ handles, labels = ax.get_legend_handles_labels()
 # Remove old legend
 leg = ax.legend()
 leg.remove()
-fig.legend(handles,\
-           labels ,\
-           bbox_to_anchor=(1.05, 1.0),\
-           loc="upper left",\
-           borderaxespad=0.,\
-           bbox_transform = ax.transAxes,\
-           )
+fig.legend(
+    handles,
+    labels,
+    bbox_to_anchor=(1.05, 1.0),
+    loc="upper left",
+    borderaxespad=0.0,
+    bbox_transform=ax.transAxes,
+)
 
-PlotHelper.savePlot(fig, "PercentagesNeutralScanB0{}Nn{}".format(B0, nn).replace(".","_") + ".pdf")
+PlotHelper.savePlot(
+    fig, "PercentagesNeutralScanB0{}Nn{}".format(B0, nn).replace(".", "_") + ".pdf"
+)

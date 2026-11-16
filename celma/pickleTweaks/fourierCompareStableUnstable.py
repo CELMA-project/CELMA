@@ -9,6 +9,7 @@ import matplotlib.pylab as plt
 import numpy as np
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../common")
 # Sys path is a list of system paths
@@ -21,7 +22,7 @@ with open(picklePath, "rb") as f:
     fig = pickle.load(f)
 
 _, height = fig.get_size_inches()
-width   = 3
+width = 3
 fig.set_size_inches(width, height)
 fileName = "FFT01.pdf"
 PlotHelper.savePlot(fig, fileName)

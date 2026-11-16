@@ -11,6 +11,7 @@ import numpy as np
 from subprocess import Popen
 
 import os, sys
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
@@ -18,43 +19,43 @@ sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import PlotHelper, seqCMap3
 
-scans  = (\
-          "nn_9.9e+20"              ,\
-          "nn_4e+19"                ,\
-          "nn_1.5e+19"              ,\
-          "nn_6.666666666666668e+18",\
-          "nn_2.5e+18"              ,\
-         )
+scans = (
+    "nn_9.9e+20",
+    "nn_4e+19",
+    "nn_1.5e+19",
+    "nn_6.666666666666668e+18",
+    "nn_2.5e+18",
+)
 markers = ("*", "o", "s", "v", "^")
-ls = (\
-      (0, ()),\
-      (0, (5, 5)),\
-      (0, (3, 1, 1, 1)),\
-      (0, (3, 1, 1, 1, 1, 1)),\
-      (0, (1, 1)),\
-     )
+ls = (
+    (0, ()),
+    (0, (5, 5)),
+    (0, (3, 1, 1, 1)),
+    (0, (3, 1, 1, 1, 1, 1)),
+    (0, (1, 1)),
+)
 fields = ("n", "phi", "jPar", "om", "ui", "sA", "ue")
 
-sD =\
-    {s:{f:\
-        {"ax":None,"line":None,"ls":l,"marker":m,"color":None}\
-        for f in fields}\
-    for s, m, l in zip(scans, markers, ls)}
+sD = {
+    s: {
+        f: {"ax": None, "line": None, "ls": l, "marker": m, "color": None}
+        for f in fields
+    }
+    for s, m, l in zip(scans, markers, ls)
+}
 
 for direction in ("radial", "parallel"):
     for scan in scans:
         folder = "../../CSDXNeutralScanAr/visualizationPhysical/{}/field1D".format(scan)
-        picklePath = os.path.join(folder,\
-                                  "mainFields-{}-1D-0.pickle".format(direction))
+        picklePath = os.path.join(folder, "mainFields-{}-1D-0.pickle".format(direction))
         with open(picklePath, "rb") as f:
             fig = pickle.load(f)
 
-        lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx =\
-                fig.get_axes()
+        lnAx, phiAx, nAx, omDAx, jParAx, omAx, uiAx, nuiAx, ueAx, sAx = fig.get_axes()
 
         # Swap axes
         phiAx.set_position(omDAx.get_position())
-        sAx  .set_position(nuiAx.get_position())
+        sAx.set_position(nuiAx.get_position())
 
         fig.delaxes(lnAx)
         fig.delaxes(omDAx)
@@ -80,22 +81,22 @@ for direction in ("radial", "parallel"):
             line._markeredgecolor = color
 
         # Set the colors
-        sD[scan]["n"]   ["color"] = colors[0]
-        sD[scan]["phi"] ["color"] = colors[1]
+        sD[scan]["n"]["color"] = colors[0]
+        sD[scan]["phi"]["color"] = colors[1]
         sD[scan]["jPar"]["color"] = colors[2]
-        sD[scan]["om"]  ["color"] = colors[3]
-        sD[scan]["ui"]  ["color"] = colors[4]
-        sD[scan]["sA"]  ["color"] = colors[5]
-        sD[scan]["ue"]  ["color"] = colors[6]
+        sD[scan]["om"]["color"] = colors[3]
+        sD[scan]["ui"]["color"] = colors[4]
+        sD[scan]["sA"]["color"] = colors[5]
+        sD[scan]["ue"]["color"] = colors[6]
 
         # Set the lines
-        sD[scan]["n"]   ["line"] = nAx   .get_lines()[0].get_data()[1]
-        sD[scan]["phi"] ["line"] = phiAx .get_lines()[0].get_data()[1]
+        sD[scan]["n"]["line"] = nAx.get_lines()[0].get_data()[1]
+        sD[scan]["phi"]["line"] = phiAx.get_lines()[0].get_data()[1]
         sD[scan]["jPar"]["line"] = jParAx.get_lines()[0].get_data()[1]
-        sD[scan]["om"]  ["line"] = omAx  .get_lines()[0].get_data()[1]
-        sD[scan]["ui"]  ["line"] = uiAx  .get_lines()[0].get_data()[1]
-        sD[scan]["sA"]  ["line"] = sAx   .get_lines()[0].get_data()[1]
-        sD[scan]["ue"]  ["line"] = ueAx  .get_lines()[0].get_data()[1]
+        sD[scan]["om"]["line"] = omAx.get_lines()[0].get_data()[1]
+        sD[scan]["ui"]["line"] = uiAx.get_lines()[0].get_data()[1]
+        sD[scan]["sA"]["line"] = sAx.get_lines()[0].get_data()[1]
+        sD[scan]["ue"]["line"] = ueAx.get_lines()[0].get_data()[1]
 
         xAxis = nAx.get_lines()[0].get_data()[0]
 
@@ -103,27 +104,28 @@ for direction in ("radial", "parallel"):
         for ax in axes:
             ax.get_lines()[0].set_data((None,), (None,))
 
-        sD[scan]["n"]   ["ax"] = nAx
-        sD[scan]["phi"] ["ax"] = phiAx
+        sD[scan]["n"]["ax"] = nAx
+        sD[scan]["phi"]["ax"] = phiAx
         sD[scan]["jPar"]["ax"] = jParAx
-        sD[scan]["om"]  ["ax"] = omAx
-        sD[scan]["ui"]  ["ax"] = uiAx
-        sD[scan]["sA"]  ["ax"] = sAx
-        sD[scan]["ue"]  ["ax"] = ueAx
+        sD[scan]["om"]["ax"] = omAx
+        sD[scan]["ui"]["ax"] = uiAx
+        sD[scan]["sA"]["ax"] = sAx
+        sD[scan]["ue"]["ax"] = ueAx
 
     # Plot
     for scan in scans:
         fig = sD[scans[0]]["n"]["ax"].figure
         for key in sD[scans[0]].keys():
-            sD[scans[0]][key]["ax"].plot(xAxis,\
-                                         sD[scan][key]["line"],\
-                                         color     = sD[scan][key]["color"],\
-                                         marker    = sD[scan][key]["marker"],\
-                                         ms        = 5,\
-                                         markevery = 7,\
-                                         alpha     = 0.7,\
-                                         ls        = sD[scan][key]["ls"],\
-                                                 )
+            sD[scans[0]][key]["ax"].plot(
+                xAxis,
+                sD[scan][key]["line"],
+                color=sD[scan][key]["color"],
+                marker=sD[scan][key]["marker"],
+                ms=5,
+                markevery=7,
+                alpha=0.7,
+                ls=sD[scan][key]["ls"],
+            )
             sD[scans[0]][key]["ax"].autoscale(enable=True, axis="y", tight=True)
 
             # Put the legends on the y-axis
@@ -146,26 +148,29 @@ for direction in ("radial", "parallel"):
     # Used for conversion
     n0 = 1e19
     for scan in scans:
-        curScan = n0/(n0+float(scan[3:]))*100
-        label  = r"$d = {:d} \;\%$".format(int(curScan))
-        handle = mlines.Line2D([], [],\
-                       color  = "k"                    ,\
-                       marker = sD[scan]["n"]["marker"],\
-                       ls     = sD[scan]["n"]["ls"]    ,\
-                       ms     = 5                      ,\
-                       alpha  = 0.7                    ,\
-                       label  =label)
+        curScan = n0 / (n0 + float(scan[3:])) * 100
+        label = r"$d = {:d} \;\%$".format(int(curScan))
+        handle = mlines.Line2D(
+            [],
+            [],
+            color="k",
+            marker=sD[scan]["n"]["marker"],
+            ls=sD[scan]["n"]["ls"],
+            ms=5,
+            alpha=0.7,
+            label=label,
+        )
         handles.append(handle)
 
     # Put legends outside
-    sD[scans[0]]["ue"]["ax"].legend(handles=handles,\
-                                    ncol=2,\
-                                    bbox_to_anchor=(1.15, 0.25),\
-                                    loc="upper left",\
-                                    borderaxespad=0.,\
-                                    bbox_transform =\
-                                        sD[scans[0]]["ue"]["ax"].transAxes,\
-                                    )
+    sD[scans[0]]["ue"]["ax"].legend(
+        handles=handles,
+        ncol=2,
+        bbox_to_anchor=(1.15, 0.25),
+        loc="upper left",
+        borderaxespad=0.0,
+        bbox_transform=sD[scans[0]]["ue"]["ax"].transAxes,
+    )
 
     if direction == "radial":
         fileName = "nnScanRad.pdf"

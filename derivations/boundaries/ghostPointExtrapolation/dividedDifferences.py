@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+
 def get_coeff(f, x):
     """
     Solves for the coefficients in a Netwon polynomial using divided
@@ -22,13 +23,14 @@ def get_coeff(f, x):
     # Initially copy all the f values to a
     a = f.copy()
 
-    for i in range( 1, n + 1 ):
-        for j in range( n, i - 1 , -1 ):
+    for i in range(1, n + 1):
+        for j in range(n, i - 1, -1):
             # Notice that a[j] uses a[j]. This is no problem as
             # initially a[j] is equal to f
-            a[j] = (a[j] - a[j-1]) / (x[j] - x[j-i])
+            a[j] = (a[j] - a[j - 1]) / (x[j] - x[j - i])
 
     return a
+
 
 def get_polynomial(a, x, xeval):
     """
@@ -51,8 +53,8 @@ def get_polynomial(a, x, xeval):
     # Find the integration polynomial
     p = a[order]
     # Looping backwards
-    for i in range( order, 0, -1 ):
+    for i in range(order, 0, -1):
         # Notice that we will use the previous value of p to compute p
-        p = p * (xeval - x[i-1] ) + a[i-1]
+        p = p * (xeval - x[i - 1]) + a[i - 1]
 
     return p
