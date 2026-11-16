@@ -49,9 +49,9 @@ OwnOperators *OwnOperators::createOperators(Options *options) {
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "OwnOperators '" << type << "' not implemented\n"
-           << "Available operators:\n"
-           << "BasicBrackets - Consistent implementation using brackets "
-              "with basic Arakawa.\n";
+            << "Available operators:\n"
+            << "BasicBrackets - Consistent implementation using brackets "
+               "with basic Arakawa.\n";
     throw BoutException(message.str());
   }
 }

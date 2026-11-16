@@ -49,7 +49,7 @@ public:
   // Destructors
   // NOTE: New is called, so should destruct
   // NOTE: Needs to be virtual in order for the child classes to call destruct
-  virtual ~OwnOperators(){};
+  virtual ~OwnOperators() {};
 
   // Member functions
   //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
@@ -139,7 +139,7 @@ public:
    *       If else the compiler gives
    *       "udefined reference to `vtable for ...'"
    */
-  virtual ~OwnOpBasicBrackets(){};
+  virtual ~OwnOpBasicBrackets() {};
 };
 
 // Function bodies of the non-inlined functions are located in the .cxx file

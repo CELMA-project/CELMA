@@ -18,3 +18,10 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  # C++: clang-format reads the repository's .clang-format (style=file)
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v23.1.5
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]

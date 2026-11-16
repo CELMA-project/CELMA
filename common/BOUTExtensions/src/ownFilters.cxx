@@ -57,9 +57,9 @@ OwnFilters *OwnFilters::createFilter(Options *options) {
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "Filtertype '" << type << "' not implemented\n"
-           << "Available filters:\n"
-           << "none          - No filtering will be performed\n"
-           << "radialLowPass - Filtering dependant on rho\n";
+            << "Available filters:\n"
+            << "none          - No filtering will be performed\n"
+            << "radialLowPass - Filtering dependant on rho\n";
     throw BoutException(message.str());
   }
 }
@@ -109,7 +109,7 @@ const Field3D OwnFiltAllPass::ownFilter(const Field3D &var) {
  *       circumference
  * \warning Only works on grid equidistant in \f$\rho\f$
  */
-OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options){
+OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options) {
   TRACE("Halt in OwnFiltRadialLowPass::OwnFiltRadialLowPass");
 
   // Get MXG
@@ -127,8 +127,7 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options){
    * the origin of the cylinder) to the first inner point, located dx/2 away.
    * Thus:
    */
-  BoutReal outerRho =
-      (mesh->GlobalNx - 2 * MXG - 0.5) * coord->dx(0, 0);
+  BoutReal outerRho = (mesh->GlobalNx - 2 * MXG - 0.5) * coord->dx(0, 0);
   BoutReal outerCircumference = TWOPI * outerRho;
 
   // Calculate the corresponding minimum resolvable wavelength
@@ -139,9 +138,8 @@ OwnFiltRadialLowPass::OwnFiltRadialLowPass(Options *options){
   bool throwWarning;
   options->get("throwWarning", throwWarning, true);
 
-  circumference = TWOPI *
-                  coord->J(
-                      mesh->xstart, 0); // Lowest circumference (inner point)
+  circumference =
+      TWOPI * coord->J(mesh->xstart, 0); // Lowest circumference (inner point)
   kMaxCurrent = int(floor(circumference / lambdaMin));
   if (kMaxCurrent <= 0) {
     if (throwWarning) {

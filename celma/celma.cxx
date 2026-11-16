@@ -115,7 +115,7 @@ int Celma::init(bool restarting) {
 
 int Celma::rhs(BoutReal t) {
   TRACE("Halt in Celma::rhs");
-  (void)t;  // We are not using t in this simulation
+  (void)t; // We are not using t in this simulation
 
   timestepInitialization();
 
@@ -346,21 +346,21 @@ void Celma::setAndSaveParameters() {
   if ((fabs(round(LxParam * 1e4) / 1e4 - round(Lx * 1e4) / 1e4)) >
       DBL_EPSILON) {
     message << "Mismatch between 'Lx' calculated from 'radius' "
-           << "and input 'Lx'\n"
-           << "Calculated = " << std::fixed << std::setprecision(precision)
-           << round(LxParam * 1e4) / 1e4 << "\n"
-           << "Input      = " << std::fixed << std::setprecision(precision)
-           << round(Lx * 1e4) / 1e4 << "\n\n";
+            << "and input 'Lx'\n"
+            << "Calculated = " << std::fixed << std::setprecision(precision)
+            << round(LxParam * 1e4) / 1e4 << "\n"
+            << "Input      = " << std::fixed << std::setprecision(precision)
+            << round(Lx * 1e4) / 1e4 << "\n\n";
     throwError = true;
   }
   if ((fabs(round(LyParam * 1e4) / 1e4 - round(Ly * 1e4) / 1e4)) >
       DBL_EPSILON) {
     message << "Mismatch between 'Ly' calculated from 'length' "
-           << "and input 'Ly'\n"
-           << "Calculated = " << std::fixed << std::setprecision(precision)
-           << round(LyParam * 1e4) / 1e4 << "\n"
-           << "Input      = " << std::fixed << std::setprecision(precision)
-           << round(Ly * 1e4) / 1e4 << "\n\n";
+            << "and input 'Ly'\n"
+            << "Calculated = " << std::fixed << std::setprecision(precision)
+            << round(LyParam * 1e4) / 1e4 << "\n"
+            << "Input      = " << std::fixed << std::setprecision(precision)
+            << round(Ly * 1e4) / 1e4 << "\n\n";
     throwError = true;
   }
   if (throwError) {
@@ -414,20 +414,20 @@ void Celma::printPointsPerRhoS() {
   bool throwError = false;
   if (pointsPerRhoSRadially < minPointsPerRhoSXZ) {
     message << "Minimum points per rhoS not fulfilled in x.\n"
-           << "Limit is         " << minPointsPerRhoSXZ << "\n"
-           << "Current value is " << pointsPerRhoSRadially << "\n\n";
+            << "Limit is         " << minPointsPerRhoSXZ << "\n"
+            << "Current value is " << pointsPerRhoSRadially << "\n\n";
     throwError = true;
   }
   if (mesh->LocalNz > 2 && pointsPerRhoSAzimuthally < minPointsPerRhoSXZ) {
     message << "Minimum points per rhoS not fulfilled on outer circumference.\n"
-           << "Limit is         " << minPointsPerRhoSXZ << "\n"
-           << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
+            << "Limit is         " << minPointsPerRhoSXZ << "\n"
+            << "Current value is " << pointsPerRhoSAzimuthally << "\n\n";
     throwError = true;
   }
   if (pointsPerRhoSParallely < minPointsPerRhoSY) {
     message << "Minimum points per rhoS not fulfilled in y.\n"
-           << "Limit is         " << minPointsPerRhoSY << "\n"
-           << "Current value is " << pointsPerRhoSParallely << "\n\n";
+            << "Limit is         " << minPointsPerRhoSY << "\n"
+            << "Current value is " << pointsPerRhoSParallely << "\n\n";
     throwError = true;
   }
   if (throwError) {
@@ -467,9 +467,8 @@ void Celma::setAndSaveSource() {
   SAVE_ONCE3(parallelWidth, parallelCentre, parallelSteepness);
 
   // The source (obtained from the input, and multiplied with SNorm)
-  S = SNorm *
-      FieldFactory::get()->create3D("theSource:S", Options::getRoot(), mesh,
-                                    CELL_CENTRE, 0);
+  S = SNorm * FieldFactory::get()->create3D("theSource:S", Options::getRoot(),
+                                            mesh, CELL_CENTRE, 0);
 
   // Save the source field
   SAVE_ONCE(S);
@@ -555,8 +554,7 @@ void Celma::setAndSaveViscosities() {
   output << "***********************************************" << std::endl;
   output << "Perpendicular";
   if (!constViscPerp) {
-    output << " (SQ(coord->dx(0,0)) = "
-           << SQ(coord->dx(0, 0)) << "):";
+    output << " (SQ(coord->dx(0,0)) = " << SQ(coord->dx(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscPerpLnN << std::endl;
@@ -565,8 +563,7 @@ void Celma::setAndSaveViscosities() {
   output << "    For vortD    : " << artViscPerpVortD << std::endl;
   output << "Parallel";
   if (!constViscPar) {
-    output << " (SQ(coord->dy(0,0)) = "
-           << SQ(coord->dy(0, 0)) << "):";
+    output << " (SQ(coord->dy(0,0)) = " << SQ(coord->dy(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscParLnN << std::endl;

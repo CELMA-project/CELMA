@@ -3,28 +3,29 @@ Language:        Cpp
 BasedOnStyle:  LLVM
 AccessModifierOffset: -2
 ConstructorInitializerIndentWidth: 4
-AlignEscapedNewlinesLeft: false
+AlignEscapedNewlines: Right
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-AlwaysBreakTemplateDeclarations: false
+BreakTemplateDeclarations: MultiLine
 AlwaysBreakBeforeMultilineStrings: false
-BreakBeforeBinaryOperators: false
+BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
-BinPackParameters: true
+BreakConstructorInitializers: BeforeColon
+PackParameters:
+  BinPack: BinPack
 ColumnLimit:     80
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+PackConstructorInitializers: BinPack
 DerivePointerAlignment: false
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
 IndentWrappedFunctionNames: false
-IndentFunctionDeclarationAfterType: false
 MaxEmptyLinesToKeep: 1
-KeepEmptyLinesAtTheStartOfBlocks: true
+KeepEmptyLines:
+  AtStartOfBlock: true
 NamespaceIndentation: None
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
@@ -37,15 +38,13 @@ PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Right
 SpacesBeforeTrailingComments: 1
 Cpp11BracedListStyle: true
-Standard:        Cpp11
+Standard:        Latest
 IndentWidth:     2
 TabWidth:        8
 UseTab:          Never
 BreakBeforeBraces: Attach
-SpacesInParentheses: false
+SpacesInParens:  Never
 SpacesInAngles:  false
-SpaceInEmptyParentheses: false
-SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: true
 SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 4
