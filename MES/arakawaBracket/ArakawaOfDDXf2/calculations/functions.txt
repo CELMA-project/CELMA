@@ -48,7 +48,7 @@ the_vars['phi'] = 10*(6+((x/(Lx))**3)*\
                 cos(2*z)*\
                 (
                    cos(2*pi*(x/Lx)) + sin(2*pi*(x/Lx))
-                 + cos(3*2*pi*(x/Lx)) + cos(2*2*pi*(x/Lx))                
+                 + cos(3*2*pi*(x/Lx)) + cos(2*2*pi*(x/Lx))
                 )\
                 *(1/2)*(1-tanh((1/8)*(x))))
 

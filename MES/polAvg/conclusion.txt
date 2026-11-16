@@ -4,7 +4,7 @@ Copied from MMS/integrals/volumeIntegral/
 
 Results:
 ========
-- zHat : Convergence of 2 observed. 
+- zHat : Convergence of 2 observed.
          2 Comes from the rectangular integration
 
 Conclusion:

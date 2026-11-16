@@ -70,7 +70,7 @@ theta0 = 5*pi/4
 the_vars['S_n'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
                 exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
                 ((x*cos(z)+Lx)/(2*Lx))**2
-        
+
 # The gaussian
 
 # In cartesian coordinates we would like
@@ -140,7 +140,7 @@ theta0 = 5*pi/4
 the_vars['phi'] = sin((1/sqrt(2))*(x*(cos(z)+sin(z)))*(2*pi/(2*Lx)))*\
                 exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) ))*\
                 ((x*cos(z)+Lx)/(2*Lx))**2
-        
+
 # The gaussian
 
 # In cartesian coordinates we would like
