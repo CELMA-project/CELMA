@@ -1,4 +1,4 @@
-// *************** Simulation of DDZCylinder *********************
+// *************** Simulation of D2DZ2Cylinder *********************
 /* Geometry
  *  x - The radial coordinate (rho)
  *  y - The height of the cylinder (z)
@@ -9,8 +9,8 @@
 
 // Initialization of the physics
 // ############################################################################
-int DDZCylinder::init(bool restarting) {
-  TRACE("Halt in DDZCylinder::init");
+int D2DZ2Cylinder::init(bool restarting) {
+  TRACE("Halt in D2DZ2Cylinder::init");
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -59,8 +59,8 @@ int DDZCylinder::init(bool restarting) {
 
 // Solving the equations
 // ############################################################################
-int DDZCylinder::rhs(BoutReal t) {
-  TRACE("DDZCylinder::~DDZCylinder");
+int D2DZ2Cylinder::rhs(BoutReal t) {
+  TRACE("D2DZ2Cylinder::~D2DZ2Cylinder");
 
   // Calculate
   S_num = D2DZ2(f);
@@ -72,7 +72,7 @@ int DDZCylinder::rhs(BoutReal t) {
 // ############################################################################
 
 // Create a simple main() function
-BOUTMAIN(DDZCylinder);
+BOUTMAIN(D2DZ2Cylinder);
 
 // Destructor
-DDZCylinder::~DDZCylinder() { TRACE("DDZCylinder::~DDZCylinder"); }
+D2DZ2Cylinder::~D2DZ2Cylinder() { TRACE("D2DZ2Cylinder::~D2DZ2Cylinder"); }

@@ -42,3 +42,11 @@ repos:
         # build/include_subdir: each model and test is a standalone BOUT++
         #   build with no project include root, so a header beside its source
         #   is named without a directory.
+  # cppcheck is not pip-installable; Lint installs the system package
+  - repo: local
+    hooks:
+      - id: cppcheck
+        name: cppcheck
+        entry: cppcheck --error-exitcode=1 --quiet --inline-suppr --library=boost
+        language: system
+        types_or: [c++, c]
