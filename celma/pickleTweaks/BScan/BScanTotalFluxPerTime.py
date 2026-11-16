@@ -8,11 +8,12 @@ over time (this number is given in the figure legend), divided by the
 last timepoint in the particle flux time trace.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -47,7 +48,6 @@ def getNumber(t, ind):
     val : float
         The value extracted from the text
     """
-
     val = eval(
         t.split("=")[ind]
         .split(";")[0]
@@ -183,9 +183,9 @@ parAx.grid(False)
 # Make legend manually
 handles = (perpRects[0], ionRects[0], elRects[0])
 labels = (
-    "$\mathrm{Both}$",
-    "$\mathrm{Ions}$",
-    "$\mathrm{Electrons}$",
+    r"$\mathrm{Both}$",
+    r"$\mathrm{Ions}$",
+    r"$\mathrm{Electrons}$",
 )
 
 fig.legend(

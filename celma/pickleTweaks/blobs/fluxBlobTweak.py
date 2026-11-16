@@ -4,12 +4,13 @@
 Tweaks the flux obtained from the blob runner.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
 from scipy import stats
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -59,8 +60,8 @@ for mul, color in zip(sigMul, colors):
     curSig = stdDev * mul
     cond = (curSig,) * 2
     label = r"${}\sigma$".format(mul)
-    label += "\n" + "$\mathrm{{Blobs}}:{}$".format(counts.blobs)
-    label += "\n" + "$\mathrm{{Holes}}:{}$".format(counts.holes)
+    label += "\n" + r"$\mathrm{{Blobs}}:{}$".format(counts.blobs)
+    label += "\n" + r"$\mathrm{{Holes}}:{}$".format(counts.holes)
     ax.plot(t, cond, alpha=0.7, lw=2, label=label, color=color)
     PDFStats["stdDev"][mul] = curSig
 

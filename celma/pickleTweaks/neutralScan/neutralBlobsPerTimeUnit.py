@@ -4,11 +4,12 @@
 Gives blobs per unit time for the nn-Scan.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -121,8 +122,8 @@ ax.grid(False)
 # Make legend manually
 handles = (holeRects[0], blobRects[0])
 labels = (
-    "$\mathrm{Holes}$",
-    "$\mathrm{Blobs}$",
+    r"$\mathrm{Holes}$",
+    r"$\mathrm{Blobs}$",
 )
 
 fig.suptitle(r"$\mathrm{Average\;blobs\;and\;holes\;per\;second}$", y=1.1)

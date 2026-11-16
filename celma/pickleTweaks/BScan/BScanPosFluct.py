@@ -4,20 +4,21 @@
 Tweak of position of fluctuations as a function of B.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
-import matplotlib.lines as mlines
-import numpy as np
+import sys
 from subprocess import Popen
 
-import os, sys
+import matplotlib.lines as mlines
+import matplotlib.pylab as plt
+import numpy as np
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, seqCMap3
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker, seqCMap3
 
 scans = ("B0_0.1", "B0_0.08", "B0_0.06")
 markers = ("*", "o", "s")
@@ -67,7 +68,7 @@ for scan in scans:
         marker=sD[scan]["marker"],
         ms=7,
         alpha=0.7,
-        label="$B_0 = {} \mathrm{{T}}$".format(curScan),
+        label=r"$B_0 = {} \mathrm{{T}}$".format(curScan),
     )
 
 ax.set_ylabel(yLabel)

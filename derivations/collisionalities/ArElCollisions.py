@@ -20,8 +20,8 @@ but it is trickier to implement as it yields one equation per segment.
 [3] Rohatgi, Ankit - WebPlotDigitalizer available at http://arohatgi.info/WebPlotDigitizer/
 """
 
-import numpy as np
 import matplotlib.pylab as plt
+import numpy as np
 import scipy.constants as cst
 from scipy.integrate import simps
 

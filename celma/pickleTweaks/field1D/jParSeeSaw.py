@@ -4,20 +4,21 @@
 Creation of the see-saw comparison.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
 import scipy.constants as cst
 from boututils.options import BOUTOptions
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, seqCMap2
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker, seqCMap2
 
 nys = (16, 24, 32, 42, 50)
 # Initialize jPar

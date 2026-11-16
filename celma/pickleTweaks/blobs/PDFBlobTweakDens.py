@@ -4,11 +4,12 @@
 Tweaks the density PDF obtained from the blob runner.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -50,7 +51,7 @@ textPos = (0.595, 0.935)
 # Add text
 SKTxt = ax.text(
     *textPos,
-    "$S \;\; = {:.2f}$\n $K_E = {:.2f}$".format(skew, kurtExcess),
+    "$S \\;\\; = {:.2f}$\n $K_E = {:.2f}$".format(skew, kurtExcess),
     transform=ax.transAxes,
     ha="left",
     va="top",

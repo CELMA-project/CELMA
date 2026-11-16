@@ -4,11 +4,12 @@
 Tweaks the averaged structures obtained from the blob runner.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -54,7 +55,7 @@ for nr, ax in enumerate(axes):
             data[key][blobOrHole + "Time"],
             data[key][blobOrHole + "Dens"],
             color=c,
-            label="${}\sigma$".format(key),
+            label=r"${}\sigma$".format(key),
             alpha=0.75,
         )
         if nr == 0:

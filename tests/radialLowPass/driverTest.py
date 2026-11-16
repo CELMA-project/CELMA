@@ -2,9 +2,8 @@
 
 """Test driver"""
 
-from bout_runners import basic_runner
 import numpy as np
-
+from bout_runners import basic_runner
 from postProcess.checkModes import checkModes as postProcess
 
 # The options for the run

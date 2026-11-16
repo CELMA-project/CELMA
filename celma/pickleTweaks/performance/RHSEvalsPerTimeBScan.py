@@ -4,17 +4,18 @@
 Plots the RHS evaluations per timestep for the B-scan.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
+import sys
 
-import os, sys
+import matplotlib.pylab as plt
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker
 
 B0s = (0.02, 0.04, 0.06, 0.08, 0.1)
 modes = ("Init", "Expand", "Linear", "Turbulence")

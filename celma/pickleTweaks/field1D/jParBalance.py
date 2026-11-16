@@ -4,20 +4,21 @@
 Creation of the parallel current balance.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
 import scipy.constants as cst
 from boututils.options import BOUTOptions
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, plotNumberFormatter, seqCMap3
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker, plotNumberFormatter, seqCMap3
 
 # Collect from fieldScan
 path = "../../CSDXMagFieldScanAr/visualizationNormalized/B0_0.06/field1D/jPar-parallel-1D-0.pickle"

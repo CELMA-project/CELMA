@@ -11,18 +11,18 @@ LICENSE: Public Domain
 Source: https://gist.github.com/minrk/6176788
 """
 
-import io
-import sys
-import re
 import fileinput
+import io
+import re
+import sys
 
 try:
     # Jupyter >= 4
-    from nbformat import read, write, NO_CONVERT
+    from nbformat import NO_CONVERT, read, write
 except ImportError:
     # IPython 3
     try:
-        from IPython.nbformat import read, write, NO_CONVERT
+        from IPython.nbformat import NO_CONVERT, read, write
     except ImportError:
         # IPython < 3
         from IPython.nbformat import current

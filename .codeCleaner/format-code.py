@@ -5,9 +5,9 @@ Script which formats all .cxx and .hxx according to the .clang-format
 style (based upon the one found in BOUT-dev).
 """
 
+import shutil
 from glob import glob
 from subprocess import call
-import shutil
 
 # Check if clang-format is installed
 path = shutil.which("clang-format")

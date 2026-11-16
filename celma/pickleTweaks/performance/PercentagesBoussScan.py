@@ -4,17 +4,18 @@
 Plots the percentages for the Boussinesq-scan.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
+import sys
 
-import os, sys
+import matplotlib.pylab as plt
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker
 
 B0 = 0.08
 modes = ("Init", "Expand", "Linear", "Turbulence")
@@ -94,7 +95,7 @@ ax.xaxis.set_ticks(tickVals)
 ax.xaxis.set_ticklabels(
     ("Initial\nphase", "Expand\nphase", "Linear\nphase", "Turbulent\nphase")
 )
-ax.set_ylabel("$\%$")
+ax.set_ylabel(r"$\%$")
 
 # Move legend outside
 handles, labels = ax.get_legend_handles_labels()
