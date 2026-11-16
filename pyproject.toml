@@ -28,7 +28,6 @@ ignore = [
     "E741",    # ambiguous-variable-name
     "F401",    # unused-import
     "F811",    # redefined-while-unused
-    "F821",    # undefined-name
     "F841",    # unused-variable
     "PLC0206", # dict-index-missing-items
     "PLR0912", # too-many-branches

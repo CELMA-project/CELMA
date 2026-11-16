@@ -5,6 +5,8 @@
 import os
 import sys
 
+import numpy as np
+
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")
 # Sys path is a list of system paths
