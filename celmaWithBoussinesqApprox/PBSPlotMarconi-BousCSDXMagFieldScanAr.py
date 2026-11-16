@@ -6,9 +6,10 @@ Driver which plots the results of the simulations.
 **NOTE:** This driver has unfilled fields marked with FIXME
 """
 
-import numpy as np
+import os
+import sys
 
-import os, sys
+import numpy as np
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")

@@ -4,13 +4,14 @@
 Tweak of profile plots as a function of nn.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
-import matplotlib.lines as mlines
-import numpy as np
+import sys
 from subprocess import Popen
 
-import os, sys
+import matplotlib.lines as mlines
+import matplotlib.pylab as plt
+import numpy as np
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")

@@ -5,8 +5,8 @@ Driver which runs using PBS.
 Note: This is done in the old school bout_runners way
 """
 
-from bout_runners import PBS_runner
 import numpy as np
+from bout_runners import PBS_runner
 
 mode = "expand"
 saveFolder = mode

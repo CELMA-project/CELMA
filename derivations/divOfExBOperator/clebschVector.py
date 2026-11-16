@@ -3,10 +3,9 @@
 """Classes and modules for cylindrical BOUT++ Clebsch system"""
 
 from collections import deque
+
 from IPython.display import display
-from sympy import symbols, simplify
-from sympy import Eq, Derivative, Matrix
-from sympy import sqrt
+from sympy import Derivative, Eq, Matrix, simplify, sqrt, symbols
 from sympy import Rational as R
 
 from common import cartCoord, cartMap, cylCoord, cylMap, rho, theta, z
@@ -520,7 +519,6 @@ def grad(s):
     Gradient of a scalar.
     Equation (2.6.34) in D'Haeseleer
     """
-
     v = ClebschVec()
     # Basis vectors of gradient is contravariant, so elements are
     # covariant
@@ -539,7 +537,6 @@ def gradPerp(s):
     Perpendicular gradient of a scalar.
     Equation (2.6.34) in D'Haeseleer
     """
-
     v = ClebschVec()
     # Basis vectors of gradient is contravariant, so elements are
     # covariant
@@ -560,7 +557,6 @@ def advVec(v, a):
 
     v*grad(a)
     """
-
     if type(v).__name__ != "ClebschVec" or type(a).__name__ != "ClebschVec":
         message = "v and a must be ClebschVec, not {0} and {1}".format(
             type(v).__name__, type(a).__name__

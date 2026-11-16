@@ -4,20 +4,21 @@
 Tweaks the statistics obtained from the blob runner.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
-import matplotlib.patches as pa
-from matplotlib.ticker import MaxNLocator
-import numpy as np
+import sys
 
-import os, sys
+import matplotlib.patches as pa
+import matplotlib.pylab as plt
+import numpy as np
+from matplotlib.ticker import MaxNLocator
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, seqCMap2
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker, seqCMap2
 
 # Set the label colors
 colors = seqCMap2(np.linspace(0.25, 0.75, 3))

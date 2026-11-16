@@ -2,12 +2,13 @@
 
 """Check the modes of the run"""
 
+import os
+import sys
 from functools import partial
-from boutdata import collect
-import numpy as np
-import matplotlib.pylab as plt
 
-import os, sys
+import matplotlib.pylab as plt
+import numpy as np
+from boutdata import collect
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../common")

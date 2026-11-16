@@ -7,7 +7,8 @@ In this case some of the processors wrote a timestep, others didn't.
 **NOTE**: DO NOT RUN THIS unless tere is a problem.
 """
 
-import os, sys
+import os
+import sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../common")

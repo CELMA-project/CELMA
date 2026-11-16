@@ -5,15 +5,14 @@ Contains a function to convert the code
 """
 
 from glob import glob
-from subprocess import call
 from os.path import expanduser
+from subprocess import call
 
 
 def convert(path):
     """
     Converts the code using the binary specified in the input path
     """
-
     extension = ("*.cxx", "*.hxx")
     for ex in extension:
         files = glob("./../**/" + ex, recursive=True)

@@ -17,7 +17,6 @@ def get_coeff(f, x):
     Laney, C.B. - Computational Gasdynamics page 135
     www.math-cs.gordon.edu/courses/ma342/python/divided_difference.py
     """
-
     # Find the looping index
     n = len(x) - 1
     # Initially copy all the f values to a
@@ -47,7 +46,6 @@ def get_polynomial(a, x, xeval):
     Source:
     Laney, C.B. - Computational Gasdynamics page 135
     """
-
     # Find the order
     order = len(a) - 1
     # Find the integration polynomial

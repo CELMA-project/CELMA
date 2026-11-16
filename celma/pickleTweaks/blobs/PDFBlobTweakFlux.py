@@ -6,11 +6,12 @@ Tweaks the flux PDF obtained from the blob runner.
 To be runned after fluxBlobTweak.py as needs the numbers from the sigmas
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
@@ -89,7 +90,7 @@ textPos = (0.5575, 0.935)
 # Add text
 SKTxt = ax.text(
     *textPos,
-    "$S \;\;= \;\;{:.2f}$\n $K_E = {:.2f}$".format(
+    "$S \\;\\;= \\;\\;{:.2f}$\n $K_E = {:.2f}$".format(
         PDFStats["skew"], PDFStats["kurtExcess"]
     ),
     transform=ax.transAxes,

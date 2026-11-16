@@ -4,20 +4,21 @@
 Comparison of parallel modified vorticity balance.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
 import scipy.constants as cst
 from boututils.options import BOUTOptions
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper, plotNumberFormatter, seqCMap3
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker, plotNumberFormatter, seqCMap3
 
 # {{{Collect normalization and title from nnScan
 nn = 9.9e20

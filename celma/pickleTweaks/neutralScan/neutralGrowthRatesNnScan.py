@@ -6,20 +6,21 @@ Tweak scan plot by changing the legend.
 NOTE: Couldn't remove the legend, so needed to make a new figure
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
 from matplotlib.pylab import MaxNLocator
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import PlotHelper
 from CELMAPy.growthRates import PlotGrowthRates
+from CELMAPy.plotHelpers import PlotHelper
 
 path = "../../CSDXNeutralScanAr/visualizationPhysical/all/growthRates/n-growthRates-rho-0.0363-z-0.7-nn.pickle"
 with open(path, "rb") as f:
@@ -37,7 +38,7 @@ handles, labels = imAx.get_legend_handles_labels()
 newLabels = []
 for label in labels:
     nr = float(
-        label.split("$")[3].replace("\cdot 10", "e").replace("^{", "").replace("}", "")
+        label.split("$")[3].replace(r"\cdot 10", "e").replace("^{", "").replace("}", "")
     )
     nr = n0 / (n0 + np.array(nr)) * 100
     newLabels.append(r"$d\;=\;{:d}\%$".format(int(np.ceil(nr))))

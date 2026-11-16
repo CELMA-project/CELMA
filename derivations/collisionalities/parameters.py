@@ -5,8 +5,8 @@ Collection of analytic equations
 """
 
 import numpy as np
-from numpy import log, sqrt
 import scipy.constants as cst
+from numpy import log, sqrt
 
 
 # {{{
@@ -77,11 +77,11 @@ class Parameters(object):
     def calcEtaI(self, n, Ti, tauI, omCI):
         etaI = {}
 
-        etaI["\eta_{{i,0}}"] = 0.96 * n * Ti * tauI
-        etaI["\eta_{{i,1}}"] = 3.0 * n * Ti / (10.0 * (omCI**2.0) * tauI)
-        etaI["\eta_{{i,2}}"] = 4.0 * etaI["\eta_{{i,1}}"]
-        etaI["\eta_{{i,3}}"] = n * Ti / (2.0 * omCI)
-        etaI["\eta_{{i,4}}"] = 2.0 * etaI["\eta_{{i,3}}"]
+        etaI[r"\eta_{{i,0}}"] = 0.96 * n * Ti * tauI
+        etaI[r"\eta_{{i,1}}"] = 3.0 * n * Ti / (10.0 * (omCI**2.0) * tauI)
+        etaI[r"\eta_{{i,2}}"] = 4.0 * etaI[r"\eta_{{i,1}}"]
+        etaI[r"\eta_{{i,3}}"] = n * Ti / (2.0 * omCI)
+        etaI[r"\eta_{{i,4}}"] = 2.0 * etaI[r"\eta_{{i,3}}"]
 
         return etaI
 
@@ -91,11 +91,11 @@ class Parameters(object):
     def calcEtaE(self, n, Te, tauE, omCE):
         etaE = {}
 
-        etaE["\eta_{{e,0}}"] = 0.73 * n * Te * tauE
-        etaE["\eta_{{e,1}}"] = 0.51 * n * Te / (omCE**2.0 * tauE)
-        etaE["\eta_{{e,2}}"] = 4.0 * etaE["\eta_{{e,1}}"]
-        etaE["\eta_{{e,3}}"] = n * Te / (2.0 * omCE)
-        etaE["\eta_{{e,4}}"] = 2.0 * etaE["\eta_{{e,3}}"]
+        etaE[r"\eta_{{e,0}}"] = 0.73 * n * Te * tauE
+        etaE[r"\eta_{{e,1}}"] = 0.51 * n * Te / (omCE**2.0 * tauE)
+        etaE[r"\eta_{{e,2}}"] = 4.0 * etaE[r"\eta_{{e,1}}"]
+        etaE[r"\eta_{{e,3}}"] = n * Te / (2.0 * omCE)
+        etaE[r"\eta_{{e,4}}"] = 2.0 * etaE[r"\eta_{{e,3}}"]
 
         return etaE
 

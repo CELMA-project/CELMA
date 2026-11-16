@@ -4,12 +4,13 @@
 Tweak of Boussinesq profile.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
-import numpy as np
+import sys
 from subprocess import Popen
 
-import os, sys
+import matplotlib.pylab as plt
+import numpy as np
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")

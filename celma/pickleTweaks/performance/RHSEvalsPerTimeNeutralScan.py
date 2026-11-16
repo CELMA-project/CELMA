@@ -4,18 +4,19 @@
 Plots the RHS evaluations per timestep for the neutral-scan.
 """
 
+import os
 import pickle
+import sys
+
 import matplotlib.pylab as plt
 import numpy as np
-
-import os, sys
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")
 # Sys path is a list of system paths
 sys.path.append(commonDir)
 
-from CELMAPy.plotHelpers import SizeMaker, PlotHelper
+from CELMAPy.plotHelpers import PlotHelper, SizeMaker
 
 nns = ("2.5e+18", "6.666666666666668e+18", "1.5e+19", "4e+19", "9.9e+20")
 modes = ("Init", "Expand", "Linear", "Turbulence")

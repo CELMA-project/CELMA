@@ -4,13 +4,14 @@
 Makes the plots to be used in the matrix showing the averaged blob.
 """
 
+import os
 import pickle
-import matplotlib.pylab as plt
-import numpy as np
+import sys
 from glob import glob
 from subprocess import Popen
 
-import os, sys
+import matplotlib.pylab as plt
+import numpy as np
 
 # If we add to sys.path, then it must be an absolute path
 commonDir = os.path.abspath("./../../../common")

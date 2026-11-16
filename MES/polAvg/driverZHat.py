@@ -2,9 +2,11 @@
 
 """Method of exact solution driver"""
 
-from bout_runners.bout_runners import basic_runner
+import os
+import sys
+
 import numpy as np
-import sys, os
+from bout_runners.bout_runners import basic_runner
 
 # If we add to sys.path, then it must be an absolute path
 common_dir = os.path.abspath("./../../common")

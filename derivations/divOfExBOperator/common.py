@@ -3,10 +3,9 @@
 """Contains common variables and functions for all coordinate systems"""
 
 from collections import OrderedDict
+
 from IPython.display import display
-from sympy import symbols
-from sympy import Eq, Derivative
-from sympy import sin, cos, atan, sqrt
+from sympy import Derivative, Eq, atan, cos, sin, sqrt, symbols
 
 x, y, z = symbols("x, y, z", real=True)
 rho = symbols("rho", positive=True)
@@ -39,7 +38,6 @@ def poisson(a, b):
 
     NOTE: This is derived for the Clebsch system
     """
-
     return Derivative(a, theta) * Derivative(b, rho) - Derivative(a, rho) * Derivative(
         b, theta
     )
@@ -51,7 +49,6 @@ def poisson(a, b):
 # {{{displayVec
 def displayVec(v, LHS=None):
     """Displays the vector nicely in a notebook"""
-
     if LHS == None:
         LHS = "v"
     if type(v).__name__ == "ClebschVec":
