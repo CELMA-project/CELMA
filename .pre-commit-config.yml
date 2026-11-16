@@ -12,7 +12,7 @@ repos:
       - id: bandit
         args: [--configfile=.bandit.yaml]
 
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/pycqa/flake8
     rev: 3.9.1
     hooks:
       - id: flake8
@@ -20,13 +20,13 @@ repos:
           - flake8-bugbear
           - flake8-docstrings
 
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.4.0
     hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-    -   id: check-added-large-files
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: check-added-large-files
 
   # NOTE: MonkeyType can automatically annotate
   #       monkeytype run `which pytest`
@@ -39,8 +39,8 @@ repos:
       - id: mypy
         exclude: ^docs/conf.py
 
-  - repo: https://github.com/prettier/pre-commit
-    rev: 57f39166b5a5a504d6808b87ab98d41ebf095b46
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -60,12 +60,12 @@ repos:
         language: system
         types: [python]
 
--   repo: https://gitlab.com/daverona/pre-commit/cpp
+  - repo: https://gitlab.com/daverona/pre-commit/cpp
     rev: 0.8.0
     hooks:
-    -   id: clang-format
-        args: ["-style=LLVM"]
-    -   id: cpplint
-        args: ["--filter=-legal/copyright,-build/include_order"]
-    -   id: cppcheck
-        args: ["--inline-suppr", "--library=boost"]
+    - id: clang-format
+      args: ["-style=LLVM"]
+    - id: cpplint
+      args: ["--filter=-legal/copyright,-build/include_order"]
+    - id: cppcheck
+      args: ["--inline-suppr", "--library=boost"]

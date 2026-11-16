@@ -13,25 +13,49 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: loeiten/celma_env:latest
-    strategy:
-      fail-fast: true
+    env:
+      # The image is Ubuntu 18.04, too old for the Node of GitHub's own actions,
+      # so the job runs on the host and the steps run inside the image
+      IMAGE: loeiten/celma_env:latest
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Pull the build image
+        run: docker pull "$IMAGE"
+
+      - name: Build every target
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" bash -c '
+            set -e
+            for makefile in $(find . -name makefile | sort); do
+              echo "::group::$makefile"
+              make -C "$(dirname "$makefile")"
+              echo "::endgroup::"
+            done'
+
+      - name: Filter test
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work/tests/radialLowPass "$IMAGE" \
+            ./radialLowPass -d data
+
+      - name: Regression test of the models
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
+            python3 tests/regression/regression.py
+
+      - name: Operator errors of the method of exact solutions cases
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
+            python3 tests/regression/mes.py
+
+      - name: Keep the numbers of this run
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Build CELMA
-        run: |
-          cd celma
-          make
-
-      - name: Build CELMA with Boussinesq approximation
-        run: |
-          cd ../celmaWithBoussinesqApprox
-          make
+          name: recorded-numbers
+          path: |
+            recorded-reference.json
+            recorded-mes.json
+          if-no-files-found: ignore
