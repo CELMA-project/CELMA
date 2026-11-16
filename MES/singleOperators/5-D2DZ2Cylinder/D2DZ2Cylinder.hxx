@@ -20,10 +20,10 @@
 // Gives own operators
 #include "../../../common/BOUTExtensions/include/ownOperators.hxx"
 
-class DDZCylinder : public PhysicsModel {
+class D2DZ2Cylinder : public PhysicsModel {
 public:
   // Destructor
-  ~DDZCylinder();
+  ~D2DZ2Cylinder();
 
 protected:
   int init(bool restarting);
