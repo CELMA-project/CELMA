@@ -97,15 +97,9 @@ private:
 
 public:
   // Constructor
-  Parameters(BoutReal const &radius,
-             BoutReal const &length,
-             BoutReal const &n0,
-             BoutReal const &Te0,
-             BoutReal const &Ti0,
-             BoutReal const &B0,
-             BoutReal const &S,
-             BoutReal const &nn,
-             std::string const gas = "H",
+  Parameters(BoutReal const &radius, BoutReal const &length, BoutReal const &n0,
+             BoutReal const &Te0, BoutReal const &Ti0, BoutReal const &B0,
+             BoutReal const &S, BoutReal const &nn, std::string const gas = "H",
              bool const warningForException = false);
 
   //! Prints the table

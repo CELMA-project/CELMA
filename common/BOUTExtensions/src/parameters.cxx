@@ -22,31 +22,14 @@
  * outside
  *                   the drift approximation.
  */
-Parameters::Parameters(BoutReal const &radius,
-                       BoutReal const &length,
-                       BoutReal const &n0,
-                       BoutReal const &Te0,
-                       BoutReal const &Ti0,
-                       BoutReal const &B0,
-                       BoutReal const &S,
-                       BoutReal const &nn,
-                       std::string const gas,
-                       bool const warningForException)
-    : radius_(radius),
-      length_(length),
-      n0_(n0),
-      Te0_(Te0),
-      Ti0_(Ti0),
-      B0_(B0),
-      S_(S),
-      nn_(nn),
-      gas_(gas),
-      warn_(warningForException),
-      separatorLen(57),
-      separator(' '),
-      nameWidth(23),
-      numberWidth(15),
-      unitsWidth(16),
+Parameters::Parameters(BoutReal const &radius, BoutReal const &length,
+                       BoutReal const &n0, BoutReal const &Te0,
+                       BoutReal const &Ti0, BoutReal const &B0,
+                       BoutReal const &S, BoutReal const &nn,
+                       std::string const gas, bool const warningForException)
+    : radius_(radius), length_(length), n0_(n0), Te0_(Te0), Ti0_(Ti0), B0_(B0),
+      S_(S), nn_(nn), gas_(gas), warn_(warningForException), separatorLen(57),
+      separator(' '), nameWidth(23), numberWidth(15), unitsWidth(16),
       precision(4) {
   TRACE("Parameters::Parameters");
 
@@ -73,12 +56,12 @@ Parameters::Parameters(BoutReal const &radius,
     std::ostringstream message;
     if (Te0_ < 0.1 || Te0_ > 10) {
       message << "Cross section for electron-neutral collision only "
-             << "valid in range 0.1-10eV.\n";
+              << "valid in range 0.1-10eV.\n";
       allPass = false;
     }
     if (Ti0_ < 0.1 || Ti0_ > 10) {
       message << "Cross section for ion-neutral collision only "
-             << "valid in range 0.1-10eV.\n";
+              << "valid in range 0.1-10eV.\n";
       allPass = false;
     }
     // Throw error or warning
@@ -95,8 +78,8 @@ Parameters::Parameters(BoutReal const &radius,
   } else {
     std::ostringstream message;
     message << "The current gases are implemented:"
-           << "\nH\nAr\n"
-           << "You specified " << gas_ << std::endl;
+            << "\nH\nAr\n"
+            << "You specified " << gas_ << std::endl;
     throw BoutException(message.str());
   }
 
@@ -375,8 +358,7 @@ void Parameters::printVar(std::string const &name, BoutReal const &val,
          << name << std::setw(numberWidth) << std::setfill(separator)
          << std::scientific << std::setprecision(precision) << val << std::left
          << std::setw(unitsWidth) << std::setfill(separator)
-         << "[" + units + "]"
-         << "|" << std::endl;
+         << "[" + units + "]" << "|" << std::endl;
 }
 
 /*!
@@ -394,8 +376,7 @@ void Parameters::printVar(std::string const &name, std::string const &val,
          << name << std::setw(numberWidth) << std::setfill(separator)
          << std::scientific << std::setprecision(precision) << val << std::left
          << std::setw(unitsWidth) << std::setfill(separator)
-         << "[" + units + "]"
-         << "|" << std::endl;
+         << "[" + units + "]" << "|" << std::endl;
 }
 
 /*!

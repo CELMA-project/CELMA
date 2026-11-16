@@ -484,9 +484,8 @@ void CelmaWBA::setAndSaveSource() {
   SAVE_ONCE3(parallelWidth, parallelCentre, parallelSteepness);
 
   // The source (obtained from the input, and multiplied with SNorm)
-  S = SNorm *
-      FieldFactory::get()->create3D("theSource:S", Options::getRoot(), mesh,
-                                    CELL_CENTRE, 0);
+  S = SNorm * FieldFactory::get()->create3D("theSource:S", Options::getRoot(),
+                                            mesh, CELL_CENTRE, 0);
 
   // Save the source field
   SAVE_ONCE(S);
@@ -572,8 +571,7 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "***********************************************" << std::endl;
   output << "Perpendicular";
   if (!constViscPerp) {
-    output << " (SQ(coord->dx(0,0)) = "
-           << SQ(coord->dx(0, 0)) << "):";
+    output << " (SQ(coord->dx(0,0)) = " << SQ(coord->dx(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscPerpLnN << std::endl;
@@ -582,8 +580,7 @@ void CelmaWBA::setAndSaveViscosities() {
   output << "    For vort     : " << artViscPerpVort << std::endl;
   output << "Parallel";
   if (!constViscPar) {
-    output << " (SQ(coord->dy(0,0)) = "
-           << SQ(coord->dy(0, 0)) << "):";
+    output << " (SQ(coord->dy(0,0)) = " << SQ(coord->dy(0, 0)) << "):";
   }
   output << std::endl;
   output << "    For ln(n)    : " << artViscParLnN << std::endl;

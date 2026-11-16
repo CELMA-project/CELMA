@@ -70,14 +70,14 @@ protected:
 class OwnFiltAllPass : public OwnFilters {
 public:
   //! Constructor does nothing
-  OwnFiltAllPass(){};
+  OwnFiltAllPass() {};
 
   //! Destructor
   /* NOTE: {} in the end is needed
    *       If else the compiler gives
    *       "udefined reference to `vtable for ...'"
    */
-  virtual ~OwnFiltAllPass(){};
+  virtual ~OwnFiltAllPass() {};
 
   //! OwnFiltAllPass implementation of ownFilter
   const Field3D ownFilter(const Field3D &var);
@@ -107,7 +107,7 @@ public:
   OwnFiltRadialLowPass(Options *options);
 
   //! Destructor
-  virtual ~OwnFiltRadialLowPass(){};
+  virtual ~OwnFiltRadialLowPass() {};
 
   //! OwnFiltRadialLowPass implementation of ownFilter
   const Field3D ownFilter(const Field3D &var);

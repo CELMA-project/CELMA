@@ -49,11 +49,11 @@ OwnBCs::OwnBCs() {
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "Not enough inner points i the y-direction\n"
-           << "The cauchy and uEPar BC needs 3 inner points in y\n"
-           << "extrapolateYUp and extrapolateYDown needs 4 inner points "
-           << "in y\n"
-           << "Currently the number of inner points is "
-           << mesh->LocalNy - 2 * mesh->ystart << "\n";
+            << "The cauchy and uEPar BC needs 3 inner points in y\n"
+            << "extrapolateYUp and extrapolateYDown needs 4 inner points "
+            << "in y\n"
+            << "Currently the number of inner points is "
+            << mesh->LocalNy - 2 * mesh->ystart << "\n";
 
     if (warnPoints) {
       output << "\n\n!!! WARNING\n" << message.str() << "\n\n" << std::endl;
@@ -301,8 +301,8 @@ void OwnBCs::uEParSheath(Field3D &uEPar, const Field3D &phi,
     for (int xInd = mesh->xstart; xInd <= mesh->xend; xInd++) {
       for (int zInd = 0; zInd < mesh->LocalNz; zInd++) {
         uEPar(xInd, firstUpperYGhost, zInd) =
-            exp(Lambda - (phiRef +
-                          (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
+            exp(Lambda -
+                (phiRef + (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
                            15.0 * phi(xInd, firstUpperYGhost - 1, zInd) -
                            5.0 * phi(xInd, firstUpperYGhost - 2, zInd) +
                            phi(xInd, firstUpperYGhost - 3, zInd)) /
@@ -434,8 +434,8 @@ void OwnBCs::jParSheath(Field3D &jPar, const Field3D &uEPar,
         jPar(xInd, firstUpperYGhost, zInd) =
             n(xInd, firstUpperYGhost, zInd) *
             (uIPar(xInd, firstUpperYGhost, zInd) -
-             (exp(Lambda - (phiRef +
-                            (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
+             (exp(Lambda -
+                  (phiRef + (+5.0 * phi(xInd, firstUpperYGhost, zInd) +
                              15.0 * phi(xInd, firstUpperYGhost - 1, zInd) -
                              5.0 * phi(xInd, firstUpperYGhost - 2, zInd) +
                              phi(xInd, firstUpperYGhost - 3, zInd)) /
@@ -529,18 +529,14 @@ void OwnBCs::cauchyYDown(Field3D &f, const BoutReal &t,
         b = bBndryFuncGen->generate(x, yValAtYDownBndry, z, t);
         // Set the ghost point
         f(xInd, firstLowerYGhost, zInd) =
-            (1.0 / (120.0 * coord->dy(xInd, firstLowerYGhost) -
-                    115.0)) *
-            (-15.0 * (24.0 * coord->dy(xInd, firstLowerYGhost) +
-                      7.0) *
+            (1.0 / (120.0 * coord->dy(xInd, firstLowerYGhost) - 115.0)) *
+            (-15.0 * (24.0 * coord->dy(xInd, firstLowerYGhost) + 7.0) *
                  f(xInd, firstLowerYGhost + 1, zInd) +
-             15.0 *
-                 (8.0 * coord->dy(xInd, firstLowerYGhost) - 1.0) *
+             15.0 * (8.0 * coord->dy(xInd, firstLowerYGhost) - 1.0) *
                  f(xInd, firstLowerYGhost + 2, zInd) -
              (24.0 * coord->dy(xInd, firstLowerYGhost) - 5.0) *
                  f(xInd, firstLowerYGhost + 3, zInd) +
-             (24.0 * coord->dy(xInd, firstLowerYGhost)) *
-                 (16.0 * a + 5.0 * b));
+             (24.0 * coord->dy(xInd, firstLowerYGhost)) * (16.0 * a + 5.0 * b));
       }
     }
   }
@@ -597,7 +593,7 @@ void OwnBCs::getAFunction(const std::string &section) {
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "'a' not found in section '" << section << "' "
-           << "but is needed when setting the Cauchy BC\n";
+            << "but is needed when setting the Cauchy BC\n";
     throw BoutException(message.str());
   }
   aBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
@@ -624,7 +620,7 @@ void OwnBCs::getBFunction(const std::string &section) {
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "'b' not found in section '" << section << "' "
-           << "but is needed when setting the Cauchy BC\n";
+            << "but is needed when setting the Cauchy BC\n";
     throw BoutException(message.str());
   }
   bBndryFuncGen = FieldFactory::get()->parse(bndryFuncString);
