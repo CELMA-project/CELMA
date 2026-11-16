@@ -45,7 +45,6 @@ OwnBCs::OwnBCs() {
   Options *switchOptions = Options::getRoot()->getSection("switch");
   switchOptions->get("warnPoints", warnPoints, false);
   if (mesh->LocalNy - 2 * mesh->ystart < 4) {
-
     // Create a stream which we cast to a string
     std::ostringstream message;
     message << "Not enough inner points i the y-direction\n"

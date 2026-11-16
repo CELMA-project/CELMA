@@ -6,6 +6,7 @@
  */
 
 #include "jParSheath.hxx"
+#include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
@@ -72,7 +73,6 @@ int JParSheath::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int JParSheath::rhs(BoutReal t) {
-
   TRACE("JParSheath::rhs");
 
   // Extrapolate

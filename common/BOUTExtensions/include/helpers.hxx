@@ -1,5 +1,5 @@
-#ifndef __HELPERS_H__
-#define __HELPERS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_HELPERS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_HELPERS_HXX_
 
 #include <bout.hxx>
 
@@ -50,6 +50,8 @@ public:
   BoutReal volumeIntegral(Field3D const &f);
 };
 
-#include "../src/helpers.cxx"
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
+#include "../src/helpers.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_HELPERS_HXX_

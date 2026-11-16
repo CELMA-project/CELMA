@@ -1,10 +1,11 @@
-#ifndef __PARAMETERS_H__
-#define __PARAMETERS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_PARAMETERS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_PARAMETERS_HXX_
 
 #include <bout.hxx>
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <iomanip>            // Gives setw and setfill
 #include <iostream>           // Gives the strings
+#include <string>
 
 /*!
  * \class Parameters
@@ -140,6 +141,8 @@ public:
   BoutReal getEta0ENorm() const;
 };
 
-#include "../src/parameters.cxx"
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
+#include "../src/parameters.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_PARAMETERS_HXX_

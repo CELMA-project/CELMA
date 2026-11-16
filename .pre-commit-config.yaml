@@ -25,3 +25,20 @@ repos:
     hooks:
       - id: clang-format
         types_or: [c++, c]
+  - repo: https://github.com/cpplint/cpplint
+    rev: 2.0.2
+    hooks:
+      - id: cpplint
+        args:
+          - --filter=-legal/copyright,-build/include_order,-whitespace/comments,-whitespace/indent,-whitespace/line_length,-build/include_subdir
+        # Filters beyond the old two:
+        # whitespace/comments: clang-format puts one space before a trailing
+        #   comment (SpacesBeforeTrailingComments: 1), cpplint wants two.
+        # whitespace/indent: clang-format puts public:/private: at column 0
+        #   (AccessModifierOffset: -2), cpplint wants them indented one space.
+        # whitespace/line_length: clang-format enforces ColumnLimit 80; its one
+        #   space before the comment of a long header guard's #endif loses
+        #   cpplint's exemption for that line.
+        # build/include_subdir: each model and test is a standalone BOUT++
+        #   build with no project include root, so a header beside its source
+        #   is named without a directory.

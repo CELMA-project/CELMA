@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __CELMA_H__
-#define __CELMA_H__
+#ifndef CELMA_CELMA_HXX_
+#define CELMA_CELMA_HXX_
 
 #include <bout/physicsmodel.hxx>
 #include <derivs.hxx>         // Gives the bracket method
@@ -205,4 +205,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // CELMA_CELMA_HXX_

@@ -1,5 +1,5 @@
-#ifndef __OWNFILTERS_H__
-#define __OWNFILTERS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_OWNFILTERS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_OWNFILTERS_HXX_
 
 #include <bout.hxx>
 #include <bout/constants.hxx> // Gives PI and TWOPI
@@ -70,14 +70,14 @@ protected:
 class OwnFiltAllPass : public OwnFilters {
 public:
   //! Constructor does nothing
-  OwnFiltAllPass() {};
+  OwnFiltAllPass() {}
 
   //! Destructor
   /* NOTE: {} in the end is needed
    *       If else the compiler gives
    *       "udefined reference to `vtable for ...'"
    */
-  virtual ~OwnFiltAllPass() {};
+  virtual ~OwnFiltAllPass() {}
 
   //! OwnFiltAllPass implementation of ownFilter
   const Field3D ownFilter(const Field3D &var);
@@ -104,10 +104,10 @@ public:
 class OwnFiltRadialLowPass : public OwnFilters {
 public:
   // Constructor
-  OwnFiltRadialLowPass(Options *options);
+  explicit OwnFiltRadialLowPass(Options *options);
 
   //! Destructor
-  virtual ~OwnFiltRadialLowPass() {};
+  virtual ~OwnFiltRadialLowPass() {}
 
   //! OwnFiltRadialLowPass implementation of ownFilter
   const Field3D ownFilter(const Field3D &var);
@@ -116,6 +116,8 @@ private:
   int kMaxCurrent; //!< Max mode at current \f$\rho\f$
 };
 
-#include "../src/ownFilters.cxx"
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
+#include "../src/ownFilters.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_OWNFILTERS_HXX_

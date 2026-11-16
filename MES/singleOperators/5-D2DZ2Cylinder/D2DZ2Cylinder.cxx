@@ -60,7 +60,6 @@ int DDZCylinder::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DDZCylinder::rhs(BoutReal t) {
-
   TRACE("DDZCylinder::~DDZCylinder");
 
   // Calculate

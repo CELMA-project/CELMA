@@ -96,7 +96,6 @@ int ArakawaOfDDX::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int ArakawaOfDDX::rhs(BoutReal t) {
-
   TRACE("ArakawaOfDDX::rhs");
 
   // Calculate

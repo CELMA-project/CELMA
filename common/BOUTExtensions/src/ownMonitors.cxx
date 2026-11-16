@@ -2,6 +2,8 @@
 #define __OWNMONITORS_CXX__
 
 #include "../include/ownMonitors.hxx"
+#include <map>
+#include <string>
 
 /* FIXME: Monitors are not printing traces or BoutException at the moment
  *        (see BOUT-dev #355)

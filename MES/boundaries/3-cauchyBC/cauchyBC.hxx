@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __cauchyBC_H__
-#define __cauchyBC_H__
+#ifndef MES_BOUNDARIES_3_CAUCHYBC_CAUCHYBC_HXX_
+#define MES_BOUNDARIES_3_CAUCHYBC_CAUCHYBC_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -53,4 +53,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_BOUNDARIES_3_CAUCHYBC_CAUCHYBC_HXX_

@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __VolIntCyl_H__
-#define __VolIntCyl_H__
+#ifndef MES_INTEGRALS_VOLUMEINTEGRAL_VOLINTCYL_HXX_
+#define MES_INTEGRALS_VOLUMEINTEGRAL_VOLINTCYL_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -59,4 +59,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_INTEGRALS_VOLUMEINTEGRAL_VOLINTCYL_HXX_

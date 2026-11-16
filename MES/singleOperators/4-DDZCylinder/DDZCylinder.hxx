@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __DDZCylinder_H__
-#define __DDZCylinder_H__
+#ifndef MES_SINGLEOPERATORS_4_DDZCYLINDER_DDZCYLINDER_HXX_
+#define MES_SINGLEOPERATORS_4_DDZCYLINDER_DDZCYLINDER_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -56,4 +56,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_SINGLEOPERATORS_4_DDZCYLINDER_DDZCYLINDER_HXX_

@@ -1,8 +1,9 @@
-#ifndef __OWNBCS_H__
-#define __OWNBCS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_OWNBCS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_OWNBCS_HXX_
 
 #include <bout.hxx>           // Includes all necessary classes and types
 #include <bout/constants.hxx> // Gives PI and TWOPI
+#include <memory>
 #include <string>
 
 /*!
@@ -52,6 +53,7 @@ private:
   BoutReal yValAtYDownBndry;
   BoutReal x; //!< The value of x at the current index
   BoutReal z; //!< The value of z at the current index
+
 public:
   // Constructors
   OwnBCs();
@@ -95,7 +97,9 @@ public:
   void getYValAtYDownBndry();
 };
 
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
 // Function bodies of the non-inlined functions are located in the .cxx file
-#include "../src/ownBCs.cxx"
+#include "../src/ownBCs.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_OWNBCS_HXX_

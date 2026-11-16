@@ -73,7 +73,6 @@ int DivPerp::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int DivPerp::rhs(BoutReal t) {
-
   TRACE("DivPerp::rhs");
 
   // Calculate

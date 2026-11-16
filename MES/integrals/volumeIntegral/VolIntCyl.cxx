@@ -68,7 +68,6 @@ int VolIntCyl::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int VolIntCyl::rhs(BoutReal t) {
-
   TRACE("VolIntCyl::rhs");
 
   // Calculate the integral

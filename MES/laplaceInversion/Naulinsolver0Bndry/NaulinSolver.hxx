@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __NaulinSolver_H__
-#define __NaulinSolver_H__
+#ifndef MES_LAPLACEINVERSION_NAULINSOLVER0BNDRY_NAULINSOLVER_HXX_
+#define MES_LAPLACEINVERSION_NAULINSOLVER0BNDRY_NAULINSOLVER_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -58,4 +58,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_LAPLACEINVERSION_NAULINSOLVER0BNDRY_NAULINSOLVER_HXX_

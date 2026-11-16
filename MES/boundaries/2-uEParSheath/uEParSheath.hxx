@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __uEParSheath_H__
-#define __uEParSheath_H__
+#ifndef MES_BOUNDARIES_2_UEPARSHEATH_UEPARSHEATH_HXX_
+#define MES_BOUNDARIES_2_UEPARSHEATH_UEPARSHEATH_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -56,4 +56,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_BOUNDARIES_2_UEPARSHEATH_UEPARSHEATH_HXX_

@@ -6,8 +6,8 @@
  *                                        internally in the BOUT++ framework]
  */
 
-#ifndef __ArakawaOfDDX_H__
-#define __ArakawaOfDDX_H__
+#ifndef MES_ARAKAWABRACKET_ARAKAWAOFDDXF2_ARAKAWAOFDDX_HXX_
+#define MES_ARAKAWABRACKET_ARAKAWAOFDDXF2_ARAKAWAOFDDX_HXX_
 
 #include <bout/constants.hxx> // Gives PI and TWOPI
 #include <bout/physicsmodel.hxx>
@@ -55,4 +55,4 @@ private:
   // ############################################################################
 };
 
-#endif
+#endif // MES_ARAKAWABRACKET_ARAKAWAOFDDXF2_ARAKAWAOFDDX_HXX_

@@ -1,5 +1,5 @@
-#ifndef __OWNOPERATORS_H__
-#define __OWNOPERATORS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_OWNOPERATORS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_OWNOPERATORS_HXX_
 
 #include "ownBCs.hxx"         // Gives inner rho boundaries
 #include <bout.hxx>           // Includes all necessary classes and types
@@ -42,6 +42,7 @@ protected:
   int xInd; //!< x-index
   int yInd; //!< y-index
   int zInd; //!< z-index
+
 public:
   // Constructors
   OwnOperators();
@@ -49,7 +50,7 @@ public:
   // Destructors
   // NOTE: New is called, so should destruct
   // NOTE: Needs to be virtual in order for the child classes to call destruct
-  virtual ~OwnOperators() {};
+  virtual ~OwnOperators() {}
 
   // Member functions
   //! Operator for \f$\nabla\cdot_(f \nabla_\perp g)\f$
@@ -139,10 +140,12 @@ public:
    *       If else the compiler gives
    *       "udefined reference to `vtable for ...'"
    */
-  virtual ~OwnOpBasicBrackets() {};
+  virtual ~OwnOpBasicBrackets() {}
 };
 
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
 // Function bodies of the non-inlined functions are located in the .cxx file
-#include "../src/ownOperators.cxx"
+#include "../src/ownOperators.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_OWNOPERATORS_HXX_

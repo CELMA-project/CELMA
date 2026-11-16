@@ -1,9 +1,10 @@
-#ifndef __OWNMONITORS_H__
-#define __OWNMONITORS_H__
+#ifndef COMMON_BOUTEXTENSIONS_INCLUDE_OWNMONITORS_HXX_
+#define COMMON_BOUTEXTENSIONS_INCLUDE_OWNMONITORS_HXX_
 
 #include "helpers.hxx"
 #include <bout.hxx>
 #include <map>
+#include <string>
 
 /*!
  * \class OwnMonitors
@@ -27,6 +28,8 @@ public:
   void numberOfParticles(Field3D const &n, std::map<std::string, BoutReal> *N);
 };
 
-#include "../src/ownMonitors.cxx"
+// Each model compiles one source file, so the header pulls in its
+// implementation; cpplint assumes separately compiled .cxx files
+#include "../src/ownMonitors.cxx" // NOLINT(build/include)
 
-#endif
+#endif // COMMON_BOUTEXTENSIONS_INCLUDE_OWNMONITORS_HXX_

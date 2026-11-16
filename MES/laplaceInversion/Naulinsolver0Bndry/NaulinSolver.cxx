@@ -84,7 +84,6 @@ int NaulinSolver::init(bool restarting) {
 // Solving the equations
 // ############################################################################
 int NaulinSolver::rhs(BoutReal t) {
-
   TRACE("Halt in NaulinSolver::rhs");
 
   // Call the solver
