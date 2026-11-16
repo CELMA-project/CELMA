@@ -103,7 +103,11 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         command = [str(exe), "-d", tmp, f"mesh:nx={nx}", f"mesh:ny={ny}"]
         command += [f"mesh:nz={nz}", "NXPE=1"]
         done = subprocess.run(  # nosec
-            command, cwd=exe.parent, capture_output=True, check=False
+            command,
+            cwd=exe.parent,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
         )
         dump = Path(tmp) / "BOUT.dmp.0.nc"
         if done.returncode != 0 or not dump.exists():
