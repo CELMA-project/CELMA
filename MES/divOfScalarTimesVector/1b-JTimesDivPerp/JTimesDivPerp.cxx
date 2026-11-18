@@ -36,7 +36,7 @@ int JTimesDivPerp::init(bool restarting) {
   f.covariant = false;
 
   // The source
-  S = FieldFactory::get()->create3D("S:Solution", Options::getRoot(), mesh,
+  S = FieldFactory::get()->create3D("S:solution", Options::getRoot(), mesh,
                                     CELL_CENTRE, 0);
   // ************************************************************************
 

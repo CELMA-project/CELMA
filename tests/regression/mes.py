@@ -101,7 +101,7 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
     with tempfile.TemporaryDirectory() as tmp:
         shutil.copy(inp, Path(tmp) / "BOUT.inp")
         command = [str(exe), "-d", tmp, f"mesh:nx={nx}", f"mesh:ny={ny}"]
-        command += [f"mesh:nz={nz}", "NXPE=1"]
+        command += [f"mesh:nz={nz}", "NXPE=1", "input:error_on_unused_options=false"]
         done = subprocess.run(  # nosec
             command,
             cwd=exe.parent,
