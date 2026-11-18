@@ -2,7 +2,7 @@ name: Image
 
 on:
   push:
-    branches: [main, "r3becc4/bout5-image"]
+    branches: [main]
     paths:
       - docker/Dockerfile.bout5
       - .github/workflows/image.yml
