@@ -36,6 +36,13 @@ RUN = ("nout=10", "timestep=1e-2")
 RTOL = 1.0e-6
 ATOL = 1.0e-14
 RECORDED = Path("recorded-reference.json")
+# One guard cell on each side in x and y: BOUT++ 4 left the guard cells of the
+# time derivatives finite, BOUT++ 5 leaves them unset, so only the inner
+# points (the solution) are compared
+SHAPE = (12, 10, 32)
+INTERIOR = np.zeros(SHAPE, dtype=bool)
+INTERIOR[1:-1, 1:-1, :] = True
+INTERIOR = INTERIOR.ravel()
 
 
 def run_model(name: str, workdir: Path) -> Dict[str, List[float]]:
@@ -89,14 +96,13 @@ def main() -> int:
             actual[name] = run_model(name, Path(tmp))
     for name, fields in actual.items():
         for field, values in fields.items():
-            bad = np.flatnonzero(~np.isfinite(values))
-            if bad.size:
-                where = np.unravel_index(bad, (12, 10, 32))
-                print(f"FAIL {name} {field}: {bad.size} of {len(values)} not finite")
-                print("  x:", sorted(set(where[0].tolist())))
-                print("  y:", sorted(set(where[1].tolist())))
-                print("  z:", sorted(set(where[2].tolist())))
+            bad = ~np.isfinite(values) & INTERIOR
+            if bad.any():
+                print(f"FAIL {name} {field}: {int(bad.sum())} inner values not finite")
                 return 1
+            outer = ~np.isfinite(values) & ~INTERIOR
+            if outer.any():
+                print(f"note {name} {field}: {int(outer.sum())} guard values not set")
     RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
     if not REFERENCE.exists():
         print(f"FAIL no reference at {REFERENCE}; the numbers are in {RECORDED}")
@@ -105,8 +111,8 @@ def main() -> int:
     failed = False
     for name, fields in actual.items():
         for field, values in fields.items():
-            expected = np.array(reference[name][field])
-            diff = float(np.max(np.abs(np.array(values) - expected)))
+            expected = np.array(reference[name][field])[INTERIOR]
+            diff = float(np.max(np.abs(np.array(values)[INTERIOR] - expected)))
             allowed = RTOL * float(np.max(np.abs(expected))) + ATOL
             error = diff / allowed * RTOL
             status = "ok  " if error <= RTOL else "FAIL"
