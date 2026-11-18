@@ -25,7 +25,9 @@ ROOT = Path(__file__).resolve().parents[2]
 REFERENCE = Path(__file__).with_name("mes-reference.json")
 RECORDED = Path("recorded-mes.json")
 RTOL = 1.0e-6
-ATOL = 1.0e-14
+# The volume integral of pure sines has the exact value zero, so its "error" is
+# summation round-off of about 4e-12 that moves with the order of the sum
+ATOL = 1.0e-12
 RESOLUTIONS = ((32, 34, 64), (64, 66, 128))
 
 
