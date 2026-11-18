@@ -114,12 +114,15 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         dump = Path(tmp) / "BOUT.dmp.0.nc"
         if done.returncode != 0 or not dump.exists():
             lines = [x for x in done.stdout.splitlines() if x.strip()]
-            keys = ("Error encountered", "Assertion", "terminate", "unused input", "Exception")
-            tail = [x for x in lines if any(k in x for k in keys)][:2]
-            extra = [x for i, x in enumerate(lines) if lines[i - 1:i] and any(k in lines[i - 1] for k in keys)][:2]
-            tail += extra
-            tail = tail or lines[-6:]
-            print(f"  run failed ({exe.name}, {resolution}): " + " | ".join(t[:300] for t in tail))
+            keys = ("Error encountered", "terminate called", "Assertion")
+            first = next(
+                (i for i, x in enumerate(lines) if any(k in x for k in keys)), -1
+            )
+            tail = lines[first : first + 8] if first >= 0 else lines[-6:]
+            print(
+                f"  run failed ({exe.name}, {resolution}): "
+                + " | ".join(t[:300] for t in tail)
+            )
             return None
         with Dataset(dump) as data:
             return float(np.max(np.abs(np.array(data.variables["e"][:]))))
