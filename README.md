@@ -44,8 +44,16 @@ An install script can be found in [install/boutPPInstall.sh](install/boutPPInsta
 This will install the master branch of `BOUT-dev` in `$HOME`, whereas the
 dependencies will be installed in `local`.
 
-**NOTE** : The `makefiles` in this repository assumes that `BOUT++` is located
-           in the `$HOME` directory.
+Build the models with CMake against an installed `BOUT++` 5.2.0 (or use the
+image the continuous integration uses, see `docker/Dockerfile.bout5`):
+
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/bout-install
+cmake --build build
+```
+
+Each executable is written next to its source and input files, for example
+`celma/celma` with `celma/CSDXNyScan/BOUT.inp`.
 
 ## Usage
 
