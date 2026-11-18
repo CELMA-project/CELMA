@@ -18,7 +18,7 @@ jobs:
       packages: read
     env:
       # BOUT++ 5.2.0, built by .github/workflows/image.yml and pinned by digest
-      IMAGE: ghcr.io/celma-project/celma-env@sha256:adfff3bfbfee02cdce98df74f4274a799fa0736c35a9e11cd91b4aa1bd5b802c
+      IMAGE: ghcr.io/celma-project/celma-env@sha256:8ac515c6973d1df6e0a89da1a3178fab3d5276220b57f787bbc915450474c40e
 
     steps:
       - name: Checkout repo
