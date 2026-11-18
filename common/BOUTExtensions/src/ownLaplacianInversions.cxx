@@ -4,6 +4,7 @@
 #include "../include/ownLaplacianInversions.hxx"
 #include <algorithm>
 #include <string>
+using bout::globals::mesh;
 
 /*!
  * This function is used instead of a constructor as a OwnOperators and a
@@ -181,8 +182,8 @@ Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
 
     if (curCount > maxit) {
       throw BoutException("NaulinSolver reached max iterations with\n"
-                          "iterations=%d, atol=%.3e and rtol=%.3e\n"
-                          "aerr=%.3e, rerr=%.3e",
+                          "iterations={:d}, atol={:.3e} and rtol={:.3e}\n"
+                          "aerr={:.3e}, rerr={:.3e}",
                           curCount, atol, rtol, EAbsLInf, ERelLInf);
     }
   }
@@ -205,6 +206,5 @@ Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
 OwnLaplacianInversions::~OwnLaplacianInversions() {
   TRACE("Halt in OwnLaplacianInversions::~OwnLaplacianInversions");
 
-  delete phiSolver;
 }
 #endif

@@ -73,7 +73,7 @@ int JTimesDivSource::rhs(BoutReal t) {
   TRACE("JTimesDivSource::rhs");
 
   // Calculate
-  S_num = mesh->coordinates()->J * ownOp->div_f_GradPerp_g(S_n, phi);
+  S_num = mesh->getCoordinates()->J * ownOp->div_f_GradPerp_g(S_n, phi);
 
   // Error in phi
   e = S_num - S;

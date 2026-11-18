@@ -4,6 +4,7 @@
 #include "../include/ownFilters.hxx"
 #include <iostream>
 #include <string>
+using bout::globals::mesh;
 
 // OwnFilters
 

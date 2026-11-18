@@ -450,8 +450,6 @@ void Celma::printPointsPerRhoS() {
 void Celma::setAndSaveSource() {
   TRACE("Halt in Celma::setAndSaveSource");
 
-  BoutReal radialWidth, radialCentre, radialSteepness;
-  BoutReal parallelWidth, parallelCentre, parallelSteepness;
 
   // Get the source constants, save them and create the source
   // ************************************************************************
@@ -549,7 +547,7 @@ void Celma::setAndSaveViscosities() {
   }
   if (!constViscHyper) {
     // Azimuthal hyperviscosities
-    artHyperAzVortD *= SQ(SQ(coord->dz));
+    artHyperAzVortD *= SQ(SQ(getUniform(coord->dz)));
   }
 
   // Print and store the variables

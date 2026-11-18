@@ -149,7 +149,10 @@ private:
   std::string ownOpType; // Type of own operators
   BRACKET_METHOD bm;     // The bracket method
   OwnBCs ownBC;          // Class containing methods which sets the ghost points
-  Laplacian *phiSolver;  // Solver object for the FFT solver
+  // Source shape constants (members: SAVE_ONCE keeps a pointer to them)
+  BoutReal radialWidth, radialCentre, radialSteepness;
+  BoutReal parallelWidth, parallelCentre, parallelSteepness;
+  std::unique_ptr<Laplacian> phiSolver;  // Solver object for the FFT solver
   OwnFilters *ownFilter; // Pointer to the chosen filter class
   OwnMonitors ownMon;    // Own monitors
   int outputMonitor(BoutReal simtime, int iter,

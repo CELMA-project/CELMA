@@ -63,7 +63,7 @@ int DDXOverJCylinder::rhs(BoutReal t) {
   TRACE("DDXOverJCylinder::rhs");
 
   // Calculate
-  S_num = (1 / mesh->coordinates()->J) * DDX(f);
+  S_num = (1 / mesh->getCoordinates()->J) * DDX(f);
 
   // Error in S
   e = S_num - S;

@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.17)
+project(CELMA LANGUAGES CXX)
+
+# BOUT++ 5 ships a CMake package; point CMAKE_PREFIX_PATH at its install
+find_package(bout++ REQUIRED)
+
+# Each executable is written next to its source and input files
+add_subdirectory(MES/arakawaBracket/ArakawaOfDDXf2)
+add_subdirectory(MES/boundaries/1-yExtrapolation)
+add_subdirectory(MES/boundaries/2-uEParSheath)
+add_subdirectory(MES/boundaries/3-cauchyBC)
+add_subdirectory(MES/boundaries/4-jParSheath)
+add_subdirectory(MES/divOfScalarTimesVector/1a-divPerp)
+add_subdirectory(MES/divOfScalarTimesVector/1b-JTimesDivPerp)
+add_subdirectory(MES/divOfScalarTimesVector/2a-divSource)
+add_subdirectory(MES/divOfScalarTimesVector/2b-JTimesDivSource)
+add_subdirectory(MES/integrals/volumeIntegral)
+add_subdirectory(MES/laplaceInversion/Naulinsolver0Bndry)
+add_subdirectory(MES/polAvg)
+add_subdirectory(MES/singleOperators/1-DDXCylinder)
+add_subdirectory(MES/singleOperators/1.1-DDXCylinderWideStencilCenter)
+add_subdirectory(MES/singleOperators/2-D2DX2Cylinder)
+add_subdirectory(MES/singleOperators/3-DDXOverJCylinder)
+add_subdirectory(MES/singleOperators/4-DDZCylinder)
+add_subdirectory(MES/singleOperators/5-D2DZ2Cylinder)
+add_subdirectory(celma)
+add_subdirectory(celmaWithBoussinesqApprox)
+add_subdirectory(tests/radialLowPass)

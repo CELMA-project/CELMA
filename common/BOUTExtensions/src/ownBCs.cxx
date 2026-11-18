@@ -3,6 +3,7 @@
 
 #include "../include/ownBCs.hxx"
 #include <string>
+using bout::globals::mesh;
 
 /*!
  * \brief Constructor

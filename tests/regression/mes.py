@@ -62,8 +62,8 @@ def cases() -> List[Tuple[str, Path, Path]]:
         Tuples of the case name, the executable and the input file.
     """
     found = []
-    for makefile in sorted((ROOT / "MES").rglob("makefile")):
-        source = re.search(r"SOURCEC\s*=\s*(\w+)\.cxx", makefile.read_text())
+    for makefile in sorted((ROOT / "MES").rglob("CMakeLists.txt")):
+        source = re.search(r"add_executable\((\w+)\s", makefile.read_text())
         if source is None:
             continue
         folder = makefile.parent
