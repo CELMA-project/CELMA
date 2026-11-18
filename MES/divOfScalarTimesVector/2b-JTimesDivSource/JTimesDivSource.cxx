@@ -6,11 +6,14 @@
  */
 
 #include "JTimesDivSource.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int JTimesDivSource::init(bool restarting) {
   TRACE("Halt in JTimesDivSource::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

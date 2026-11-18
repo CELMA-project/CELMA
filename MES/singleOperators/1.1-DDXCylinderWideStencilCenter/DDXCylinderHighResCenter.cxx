@@ -6,6 +6,7 @@
  */
 
 #include "DDXCylinderHighResCenter.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 Field3D DDXCylHighResCenter(Field3D const &f);
 
@@ -13,6 +14,8 @@ Field3D DDXCylHighResCenter(Field3D const &f);
 // ############################################################################
 int DDXCylinderHighResCenter::init(bool restarting) {
   TRACE("Halt in DDXCylinderHighResCenter::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

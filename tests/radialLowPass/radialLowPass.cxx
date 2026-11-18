@@ -6,11 +6,14 @@
  */
 
 #include "radialLowPass.hxx"
+#include "../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int RadialLowPass::init(bool restarting) {
   TRACE("Halt in RadialLowPass::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

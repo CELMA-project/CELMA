@@ -6,11 +6,14 @@
  */
 
 #include "NaulinSolver.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int NaulinSolver::init(bool restarting) {
   TRACE("Halt in NaulinSolver::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

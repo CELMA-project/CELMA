@@ -6,12 +6,15 @@
  */
 
 #include "cauchyBC.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 #include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
 int CauchyBC::init(bool restarting) {
   TRACE("Halt in CauchyBC::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

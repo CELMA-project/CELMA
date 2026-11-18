@@ -6,11 +6,14 @@
  */
 
 #include "DDXCylinder.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int DDXCylinder::init(bool restarting) {
   TRACE("Halt in DDXCylinder::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

@@ -6,6 +6,7 @@
  */
 
 #include "celma.hxx"
+#include "../common/BOUTExtensions/include/signedJacobian.hxx"
 #include <map>
 #include <string>
 #include <vector>
@@ -14,6 +15,8 @@
 // ############################################################################
 int Celma::init(bool restarting) {
   TRACE("Halt in Celma::init");
+
+  restoreSignedJacobian();
 
   // Not used in the init
   (void)restarting;
@@ -455,7 +458,7 @@ void Celma::setAndSaveSource() {
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
 
-  Options *thesource = options->getSection("thesource");
+  Options *thesource = options->getSection("theSource");
   thesource->get("radialWidth", radialWidth, 0.0);
   thesource->get("radialCentre", radialCentre, 0.0);
   thesource->get("radialSteepness", radialSteepness, 0.0);

@@ -8,9 +8,7 @@
 # Root options
 ###############################################################################
 nout = 0            # Number of output timesteps
-timestep = 1e-3     # Time between outputs
-
-dump_format="nc"   # Write NetCDF format files
+timestep = 0.001     # Time between outputs
 
 # Setting the z coordinate
 ZMIN = 0.0
@@ -36,10 +34,10 @@ nz = 2^7
 dx = geom:Lx/(nx-2*MXG)
 # The metrics
 g33 = 1/(geom:xl^2)
-J = geom:xl
+J = abs(geom:xl) # BOUT++ 5 demands J > 0; the signed value is restored in init()
 # Puts the boundaries half a step outside the last gridpoints
-symmetricGlobalY=true
-symmetricGlobalX=true
+symmetricGlobalY = true
+symmetricGlobalX = true
 # Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
@@ -61,10 +59,7 @@ type = euler
 
 
 # Specifying the output
-###############################################################################
-[output]
-floats = false # floats = false => output in double
-###############################################################################
+##############################################################################################################################################################
 
 
 # The filter options
@@ -81,5 +76,3 @@ type = radialLowPass
 [geom]
 Lx = 30                     # The length of x from boundary to boundary
 xl = x * geom:Lx            # x in range [0,Lx]
-# =============================================================================
-##############################################################################
