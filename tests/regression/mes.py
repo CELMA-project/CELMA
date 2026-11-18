@@ -105,13 +105,16 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         done = subprocess.run(  # nosec
             command,
             cwd=exe.parent,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
             check=False,
             timeout=600,
         )
         dump = Path(tmp) / "BOUT.dmp.0.nc"
         if done.returncode != 0 or not dump.exists():
+            tail = [x for x in done.stdout.splitlines() if x.strip()][-6:]
+            print(f"  run failed ({exe.name}, {resolution}): " + " | ".join(tail))
             return None
         with Dataset(dump) as data:
             return float(np.max(np.abs(np.array(data.variables["e"][:]))))
