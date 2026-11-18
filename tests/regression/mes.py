@@ -114,8 +114,10 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         dump = Path(tmp) / "BOUT.dmp.0.nc"
         if done.returncode != 0 or not dump.exists():
             lines = [x for x in done.stdout.splitlines() if x.strip()]
-            keys = ("rror", "ssert", "xception", "not ", "unused", "-----", "=")
-            tail = [x for x in lines if any(k in x for k in keys[:5])][:4]
+            keys = ("Error encountered", "Assertion", "terminate", "unused input", "Exception")
+            tail = [x for x in lines if any(k in x for k in keys)][:2]
+            extra = [x for i, x in enumerate(lines) if lines[i - 1:i] and any(k in lines[i - 1] for k in keys)][:2]
+            tail += extra
             tail = tail or lines[-6:]
             print(f"  run failed ({exe.name}, {resolution}): " + " | ".join(t[:300] for t in tail))
             return None
