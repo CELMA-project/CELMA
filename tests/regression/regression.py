@@ -89,8 +89,13 @@ def main() -> int:
             actual[name] = run_model(name, Path(tmp))
     for name, fields in actual.items():
         for field, values in fields.items():
-            if not np.all(np.isfinite(values)):
-                print(f"FAIL {name} {field}: not finite")
+            bad = np.flatnonzero(~np.isfinite(values))
+            if bad.size:
+                where = np.unravel_index(bad, (12, 10, 32))
+                print(f"FAIL {name} {field}: {bad.size} of {len(values)} not finite")
+                print("  x:", sorted(set(where[0].tolist())))
+                print("  y:", sorted(set(where[1].tolist())))
+                print("  z:", sorted(set(where[2].tolist())))
                 return 1
     RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
     if not REFERENCE.exists():
