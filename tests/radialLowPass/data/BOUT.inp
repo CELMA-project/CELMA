@@ -17,8 +17,8 @@ ZMIN = 0.0
 ZMAX = 1.0 # dz = 2*pi(ZMAX - ZMIN)/(MZ - 1)
 
 # Number of guard cells
-MXG = 0 # Not needed
-MYG = 0 # Make this 2D
+MXG = 1 # BOUT++ 5 needs a guard cell for the metric derivatives
+MYG = 1
 ###############################################################################
 
 

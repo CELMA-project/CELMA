@@ -467,7 +467,6 @@ void CelmaWBA::printPointsPerRhoS() {
 void CelmaWBA::setAndSaveSource() {
   TRACE("Halt in CelmaWBA::setAndSaveSource");
 
-
   // Get the source constants, save them and create the source
   // ************************************************************************
   // Get the option (before any sections) in the BOUT.inp file

@@ -33,8 +33,8 @@ private:
   //! Relative error between phiCur and phiNext in \f$L_\infty\f$ norm
   BoutReal ERelLInf;
   std::unique_ptr<Laplacian> phiSolver; //!< Solver object for the FFT solver
-  OwnOperators *ownOp;  //!< Object with own operators (used in create)
-  OwnBCs *ownBC;        //!< Object with own BCs (used in create)
+  OwnOperators *ownOp; //!< Object with own operators (used in create)
+  OwnBCs *ownBC;       //!< Object with own BCs (used in create)
 
 public:
   // Constructors

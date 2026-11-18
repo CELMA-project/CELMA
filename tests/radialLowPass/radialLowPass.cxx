@@ -44,7 +44,8 @@ int RadialLowPass::init(bool restarting) {
       for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {
         for (int zInd = 0; zInd < mesh->LocalNz; zInd++) {
           unfiltered(xInd, yInd, zInd) +=
-              cos((TWOPI * mode / TWOPI) * zInd * (mesh->getCoordinates()->dz(xInd, yInd)));
+              cos((TWOPI * mode / TWOPI) * zInd *
+                  (mesh->getCoordinates()->dz(xInd, yInd)));
         }
       }
     }

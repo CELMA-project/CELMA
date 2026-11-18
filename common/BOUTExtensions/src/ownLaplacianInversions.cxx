@@ -205,6 +205,5 @@ Field3D OwnLaplacianInversions::NaulinSolver(const Vector3D &gradPerpLnN,
  */
 OwnLaplacianInversions::~OwnLaplacianInversions() {
   TRACE("Halt in OwnLaplacianInversions::~OwnLaplacianInversions");
-
 }
 #endif
