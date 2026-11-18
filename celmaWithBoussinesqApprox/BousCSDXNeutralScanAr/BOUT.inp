@@ -154,7 +154,7 @@ minPointsPerRhoSY = 0.001
 # Parallel artificial viscosity
 artPar = 40                # From 4.0/B=0.08 (actually scales with 1/B)
 artViscParLnN = artPar # Density
-artViscParJPar = artPar # Electron velocity
+artViscParJpar = artPar # Electron velocity
 artViscParMomDens = artPar # Ion velocity
 artViscParVort = 0.1 # Vorticity. From 1-CELMACurMom/PBSDriver-3-d-1.0-ViscPerpScanRestart31a0
 
