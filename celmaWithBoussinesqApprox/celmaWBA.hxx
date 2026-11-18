@@ -16,6 +16,7 @@
 #include <float.h>            // Includes DBL_EPSILON
 #include <invert_laplace.hxx> // Gives invert laplace option
 #include <map>                // Gives std::map
+#include <memory>
 #include <string>
 #include <vecops.hxx> // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)

@@ -4,6 +4,7 @@
 #include "ownBCs.hxx"       // Must know about the boundary conditions
 #include "ownOperators.hxx" // Must know about the operators class
 #include <bout.hxx>         // Includes all necessary classes and types
+#include <memory>
 #include <string>
 
 /*!
