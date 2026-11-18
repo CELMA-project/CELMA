@@ -202,8 +202,6 @@ include_yguards = false # Do invert for the boundary cells
 global_flags = 4        # Only one guard in the x boundary for inner and outer
 # Filtering (default 0)
 filter = 0.0 # Filtering will happen after the inversion is done
-# Options to the NaulinSolver
-maxit = 1000000.0
 # =============================================================================
 
 # Own filters
