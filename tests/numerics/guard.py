@@ -1,11 +1,13 @@
 """Guard that reports every semantic change of the CELMA numerics.
 
 Compares two commits of a git repository and lists the changes in the guarded
-content: C++ sources (as token streams, so formatting, comments and header guards do
-not count; the set of ``#include`` lines does, their order does not), every
-``BOUT.inp`` (as a map of options, so comments, spacing, key order and number spelling do not count) and a set of
-files that are compared byte for byte (references, the build image, compiler
-flags, every workflow and the guard itself).
+content: C++ sources anywhere in the repository (as token streams, so
+formatting and comments do not count; header guards and every ``#include`` do,
+and only a reorder within a block of adjacent ``#include`` lines is ignored),
+every ``BOUT.inp`` (as options with every value in order, so comments, spacing
+and the spelling of plain decimal numbers do not count) and a set of files that
+are compared byte for byte (references, the build image, compiler flags, lint
+and test configuration, everything under ``.github/`` and the guard itself).
 
 Modified, deleted or added guarded content is a change.
 The files are read from the git object store only, so nothing of either commit
