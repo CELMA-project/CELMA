@@ -301,7 +301,8 @@ def run_model(
             if check:
                 count = rhs_evaluations(log)
                 if count != 1:
-                    raise RuntimeError(f"{name}: {count} RHS evaluations, not 1")
+                    tail = "\n".join(log.splitlines()[-40:])
+                    raise RuntimeError(f"{name}: {count} RHS evaluations, not 1\n{tail}")
                 check_euler_step(dump, evolved)
             for var, variable in dump.variables.items():
                 if variable.dimensions != ("t", "x", "y", "z") or var in evolved:
