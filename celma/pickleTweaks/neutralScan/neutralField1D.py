@@ -62,7 +62,7 @@ sD: dict[str, dict[str, FieldStyle]] = {
     for s, m, l in zip(scans, markers, ls)
 }
 
-pos: list[float] | tuple[float, ...] | "Bbox"
+pos: "list[float] | tuple[float, ...] | Bbox"
 for direction in ("radial", "parallel"):
     for scan in scans:
         folder = "../../CSDXNeutralScanAr/visualizationPhysical/{}/field1D".format(scan)
