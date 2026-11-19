@@ -219,10 +219,10 @@ Field3D OwnOpBasicBrackets::kinEnAdvN(const Field3D &phi, const Field3D &n) {
 
   // The thesis (BOUT++ 4) took DDZ(phi, true) over all x, guard cells included,
   // and the interior y points: the region RGN_NOY
-  result = bracket(
-      pow(DDXPhi, 2.0) +
-          pow(invJ * DDZ(phi, CELL_DEFAULT, "DEFAULT", "RGN_NOY"), 2.0),
-      n, bm);
+  result =
+      bracket(pow(DDXPhi, 2.0) +
+                  pow(invJ * DDZ(phi, CELL_DEFAULT, "DEFAULT", "RGN_NOY"), 2.0),
+              n, bm);
 
   // Multiply with B/2
   return 0.5 * invJ * result;
