@@ -1,49 +1,51 @@
 # celma
 
-The folder containing the `celma` code.
-**NOTE**: If the run exits prematurely, see
-[../common/CELMAPy/scripts/prematureExitFixes](../common/CELMAPy/scripts/prematureExitFixes)
-for common fixes.
+[Root](../README.md)
+
+The CELMA model: a `BOUT++` model of plasma turbulence in a cylinder.
 
 ## The model
-* [CSDXMagFieldScanAr](CSDXMagFieldScanAr) - Contains the `BOUT.inp` file used
-  for the magnetic field scan.
-* [CSDXNeutralScanAr](CSDXNeutralScanAr) - Contains the `BOUT.inp` file used
-  for the neutral density scan.
-* [CSDXNyScan](CSDXNyScan) - Contains the `BOUT.inp` file used for the `ny`
-  scan.
-* [celma.cxx](celma.cxx) - The source file for the `celma` code.
-* [celma.hxx](celma.hxx) - The include file for the `celma` code.
-* [makefile](makefile) - The `makefile` for the `celma` code.
-  **NOTE:** The makefile assumes that `BOUT-dev` is located in `$HOME` through
-  the `BOUT-TOP` flag.
 
-## Run scripts
-These scripts are made for doing the simulations on a super computer:
-* [PBSScanMarconi-CSDXMagFieldScanAr.py](PBSScanMarconi-CSDXMagFieldScanAr.py) - The magnetic field scan.
-* [PBSScanMarconi-CSDXNeutralScanAr.py](PBSScanMarconi-CSDXNeutralScanAr.py) - The neutral density scan.
-* [PBSScanMarconi-CSDXNyScan.py](PBSScanMarconi-CSDXNyScan.py) - The `ny` scan.
+* [celma.cxx](celma.cxx) and [celma.hxx](celma.hxx) - The source of the model.
+  The equations are here and in
+  [../common/BOUTExtensions](../common/BOUTExtensions/README.md); edit with
+  care, see [AGENTS.md](../AGENTS.md).
+* [CMakeLists.txt](CMakeLists.txt) - Builds the `celma` executable next to the
+  source, as part of the [root build](../README.md#build-and-test).
+* [CSDXMagFieldScanAr](CSDXMagFieldScanAr) - The `BOUT.inp` for the magnetic
+  field scan, and `editDmpFoldersDict.py`.
+* [CSDXNeutralScanAr](CSDXNeutralScanAr) - The `BOUT.inp` for the neutral
+  density scan.
+* [CSDXNyScan](CSDXNyScan) - The `BOUT.inp` for the `ny` scan. The regression
+  test runs the model with this input.
 
-## Post processing scripts
-These scripts are made for doing the post processing on a super computer:
-* [PBSPlotMarconi-CSDXMagFieldScanAr.py](PBSPlotMarconi-CSDXMagFieldScanAr.py) - To be run when
-  [PBSScanMarconi-CSDXMagFieldScanAr.py](PBSScanMarconi-CSDXMagFieldScanAr.py)
-  is done.
-* [PBSPlotMarconi-CSDXNeutralScanAr.py](PBSPlotMarconi-CSDXMagFieldScanAr.py) - To be run when
+Run a case from this directory with `./celma -d CSDXNyScan`.
+
+The variant with the Boussinesq approximation is in
+[../celmaWithBoussinesqApprox](../celmaWithBoussinesqApprox/README.md).
+
+## Python scripts
+
+These were written for the earlier makefile build and use `bout_runners` and
+the `CELMAPy` package, which is in a separate repository (CELMA-py) and not
+installed by the CI image.
+They are not run by the continuous integration.
+
+* [PBSScanMarconi-CSDXMagFieldScanAr.py](PBSScanMarconi-CSDXMagFieldScanAr.py),
   [PBSScanMarconi-CSDXNeutralScanAr.py](PBSScanMarconi-CSDXNeutralScanAr.py)
-  is done.
-* [PBSPlotMarconi-CSDXNyScan.py](PBSPlotMarconi-CSDXMagFieldScanAr.py) - To be run when
-  [PBSScanMarconi-CSDXNyScan.py](PBSScanMarconi-CSDXNyScan.py)
-  is done.
-
-## Miscellaneous
-* [pickleTweaks](pickleTweaks) - Contains python-scripts which alters
-  standard-plots obtained from `PBSPlot<cluster>-<scan>.py`. The scripts were
-  used to create the plots given in the
+  and [PBSScanMarconi-CSDXNyScan.py](PBSScanMarconi-CSDXNyScan.py) - The
+  scans, for submission to a PBS queue on a super computer.
+* [PBSPlotMarconi-CSDXMagFieldScanAr.py](PBSPlotMarconi-CSDXMagFieldScanAr.py),
+  [PBSPlotMarconi-CSDXNeutralScanAr.py](PBSPlotMarconi-CSDXNeutralScanAr.py)
+  and [PBSPlotMarconi-CSDXNyScan.py](PBSPlotMarconi-CSDXNyScan.py) - The post
+  processing of the matching scan, to be run when it is done.
+* [pickleTweaks](pickleTweaks) - Scripts that alter the standard plots from
+  the post processing, used for the plots in the
   [thesis](https://github.com/CELMA-project/dissertation/releases/latest).
-  **NOTE:** These are to be run *after* the simulations are done.
-* [testPostProcessing.py](testPostProcessing.py) - To be run after
-  [testScan.py](testScan.py). Checks that the system has been sucessfully built
-  for the included post-processing.
-* [testScan.py](testScan.py) - Performs a quick scan to check if the system has
-  been sucessfully built.
+  Run them after the simulations are done.
+* [testScan.py](testScan.py) - A quick scan to check that the system is built.
+* [testPostProcessing.py](testPostProcessing.py) - Run after `testScan.py`;
+  checks the post processing.
+* [brokenExitExample.py](brokenExitExample.py) - Example of how to repair
+  runs whose `*.dmp.*` files were corrupted by a premature exit while
+  writing. Do not run it unless there is a problem.
