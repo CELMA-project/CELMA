@@ -66,9 +66,9 @@ pre-commit run --all-files
 * Notebooks are committed without output (see
   [.codeCleaner/README.md](.codeCleaner/README.md)).
 
-## Numerics need Michael's consent
+## Numerics need a maintainer's consent
 
-Never change any of these without Michael's explicit consent for that specific
+Never change any of these without a maintainer's explicit consent for that specific
 change:
 
 * model equations, operators, derivative schemes or stencils
@@ -78,7 +78,7 @@ change:
 * a rerecorded numerics reference
 
 Ask for it as its own question, with the numbers or the line before and after.
-Consent shows as the label `numerics-change-approved`, which Michael applies to
+Consent shows as the label `numerics-change-approved`, which a maintainer listed as an approver in `numerics-guard.yml` applies to
 the pull request; it approves the head and base at that moment, so a push, a
 retarget or a reopen needs it again.
 The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),

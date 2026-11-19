@@ -3,7 +3,7 @@ name: Numerics guard
 # Fails a pull request that changes the numerics (equations, operators,
 # stencils, boundary conditions, inputs, solver and inversion settings, the
 # BOUT++ image, compiler flags, the references, every workflow or this guard)
-# unless Michael approved that head against that base.
+# unless an approver (ALLOWED_APPROVERS) approved that head against that base.
 #
 # Nothing is stored. The only run that passes a numerics change is the run for
 # the event "label numerics-change-approved applied" whose sender is in
@@ -185,5 +185,5 @@ jobs:
               exit 0
             fi
           fi
-          echo "::error::The numerics changed. Michael's consent is him applying the label $LABEL to this head and base; any later push, retarget, reopen or other event needs it again."
+          echo "::error::The numerics changed. Consent is an approver applying the label $LABEL to this head and base; any later push, retarget, reopen or other event needs it again."
           exit 1

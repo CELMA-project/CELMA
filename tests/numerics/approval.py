@@ -1,4 +1,4 @@
-"""Decide whether Michael approved a numerics change, from facts GitHub sets.
+"""Decide whether an approver approved a numerics change, from facts GitHub sets.
 
 Nothing is stored. GitHub itself records who applied a label and which head the
 pull request had at that moment, and the pull request author cannot forge that:

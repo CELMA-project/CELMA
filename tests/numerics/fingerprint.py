@@ -24,7 +24,7 @@ Run from the repository root, in the CI image, as
 ``python3 tests/numerics/fingerprint.py``. The numbers of the run are written
 to ``recorded-fingerprint.json`` in the current directory; commit that file as
 ``tests/numerics/fingerprint-reference.json`` to rerecord the reference (which
-needs Michael's consent, see AGENTS.md).
+needs a maintainer's consent, see AGENTS.md).
 """
 
 import json

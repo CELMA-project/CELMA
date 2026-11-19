@@ -63,17 +63,17 @@ runs.
   `python3 -I`), and never runs code of the pull request or of the pushed
   commit.
   Nothing is stored. A numerics change passes only in the run for the event
-  "Michael applied the label `numerics-change-approved`" (GitHub sets the
+  "an approver applied the label `numerics-change-approved`" (GitHub sets the
   sender), which approves the head and base that event carries, provided the run
-  was started by `loeiten` and the live pull request is still open, labelled and
+  was started by an approver and the live pull request is still open, labelled and
   at that head and base (a re-run replays the old event). Every other
   event with a change (push, reopen, retarget, another label or sender) fails
   and drops the label. A push to `main` passes only if the latest
   `pull_request_target` run for the merged pull request is a successful one of
-  that kind, started and re-run by `loeiten`, for the merged head and the base
+  that kind, started and re-run by an approver, for the merged head and the base
   the push started from, for a pull request merged into `main` as exactly the pushed commit
   (`merge_commit_sha`), which still had the label; a copy of the
   workflow on a branch cannot make one, and any later event voids it. `approval.py` holds the decisions and `test_guard.py` tests
   them. Every file under `.github/workflows/` is guarded too.
-  The label is Michael's consent for that specific change, see
-  [AGENTS.md](../AGENTS.md#numerics-need-michaels-consent).
+  The label is a maintainer's consent for that specific change, see
+  [AGENTS.md](../AGENTS.md#numerics-need-a-maintainers-consent).

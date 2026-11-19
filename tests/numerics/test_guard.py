@@ -244,7 +244,7 @@ def test_escaped_quote_does_not_end_a_string_in_an_input_file():
     assert guard.compare_inp(old, old.rstrip() + " # more\n") == []
 
 
-ALLOWED = ["loeiten"]
+ALLOWED = ["approver"]
 AGENT = "r3becc4-agent"
 HEAD = "a" * 40
 BASE = "b" * 40
@@ -276,7 +276,7 @@ def live_pr(**changes):
     return live
 
 
-def decided(payload, actor="loeiten", live=None):
+def decided(payload, actor="approver", live=None):
     """Decide a pull request run."""
     live = live_pr() if live is None else live
     return approval.pull_request_approved(payload, actor, live, ALLOWED)
@@ -284,45 +284,45 @@ def decided(payload, actor="loeiten", live=None):
 
 def test_fresh_label_by_the_approver_passes():
     """The approver applies the label and starts the run: approved."""
-    assert decided(event("labeled", "loeiten"))
-    assert decided(event("labeled", "Loeiten"), actor="LOEITEN")
+    assert decided(event("labeled", "approver"))
+    assert decided(event("labeled", "Approver"), actor="APPROVER")
 
 
 @pytest.mark.parametrize(
     ("actor", "live"),
     [
-        ("loeiten", live_pr(labels=[])),  # replay after the label was removed
-        ("loeiten", live_pr(labels=[{"name": "bug"}])),
-        ("loeiten", live_pr(state="closed")),
-        ("loeiten", live_pr(head={"sha": "c" * 40})),  # replay after a push
-        ("loeiten", live_pr(base={"sha": "c" * 40, "ref": "main"})),  # base moved
-        ("loeiten", live_pr(base={"sha": BASE, "ref": "release"})),  # retargeted
-        ("loeiten", {}),  # no live data
+        ("approver", live_pr(labels=[])),  # replay after the label was removed
+        ("approver", live_pr(labels=[{"name": "bug"}])),
+        ("approver", live_pr(state="closed")),
+        ("approver", live_pr(head={"sha": "c" * 40})),  # replay after a push
+        ("approver", live_pr(base={"sha": "c" * 40, "ref": "main"})),  # base moved
+        ("approver", live_pr(base={"sha": BASE, "ref": "release"})),  # retargeted
+        ("approver", {}),  # no live data
         (AGENT, live_pr()),  # the agent re-ran the old approval run
         ("", live_pr()),
     ],
 )
 def test_replay_of_the_approval_event_fails_when_the_pull_request_moved(actor, live):
     """A re-run replays the old event, so the live pull request and actor decide."""
-    assert not decided(event("labeled", "loeiten"), actor=actor, live=live)
+    assert not decided(event("labeled", "approver"), actor=actor, live=live)
 
 
 def test_queued_run_fails_after_an_earlier_run_deleted_the_label():
     """The label was dropped by an earlier run: a queued labeled run fails."""
     dropped = live_pr(labels=[])
-    assert not decided(event("labeled", "loeiten"), live=dropped)
+    assert not decided(event("labeled", "approver"), live=dropped)
 
 
 @pytest.mark.parametrize(
     "payload",
     [
         event("labeled", AGENT),  # the agent applies the label
-        event("labeled", "loeiten", label="bug"),  # another label
-        event("synchronize", "loeiten"),  # a push after the label
-        event("reopened", "loeiten"),  # close and reopen
-        event("edited", "loeiten"),  # retarget
-        event("opened", "loeiten"),
-        event("unlabeled", "loeiten"),
+        event("labeled", "approver", label="bug"),  # another label
+        event("synchronize", "approver"),  # a push after the label
+        event("reopened", "approver"),  # close and reopen
+        event("edited", "approver"),  # retarget
+        event("opened", "approver"),
+        event("unlabeled", "approver"),
         event("labeled", ""),
     ],
 )
@@ -343,8 +343,8 @@ def run(**changes):
         "conclusion": "success",
         "run_number": 10,
         "display_title": title,
-        "actor": {"login": "loeiten"},
-        "triggering_actor": {"login": "loeiten"},
+        "actor": {"login": "approver"},
+        "triggering_actor": {"login": "approver"},
     }
     entry.update(changes)
     return entry
