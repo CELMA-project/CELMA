@@ -79,8 +79,8 @@ change:
 
 Ask for it as its own question, with the numbers or the line before and after.
 Consent shows as the label `numerics-change-approved`, which Michael applies to
-the pull request; a push to the branch removes it, so it binds to the head he
-saw.
+the pull request; the check records it against that head and base, so a push or
+a retarget needs it again.
 The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),
 [tests/README.md](tests/README.md)) fails any pull request that changes
 the guarded content without it.

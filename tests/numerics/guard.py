@@ -1,9 +1,9 @@
 """Guard that reports every semantic change of the CELMA numerics.
 
 Compares two commits of a git repository and lists the changes in the guarded
-content: C++ sources (as token streams, so formatting, comments, includes and
-header guards do not count), every ``BOUT.inp`` (as a map of options, so
-comments, spacing, key order and number spelling do not count) and a set of
+content: C++ sources (as token streams, so formatting, comments and header guards do
+not count; the set of ``#include`` lines does, their order does not), every
+``BOUT.inp`` (as a map of options, so comments, spacing, key order and number spelling do not count) and a set of
 files that are compared byte for byte (references, the build image, compiler
 flags and the guard itself).
 
@@ -23,11 +23,15 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-CPP_PATTERNS = (
-    re.compile(r"celma/[^/]+\.(cxx|hxx)"),
-    re.compile(r"celmaWithBoussinesqApprox/[^/]+\.(cxx|hxx)"),
-    re.compile(r"common/BOUTExtensions/.+\.(cxx|hxx|cpp|hpp|cc|h)"),
-    re.compile(r"MES/.+\.(cxx|hxx)"),
+CPP_EXT = r"(cxx|hxx|cpp|hpp|cc|hh|h|c)"
+CPP_PATTERNS = tuple(
+    re.compile(rf"{folder}/.+\.{CPP_EXT}")
+    for folder in (
+        "celma",
+        "celmaWithBoussinesqApprox",
+        "common/BOUTExtensions",
+        "MES",
+    )
 )
 INP_PATTERN = re.compile(r"(.+/)?BOUT\.inp")
 RAW_PATTERNS = (
@@ -76,6 +80,7 @@ TOKEN = re.compile(
     r"|[A-Za-z_]\w*"
     r"|" + "|".join(re.escape(op) for op in OPERATORS) + r"|\S"
 )
+INCLUDE = re.compile(r"\s*#\s*include\b")
 Token = Tuple[str, int]
 
 
@@ -213,7 +218,7 @@ def cpp_tokens(text: str) -> List[Token]:
         lines.append((number, line))
     if pending is not None:
         lines.append(pending)
-    lines = [x for x in lines if not re.match(r"\s*#\s*include\b", x[1])]
+    lines = [x for x in lines if not INCLUDE.match(x[1])]
     lines = drop_header_guard(lines)
     tokens: List[Token] = []
     for number, line in lines:
@@ -222,6 +227,29 @@ def cpp_tokens(text: str) -> List[Token]:
         if found and found[0][0] == "#":
             tokens.append(("<eol>", number))
     return tokens
+
+
+def cpp_includes(text: str) -> List[str]:
+    """List the ``#include`` lines of a source, without order or spacing.
+
+    A new header included from a model changes what the model compiles, so the
+    set of includes is guarded, though their order is not.
+
+    Parameters
+    ----------
+    text : str
+        Source code.
+
+    Returns
+    -------
+    list
+        The sorted, whitespace-normalised include lines, without duplicates.
+    """
+    found = set()
+    for line in strip_comments(text).split("\n"):
+        if INCLUDE.match(line):
+            found.add(re.sub(r"\s+", "", line))
+    return sorted(found)
 
 
 def drop_header_guard(lines: List[Tuple[int, str]]) -> List[Tuple[int, str]]:
@@ -286,6 +314,9 @@ def compare_cpp(old: str, new: str) -> List[str]:
         a=[t for t, _ in a], b=[t for t, _ in b], autojunk=False
     )
     changes = []
+    old_inc, new_inc = cpp_includes(old), cpp_includes(new)
+    changes.extend(f"include removed: {x}" for x in old_inc if x not in new_inc)
+    changes.extend(f"include added: {x}" for x in new_inc if x not in old_inc)
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
             continue
@@ -335,7 +366,10 @@ def parse_inp(text: str) -> Dict[str, Union[float, str]]:
 
 
 def strip_inp_comment(line: str) -> str:
-    """Remove a ``#`` or ``;`` comment that is not inside quotes.
+    r"""Remove a ``#`` or ``;`` comment that is not inside quotes.
+
+    A backslash inside quotes escapes the next character, so ``\"`` does not
+    end the string.
 
     Parameters
     ----------
@@ -348,8 +382,13 @@ def strip_inp_comment(line: str) -> str:
         The line without its comment.
     """
     quote = ""
+    skip = False
     for i, char in enumerate(line):
-        if quote:
+        if skip:
+            skip = False
+        elif quote and char == "\\":
+            skip = True
+        elif quote:
             quote = "" if char == quote else quote
         elif char in "\"'":
             quote = char

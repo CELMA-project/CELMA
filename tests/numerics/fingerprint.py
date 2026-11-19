@@ -16,8 +16,8 @@ tolerance, so the report names the term that moved. A few operator cases of
 
 The test proves its own sensitivity: it reruns with a changed z derivative, x
 derivative, upwind scheme and boundary condition and requires each of them to
-fail the comparison by a wide margin, and it runs the unchanged case twice to
-show the numbers do not wobble from run to run.
+fail the comparison by a wide margin, and it runs the unchanged case twice and
+requires every compared value to be bit for bit the same.
 
 Run from the repository root, in the CI image, as
 ``python3 tests/numerics/fingerprint.py``. The numbers of the run are written
@@ -42,7 +42,6 @@ ROOT = Path(__file__).resolve().parents[2]
 REFERENCE = Path(__file__).with_name("fingerprint-reference.json")
 RECORDED = Path("recorded-fingerprint.json")
 RTOL = 1.0e-9
-NOISE_LIMIT = 1.0e-13
 # A mutation has to move the numbers this many times the tolerance
 MARGIN = 100.0
 GRID = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
@@ -274,7 +273,7 @@ def interior(data: np.ndarray) -> np.ndarray:
 
 def run_model(
     name: str, extra: Tuple[str, ...] = (), check: bool = False
-) -> Dict[str, Fingerprint]:
+) -> Dict[str, np.ndarray]:
     """Run one model for one right-hand-side evaluation.
 
     Parameters
@@ -301,7 +300,7 @@ def run_model(
     directory, executable, case, vorticity = MODELS[name]
     args = (*GRID, *RUN, *FIELDS, VORTICITY.format(vorticity), *extra)
     evolved = (vorticity, *EVOLVED)
-    result: Dict[str, Fingerprint] = {}
+    result: Dict[str, np.ndarray] = {}
     with tempfile.TemporaryDirectory() as tmp:
         dump, log = run_bout(ROOT / directory, executable, case, args, Path(tmp))
         with dump:
@@ -319,7 +318,7 @@ def run_model(
                 values = interior(variable[0])
                 if not np.all(np.isfinite(values)):
                     raise RuntimeError(f"{name} {var}: inner values not finite")
-                result[f"{name}/{var}"] = fingerprint_of(values)
+                result[f"{name}/{var}"] = np.array(values)
     return result
 
 
@@ -354,7 +353,7 @@ def check_euler_step(dump: Dataset, evolved: Tuple[str, ...]) -> None:
             )
 
 
-def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, Fingerprint]:
+def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
     """Run one operator case of ``MES/`` and fingerprint its output.
 
     Parameters
@@ -371,7 +370,7 @@ def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, Fingerprint]:
         ``"name/variable"``.
     """
     directory, executable, case = MES_CASES[name]
-    result: Dict[str, Fingerprint] = {}
+    result: Dict[str, np.ndarray] = {}
     with tempfile.TemporaryDirectory() as tmp:
         dump, _ = run_bout(
             ROOT / directory, executable, case, (*MES_GRID, *MES_RUN, *extra), Path(tmp)
@@ -383,11 +382,11 @@ def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, Fingerprint]:
                 data = np.asarray(dump.variables[var])
                 # Saved once: (x, y, z); repeated: (t, x, y, z), last step
                 values = (data[-1] if data.ndim == 4 else data)[1:-1]
-                result[f"{name}/{var}"] = fingerprint_of(values)
+                result[f"{name}/{var}"] = np.array(values)
     return result
 
 
-def run_all(extra: Tuple[str, ...] = (), check: bool = False) -> Dict[str, Fingerprint]:
+def run_all(extra: Tuple[str, ...] = (), check: bool = False) -> Dict[str, np.ndarray]:
     """Run both models and the operator cases.
 
     Parameters
@@ -400,15 +399,53 @@ def run_all(extra: Tuple[str, ...] = (), check: bool = False) -> Dict[str, Finge
     Returns
     -------
     dict
-        All fingerprints.
+        The compared values of every term, keyed ``"model/term"``.
     """
-    result: Dict[str, Fingerprint] = {}
+    result: Dict[str, np.ndarray] = {}
     for name in MODELS:
         result.update(run_model(name, extra, check))
     for name in MES_CASES:
         mes_extra = tuple(x for x in extra if not x.startswith(("lnN:", "jPar:")))
         result.update(run_mes(name, mes_extra))
     return result
+
+
+def fingerprints(arrays: Dict[str, np.ndarray]) -> Dict[str, Fingerprint]:
+    """Reduce every term to its fingerprint.
+
+    Parameters
+    ----------
+    arrays : dict
+        The compared values of every term.
+
+    Returns
+    -------
+    dict
+        Term to fingerprint.
+    """
+    return {term: fingerprint_of(values) for term, values in arrays.items()}
+
+
+def differing(a: Dict[str, np.ndarray], b: Dict[str, np.ndarray]) -> List[str]:
+    """List the terms whose values are not bit for bit the same.
+
+    Parameters
+    ----------
+    a : dict
+        Values of one run.
+    b : dict
+        Values of another run.
+
+    Returns
+    -------
+    list
+        The terms that differ in any element, or are in one run only.
+    """
+    return [
+        t
+        for t in sorted(set(a) | set(b))
+        if t not in a or t not in b or not np.array_equal(a[t], b[t])
+    ]
 
 
 def report(errors: Dict[str, float], limit: float) -> List[str]:
@@ -455,14 +492,17 @@ def main() -> int:
     int
         Zero when the numbers agree and every mutation fails the comparison.
     """
-    first = run_all(check=True)
-    second = run_all()
+    run_one = run_all(check=True)
+    run_two = run_all()
+    first = fingerprints(run_one)
     RECORDED.write_text(json.dumps(first, indent=0) + "\n")
-    noise_term, noise = worst(compare(second, first))
+    unequal = differing(run_one, run_two)
     print(
-        f"run-to-run noise: {noise:.3e} (worst term {noise_term}), limit {NOISE_LIMIT:.0e}"
+        f"run-to-run: {len(run_one) - len(unequal)} of {len(run_one)} terms bit for bit"
     )
-    failed = not noise <= NOISE_LIMIT
+    for term in unequal:
+        print(f"  FAIL not bit for bit the same: {term}")
+    failed = bool(unequal)
     if REFERENCE.exists():
         reference = json.loads(REFERENCE.read_text())
     else:
@@ -476,7 +516,7 @@ def main() -> int:
     print("\n".join(moved))
     for label, extra in MUTATIONS.items():
         try:
-            mutated = run_all(extra)
+            mutated = fingerprints(run_all(extra))
         except RuntimeError as error:
             print(f"FAIL mutation '{label}' did not run: {error}")
             failed = True
@@ -492,7 +532,7 @@ def main() -> int:
             print(
                 f"{'ok  ' if good else 'FAIL'} mutation '{label}', {group}: "
                 f"worst term {term}, error {err:.3e} = {margin:.1e} x tolerance, "
-                f"noise {noise:.1e}"
+                "run-to-run noise 0 (bit for bit)"
             )
     return 1 if failed else 0
 

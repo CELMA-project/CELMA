@@ -33,7 +33,7 @@ runs.
       that moved.
       It reruns with a changed z derivative, x derivative, upwind scheme and
       boundary condition and requires each to fail by a wide margin, and runs
-      the unchanged case twice to show the numbers are reproducible.
+      the unchanged case twice and requires every value bit for bit the same.
       CI runs it in the image, which also records the reference
       (`recorded-fingerprint.json`).
     * `guard.py BASE HEAD` compares two commits and lists every semantic change
@@ -52,9 +52,14 @@ runs.
   The workflow [numerics-guard.yml](../.github/workflows/numerics-guard.yml)
   (check `numerics-guard`) runs the guard on every pull request, with the
   base branch's copy of `guard.py`, and never runs code of the pull request.
-  A change passes only if the pull request carries the label
-  `numerics-change-approved` and `loeiten` applied it last; a push to the pull
-  request removes the label. A push to `main` is checked against its first
-  parent and passes only if the merged pull request had the approved label.
+  A change passes only if Michael applied the label `numerics-change-approved`
+  (the run that sees him apply it, with `loeiten` as the sender, records the
+  commit status `numerics-approval` on that head, naming the merge base).
+  The status belongs to one commit, so a push, a retarget or a reopen onto
+  other content is not approved; a push also removes the label, and removing
+  it records a failure. A push to `main` is compared from the commit before
+  the push and passes only if the merged pull request's head itself carries
+  the approval status.
+  `approval.py` holds that decision and `test_guard.py` tests it.
   The label is Michael's consent for that specific change, see
   [AGENTS.md](../AGENTS.md#numerics-need-michaels-consent).

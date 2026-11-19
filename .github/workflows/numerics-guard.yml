@@ -2,18 +2,26 @@ name: Numerics guard
 
 # Fails a pull request that changes the numerics (equations, operators,
 # stencils, boundary conditions, inputs, solver and inversion settings, the
-# BOUT++ image, compiler flags, the references or this guard) unless the label
-# `numerics-change-approved` was last applied by someone in ALLOWED_APPROVERS.
+# BOUT++ image, compiler flags, the references or this guard) unless Michael
+# approved that head against that base.
+#
+# Approval: he applies the label `numerics-change-approved`. The run that sees
+# him apply it (the label event's sender is in ALLOWED_APPROVERS) records a
+# commit status `numerics-approval` on the head commit that names the merge
+# base. A status belongs to one commit and the server sets it, so a push, a
+# retarget or a close and reopen onto other content leaves nothing approved, and
+# no commit date the author controls is read. Removing the label records a
+# failure status on its head. The label is also removed on every push.
 #
 # The job runs on `pull_request_target`, so it has a token that can write
-# labels. It therefore never checks out, builds or runs anything of the pull
-# request: it checks out the base branch and fetches the head commit as git
-# objects only, and the BASE copy of tests/numerics/guard.py reads both commits
-# from the object store.
+# labels and statuses. It therefore never checks out, builds or runs anything of
+# the pull request: it checks out the base branch and fetches the head commit as
+# git objects only, and the BASE copy of tests/numerics/guard.py reads both
+# commits from the object store.
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
   push:
     branches: [main]
 
@@ -27,10 +35,12 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
+      statuses: write
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
       LABEL: numerics-change-approved
+      CONTEXT: numerics-approval
       ALLOWED_APPROVERS: loeiten
 
     steps:
@@ -40,13 +50,22 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Drop the approval of an earlier head
+      - name: Drop the approval label of an earlier head
         if: github.event_name == 'pull_request_target' && github.event.action == 'synchronize'
         env:
           PR: ${{ github.event.pull_request.number }}
         run: |
-          # The approval binds to the head the approver saw
-          gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" || true
+          set -u
+          # Only the label being absent (404) is fine; any other failure fails the job
+          if ! out=$(gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" 2>&1); then
+            case "$out" in
+              *"Label does not exist"* | *"Not Found"* | *"HTTP 404"*) echo "No label to drop." ;;
+              *)
+                echo "::error::Could not drop the label: $out"
+                exit 1
+                ;;
+            esac
+          fi
 
       - name: Fetch the head of the pull request as data
         if: github.event_name == 'pull_request_target'
@@ -63,6 +82,8 @@ jobs:
           EVENT: ${{ github.event_name }}
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
         run: |
           set -u
           if [ "$EVENT" = pull_request_target ]; then
@@ -70,11 +91,24 @@ jobs:
             HEAD=$HEAD_SHA
             GUARD=tests/numerics/guard.py
           else
-            BASE=$(git rev-parse HEAD^1)
-            HEAD=$(git rev-parse HEAD)
-            # The guard of the first parent, not the one that was just merged
+            HEAD=$AFTER
+            if [ "$BEFORE" = 0000000000000000000000000000000000000000 ]; then
+              BASE=$(git rev-parse "$AFTER^1" 2>/dev/null || true)
+            else
+              BASE=$BEFORE
+            fi
+            if [ -z "$BASE" ]; then
+              echo "The push has no earlier commit: nothing to compare."
+              echo "status=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+              echo "::error::The earlier commit $BASE is not in the history (a forced push?)."
+              exit 1
+            fi
+            # The guard of the commit before the push, not the one just pushed
             if ! git cat-file -e "$BASE:tests/numerics/guard.py" 2>/dev/null; then
-              echo "The first parent has no guard: nothing to compare."
+              echo "The earlier commit has no guard: nothing to compare."
               echo "status=0" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -88,49 +122,68 @@ jobs:
           set -e
           cat "$RUNNER_TEMP/report.txt"
           echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
           {
             echo '```'
             cat "$RUNNER_TEMP/report.txt"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Record the approval, or its removal, on the head commit
+        if: github.event_name == 'pull_request_target' && (github.event.action == 'labeled' || github.event.action == 'unlabeled') && github.event.label.name == 'numerics-change-approved'
+        env:
+          ACTION: ${{ github.event.action }}
+          SENDER: ${{ github.event.sender.login }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE: ${{ steps.guard.outputs.base }}
+        run: |
+          set -eu
+          state=failure
+          text="approval removed"
+          if [ "$ACTION" = labeled ]; then
+            text="label applied by $SENDER, who may not approve"
+            for allowed in ${ALLOWED_APPROVERS//,/ }; do
+              if [ "${SENDER,,}" = "${allowed,,}" ]; then
+                state=success
+                text=$(cd tests/numerics && python3 -c 'import sys, approval; print(approval.description(sys.argv[1]))' "$BASE")
+              fi
+            done
+          fi
+          echo "Status $state on $HEAD_SHA: $text"
+          gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
+            -f state="$state" -f context="$CONTEXT" -f description="$text"
+
       - name: Require the approval if the numerics changed
         env:
           STATUS: ${{ steps.guard.outputs.status }}
+          BASE: ${{ steps.guard.outputs.base }}
           EVENT: ${{ github.event_name }}
-          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AFTER: ${{ github.event.after }}
         run: |
           set -eu
           if [ "$STATUS" = 0 ]; then
             echo "No change of the numerics."
             exit 0
           fi
+          approved_for() { # head sha, merge base or empty
+            gh api "repos/$REPO/commits/$1/statuses" | (cd tests/numerics && python3 approval.py ${2:+"$2"})
+          }
           if [ "$EVENT" = pull_request_target ]; then
-            numbers=$PR
-          else
-            numbers=$(gh api "repos/$REPO/commits/$GITHUB_SHA/pulls" \
-              --jq '.[] | select(.merged_at != null) | .number')
-          fi
-          if [ -z "$numbers" ]; then
-            echo "::error::The numerics changed and no merged pull request is associated with the commit."
-            exit 1
-          fi
-          for number in $numbers; do
-            labelled=$(gh api "repos/$REPO/issues/$number/labels" \
-              --jq "[.[] | select(.name == \"$LABEL\")] | length")
-            # Events come oldest first, so the last line is the latest application
-            actor=$(gh api --paginate "repos/$REPO/issues/$number/events" \
-              --jq ".[] | select(.event == \"labeled\" and .label.name == \"$LABEL\") | .actor.login" \
-              | tail -n 1)
-            echo "Pull request $number: label present: $labelled, last applied by: '$actor'"
-            if [ "$labelled" != 0 ] && [ -n "$actor" ]; then
-              for allowed in ${ALLOWED_APPROVERS//,/ }; do
-                if [ "${actor,,}" = "${allowed,,}" ]; then
-                  echo "Approved by $actor."
-                  exit 0
-                fi
-              done
+            if approved_for "$HEAD_SHA" "$BASE"; then
+              echo "Approved for head $HEAD_SHA against base $BASE."
+              exit 0
             fi
-          done
-          echo "::error::The numerics changed. Michael's consent for this change is the label $LABEL, applied by him to this head."
+          else
+            # The merged head itself must have been approved
+            heads=$(gh api "repos/$REPO/commits/$AFTER/pulls" \
+              --jq '.[] | select(.merged_at != null) | .head.sha')
+            for head in $heads; do
+              if approved_for "$head" ""; then
+                echo "The merged head $head was approved."
+                exit 0
+              fi
+            done
+          fi
+          echo "::error::The numerics changed. Michael's consent is the label $LABEL, applied by him to this head and base."
           exit 1
