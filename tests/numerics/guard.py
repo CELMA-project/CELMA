@@ -5,7 +5,7 @@ content: C++ sources (as token streams, so formatting, comments and header guard
 not count; the set of ``#include`` lines does, their order does not), every
 ``BOUT.inp`` (as a map of options, so comments, spacing, key order and number spelling do not count) and a set of
 files that are compared byte for byte (references, the build image, compiler
-flags and the guard itself).
+flags, every workflow and the guard itself).
 
 Modified or deleted guarded content is a change; a newly added file is not.
 The files are read from the git object store only, so nothing of either commit
@@ -39,11 +39,8 @@ RAW_PATTERNS = (
     re.compile(r"tests/numerics/.+"),
     re.compile(r"docker/Dockerfile\.bout5"),
     re.compile(r"(.+/)?CMakeLists\.txt"),
-    re.compile(r"\.github/workflows/numerics-guard\.yml"),
+    re.compile(r"\.github/workflows/.+"),
 )
-# Only the pinned image line of the test workflow is guarded
-IMAGE_LINE_FILE = ".github/workflows/test.yml"
-IMAGE_LINE = re.compile(r"^\s*IMAGE:.*$", re.M)
 OPERATORS = (
     "<<=",
     ">>=",
@@ -488,7 +485,7 @@ def kind_of(path: str) -> Optional[str]:
     Returns
     -------
     str or None
-        ``"cpp"``, ``"inp"``, ``"raw"``, ``"image"`` or ``None`` if unguarded.
+        ``"cpp"``, ``"inp"``, ``"raw"`` or ``None`` if unguarded.
     """
     if any(p.fullmatch(path) for p in CPP_PATTERNS):
         return "cpp"
@@ -496,7 +493,7 @@ def kind_of(path: str) -> Optional[str]:
         return "inp"
     if any(p.fullmatch(path) for p in RAW_PATTERNS):
         return "raw"
-    return "image" if path == IMAGE_LINE_FILE else None
+    return None
 
 
 def compare(repo: Path, base: str, head: str) -> Dict[str, List[str]]:
@@ -531,11 +528,6 @@ def compare(repo: Path, base: str, head: str) -> Dict[str, List[str]]:
                 changes = compare_cpp(old, new)
             elif kind == "inp":
                 changes = compare_inp(old, new)
-            elif kind == "image":
-                changes = compare_raw(
-                    "\n".join(IMAGE_LINE.findall(old)),
-                    "\n".join(IMAGE_LINE.findall(new)),
-                )
             else:
                 changes = compare_raw(old, new)
         if changes:

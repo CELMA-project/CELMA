@@ -2,22 +2,37 @@ name: Numerics guard
 
 # Fails a pull request that changes the numerics (equations, operators,
 # stencils, boundary conditions, inputs, solver and inversion settings, the
-# BOUT++ image, compiler flags, the references or this guard) unless Michael
-# approved that head against that base.
+# BOUT++ image, compiler flags, the references, every workflow or this guard)
+# unless Michael approved that head against that base.
 #
-# Approval: he applies the label `numerics-change-approved`. The run that sees
-# him apply it (the label event's sender is in ALLOWED_APPROVERS) records a
-# commit status `numerics-approval` on the head commit that names the merge
-# base. A status belongs to one commit and the server sets it, so a push, a
-# retarget or a close and reopen onto other content leaves nothing approved, and
-# no commit date the author controls is read. Removing the label records a
-# failure status on its head. The label is also removed on every push.
+# Nothing is stored. The only run that passes a numerics change is the run for
+# the event "label numerics-change-approved applied" whose sender is in
+# ALLOWED_APPROVERS: GitHub sets the sender, and the event carries the head and
+# base it approves. Every other event with a numerics change (opened,
+# synchronize, reopened, edited, unlabeled, another label, another sender) fails
+# and drops the approval label, so a push, a retarget or a reopen needs a new
+# application. The decision is tests/numerics/approval.py, tested in Lint.
+#
+# After the merge, a push to main passes only if the runs API holds a
+# successful pull_request_target run of this workflow for the merged pull
+# request's final head, started and re-run by someone in ALLOWED_APPROVERS,
+# named (run-name) as the approval label event. A copy of this workflow on a
+# pull request branch cannot satisfy that: pull_request_target always runs the
+# workflow of the base branch, so such a copy only makes runs with the event
+# pull_request, push or workflow_dispatch, with the agent as actor.
 #
 # The job runs on `pull_request_target`, so it has a token that can write
-# labels and statuses. It therefore never checks out, builds or runs anything of
-# the pull request: it checks out the base branch and fetches the head commit as
-# git objects only, and the BASE copy of tests/numerics/guard.py reads both
-# commits from the object store.
+# labels. It therefore never checks out, builds or runs anything of the pull
+# request: it checks out the base branch and fetches the head commit as git
+# objects only, and the BASE copy of tests/numerics/guard.py reads both commits
+# from the object store.
+
+run-name: >-
+  numerics-guard event=${{ github.event_name }} action=${{ github.event.action }}
+  pr=${{ github.event.pull_request.number }}
+  head=${{ github.event.pull_request.head.sha || github.event.after }}
+  base=${{ github.event.pull_request.base.sha }}
+  label=${{ github.event.label.name }}
 
 on:
   pull_request_target:
@@ -35,12 +50,11 @@ jobs:
       contents: read
       issues: write
       pull-requests: read
-      statuses: write
+      actions: read
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
       LABEL: numerics-change-approved
-      CONTEXT: numerics-approval
       ALLOWED_APPROVERS: loeiten
 
     steps:
@@ -49,23 +63,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-
-      - name: Drop the approval label of an earlier head
-        if: github.event_name == 'pull_request_target' && github.event.action == 'synchronize'
-        env:
-          PR: ${{ github.event.pull_request.number }}
-        run: |
-          set -u
-          # Only the label being absent (404) is fine; any other failure fails the job
-          if ! out=$(gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" 2>&1); then
-            case "$out" in
-              *"Label does not exist"* | *"Not Found"* | *"HTTP 404"*) echo "No label to drop." ;;
-              *)
-                echo "::error::Could not drop the label: $out"
-                exit 1
-                ;;
-            esac
-          fi
 
       - name: Fetch the head of the pull request as data
         if: github.event_name == 'pull_request_target'
@@ -129,36 +126,11 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Record the approval, or its removal, on the head commit
-        if: github.event_name == 'pull_request_target' && (github.event.action == 'labeled' || github.event.action == 'unlabeled') && github.event.label.name == 'numerics-change-approved'
-        env:
-          ACTION: ${{ github.event.action }}
-          SENDER: ${{ github.event.sender.login }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE: ${{ steps.guard.outputs.base }}
-        run: |
-          set -eu
-          state=failure
-          text="approval removed"
-          if [ "$ACTION" = labeled ]; then
-            text="label applied by $SENDER, who may not approve"
-            for allowed in ${ALLOWED_APPROVERS//,/ }; do
-              if [ "${SENDER,,}" = "${allowed,,}" ]; then
-                state=success
-                text=$(cd tests/numerics && python3 -c 'import sys, approval; print(approval.description(sys.argv[1]))' "$BASE")
-              fi
-            done
-          fi
-          echo "Status $state on $HEAD_SHA: $text"
-          gh api -X POST "repos/$REPO/statuses/$HEAD_SHA" \
-            -f state="$state" -f context="$CONTEXT" -f description="$text"
-
       - name: Require the approval if the numerics changed
         env:
           STATUS: ${{ steps.guard.outputs.status }}
-          BASE: ${{ steps.guard.outputs.base }}
           EVENT: ${{ github.event_name }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR: ${{ github.event.pull_request.number }}
           AFTER: ${{ github.event.after }}
         run: |
           set -eu
@@ -166,24 +138,31 @@ jobs:
             echo "No change of the numerics."
             exit 0
           fi
-          approved_for() { # head sha, merge base or empty
-            gh api "repos/$REPO/commits/$1/statuses" | (cd tests/numerics && python3 approval.py ${2:+"$2"})
-          }
           if [ "$EVENT" = pull_request_target ]; then
-            if approved_for "$HEAD_SHA" "$BASE"; then
-              echo "Approved for head $HEAD_SHA against base $BASE."
+            if (cd tests/numerics && python3 approval.py pr "$GITHUB_EVENT_PATH"); then
+              echo "Approved: the label was applied by an approver to this head and base."
               exit 0
             fi
+            # Not the approval event: the approval, if any, no longer holds. Only
+            # the label being absent (404) is fine; any other failure fails the job.
+            if ! out=$(gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" 2>&1); then
+              case "$out" in
+                *"Label does not exist"* | *"Not Found"* | *"HTTP 404"*) echo "No label to drop." ;;
+                *)
+                  echo "::error::Could not drop the label: $out"
+                  exit 1
+                  ;;
+              esac
+            fi
           else
-            # The merged head itself must have been approved
-            heads=$(gh api "repos/$REPO/commits/$AFTER/pulls" \
-              --jq '.[] | select(.merged_at != null) | .head.sha')
-            for head in $heads; do
-              if approved_for "$head" ""; then
-                echo "The merged head $head was approved."
-                exit 0
-              fi
-            done
+            gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&status=success&per_page=100" \
+              --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
+            gh api "repos/$REPO/commits/$AFTER/pulls" \
+              --jq '[.[] | select(.merged_at != null)]' > "$RUNNER_TEMP/pulls.json"
+            if (cd tests/numerics && python3 approval.py push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json"); then
+              echo "The merged head was approved by an approver."
+              exit 0
+            fi
           fi
-          echo "::error::The numerics changed. Michael's consent is the label $LABEL, applied by him to this head and base."
+          echo "::error::The numerics changed. Michael's consent is him applying the label $LABEL to this head and base; any later push, retarget or reopen needs it again."
           exit 1

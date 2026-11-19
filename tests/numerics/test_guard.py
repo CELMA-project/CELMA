@@ -177,16 +177,14 @@ def test_deleted_file_fails_and_added_file_passes():
     assert guard.compare(ROOT, "HEAD", deleted) == {"celma/celma.cxx": ["file deleted"]}
 
 
-def test_image_pin_and_compiler_flags_are_guarded():
-    """The pinned image and a CMakeLists.txt are compared as they are."""
-    workflow = ".github/workflows/test.yml"
-    text = read_head(workflow)
-    other = text.replace("name: Test", "name: Tests", 1)
-    assert guard.compare(ROOT, "HEAD", commit_with({workflow: other})) == {}
-    pinned = text.replace("sha256:8ac5", "sha256:9ac5", 1)
-    assert list(guard.compare(ROOT, "HEAD", commit_with({workflow: pinned}))) == [
-        workflow
-    ]
+def test_every_workflow_and_compiler_flags_are_guarded():
+    """Any edit of a workflow, the pinned image included, or of a CMakeLists."""
+    for workflow in (".github/workflows/test.yml", ".github/workflows/lint.yml"):
+        text = read_head(workflow)
+        assert list(
+            guard.compare(ROOT, "HEAD", commit_with({workflow: text + "# x\n"}))
+        ) == [workflow]
+    assert guard.kind_of(".github/workflows/brand-new.yml") == "raw"
     flags = read_head("CMakeLists.txt") + "\nadd_compile_options(-ffast-math)\n"
     assert "CMakeLists.txt" in guard.compare(
         ROOT, "HEAD", commit_with({"CMakeLists.txt": flags})
@@ -237,14 +235,96 @@ def test_escaped_quote_does_not_end_a_string_in_an_input_file():
     assert guard.compare_inp(old, old.rstrip() + " # more\n") == []
 
 
-def test_approval_binds_to_head_and_base():
-    """Only the newest success for this merge base approves."""
-    ok = {"context": "numerics-approval", "state": "success"}
-    ok["description"] = approval.description("abc")
-    other = {"context": "ci/other", "state": "failure", "description": "x"}
-    assert approval.approved([other, ok], "abc")
-    assert not approval.approved([ok], "def")  # the pull request was retargeted
-    assert not approval.approved([], "abc")  # a new head has no status
-    assert approval.approved([ok], None)  # after the merge only the head counts
-    revoked = {"context": "numerics-approval", "state": "failure"}
-    assert not approval.approved([revoked, ok], "abc")
+ALLOWED = ["loeiten"]
+AGENT = "r3becc4-agent"
+HEAD = "a" * 40
+BASE = "b" * 40
+
+
+def event(action, sender, label=approval.LABEL):
+    """Build a pull request event payload."""
+    return {
+        "action": action,
+        "sender": {"login": sender},
+        "label": {"name": label},
+        "pull_request": {"head": {"sha": HEAD}, "base": {"sha": BASE}},
+        "statuses": [{"context": "numerics-approval", "state": "success"}],
+    }
+
+
+def test_label_applied_by_the_approver_passes():
+    """Only the label event of a permitted sender approves."""
+    assert approval.pull_request_approved(event("labeled", "loeiten"), ALLOWED)
+    assert approval.pull_request_approved(event("labeled", "Loeiten"), ALLOWED)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        event("labeled", AGENT),  # the agent applies the label
+        event("labeled", "loeiten", label="bug"),  # another label
+        event("synchronize", "loeiten"),  # a push after the label
+        event("reopened", "loeiten"),  # close and reopen
+        event("edited", "loeiten"),  # retarget
+        event("opened", "loeiten"),
+        event("unlabeled", "loeiten"),
+        event("labeled", ""),
+    ],
+)
+def test_every_other_event_fails_and_a_forged_status_is_not_read(payload):
+    """Nothing but the approver applying the label approves."""
+    assert not approval.pull_request_approved(payload, ALLOWED)
+
+
+def run(**changes):
+    """Build a workflow run as the API lists it, by default an approving one."""
+    title = (
+        f"numerics-guard event=pull_request_target action=labeled pr=7 "
+        f"head={HEAD} base={BASE} label={approval.LABEL}"
+    )
+    entry = {
+        "event": "pull_request_target",
+        "conclusion": "success",
+        "display_title": title,
+        "actor": {"login": "loeiten"},
+        "triggering_actor": {"login": "loeiten"},
+    }
+    entry.update(changes)
+    return entry
+
+
+PULLS = [{"number": 7, "head": {"sha": HEAD}}]
+
+
+def test_push_passes_with_the_approvers_run_for_the_merged_head():
+    """The run for the merged pull request's final head approves the push."""
+    assert approval.push_approved([run()], PULLS, ALLOWED)
+
+
+@pytest.mark.parametrize(
+    "runs",
+    [
+        [run(actor={"login": AGENT}, triggering_actor={"login": AGENT})],
+        [run(triggering_actor={"login": AGENT})],  # the agent re-ran it
+        [run(actor={"login": AGENT})],
+        [run(event="pull_request")],  # a copy of the workflow on the branch
+        [run(event="push")],
+        [run(conclusion="failure")],
+        [run(display_title=run()["display_title"].replace(HEAD, "c" * 40))],
+        [run(display_title=run()["display_title"].replace("pr=7", "pr=8"))],
+        [run(display_title=run()["display_title"].replace("labeled", "synchronize"))],
+        [run(display_title=run()["display_title"] + " head=" + HEAD)],
+        [run(display_title="numerics-guard label=" + approval.LABEL)],
+        [],
+    ],
+)
+def test_push_fails_without_the_approvers_own_run(runs):
+    """A run by the agent, of another event, head or label does not approve."""
+    assert not approval.push_approved(runs, PULLS, ALLOWED)
+
+
+def test_push_fails_if_the_merged_head_is_not_the_approved_one():
+    """A push after the approval changed the merged head."""
+    pulls = [{"number": 7, "head": {"sha": "d" * 40}}]
+    assert not approval.push_approved([run()], pulls, ALLOWED)
+    assert not approval.push_approved([run()], [], ALLOWED)

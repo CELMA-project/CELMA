@@ -52,14 +52,14 @@ runs.
   The workflow [numerics-guard.yml](../.github/workflows/numerics-guard.yml)
   (check `numerics-guard`) runs the guard on every pull request, with the
   base branch's copy of `guard.py`, and never runs code of the pull request.
-  A change passes only if Michael applied the label `numerics-change-approved`
-  (the run that sees him apply it, with `loeiten` as the sender, records the
-  commit status `numerics-approval` on that head, naming the merge base).
-  The status belongs to one commit, so a push, a retarget or a reopen onto
-  other content is not approved; a push also removes the label, and removing
-  it records a failure. A push to `main` is compared from the commit before
-  the push and passes only if the merged pull request's head itself carries
-  the approval status.
-  `approval.py` holds that decision and `test_guard.py` tests it.
+  Nothing is stored. A numerics change passes only in the run for the event
+  "Michael applied the label `numerics-change-approved`" (GitHub sets the
+  sender), which approves the head and base that event carries. Every other
+  event with a change (push, reopen, retarget, another label or sender) fails
+  and drops the label. A push to `main` passes only if a successful
+  `pull_request_target` run of that kind, started and re-run by `loeiten`, exists
+  for the merged pull request's final head; a copy of the workflow on a branch
+  cannot make one. `approval.py` holds the decisions and `test_guard.py` tests
+  them. Every file under `.github/workflows/` is guarded too.
   The label is Michael's consent for that specific change, see
   [AGENTS.md](../AGENTS.md#numerics-need-michaels-consent).
