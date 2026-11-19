@@ -43,6 +43,13 @@ on:
 
 permissions: {}
 
+# One guard run per pull request at a time, none cancelled: a run for a later
+# event (a push after the label) must not finish before, and be overtaken by,
+# a run for an earlier one. Pushes to main queue on their own group.
+concurrency:
+  group: numerics-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   numerics-guard:
     name: numerics-guard
@@ -50,7 +57,9 @@ jobs:
     permissions:
       contents: read
       issues: write
-      pull-requests: read
+      # Labels on a pull request are written through the issues API, but
+      # GitHub gates that on pull-requests: write
+      pull-requests: write
       actions: read
     env:
       GH_TOKEN: ${{ github.token }}
