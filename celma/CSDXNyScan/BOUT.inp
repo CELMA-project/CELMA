@@ -7,7 +7,7 @@
 
 # Root options
 ###############################################################################
-nout = 1         # Number of output timesteps
+nout = 2         # Number of output timesteps
 timestep = 1e-10 # Time between outputs
 
 # Setting the z coordinate
