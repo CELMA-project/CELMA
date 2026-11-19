@@ -1,4 +1,6 @@
 # dispersion
 
+[Root](../../README.md) | [derivations](../README.md)
+
 * [slabDispersion.ipynb](slabDispersion.ipynb) - Calculates the dispersion
-  relation without using simplifications yielding "nice" analytical results
+  relation without simplifications that yield "nice" analytical results.

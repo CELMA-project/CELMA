@@ -1,14 +1,16 @@
 # common
 
-Contains own extensions to `BOUT++` together with pre- and post-processing
-modules written in `python`.
+[Root](../README.md)
 
-* [BOUTExtensions](BOUTExtensions) - Own extensions to BOUT++.
-* [CELMAPy](CELMAPy) - `python` modules used for pre- and post-processing of
-  the simulations.
-* [standardPlots](standardPlots) - Contains the `PlotSubmitter`-class, which
-  easen the post-processing calls for plotting.
-  See [`testPostProcessing.py`](../celma/testPostProcessing.py) for an example
-  of usage.
-  This folder also contains the standarized caller-functions used by the
-  `PlotSubmitter` to the post-processing modules using standard parameters.
+Own extensions to `BOUT++`, shared by the models in
+[../celma](../celma/README.md) and
+[../celmaWithBoussinesqApprox](../celmaWithBoussinesqApprox/README.md) and by
+the cases in [../MES](../MES/README.md).
+
+* [BOUTExtensions](BOUTExtensions/README.md) - The C++ extensions: operators,
+  boundary conditions, filters, monitors, Laplace inversion and parameters.
+
+The `python` modules for pre- and post-processing (`CELMAPy`) and the
+`standardPlots` helpers used to live here.
+They moved to a separate repository (CELMA-py), and the Python scripts in
+this repository that import them do not run without it.
