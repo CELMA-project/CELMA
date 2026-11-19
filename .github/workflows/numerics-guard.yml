@@ -1,0 +1,134 @@
+name: Numerics guard
+
+# Fails a pull request that changes the numerics (equations, operators,
+# stencils, boundary conditions, inputs, solver and inversion settings, the
+# BOUT++ image, compiler flags, the references or this guard) unless the label
+# `numerics-change-approved` was last applied by someone in ALLOWED_APPROVERS.
+#
+# The job runs on `pull_request_target`, so it has a token that can write
+# labels. It therefore never checks out, builds or runs anything of the pull
+# request: it checks out the base branch and fetches the head commit as git
+# objects only, and the BASE copy of tests/numerics/guard.py reads both commits
+# from the object store.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  numerics-guard:
+    name: numerics-guard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      LABEL: numerics-change-approved
+      ALLOWED_APPROVERS: loeiten
+
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Drop the approval of an earlier head
+        if: github.event_name == 'pull_request_target' && github.event.action == 'synchronize'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          # The approval binds to the head the approver saw
+          gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" || true
+
+      - name: Fetch the head of the pull request as data
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          git cat-file -e "$HEAD_SHA^{commit}"
+
+      - name: Compare the numerics
+        id: guard
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -u
+          if [ "$EVENT" = pull_request_target ]; then
+            BASE=$(git merge-base "origin/$BASE_REF" "$HEAD_SHA")
+            HEAD=$HEAD_SHA
+            GUARD=tests/numerics/guard.py
+          else
+            BASE=$(git rev-parse HEAD^1)
+            HEAD=$(git rev-parse HEAD)
+            # The guard of the first parent, not the one that was just merged
+            if ! git cat-file -e "$BASE:tests/numerics/guard.py" 2>/dev/null; then
+              echo "The first parent has no guard: nothing to compare."
+              echo "status=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            git show "$BASE:tests/numerics/guard.py" > "$RUNNER_TEMP/guard.py"
+            GUARD=$RUNNER_TEMP/guard.py
+          fi
+          echo "Comparing $BASE..$HEAD"
+          set +e
+          python3 "$GUARD" "$BASE" "$HEAD" > "$RUNNER_TEMP/report.txt" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/report.txt"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          {
+            echo '```'
+            cat "$RUNNER_TEMP/report.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require the approval if the numerics changed
+        env:
+          STATUS: ${{ steps.guard.outputs.status }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -eu
+          if [ "$STATUS" = 0 ]; then
+            echo "No change of the numerics."
+            exit 0
+          fi
+          if [ "$EVENT" = pull_request_target ]; then
+            numbers=$PR
+          else
+            numbers=$(gh api "repos/$REPO/commits/$GITHUB_SHA/pulls" \
+              --jq '.[] | select(.merged_at != null) | .number')
+          fi
+          if [ -z "$numbers" ]; then
+            echo "::error::The numerics changed and no merged pull request is associated with the commit."
+            exit 1
+          fi
+          for number in $numbers; do
+            labelled=$(gh api "repos/$REPO/issues/$number/labels" \
+              --jq "[.[] | select(.name == \"$LABEL\")] | length")
+            actor=$(gh api --paginate --slurp "repos/$REPO/issues/$number/events" \
+              --jq "add | [.[] | select(.event == \"labeled\" and .label.name == \"$LABEL\")] | last | .actor.login // \"\"")
+            echo "Pull request $number: label present: $labelled, last applied by: '$actor'"
+            if [ "$labelled" != 0 ] && [ -n "$actor" ]; then
+              for allowed in ${ALLOWED_APPROVERS//,/ }; do
+                if [ "${actor,,}" = "${allowed,,}" ]; then
+                  echo "Approved by $actor."
+                  exit 0
+                fi
+              done
+            fi
+          done
+          echo "::error::The numerics changed. Michael's consent for this change is the label $LABEL, applied by him to this head."
+          exit 1
