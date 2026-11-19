@@ -32,13 +32,34 @@ import json
 import os
 import re
 import sys
+from dataclasses import dataclass
 from typing import Any, Dict, List
 
 LABEL = "numerics-change-approved"
 TITLE = re.compile(
     r"numerics-guard event=(?P<event>\S+) action=(?P<action>\S*) pr=(?P<pr>\d*) "
-    r"head=(?P<head>[0-9a-f]*) base=(?P<base>[0-9a-f]*) label=(?P<label>.*)"
+    r"head=(?P<head>[0-9a-f]*) base=(?P<base>[0-9a-f]*) approval=(?P<approval>true|false)"
 )
+
+
+@dataclass(frozen=True)
+class Push:
+    """The push to a branch whose merge is being judged.
+
+    Attributes
+    ----------
+    base : str
+        The commit the push started from, the tip of the branch the merge was
+        made on.
+    after : str
+        The commit the push ended on.
+    branch : str
+        The branch pushed to.
+    """
+
+    base: str
+    after: str
+    branch: str
 
 
 def permitted(login: str, allowlist: List[str]) -> bool:
@@ -143,7 +164,7 @@ def approving_run(
         and run.get("conclusion") == "success"
         and match["event"] == "pull_request_target"
         and match["action"] == "labeled"
-        and match["label"] == LABEL
+        and match["approval"] == "true"
         and match["pr"] == str(pr_number)
         and match["head"] == head
         and match["base"] == base
@@ -181,7 +202,7 @@ def push_approved(
     runs: List[Dict[str, Any]],
     pulls: List[Dict[str, Any]],
     allowlist: List[str],
-    base: str,
+    push: Push,
 ) -> bool:
     """Decide a push to main from the merged pull request and the runs.
 
@@ -193,20 +214,26 @@ def push_approved(
         The merged pull requests associated with the pushed commit.
     allowlist : list
         Logins that may approve.
-    base : str
-        The commit the push started from, the tip of main the merge was made on.
+    push : Push
+        The push: where it started, where it ended, which branch.
 
     Returns
     -------
     bool
-        True if some merged pull request carried the label at the merge, its
-        latest run is the approval of its final head and base.
+        True if some pull request merged into this branch as exactly the pushed
+        commit (``merge_commit_sha``, which GitHub sets to the merge, squash or
+        last rebased commit) carried the label at the merge, and its latest run
+        is the approval of its final head and base.
     """
     for pull in pulls:
+        if (pull.get("base") or {}).get("ref") != push.branch:
+            continue
+        if not push.after or pull.get("merge_commit_sha") != push.after:
+            continue
         labels = [x.get("name") for x in pull.get("labels") or []]
         latest = latest_run_of(runs, pull["number"])
         if LABEL in labels and approving_run(
-            latest, allowlist, pull["number"], pull["head"]["sha"], base
+            latest, allowlist, pull["number"], pull["head"]["sha"], push.base
         ):
             return True
     return False
@@ -219,7 +246,7 @@ def main(argv: List[str]) -> int:
     ----------
     argv : list
         ``pr EVENT_JSON LIVE_PR_JSON`` (the triggering actor is in
-        ``GITHUB_TRIGGERING_ACTOR``) or ``push RUNS_JSON PULLS_JSON BASE_SHA``; the allowlist is
+        ``GITHUB_TRIGGERING_ACTOR``) or ``push RUNS_JSON PULLS_JSON BASE_SHA AFTER_SHA BRANCH``; the allowlist is
         in the environment variable ``ALLOWED_APPROVERS``, comma separated.
 
     Returns
@@ -237,7 +264,9 @@ def main(argv: List[str]) -> int:
         approved = pull_request_approved(first, actor, live, allowlist)
     else:
         with open(argv[2], encoding="utf-8") as handle:
-            approved = push_approved(first, json.load(handle), allowlist, argv[3])
+            approved = push_approved(
+                first, json.load(handle), allowlist, Push(argv[3], argv[4], argv[5])
+            )
     print("approved" if approved else "no approval for this change")
     return 0 if approved else 1
 

@@ -337,7 +337,7 @@ def run(**changes):
     """Build a workflow run as the API lists it, by default an approving one."""
     title = (
         f"numerics-guard event=pull_request_target action=labeled pr=7 "
-        f"head={HEAD} base={BASE} label={approval.LABEL}"
+        f"head={HEAD} base={BASE} approval=true"
     )
     entry = {
         "event": "pull_request_target",
@@ -358,12 +358,23 @@ def later(action, number=11, conclusion="failure", **changes):
     return run(run_number=number, conclusion=conclusion, display_title=title, **changes)
 
 
-PULLS = [{"number": 7, "head": {"sha": HEAD}, "labels": [{"name": approval.LABEL}]}]
+MERGED = "f" * 40
+PULLS = [
+    {
+        "number": 7,
+        "head": {"sha": HEAD},
+        "base": {"ref": "main"},
+        "merge_commit_sha": MERGED,
+        "labels": [{"name": approval.LABEL}],
+    }
+]
 
 
-def pushed(runs, pulls=PULLS, base=BASE):
+def pushed(runs, pulls=PULLS, base=BASE, after=MERGED, branch="main"):
     """Decide a push with the approvers of these tests."""
-    return approval.push_approved(runs, pulls, ALLOWED, base)
+    return approval.push_approved(
+        runs, pulls, ALLOWED, approval.Push(base, after, branch)
+    )
 
 
 def test_push_passes_with_the_approvers_latest_run_for_head_and_base():
@@ -387,7 +398,10 @@ def test_push_passes_with_the_approvers_latest_run_for_head_and_base():
         [run(display_title=run()["display_title"].replace("pr=7", "pr=8"))],
         [run(display_title=run()["display_title"].replace("labeled", "synchronize"))],
         [run(display_title=run()["display_title"] + " head=" + HEAD)],
-        [run(display_title="numerics-guard label=" + approval.LABEL)],
+        [run(display_title="numerics-guard approval=true")],
+        # a crafted label name cannot reach the title: only true or false does
+        [run(display_title=run()["display_title"] + " label=" + approval.LABEL)],
+        [run(display_title=run()["display_title"].replace("true", "numerics"))],
         [],
         # events after the approval void it, whatever their outcome
         [run(), later("unlabeled")],
@@ -412,6 +426,27 @@ def test_push_fails_if_head_base_or_label_differ_at_the_merge():
     no_label = [{"number": 7, "head": {"sha": HEAD}, "labels": []}]
     assert not pushed([run()], no_label)
     assert not pushed([run()], [{"number": 7, "head": {"sha": HEAD}}])
+
+
+def test_push_fails_for_a_pull_request_that_was_not_merged_into_this_push():
+    """The pull request must be merged into the pushed branch, as the pushed commit."""
+    elsewhere = [{**PULLS[0], "base": {"ref": "release"}}]
+    assert not pushed([run()], elsewhere)
+    assert not pushed([run()], branch="release")
+    other_commit = [{**PULLS[0], "merge_commit_sha": "9" * 40}]
+    assert not pushed([run()], other_commit)
+    assert not pushed([run()], after="9" * 40)
+    assert not pushed([run()], after="")
+    assert not pushed([run()], [{k: v for k, v in PULLS[0].items() if k != "base"}])
+
+
+def test_run_name_has_no_free_text_field():
+    """The title is event, action, numbers, shas and a boolean, nothing a user types."""
+    text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
+    assert "github.event.label.name }}" not in text
+    assert (
+        "approval=${{ github.event.label.name == 'numerics-change-approved' }}" in text
+    )
 
 
 def test_the_scripts_of_the_push_path_come_from_the_base():
@@ -484,3 +519,43 @@ def test_semicolon_is_not_a_comment_in_an_input_file():
     """Text after a semicolon is part of the value, so it cannot hide a change."""
     assert guard.compare_inp("y = 1\n", "y = 1 ; z = 2\n")
     assert guard.compare_inp("y = 1 # c\n", "y = 1 # d\n") == []
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["1_000", " inf", "inf", "nan", "1e3 x", "0x10", "1,5", "١٢٣", "1e", "--1"],
+)
+def test_only_plain_decimals_are_numbers_in_an_input_file(value):
+    """float() accepts spellings a reader may not, so those stay text and trip."""
+    assert guard.compare_inp("n = 1000\n", f"n = {value}\n")
+    assert guard.parse_inp(f"n = {value}\n")["n"] == [value.strip()]
+
+
+def test_equal_decimal_spellings_are_the_same_number():
+    """Decimal and exponent spellings of one number are no change."""
+    for other in ("1000", "1000.0", "1e3", "1.0E+3", "+1000", "10e2"):
+        assert guard.compare_inp("n = 1000\n", f"n = {other}\n") == []
+
+
+def test_cpp_is_guarded_anywhere_and_mode_changes_trip():
+    """C++ in any folder is guarded; a mode or symlink change on a guarded path trips."""
+    for path in ("tools/x.cxx", "tests/radialLowPass/a.hxx", "top.cpp", "a/b/c/d.H"):
+        assert guard.kind_of(path) == "cpp", path
+    assert guard.kind_of("tools/readme.md") is None
+    path = "celma/celma.cxx"
+    blob = run_git("rev-parse", f"HEAD:{path}")
+    with tempfile.TemporaryDirectory() as tmp:
+        env = {**ENV, "GIT_INDEX_FILE": str(Path(tmp) / "index")}
+        run_git("read-tree", "HEAD", env=env)
+        run_git("update-index", "--cacheinfo", f"100755,{blob},{path}", env=env)
+        executable = run_git(
+            "commit-tree", run_git("write-tree", env=env), "-p", "HEAD", "-m", "mode"
+        )
+        link = run_git("hash-object", "-w", "--stdin", data=b"../elsewhere.cxx")
+        run_git("update-index", "--cacheinfo", f"120000,{link},{path}", env=env)
+        symlink = run_git(
+            "commit-tree", run_git("write-tree", env=env), "-p", "HEAD", "-m", "link"
+        )
+    mode = guard.compare(ROOT, "HEAD", executable)
+    assert mode == {path: ["file mode 100644 -> 100755"]}
+    assert any("120000" in x for x in guard.compare(ROOT, "HEAD", symlink)[path])

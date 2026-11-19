@@ -24,15 +24,9 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 CPP_EXT = r"(cxx|hxx|cpp|hpp|cc|hh|h|c|ixx|ipp|tpp|txx|inl|inc)"
-CPP_PATTERNS = tuple(
-    re.compile(rf"{folder}/.+\.{CPP_EXT}", re.IGNORECASE)
-    for folder in (
-        "celma",
-        "celmaWithBoussinesqApprox",
-        "common/BOUTExtensions",
-        "MES",
-    )
-)
+# C++ anywhere in the repository: any folder can hold a header that a model
+# includes, or a source that CMake compiles
+CPP_PATTERNS = (re.compile(rf"(.+/)?[^/]+\.{CPP_EXT}", re.IGNORECASE),)
 INP_PATTERN = re.compile(r"(.+/)?BOUT\.inp")
 RAW_PATTERNS = (
     re.compile(r"tests/regression/[^/]*reference[^/]*"),
@@ -119,7 +113,7 @@ def git(repo: Path, *args: str) -> bytes:
     return done.stdout
 
 
-def list_tree(repo: Path, rev: str) -> Dict[str, str]:
+def list_tree(repo: Path, rev: str) -> Dict[str, Tuple[str, str]]:
     """List the files of a commit.
 
     Parameters
@@ -132,7 +126,7 @@ def list_tree(repo: Path, rev: str) -> Dict[str, str]:
     Returns
     -------
     dict
-        Path to blob id.
+        Path to the git file mode and the object id.
     """
     out = git(repo, "ls-tree", "-r", "-z", rev)
     files = {}
@@ -140,7 +134,8 @@ def list_tree(repo: Path, rev: str) -> Dict[str, str]:
         if not entry:
             continue
         meta, path = entry.split(b"\t", 1)
-        files[path.decode("utf-8", "surrogateescape")] = meta.split()[2].decode()
+        mode, _, blob = meta.decode().split()
+        files[path.decode("utf-8", "surrogateescape")] = (mode, blob)
     return files
 
 
@@ -376,6 +371,11 @@ def compare_cpp(old: str, new: str) -> List[str]:
     return changes
 
 
+# Only plain decimals are numbers. float() also takes 1_000, inf, nan and
+# stray spaces, which a reader of the input file may read differently or reject,
+# so those are compared as the text they are. Option names are case-sensitive in
+# BOUT++ 5, so keys are compared as written.
+NUMBER = re.compile(r"[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?")
 Value = Union[float, str]
 
 
@@ -421,10 +421,8 @@ def parse_inp(text: str, joined: bool = True) -> Dict[str, List[Value]]:
             continue
         key, value = (x.strip() for x in line.split("=", 1))
         last = f"{section}:{key}" if section else key
-        try:
-            options.setdefault(last, []).append(float(value))
-        except ValueError:
-            options.setdefault(last, []).append(value)
+        number = float(value) if NUMBER.fullmatch(value) else value
+        options.setdefault(last, []).append(number)
     return options
 
 
@@ -592,6 +590,9 @@ def compare(repo: Path, base: str, head: str) -> Dict[str, List[str]]:
         kind = kind_of(path)
         if kind is None or old_tree.get(path) == new_tree.get(path):
             continue
+        old_mode, old_blob = old_tree.get(path, ("", ""))
+        new_mode, new_blob = new_tree.get(path, ("", ""))
+        changes: List[str] = []
         if path not in new_tree:
             changes = ["file deleted"]
         elif path not in old_tree:
@@ -599,14 +600,18 @@ def compare(repo: Path, base: str, head: str) -> Dict[str, List[str]]:
             # shadow an include, a new input or workflow changes what runs
             changes = ["file added"]
         else:
-            old = blob_text(repo, old_tree[path])
-            new = blob_text(repo, new_tree[path])
-            if kind == "cpp":
-                changes = compare_cpp(old, new)
-            elif kind == "inp":
-                changes = compare_inp(old, new)
-            else:
-                changes = compare_raw(old, new)
+            if old_mode != new_mode:
+                changes.append(f"file mode {old_mode} -> {new_mode}")
+            if "160000" in (old_mode, new_mode):
+                changes.append("submodule changed")
+            elif old_blob != new_blob:
+                old, new = blob_text(repo, old_blob), blob_text(repo, new_blob)
+                if kind == "cpp":
+                    changes += compare_cpp(old, new)
+                elif kind == "inp":
+                    changes += compare_inp(old, new)
+                else:
+                    changes += compare_raw(old, new)
         if changes:
             report[path] = changes
     return report

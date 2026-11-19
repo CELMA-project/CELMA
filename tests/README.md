@@ -37,14 +37,15 @@ runs.
       CI runs it in the image, which also records the reference
       (`recorded-fingerprint.json`).
     * `guard.py BASE HEAD` compares two commits and lists every semantic change
-      in the guarded content: C++ (in the model, common and MES folders, any
-      depth and extension) as token streams after joining continued lines
+      in the guarded content: C++ (any folder of the repository, any C++
+      extension) as token streams after joining continued lines
       (formatting, comments and header guards ignored; the set of `#include`
       lines is not), every `BOUT.inp` as a map of options (comments, spacing,
       order and number spelling ignored; continued lines read both ways), and
       byte for byte the references, the scripts of `tests/regression`,
       `docker/Dockerfile.bout5`, every `CMakeLists.txt` and `.cmake`, every file
-      under `.github/workflows/` and `tests/numerics/`. Modified, deleted or
+      under `.github/workflows/` and `tests/numerics/`, and any change of the file
+      mode or a symlink on those paths. Modified, deleted or
       added guarded content is a change (a new local header can shadow an
       include). It exits 1 on a change.
     * `test_guard.py` proves the guard on the history: it fails on the commit
@@ -67,7 +68,8 @@ runs.
   and drops the label. A push to `main` passes only if the latest
   `pull_request_target` run for the merged pull request is a successful one of
   that kind, started and re-run by `loeiten`, for the merged head and the base
-  the push started from, and the pull request still had the label; a copy of the
+  the push started from, for a pull request merged into `main` as exactly the pushed commit
+  (`merge_commit_sha`), which still had the label; a copy of the
   workflow on a branch cannot make one, and any later event voids it. `approval.py` holds the decisions and `test_guard.py` tests
   them. Every file under `.github/workflows/` is guarded too.
   The label is Michael's consent for that specific change, see

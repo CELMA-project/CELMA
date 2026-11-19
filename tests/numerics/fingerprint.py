@@ -222,7 +222,11 @@ def run_bout(
         tail = "\n".join(done.stdout.splitlines()[-15:])
         raise RuntimeError(f"{executable} {args} failed:\n{tail}")
     dump = Dataset(tmp / "BOUT.dmp.0.nc")
-    check_single_evaluation(done.stdout, dump)
+    try:
+        check_single_evaluation(done.stdout, dump)
+    except RuntimeError:
+        dump.close()
+        raise
     return dump, done.stdout
 
 

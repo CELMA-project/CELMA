@@ -33,7 +33,7 @@ run-name: >-
   pr=${{ github.event.pull_request.number }}
   head=${{ github.event.pull_request.head.sha || github.event.after }}
   base=${{ github.event.pull_request.base.sha }}
-  label=${{ github.event.label.name }}
+  approval=${{ github.event.label.name == 'numerics-change-approved' }}
 
 on:
   pull_request_target:
@@ -149,6 +149,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.event.after }}
+          BRANCH: ${{ github.ref_name }}
         run: |
           set -eu
           if [ "$STATUS" = 0 ]; then
@@ -179,7 +180,7 @@ jobs:
               --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
             gh api "repos/$REPO/commits/$AFTER/pulls" \
               --jq '[.[] | select(.merged_at != null)]' > "$RUNNER_TEMP/pulls.json"
-            if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE"; then
+            if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE" "$AFTER" "$BRANCH"; then
               echo "The merged head and base were approved by an approver, and nothing came after."
               exit 0
             fi
