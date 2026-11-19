@@ -7,6 +7,16 @@ Tweaks the flux obtained from the blob runner.
 import os
 import pickle
 import sys
+from typing import BinaryIO, TypedDict
+
+
+class FluxStatistics(TypedDict):
+    """Statistics populated from each flux trace."""
+
+    stdDev: dict[int, float | None]
+    skew: float | None
+    kurtExcess: float | None
+
 
 import matplotlib.pylab as plt
 import numpy as np
@@ -22,11 +32,16 @@ from CELMAPy.plotHelpers import PlotHelper, seqCMap2
 # Will not use namedTuple here as it is unnecessary complicated to
 # pickle/unpickle
 sigMul = (2, 3, 4)
-PDFStats = {"stdDev": {key: None for key in sigMul}, "skew": None, "kurtExcess": None}
+PDFStats: FluxStatistics = {
+    "stdDev": {key: None for key in sigMul},
+    "skew": None,
+    "kurtExcess": None,
+}
 
 scan = "B0_0.08"
 path = "../../CSDXMagFieldScanAr/visualizationPhysical/{}/blobs/".format(scan)
 fileName = os.path.join(path, "3", "n-radialFluxes-fluct.pickle")
+f: BinaryIO
 with open(fileName, "rb") as f:
     fig = pickle.load(f)
 

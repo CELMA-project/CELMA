@@ -30,7 +30,7 @@ scanVal = []
 
 
 # {{{getNumber
-def getNumber(t, ind):
+def getNumber(t: str, ind: int) -> float:
     """
     Retruns the string in the total fluxes.
 
@@ -48,9 +48,9 @@ def getNumber(t, ind):
     val : float
         The value extracted from the text
     """
-    val = eval(
+    val: float = eval(
         t.split("=")[ind]
-        .split(";")[0]
+        .split(";", maxsplit=1)[0]
         .replace("$", "")
         .replace("\\", "")
         .replace("{", "")

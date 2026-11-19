@@ -107,7 +107,7 @@ pics = 10
 frameNr = np.linspace(start, end, pics)
 # Run runSnapShotsSameScanVal without vMaxVmin in order to see maxMin
 # FIXME:
-maxMin = (1.35e18, 7.50e18)
+maxMin: tuple[float, float] | None = (1.35e18, 7.50e18)
 maxMin = None
 turbSlices = tuple(slice(int(frame), int(frame)) for frame in frameNr)
 pltSub.runSnapShotsSameScanVal("param0", turbSlices, fluct=False, vMaxVMin=maxMin)

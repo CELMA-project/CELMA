@@ -39,7 +39,7 @@ pltSub.sub.setMisc(
 pltSub.sub.setQueue(queue)
 
 # Set linear slices (found from looking at the Fourier modes)
-tSlices = {
+tSlices: dict[str, slice | None] = {
     "B0_0.02": slice(80, 300),
     "B0_0.04": slice(800, 1250),
     "B0_0.06": slice(180, 280),

@@ -21,15 +21,15 @@ B0s = (0.02, 0.04, 0.06, 0.08, 0.1)
 modes = ("Init", "Expand", "Linear", "Turbulence")
 
 # Make place holders for the y-values
-initMeans = []
-expandMeans = []
-linearMeans = []
-turbulenceMeans = []
+initMeans: list[float] = []
+expandMeans: list[float] = []
+linearMeans: list[float] = []
+turbulenceMeans: list[float] = []
 
-initStds = []
-expandStds = []
-linearStds = []
-turbulenceStds = []
+initStds: list[float] = []
+expandStds: list[float] = []
+linearStds: list[float] = []
+turbulenceStds: list[float] = []
 
 means = (initMeans, expandMeans, linearMeans, turbulenceMeans)
 stds = (initStds, expandStds, linearStds, turbulenceStds)

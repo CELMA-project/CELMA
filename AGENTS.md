@@ -55,8 +55,12 @@ pre-commit run --all-files
 * Lint is [.pre-commit-config.yaml](.pre-commit-config.yaml): the standard
   `pre-commit-hooks`, `ruff-check` and `ruff-format`, `clang-format`
   (reads [.clang-format](.clang-format)), `cpplint`, `cppcheck` and
-  `markdownlint` (default rules, with formatting fixes).
+  `markdownlint` (default rules, with formatting fixes), and `mypy`.
   Fix findings in the code; do not loosen a hook or its filters.
+  Mypy retains `setup.cfg` and upstream hook defaults, but checks each file
+  separately through `tools/mypy_standalone.py`: standalone drivers reuse
+  module names. CI tests that wrapper with `python -m unittest discover -s
+  tests/lint -v` and mypy 2.4.1 installed.
 * Ruff is configured in [pyproject.toml](pyproject.toml): line length 88,
   Python 3.12, numpy docstring convention.
   The `ignore` list there is known debt, not a model to copy.

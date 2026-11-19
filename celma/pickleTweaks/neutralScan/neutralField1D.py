@@ -8,6 +8,23 @@ import os
 import pickle
 import sys
 from subprocess import Popen
+from typing import TYPE_CHECKING, TypedDict, cast
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.transforms import Bbox
+    from numpy import ndarray
+
+
+class FieldStyle(TypedDict):
+    """Plot data and styling, populated before rendering each direction."""
+
+    ax: "Axes | None"
+    line: "ndarray | None"
+    ls: tuple[int, tuple[int, ...]]
+    marker: str
+    color: "ndarray | None"
+
 
 import matplotlib.lines as mlines
 import matplotlib.pylab as plt
@@ -37,7 +54,7 @@ ls = (
 )
 fields = ("n", "phi", "jPar", "om", "ui", "sA", "ue")
 
-sD = {
+sD: dict[str, dict[str, FieldStyle]] = {
     s: {
         f: {"ax": None, "line": None, "ls": l, "marker": m, "color": None}
         for f in fields
@@ -45,6 +62,7 @@ sD = {
     for s, m, l in zip(scans, markers, ls)
 }
 
+pos: list[float] | tuple[float, ...] | "Bbox"
 for direction in ("radial", "parallel"):
     for scan in scans:
         folder = "../../CSDXNeutralScanAr/visualizationPhysical/{}/field1D".format(scan)
@@ -115,9 +133,9 @@ for direction in ("radial", "parallel"):
 
     # Plot
     for scan in scans:
-        fig = sD[scans[0]]["n"]["ax"].figure
+        fig = cast("Axes", sD[scans[0]]["n"]["ax"]).figure
         for key in sD[scans[0]].keys():
-            sD[scans[0]][key]["ax"].plot(
+            cast("Axes", sD[scans[0]][key]["ax"]).plot(
                 xAxis,
                 sD[scan][key]["line"],
                 color=sD[scan][key]["color"],
@@ -127,21 +145,25 @@ for direction in ("radial", "parallel"):
                 alpha=0.7,
                 ls=sD[scan][key]["ls"],
             )
-            sD[scans[0]][key]["ax"].autoscale(enable=True, axis="y", tight=True)
+            cast("Axes", sD[scans[0]][key]["ax"]).autoscale(
+                enable=True, axis="y", tight=True
+            )
 
             # Put the legends on the y-axis
-            handles, labels = sD[scans[0]][key]["ax"].get_legend_handles_labels()
-            leg = sD[scans[0]][key]["ax"].legend()
+            handles, labels = cast(
+                "Axes", sD[scans[0]][key]["ax"]
+            ).get_legend_handles_labels()
+            leg = cast("Axes", sD[scans[0]][key]["ax"]).legend()
             leg.remove()
             # Decrease fontsize by 1 to get some spacing
-            sD[scans[0]][key]["ax"].set_ylabel(labels[0], fontsize=11)
+            cast("Axes", sD[scans[0]][key]["ax"]).set_ylabel(labels[0], fontsize=11)
 
     # Manually ajust the wspace as fig.subplots_adjust messes with the
     # spacing
     for key in ("phi", "om", "sA"):
-        pos = sD[scans[0]][key]["ax"].get_position()
+        pos = cast("Axes", sD[scans[0]][key]["ax"]).get_position()
         pos = (pos.x0 + 0.05, pos.y0, pos.width, pos.height)
-        sD[scans[0]][key]["ax"].set_position(pos)
+        cast("Axes", sD[scans[0]][key]["ax"]).set_position(pos)
 
     # Manually creating the legend
     handles = []
@@ -164,13 +186,13 @@ for direction in ("radial", "parallel"):
         handles.append(handle)
 
     # Put legends outside
-    sD[scans[0]]["ue"]["ax"].legend(
+    cast("Axes", sD[scans[0]]["ue"]["ax"]).legend(
         handles=handles,
         ncol=2,
         bbox_to_anchor=(1.15, 0.25),
         loc="upper left",
         borderaxespad=0.0,
-        bbox_transform=sD[scans[0]]["ue"]["ax"].transAxes,
+        bbox_transform=cast("Axes", sD[scans[0]]["ue"]["ax"]).transAxes,
     )
 
     if direction == "radial":
