@@ -431,6 +431,22 @@ def report(errors: Dict[str, float], limit: float) -> List[str]:
     ]
 
 
+def groups(errors: Dict[str, float]) -> List[str]:
+    """List the models and operator cases in a set of errors.
+
+    Parameters
+    ----------
+    errors : dict
+        Term to relative error.
+
+    Returns
+    -------
+    list
+        The first part of every term name, in order and once.
+    """
+    return list(dict.fromkeys(t.split("/")[0] for t in errors))
+
+
 def main() -> int:
     """Compare with the reference and prove the sensitivity of the comparison.
 
@@ -465,14 +481,19 @@ def main() -> int:
             print(f"FAIL mutation '{label}' did not run: {error}")
             failed = True
             continue
-        term, err = worst(compare(mutated, reference))
-        margin = err / RTOL
-        good = margin >= MARGIN
-        failed = failed or not good
-        print(
-            f"{'ok  ' if good else 'FAIL'} mutation '{label}': worst term {term}, "
-            f"error {err:.3e} = {margin:.1e} x tolerance, noise {noise:.1e}"
-        )
+        errors = compare(mutated, reference)
+        for group in groups(errors):
+            subset = {t: e for t, e in errors.items() if t.split("/")[0] == group}
+            term, err = worst(subset)
+            margin = err / RTOL
+            # The operator cases are only a second opinion on the operators
+            good = margin >= MARGIN or group == "MES"
+            failed = failed or not good
+            print(
+                f"{'ok  ' if good else 'FAIL'} mutation '{label}', {group}: "
+                f"worst term {term}, error {err:.3e} = {margin:.1e} x tolerance, "
+                f"noise {noise:.1e}"
+            )
     return 1 if failed else 0
 
 
