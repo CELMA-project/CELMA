@@ -5,12 +5,14 @@ minus the analytic one. This script runs every input of every case at two small
 resolutions and compares the largest absolute error to a committed reference,
 so a change of any operator or boundary condition shows up.
 
-The cases compute their operator in ``rhs()``, which BOUT++ 5 never calls with
-``nout=0``: the saved error was then ``-S``, the source itself, and blind to
-every operator. The runs here use ``nout=1``, which evaluates ``rhs()`` once for
-the initial output, where the cases save their fields. The script then proves
-it cannot go blind again: it reruns three cases with a changed derivative
-method and requires the error to move far beyond the tolerance.
+The cases save the numerical operator ``S_num`` and the error ``e = S_num - S``
+after one evaluation of ``rhs()``, but the operators leave the guard cells
+unset (zero), so there ``e = -S``. The largest error over all points was that
+source in the outermost guard cell: independent of the operator, the method and
+the resolution. The error is therefore taken over the inner points only. The
+script then proves it cannot go blind again: it reruns three cases with a
+changed derivative method and requires the error to move far beyond the
+tolerance.
 
 Run from the repository root as ``python3 tests/regression/mes.py``. The
 numbers of the run are written to ``recorded-mes.json`` in the current directory.
@@ -37,8 +39,6 @@ RTOL = 1.0e-6
 # summation round-off of about 4e-12 that moves with the order of the sum
 ATOL = 1.0e-12
 RESOLUTIONS = ((32, 34, 64), (64, 66, 128))
-# One evaluation of rhs() for the initial output (nout=0 never evaluates it)
-RUN = ("nout=1",)
 # Case, changed options: each must move the error of the case
 MUTATIONS = {
     "singleOperators/4-DDZCylinder/gaussianWSinAndParabola": ("mesh:ddz:first=C2",),
@@ -70,6 +70,32 @@ def read_int(text: str, key: str, default: int) -> int:
         return default
     base, power = int(match.group(1)), match.group(2)
     return base ** int(power) if power else base
+
+
+def inner(values: np.ndarray, mxg: int, myg: int) -> np.ndarray:
+    """Cut the guard cells in x and y from a saved field.
+
+    Parameters
+    ----------
+    values : np.ndarray
+        The saved field, ``(x, y, z)`` or ``(t, x, y, z)`` (last step used);
+        anything else (a scalar) is returned as it is.
+    mxg : int
+        Guard cells in x.
+    myg : int
+        Guard cells in y.
+
+    Returns
+    -------
+    np.ndarray
+        The inner points.
+    """
+    data = np.array(values)
+    if data.ndim == 4:
+        data = data[-1]
+    if data.ndim != 3:
+        return data
+    return data[mxg : data.shape[0] - mxg, myg : data.shape[1] - myg, :]
 
 
 def cases() -> List[Tuple[str, Path, Path]]:
@@ -118,6 +144,7 @@ def run_case(
     """
     text = inp.read_text()
     mxg = read_int(text, "MXG", 1)
+    myg = read_int(text, "MYG", 1)
     nxi, nyi, nzi = resolution
     own_ny = read_int(text, "ny", 1)
     own_nz = read_int(text, "nz", 1)
@@ -128,7 +155,7 @@ def run_case(
         shutil.copy(inp, Path(tmp) / "BOUT.inp")
         command = [str(exe), "-d", tmp, f"mesh:nx={nx}", f"mesh:ny={ny}"]
         command += [f"mesh:nz={nz}", "NXPE=1", "input:error_on_unused_options=false"]
-        command += [*RUN, *extra]
+        command += list(extra)
         done = subprocess.run(  # nosec
             command,
             cwd=exe.parent,
@@ -152,7 +179,7 @@ def run_case(
             )
             return None
         with Dataset(dump) as data:
-            return float(np.max(np.abs(np.array(data.variables["e"][:]))))
+            return float(np.max(np.abs(inner(data.variables["e"][:], mxg, myg))))
 
 
 def order(errors: List[Optional[float]]) -> str:
