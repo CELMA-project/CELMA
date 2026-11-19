@@ -37,12 +37,16 @@ runs.
       CI runs it in the image, which also records the reference
       (`recorded-fingerprint.json`).
     * `guard.py BASE HEAD` compares two commits and lists every semantic change
-      in the guarded content: C++ as token streams (formatting, comments,
-      includes and header guards ignored), every `BOUT.inp` as a map of options
-      (comments, spacing, order and number spelling ignored), and byte for byte
-      the references, `docker/Dockerfile.bout5`, the image line of `test.yml`,
-      every `CMakeLists.txt` and the guard's own files. Modified or deleted
-      guarded content is a change, a new file is not. It exits 1 on a change.
+      in the guarded content: C++ (in the model, common and MES folders, any
+      depth and extension) as token streams after joining continued lines
+      (formatting, comments and header guards ignored; the set of `#include`
+      lines is not), every `BOUT.inp` as a map of options (comments, spacing,
+      order and number spelling ignored; continued lines read both ways), and
+      byte for byte the references, the scripts of `tests/regression`,
+      `docker/Dockerfile.bout5`, every `CMakeLists.txt` and `.cmake`, every file
+      under `.github/workflows/` and `tests/numerics/`. Modified, deleted or
+      added guarded content is a change (a new local header can shadow an
+      include). It exits 1 on a change.
     * `test_guard.py` proves the guard on the history: it fails on the commit
       that moved `[ddz]` to `[mesh:ddz]`, passes on the clang-format commit and
       fails on a synthetic boundary condition and stencil change.
@@ -50,16 +54,19 @@ runs.
       (`python3 -m pytest tests/numerics/test_guard.py`).
 
   The workflow [numerics-guard.yml](../.github/workflows/numerics-guard.yml)
-  (check `numerics-guard`) runs the guard on every pull request, with the
-  base branch's copy of `guard.py`, and never runs code of the pull request.
+  (check `numerics-guard`) runs the guard on every pull request and every push
+  to `main`, with the scripts of the base commit (extracted from git, run with
+  `python3 -I`), and never runs code of the pull request or of the pushed
+  commit.
   Nothing is stored. A numerics change passes only in the run for the event
   "Michael applied the label `numerics-change-approved`" (GitHub sets the
   sender), which approves the head and base that event carries. Every other
   event with a change (push, reopen, retarget, another label or sender) fails
-  and drops the label. A push to `main` passes only if a successful
-  `pull_request_target` run of that kind, started and re-run by `loeiten`, exists
-  for the merged pull request's final head; a copy of the workflow on a branch
-  cannot make one. `approval.py` holds the decisions and `test_guard.py` tests
+  and drops the label. A push to `main` passes only if the latest
+  `pull_request_target` run for the merged pull request is a successful one of
+  that kind, started and re-run by `loeiten`, for the merged head and the base
+  the push started from, and the pull request still had the label; a copy of the
+  workflow on a branch cannot make one, and any later event voids it. `approval.py` holds the decisions and `test_guard.py` tests
   them. Every file under `.github/workflows/` is guarded too.
   The label is Michael's consent for that specific change, see
   [AGENTS.md](../AGENTS.md#numerics-need-michaels-consent).

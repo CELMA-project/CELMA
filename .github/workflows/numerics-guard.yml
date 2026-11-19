@@ -24,7 +24,8 @@ name: Numerics guard
 # The job runs on `pull_request_target`, so it has a token that can write
 # labels. It therefore never checks out, builds or runs anything of the pull
 # request: it checks out the base branch and fetches the head commit as git
-# objects only, and the BASE copy of tests/numerics/guard.py reads both commits
+# objects only, and the BASE copies of the scripts in tests/numerics, extracted
+# from git and run with python -I, read both commits
 # from the object store.
 
 run-name: >-
@@ -83,10 +84,14 @@ jobs:
           AFTER: ${{ github.event.after }}
         run: |
           set -u
+          # Every script of this job comes out of the git object store of the
+          # BASE commit (the base branch, or the commit before the push) into a
+          # directory of its own and runs with python -I: nothing is run from the
+          # checked-out tree, which on a push holds the pushed commit.
           if [ "$EVENT" = pull_request_target ]; then
-            BASE=$(git merge-base "origin/$BASE_REF" "$HEAD_SHA")
+            TRUSTED=origin/$BASE_REF
+            BASE=$(git merge-base "$TRUSTED" "$HEAD_SHA")
             HEAD=$HEAD_SHA
-            GUARD=tests/numerics/guard.py
           else
             HEAD=$AFTER
             if [ "$BEFORE" = 0000000000000000000000000000000000000000 ]; then
@@ -103,23 +108,25 @@ jobs:
               echo "::error::The earlier commit $BASE is not in the history (a forced push?)."
               exit 1
             fi
-            # The guard of the commit before the push, not the one just pushed
-            if ! git cat-file -e "$BASE:tests/numerics/guard.py" 2>/dev/null; then
+            TRUSTED=$BASE
+            # The commit before the push has no guard yet: nothing to compare
+            if ! git cat-file -e "$TRUSTED:tests/numerics/guard.py" 2>/dev/null; then
               echo "The earlier commit has no guard: nothing to compare."
               echo "status=0" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            git show "$BASE:tests/numerics/guard.py" > "$RUNNER_TEMP/guard.py"
-            GUARD=$RUNNER_TEMP/guard.py
           fi
+          mkdir "$RUNNER_TEMP/trusted"
+          for script in guard.py approval.py; do
+            git show "$TRUSTED:tests/numerics/$script" > "$RUNNER_TEMP/trusted/$script"
+          done
           echo "Comparing $BASE..$HEAD"
           set +e
-          python3 "$GUARD" "$BASE" "$HEAD" > "$RUNNER_TEMP/report.txt" 2>&1
+          python3 -I "$RUNNER_TEMP/trusted/guard.py" "$BASE" "$HEAD" > "$RUNNER_TEMP/report.txt" 2>&1
           status=$?
           set -e
           cat "$RUNNER_TEMP/report.txt"
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          echo "base=$BASE" >> "$GITHUB_OUTPUT"
           {
             echo '```'
             cat "$RUNNER_TEMP/report.txt"
@@ -131,6 +138,7 @@ jobs:
           STATUS: ${{ steps.guard.outputs.status }}
           EVENT: ${{ github.event_name }}
           PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.event.after }}
         run: |
           set -eu
@@ -138,8 +146,9 @@ jobs:
             echo "No change of the numerics."
             exit 0
           fi
+          TRUSTED_DIR=$RUNNER_TEMP/trusted
           if [ "$EVENT" = pull_request_target ]; then
-            if (cd tests/numerics && python3 approval.py pr "$GITHUB_EVENT_PATH"); then
+            if python3 -I "$TRUSTED_DIR/approval.py" pr "$GITHUB_EVENT_PATH"; then
               echo "Approved: the label was applied by an approver to this head and base."
               exit 0
             fi
@@ -155,14 +164,14 @@ jobs:
               esac
             fi
           else
-            gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&status=success&per_page=100" \
+            gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&per_page=100" \
               --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
             gh api "repos/$REPO/commits/$AFTER/pulls" \
               --jq '[.[] | select(.merged_at != null)]' > "$RUNNER_TEMP/pulls.json"
-            if (cd tests/numerics && python3 approval.py push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json"); then
-              echo "The merged head was approved by an approver."
+            if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE"; then
+              echo "The merged head and base were approved by an approver, and nothing came after."
               exit 0
             fi
           fi
-          echo "::error::The numerics changed. Michael's consent is him applying the label $LABEL to this head and base; any later push, retarget or reopen needs it again."
+          echo "::error::The numerics changed. Michael's consent is him applying the label $LABEL to this head and base; any later push, retarget, reopen or other event needs it again."
           exit 1

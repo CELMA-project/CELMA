@@ -164,10 +164,21 @@ def test_header_guard_name_is_ignored_but_code_is_not():
     assert guard.compare(ROOT, "HEAD", commit_with({path: text + "\nint x;\n"}))
 
 
-def test_deleted_file_fails_and_added_file_passes():
-    """A deleted guarded file trips; a new one does not."""
+def test_deleted_and_added_files_in_guarded_scope_fail():
+    """A deleted guarded file trips, and so does a new one."""
     added = commit_with({"celma/newFile.cxx": "int x;\n"})
-    assert guard.compare(ROOT, "HEAD", added) == {}
+    assert guard.compare(ROOT, "HEAD", added) == {"celma/newFile.cxx": ["file added"]}
+    for path in (
+        "MES/shadow/ownOperators.hxx",
+        "tests/numerics/conftest.py",
+        ".github/workflows/extra.yml",
+        "celma/NewScan/BOUT.inp",
+        "newdir/CMakeLists.txt",
+        "tests/regression/new-reference.json",
+    ):
+        report = guard.compare(ROOT, "HEAD", commit_with({path: "x\n"}))
+        assert report == {path: ["file added"]}
+    assert guard.compare(ROOT, "HEAD", commit_with({"README.md": "x\n"})) == {}
     with tempfile.TemporaryDirectory() as tmp:
         env = {**ENV, "GIT_INDEX_FILE": str(Path(tmp) / "index")}
         run_git("read-tree", "HEAD", env=env)
@@ -284,7 +295,9 @@ def run(**changes):
     )
     entry = {
         "event": "pull_request_target",
+        "status": "completed",
         "conclusion": "success",
+        "run_number": 10,
         "display_title": title,
         "actor": {"login": "loeiten"},
         "triggering_actor": {"login": "loeiten"},
@@ -293,12 +306,24 @@ def run(**changes):
     return entry
 
 
-PULLS = [{"number": 7, "head": {"sha": HEAD}}]
+def later(action, number=11, conclusion="failure", **changes):
+    """Build a later run of the workflow for the same pull request."""
+    title = run()["display_title"].replace("action=labeled", f"action={action}")
+    return run(run_number=number, conclusion=conclusion, display_title=title, **changes)
 
 
-def test_push_passes_with_the_approvers_run_for_the_merged_head():
-    """The run for the merged pull request's final head approves the push."""
-    assert approval.push_approved([run()], PULLS, ALLOWED)
+PULLS = [{"number": 7, "head": {"sha": HEAD}, "labels": [{"name": approval.LABEL}]}]
+
+
+def pushed(runs, pulls=PULLS, base=BASE):
+    """Decide a push with the approvers of these tests."""
+    return approval.push_approved(runs, pulls, ALLOWED, base)
+
+
+def test_push_passes_with_the_approvers_latest_run_for_head_and_base():
+    """The approval run is the latest for the merged head and base."""
+    assert pushed([run()])
+    assert pushed([run(run_number=3, conclusion="failure"), run()])
 
 
 @pytest.mark.parametrize(
@@ -310,21 +335,79 @@ def test_push_passes_with_the_approvers_run_for_the_merged_head():
         [run(event="pull_request")],  # a copy of the workflow on the branch
         [run(event="push")],
         [run(conclusion="failure")],
+        [run(status="in_progress", conclusion=None)],
         [run(display_title=run()["display_title"].replace(HEAD, "c" * 40))],
+        [run(display_title=run()["display_title"].replace(BASE, "c" * 40))],
         [run(display_title=run()["display_title"].replace("pr=7", "pr=8"))],
         [run(display_title=run()["display_title"].replace("labeled", "synchronize"))],
         [run(display_title=run()["display_title"] + " head=" + HEAD)],
         [run(display_title="numerics-guard label=" + approval.LABEL)],
         [],
+        # events after the approval void it, whatever their outcome
+        [run(), later("unlabeled")],
+        [run(), later("synchronize")],
+        [run(), later("edited")],
+        [run(), later("reopened", conclusion="success")],
     ],
 )
-def test_push_fails_without_the_approvers_own_run(runs):
-    """A run by the agent, of another event, head or label does not approve."""
-    assert not approval.push_approved(runs, PULLS, ALLOWED)
+def test_push_fails_without_the_approvers_own_latest_run(runs):
+    """A run by the agent, of another event, head, base or label, or a later run."""
+    assert not pushed(runs)
 
 
-def test_push_fails_if_the_merged_head_is_not_the_approved_one():
-    """A push after the approval changed the merged head."""
-    pulls = [{"number": 7, "head": {"sha": "d" * 40}}]
-    assert not approval.push_approved([run()], pulls, ALLOWED)
-    assert not approval.push_approved([run()], [], ALLOWED)
+def test_push_fails_if_head_base_or_label_differ_at_the_merge():
+    """A push after the approval changed the head; main moved; the label was off."""
+    other_head = [
+        {"number": 7, "head": {"sha": "d" * 40}, "labels": PULLS[0]["labels"]}
+    ]
+    assert not pushed([run()], other_head)
+    assert not pushed([run()], [])
+    assert not pushed([run()], base="e" * 40)
+    no_label = [{"number": 7, "head": {"sha": HEAD}, "labels": []}]
+    assert not pushed([run()], no_label)
+    assert not pushed([run()], [{"number": 7, "head": {"sha": HEAD}}])
+
+
+def test_the_scripts_of_the_push_path_come_from_the_base():
+    """The workflow extracts guard.py and approval.py from git and runs them -I."""
+    text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
+    assert 'git show "$TRUSTED:tests/numerics/$script"' in text
+    assert text.count("python3 ") == text.count("python3 -I")
+    assert "python3 tests/" not in text
+    assert "cd tests/numerics" not in text
+
+
+def test_line_splicing_cannot_hide_an_include_or_a_token():
+    """A directive split by a backslash is seen whole, a splice alone is no change."""
+    path = "celma/celma.cxx"
+    text = read_head(path)
+    for hidden in ('#\\\ninclude "evil.hxx"\n', '# \\ \n include "evil.hxx"\n'):
+        report = guard.compare(ROOT, "HEAD", commit_with({path: hidden + text}))
+        assert any("include added" in x for x in report[path]), hidden
+    assert guard.compare_cpp("int x = 1;\n", "int x = \\\n1;\n") == []
+    assert guard.compare_cpp("int x = 1;\n", "int x = \\\n2;\n")
+    assert guard.compare_cpp("#define A 1\n", "#def\\\nine A 2\n")
+    assert guard.compare_cpp("#include <a>\n", "%:include <b>\n")
+
+
+def test_input_file_continuations_are_not_dropped():
+    """A continued line is read both ways, so a hidden option shows."""
+    old = "x = 1\ny = 5\n"
+    new = "x = 1 \\\ny = 5\n"
+    assert guard.compare_inp(old, new)
+    assert guard.compare_inp(old, old) == []
+    assert guard.compare_inp("a = 1\n", "a = 1 \\\n\n")
+    path = "celma/CSDXNyScan/BOUT.inp"
+    edited = read_head(path).replace("nx = 32", "nx = 32 \\\n+ 0", 1)
+    assert guard.compare(ROOT, "HEAD", commit_with({path: edited}))
+
+
+def test_digit_separators_do_not_open_character_literals():
+    """A comment after 100'000 is a comment, a prefixed char literal is one."""
+    plain = "int n = 100'000;\nint k = 1;\n"
+    commented = "int n = 100'000; // it's a comment\nint k = 1; /* don't */\n"
+    assert guard.compare_cpp(plain, commented) == []
+    assert guard.compare_cpp(plain, plain.replace("k = 1", "k = 2"))
+    assert guard.compare_cpp("char c = L'a';\n", "char c = L'a'; // it's\n") == []
+    assert guard.compare_cpp("char c = L'a';\n", "char c = L'b';\n")
+    assert guard.compare_cpp("int n = 0x1'F;\n", "int n = 0x1'E;\n")

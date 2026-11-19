@@ -9,12 +9,15 @@ pull request had at that moment, and the pull request author cannot forge that:
   head and base its event carries. Every other event (opened, synchronize,
   reopened, edited, unlabeled, another label, a sender outside the allowlist)
   fails, so a push, a retarget or a reopen needs a new application of the label.
-* After the merge, a push to ``main`` passes only if the workflow-runs API holds
-  a successful ``pull_request_target`` run of the workflow for the merged pull
-  request's final head, triggered by someone in the allowlist (the original
-  actor and the actor of any re-run) for the label ``numerics-change-approved``.
-  The run's name (``run-name`` in the workflow, from the base branch copy)
-  carries event, action, pull request, head, base and label.
+* After the merge, a push to ``main`` passes only if the LATEST
+  ``pull_request_target`` run of the workflow for the merged pull request is a
+  successful one for the label ``numerics-change-approved`` being applied, for
+  the merged pull request's final head and for the base the push started from,
+  triggered by someone in the allowlist (the original actor and the actor of any
+  re-run), and the pull request still carried the label at the merge. A later
+  event (an unlabel, a retarget, a push) makes a later run the latest, so it
+  voids the approval. The run's name (``run-name`` in the workflow, from the
+  base branch copy) carries event, action, pull request, head, base and label.
 
 A copy of the workflow on a pull request branch cannot satisfy this. Its runs
 have the event ``pull_request`` or ``push`` (or ``workflow_dispatch``), never
@@ -78,7 +81,7 @@ def pull_request_approved(payload: Dict[str, Any], allowlist: List[str]) -> bool
 
 
 def approving_run(
-    run: Dict[str, Any], allowlist: List[str], pr_number: int, head: str
+    run: Dict[str, Any], allowlist: List[str], pr_number: int, head: str, base: str
 ) -> bool:
     """Tell whether a workflow run is the approval of a pull request head.
 
@@ -92,53 +95,91 @@ def approving_run(
         The merged pull request.
     head : str
         The final head of the merged pull request.
+    base : str
+        The tip of the base branch the merge started from.
 
     Returns
     -------
     bool
-        True for a successful ``pull_request_target`` run for this head, whose
-        name says the approval label was applied, started and re-run only by
-        permitted users.
+        True for a completed, successful ``pull_request_target`` run for this
+        head and base, whose name says the approval label was applied, started
+        and re-run only by permitted users.
     """
     match = TITLE.fullmatch(run.get("display_title") or "")
     if not match or run.get("event") != "pull_request_target":
         return False
     return (
-        run.get("conclusion") == "success"
+        run.get("status", "completed") == "completed"
+        and run.get("conclusion") == "success"
         and match["event"] == "pull_request_target"
         and match["action"] == "labeled"
         and match["label"] == LABEL
         and match["pr"] == str(pr_number)
         and match["head"] == head
+        and match["base"] == base
         and permitted((run.get("actor") or {}).get("login", ""), allowlist)
         and permitted((run.get("triggering_actor") or {}).get("login", ""), allowlist)
     )
 
 
+def latest_run_of(runs: List[Dict[str, Any]], pr_number: int) -> Dict[str, Any]:
+    """Find the latest ``pull_request_target`` run for a pull request.
+
+    Parameters
+    ----------
+    runs : list
+        Runs of the workflow, any event, any state.
+    pr_number : int
+        The pull request.
+
+    Returns
+    -------
+    dict
+        The run with the highest run number among those named for the pull
+        request, or an empty dict.
+    """
+    named = []
+    for run in runs:
+        match = TITLE.fullmatch(run.get("display_title") or "")
+        if match and run.get("event") == "pull_request_target":
+            if match["pr"] == str(pr_number):
+                named.append(run)
+    return max(named, key=lambda r: r.get("run_number", 0), default={})
+
+
 def push_approved(
-    runs: List[Dict[str, Any]], pulls: List[Dict[str, Any]], allowlist: List[str]
+    runs: List[Dict[str, Any]],
+    pulls: List[Dict[str, Any]],
+    allowlist: List[str],
+    base: str,
 ) -> bool:
     """Decide a push to main from the merged pull request and the runs.
 
     Parameters
     ----------
     runs : list
-        Successful ``pull_request_target`` runs of the workflow.
+        Runs of the workflow, any event, any state.
     pulls : list
         The merged pull requests associated with the pushed commit.
     allowlist : list
         Logins that may approve.
+    base : str
+        The commit the push started from, the tip of main the merge was made on.
 
     Returns
     -------
     bool
-        True if some merged pull request's final head has an approving run.
+        True if some merged pull request carried the label at the merge, its
+        latest run is the approval of its final head and base.
     """
-    return any(
-        approving_run(run, allowlist, pull["number"], pull["head"]["sha"])
-        for pull in pulls
-        for run in runs
-    )
+    for pull in pulls:
+        labels = [x.get("name") for x in pull.get("labels") or []]
+        latest = latest_run_of(runs, pull["number"])
+        if LABEL in labels and approving_run(
+            latest, allowlist, pull["number"], pull["head"]["sha"], base
+        ):
+            return True
+    return False
 
 
 def main(argv: List[str]) -> int:
@@ -147,7 +188,7 @@ def main(argv: List[str]) -> int:
     Parameters
     ----------
     argv : list
-        ``pr EVENT_JSON`` or ``push RUNS_JSON PULLS_JSON``; the allowlist is
+        ``pr EVENT_JSON`` or ``push RUNS_JSON PULLS_JSON BASE_SHA``; the allowlist is
         in the environment variable ``ALLOWED_APPROVERS``, comma separated.
 
     Returns
@@ -162,7 +203,7 @@ def main(argv: List[str]) -> int:
         approved = pull_request_approved(first, allowlist)
     else:
         with open(argv[2], encoding="utf-8") as handle:
-            approved = push_approved(first, json.load(handle), allowlist)
+            approved = push_approved(first, json.load(handle), allowlist, argv[3])
     print("approved" if approved else "no approval for this change")
     return 0 if approved else 1
 

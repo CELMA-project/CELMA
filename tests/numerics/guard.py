@@ -7,7 +7,7 @@ not count; the set of ``#include`` lines does, their order does not), every
 files that are compared byte for byte (references, the build image, compiler
 flags, every workflow and the guard itself).
 
-Modified or deleted guarded content is a change; a newly added file is not.
+Modified, deleted or added guarded content is a change.
 The files are read from the git object store only, so nothing of either commit
 is checked out or executed.
 
@@ -23,9 +23,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-CPP_EXT = r"(cxx|hxx|cpp|hpp|cc|hh|h|c)"
+CPP_EXT = r"(cxx|hxx|cpp|hpp|cc|hh|h|c|ixx|ipp|tpp|txx|inl|inc)"
 CPP_PATTERNS = tuple(
-    re.compile(rf"{folder}/.+\.{CPP_EXT}")
+    re.compile(rf"{folder}/.+\.{CPP_EXT}", re.IGNORECASE)
     for folder in (
         "celma",
         "celmaWithBoussinesqApprox",
@@ -39,6 +39,9 @@ RAW_PATTERNS = (
     re.compile(r"tests/numerics/.+"),
     re.compile(r"docker/Dockerfile\.bout5"),
     re.compile(r"(.+/)?CMakeLists\.txt"),
+    re.compile(r".+\.cmake"),
+    # The scripts hold the tolerances of the references
+    re.compile(r"tests/regression/.+\.py"),
     re.compile(r"\.github/workflows/.+"),
 )
 OPERATORS = (
@@ -141,8 +144,94 @@ def list_tree(repo: Path, rev: str) -> Dict[str, str]:
     return files
 
 
+SPLICE = re.compile(r"\\[ \t]*\r?\n")
+
+
+def splice(text: str) -> str:
+    r"""Join backslash-newline pairs, as the first phases of C++ translation do.
+
+    Every path that reads C++ (tokens, includes) goes through this first, so a
+    directive split over lines (``#\`` newline ``include``) is seen whole.
+
+    Parameters
+    ----------
+    text : str
+        Source code or an input file.
+
+    Returns
+    -------
+    str
+        The text with every continued line joined.
+    """
+    return SPLICE.sub("", text)
+
+
+def is_digit_separator(text: str, i: int) -> bool:
+    """Tell whether the quote at ``text[i]`` is a C++14 digit separator.
+
+    Parameters
+    ----------
+    text : str
+        Source code.
+    i : int
+        Position of a single quote.
+
+    Returns
+    -------
+    bool
+        True if the quote sits inside a number such as ``100'000``, not at the
+        start of a character literal (``L'a'`` starts with a letter).
+    """
+    start = i
+    while start > 0 and (text[start - 1].isalnum() or text[start - 1] in "_'."):
+        start -= 1
+    return start < i and text[start].isdigit()
+
+
 def strip_comments(text: str) -> str:
-    """Remove C++ comments and join continued lines, keeping line numbers.
+    """Remove C++ comments.
+
+    Parameters
+    ----------
+    text : str
+        Source code, already spliced.
+
+    Returns
+    -------
+    str
+        The code with every comment replaced by one space, as the compiler
+        does, so a directive keeps its line.
+    """
+    out: List[str] = []
+    i, n = 0, len(text)
+    while i < n:
+        char = text[i]
+        two = text[i : i + 2]
+        if char == "'" and is_digit_separator(text, i):
+            out.append(char)
+            i += 1
+        elif char in "\"'":
+            j = i + 1
+            while j < n and text[j] != char and text[j] != "\n":
+                j += 2 if text[j] == "\\" else 1
+            out.append(text[i : j + 1])
+            i = j + 1
+        elif two == "//":
+            while i < n and text[i] != "\n":
+                i += 1
+            out.append(" ")
+        elif two == "/*":
+            end = text.find("*/", i + 2)
+            i = n if end < 0 else end + 2
+            out.append(" ")
+        else:
+            out.append(char)
+            i += 1
+    return "".join(out)
+
+
+def preprocess(text: str) -> str:
+    """Splice lines, strip comments and spell the digraph ``%:`` as ``#``.
 
     Parameters
     ----------
@@ -152,37 +241,10 @@ def strip_comments(text: str) -> str:
     Returns
     -------
     str
-        The code with every comment replaced by a space (newlines kept inside
-        block comments).
+        The text every reader of C++ in this module works on.
     """
-    out: List[str] = []
-    i, n = 0, len(text)
-    while i < n:
-        char = text[i]
-        two = text[i : i + 2]
-        if char in "\"'":
-            j = i + 1
-            while j < n and text[j] != char and text[j] != "\n":
-                j += 2 if text[j] == "\\" else 1
-            out.append(text[i : j + 1])
-            i = j + 1
-        elif two == "//":
-            while i < n and text[i] != "\n":
-                # A backslash continues a line comment
-                if text[i] == "\\" and text[i + 1 : i + 2] == "\n":
-                    out.append("\n")
-                    i += 1
-                i += 1
-            out.append(" ")
-        elif two == "/*":
-            end = text.find("*/", i + 2)
-            end = n if end < 0 else end + 2
-            out.append(" " + "\n" * text.count("\n", i, end))
-            i = end
-        else:
-            out.append(char)
-            i += 1
-    return "".join(out)
+    code = strip_comments(splice(text))
+    return code.replace("%:%:", "##").replace("%:", "#")
 
 
 def cpp_tokens(text: str) -> List[Token]:
@@ -190,6 +252,7 @@ def cpp_tokens(text: str) -> List[Token]:
 
     Preprocessor lines other than ``#include`` and the header guard stay, each
     closed by an end-of-line token, as their line structure carries meaning.
+    Line numbers are those of the spliced text.
 
     Parameters
     ----------
@@ -201,20 +264,7 @@ def cpp_tokens(text: str) -> List[Token]:
     list
         Tuples of the token and its line number.
     """
-    code = strip_comments(text)
-    # Lines continued with a backslash form one logical line
-    lines: List[Tuple[int, str]] = []
-    pending: Optional[Tuple[int, str]] = None
-    for number, line in enumerate(code.split("\n"), 1):
-        if pending is not None:
-            number, line = pending[0], pending[1] + " " + line
-            pending = None
-        if line.endswith("\\"):
-            pending = (number, line[:-1])
-            continue
-        lines.append((number, line))
-    if pending is not None:
-        lines.append(pending)
+    lines = list(enumerate(preprocess(text).split("\n"), 1))
     lines = [x for x in lines if not INCLUDE.match(x[1])]
     lines = drop_header_guard(lines)
     tokens: List[Token] = []
@@ -243,7 +293,7 @@ def cpp_includes(text: str) -> List[str]:
         The sorted, whitespace-normalised include lines, without duplicates.
     """
     found = set()
-    for line in strip_comments(text).split("\n"):
+    for line in preprocess(text).split("\n"):
         if INCLUDE.match(line):
             found.add(re.sub(r"\s+", "", line))
     return sorted(found)
@@ -326,7 +376,7 @@ def compare_cpp(old: str, new: str) -> List[str]:
     return changes
 
 
-def parse_inp(text: str) -> Dict[str, Union[float, str]]:
+def parse_inp(text: str, joined: bool = True) -> Dict[str, Union[float, str]]:
     """Parse a BOUT.inp into a map of ``section:key`` to value.
 
     Comments, spacing and the order of keys are dropped, and a value that
@@ -336,6 +386,9 @@ def parse_inp(text: str) -> Dict[str, Union[float, str]]:
     ----------
     text : str
         Content of the input file.
+    joined : bool
+        Join lines that end in a backslash first. Whether a reader does is not
+        certain, so the comparison reads the file both ways.
 
     Returns
     -------
@@ -344,7 +397,7 @@ def parse_inp(text: str) -> Dict[str, Union[float, str]]:
     """
     options: Dict[str, Union[float, str]] = {}
     section = ""
-    for raw in text.splitlines():
+    for raw in (splice(text) if joined else text).split("\n"):
         line = strip_inp_comment(raw).strip()
         if not line:
             continue
@@ -425,12 +478,14 @@ def compare_inp(old: str, new: str) -> List[str]:
     list
         One line per added, removed or changed option.
     """
-    a, b = parse_inp(old), parse_inp(new)
-    return [
-        f"{name} {show(a.get(name))} -> {show(b.get(name))}"
-        for name in sorted(set(a) | set(b))
-        if a.get(name) != b.get(name)
-    ]
+    found: List[str] = []
+    for joined in (True, False):
+        a, b = parse_inp(old, joined), parse_inp(new, joined)
+        for name in sorted(set(a) | set(b)):
+            line = f"{name} {show(a.get(name))} -> {show(b.get(name))}"
+            if a.get(name) != b.get(name) and line not in found:
+                found.append(line)
+    return found
 
 
 def compare_raw(old: str, new: str) -> List[str]:
@@ -515,14 +570,18 @@ def compare(repo: Path, base: str, head: str) -> Dict[str, List[str]]:
     """
     old_tree, new_tree = list_tree(repo, base), list_tree(repo, head)
     report: Dict[str, List[str]] = {}
-    for path in sorted(old_tree):
+    for path in sorted(set(old_tree) | set(new_tree)):
         kind = kind_of(path)
-        if kind is None or old_tree[path] == new_tree.get(path):
+        if kind is None or old_tree.get(path) == new_tree.get(path):
             continue
-        old = blob_text(repo, old_tree[path])
         if path not in new_tree:
             changes = ["file deleted"]
+        elif path not in old_tree:
+            # A new file in guarded scope is a change too: a new local header can
+            # shadow an include, a new input or workflow changes what runs
+            changes = ["file added"]
         else:
+            old = blob_text(repo, old_tree[path])
             new = blob_text(repo, new_tree[path])
             if kind == "cpp":
                 changes = compare_cpp(old, new)
