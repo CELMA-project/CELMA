@@ -16,7 +16,7 @@ CASES = {
     "DDX": ("MES/singleOperators/1-DDXCylinder", "DDXCylinder", "gaussian"),
 }
 for name, (d, exe, case) in CASES.items():
-    for nout in (0, 1):
+    for nout in (0,):
         with tempfile.TemporaryDirectory() as tmp:
             shutil.copy(ROOT / d / case / "BOUT.inp", Path(tmp) / "BOUT.inp")
             done = subprocess.run(  # nosec
@@ -26,6 +26,8 @@ for name, (d, exe, case) in CASES.items():
             rows = re.findall(r"^\s*[\d.]+e[+-]\d+\s+(\d+)\s+[\d.]+e[+-]\d+", done.stdout, re.M)
             with Dataset(Path(tmp) / "BOUT.dmp.0.nc") as dump:
                 s_num, e, s = (np.asarray(dump.variables[v]) for v in ("S_num", "e", "S"))
+            ex = np.max(np.abs(e), axis=tuple(range(1, e.ndim)))
+            print(f"PROBE-X {name} nout={nout} shape={e.shape} guard e[0]={ex[0]:.3e} e[-1]={ex[-1]:.3e} interior max={np.max(ex[1:-1]):.3e} argmax={int(np.argmax(ex))} S_num[0]max={np.max(np.abs(s_num[0])):.3e} S[0]max={np.max(np.abs(s[0])):.3e}")
             print(f"PROBE {name} nout={nout} rc={done.returncode} rhs_rows={rows} "
                   f"max|S_num|={np.max(np.abs(s_num)):.3e} max|e|={np.max(np.abs(e)):.3e} "
                   f"max|e+S|={np.max(np.abs(e + s)):.3e} max|S|={np.max(np.abs(s)):.3e}")

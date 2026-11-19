@@ -5,11 +5,19 @@ minus the analytic one. This script runs every input of every case at two small
 resolutions and compares the largest absolute error to a committed reference,
 so a change of any operator or boundary condition shows up.
 
+The cases compute their operator in ``rhs()``, which BOUT++ 5 never calls with
+``nout=0``: the saved error was then ``-S``, the source itself, and blind to
+every operator. The runs here use ``nout=1``, which evaluates ``rhs()`` once for
+the initial output, where the cases save their fields. The script then proves
+it cannot go blind again: it reruns three cases with a changed derivative
+method and requires the error to move far beyond the tolerance.
+
 Run from the repository root as ``python3 tests/regression/mes.py``. The
 numbers of the run are written to ``recorded-mes.json`` in the current directory.
 """
 
 import json
+import math
 import re
 import shutil
 import subprocess  # nosec
@@ -29,6 +37,15 @@ RTOL = 1.0e-6
 # summation round-off of about 4e-12 that moves with the order of the sum
 ATOL = 1.0e-12
 RESOLUTIONS = ((32, 34, 64), (64, 66, 128))
+# One evaluation of rhs() for the initial output (nout=0 never evaluates it)
+RUN = ("nout=1",)
+# Case, changed options: each must move the error of the case
+MUTATIONS = {
+    "singleOperators/4-DDZCylinder/gaussianWSinAndParabola": ("mesh:ddz:first=C2",),
+    "singleOperators/5-D2DZ2Cylinder/gaussianWSinAndParabola": ("mesh:ddz:second=C2",),
+    "singleOperators/1-DDXCylinder/gaussian": ("mesh:ddx:first=W2",),
+}
+MUTATION_MARGIN = 1000.0
 
 
 def read_int(text: str, key: str, default: int) -> int:
@@ -75,7 +92,12 @@ def cases() -> List[Tuple[str, Path, Path]]:
     return found
 
 
-def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional[float]:
+def run_case(
+    exe: Path,
+    inp: Path,
+    resolution: Tuple[int, int, int],
+    extra: Tuple[str, ...] = (),
+) -> Optional[float]:
     """Run one input at one resolution.
 
     Parameters
@@ -86,6 +108,8 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         Its input file.
     resolution : tuple
         Inner points in x, points in y and in z, each capped at the input's own.
+    extra : tuple
+        Further command line options, for the mutations.
 
     Returns
     -------
@@ -104,6 +128,7 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
         shutil.copy(inp, Path(tmp) / "BOUT.inp")
         command = [str(exe), "-d", tmp, f"mesh:nx={nx}", f"mesh:ny={ny}"]
         command += [f"mesh:nz={nz}", "NXPE=1", "input:error_on_unused_options=false"]
+        command += [*RUN, *extra]
         done = subprocess.run(  # nosec
             command,
             cwd=exe.parent,
@@ -130,6 +155,58 @@ def run_case(exe: Path, inp: Path, resolution: Tuple[int, int, int]) -> Optional
             return float(np.max(np.abs(np.array(data.variables["e"][:]))))
 
 
+def order(errors: List[Optional[float]]) -> str:
+    """Observed order of convergence between the two resolutions.
+
+    Parameters
+    ----------
+    errors : list
+        Errors at the two resolutions.
+
+    Returns
+    -------
+    str
+        The order, or ``n/a``.
+    """
+    old, new = errors
+    if not old or not new:
+        return "n/a"
+    return f"{math.log2(old / new):.2f}"
+
+
+def check_mutations(reference: Dict[str, List[Optional[float]]]) -> bool:
+    """Prove that the cases evaluate their operator, by changing it.
+
+    Parameters
+    ----------
+    reference : dict
+        The committed errors.
+
+    Returns
+    -------
+    bool
+        True if every mutation moved its case far beyond the tolerance.
+    """
+    paths = {name: (exe, inp) for name, exe, inp in cases()}
+    good = True
+    for name, extra in MUTATIONS.items():
+        exe, inp = paths[name]
+        mutated = run_case(exe, inp, RESOLUTIONS[0], extra)
+        old = reference[name][0]
+        if mutated is None or old is None:
+            print(f"FAIL mutation {extra} of {name} did not run")
+            good = False
+            continue
+        move = abs(mutated - old) / (RTOL * abs(old) + ATOL)
+        status = "ok  " if move >= MUTATION_MARGIN else "FAIL"
+        good = good and move >= MUTATION_MARGIN
+        print(
+            f"{status} mutation {extra} of {name}: error {old:.3e} -> "
+            f"{mutated:.3e}, {move:.1e} x tolerance"
+        )
+    return good
+
+
 def main() -> int:
     """Run every case and compare with the reference.
 
@@ -141,7 +218,7 @@ def main() -> int:
     actual: Dict[str, List[Optional[float]]] = {}
     for name, exe, inp in cases():
         actual[name] = [run_case(exe, inp, res) for res in RESOLUTIONS]
-        print(name, actual[name])
+        print(name, actual[name], "order", order(actual[name]))
     RECORDED.write_text(json.dumps(actual, indent=1) + "\n")
     if not REFERENCE.exists():
         print(f"FAIL no reference at {REFERENCE}; the numbers are in {RECORDED}")
@@ -157,7 +234,8 @@ def main() -> int:
                     failed.append(name)
     for name in sorted(set(failed)):
         print(f"FAIL {name}: {actual.get(name)} against {reference.get(name)}")
-    return 1 if failed else 0
+    blind = not check_mutations(reference)
+    return 1 if failed or blind else 0
 
 
 if __name__ == "__main__":
