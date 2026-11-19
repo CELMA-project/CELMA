@@ -33,33 +33,33 @@ Agents: start at [AGENTS.md](AGENTS.md).
 ## Repository structure
 
 * [`celma/`](celma/README.md)
-    * The CELMA model: source, input files of the scans, run scripts.
+  * The CELMA model: source, input files of the scans, run scripts.
 * [`celmaWithBoussinesqApprox/`](celmaWithBoussinesqApprox/README.md)
-    * The CELMA model with the Boussinesq approximation.
+  * The CELMA model with the Boussinesq approximation.
 * [`common/`](common/README.md)
-    * Own `BOUT++` extensions in C++ (operators, boundary conditions,
+  * Own `BOUT++` extensions in C++ (operators, boundary conditions,
       filters, monitors, Laplace inversion, parameters) shared by the models
       and the cases below.
 * [`derivations/`](derivations/README.md)
-    * Derivations of stencils, boundary conditions, collisionalities and
+  * Derivations of stencils, boundary conditions, collisionalities and
       dispersion relations, mostly in
       [jupyter notebooks](http://jupyter.org/).
       The results are copied into the code by hand.
 * [`MES/`](MES/README.md)
-    * Cases that verify the operators and boundary conditions with the method
+  * Cases that verify the operators and boundary conditions with the method
       of manufactured solutions (MES).
 * [`tests/`](tests/README.md)
-    * The filter test and the regression tests the continuous integration
+  * The filter test and the regression tests the continuous integration
       runs.
 * [`docker/`](docker/Dockerfile.bout5)
-    * `Dockerfile.bout5` builds the `BOUT++` 5.2.0 environment the continuous
+  * `Dockerfile.bout5` builds the `BOUT++` 5.2.0 environment the continuous
       integration uses.
       `Dockerfile` is the old Ubuntu 18.04 image from before the CMake build
       and is not used by any workflow.
 * [`.github/`](.github/workflows)
-    * Workflows: `lint.yml`, `test.yml` and `image.yml`.
+  * Workflows: `lint.yml`, `test.yml` and `image.yml`.
 * [`.codeCleaner/`](.codeCleaner/README.md)
-    * Old helper scripts for formatting, converting and cleaning the code.
+  * Old helper scripts for formatting, converting and cleaning the code.
 
 The build is defined in [CMakeLists.txt](CMakeLists.txt) and one
 `CMakeLists.txt` per model and case.

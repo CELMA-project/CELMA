@@ -54,7 +54,8 @@ pre-commit run --all-files
 
 * Lint is [.pre-commit-config.yaml](.pre-commit-config.yaml): the standard
   `pre-commit-hooks`, `ruff-check` and `ruff-format`, `clang-format`
-  (reads [.clang-format](.clang-format)), `cpplint` and `cppcheck`.
+  (reads [.clang-format](.clang-format)), `cpplint`, `cppcheck` and
+  `markdownlint` (default rules, with formatting fixes).
   Fix findings in the code; do not loosen a hook or its filters.
 * Ruff is configured in [pyproject.toml](pyproject.toml): line length 88,
   Python 3.12, numpy docstring convention.

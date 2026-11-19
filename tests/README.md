@@ -15,9 +15,9 @@ runs.
   `driverTest.py` and `postProcess/checkModes.py` are the older driver and the
   mode check; the driver needs `bout_runners`, which CI does not install.
 * [regression](regression) - Two scripts, run from the repository root:
-    * `regression.py` runs both models on a small mesh and compares the time
+  * `regression.py` runs both models on a small mesh and compares the time
       derivatives and the evolved fields with `reference.json.gz`.
-    * `mes.py` runs every `BOUT.inp` under `MES/` at two small resolutions and
+  * `mes.py` runs every `BOUT.inp` under `MES/` at two small resolutions and
       compares the largest absolute error with `mes-reference.json`.
 
   The references depend on the `BOUT++` version and the compiler, so CI

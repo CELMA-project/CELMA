@@ -10,8 +10,8 @@ The notebooks are committed without output.
 
 * [boundaries](boundaries/README.md) - Polynomials for the Cauchy boundary
   condition and for extrapolation to the ghost point.
-    * [cauchyBC](boundaries/cauchyBC/README.md)
-    * [ghostPointExtrapolation](boundaries/ghostPointExtrapolation/README.md)
+  * [cauchyBC](boundaries/cauchyBC/README.md)
+  * [ghostPointExtrapolation](boundaries/ghostPointExtrapolation/README.md)
 * [collisionalities](collisionalities/README.md) - Scripts for the
   electron-neutral and ion-neutral collision frequencies in argon and for
   plasma parameters.

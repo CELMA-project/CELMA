@@ -28,10 +28,11 @@ installed by the CI image.
 They are not run by the continuous integration.
 
 * [PBSScanMarconi-BousCSDXMagFieldScanAr.py](PBSScanMarconi-BousCSDXMagFieldScanAr.py)
-  and [PBSScanMarconi-BousCSDXNeutralScanAr.py](PBSScanMarconi-BousCSDXNeutralScanAr.py) -
+  and
+  [PBSScanMarconi-BousCSDXNeutralScanAr.py](PBSScanMarconi-BousCSDXNeutralScanAr.py)
   The magnetic field scan and the neutral density scan, for submission to a
   PBS queue.
-* [PBSPlotMarconi-BousCSDXMagFieldScanAr.py](PBSPlotMarconi-BousCSDXMagFieldScanAr.py) -
+* [PBSPlotMarconi-BousCSDXMagFieldScanAr.py](PBSPlotMarconi-BousCSDXMagFieldScanAr.py)
   Post processing of the magnetic field scan, to be run when it is done.
 * [testScan.py](testScan.py) - A quick scan to check that the system is built.
 * [testPostProcessing.py](testPostProcessing.py) - Run after `testScan.py`;
