@@ -1,12 +1,13 @@
 """Fingerprint of the numerics: one right-hand-side evaluation, term by term.
 
 Both models run on a small mesh from z-, x- and y-dependent initial fields, set
-on the command line over the real input file. The solver is explicit Euler with
-one internal step per output and ``nout=1``. BOUT++ evaluates the right-hand
-side once for the initial output, before the first step, and the saved terms of
-the first time slice are that evaluation; the step and the output after it
-evaluate it again at the new state, which is not used. The log shows the count
-of its first row, which the test requires to be one.
+on the command line over the real input file, with ``nout=0``. BOUT++ then
+evaluates the right-hand side exactly once, for the initial output, and takes
+no solver step; the saved terms of that one time slice are that evaluation. Every
+run asserts this from the log (one row of the table, one evaluation, step 0 of
+0) and from the output (one time slice). A run with ``nout=1`` and the Euler
+solver gave bit for bit the same values at the interior points and the model
+guard cells, with a further evaluation in the step.
 
 The time derivative of every evolved field and every individually saved term is
 reduced to a few numbers (norms, sums, fixed projections and sampled points of
@@ -45,13 +46,7 @@ RTOL = 1.0e-9
 # A mutation has to move the numbers this many times the tolerance
 MARGIN = 100.0
 GRID = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
-RUN = (
-    "nout=1",
-    "timestep=1e-10",
-    "solver:type=euler",
-    "solver:timestep=1e-10",
-    "input:error_on_unused_options=false",
-)
+RUN = ("nout=0", "timestep=1e-10", "input:error_on_unused_options=false")
 # Several z modes, x and y dependence, nothing polynomial
 FIELDS = (
     "lnN:function=0.2*sin(2*z+3*x)*cos(y)+0.1*cos(5*z-2*x+y)+0.05*sin(x)",
@@ -95,7 +90,7 @@ MES_CASES = {
     ),
 }
 MES_GRID = ("mesh:nx=34", "mesh:nz=32", "NXPE=1")
-MES_RUN = ("nout=1", "input:error_on_unused_options=false")
+MES_RUN = ("nout=0", "input:error_on_unused_options=false")
 SAMPLES = 16
 Stats = List[float]
 Fingerprint = Dict[str, Stats]
@@ -226,33 +221,37 @@ def run_bout(
     if done.returncode != 0:
         tail = "\n".join(done.stdout.splitlines()[-15:])
         raise RuntimeError(f"{executable} {args} failed:\n{tail}")
-    return Dataset(tmp / "BOUT.dmp.0.nc"), done.stdout
+    dump = Dataset(tmp / "BOUT.dmp.0.nc")
+    check_single_evaluation(done.stdout, dump)
+    return dump, done.stdout
 
 
-def rhs_evaluations(log: str) -> int:
-    """Read the number of right-hand-side evaluations of the initial output.
+def check_single_evaluation(log: str, dump: Dataset) -> None:
+    """Prove that a run evaluated the right-hand side once and took no step.
 
     Parameters
     ----------
     log : str
-        Standard output of a run.
-
-    Returns
-    -------
-    int
-        The count in the "RHS evals" column of the first row, the one for
-        the initial state.
+        Standard output of the run.
+    dump : Dataset
+        Its output file.
 
     Raises
     ------
     RuntimeError
-        If the log has no such line.
+        If the log table has other than one row with one evaluation, the solver
+        ran for outputs or took a step, or the output has other than one time
+        slice.
     """
-    found = re.findall(r"^\s*[\d.]+e[+-]\d+\s+(\d+)\s+[\d.]+e[+-]\d+", log, re.M)
-    if not found:
-        tail = "\n".join(log.splitlines()[-20:])
-        raise RuntimeError(f"no 'RHS evals' line in the log:\n{tail}")
-    return int(found[0])
+    rows = re.findall(r"^\s*[\d.]+e[+-]\d+\s+(\d+)\s+[\d.]+e[+-]\d+", log, re.M)
+    steps = re.findall(r"Step (\d+) of (\d+)", log)
+    slices = dump.dimensions["t"].size
+    if rows != ["1"] or steps != [("0", "0")] or slices != 1:
+        tail = "\n".join(log.splitlines()[-30:])
+        raise RuntimeError(
+            f"not one evaluation and no step: RHS rows {rows}, steps {steps}, "
+            f"time slices {slices}\n{tail}"
+        )
 
 
 def interior(data: np.ndarray) -> np.ndarray:
@@ -271,9 +270,7 @@ def interior(data: np.ndarray) -> np.ndarray:
     return np.asarray(data)[1:-1, 1:-1, :]
 
 
-def run_model(
-    name: str, extra: Tuple[str, ...] = (), check: bool = False
-) -> Dict[str, np.ndarray]:
+def run_model(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
     """Run one model for one right-hand-side evaluation.
 
     Parameters
@@ -282,8 +279,6 @@ def run_model(
         Key in ``MODELS``.
     extra : tuple
         Further command line options, for the mutations.
-    check : bool
-        Prove that there is one evaluation and that the Euler step used it.
 
     Returns
     -------
@@ -291,11 +286,6 @@ def run_model(
         Fingerprint of every time dependent field except the evolved fields
         themselves, keyed ``"model/term"``; the time derivative of each
         evolved field is among them.
-
-    Raises
-    ------
-    RuntimeError
-        If ``check`` is set and the run is not one evaluation.
     """
     directory, executable, case, vorticity = MODELS[name]
     args = (*GRID, *RUN, *FIELDS, VORTICITY.format(vorticity), *extra)
@@ -304,14 +294,6 @@ def run_model(
     with tempfile.TemporaryDirectory() as tmp:
         dump, log = run_bout(ROOT / directory, executable, case, args, Path(tmp))
         with dump:
-            if check:
-                count = rhs_evaluations(log)
-                if count != 1:
-                    tail = "\n".join(log.splitlines()[-40:])
-                    raise RuntimeError(
-                        f"{name}: {count} RHS evaluations, not 1\n{tail}"
-                    )
-                check_euler_step(dump, evolved)
             for var, variable in dump.variables.items():
                 if variable.dimensions != ("t", "x", "y", "z") or var in evolved:
                     continue
@@ -320,37 +302,6 @@ def run_model(
                     raise RuntimeError(f"{name} {var}: inner values not finite")
                 result[f"{name}/{var}"] = np.array(values)
     return result
-
-
-def check_euler_step(dump: Dataset, evolved: Tuple[str, ...]) -> None:
-    """Prove that the saved time derivatives are the one evaluation of the step.
-
-    Explicit Euler gives ``f(dt) = f(0) + dt * ddt(f)``, so the change of each
-    evolved field over the step must equal the time step times the saved time
-    derivative.
-
-    Parameters
-    ----------
-    dump : Dataset
-        The output of a run with one Euler step.
-    evolved : tuple
-        Names of the evolved fields.
-
-    Raises
-    ------
-    RuntimeError
-        If the change of a field is not the step times its saved derivative.
-    """
-    dt = float(dump.variables["t_array"][-1] - dump.variables["t_array"][0])
-    for field in evolved:
-        step = interior(dump.variables[field][-1] - dump.variables[field][0])
-        ddt = interior(dump.variables[f"ddt({field})"][0]) * dt
-        scale = float(np.max(np.abs(ddt)))
-        diff = float(np.max(np.abs(step - ddt)))
-        if not diff <= 1e-3 * scale:
-            raise RuntimeError(
-                f"{field}: Euler step differs from dt*ddt by {diff:.3e} (scale {scale:.3e})"
-            )
 
 
 def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
@@ -386,15 +337,13 @@ def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
     return result
 
 
-def run_all(extra: Tuple[str, ...] = (), check: bool = False) -> Dict[str, np.ndarray]:
+def run_all(extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
     """Run both models and the operator cases.
 
     Parameters
     ----------
     extra : tuple
         Further command line options.
-    check : bool
-        Prove the single evaluation of each model run.
 
     Returns
     -------
@@ -403,7 +352,7 @@ def run_all(extra: Tuple[str, ...] = (), check: bool = False) -> Dict[str, np.nd
     """
     result: Dict[str, np.ndarray] = {}
     for name in MODELS:
-        result.update(run_model(name, extra, check))
+        result.update(run_model(name, extra))
     for name in MES_CASES:
         mes_extra = tuple(x for x in extra if not x.startswith(("lnN:", "jPar:")))
         result.update(run_mes(name, mes_extra))
@@ -492,7 +441,7 @@ def main() -> int:
     int
         Zero when the numbers agree and every mutation fails the comparison.
     """
-    run_one = run_all(check=True)
+    run_one = run_all()
     run_two = run_all()
     first = fingerprints(run_one)
     RECORDED.write_text(json.dumps(first, indent=0) + "\n")

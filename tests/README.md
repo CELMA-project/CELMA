@@ -26,7 +26,7 @@ runs.
   current directory.
 * [numerics](numerics) - Guards against an unintended change of the numerics:
     * `fingerprint.py` runs both models for exactly one right-hand-side
-      evaluation (explicit Euler, one step) from z-, x- and y-dependent initial
+      evaluation (`nout=0`: one evaluation, no solver step, asserted in every run) from z-, x- and y-dependent initial
       fields and compares the time derivative of every evolved field and every
       saved term, plus a few operator cases of `MES/`, with
       `fingerprint-reference.json` at relative tolerance 1e-9; it names the term
