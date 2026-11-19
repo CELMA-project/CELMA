@@ -51,6 +51,11 @@ jobs:
           docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
             python3 tests/regression/mes.py
 
+      - name: Fingerprint of the numerics, term by term
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
+            python3 tests/numerics/fingerprint.py
+
       - name: Keep the numbers of this run
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,4 +64,5 @@ jobs:
           path: |
             recorded-reference.json
             recorded-mes.json
+            recorded-fingerprint.json
           if-no-files-found: ignore
