@@ -72,8 +72,9 @@ MODELS = {
 EVOLVED = ("lnN", "momDensPar", "jPar")
 MUTATIONS = {
     "z derivative C2 instead of FFT": ("mesh:ddz:first=C2", "mesh:ddz:second=C2"),
-    "x derivative C4 instead of C2": ("mesh:ddx:first=C4",),
-    "y upwind U2 instead of U1": ("mesh:ddy:upwind=U2",),
+    # C4 and U2 need two guard cells, the inputs have one
+    "x derivative W2 instead of C2": ("mesh:ddx:first=W2",),
+    "y upwind C2 instead of U1": ("mesh:ddy:upwind=C2",),
     "outer x boundary of lnN Dirichlet": ("lnN:bndry_xout=dirichlet_o4(0.0)",),
 }
 # MES operator cases: directory, executable, input, saved variables
