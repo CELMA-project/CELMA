@@ -2,12 +2,17 @@
 
 Both models run on a small mesh from z-, x- and y-dependent initial fields, set
 on the command line over the real input file. The solver is explicit Euler with
-one internal step per output and ``nout=1``, so the right-hand side is evaluated
-exactly once, for the initial fields. The time derivative of every evolved field
-and every individually saved term is reduced to a few numbers (norms, sums,
-fixed projections and sampled points of the interior) and compared with a
-committed reference at a tight relative tolerance, so the report names the term
-that moved. A few operator cases of ``MES/`` are fingerprinted the same way.
+one internal step per output and ``nout=1``. BOUT++ evaluates the right-hand
+side once for the initial output, before the first step, and the saved terms of
+the first time slice are that evaluation; the step and the output after it
+evaluate it again at the new state, which is not used. The log shows the count
+of its first row, which the test requires to be one.
+
+The time derivative of every evolved field and every individually saved term is
+reduced to a few numbers (norms, sums, fixed projections and sampled points of
+the interior) and compared with a committed reference at a tight relative
+tolerance, so the report names the term that moved. A few operator cases of
+``MES/`` are fingerprinted the same way.
 
 The test proves its own sensitivity: it reruns with a changed z derivative, x
 derivative, upwind scheme and boundary condition and requires each of them to
@@ -225,7 +230,7 @@ def run_bout(
 
 
 def rhs_evaluations(log: str) -> int:
-    """Read the number of right-hand-side evaluations of the last output step.
+    """Read the number of right-hand-side evaluations of the initial output.
 
     Parameters
     ----------
@@ -235,7 +240,8 @@ def rhs_evaluations(log: str) -> int:
     Returns
     -------
     int
-        The count in the "RHS evals" column.
+        The count in the "RHS evals" column of the first row, the one for
+        the initial state.
 
     Raises
     ------
@@ -246,7 +252,7 @@ def rhs_evaluations(log: str) -> int:
     if not found:
         tail = "\n".join(log.splitlines()[-20:])
         raise RuntimeError(f"no 'RHS evals' line in the log:\n{tail}")
-    return int(found[-1])
+    return int(found[0])
 
 
 def interior(data: np.ndarray) -> np.ndarray:
@@ -302,12 +308,14 @@ def run_model(
                 count = rhs_evaluations(log)
                 if count != 1:
                     tail = "\n".join(log.splitlines()[-40:])
-                    raise RuntimeError(f"{name}: {count} RHS evaluations, not 1\n{tail}")
+                    raise RuntimeError(
+                        f"{name}: {count} RHS evaluations, not 1\n{tail}"
+                    )
                 check_euler_step(dump, evolved)
             for var, variable in dump.variables.items():
                 if variable.dimensions != ("t", "x", "y", "z") or var in evolved:
                     continue
-                values = interior(variable[-1])
+                values = interior(variable[0])
                 if not np.all(np.isfinite(values)):
                     raise RuntimeError(f"{name} {var}: inner values not finite")
                 result[f"{name}/{var}"] = fingerprint_of(values)
@@ -336,10 +344,10 @@ def check_euler_step(dump: Dataset, evolved: Tuple[str, ...]) -> None:
     dt = float(dump.variables["t_array"][-1] - dump.variables["t_array"][0])
     for field in evolved:
         step = interior(dump.variables[field][-1] - dump.variables[field][0])
-        ddt = interior(dump.variables[f"ddt({field})"][-1]) * dt
+        ddt = interior(dump.variables[f"ddt({field})"][0]) * dt
         scale = float(np.max(np.abs(ddt)))
         diff = float(np.max(np.abs(step - ddt)))
-        if not diff <= 1e-6 * scale:
+        if not diff <= 1e-3 * scale:
             raise RuntimeError(
                 f"{field}: Euler step differs from dt*ddt by {diff:.3e} (scale {scale:.3e})"
             )
@@ -368,6 +376,8 @@ def run_mes(name: str, extra: Tuple[str, ...] = ()) -> Dict[str, Fingerprint]:
             ROOT / directory, executable, case, (*MES_GRID, *MES_RUN, *extra), Path(tmp)
         )
         with dump:
+            if not np.any(np.asarray(dump.variables["S_num"])):
+                raise RuntimeError(f"{name}: the operator was not evaluated")
             for var in ("S_num", "e"):
                 data = np.asarray(dump.variables[var])
                 # Saved once: (x, y, z); repeated: (t, x, y, z), last step

@@ -14,7 +14,7 @@ cases that verify its operators.
 | `common/` | `BOUTExtensions/`: own operators, boundary conditions, filters, monitors, Laplace inversion, parameters | [README](common/README.md) |
 | `MES/` | Verification cases (method of manufactured solutions) | [README](MES/README.md) |
 | `derivations/` | Notebooks and scripts that derive stencils and boundary conditions | [README](derivations/README.md) |
-| `tests/` | Filter test and the regression tests CI runs | [README](tests/README.md) |
+| `tests/` | Filter test, the regression tests and the numerics guard CI runs | [README](tests/README.md) |
 | `docker/` | `Dockerfile.bout5`: the build image of CI. `Dockerfile` is old and unused | [Dockerfile.bout5](docker/Dockerfile.bout5) |
 | `.github/` | Workflows `lint.yml`, `test.yml`, `image.yml` | [workflows](.github/workflows) |
 | `.codeCleaner/` | Old helper scripts, not used by CI | [README](.codeCleaner/README.md) |
@@ -38,6 +38,8 @@ cmake --build build
 (cd tests/radialLowPass && ./radialLowPass -d data)
 python3 tests/regression/regression.py
 python3 tests/regression/mes.py
+python3 tests/numerics/fingerprint.py
+python3 -m pytest tests/numerics/test_guard.py
 pre-commit run --all-files
 ```
 
@@ -64,18 +66,42 @@ pre-commit run --all-files
 * Notebooks are committed without output (see
   [.codeCleaner/README.md](.codeCleaner/README.md)).
 
-## Where not to edit casually
+## Numerics need Michael's consent
+
+Never change any of these without Michael's explicit consent for that specific
+change:
+
+* model equations, operators, derivative schemes or stencils
+* boundary conditions, the Jacobian or the metric
+* solver or inversion settings, numeric input options
+* the `BOUT++` version (the pinned image and the compiler flags)
+* a rerecorded numerics reference
+
+Ask for it as its own question, with the numbers or the line before and after.
+Consent shows as the label `numerics-change-approved`, which Michael applies to
+the pull request; a push to the branch removes it, so it binds to the head he
+saw.
+The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),
+[tests/README.md](tests/README.md)) fails any pull request that changes
+the guarded content without it.
+It ignores formatting, comments and include order, so a formatting commit
+passes.
+Do not edit `tests/numerics/` or the guard workflow to get past it.
+
+Where the numerics live:
 
 * Model equations: [celma/](celma/celma.cxx),
   [celmaWithBoussinesqApprox/](celmaWithBoussinesqApprox/celmaWBA.cxx) and
   [common/BOUTExtensions/src/ownOperators.cxx](common/BOUTExtensions/src/ownOperators.cxx).
-  The MES cases and the regression test exist to catch changes here; run
-  both after any edit.
+  The MES cases and the tests exist to catch changes here; run them after any
+  edit.
 * `BOUT.inp` values: they set the physics of a scan and the inputs of the MES
   cases.
   `tests/regression/mes.py` reads every `BOUT.inp` under `MES/`.
-* [tests/regression](tests/regression) reference files: rerecord them only for
-  a reason you can state, in the CI image.
+  The z derivatives are FFT, as in the thesis (v1.0.0).
+* [tests/regression](tests/regression) and [tests/numerics](tests/numerics)
+  reference files: rerecord them only with consent, for a reason you can
+  state, in the CI image.
 * `derivations/`: the results are hard-coded in the C++, so changing a
   notebook does not change the simulation.
 
