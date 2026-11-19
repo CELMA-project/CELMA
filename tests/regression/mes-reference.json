@@ -4,32 +4,32 @@
   0.00017485801146210596
  ],
  "boundaries/1-yExtrapolation/gaussianWSinAndParabola": [
-  0.0,
-  0.0
+  4.9286629638656265e-09,
+  3.470048415277205e-10
  ],
  "boundaries/2-uEParSheath/gaussianWSinAndParabola": [
-  0.0,
-  0.0
+  1.4519290590640563,
+  1.4567791445369611
  ],
  "boundaries/2-uEParSheath/noYDepInProf": [
-  0.0,
-  0.0
+  1.022297651609871,
+  1.0456954310046802
  ],
  "boundaries/3-cauchyBC/gaussianWSinAndParabola": [
-  0.0,
-  0.0
+  0.004346462512622842,
+  0.006107474057439596
  ],
  "boundaries/3-cauchyBC/noXDepInFunc": [
-  0.0,
-  0.0
+  0.012750426437877585,
+  0.01725777661761512
  ],
  "boundaries/4-jParSheath/data": [
-  0.0,
-  0.0
+  0.0033005542189095127,
+  0.00016019812268935896
  ],
  "boundaries/4-jParSheath/gaussianWSinAndParabola": [
-  0.0,
-  0.0
+  0.0033005542189095127,
+  0.00016019812268935896
  ],
  "divOfScalarTimesVector/1a-divPerp/twoGaussians": [
   0.0021582731604553734,

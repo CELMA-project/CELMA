@@ -9,7 +9,9 @@ The cases save the numerical operator ``S_num`` and the error ``e = S_num - S``
 after one evaluation of ``rhs()``, but the operators leave the guard cells
 unset (zero), so there ``e = -S``. The largest error over all points was that
 source in the outermost guard cell: independent of the operator, the method and
-the resolution. The error is therefore taken over the inner points only. The
+the resolution. The error is therefore taken over the inner points only, except
+for the boundary condition cases under ``MES/boundaries``, which set the guard
+cells and are measured there. The
 script then proves it cannot go blind again: it reruns three cases with a
 changed derivative method and requires the error to move far beyond the
 tolerance.
@@ -179,7 +181,10 @@ def run_case(
             )
             return None
         with Dataset(dump) as data:
-            return float(np.max(np.abs(inner(data.variables["e"][:], mxg, myg))))
+            error = np.array(data.variables["e"][:])
+            if "boundaries" not in inp.parts:
+                error = inner(error, mxg, myg)
+            return float(np.max(np.abs(error)))
 
 
 def order(errors: List[Optional[float]]) -> str:
