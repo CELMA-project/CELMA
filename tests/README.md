@@ -37,19 +37,22 @@ runs.
       CI runs it in the image, which also records the reference
       (`recorded-fingerprint.json`).
     * `guard.py BASE HEAD` compares two commits and lists every semantic change
-      in the guarded content: C++ (any folder of the repository, any C++
-      extension) as token streams after joining continued lines
-      (formatting, comments and header guards ignored; the set of `#include`
-      lines is not), every `BOUT.inp` as a map of options (comments, spacing,
-      order and number spelling ignored; continued lines read both ways), and
-      byte for byte the references, the scripts of `tests/regression`,
-      `docker/Dockerfile.bout5`, every `CMakeLists.txt` and `.cmake`, every file
-      under `.github/workflows/` and `tests/numerics/`, and any change of the file
-      mode or a symlink on those paths. Modified, deleted or
-      added guarded content is a change (a new local header can shadow an
-      include). It exits 1 on a change.
+      in the guarded content: C++ (any folder, any C++ extension) as token
+      streams after joining continued lines, with raw string literals as one
+      token (formatting and comments ignored; `#include` lines may be reordered
+      only among lines directly after one another; a header guard is a normal
+      change), every `BOUT.inp` as a map of options (comments, spacing, order
+      and number spelling ignored; continued lines read both ways; duplicate
+      keys and lines without `=` all count), and byte for byte the references,
+      the scripts of `tests/regression`, `docker/Dockerfile.bout5`, every
+      `CMakeLists.txt` and `.cmake`, everything under `.github/` and
+      `tests/numerics/`, `.pre-commit-config.yaml`, every `pyproject.toml`,
+      `setup.cfg`, `pytest.ini`, `tox.ini` and `conftest.py`, and any change of
+      the file mode or a symlink on guarded paths. Modified, deleted or added
+      guarded content is a change (a new local header can shadow an include).
+      It exits 1 on a change.
     * `test_guard.py` proves the guard on the history: it fails on the commit
-      that moved `[ddz]` to `[mesh:ddz]`, passes on the clang-format commit and
+      that moved `[ddz]` to `[mesh:ddz]`, passes on a clang-format commit (and on the C++ of the first one) and
       fails on a synthetic boundary condition and stencil change.
       The `Lint` workflow runs it with the full history
       (`python3 -m pytest tests/numerics/test_guard.py`).

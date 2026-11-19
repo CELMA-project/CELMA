@@ -178,8 +178,8 @@ jobs:
           else
             gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&per_page=100" \
               --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
-            gh api "repos/$REPO/commits/$AFTER/pulls" \
-              --jq '[.[] | select(.merged_at != null)]' > "$RUNNER_TEMP/pulls.json"
+            gh api --paginate "repos/$REPO/commits/$AFTER/pulls?per_page=100" \
+              --jq '.[] | select(.merged_at != null)' | jq -s . > "$RUNNER_TEMP/pulls.json"
             if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE" "$AFTER" "$BRANCH"; then
               echo "The merged head and base were approved by an approver, and nothing came after."
               exit 0

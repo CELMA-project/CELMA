@@ -23,6 +23,7 @@ ENV = {
     "GIT_COMMITTER_EMAIL": "t@example.com",
 }
 FORMATTING_ONLY = "b359f167"
+FORMATTING_ONLY_2 = "4b1ad55f"
 PORT = "f812d33e"
 
 
@@ -93,12 +94,20 @@ def test_port_commit_fails_and_reports_the_ddz_change(capsys):
     assert "celma/CSDXNyScan/BOUT.inp" in capsys.readouterr().out
 
 
-def test_formatting_only_commit_passes():
-    """The clang-format commit changes whitespace and include order only."""
+def test_formatting_only_commits_pass():
+    """Whitespace, comments and include order are no change of the C++."""
     assert have(FORMATTING_ONLY), "the history is shallow: fetch with depth 0"
-    assert guard.compare(ROOT, FORMATTING_ONLY + "^", FORMATTING_ONLY) == {}
+    assert have(FORMATTING_ONLY_2), "the history is shallow: fetch with depth 0"
+    # The clang-format commit also added a hook to .pre-commit-config.yaml, which
+    # is guarded now; every C++ file in it is formatting only
+    report = guard.compare(ROOT, FORMATTING_ONLY + "^", FORMATTING_ONLY)
+    assert list(report) == [".pre-commit-config.yaml"]
+    # A commit that only reformats one C++ file passes as a whole
+    assert guard.compare(ROOT, FORMATTING_ONLY_2 + "^", FORMATTING_ONLY_2) == {}
+    args = ["--repo", str(ROOT), FORMATTING_ONLY_2 + "^", FORMATTING_ONLY_2]
+    assert guard.main(args) == 0
     assert (
-        guard.main(["--repo", str(ROOT), FORMATTING_ONLY + "^", FORMATTING_ONLY]) == 0
+        guard.main(["--repo", str(ROOT), FORMATTING_ONLY + "^", FORMATTING_ONLY]) == 1
     )
 
 
@@ -151,17 +160,6 @@ def test_harmless_edits_pass(path, edit):
     """Comments, spacing and spelling of the same value are not changes."""
     text = read_head(path)
     assert guard.compare(ROOT, "HEAD", commit_with({path: edit(text)})) == {}
-
-
-def test_header_guard_name_is_ignored_but_code_is_not():
-    """The name of the header guard may change, a statement may not."""
-    path = "common/BOUTExtensions/include/ownOperators.hxx"
-    text = read_head(path)
-    name = "COMMON_BOUTEXTENSIONS_INCLUDE_OWNOPERATORS_HXX_"
-    assert name in text
-    renamed = text.replace(name, "OTHER_GUARD_")
-    assert guard.compare(ROOT, "HEAD", commit_with({path: renamed})) == {}
-    assert guard.compare(ROOT, "HEAD", commit_with({path: text + "\nint x;\n"}))
 
 
 def test_deleted_and_added_files_in_guarded_scope_fail():
@@ -464,7 +462,7 @@ def test_line_splicing_cannot_hide_an_include_or_a_token():
     text = read_head(path)
     for hidden in ('#\\\ninclude "evil.hxx"\n', '# \\ \n include "evil.hxx"\n'):
         report = guard.compare(ROOT, "HEAD", commit_with({path: hidden + text}))
-        assert any("include added" in x for x in report[path]), hidden
+        assert report[path], hidden
     assert guard.compare_cpp("int x = 1;\n", "int x = \\\n1;\n") == []
     assert guard.compare_cpp("int x = 1;\n", "int x = \\\n2;\n")
     assert guard.compare_cpp("#define A 1\n", "#def\\\nine A 2\n")
@@ -559,3 +557,104 @@ def test_cpp_is_guarded_anywhere_and_mode_changes_trip():
     mode = guard.compare(ROOT, "HEAD", executable)
     assert mode == {path: ["file mode 100644 -> 100755"]}
     assert any("120000" in x for x in guard.compare(ROOT, "HEAD", symlink)[path])
+
+
+def test_rebase_and_merge_of_a_multi_commit_pull_request():
+    """BEFORE..AFTER spans all rebased commits; the approval is for that base."""
+    first = commit_with(
+        {
+            "celma/CSDXNyScan/BOUT.inp": read_head("celma/CSDXNyScan/BOUT.inp")
+            + "\nextra = 1\n"
+        }
+    )
+    second = commit_with({"celma/extra.cxx": "int x;\n"}, first)
+    third = commit_with({"README.md": "x\n"}, second)
+    report = guard.compare(ROOT, "HEAD", third)
+    assert set(report) == {"celma/CSDXNyScan/BOUT.inp", "celma/extra.cxx"}
+    before, after = BASE, MERGED
+    pull = {**PULLS[0], "merge_commit_sha": after}
+    assert pushed([run()], [pull], base=before, after=after)
+    # main moved between the approval and the merge: the base differs
+    assert not pushed([run()], [pull], base="e" * 40, after=after)
+    # the rebase made the last commit the merge commit, not an earlier one
+    assert not pushed([run()], [pull], base=before, after="1" * 40)
+
+
+def test_the_push_path_reads_every_page_of_associated_pull_requests():
+    """A commit with many associated pull requests is read whole."""
+    text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
+    assert 'gh api --paginate "repos/$REPO/commits/$AFTER/pulls' in text
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ".pre-commit-config.yaml",
+        "pyproject.toml",
+        "tests/sub/pyproject.toml",
+        "setup.cfg",
+        "pytest.ini",
+        "tox.ini",
+        "conftest.py",
+        "tests/regression/conftest.py",
+        ".github/dependabot.yml",
+        ".github/actions/local/action.yml",
+        ".github/CODEOWNERS",
+    ],
+)
+def test_what_lint_and_pytest_run_is_guarded(path):
+    """Hooks, tool settings, conftest files and everything under .github trip."""
+    assert guard.kind_of(path) == "raw"
+    report = guard.compare(ROOT, "HEAD", commit_with({path: "x\n"}))
+    assert list(report) == [path]  # added, or the content changed if it exists
+    assert guard.kind_of(".clang-format") is None
+
+
+def test_raw_string_literals_are_one_token():
+    """Comment signs and quotes inside R"(...)" do not start comments or strings."""
+    plain = 'const char *s = R"(")"; int k = 1;\n'
+    assert guard.compare_cpp(plain, plain.rstrip() + " // c\n") == []
+    assert guard.compare_cpp(plain, plain.replace("k = 1", "k = 2"))
+    slash = 'auto s = R"x(a // b /* c)x"; int k = 1; /* gone */\n'
+    assert guard.compare_cpp(slash, slash.replace(" /* gone */", "")) == []
+    assert guard.compare_cpp(slash, slash.replace("a //", "b //"))
+    assert guard.compare_cpp(slash, slash.replace("k = 1", "k = 2"))
+    for prefix in ("u8R", "uR", "UR", "LR"):
+        text = f'auto s = {prefix}"(a /* b)"; int k = 1; // c\n'
+        assert guard.compare_cpp(text, text.replace("k = 1", "k = 2"))
+        assert guard.compare_cpp(text, text.replace(" // c", "")) == []
+    # a multi-line literal with an include-looking line is data, not an include
+    multi = 'auto s = R"(\n#include <x>\n)";\nint k = 1;\n'
+    assert not any(t == "include" for t, _ in guard.cpp_tokens(multi))
+    assert guard.compare_cpp(multi, multi.replace("<x>", "<y>"))
+    # an identifier ending in R is not a prefix
+    assert guard.cpp_tokens('x = fooR"(a)";')[2] == ("fooR", 1)
+
+
+def test_include_blocks_sort_but_an_include_cannot_move_past_code():
+    """clang-format sorts adjacent includes; a move past a macro changes meaning."""
+    block = "#include <b>\n#include <a>\nint k;\n"
+    assert guard.compare_cpp(block, "#include <a>\n#include <b>\nint k;\n") == []
+    moved = "#include <b>\n#define X 1\n#include <a>\nint k;\n"
+    swapped = "#include <b>\n#include <a>\n#define X 1\nint k;\n"
+    assert guard.compare_cpp(moved, swapped)
+    # a blank line splits blocks, so an include moved across it is a change
+    split = "#include <a>\n\n#include <b>\n"
+    assert guard.compare_cpp(split, "#include <b>\n\n#include <a>\n")
+    assert guard.compare_cpp("int k;\n", "#include <new.hxx>\nint k;\n")
+
+
+def test_header_guards_are_not_ignored():
+    """A guard whose name collides with a defined macro switches a file off."""
+    body = "int k;\n"
+    guarded = "#ifndef A_H\n#define A_H\nint k;\n#endif\n"
+    assert guard.compare_cpp(body, guarded)
+    assert guard.compare_cpp(guarded, guarded.replace("A_H", "STRING_H"))
+    assert guard.compare_cpp(guarded, body)
+    assert guard.compare_cpp(guarded, guarded.replace("#endif", "#endif  // A_H")) == []
+
+
+def test_numbers_that_overflow_stay_text():
+    """1e400 and 1e999 are both inf as floats, so they must not compare equal."""
+    assert guard.compare_inp("n = 1e400\n", "n = 1e999\n")
+    assert guard.compare_inp("n = 1e400\n", "n = 1e400\n") == []

@@ -84,8 +84,9 @@ retarget or a reopen needs it again.
 The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),
 [tests/README.md](tests/README.md)) fails any pull request that changes
 the guarded content without it.
-It ignores formatting, comments and include order, so a formatting commit
-passes.
+It ignores formatting, comments and the order of adjacent includes, so a
+formatting commit passes. It also guards the lint hooks, tool settings and
+workflows (`.pre-commit-config.yaml`, `pyproject.toml`, `.github/`).
 Do not edit `tests/numerics/` or the guard workflow to get past it.
 
 Where the numerics live:

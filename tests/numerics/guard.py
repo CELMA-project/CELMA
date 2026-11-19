@@ -17,6 +17,7 @@ anything changed, else 0.
 
 import argparse
 import difflib
+import math
 import re
 import subprocess  # nosec
 import sys
@@ -36,7 +37,13 @@ RAW_PATTERNS = (
     re.compile(r".+\.cmake"),
     # The scripts hold the tolerances of the references
     re.compile(r"tests/regression/.+\.py"),
-    re.compile(r"\.github/workflows/.+"),
+    # Everything under .github (workflows, local actions, owners, dependabot)
+    re.compile(r"\.github/.+"),
+    # What lint and pytest run and read: a local hook, the tool settings, any
+    # conftest.py. .clang-format is not here: it only shapes whitespace
+    re.compile(r"\.pre-commit-config\.yaml"),
+    re.compile(r"(.+/)?pyproject\.toml"),
+    re.compile(r"(.+/)?(setup\.cfg|pytest\.ini|tox\.ini|conftest\.py)"),
 )
 OPERATORS = (
     "<<=",
@@ -67,7 +74,11 @@ OPERATORS = (
     ".*",
     "##",
 )
+# A C++11 raw string literal R"delim( ... )delim" with an optional encoding
+# prefix. strip_comments writes its newlines as NUL so it stays on one line.
+RAW_STRING = r'(?:u8|u|U|L)?R"(?P<delim>[^ ()\\\t\v\f\n]{0,16})\(.*?\)(?P=delim)"'
 TOKEN = re.compile(
+    RAW_STRING + "|"
     r'"(?:\\.|[^"\\])*"'
     r"|'(?:\\.|[^'\\])*'"
     r"|\d(?:[eEpP][+-]|[\w.'])*"
@@ -183,6 +194,59 @@ def is_digit_separator(text: str, i: int) -> bool:
     return start < i and text[start].isdigit()
 
 
+def raw_string_start(text: str, i: int) -> bool:
+    """Tell whether the quote at ``text[i]`` opens a C++11 raw string literal.
+
+    Parameters
+    ----------
+    text : str
+        Source code.
+    i : int
+        Position of a double quote.
+
+    Returns
+    -------
+    bool
+        True if the quote follows ``R`` with an optional ``u8``, ``u``, ``U`` or
+        ``L`` before it that does not belong to a longer identifier, and the
+        delimiter that follows is valid and closed by an opening parenthesis.
+    """
+    if i == 0 or text[i - 1] != "R":
+        return False
+    start = i - 1
+    for prefix in ("u8", "u", "U", "L"):
+        if text[max(0, start - len(prefix)) : start] == prefix:
+            start -= len(prefix)
+            break
+    if start > 0 and (text[start - 1].isalnum() or text[start - 1] == "_"):
+        return False
+    j = i + 1
+    while j < len(text) and text[j] not in " ()\\\t\v\f\n" and j - i <= 16:
+        j += 1
+    return j < len(text) and text[j] == "("
+
+
+def raw_string_end(text: str, i: int) -> int:
+    """Find the end of the raw string literal whose quote is at ``text[i]``.
+
+    Parameters
+    ----------
+    text : str
+        Source code.
+    i : int
+        Position of the opening double quote.
+
+    Returns
+    -------
+    int
+        The index after the closing quote, or the end of the text if unclosed.
+    """
+    open_paren = text.index("(", i)
+    marker = ")" + text[i + 1 : open_paren] + '"'
+    end = text.find(marker, open_paren + 1)
+    return len(text) if end < 0 else end + len(marker)
+
+
 def strip_comments(text: str) -> str:
     """Remove C++ comments.
 
@@ -205,6 +269,10 @@ def strip_comments(text: str) -> str:
         if char == "'" and is_digit_separator(text, i):
             out.append(char)
             i += 1
+        elif char == '"' and raw_string_start(text, i):
+            end = raw_string_end(text, i)
+            out.append(text[i:end].replace("\n", "\x00"))
+            i = end
         elif char in "\"'":
             j = i + 1
             while j < n and text[j] != char and text[j] != "\n":
@@ -242,12 +310,37 @@ def preprocess(text: str) -> str:
     return code.replace("%:%:", "##").replace("%:", "#")
 
 
-def cpp_tokens(text: str) -> List[Token]:
-    """Tokenise C++ without comments, whitespace, includes and header guards.
+def line_tokens(number: int, line: str) -> List[Token]:
+    """Tokenise one logical line, closing a preprocessor line with a marker.
 
-    Preprocessor lines other than ``#include`` and the header guard stay, each
-    closed by an end-of-line token, as their line structure carries meaning.
-    Line numbers are those of the spliced text.
+    Parameters
+    ----------
+    number : int
+        Line number.
+    line : str
+        The line, without comments.
+
+    Returns
+    -------
+    list
+        The tokens with their line number.
+    """
+    found = [(m.group(0), number) for m in TOKEN.finditer(line)]
+    if found and found[0][0] == "#":
+        found.append(("<eol>", number))
+    return found
+
+
+def cpp_tokens(text: str) -> List[Token]:
+    """Tokenise C++ without comments and whitespace.
+
+    Preprocessor lines stay, each closed by an end-of-line token, as their line
+    structure carries meaning. A header guard is not special: a guard added,
+    removed or renamed is a change, since a guard name that collides with a
+    macro defined earlier switches the whole file off. The one reordering that
+    passes is among ``#include`` lines directly after one another (clang-format
+    sorts such blocks), so an include moved past other code or a blank line is a
+    change. Line numbers are those of the spliced text.
 
     Parameters
     ----------
@@ -259,64 +352,23 @@ def cpp_tokens(text: str) -> List[Token]:
     list
         Tuples of the token and its line number.
     """
-    lines = list(enumerate(preprocess(text).split("\n"), 1))
-    lines = [x for x in lines if not INCLUDE.match(x[1])]
-    lines = drop_header_guard(lines)
     tokens: List[Token] = []
-    for number, line in lines:
-        found = [(m.group(0), number) for m in TOKEN.finditer(line)]
-        tokens.extend(found)
-        if found and found[0][0] == "#":
-            tokens.append(("<eol>", number))
-    return tokens
+    block: List[List[Token]] = []
 
+    def flush() -> None:
+        for item in sorted(block, key=lambda x: [t for t, _ in x]):
+            tokens.extend(item)
+        block.clear()
 
-def cpp_includes(text: str) -> List[str]:
-    """List the ``#include`` lines of a source, without order or spacing.
-
-    A new header included from a model changes what the model compiles, so the
-    set of includes is guarded, though their order is not.
-
-    Parameters
-    ----------
-    text : str
-        Source code.
-
-    Returns
-    -------
-    list
-        The sorted, whitespace-normalised include lines, without duplicates.
-    """
-    found = set()
-    for line in preprocess(text).split("\n"):
+    for number, line in enumerate(preprocess(text).split("\n"), 1):
+        found = line_tokens(number, line)
         if INCLUDE.match(line):
-            found.add(re.sub(r"\s+", "", line))
-    return sorted(found)
-
-
-def drop_header_guard(lines: List[Tuple[int, str]]) -> List[Tuple[int, str]]:
-    """Remove a header guard (``#ifndef NAME``, ``#define NAME``, ``#endif``).
-
-    Parameters
-    ----------
-    lines : list
-        Logical lines with their numbers.
-
-    Returns
-    -------
-    list
-        The lines without the guard, unchanged if there is none.
-    """
-    real = [i for i, (_, text) in enumerate(lines) if text.strip()]
-    if len(real) < 3:
-        return lines
-    first, second, last = real[0], real[1], real[-1]
-    opening = re.fullmatch(r"\s*#\s*ifndef\s+(\w+)\s*", lines[first][1])
-    defining = re.fullmatch(r"\s*#\s*define\s+(\w+)\s*", lines[second][1])
-    closing = re.fullmatch(r"\s*#\s*endif\b.*", lines[last][1])
-    if opening and defining and closing and opening.group(1) == defining.group(1):
-        return [x for i, x in enumerate(lines) if i not in (first, second, last)]
-    return lines
+            block.append(found)
+            continue
+        flush()
+        tokens.extend(found)
+    flush()
+    return tokens
 
 
 def snippet(tokens: List[Token]) -> str:
@@ -356,9 +408,6 @@ def compare_cpp(old: str, new: str) -> List[str]:
         a=[t for t, _ in a], b=[t for t, _ in b], autojunk=False
     )
     changes = []
-    old_inc, new_inc = cpp_includes(old), cpp_includes(new)
-    changes.extend(f"include removed: {x}" for x in old_inc if x not in new_inc)
-    changes.extend(f"include added: {x}" for x in new_inc if x not in old_inc)
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
             continue
@@ -421,7 +470,9 @@ def parse_inp(text: str, joined: bool = True) -> Dict[str, List[Value]]:
             continue
         key, value = (x.strip() for x in line.split("=", 1))
         last = f"{section}:{key}" if section else key
-        number = float(value) if NUMBER.fullmatch(value) else value
+        number: Value = value
+        if NUMBER.fullmatch(value) and math.isfinite(float(value)):
+            number = float(value)
         options.setdefault(last, []).append(number)
     return options
 
