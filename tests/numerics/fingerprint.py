@@ -45,7 +45,7 @@ RTOL = 1.0e-9
 NOISE_LIMIT = 1.0e-13
 # A mutation has to move the numbers this many times the tolerance
 MARGIN = 100.0
-GRID = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=16")
+GRID = ("mesh:nx=12", "mesh:ny=8", "mesh:nz=32")
 RUN = (
     "nout=1",
     "timestep=1e-10",
