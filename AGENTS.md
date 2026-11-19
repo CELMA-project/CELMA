@@ -16,7 +16,7 @@ cases that verify its operators.
 | `derivations/` | Notebooks and scripts that derive stencils and boundary conditions | [README](derivations/README.md) |
 | `tests/` | Filter test, the regression tests and the numerics guard CI runs | [README](tests/README.md) |
 | `docker/` | `Dockerfile.bout5`: the build image of CI. `Dockerfile` is old and unused | [Dockerfile.bout5](docker/Dockerfile.bout5) |
-| `.github/` | Workflows `lint.yml`, `test.yml`, `image.yml` | [workflows](.github/workflows) |
+| `.github/` | Workflows `lint.yml`, `test.yml`, `image.yml`, `numerics-guard.yml` | [workflows](.github/workflows) |
 | `.codeCleaner/` | Old helper scripts, not used by CI | [README](.codeCleaner/README.md) |
 
 Every model and case has its own `CMakeLists.txt`, listed in the root
