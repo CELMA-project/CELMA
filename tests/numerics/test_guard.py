@@ -258,15 +258,61 @@ def event(action, sender, label=approval.LABEL):
         "action": action,
         "sender": {"login": sender},
         "label": {"name": label},
-        "pull_request": {"head": {"sha": HEAD}, "base": {"sha": BASE}},
+        "pull_request": {
+            "head": {"sha": HEAD},
+            "base": {"sha": BASE, "ref": "main"},
+        },
         "statuses": [{"context": "numerics-approval", "state": "success"}],
     }
 
 
-def test_label_applied_by_the_approver_passes():
-    """Only the label event of a permitted sender approves."""
-    assert approval.pull_request_approved(event("labeled", "loeiten"), ALLOWED)
-    assert approval.pull_request_approved(event("labeled", "Loeiten"), ALLOWED)
+def live_pr(**changes):
+    """Build the pull request as the API shows it now, by default as approved."""
+    live = {
+        "state": "open",
+        "labels": [{"name": approval.LABEL}],
+        "head": {"sha": HEAD},
+        "base": {"sha": BASE, "ref": "main"},
+    }
+    live.update(changes)
+    return live
+
+
+def decided(payload, actor="loeiten", live=None):
+    """Decide a pull request run."""
+    live = live_pr() if live is None else live
+    return approval.pull_request_approved(payload, actor, live, ALLOWED)
+
+
+def test_fresh_label_by_the_approver_passes():
+    """The approver applies the label and starts the run: approved."""
+    assert decided(event("labeled", "loeiten"))
+    assert decided(event("labeled", "Loeiten"), actor="LOEITEN")
+
+
+@pytest.mark.parametrize(
+    ("actor", "live"),
+    [
+        ("loeiten", live_pr(labels=[])),  # replay after the label was removed
+        ("loeiten", live_pr(labels=[{"name": "bug"}])),
+        ("loeiten", live_pr(state="closed")),
+        ("loeiten", live_pr(head={"sha": "c" * 40})),  # replay after a push
+        ("loeiten", live_pr(base={"sha": "c" * 40, "ref": "main"})),  # base moved
+        ("loeiten", live_pr(base={"sha": BASE, "ref": "release"})),  # retargeted
+        ("loeiten", {}),  # no live data
+        (AGENT, live_pr()),  # the agent re-ran the old approval run
+        ("", live_pr()),
+    ],
+)
+def test_replay_of_the_approval_event_fails_when_the_pull_request_moved(actor, live):
+    """A re-run replays the old event, so the live pull request and actor decide."""
+    assert not decided(event("labeled", "loeiten"), actor=actor, live=live)
+
+
+def test_queued_run_fails_after_an_earlier_run_deleted_the_label():
+    """The label was dropped by an earlier run: a queued labeled run fails."""
+    dropped = live_pr(labels=[])
+    assert not decided(event("labeled", "loeiten"), live=dropped)
 
 
 @pytest.mark.parametrize(
@@ -284,7 +330,7 @@ def test_label_applied_by_the_approver_passes():
 )
 def test_every_other_event_fails_and_a_forged_status_is_not_read(payload):
     """Nothing but the approver applying the label approves."""
-    assert not approval.pull_request_approved(payload, ALLOWED)
+    assert not decided(payload)
 
 
 def run(**changes):
@@ -411,3 +457,30 @@ def test_digit_separators_do_not_open_character_literals():
     assert guard.compare_cpp("char c = L'a';\n", "char c = L'a'; // it's\n") == []
     assert guard.compare_cpp("char c = L'a';\n", "char c = L'b';\n")
     assert guard.compare_cpp("int n = 0x1'F;\n", "int n = 0x1'E;\n")
+
+
+def test_input_lines_without_equals_sign_and_duplicate_keys_count():
+    """A multi-line expression and a repeated key are compared whole."""
+    base = "[a]\nx = (1 +\n  2)\ny = 1\n"
+    assert guard.compare_inp(base, base) == []
+    assert guard.compare_inp(base, base.replace("  2)", "  3)"))  # continuation
+    assert guard.compare_inp(base, base.replace("  2)", ""))  # line removed
+    # a positional line before any option of the section
+    assert guard.compare_inp("[a]\ny = 1\n", "[a]\nstray\ny = 1\n")
+    # a duplicate key added, changed, removed: the last value no longer hides
+    assert guard.compare_inp("[a]\ny = 1\n", "[a]\ny = 1\ny = 1\n")
+    assert guard.compare_inp("[a]\ny = 1\ny = 2\n", "[a]\ny = 1\ny = 3\n")
+    assert guard.compare_inp("[a]\ny = 1\ny = 2\n", "[a]\ny = 2\n")
+    assert guard.compare_inp("[a]\ny = 9\ny = 2\n", "[a]\ny = 2\n")
+    assert guard.compare_inp("[a]\ny = 1\n", "[a]\ny = 1\n[a]\ny = 1\n")
+    assert guard.parse_inp("[a]\ny = 1\ny = 2\n") == {"a:y": [1.0, 2.0]}
+    path = "celma/CSDXNyScan/BOUT.inp"
+    text = read_head(path)
+    doubled = text.replace("first = FFT", "first = FFT\nfirst = C2", 1)
+    assert guard.compare(ROOT, "HEAD", commit_with({path: doubled}))
+
+
+def test_semicolon_is_not_a_comment_in_an_input_file():
+    """Text after a semicolon is part of the value, so it cannot hide a change."""
+    assert guard.compare_inp("y = 1\n", "y = 1 ; z = 2\n")
+    assert guard.compare_inp("y = 1 # c\n", "y = 1 # d\n") == []

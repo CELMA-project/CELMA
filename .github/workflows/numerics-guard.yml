@@ -157,8 +157,10 @@ jobs:
           fi
           TRUSTED_DIR=$RUNNER_TEMP/trusted
           if [ "$EVENT" = pull_request_target ]; then
-            if python3 -I "$TRUSTED_DIR/approval.py" pr "$GITHUB_EVENT_PATH"; then
-              echo "Approved: the label was applied by an approver to this head and base."
+            # A re-run replays the old event: judge the pull request as it is now
+            gh api "repos/$REPO/pulls/$PR" > "$RUNNER_TEMP/live.json"
+            if python3 -I "$TRUSTED_DIR/approval.py" pr "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/live.json"; then
+              echo "Approved: an approver applied the label, the label, head and base still hold."
               exit 0
             fi
             # Not the approval event: the approval, if any, no longer holds. Only

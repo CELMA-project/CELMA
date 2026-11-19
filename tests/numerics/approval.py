@@ -5,8 +5,10 @@ pull request had at that moment, and the pull request author cannot forge that:
 
 * A pull request run of ``numerics-guard.yml`` may pass a numerics change only
   if its event is the label ``numerics-change-approved`` being applied
-  (``labeled``) by a sender in the allowlist. That one run approves exactly the
-  head and base its event carries. Every other event (opened, synchronize,
+  (``labeled``) by a sender in the allowlist, the run is started (or re-run) by
+  someone in the allowlist, and the pull request as it is NOW (the live API) is
+  open, still has the label and still has the head and base of the event, since
+  a re-run replays the old event. That run approves exactly that head and base. Every other event (opened, synchronize,
   reopened, edited, unlabeled, another label, a sender outside the allowlist)
   fails, so a push, a retarget or a reopen needs a new application of the label.
 * After the merge, a push to ``main`` passes only if the LATEST
@@ -57,26 +59,54 @@ def permitted(login: str, allowlist: List[str]) -> bool:
     return bool(login) and login.lower() in [x.lower() for x in allowlist]
 
 
-def pull_request_approved(payload: Dict[str, Any], allowlist: List[str]) -> bool:
-    """Decide a pull request run from its event payload.
+def pull_request_approved(
+    payload: Dict[str, Any],
+    triggering_actor: str,
+    live: Dict[str, Any],
+    allowlist: List[str],
+) -> bool:
+    """Decide a pull request run from its event, its actor and the live pull request.
+
+    A re-run replays the original event payload, so the payload alone proves
+    nothing about now: the run must also be started by a permitted user, and the
+    pull request as it is now must still be open, carry the label and have the
+    head and base the event approved.
 
     Parameters
     ----------
     payload : dict
         The event payload (``github.event``) of a ``pull_request_target`` run.
+    triggering_actor : str
+        Who started this run or re-run (``GITHUB_TRIGGERING_ACTOR``).
+    live : dict
+        The pull request now (``GET /repos/R/pulls/N``).
     allowlist : list
         Logins that may approve.
 
     Returns
     -------
     bool
-        True only for the label being applied by a permitted sender. The
-        approval is for the head and base of this very payload.
+        True only for the label being applied by a permitted sender, in a run
+        started by a permitted user, while the pull request is still open with
+        the label and with the head and base of the event.
     """
+    event_pr = payload.get("pull_request") or {}
+    live_labels = [x.get("name") for x in live.get("labels") or []]
+    live_head = (live.get("head") or {}).get("sha")
+    live_base = live.get("base") or {}
+    event_base = event_pr.get("base") or {}
     return (
         payload.get("action") == "labeled"
         and (payload.get("label") or {}).get("name") == LABEL
         and permitted((payload.get("sender") or {}).get("login", ""), allowlist)
+        and permitted(triggering_actor, allowlist)
+        and live.get("state") == "open"
+        and LABEL in live_labels
+        and bool(live_head)
+        and live_head == (event_pr.get("head") or {}).get("sha")
+        and bool(live_base.get("sha"))
+        and live_base.get("sha") == event_base.get("sha")
+        and live_base.get("ref") == event_base.get("ref")
     )
 
 
@@ -188,7 +218,8 @@ def main(argv: List[str]) -> int:
     Parameters
     ----------
     argv : list
-        ``pr EVENT_JSON`` or ``push RUNS_JSON PULLS_JSON BASE_SHA``; the allowlist is
+        ``pr EVENT_JSON LIVE_PR_JSON`` (the triggering actor is in
+        ``GITHUB_TRIGGERING_ACTOR``) or ``push RUNS_JSON PULLS_JSON BASE_SHA``; the allowlist is
         in the environment variable ``ALLOWED_APPROVERS``, comma separated.
 
     Returns
@@ -200,7 +231,10 @@ def main(argv: List[str]) -> int:
     with open(argv[1], encoding="utf-8") as handle:
         first = json.load(handle)
     if argv[0] == "pr":
-        approved = pull_request_approved(first, allowlist)
+        with open(argv[2], encoding="utf-8") as handle:
+            live = json.load(handle)
+        actor = os.environ.get("GITHUB_TRIGGERING_ACTOR", "")
+        approved = pull_request_approved(first, actor, live, allowlist)
     else:
         with open(argv[2], encoding="utf-8") as handle:
             approved = push_approved(first, json.load(handle), allowlist, argv[3])

@@ -60,7 +60,9 @@ runs.
   commit.
   Nothing is stored. A numerics change passes only in the run for the event
   "Michael applied the label `numerics-change-approved`" (GitHub sets the
-  sender), which approves the head and base that event carries. Every other
+  sender), which approves the head and base that event carries, provided the run
+  was started by `loeiten` and the live pull request is still open, labelled and
+  at that head and base (a re-run replays the old event). Every other
   event with a change (push, reopen, retarget, another label or sender) fails
   and drops the label. A push to `main` passes only if the latest
   `pull_request_target` run for the merged pull request is a successful one of

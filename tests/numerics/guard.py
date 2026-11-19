@@ -376,11 +376,18 @@ def compare_cpp(old: str, new: str) -> List[str]:
     return changes
 
 
-def parse_inp(text: str, joined: bool = True) -> Dict[str, Union[float, str]]:
-    """Parse a BOUT.inp into a map of ``section:key`` to value.
+Value = Union[float, str]
+
+
+def parse_inp(text: str, joined: bool = True) -> Dict[str, List[Value]]:
+    """Parse a BOUT.inp into a map of ``section:key`` to its values.
 
     Comments, spacing and the order of keys are dropped, and a value that
-    reads as a number is a float, so ``1.0`` and ``1e0`` are equal.
+    reads as a number is a float, so ``1.0`` and ``1e0`` are equal. Nothing is
+    dropped silently: a key given twice keeps every value in order, and a line
+    without ``=`` that is no section header continues the value of the option
+    before it (or, with none before it in the section, is kept as a positional
+    entry), so a multi-line expression is compared whole.
 
     Parameters
     ----------
@@ -393,30 +400,39 @@ def parse_inp(text: str, joined: bool = True) -> Dict[str, Union[float, str]]:
     Returns
     -------
     dict
-        Option name to value.
+        Option name to the list of its values, in order of appearance.
     """
-    options: Dict[str, Union[float, str]] = {}
+    options: Dict[str, List[Value]] = {}
     section = ""
+    last = ""
     for raw in (splice(text) if joined else text).split("\n"):
         line = strip_inp_comment(raw).strip()
         if not line:
             continue
         if line.startswith("[") and line.endswith("]"):
             section = line[1:-1].strip()
+            last = ""
             continue
         if "=" not in line:
+            if last:
+                options[last][-1] = f"{options[last][-1]} {line}"
+            else:
+                options.setdefault(f"{section}:<positional>", []).append(line)
             continue
         key, value = (x.strip() for x in line.split("=", 1))
-        name = f"{section}:{key}" if section else key
+        last = f"{section}:{key}" if section else key
         try:
-            options[name] = float(value)
+            options.setdefault(last, []).append(float(value))
         except ValueError:
-            options[name] = value
+            options.setdefault(last, []).append(value)
     return options
 
 
 def strip_inp_comment(line: str) -> str:
-    r"""Remove a ``#`` or ``;`` comment that is not inside quotes.
+    r"""Remove a ``#`` comment that is not inside quotes.
+
+    A ``;`` is not taken as a comment start: if a reader does, the text after it
+    shows as a changed value, which is the safe way round.
 
     A backslash inside quotes escapes the next character, so ``\"`` does not
     end the string.
@@ -442,25 +458,27 @@ def strip_inp_comment(line: str) -> str:
             quote = "" if char == quote else quote
         elif char in "\"'":
             quote = char
-        elif char in "#;":
+        elif char == "#":
             return line[:i]
     return line
 
 
-def show(value: Optional[Union[float, str]]) -> str:
-    """Format an option value for a report line.
+def show(value: Optional[List[Value]]) -> str:
+    """Format the values of an option for a report line.
 
     Parameters
     ----------
-    value : float or str or None
-        The value, ``None`` for an absent option.
+    value : list or None
+        The values, ``None`` for an absent option.
 
     Returns
     -------
     str
         Text for the report.
     """
-    return "(absent)" if value is None else str(value)
+    if value is None:
+        return "(absent)"
+    return str(value[0]) if len(value) == 1 else "[" + ", ".join(map(str, value)) + "]"
 
 
 def compare_inp(old: str, new: str) -> List[str]:
