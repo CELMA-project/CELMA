@@ -6,11 +6,14 @@
  */
 
 #include "divPerp.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int DivPerp::init(bool restarting) {
   TRACE("Halt in DivPerp::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -33,7 +36,7 @@ int DivPerp::init(bool restarting) {
   f.covariant = false;
 
   // The source
-  S = FieldFactory::get()->create3D("S:Solution", Options::getRoot(), mesh,
+  S = FieldFactory::get()->create3D("S:solution", Options::getRoot(), mesh,
                                     CELL_CENTRE, 0);
   // ************************************************************************
 

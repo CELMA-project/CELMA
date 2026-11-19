@@ -6,11 +6,14 @@
  */
 
 #include "JTimesDivSource.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int JTimesDivSource::init(bool restarting) {
   TRACE("Halt in JTimesDivSource::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -73,7 +76,7 @@ int JTimesDivSource::rhs(BoutReal t) {
   TRACE("JTimesDivSource::rhs");
 
   // Calculate
-  S_num = mesh->coordinates()->J * ownOp->div_f_GradPerp_g(S_n, phi);
+  S_num = mesh->getCoordinates()->J * ownOp->div_f_GradPerp_g(S_n, phi);
 
   // Error in phi
   e = S_num - S;

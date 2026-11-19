@@ -6,11 +6,14 @@
  */
 
 #include "JTimesDivPerp.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int JTimesDivPerp::init(bool restarting) {
   TRACE("Halt in JTimesDivPerp::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -33,7 +36,7 @@ int JTimesDivPerp::init(bool restarting) {
   f.covariant = false;
 
   // The source
-  S = FieldFactory::get()->create3D("S:Solution", Options::getRoot(), mesh,
+  S = FieldFactory::get()->create3D("S:solution", Options::getRoot(), mesh,
                                     CELL_CENTRE, 0);
   // ************************************************************************
 
@@ -76,7 +79,7 @@ int JTimesDivPerp::rhs(BoutReal t) {
   TRACE("JTimesDivPerp::rhs");
 
   // Calculate
-  S_num = mesh->coordinates()->J * Div(f);
+  S_num = mesh->getCoordinates()->J * Div(f);
 
   // Error in phi
   e = S_num - S;

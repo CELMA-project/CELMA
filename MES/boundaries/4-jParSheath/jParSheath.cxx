@@ -6,12 +6,15 @@
  */
 
 #include "jParSheath.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 #include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
 int JParSheath::init(bool restarting) {
   TRACE("Halt in JParSheath::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

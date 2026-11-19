@@ -6,6 +6,7 @@
  */
 
 #include "celma.hxx"
+#include "../common/BOUTExtensions/include/signedJacobian.hxx"
 #include <map>
 #include <string>
 #include <vector>
@@ -14,6 +15,8 @@
 // ############################################################################
 int Celma::init(bool restarting) {
   TRACE("Halt in Celma::init");
+
+  restoreSignedJacobian();
 
   // Not used in the init
   (void)restarting;
@@ -450,15 +453,12 @@ void Celma::printPointsPerRhoS() {
 void Celma::setAndSaveSource() {
   TRACE("Halt in Celma::setAndSaveSource");
 
-  BoutReal radialWidth, radialCentre, radialSteepness;
-  BoutReal parallelWidth, parallelCentre, parallelSteepness;
-
   // Get the source constants, save them and create the source
   // ************************************************************************
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
 
-  Options *thesource = options->getSection("thesource");
+  Options *thesource = options->getSection("theSource");
   thesource->get("radialWidth", radialWidth, 0.0);
   thesource->get("radialCentre", radialCentre, 0.0);
   thesource->get("radialSteepness", radialSteepness, 0.0);
@@ -549,7 +549,7 @@ void Celma::setAndSaveViscosities() {
   }
   if (!constViscHyper) {
     // Azimuthal hyperviscosities
-    artHyperAzVortD *= SQ(SQ(coord->dz));
+    artHyperAzVortD *= SQ(SQ(getUniform(coord->dz)));
   }
 
   // Print and store the variables

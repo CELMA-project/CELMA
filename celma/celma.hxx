@@ -138,6 +138,9 @@ private:
   BoutReal nuEI, nuEN, nuIN; // Electron, ion, and neutral collision freqs
   BoutReal mu, Lambda;       // Mass ratio and Lambda
   BoutReal SNorm;
+  // Source shape constants (members: SAVE_ONCE keeps a pointer to them)
+  BoutReal radialWidth, radialCentre, radialSteepness;
+  BoutReal parallelWidth, parallelCentre, parallelSteepness;
   BoutReal beta;
   BoutReal omCI, rhoS;
   // *****************************************************************************

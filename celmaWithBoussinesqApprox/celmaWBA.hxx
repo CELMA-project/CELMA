@@ -16,6 +16,7 @@
 #include <float.h>            // Includes DBL_EPSILON
 #include <invert_laplace.hxx> // Gives invert laplace option
 #include <map>                // Gives std::map
+#include <memory>
 #include <string>
 #include <vecops.hxx> // Gives the vec diff options
 // Gives own boundaries (doing so by setting ghost points)
@@ -149,9 +150,12 @@ private:
   std::string ownOpType; // Type of own operators
   BRACKET_METHOD bm;     // The bracket method
   OwnBCs ownBC;          // Class containing methods which sets the ghost points
-  Laplacian *phiSolver;  // Solver object for the FFT solver
-  OwnFilters *ownFilter; // Pointer to the chosen filter class
-  OwnMonitors ownMon;    // Own monitors
+  // Source shape constants (members: SAVE_ONCE keeps a pointer to them)
+  BoutReal radialWidth, radialCentre, radialSteepness;
+  BoutReal parallelWidth, parallelCentre, parallelSteepness;
+  std::unique_ptr<Laplacian> phiSolver; // Solver object for the FFT solver
+  OwnFilters *ownFilter;                // Pointer to the chosen filter class
+  OwnMonitors ownMon;                   // Own monitors
   int outputMonitor(BoutReal simtime, int iter,
                     int NOUT); // Monitors every output
   // *****************************************************************************

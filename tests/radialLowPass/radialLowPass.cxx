@@ -6,11 +6,14 @@
  */
 
 #include "radialLowPass.hxx"
+#include "../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int RadialLowPass::init(bool restarting) {
   TRACE("Halt in RadialLowPass::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -44,7 +47,8 @@ int RadialLowPass::init(bool restarting) {
       for (int yInd = 0; yInd < mesh->LocalNy; yInd++) {
         for (int zInd = 0; zInd < mesh->LocalNz; zInd++) {
           unfiltered(xInd, yInd, zInd) +=
-              cos((TWOPI * mode / TWOPI) * zInd * (mesh->coordinates()->dz));
+              cos((TWOPI * mode / TWOPI) * zInd *
+                  (mesh->getCoordinates()->dz(xInd, yInd)));
         }
       }
     }

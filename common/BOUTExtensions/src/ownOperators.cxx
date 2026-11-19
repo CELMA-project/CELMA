@@ -2,9 +2,10 @@
 #define __OWNOPERATORS_CXX__
 
 #include "../include/ownOperators.hxx"
-#include <fft.hxx>           // Includes the FFT
-#include <interpolation.hxx> // Includes the interpolation
+#include <fft.hxx>              // Includes the FFT
+#include <interpolation_xz.hxx> // Includes the interpolation
 #include <string>
+using bout::globals::mesh;
 
 // OwnOperators
 

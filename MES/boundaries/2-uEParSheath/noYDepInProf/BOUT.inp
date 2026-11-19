@@ -8,9 +8,7 @@
 # Root options
 ###############################################################################
 nout = 0            # Number of output timesteps
-timestep = 1e-3     # Time between outputs
-
-dump_format="nc"   # Write NetCDF format files
+timestep = 0.001     # Time between outputs
 
 # Setting the z coordinate
 ZMIN = 0.0
@@ -40,15 +38,36 @@ dx = geom:Lx/(nx-2*MXG)
 dy = geom:Ly/(ny)
 # The metrics
 g33 = 1/(geom:xl^2)
-J = geom:xl
+J = abs(geom:xl) # BOUT++ 5 demands J > 0; the signed value is restored in init()
 # Puts the boundaries half a step outside the last gridpoints
-symmetricGlobalY=true
-symmetricGlobalX=true
+symmetricGlobalY = true
+symmetricGlobalX = true
 # Position of the separatrix
 # Points 0 <= x < ixseps1 are inside separatrix, ixseps1 <= x < ngx outside
 # --------Non-periodic----------
 ixseps1 = -1
 ixseps2 = -1
+###############################################################################
+
+
+# Methods options
+###############################################################################
+# Methods used for the radial (x) derivative terms
+[mesh:ddx]
+first = C2 # d/dx (f)
+second = C2 # d^2/dx^2 (f)
+upwind = U1 # u*d/dx (f)
+
+#Methods used for the axial (y) derivative terms
+[mesh:ddy]
+first = C2 # d/dy (f)
+second = C2 # d^2/dy^2 (f)
+upwind = U1 # u*d/dy (f)
+
+#Methods used for the azimuthal (z) derivative terms
+[mesh:ddz]
+first = C2 # d/dz (f)
+second = C2 # d^2/dz^2 (f)
 # ------------------------------
 ###############################################################################
 
@@ -64,32 +83,8 @@ type = euler
 ###############################################################################
 
 
-# Methods options
-###############################################################################
-# Methods used for the radial (x) derivative terms
-[ddx]
-first  = C2 # d/dx (f)
-second = C2 # d^2/dx^2 (f)
-upwind = U1 # u*d/dx (f)
-
-#Methods used for the axial (y) derivative terms
-[ddy]
-first  = C2 # d/dy (f)
-second = C2 # d^2/dy^2 (f)
-upwind = U1 # u*d/dy (f)
-
-#Methods used for the azimuthal (z) derivative terms
-[ddz]
-first  = FFT # d/dz (f)
-second = FTT # d^2/dz^2 (f)
-###############################################################################
-
-
 # Specifying the output
-###############################################################################
-[output]
-floats = false # floats = false => output in double
-###############################################################################
+##############################################################################################################################################################
 
 
 # Switches
@@ -115,7 +110,7 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 # =============================================================================
 [cst]
 # Hydrogren values for mu and Lambda
-mu     = 1836.36
+mu = 1836.36
 Lambda = log(sqrt(mu/(2.0*pi)))
 # Referenrence potential
 phiRef = 3.5
@@ -133,6 +128,3 @@ function = 0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:
 # *****************************************************************************
 [phi]
 function = sin(sqrt(2)*pi*(geom:xl + y)/60)
-# *****************************************************************************
-# =============================================================================
-##############################################################################

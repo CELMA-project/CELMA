@@ -1,0 +1,38 @@
+name: Image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docker/Dockerfile.bout5
+      - .github/workflows/image.yml
+  workflow_dispatch:
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Log in to the GitHub registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.bout5
+          push: true
+          tags: ghcr.io/celma-project/celma-env:bout-5.2.0
+
+      - name: Show the digest to pin
+        run: echo "ghcr.io/celma-project/celma-env@${{ steps.push.outputs.digest }}" | tee -a "$GITHUB_STEP_SUMMARY"

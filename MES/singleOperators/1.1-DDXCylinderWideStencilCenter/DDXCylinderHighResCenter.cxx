@@ -6,6 +6,7 @@
  */
 
 #include "DDXCylinderHighResCenter.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 Field3D DDXCylHighResCenter(Field3D const &f);
 
@@ -13,6 +14,8 @@ Field3D DDXCylHighResCenter(Field3D const &f);
 // ############################################################################
 int DDXCylinderHighResCenter::init(bool restarting) {
   TRACE("Halt in DDXCylinderHighResCenter::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -114,7 +117,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 1, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 2, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 3, yInd, zInd)) /
-            mesh->coordinates()->dx(xInd, yInd);
+            mesh->getCoordinates()->dx(xInd, yInd);
         // Second point
         // Use a seven point stencil
         result(xInd + 1, yInd, zInd) =
@@ -127,7 +130,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 2, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 3, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 4, yInd, zInd)) /
-            mesh->coordinates()->dx(xInd + 1, yInd);
+            mesh->getCoordinates()->dx(xInd + 1, yInd);
       }
     }
     // For all z indices corresponding to a theta value including and above
@@ -147,7 +150,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 1, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 2, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 3, yInd, zInd)) /
-            mesh->coordinates()->dx(xInd, yInd);
+            mesh->getCoordinates()->dx(xInd, yInd);
         // Second point
         // Use a seven point stencil
         result(xInd + 1, yInd, zInd) =
@@ -160,7 +163,7 @@ Field3D DDXCylHighResCenter(Field3D const &f) {
                 (3.0 / 4.0) * f(xInd + 2, yInd, zInd) -
                 (3.0 / 20.0) * f(xInd + 3, yInd, zInd) +
                 (1.0 / 60.0) * f(xInd + 4, yInd, zInd)) /
-            mesh->coordinates()->dx(xInd + 1, yInd);
+            mesh->getCoordinates()->dx(xInd + 1, yInd);
       }
     }
   }

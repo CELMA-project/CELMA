@@ -6,11 +6,14 @@
  */
 
 #include "DDXOverJCylinder.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int DDXOverJCylinder::init(bool restarting) {
   TRACE("Halt in DDXOverJCylinder::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
@@ -63,7 +66,7 @@ int DDXOverJCylinder::rhs(BoutReal t) {
   TRACE("DDXOverJCylinder::rhs");
 
   // Calculate
-  S_num = (1 / mesh->coordinates()->J) * DDX(f);
+  S_num = (1 / mesh->getCoordinates()->J) * DDX(f);
 
   // Error in S
   e = S_num - S;

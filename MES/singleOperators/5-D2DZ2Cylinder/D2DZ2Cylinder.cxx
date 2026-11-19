@@ -6,11 +6,14 @@
  */
 
 #include "D2DZ2Cylinder.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int D2DZ2Cylinder::init(bool restarting) {
   TRACE("Halt in D2DZ2Cylinder::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

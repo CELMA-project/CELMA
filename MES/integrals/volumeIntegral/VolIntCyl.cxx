@@ -6,11 +6,14 @@
  */
 
 #include "VolIntCyl.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int VolIntCyl::init(bool restarting) {
   TRACE("Halt in VolIntCyl::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

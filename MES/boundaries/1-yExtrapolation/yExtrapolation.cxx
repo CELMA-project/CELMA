@@ -6,12 +6,15 @@
  */
 
 #include "yExtrapolation.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 #include <algorithm>
 
 // Initialization of the physics
 // ############################################################################
 int YExtrapolation::init(bool restarting) {
   TRACE("Halt in YExtrapolation::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

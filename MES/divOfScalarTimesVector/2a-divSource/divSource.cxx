@@ -6,11 +6,14 @@
  */
 
 #include "divSource.hxx"
+#include "../../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int DivSource::init(bool restarting) {
   TRACE("Halt in DivSource::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

@@ -2,6 +2,7 @@
 #define __HELPERS_CXX__
 
 #include "../include/helpers.hxx"
+using bout::globals::mesh;
 
 /*!
  * Returns the poloidal average of a field
@@ -80,7 +81,7 @@ BoutReal VolumeIntegral::volumeIntegral(Field3D const &f) {
       for (zInd = 0; zInd < mesh->LocalNz; zInd++) {
         localResult += f(xInd, yInd, zInd) * coord->J(xInd, yInd) *
                        coord->dx(xInd, yInd) * coord->dy(xInd, yInd) *
-                       coord->dz;
+                       coord->dz(xInd, yInd);
       }
     }
   }

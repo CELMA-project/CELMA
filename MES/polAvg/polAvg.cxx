@@ -6,11 +6,14 @@
  */
 
 #include "polAvg.hxx"
+#include "../../common/BOUTExtensions/include/signedJacobian.hxx"
 
 // Initialization of the physics
 // ############################################################################
 int PolAvgTest::init(bool restarting) {
   TRACE("Halt in PolAvgTest::init");
+
+  restoreSignedJacobian();
 
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();

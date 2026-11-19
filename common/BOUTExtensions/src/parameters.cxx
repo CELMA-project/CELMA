@@ -3,6 +3,7 @@
 
 #include "../include/parameters.hxx"
 #include <string>
+using bout::globals::mesh;
 
 // FIXME: This constructor is long. Should be refactored!
 /*!
