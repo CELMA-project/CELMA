@@ -118,8 +118,10 @@ jobs:
           for number in $numbers; do
             labelled=$(gh api "repos/$REPO/issues/$number/labels" \
               --jq "[.[] | select(.name == \"$LABEL\")] | length")
-            actor=$(gh api --paginate --slurp "repos/$REPO/issues/$number/events" \
-              --jq "add | [.[] | select(.event == \"labeled\" and .label.name == \"$LABEL\")] | last | .actor.login // \"\"")
+            # Events come oldest first, so the last line is the latest application
+            actor=$(gh api --paginate "repos/$REPO/issues/$number/events" \
+              --jq ".[] | select(.event == \"labeled\" and .label.name == \"$LABEL\") | .actor.login" \
+              | tail -n 1)
             echo "Pull request $number: label present: $labelled, last applied by: '$actor'"
             if [ "$labelled" != 0 ] && [ -n "$actor" ]; then
               for allowed in ${ALLOWED_APPROVERS//,/ }; do
