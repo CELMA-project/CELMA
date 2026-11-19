@@ -86,8 +86,7 @@ The tests, as [test.yml](.github/workflows/test.yml) runs them, after the
 build:
 
 ```bash
-cd tests/radialLowPass && ./radialLowPass -d data   # filter test
-cd ../..
+(cd tests/radialLowPass && ./radialLowPass -d data)  # filter test
 python3 tests/regression/regression.py              # both models
 python3 tests/regression/mes.py                     # every MES case
 ```
