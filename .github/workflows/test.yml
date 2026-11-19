@@ -56,6 +56,11 @@ jobs:
           docker run --rm -v "$PWD:/work" -w /work "$IMAGE" \
             python3 tests/numerics/fingerprint.py
 
+      - name: Probe
+        if: always()
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work "$IMAGE" python3 tests/regression/probe_mes.py
+
       - name: Keep the numbers of this run
         if: always()
         uses: actions/upload-artifact@v4
