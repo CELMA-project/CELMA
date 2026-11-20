@@ -1,0 +1,189 @@
+name: Numerics guard
+
+# Fails a pull request that changes the numerics (equations, operators,
+# stencils, boundary conditions, inputs, solver and inversion settings, the
+# BOUT++ image, compiler flags, the references, every workflow or this guard)
+# unless an approver (ALLOWED_APPROVERS) approved that head against that base.
+#
+# Nothing is stored. The only run that passes a numerics change is the run for
+# the event "label numerics-change-approved applied" whose sender is in
+# ALLOWED_APPROVERS: GitHub sets the sender, and the event carries the head and
+# base it approves. Every other event with a numerics change (opened,
+# synchronize, reopened, edited, unlabeled, another label, another sender) fails
+# and drops the approval label, so a push, a retarget or a reopen needs a new
+# application. The decision is tests/numerics/approval.py, tested in Lint.
+#
+# After the merge, a push to main passes only if the runs API holds a
+# successful pull_request_target run of this workflow for the merged pull
+# request's final head, started and re-run by someone in ALLOWED_APPROVERS,
+# named (run-name) as the approval label event. A copy of this workflow on a
+# pull request branch cannot satisfy that: pull_request_target always runs the
+# workflow of the base branch, so such a copy only makes runs with the event
+# pull_request, push or workflow_dispatch, with the agent as actor.
+#
+# The job runs on `pull_request_target`, so it has a token that can write
+# labels. It therefore never checks out, builds or runs anything of the pull
+# request: it checks out the base branch and fetches the head commit as git
+# objects only, and the BASE copies of the scripts in tests/numerics, extracted
+# from git and run with python -I, read both commits
+# from the object store.
+
+run-name: >-
+  numerics-guard event=${{ github.event_name }} action=${{ github.event.action }}
+  pr=${{ github.event.pull_request.number }}
+  head=${{ github.event.pull_request.head.sha || github.event.after }}
+  base=${{ github.event.pull_request.base.sha }}
+  approval=${{ github.event.label.name == 'numerics-change-approved' }}
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+  push:
+    branches: [main]
+
+permissions: {}
+
+# One guard run per pull request at a time, none cancelled: a run for a later
+# event (a push after the label) must not finish before, and be overtaken by,
+# a run for an earlier one. Pushes to main queue on their own group.
+concurrency:
+  group: numerics-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  numerics-guard:
+    name: numerics-guard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      # Labels on a pull request are written through the issues API, but
+      # GitHub gates that on pull-requests: write
+      pull-requests: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      LABEL: numerics-change-approved
+      ALLOWED_APPROVERS: loeiten
+
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the head of the pull request as data
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          git cat-file -e "$HEAD_SHA^{commit}"
+
+      - name: Compare the numerics
+        id: guard
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          set -u
+          # Every script of this job comes out of the git object store of the
+          # BASE commit (the base branch, or the commit before the push) into a
+          # directory of its own and runs with python -I: nothing is run from the
+          # checked-out tree, which on a push holds the pushed commit.
+          if [ "$EVENT" = pull_request_target ]; then
+            TRUSTED=origin/$BASE_REF
+            BASE=$(git merge-base "$TRUSTED" "$HEAD_SHA")
+            HEAD=$HEAD_SHA
+          else
+            HEAD=$AFTER
+            if [ "$BEFORE" = 0000000000000000000000000000000000000000 ]; then
+              BASE=$(git rev-parse "$AFTER^1" 2>/dev/null || true)
+            else
+              BASE=$BEFORE
+            fi
+            if [ -z "$BASE" ]; then
+              echo "The push has no earlier commit: nothing to compare."
+              echo "status=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+              echo "::error::The earlier commit $BASE is not in the history (a forced push?)."
+              exit 1
+            fi
+            TRUSTED=$BASE
+            # The commit before the push has no guard yet: nothing to compare
+            if ! git cat-file -e "$TRUSTED:tests/numerics/guard.py" 2>/dev/null; then
+              echo "The earlier commit has no guard: nothing to compare."
+              echo "status=0" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          mkdir "$RUNNER_TEMP/trusted"
+          for script in guard.py approval.py; do
+            git show "$TRUSTED:tests/numerics/$script" > "$RUNNER_TEMP/trusted/$script"
+          done
+          echo "Comparing $BASE..$HEAD"
+          set +e
+          python3 -I "$RUNNER_TEMP/trusted/guard.py" "$BASE" "$HEAD" > "$RUNNER_TEMP/report.txt" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/report.txt"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          {
+            echo '```'
+            cat "$RUNNER_TEMP/report.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require the approval if the numerics changed
+        env:
+          STATUS: ${{ steps.guard.outputs.status }}
+          EVENT: ${{ github.event_name }}
+          PR: ${{ github.event.pull_request.number }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -eu
+          if [ "$STATUS" = 0 ]; then
+            echo "No change of the numerics."
+            exit 0
+          fi
+          TRUSTED_DIR=$RUNNER_TEMP/trusted
+          if [ "$EVENT" = pull_request_target ]; then
+            # A re-run replays the old event: judge the pull request as it is now
+            gh api "repos/$REPO/pulls/$PR" > "$RUNNER_TEMP/live.json"
+            if python3 -I "$TRUSTED_DIR/approval.py" pr "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/live.json"; then
+              echo "Approved: an approver applied the label, the label, head and base still hold."
+              exit 0
+            fi
+            # Not the approval event: the approval, if any, no longer holds. Only
+            # the label being absent (404) is fine; any other failure fails the job.
+            if ! out=$(gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL" 2>&1); then
+              case "$out" in
+                *"Label does not exist"* | *"Not Found"* | *"HTTP 404"*) echo "No label to drop." ;;
+                *)
+                  echo "::error::Could not drop the label: $out"
+                  exit 1
+                  ;;
+              esac
+            fi
+          else
+            gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&per_page=100" \
+              --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
+            gh api --paginate "repos/$REPO/commits/$AFTER/pulls?per_page=100" \
+              --jq '.[] | select(.merged_at != null)' | jq -s . > "$RUNNER_TEMP/pulls.json"
+            if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE" "$AFTER" "$BRANCH"; then
+              echo "The merged head and base were approved by an approver, and nothing came after."
+              exit 0
+            fi
+          fi
+          echo "::error::The numerics changed. Consent is an approver applying the label $LABEL to this head and base; any later push, retarget, reopen or other event needs it again."
+          exit 1
