@@ -14,7 +14,7 @@ import scipy.constants as cst
 
 
 # {{{crossSecArCELowEn
-def crossSecArCELowEn(TiEV):
+def crossSecArCELowEn(TiEV: float):
     # {{{docstring
     """
     Calculates the cross section for charge exchange in Argon for low
@@ -42,7 +42,7 @@ def crossSecArCELowEn(TiEV):
 
 
 # {{{nuINCELowEn
-def nuINCELowEn(nn, Ti):
+def nuINCELowEn(nn: float, Ti: float):
     # {{{docstring
     """
     Calculated the charge exchange collision frequency for Ar at low
@@ -78,7 +78,7 @@ def nuINCELowEn(nn, Ti):
 
 
 # {{{nuINTotLowEn
-def nuINTotLowEn(nn, Ti):
+def nuINTotLowEn(nn: float, Ti: float):
     # {{{docstring
     """
     Calculates the total ion-neutral collision frequencies for Ar at low

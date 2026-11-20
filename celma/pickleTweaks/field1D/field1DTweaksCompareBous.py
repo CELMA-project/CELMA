@@ -8,6 +8,21 @@ import os
 import pickle
 import sys
 from subprocess import Popen
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from matplotlib.artist import Artist
+    from matplotlib.axes import Axes
+
+
+class ProfileLegend(TypedDict, total=False):
+    """Axis and legend data collected from a saved figure."""
+
+    ax: "Axes"
+    handle: "Artist"
+    label: str
+    color: str | tuple[float, ...]
+
 
 import matplotlib.pylab as plt
 import numpy as np
@@ -23,7 +38,7 @@ folder = "."
 
 for direction in ("Rad", "Par"):
     # Store in dict in order to avoid arbitrary order
-    axDict = {}
+    axDict: dict[str, ProfileLegend] = {}
 
     # Open the non-Boussinesq plot
     picklePath = os.path.join(folder, "B010{}.pickle".format(direction))

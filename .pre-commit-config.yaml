@@ -19,6 +19,14 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.4.1
+    hooks:
+      - id: mypy
+        # Standalone drivers reuse module names across non-package directories.
+        # Keep the upstream arguments and file selection.
+        entry: python tools/mypy_standalone.py
+
   # C++: clang-format reads the repository's .clang-format (style=file)
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v23.1.5

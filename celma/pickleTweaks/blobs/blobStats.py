@@ -57,7 +57,7 @@ for key in sD.keys():
 # Make a new figure
 fig, (wAx, pAx) = plt.subplots(ncols=2, figsize=SizeMaker.array(2, 1))
 
-patchesForLegend = []
+patchesForLegend: list[pa.Patch] = []
 for key in sD.keys():
     for nr, p in enumerate(sD[key]["waiting"]):
         # Make a new patch

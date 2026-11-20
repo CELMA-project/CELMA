@@ -88,7 +88,7 @@ nuEN = np.array([val[1] for val in nuENTe])
 
 
 # {{{getPolyFit
-def getPolyFit(deg=6):
+def getPolyFit(deg: int = 6):
     # {{{docstring
     """
     Get the polynomial fit
@@ -128,7 +128,7 @@ def getPolyFit(deg=6):
 
 
 # {{{evalPolynomial
-def evalPolynomial(p, x):
+def evalPolynomial(p: np.ndarray, x: np.ndarray):
     # {{{docstring
     """
     Evaluate the polynomial in x

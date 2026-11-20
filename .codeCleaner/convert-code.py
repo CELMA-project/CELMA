@@ -9,7 +9,7 @@ from os.path import expanduser
 from subprocess import call
 
 
-def convert(path):
+def convert(path: str) -> None:
     """
     Converts the code using the binary specified in the input path
     """

@@ -59,6 +59,7 @@ dmpFolders = tuple(
     for ny in nys
 )
 
+dmp_folders: str | tuple[str]
 for nr, dmp_folders in enumerate(dmpFolders):
     dmp_folders = (dmp_folders,)
     args = (dmp_folders, dmp_folders, plotSuperKwargs)

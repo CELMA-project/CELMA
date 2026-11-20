@@ -7,6 +7,16 @@ Plots the percentages for the neutral-scan.
 import os
 import pickle
 import sys
+from typing import TypedDict
+
+
+class PerformanceData(TypedDict):
+    """Collected means, deviations, and bar positions."""
+
+    mean: list[float]
+    std: list[float]
+    x: list[int] | tuple[int, ...]
+
 
 import matplotlib.pylab as plt
 
@@ -30,7 +40,9 @@ keys = (
     "Time solver",
 )
 
-data = {key: {"mean": [], "std": [], "x": []} for key in keys}
+data: dict[str, PerformanceData] = {
+    key: {"mean": [], "std": [], "x": []} for key in keys
+}
 
 for mode in modes:
     path = (

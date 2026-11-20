@@ -15,6 +15,12 @@ import fileinput
 import io
 import re
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from nbformat import NotebookNode
 
 try:
     # Jupyter >= 4
@@ -34,7 +40,7 @@ except ImportError:
             return current.write(nb, f, "json")
 
 
-def _cells(nb):
+def _cells(nb: "NotebookNode") -> "Iterator[NotebookNode]":
     """Yield all cells in an nbformat-insensitive manner"""
     if nb.nbformat < 4:
         for ws in nb.worksheets:
@@ -45,7 +51,7 @@ def _cells(nb):
             yield cell
 
 
-def strip_output(nb):
+def strip_output(nb: "NotebookNode") -> "NotebookNode":
     """Strips the outputs from a notebook object"""
     nb.metadata.pop("signature", None)
     for cell in _cells(nb):
@@ -56,13 +62,13 @@ def strip_output(nb):
     return nb
 
 
-def repair_corrupted(filename):
+def repair_corrupted(filename: str) -> None:
     """Repairs corrupted notebooks with unmatched double quotes"""
     print("Repairing corrupted Notebook...", end="")
 
     pattern = re.compile(r"^[^\"]*\"[^\"]*$")
 
-    with fileinput.FileInput(filename, inplace=True, backup=None) as f:
+    with fileinput.FileInput(filename, inplace=True, backup="") as f:
         for line in f:
             match = re.search(pattern, line)
             if match is None:

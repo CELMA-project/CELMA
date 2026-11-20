@@ -22,15 +22,15 @@ nns = ("2.5e+18", "6.666666666666668e+18", "1.5e+19", "4e+19", "9.9e+20")
 modes = ("Init", "Expand", "Linear", "Turbulence")
 
 # Make place holders for the y-values
-initMeans = []
-expandMeans = []
-linearMeans = []
-turbulenceMeans = []
+initMeans: list[float] = []
+expandMeans: list[float] = []
+linearMeans: list[float] = []
+turbulenceMeans: list[float] = []
 
-initStds = []
-expandStds = []
-linearStds = []
-turbulenceStds = []
+initStds: list[float] = []
+expandStds: list[float] = []
+linearStds: list[float] = []
+turbulenceStds: list[float] = []
 
 means = (initMeans, expandMeans, linearMeans, turbulenceMeans)
 stds = (initStds, expandStds, linearStds, turbulenceStds)

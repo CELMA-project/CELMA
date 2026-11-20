@@ -7,6 +7,18 @@ Creation of the see-saw comparison.
 import os
 import pickle
 import sys
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+    from numpy import ndarray
+
+
+class CurrentProfile(TypedDict, total=False):
+    """Parallel coordinates, current values, and legend text."""
+
+    data: tuple["ndarray", "ndarray"]
+    leg: str
+
 
 import matplotlib.pylab as plt
 import numpy as np
@@ -20,9 +32,9 @@ sys.path.append(commonDir)
 
 from CELMAPy.plotHelpers import PlotHelper, SizeMaker, seqCMap2
 
-nys = (16, 24, 32, 42, 50)
+nys: tuple[int, ...] | list[int] = (16, 24, 32, 42, 50)
 # Initialize jPar
-jPar = {}
+jPar: dict[int, CurrentProfile] = {}
 
 # Convert to physical
 inputFileOpts = BOUTOptions("../../CSDXNyScan")

@@ -5,7 +5,23 @@ Driver which runs using PBS.
 Note: This is done in the old school bout_runners way
 """
 
+from typing import TypedDict
+
 import numpy as np
+
+
+class PBSSettings(TypedDict, total=False):
+    """Scheduler fields retain their individual value types."""
+
+    BOUT_walltime: str
+    BOUT_queue: str | None
+    BOUT_account: str | None
+    BOUT_mail: str | None
+    BOUT_ppn: int
+    BOUT_run_name: str
+    BOUT_nodes: int
+
+
 from bout_runners import PBS_runner
 
 mode = "expand"
@@ -32,7 +48,7 @@ ratios = np.linspace(0.0975, 0.3, 5)
 # NOTE: ny=66 is the standard
 nys = tuple(int(ny) for ny in ratios * (ly / rhos))
 
-PBSOptions = {
+PBSOptions: PBSSettings = {
     "BOUT_walltime": "72:00:00",
     "BOUT_queue": queue,
     "BOUT_account": account,

@@ -9,7 +9,7 @@ import os
 import subprocess  # nosec
 import tempfile
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict, Optional
 
 import approval
 import guard
@@ -250,7 +250,7 @@ HEAD = "a" * 40
 BASE = "b" * 40
 
 
-def event(action, sender, label=approval.LABEL):
+def event(action: str, sender: str, label: str = approval.LABEL) -> Dict[str, Any]:
     """Build a pull request event payload."""
     return {
         "action": action,
@@ -264,7 +264,7 @@ def event(action, sender, label=approval.LABEL):
     }
 
 
-def live_pr(**changes):
+def live_pr(**changes: Any) -> Dict[str, Any]:
     """Build the pull request as the API shows it now, by default as approved."""
     live = {
         "state": "open",
@@ -276,7 +276,11 @@ def live_pr(**changes):
     return live
 
 
-def decided(payload, actor="approver", live=None):
+def decided(
+    payload: Dict[str, Any],
+    actor: str = "approver",
+    live: Optional[Dict[str, Any]] = None,
+) -> bool:
     """Decide a pull request run."""
     live = live_pr() if live is None else live
     return approval.pull_request_approved(payload, actor, live, ALLOWED)
@@ -331,7 +335,7 @@ def test_every_other_event_fails_and_a_forged_status_is_not_read(payload):
     assert not decided(payload)
 
 
-def run(**changes):
+def run(**changes: Any) -> Dict[str, Any]:
     """Build a workflow run as the API lists it, by default an approving one."""
     title = (
         f"numerics-guard event=pull_request_target action=labeled pr=7 "
@@ -350,7 +354,9 @@ def run(**changes):
     return entry
 
 
-def later(action, number=11, conclusion="failure", **changes):
+def later(
+    action: str, number: int = 11, conclusion: str = "failure", **changes: Any
+) -> Dict[str, Any]:
     """Build a later run of the workflow for the same pull request."""
     title = run()["display_title"].replace("action=labeled", f"action={action}")
     return run(run_number=number, conclusion=conclusion, display_title=title, **changes)
