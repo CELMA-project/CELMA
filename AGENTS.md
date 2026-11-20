@@ -79,9 +79,10 @@ change:
 * a rerecorded numerics reference
 
 Ask for it as its own question, with the numbers or the line before and after.
-Consent shows as the label `numerics-change-approved`, which a maintainer listed as an approver in `numerics-guard.yml` applies to
-the pull request; it approves the head and base at that moment, so a push, a
-retarget or a reopen needs it again.
+Consent shows as the label `numerics-change-approved`, which a maintainer
+listed as an approver in `numerics-guard.yml` applies to the pull request; it
+approves the head and base at that moment, so a push, a retarget or a reopen
+needs it again.
 The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),
 [tests/README.md](tests/README.md)) fails any pull request that changes
 the guarded content without it.
