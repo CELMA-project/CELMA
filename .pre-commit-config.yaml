@@ -50,3 +50,9 @@ repos:
         entry: cppcheck --error-exitcode=1 --quiet --inline-suppr --library=boost
         language: system
         types_or: [c++, c]
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.50.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]

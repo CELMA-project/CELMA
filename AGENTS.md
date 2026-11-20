@@ -56,7 +56,8 @@ pre-commit run --all-files
 
 * Lint is [.pre-commit-config.yaml](.pre-commit-config.yaml): the standard
   `pre-commit-hooks`, `ruff-check` and `ruff-format`, `clang-format`
-  (reads [.clang-format](.clang-format)), `cpplint` and `cppcheck`.
+  (reads [.clang-format](.clang-format)), `cpplint`, `cppcheck` and
+  `markdownlint` (default rules, with formatting fixes).
   Fix findings in the code; do not loosen a hook or its filters.
 * Ruff is configured in [pyproject.toml](pyproject.toml): line length 88,
   Python 3.12, numpy docstring convention.
@@ -78,9 +79,10 @@ change:
 * a rerecorded numerics reference
 
 Ask for it as its own question, with the numbers or the line before and after.
-Consent shows as the label `numerics-change-approved`, which a maintainer listed as an approver in `numerics-guard.yml` applies to
-the pull request; it approves the head and base at that moment, so a push, a
-retarget or a reopen needs it again.
+Consent shows as the label `numerics-change-approved`, which a maintainer
+listed as an approver in `numerics-guard.yml` applies to the pull request; it
+approves the head and base at that moment, so a push, a retarget or a reopen
+needs it again.
 The check `numerics-guard` ([numerics-guard.yml](.github/workflows/numerics-guard.yml),
 [tests/README.md](tests/README.md)) fails any pull request that changes
 the guarded content without it.

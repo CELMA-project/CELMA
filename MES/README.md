@@ -29,42 +29,42 @@ runs and are not rechecked by the continuous integration.
 ## arakawaBracket
 
 * [arakawaBracket](arakawaBracket)
-    * [ArakawaOfDDXf2](arakawaBracket/ArakawaOfDDXf2/conclusion.txt):
+  * [ArakawaOfDDXf2](arakawaBracket/ArakawaOfDDXf2/conclusion.txt):
       the `bracket(a, b, bm)` method on `{(d_rho phi)^2, n}`. Converges.
       Solution: `mixModeAndGaussian`.
 
 ## boundaries
 
 * [boundaries](boundaries)
-    * [1-yExtrapolation](boundaries/1-yExtrapolation/conclusion.txt):
+  * [1-yExtrapolation](boundaries/1-yExtrapolation/conclusion.txt):
       extrapolation to the y ghost points. Fourth order, reaches machine
       precision. Solution: `gaussianWSinAndParabola`.
-    * [2-uEParSheath](boundaries/2-uEParSheath/conclusion.txt):
+  * [2-uEParSheath](boundaries/2-uEParSheath/conclusion.txt):
       the parallel electron velocity sheath condition. Converges.
       Solutions: `gaussianWSinAndParabola`, `noYDepInProf`.
-    * [3-cauchyBC](boundaries/3-cauchyBC/conclusion.txt):
+  * [3-cauchyBC](boundaries/3-cauchyBC/conclusion.txt):
       the Cauchy boundary condition. Only first order in every trial.
       Solutions: `gaussianWSinAndParabola`, `noXDepInFunc`.
-    * [4-jParSheath](boundaries/4-jParSheath/conclusion.txt):
+  * [4-jParSheath](boundaries/4-jParSheath/conclusion.txt):
       the parallel current sheath condition. Converges.
       Solution: `gaussianWSinAndParabola`.
 
 ## divOfScalarTimesVector
 
 * [divOfScalarTimesVector](divOfScalarTimesVector)
-    * [1a-divPerp](divOfScalarTimesVector/1a-divPerp/conclusion.txt):
+  * [1a-divPerp](divOfScalarTimesVector/1a-divPerp/conclusion.txt):
       `div(a*b)` with a `Vector3D` `b`, perpendicular part. First order; the
       conclusion file points to a `subConvergence.ipynb` that is not in the
       repository. Solution: `twoGaussians`.
-    * [1b-JTimesDivPerp](divOfScalarTimesVector/1b-JTimesDivPerp/conclusion.txt):
+  * [1b-JTimesDivPerp](divOfScalarTimesVector/1b-JTimesDivPerp/conclusion.txt):
       the same multiplied by the Jacobian. Second order.
       Solution: `twoGaussians`.
-    * [2a-divSource](divOfScalarTimesVector/2a-divSource/conclusion.txt):
+  * [2a-divSource](divOfScalarTimesVector/2a-divSource/conclusion.txt):
       the `divSource` term. Converges for two solutions and
       diverges for `twoNormalGaussians`, cause unknown.
       Solutions: `twoGaussians`, `twoGaussiansSwapped`,
       `twoNormalGaussians`.
-    * [2b-JTimesDivSource](divOfScalarTimesVector/2b-JTimesDivSource/conclusion.txt):
+  * [2b-JTimesDivSource](divOfScalarTimesVector/2b-JTimesDivSource/conclusion.txt):
       the same multiplied by the Jacobian. Same pattern as 2a.
       Solutions: `twoGaussians`, `twoGaussiansSwapped`,
       `twoNormalGaussians`.
@@ -72,7 +72,7 @@ runs and are not rechecked by the continuous integration.
 ## integrals
 
 * [integrals](integrals)
-    * [volumeIntegral](integrals/volumeIntegral/conclusion.txt):
+  * [volumeIntegral](integrals/volumeIntegral/conclusion.txt):
       the volume integral. Converges in x and y; the periodic z direction
       with sines gives no convergence at small errors.
       Solutions: `sumSines`, `sumSinesHat`, `xHat`, `yHat`, `zHat`,
@@ -81,7 +81,7 @@ runs and are not rechecked by the continuous integration.
 ## laplaceInversion
 
 * [laplaceInversion](laplaceInversion)
-    * [Naulinsolver0Bndry](laplaceInversion/Naulinsolver0Bndry/conclusion.txt):
+  * [Naulinsolver0Bndry](laplaceInversion/Naulinsolver0Bndry/conclusion.txt):
       inversion of `div(a*Grad_perp(b))-f` with the Naulin solver and zero
       potential on the boundary. Second order.
       Solutions: `twoGaussians`, `twoGaussiansSwapped`,
@@ -102,23 +102,23 @@ Two notebooks at this level explain the failing cases:
 and [properZFailConvergence.ipynb](singleOperators/properZFailConvergence.ipynb).
 
 * [singleOperators](singleOperators)
-    * [1-DDXCylinder](singleOperators/1-DDXCylinder/conclusion.txt):
+  * [1-DDXCylinder](singleOperators/1-DDXCylinder/conclusion.txt):
       `DDX(f)`. Converges. Solutions: `properZ`, `gaussian`,
       `gaussianWSinAndParabola`.
-    * [1.1-DDXCylinderWideStencilCenter](singleOperators/1.1-DDXCylinderWideStencilCenter/conclusion.txt):
+  * [1.1-DDXCylinderWideStencilCenter](singleOperators/1.1-DDXCylinderWideStencilCenter/conclusion.txt):
       `DDX(f)` with a sixth order stencil at the two innermost points.
       Converges. Solutions: `gaussian`, `gaussianWSinAndParabola`.
-    * [2-D2DX2Cylinder](singleOperators/2-D2DX2Cylinder/conclusion.txt):
+  * [2-D2DX2Cylinder](singleOperators/2-D2DX2Cylinder/conclusion.txt):
       `DDX(DDX(f))`. Converges, except `properZ`, which diverges for an
       unknown reason. Solutions: `properZ`, `gaussian`,
       `gaussianWSinAndParabola`.
-    * [3-DDXOverJCylinder](singleOperators/3-DDXOverJCylinder/conclusion.txt):
+  * [3-DDXOverJCylinder](singleOperators/3-DDXOverJCylinder/conclusion.txt):
       `(1/J)*DDX(f)`. First order at best, broken convergence for three
       solutions, see the two notebooks above. Solutions: `gaussian`,
       `gaussianWSinAndParabola`, `properZ`, `properZModified`, `simpleX`.
-    * [4-DDZCylinder](singleOperators/4-DDZCylinder/conclusion.txt):
+  * [4-DDZCylinder](singleOperators/4-DDZCylinder/conclusion.txt):
       own `DDZ`. Errors at machine precision.
       Solution: `gaussianWSinAndParabola`.
-    * [5-D2DZ2Cylinder](singleOperators/5-D2DZ2Cylinder/conclusion.txt):
+  * [5-D2DZ2Cylinder](singleOperators/5-D2DZ2Cylinder/conclusion.txt):
       own `D2DZ2`. Errors at machine precision.
       Solution: `gaussianWSinAndParabola`.
