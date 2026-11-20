@@ -141,9 +141,7 @@ def relative_error(new: Stats, old: Stats) -> float:
     return diff / scale if scale > 0 else (0.0 if diff == 0 else float("inf"))
 
 
-def compare(
-    new: Dict[str, Fingerprint], old: Dict[str, Fingerprint]
-) -> Dict[str, float]:
+def compare(new: Fingerprint, old: Fingerprint) -> Dict[str, float]:
     """Compare every term of two sets of fingerprints.
 
     Parameters
@@ -363,7 +361,7 @@ def run_all(extra: Tuple[str, ...] = ()) -> Dict[str, np.ndarray]:
     return result
 
 
-def fingerprints(arrays: Dict[str, np.ndarray]) -> Dict[str, Fingerprint]:
+def fingerprints(arrays: Dict[str, np.ndarray]) -> Fingerprint:
     """Reduce every term to its fingerprint.
 
     Parameters
