@@ -664,3 +664,156 @@ def test_numbers_that_overflow_stay_text():
     """1e400 and 1e999 are both inf as floats, so they must not compare equal."""
     assert guard.compare_inp("n = 1e400\n", "n = 1e999\n")
     assert guard.compare_inp("n = 1e400\n", "n = 1e400\n") == []
+
+
+def test_another_label_event_is_not_an_event_of_the_approval():
+    """Labels other than the approval label are recognised by their payload."""
+    assert approval.is_other_label_event(event("labeled", "someone", label="bug"))
+    assert approval.is_other_label_event(event("unlabeled", "someone", label="bug"))
+    assert not approval.is_other_label_event(event("labeled", "approver"))
+    assert not approval.is_other_label_event(event("unlabeled", "approver"))
+    assert not approval.is_other_label_event(event("synchronize", "approver"))
+
+
+def test_runs_for_another_label_do_not_void_the_push_approval():
+    """A label other than the approval label leaves the approval the latest run."""
+    other = {"approval": "false"}
+    for action in ("labeled", "unlabeled"):
+        title = run()["display_title"].replace("action=labeled", f"action={action}")
+        title = title.replace("approval=true", "approval=false")
+        newer = run(run_number=11, conclusion="failure", display_title=title, **other)
+        assert pushed([run(), newer])
+    assert not pushed([run(), later("unlabeled")])
+
+
+def live_now(**changes: Any) -> Dict[str, Any]:
+    """Build the live pull request with its number, by default approved."""
+    return live_pr(number=7, **changes)
+
+
+def test_read_of_the_live_pull_request_keeps_the_approval():
+    """A run for another label only re-reads: it passes while the approval holds."""
+    assert approval.pull_request_read([run()], live_now(), ALLOWED)
+    assert not approval.pull_request_read([], live_now(), ALLOWED)
+    assert not approval.pull_request_read([run()], live_now(labels=[]), ALLOWED)
+    assert not approval.pull_request_read([run()], live_now(state="closed"), ALLOWED)
+    moved = live_now(head={"sha": "c" * 40})
+    assert not approval.pull_request_read([run()], moved, ALLOWED)
+    assert not approval.pull_request_read(
+        [run(), later("synchronize")], live_now(), ALLOWED
+    )
+
+
+def test_a_base_that_lags_main_is_compared_by_the_change_it_makes():
+    """The approval holds when the base sha differs but the change is the same."""
+    seen = []
+
+    def covers(approved: str, now: str, head: str) -> bool:
+        seen.append((approved, now, head))
+        return True
+
+    lagging = "d" * 40
+    assert not pushed([run()], base=lagging)
+    assert approval.push_approved(
+        [run()], PULLS, ALLOWED, approval.Push(lagging, MERGED, "main"), covers
+    )
+    assert seen == [(BASE, lagging, HEAD)]
+    assert not approval.push_approved(
+        [run()],
+        PULLS,
+        ALLOWED,
+        approval.Push(lagging, MERGED, "main"),
+        lambda *_: False,
+    )
+    other_head = [{**PULLS[0], "head": {"sha": "c" * 40}}]
+    assert not approval.push_approved(
+        [run()], other_head, ALLOWED, approval.Push(BASE, MERGED, "main"), covers
+    )
+
+
+def test_git_covers_follows_the_fork_point_of_the_head(monkeypatch):
+    """The same change against a newer main is covered; a grown change is not."""
+    monkeypatch.chdir(ROOT)
+    older = run_git("rev-parse", "HEAD~3")
+    newer = run_git("rev-parse", "HEAD")
+    side = commit_with({"README.md": "side\n"}, older)
+    head = commit_with({"README.md": "head\n"}, side)
+    assert approval.git_covers(side, side, head)
+    assert approval.git_covers(older, older, head)
+    assert approval.git_covers(older, side, head) is True
+    assert not approval.git_covers(side, older, head)
+    assert not approval.git_covers(older, newer, "0" * 40)
+
+
+@pytest.mark.parametrize(
+    "number", [".5e-3", ".5", "1.5e+3", "0x1.8p-2", ".5f", "1'000.5e-3"]
+)
+def test_a_float_literal_is_one_token(number):
+    """A literal that starts with the point is not split into two tokens."""
+    tokens = [t for t, _ in guard.cpp_tokens(f"x = {number};")]
+    assert tokens == ["x", "=", number, ";"]
+    assert guard.compare_cpp(f"x = {number};", f"x = {number}1;")
+    assert guard.cpp_tokens("a.b;")[1][0] == "."
+    assert guard.cpp_tokens("a .* b;")[1][0] == ".*"
+
+
+def test_a_raw_string_delimiter_cannot_hold_a_carriage_return():
+    """R"a<CR>b( is not a raw string literal, as in the standard's list."""
+    assert not guard.raw_string_start('R"a\rb(x)a\rb"', 1)
+    assert guard.raw_string_start('R"ab(x)ab"', 1)
+    tokens = [t for t, _ in guard.cpp_tokens('f(R"a\rb(x)a\rb");')]
+    assert not any(t.startswith('R"a') and t.endswith('b"') for t in tokens)
+
+
+def test_digraphs_are_not_replaced_inside_literals():
+    """%: is # in code only, never inside a string or a character literal."""
+    assert guard.compare_cpp('s = "%:";\n', 's = "#";\n')
+    assert guard.compare_cpp('s = "%:%:";\n', 's = "##";\n')
+    assert guard.compare_cpp('s = R"(%:)";\n', 's = R"(#)";\n')
+    assert guard.compare_cpp("c = '%:';\n", "c = '#';\n")
+    assert guard.compare_cpp("%:define A 1\n", "#define A 1\n") == []
+    assert guard.compare_cpp("%:%:\n", "##\n") == []
+
+
+def test_the_workflow_does_not_delete_the_label_for_another_label():
+    """The label is dropped only on the path of an event that is not another label."""
+    text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
+    other = text.index('approval.py" other-label "$GITHUB_EVENT_PATH"')
+    read = text.index('approval.py" read')
+    delete = text.index("-X DELETE")
+    assert other < read < delete
+    assert text[read:delete].count("exit 1") == 1
+
+
+def test_the_push_check_reads_the_runs_since_the_pull_request_was_made():
+    """The runs query is bounded by a date, not the whole history."""
+    text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
+    assert text.count('"created=>=') == 2
+    assert "runs?event=pull_request_target&per_page=100" not in text
+
+
+def test_a_lagging_base_does_not_fail_the_live_check():
+    """live.base.sha moved on after the event: the change is the same."""
+    moved = live_pr(base={"sha": "d" * 40, "ref": "main"})
+    assert not decided(event("labeled", "approver"), live=moved)
+    assert approval.pull_request_approved(
+        event("labeled", "approver"),
+        "approver",
+        moved,
+        ALLOWED,
+        lambda *_: True,
+    )
+    assert not approval.pull_request_approved(
+        event("labeled", "approver"),
+        "approver",
+        live_pr(base={"sha": "d" * 40, "ref": "release"}),
+        ALLOWED,
+        lambda *_: True,
+    )
+
+
+def test_a_digit_separator_in_a_float_that_starts_with_the_point():
+    """.5'000 is one number, so its quote does not open a character literal."""
+    assert guard.is_digit_separator(".5'000", 2)
+    tokens = [t for t, _ in guard.cpp_tokens("x = .5'000; // it's\ny = 1;")]
+    assert tokens == ["x", "=", ".5'000", ";", "y", "=", "1", ";"]
