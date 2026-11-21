@@ -193,7 +193,7 @@ def is_digit_separator(text: str, i: int) -> bool:
     start = i
     while start > 0 and (text[start - 1].isalnum() or text[start - 1] in "_'."):
         start -= 1
-    return start < i and text[start].isdigit()
+    return start < i and text[start : start + 2].lstrip(".")[:1].isdigit()
 
 
 def raw_string_start(text: str, i: int) -> bool:

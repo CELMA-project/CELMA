@@ -13,9 +13,10 @@ name: Numerics guard
 # the event "label numerics-change-approved applied" whose sender is in
 # ALLOWED_APPROVERS: GitHub sets the sender, and the event carries the head and
 # base it approves. Every other event with a numerics change (opened,
-# synchronize, reopened, edited, unlabeled, another label, another sender) fails
-# and drops the approval label, so a push, a retarget or a reopen needs a new
-# application. The decision is tests/numerics/approval.py, tested in Lint.
+# synchronize, reopened, edited, the approval label removed, another sender)
+# fails and drops the approval label, so a push, a retarget or a reopen needs a
+# new application. Another label is the exception, as said above. The
+# decision is tests/numerics/approval.py, tested in Lint.
 #
 # After the merge, a push to main passes only if the runs API holds a
 # successful pull_request_target run of this workflow for the merged pull

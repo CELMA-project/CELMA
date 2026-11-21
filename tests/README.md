@@ -65,7 +65,7 @@ runs.
   the sender), which approves the head and base that event carries, provided the
   run was started by an approver and the live pull request is still open,
   labelled and at that head and base (a re-run replays the old event). Every
-  other event with a change (push, reopen, retarget, another label or sender)
+  other event with a change (push, reopen, retarget, another sender)
   fails and drops the label. A push to `main` passes only if the latest
   `pull_request_target` run for the merged pull request is a successful one of
   that kind, started and re-run by an approver, for the merged head and the base

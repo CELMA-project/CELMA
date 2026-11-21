@@ -93,6 +93,7 @@ def pull_request_approved(
     triggering_actor: str,
     live: Dict[str, Any],
     allowlist: List[str],
+    covers: Optional[COVERS] = None,
 ) -> bool:
     """Decide a pull request run from its event, its actor and the live pull request.
 
@@ -111,6 +112,8 @@ def pull_request_approved(
         The pull request now (``GET /repos/R/pulls/N``).
     allowlist : list
         Logins that may approve.
+    covers : callable, optional
+        Tells if the approved base covers the base now (``same_base``).
 
     Returns
     -------
@@ -134,7 +137,9 @@ def pull_request_approved(
         and bool(live_head)
         and live_head == (event_pr.get("head") or {}).get("sha")
         and bool(live_base.get("sha"))
-        and live_base.get("sha") == event_base.get("sha")
+        and same_base(
+            event_base.get("sha") or "", live_base["sha"], live_head or "", covers
+        )
         and live_base.get("ref") == event_base.get("ref")
     )
 
@@ -164,7 +169,7 @@ def git_covers(approved: str, now: str, head: str) -> bool:
         if git cannot tell.
     """
 
-    def run(*args: str) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
+    def run(*args: str) -> "subprocess.CompletedProcess[bytes]":
         return subprocess.run(  # nosec
             ["git", *args],
             stdout=subprocess.PIPE,
@@ -440,7 +445,7 @@ def main(argv: List[str]) -> int:
         with open(argv[2], encoding="utf-8") as handle:
             live = json.load(handle)
         actor = os.environ.get("GITHUB_TRIGGERING_ACTOR", "")
-        approved = pull_request_approved(first, actor, live, allowlist)
+        approved = pull_request_approved(first, actor, live, allowlist, git_covers)
     else:
         with open(argv[2], encoding="utf-8") as handle:
             approved = push_approved(

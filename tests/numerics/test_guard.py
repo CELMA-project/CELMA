@@ -791,3 +791,30 @@ def test_the_push_check_reads_the_runs_since_the_pull_request_was_made():
     text = (ROOT / ".github/workflows/numerics-guard.yml").read_text()
     assert text.count('"created=>=') == 2
     assert "runs?event=pull_request_target&per_page=100" not in text
+
+
+def test_a_lagging_base_does_not_fail_the_live_check():
+    """live.base.sha moved on after the event: the change is the same."""
+    moved = live_pr(base={"sha": "d" * 40, "ref": "main"})
+    assert not decided(event("labeled", "approver"), live=moved)
+    assert approval.pull_request_approved(
+        event("labeled", "approver"),
+        "approver",
+        moved,
+        ALLOWED,
+        lambda *_: True,
+    )
+    assert not approval.pull_request_approved(
+        event("labeled", "approver"),
+        "approver",
+        live_pr(base={"sha": "d" * 40, "ref": "release"}),
+        ALLOWED,
+        lambda *_: True,
+    )
+
+
+def test_a_digit_separator_in_a_float_that_starts_with_the_point():
+    """.5'000 is one number, so its quote does not open a character literal."""
+    assert guard.is_digit_separator(".5'000", 2)
+    tokens = [t for t, _ in guard.cpp_tokens("x = .5'000; // it's\ny = 1;")]
+    assert tokens == ["x", "=", ".5'000", ";", "y", "=", "1", ";"]
