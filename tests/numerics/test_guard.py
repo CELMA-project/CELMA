@@ -731,9 +731,9 @@ def test_a_base_that_lags_main_is_compared_by_the_change_it_makes():
     )
 
 
-def test_git_covers_follows_the_fork_point_of_the_head():
+def test_git_covers_follows_the_fork_point_of_the_head(monkeypatch):
     """The same change against a newer main is covered; a grown change is not."""
-    work = ROOT
+    monkeypatch.chdir(ROOT)
     older = run_git("rev-parse", "HEAD~3")
     newer = run_git("rev-parse", "HEAD")
     side = commit_with({"README.md": "side\n"}, older)
@@ -743,7 +743,6 @@ def test_git_covers_follows_the_fork_point_of_the_head():
     assert approval.git_covers(older, side, head) is True
     assert not approval.git_covers(side, older, head)
     assert not approval.git_covers(older, newer, "0" * 40)
-    assert work
 
 
 @pytest.mark.parametrize(
