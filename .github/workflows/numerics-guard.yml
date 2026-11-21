@@ -5,6 +5,10 @@ name: Numerics guard
 # BOUT++ image, compiler flags, the references, every workflow or this guard)
 # unless an approver (ALLOWED_APPROVERS) approved that head against that base.
 #
+# Another label added or removed is no event of the approval: its run neither
+# approves nor drops the label, it re-reads whether the approval still holds,
+# and the push check does not count it as a later event.
+#
 # Nothing is stored. The only run that passes a numerics change is the run for
 # the event "label numerics-change-approved applied" whose sender is in
 # ALLOWED_APPROVERS: GitHub sets the sender, and the event carries the head and
@@ -160,6 +164,20 @@ jobs:
           if [ "$EVENT" = pull_request_target ]; then
             # A re-run replays the old event: judge the pull request as it is now
             gh api "repos/$REPO/pulls/$PR" > "$RUNNER_TEMP/live.json"
+            if python3 -I "$TRUSTED_DIR/approval.py" other-label "$GITHUB_EVENT_PATH"; then
+              # Another label is no event of the approval: it neither approves
+              # nor drops the label, it only re-reads whether the approval holds
+              SINCE=$(jq -r .created_at "$RUNNER_TEMP/live.json")
+              gh api --paginate -X GET "repos/$REPO/actions/workflows/numerics-guard.yml/runs" \
+                -f event=pull_request_target -f per_page=100 -f "created=>=$SINCE" \
+                --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
+              if python3 -I "$TRUSTED_DIR/approval.py" read "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/live.json"; then
+                echo "Another label: the approval still holds."
+                exit 0
+              fi
+              echo "::error::The numerics changed and no approval holds for this head and base. Another label changes nothing about that."
+              exit 1
+            fi
             if python3 -I "$TRUSTED_DIR/approval.py" pr "$GITHUB_EVENT_PATH" "$RUNNER_TEMP/live.json"; then
               echo "Approved: an approver applied the label, the label, head and base still hold."
               exit 0
@@ -176,10 +194,19 @@ jobs:
               esac
             fi
           else
-            gh api --paginate "repos/$REPO/actions/workflows/numerics-guard.yml/runs?event=pull_request_target&per_page=100" \
-              --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
             gh api --paginate "repos/$REPO/commits/$AFTER/pulls?per_page=100" \
               --jq '.[] | select(.merged_at != null)' | jq -s . > "$RUNNER_TEMP/pulls.json"
+            # Only runs since the oldest merged pull request was opened can be its
+            SINCE=$(jq -r 'map(.created_at) | min // empty' "$RUNNER_TEMP/pulls.json")
+            gh api --paginate -X GET "repos/$REPO/actions/workflows/numerics-guard.yml/runs" \
+              -f event=pull_request_target -f per_page=100 -f "created=>=${SINCE:-1970-01-01}" \
+              --jq '.workflow_runs[]' | jq -s . > "$RUNNER_TEMP/runs.json"
+            # The heads of the merged pull requests as git objects only: a squash
+            # merge leaves them out of main, and the base is compared by the
+            # fork point with the head
+            for number in $(jq -r '.[].number' "$RUNNER_TEMP/pulls.json"); do
+              git fetch --no-tags origin "+refs/pull/$number/head:refs/remotes/pr/$number" || true
+            done
             if python3 -I "$TRUSTED_DIR/approval.py" push "$RUNNER_TEMP/runs.json" "$RUNNER_TEMP/pulls.json" "$BEFORE" "$AFTER" "$BRANCH"; then
               echo "The merged head and base were approved by an approver, and nothing came after."
               exit 0

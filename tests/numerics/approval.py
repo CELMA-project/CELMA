@@ -18,7 +18,13 @@ pull request had at that moment, and the pull request author cannot forge that:
   triggered by someone in the allowlist (the original actor and the actor of any
   re-run), and the pull request still carried the label at the merge. A later
   event (an unlabel, a retarget, a push) makes a later run the latest, so it
-  voids the approval. The run's name (``run-name`` in the workflow, from the
+  voids the approval. Labels other than the approval label never do: a run for
+  one of them (``approval=false`` with the action ``labeled`` or ``unlabeled``)
+  changes nothing about the head, the base or the approval, so it is not read
+  as an event, and it only re-reads the live state (``pull_request_read``).
+  The base of the approval is compared by the fork point with the head, not
+  by its sha: ``pull_request.base.sha`` may lag behind the branch, and a merge
+  of a branch that moved on is the same change. The run's name (``run-name`` in the workflow, from the
   base branch copy) carries event, action, pull request, head, base and label.
 
 A copy of the workflow on a pull request branch cannot satisfy this. Its runs
@@ -31,15 +37,17 @@ that the agent posts is not read at all.
 import json
 import os
 import re
+import subprocess  # nosec
 import sys
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 LABEL = "numerics-change-approved"
 TITLE = re.compile(
     r"numerics-guard event=(?P<event>\S+) action=(?P<action>\S*) pr=(?P<pr>\d*) "
     r"head=(?P<head>[0-9a-f]*) base=(?P<base>[0-9a-f]*) approval=(?P<approval>true|false)"
 )
+COVERS = Callable[[str, str, str], bool]
 
 
 @dataclass(frozen=True)
@@ -131,8 +139,82 @@ def pull_request_approved(
     )
 
 
+def git_covers(approved: str, now: str, head: str) -> bool:
+    """Tell, from the git history of the working directory, if a base still covers.
+
+    The change a pull request makes is its head against the fork point of the
+    head and the base branch. An approval of the change against the base
+    ``approved`` covers the change against the base ``now`` when the fork point
+    with ``now`` is the fork point with ``approved`` or a descendant of it: the
+    branch moved on, and the change did not grow.
+
+    Parameters
+    ----------
+    approved : str
+        The base sha the approval names.
+    now : str
+        The base sha to judge against.
+    head : str
+        The head of the pull request.
+
+    Returns
+    -------
+    bool
+        True if the change against ``now`` is inside the approved change; False
+        if git cannot tell.
+    """
+
+    def run(*args: str) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
+        return subprocess.run(  # nosec
+            ["git", *args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+
+    first = run("merge-base", approved, head)
+    second = run("merge-base", now, head)
+    if first.returncode != 0 or second.returncode != 0:
+        return False
+    old, new = first.stdout.decode().strip(), second.stdout.decode().strip()
+    if not old or not new:
+        return False
+    return old == new or run("merge-base", "--is-ancestor", old, new).returncode == 0
+
+
+def same_base(approved: str, now: str, head: str, covers: Optional[COVERS]) -> bool:
+    """Tell whether the base an approval names is the base of the change now.
+
+    Parameters
+    ----------
+    approved : str
+        The base sha in the approving run.
+    now : str
+        The base sha to judge against.
+    head : str
+        The head of the pull request.
+    covers : callable or None
+        ``covers(approved, now, head)``, as ``git_covers``; ``None`` compares
+        the shas only.
+
+    Returns
+    -------
+    bool
+        True if the shas are equal, or ``covers`` says the change did not grow.
+    """
+    if approved and approved == now:
+        return True
+    if covers is None or not approved or not now or not head:
+        return False
+    return covers(approved, now, head)
+
+
 def approving_run(
-    run: Dict[str, Any], allowlist: List[str], pr_number: int, head: str, base: str
+    run: Dict[str, Any],
+    allowlist: List[str],
+    pr_number: int,
+    change: Tuple[str, str],
+    covers: Optional[COVERS] = None,
 ) -> bool:
     """Tell whether a workflow run is the approval of a pull request head.
 
@@ -144,10 +226,11 @@ def approving_run(
         Logins that may approve.
     pr_number : int
         The merged pull request.
-    head : str
-        The final head of the merged pull request.
-    base : str
-        The tip of the base branch the merge started from.
+    change : tuple
+        The final head of the merged pull request and the tip of the base
+        branch the merge started from.
+    covers : callable, optional
+        Tells if an approved base covers the base now (``same_base``).
 
     Returns
     -------
@@ -159,6 +242,7 @@ def approving_run(
     match = TITLE.fullmatch(run.get("display_title") or "")
     if not match or run.get("event") != "pull_request_target":
         return False
+    head, base = change
     return (
         run.get("status", "completed") == "completed"
         and run.get("conclusion") == "success"
@@ -167,10 +251,27 @@ def approving_run(
         and match["approval"] == "true"
         and match["pr"] == str(pr_number)
         and match["head"] == head
-        and match["base"] == base
+        and same_base(match["base"], base, head, covers)
         and permitted((run.get("actor") or {}).get("login", ""), allowlist)
         and permitted((run.get("triggering_actor") or {}).get("login", ""), allowlist)
     )
+
+
+def other_label_event(match: "re.Match[str]") -> bool:
+    """Tell whether a run name is a label other than the approval label.
+
+    Parameters
+    ----------
+    match : re.Match
+        A match of ``TITLE``.
+
+    Returns
+    -------
+    bool
+        True for the action ``labeled`` or ``unlabeled`` of a label that is not
+        the approval label.
+    """
+    return match["action"] in ("labeled", "unlabeled") and match["approval"] == "false"
 
 
 def latest_run_of(runs: List[Dict[str, Any]], pr_number: int) -> Dict[str, Any]:
@@ -187,13 +288,13 @@ def latest_run_of(runs: List[Dict[str, Any]], pr_number: int) -> Dict[str, Any]:
     -------
     dict
         The run with the highest run number among those named for the pull
-        request, or an empty dict.
+        request, leaving out the runs for other labels, or an empty dict.
     """
     named = []
     for run in runs:
         match = TITLE.fullmatch(run.get("display_title") or "")
         if match and run.get("event") == "pull_request_target":
-            if match["pr"] == str(pr_number):
+            if match["pr"] == str(pr_number) and not other_label_event(match):
                 named.append(run)
     return max(named, key=lambda r: r.get("run_number", 0), default={})
 
@@ -203,6 +304,7 @@ def push_approved(
     pulls: List[Dict[str, Any]],
     allowlist: List[str],
     push: Push,
+    covers: Optional[COVERS] = None,
 ) -> bool:
     """Decide a push to main from the merged pull request and the runs.
 
@@ -216,6 +318,8 @@ def push_approved(
         Logins that may approve.
     push : Push
         The push: where it started, where it ended, which branch.
+    covers : callable, optional
+        Tells if an approved base covers the base now (``same_base``).
 
     Returns
     -------
@@ -233,10 +337,76 @@ def push_approved(
         labels = [x.get("name") for x in pull.get("labels") or []]
         latest = latest_run_of(runs, pull["number"])
         if LABEL in labels and approving_run(
-            latest, allowlist, pull["number"], pull["head"]["sha"], push.base
+            latest,
+            allowlist,
+            pull["number"],
+            (pull["head"]["sha"], push.base),
+            covers,
         ):
             return True
     return False
+
+
+def is_other_label_event(payload: Dict[str, Any]) -> bool:
+    """Tell whether an event is another label being added or removed.
+
+    Parameters
+    ----------
+    payload : dict
+        The event payload (``github.event``).
+
+    Returns
+    -------
+    bool
+        True for ``labeled`` or ``unlabeled`` of a label that is not the
+        approval label.
+    """
+    name = (payload.get("label") or {}).get("name")
+    return payload.get("action") in ("labeled", "unlabeled") and name != LABEL
+
+
+def pull_request_read(
+    runs: List[Dict[str, Any]],
+    live: Dict[str, Any],
+    allowlist: List[str],
+    covers: Optional[COVERS] = None,
+) -> bool:
+    """Judge a pull request as it is now, for an event that changes nothing.
+
+    Another label added or removed neither approves nor voids: the pull request
+    passes if it is open, still has the approval label and its latest event
+    (leaving out other labels) is the approval of its current head and base.
+
+    Parameters
+    ----------
+    runs : list
+        Runs of the workflow, any event, any state.
+    live : dict
+        The pull request now (``GET /repos/R/pulls/N``).
+    allowlist : list
+        Logins that may approve.
+    covers : callable, optional
+        Tells if an approved base covers the base now (``same_base``).
+
+    Returns
+    -------
+    bool
+        True if the approval still holds.
+    """
+    labels = [x.get("name") for x in live.get("labels") or []]
+    head = (live.get("head") or {}).get("sha") or ""
+    base = (live.get("base") or {}).get("sha") or ""
+    number = live.get("number")
+    return bool(
+        live.get("state") == "open"
+        and LABEL in labels
+        and head
+        and base
+        and number is not None
+        and approving_run(
+            latest_run_of(runs, number), allowlist, number, (head, base), covers
+        )
+    )
 
 
 def main(argv: List[str]) -> int:
@@ -246,8 +416,10 @@ def main(argv: List[str]) -> int:
     ----------
     argv : list
         ``pr EVENT_JSON LIVE_PR_JSON`` (the triggering actor is in
-        ``GITHUB_TRIGGERING_ACTOR``) or ``push RUNS_JSON PULLS_JSON BASE_SHA AFTER_SHA BRANCH``; the allowlist is
-        in the environment variable ``ALLOWED_APPROVERS``, comma separated.
+        ``GITHUB_TRIGGERING_ACTOR``), ``other-label EVENT_JSON`` (exit 0 if the
+        event is another label), ``read RUNS_JSON LIVE_PR_JSON`` or
+        ``push RUNS_JSON PULLS_JSON BASE_SHA AFTER_SHA BRANCH``; the allowlist
+        is in the environment variable ``ALLOWED_APPROVERS``, comma separated.
 
     Returns
     -------
@@ -257,7 +429,14 @@ def main(argv: List[str]) -> int:
     allowlist = [x for x in os.environ.get("ALLOWED_APPROVERS", "").split(",") if x]
     with open(argv[1], encoding="utf-8") as handle:
         first = json.load(handle)
-    if argv[0] == "pr":
+    if argv[0] == "other-label":
+        return 0 if is_other_label_event(first) else 1
+    if argv[0] == "read":
+        with open(argv[2], encoding="utf-8") as handle:
+            approved = pull_request_read(
+                first, json.load(handle), allowlist, git_covers
+            )
+    elif argv[0] == "pr":
         with open(argv[2], encoding="utf-8") as handle:
             live = json.load(handle)
         actor = os.environ.get("GITHUB_TRIGGERING_ACTOR", "")
@@ -265,7 +444,11 @@ def main(argv: List[str]) -> int:
     else:
         with open(argv[2], encoding="utf-8") as handle:
             approved = push_approved(
-                first, json.load(handle), allowlist, Push(argv[3], argv[4], argv[5])
+                first,
+                json.load(handle),
+                allowlist,
+                Push(argv[3], argv[4], argv[5]),
+                git_covers,
             )
     print("approved" if approved else "no approval for this change")
     return 0 if approved else 1

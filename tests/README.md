@@ -71,7 +71,11 @@ runs.
   that kind, started and re-run by an approver, for the merged head and the base
   the push started from, for a pull request merged into `main` as exactly the
   pushed commit (`merge_commit_sha`), which still had the label; a copy of the
-  workflow on a branch cannot make one, and any later event voids it.
+  workflow on a branch cannot make one, and any later event voids it, except
+  another label being added or removed: that run only re-reads whether the
+  approval holds and is not counted as a later event. The base of the approval
+  counts as the same when the fork point with the head is the same or a
+  descendant of the approved one (a branch that moved on).
   `approval.py` holds the decisions and `test_guard.py` tests them. Every file
   under `.github/workflows/` is guarded too. The label is a maintainer's consent
   for that specific change, see
