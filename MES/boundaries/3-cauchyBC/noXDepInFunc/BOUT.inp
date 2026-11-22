@@ -114,4 +114,5 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 [f]
 function = sin(pi*(y/75 + 1/25))^2
 a = sin(pi/25)^2
-b = 2*pi*sin(pi/25)*cos(pi/25)/75
+# b is per unit of y in [0, 2pi]; the stencil takes it per coord->dy (geom:Ly/ny)
+b = (2*pi/geom:Ly)*(2*pi*sin(pi/25)*cos(pi/25)/75)
