@@ -216,7 +216,7 @@ def orders(errors: List[Optional[float]]) -> Optional[List[float]]:
     list or None
         One order per pair, ``None`` if a run failed or an error is zero.
     """
-    if not all(x and math.isfinite(x) for x in errors):  # type: ignore
+    if not all(x and math.isfinite(x) for x in errors):
         return None
     return [math.log2(a / b) for a, b in zip(errors, errors[1:])]  # type: ignore
 
