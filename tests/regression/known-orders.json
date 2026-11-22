@@ -1,0 +1,94 @@
+{
+ "boundaries/2-uEParSheath/gaussianWSinAndParabola": {
+  "kind": "case bug",
+  "cause": "Bug in the case: the manufactured uEPar carries a factor sin(...)^2 that the sheath condition uEPar = exp(Lambda - phiRef - phi) does not have, so the exact solution does not satisfy the boundary condition and the error is the constant mismatch (about 1.46). With the factor removed the stencil converges at about 4 (2.9e-9, 2.0e-10, 1.3e-11), checked in a Python replica."
+ },
+ "boundaries/2-uEParSheath/noYDepInProf": {
+  "kind": "case bug",
+  "cause": "Bug in the case: the manufactured uEPar carries a factor sin(pi x/15)^2 that the sheath condition uEPar = exp(Lambda - phiRef - phi) does not have, so the exact solution does not satisfy the boundary condition and the error is the constant mismatch (about 1.06). With the factor removed the stencil converges at about 4 (2.5e-9, 1.8e-10, 1.2e-11), checked in a Python replica."
+ },
+ "boundaries/3-cauchyBC/gaussianWSinAndParabola": {
+  "kind": "case bug",
+  "cause": "Bug in the case input: the derivative b is written per unit of y in 0..2pi, but the stencil takes it per unit of coord->dy, which the input sets to Ly/ny (physical length). The two differ by 2pi/Ly, so the ghost value is off by a term that does not shrink with the grid. With b rescaled by 2pi/Ly the error is 4e-9, 4e-10, 7e-11 (order about 3.5 to 4), checked in a Python replica. The warning of the thesis code that the condition is only first order is probably stale. The models do not call this boundary condition, only this case does."
+ },
+ "boundaries/3-cauchyBC/noXDepInFunc": {
+  "kind": "case bug",
+  "cause": "Bug in the case input: the derivative b is written per unit of y in 0..2pi, but the stencil takes it per unit of coord->dy, which the input sets to Ly/ny (physical length). The two differ by 2pi/Ly, so the ghost value is off by a term that does not shrink with the grid. Rescaling b by 2pi/Ly gives errors of 1e-9 and falling at order 3.5 to 4 in a Python replica. The models do not call this boundary condition, only this case does."
+ },
+ "divOfScalarTimesVector/1a-divPerp/twoGaussians": {
+  "kind": "expected property",
+  "cause": "Expected property of the scheme, not a bug: Div(f) holds a (1/J) d(J f_x)/dx term; at the first cell next to the axis the 1/J (x = dx/2) multiplies the second-order error of the centred derivative, so the error of that cell falls as dx. Away from the axis (x >= 1) the order is 2, reproduced in a Python replica of the stencil."
+ },
+ "divOfScalarTimesVector/2a-divSource/twoGaussians": {
+  "kind": "case bug",
+  "cause": "Bug in the case: the run crashes (segmentation fault) at every resolution. divSource.cxx declares ownOp and never creates it, and div_f_GradPerp_g reads its members J and J2 through that pointer. The probable fix is a call ownOp = OwnOperators::createOperators(); in init(), not tried because it changes guarded C++. The crash is read from the code and the CI log, not reproduced under a debugger. No order is known until it runs."
+ },
+ "divOfScalarTimesVector/2a-divSource/twoGaussiansSwapped": {
+  "kind": "case bug",
+  "cause": "Same as divOfScalarTimesVector/2a-divSource/twoGaussians: ownOp is never created in divSource.cxx, the run crashes at every resolution."
+ },
+ "divOfScalarTimesVector/2a-divSource/twoNormalGaussians": {
+  "kind": "case bug",
+  "cause": "Same as divOfScalarTimesVector/2a-divSource/twoGaussians: ownOp is never created in divSource.cxx, the run crashes at every resolution."
+ },
+ "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians": {
+  "kind": "case bug",
+  "cause": "Probably the same as divOfScalarTimesVector/2a-divSource/twoGaussians: JTimesDivSource.cxx declares ownOp and never creates it, and the run crashes at every resolution. Not confirmed by a run."
+ },
+ "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussiansSwapped": {
+  "kind": "case bug",
+  "cause": "Probably the same as divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians: ownOp is never created, the run crashes at every resolution."
+ },
+ "divOfScalarTimesVector/2b-JTimesDivSource/twoNormalGaussians": {
+  "kind": "case bug",
+  "cause": "Probably the same as divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians: ownOp is never created, the run crashes at every resolution."
+ },
+ "integrals/volumeIntegral/sumSines": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "integrals/volumeIntegral/sumSinesHat": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "integrals/volumeIntegral/xHat": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "integrals/volumeIntegral/yHat": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "integrals/volumeIntegral/zHat": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "integrals/volumeIntegral/zSines": {
+  "kind": "case limit",
+  "cause": "Not a convergence case in mes.py: the input fixes the mesh at 32 x 34 x 16 and the script caps every resolution at the input's own size, so the three runs are the same run and the error does not change. The thesis convergence studies of the integral varied one direction at a time with the driver, which this repository does not hold."
+ },
+ "singleOperators/3-DDXOverJCylinder/gaussian": {
+  "kind": "expected property",
+  "cause": "Expected property of the scheme, not a bug: the first inner cell is half a cell from the axis, so 1/J multiplies the second-order error of the centred x derivative by about 2/dx there, and the error of that one cell falls only as dx. Away from the axis (x >= 1) the order is 2, reproduced in a Python replica of the stencil."
+ },
+ "singleOperators/3-DDXOverJCylinder/gaussianWSinAndParabola": {
+  "kind": "expected property",
+  "cause": "Expected property of the scheme, not a bug: the first inner cell is half a cell from the axis, so 1/J multiplies the second-order error of the centred x derivative by about 2/dx there, and the error of that one cell falls only as dx. Away from the axis (x >= 1) the order is 2, reproduced in a Python replica of the stencil."
+ },
+ "singleOperators/3-DDXOverJCylinder/properZModified": {
+  "kind": "case bug",
+  "cause": "Bug in the case: f is not a function that continues smoothly through the axis, so the axis boundary condition (a copy of the point across the axis) gives a guard cell wrong by O(dx), the centred derivative by O(1), and 1/J at x = dx/2 turns that into an error of order 1/dx, which grows with the resolution. With the exact guard value the order is 1 (properZModified) or 1.5 falling to 1 (simpleX); away from the axis (x >= 1) it is 2 for both. Checked in a Python replica of the stencil."
+ },
+ "singleOperators/3-DDXOverJCylinder/simpleX": {
+  "kind": "case bug",
+  "cause": "Bug in the case: f is not a function that continues smoothly through the axis, so the axis boundary condition (a copy of the point across the axis) gives a guard cell wrong by O(dx), the centred derivative by O(1), and 1/J at x = dx/2 turns that into an error of order 1/dx, which grows with the resolution. With the exact guard value the order is 1 (properZModified) or 1.5 falling to 1 (simpleX); away from the axis (x >= 1) it is 2 for both. Checked in a Python replica of the stencil."
+ },
+ "singleOperators/4-DDZCylinder/gaussianWSinAndParabola": {
+  "kind": "expected property",
+  "cause": "Expected property: the z derivative is spectral (FFT), exact to round-off for a smooth periodic function. The error is round-off (1e-14), so no order exists."
+ },
+ "singleOperators/5-D2DZ2Cylinder/gaussianWSinAndParabola": {
+  "kind": "expected property",
+  "cause": "Expected property: the z derivative is spectral (FFT), exact to round-off for a smooth periodic function. The error is round-off (1e-13 to 3e-12) and grows with the number of points, so no order exists."
+ }
+}
