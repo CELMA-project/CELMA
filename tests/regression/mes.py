@@ -1,7 +1,7 @@
 """Operator errors of the method of exact solutions (MES) cases.
 
 Every case under ``MES/`` saves its error field ``e``, the numerical operator
-minus the analytic one. This script runs every input of every case at two small
+minus the analytic one. This script runs every input of every case at three small
 resolutions and compares the largest absolute error to a committed reference,
 so a change of any operator or boundary condition shows up.
 
@@ -57,6 +57,8 @@ MUTATION_MARGIN = 1000.0
 # Order of the scheme under test, by case-name prefix; every other case is second order
 EXPECTED_ORDERS = {
     "boundaries/1-yExtrapolation/": 4.0,
+    "boundaries/2-uEParSheath/": 4.0,
+    "boundaries/3-cauchyBC/": 4.0,
     "boundaries/4-jParSheath/": 4.0,
 }
 DEFAULT_ORDER = 2.0
@@ -214,7 +216,7 @@ def orders(errors: List[Optional[float]]) -> Optional[List[float]]:
     list or None
         One order per pair, ``None`` if a run failed or an error is zero.
     """
-    if not all(errors):
+    if not all(x and math.isfinite(x) for x in errors):  # type: ignore
         return None
     return [math.log2(a / b) for a, b in zip(errors, errors[1:])]  # type: ignore
 
