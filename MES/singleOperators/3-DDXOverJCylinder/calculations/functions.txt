@@ -101,17 +101,20 @@ Proper z modified
 # We multiply with cos(6*pi*x/(2*Lx)) in order to give it a modulation, and to get a non-zero value at the boundary
 # We multiply with (x/Lx)^2 in order for S not to blow up at rho=0, and for f to
 # continue smoothly through the axis (a sin(2*z) mode must go as rho^2)
+# The tanh takes x^2, so the envelope is even in x; it still steps at
+# xc = c - w/2 with slope s there
 s = 0.15
 c = 50
 w = 30
-the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x-(c - (w/2))))))*cos(6*pi*x/(2*Lx))*sin(2*z)*(x/Lx)**2
+xc = c - (w/2)
+the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x**2 - xc**2)/(2*xc))))*cos(6*pi*x/(2*Lx))*sin(2*z)*(x/Lx)**2
 
 
 [S]
-(-pi*geom:xl^2*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*sin(pi*geom:xl/10)/9000 + geom:xl^2*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/900 + geom:xl*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*cos(pi*geom:xl/10)/450)/geom:xl
+(-2.38095238095238e-6*geom:xl^3*(1 - tanh(0.00214285714285714*geom:xl^2 - 2.625)^2)*sin(2*z)*cos(pi*geom:xl/10) - pi*geom:xl^2*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*sin(pi*geom:xl/10)/9000 + geom:xl*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*cos(pi*geom:xl/10)/450)/geom:xl
 
 [f]
-geom:xl^2*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*cos(pi*geom:xl/10)/900
+geom:xl^2*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*cos(pi*geom:xl/10)/900
 ======================================================================================================================================
 
 
