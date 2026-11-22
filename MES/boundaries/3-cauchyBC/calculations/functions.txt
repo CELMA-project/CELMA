@@ -27,7 +27,8 @@ the_vars['f'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))*\
                 ((x-x0)/Lx)**2
 
 the_vars['a'] = the_vars['f'].subs(y, 0)
-the_vars['b'] = the_vars['f'].diff(y).subs(y, 0)
+# The stencil takes b per coord->dy = Ly/ny, while y here runs over [0, 2pi]
+the_vars['b'] = the_vars['f'].diff(y).subs(y, 0)*2*pi/Ly
 
 
 
@@ -38,7 +39,7 @@ the_vars['b'] = the_vars['f'].diff(y).subs(y, 0)
 
 
 [b]
-0.00808707546283511*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2)*sin(sqrt(2)*pi*geom:xl/60) + 0.0101088443285439*sqrt(2)*pi*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2)*cos(sqrt(2)*pi*geom:xl/60)
+(2*pi/geom:Ly)*(0.00808707546283511*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2)*sin(sqrt(2)*pi*geom:xl/60) + 0.0101088443285439*sqrt(2)*pi*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2)*cos(sqrt(2)*pi*geom:xl/60))
 
 [f]
 (geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60)
@@ -61,12 +62,13 @@ No x variation in the function
 the_vars['f'] = sin(2*pi*(y+3)/Ly)**2
 
 the_vars['a'] = the_vars['f'].subs(y, 0)
-the_vars['b'] = the_vars['f'].diff(y).subs(y, 0)
+# The stencil takes b per coord->dy = Ly/ny, while y here runs over [0, 2pi]
+the_vars['b'] = the_vars['f'].diff(y).subs(y, 0)*2*pi/Ly
 
 
 
 [b]
-2*pi*sin(pi/25)*cos(pi/25)/75
+(2*pi/geom:Ly)*(2*pi*sin(pi/25)*cos(pi/25)/75)
 
 [a]
 sin(pi/25)^2

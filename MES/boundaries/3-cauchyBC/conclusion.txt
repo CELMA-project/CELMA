@@ -12,3 +12,14 @@ Conclusion:
 ===========
 For some reason: All trials here have given 1st order convergence.
 Proceed with care
+
+Update (b scaling)
+==================
+- b was per unit of y in [0, 2pi], the stencil takes it per coord->dy = Ly/ny,
+  so b is now scaled by 2pi/Ly. That was the first order seen above.
+- The error mes.py records is dominated by the upper ghost (extrapolateYUp,
+  which cauchyYDown calls by default), order about 3.8 to 3.9.
+- The Cauchy ghost's own order is about 3.5, dropping toward 2.4 near the
+  pole of the stencil at dy = 23/24 (120*dy - 115 in ownBCs.cxx): the
+  derivation adds the extrapolation and the derivative equations, which
+  carry different units.

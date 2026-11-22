@@ -114,5 +114,9 @@ yl = y * geom:Ly / (2.0*pi) # y in range [0,Ly]
 [f]
 function = sin(pi*(y/75 + 1/25))^2
 a = sin(pi/25)^2
-# b is per unit of y in [0, 2pi]; the stencil takes it per coord->dy (geom:Ly/ny)
+# b is per unit of y in [0, 2pi]; the stencil takes it per coord->dy (geom:Ly/ny),
+# hence the factor 2pi/Ly. The error mes.py records is dominated by the upper
+# ghost (extrapolateYUp, called by cauchyYDown by default). The Cauchy ghost's
+# own order is about 3.5, dropping toward 2.4 near the pole of the stencil at
+# dy = 23/24 (120*dy - 115 in ownBCs.cxx)
 b = (2*pi/geom:Ly)*(2*pi*sin(pi/25)*cos(pi/25)/75)
