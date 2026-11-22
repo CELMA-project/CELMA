@@ -21,11 +21,11 @@
  },
  "divOfScalarTimesVector/2a-divSource/twoGaussiansSwapped": {
   "kind": "expected property",
-  "cause": "Expected property of the scheme, probably, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term, and at the first cell next to the axis (x = dx/2) the 1/J multiplies the second-order error of the centred derivative, so the error of that cell falls as dx, as for divOfScalarTimesVector/1a-divPerp. Read from the stencil and the CI orders (about 1.0), not checked in a replica; twoGaussians of the same case, whose functions differ near the axis, converges at 2."
+  "cause": "Expected property of the scheme, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term; at the cells next to the axis (x = (i + 1/2) dx) the 1/J multiplies the second-order error of the centred derivative, so the error at a fixed cell index falls as dx. Here f is nonzero at the axis; in twoGaussians it vanishes there, which is why that input converges at 2. Checked in a Python replica of the stencil that reproduces the CI errors (1.23e-4, 6.00e-5, 2.96e-5): the (f/J) DDX(g) term carries almost all of the error, both fields continue exactly through the axis (the guard cell is exact), and the error at x >= 1 or x >= 3 converges at 2. JTimesDivSource multiplies by J, removes the 1/J, and converges at 2 with the same inputs."
  },
  "divOfScalarTimesVector/2a-divSource/twoNormalGaussians": {
   "kind": "expected property",
-  "cause": "Expected property of the scheme, probably, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term, and at the first cell next to the axis (x = dx/2) the 1/J multiplies the second-order error of the centred derivative, so the error of that cell falls as dx, as for divOfScalarTimesVector/1a-divPerp. Read from the stencil and the CI orders (about 1.0), not checked in a replica; twoGaussians of the same case, whose functions differ near the axis, converges at 2."
+  "cause": "Expected property of the scheme, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term; at the cells next to the axis (x = (i + 1/2) dx) the 1/J multiplies the second-order error of the centred derivative, so the error at a fixed cell index falls as dx. Here f is nonzero at the axis; in twoGaussians it vanishes there, which is why that input converges at 2. Checked in a Python replica of the stencil that reproduces the CI errors (2.29e-5, 1.09e-5, 5.34e-6): the (f/J) DDX(g) term carries almost all of the error, both fields continue exactly through the axis (the guard cell is exact), and the error at x >= 1 or x >= 3 converges at 2. JTimesDivSource multiplies by J, removes the 1/J, and converges at 2 with the same inputs."
  },
  "integrals/volumeIntegral/sumSines": {
   "kind": "case limit",
