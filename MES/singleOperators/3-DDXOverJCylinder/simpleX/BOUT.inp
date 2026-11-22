@@ -108,7 +108,7 @@ xl = x * geom:Lx            # x in range [0,Lx]
 # The function to test
 # =============================================================================
 [f]
-function = sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2)
+function = cos(geom:xl/2)*cos(pi*geom:xl/10)
 
 # Boundaries
 bndry_xin = none                     # Manual boundary found in the code
@@ -121,4 +121,4 @@ bndry_ydown = none                     # Not used
 # The analytic solution
 # =============================================================================
 [S]
-solution = (sin(pi*(geom:xl/10 - 1/10))*cos(geom:xl/2 + 1/2)/2 + pi*sin(geom:xl/2 + 1/2)*cos(pi*(geom:xl/10 - 1/10))/10)/geom:xl
+solution = (-sin(geom:xl/2)*cos(pi*geom:xl/10)/2 - pi*sin(pi*geom:xl/10)*cos(geom:xl/2)/10)/geom:xl

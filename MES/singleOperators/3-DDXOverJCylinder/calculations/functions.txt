@@ -79,14 +79,15 @@ Simple x
 # NOTE: Extremely sharp gradients close to inner rho
 
 # A simple function dependent on x, with non-zero boundaries
-the_vars['f'] = sin(6*pi*(x-1)/(2*Lx))*sin((x+1)/2)
+# Even in x, so it continues smoothly through the axis (mode 0)
+the_vars['f'] = cos(6*pi*x/(2*Lx))*cos(x/2)
 
 
 [f]
-sin(pi*(geom:xl/10 - 1/10))*sin(geom:xl/2 + 1/2)
+cos(geom:xl/2)*cos(pi*geom:xl/10)
 
 [S]
-(sin(pi*(geom:xl/10 - 1/10))*cos(geom:xl/2 + 1/2)/2 + pi*sin(geom:xl/2 + 1/2)*cos(pi*(geom:xl/10 - 1/10))/10)/geom:xl
+(-sin(geom:xl/2)*cos(pi*geom:xl/10)/2 - pi*sin(pi*geom:xl/10)*cos(geom:xl/2)/10)/geom:xl
 =====================================================================================================================================
 
 
@@ -98,18 +99,19 @@ Proper z modified
 # We make f a tanh function, but modified in order to not let S blow up close to the the center
 
 # We multiply with cos(6*pi*x/(2*Lx)) in order to give it a modulation, and to get a non-zero value at the boundary
-# We multiply with (x/Lx) in order for S not to blow up at rho=0
+# We multiply with (x/Lx)^2 in order for S not to blow up at rho=0, and for f to
+# continue smoothly through the axis (a sin(2*z) mode must go as rho^2)
 s = 0.15
 c = 50
 w = 30
-the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x-(c - (w/2))))))*cos(6*pi*x/(2*Lx))*sin(2*z)*(x/Lx)
+the_vars['f'] = ((1/2) - (1/2)*(tanh(s*(x-(c - (w/2))))))*cos(6*pi*x/(2*Lx))*sin(2*z)*(x/Lx)**2
 
 
 [S]
-(-pi*geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/300 + geom:xl*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/30 + (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30)/geom:xl
+(-pi*geom:xl^2*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*sin(pi*geom:xl/10)/9000 + geom:xl^2*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/900 + geom:xl*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*cos(pi*geom:xl/10)/450)/geom:xl
 
 [f]
-geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30
+geom:xl^2*(1/2 - tanh(0.15*geom:xl - 5.25)/2)*sin(2*z)*cos(pi*geom:xl/10)/900
 ======================================================================================================================================
 
 
