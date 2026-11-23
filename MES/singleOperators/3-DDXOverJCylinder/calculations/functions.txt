@@ -76,7 +76,6 @@ the_vars['f'] = exp(-(1/(2*w**2))*(x**2 + rho0**2 - 2*x*rho0*(cos(z - theta0)) )
 Simple x
 =====================================================================================================================================
 # Simple X
-# NOTE: Extremely sharp gradients close to inner rho
 
 # A simple function dependent on x, with non-zero boundaries
 # Even in x, so it continues smoothly through the axis (mode 0)

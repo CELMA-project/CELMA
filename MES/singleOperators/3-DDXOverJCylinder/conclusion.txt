@@ -36,3 +36,11 @@ Conclusion:
 - Still a mystery why convergence is broken somewhere
   Checked if has something with one term being much larger than another
   Hypothesis: A workaround could be to multiply with J
+
+Update 2026-11:
+===============
+- properZModified and simpleX: the broken convergence came from the test
+  functions, not the operator. Neither continued smoothly through the axis,
+  so the axis boundary condition, f(-rho, theta) = f(rho, theta + pi), set
+  wrong ghost cells. With f even in rho (simpleX) and going as rho^2 with an
+  even envelope (properZModified) both converge at order 2.
