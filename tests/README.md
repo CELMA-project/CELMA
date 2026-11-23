@@ -17,8 +17,12 @@ runs.
 * [regression](regression) - Two scripts, run from the repository root:
   * `regression.py` runs both models on a small mesh and compares the time
       derivatives and the evolved fields with `reference.json.gz`.
-  * `mes.py` runs every `BOUT.inp` under `MES/` at two small resolutions and
-      compares the largest absolute error with `mes-reference.json`.
+  * `mes.py` runs every `BOUT.inp` under `MES/` at three small resolutions,
+      compares the largest absolute error with `mes-reference.json` and the
+      observed order of convergence with the order of the scheme. A case that
+      falls short is listed with its cause in `known-orders.json`; a case
+      below its order with no entry, or an entry for a case that reaches its
+      order, fails the run.
 
   The references depend on the `BOUT++` version and the compiler, so CI
   records them inside its image.

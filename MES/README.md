@@ -21,8 +21,11 @@ Each case directory holds:
   repository, see [AGENTS.md](../AGENTS.md).
 
 [../tests/regression/mes.py](../tests/regression/mes.py) runs every
-`BOUT.inp` below at two small resolutions and compares the largest absolute
-error to a stored reference.
+`BOUT.inp` below at three small resolutions, compares the largest absolute
+error to a stored reference and checks the observed order of convergence.
+[../tests/regression/known-orders.json](../tests/regression/known-orders.json)
+lists the cases that fall short of the order of their scheme, each with its
+cause.
 The convergence results in the `conclusion.txt` files are from the original
 runs and are not rechecked by the continuous integration.
 

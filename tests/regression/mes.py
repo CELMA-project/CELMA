@@ -1,7 +1,7 @@
 """Operator errors of the method of exact solutions (MES) cases.
 
 Every case under ``MES/`` saves its error field ``e``, the numerical operator
-minus the analytic one. This script runs every input of every case at two small
+minus the analytic one. This script runs every input of every case at three small
 resolutions and compares the largest absolute error to a committed reference,
 so a change of any operator or boundary condition shows up.
 
@@ -15,6 +15,11 @@ cells and are measured there. The
 script then proves it cannot go blind again: it reruns three cases with a
 changed derivative method and requires the error to move far beyond the
 tolerance.
+
+Every case is run at three resolutions, and the observed order of convergence
+between each pair is compared with the order its scheme should have. A case that
+falls short must be listed with its cause in ``known-orders.json``; a listed case
+that reaches its order again, or a case that fails with no entry, fails the run.
 
 Run from the repository root as ``python3 tests/regression/mes.py``. The
 numbers of the run are written to ``recorded-mes.json`` in the current directory.
@@ -35,12 +40,13 @@ from netCDF4 import Dataset  # pylint: disable=no-name-in-module
 
 ROOT = Path(__file__).resolve().parents[2]
 REFERENCE = Path(__file__).with_name("mes-reference.json")
+KNOWN_ORDERS = Path(__file__).with_name("known-orders.json")
 RECORDED = Path("recorded-mes.json")
 RTOL = 1.0e-6
 # The volume integral of pure sines has the exact value zero, so its "error" is
 # summation round-off of about 4e-12 that moves with the order of the sum
 ATOL = 1.0e-12
-RESOLUTIONS = ((32, 34, 64), (64, 66, 128))
+RESOLUTIONS = ((32, 34, 64), (64, 66, 128), (128, 130, 256))
 # Case, changed options: each must move the error of the case
 MUTATIONS = {
     "singleOperators/4-DDZCylinder/gaussianWSinAndParabola": ("mesh:ddz:first=C2",),
@@ -48,6 +54,16 @@ MUTATIONS = {
     "singleOperators/1-DDXCylinder/gaussian": ("mesh:ddx:first=W2",),
 }
 MUTATION_MARGIN = 1000.0
+# Order of the scheme under test, by case-name prefix; every other case is second order
+EXPECTED_ORDERS = {
+    "boundaries/1-yExtrapolation/": 4.0,
+    "boundaries/2-uEParSheath/": 4.0,
+    "boundaries/3-cauchyBC/": 4.0,
+    "boundaries/4-jParSheath/": 4.0,
+}
+DEFAULT_ORDER = 2.0
+# An observed order may fall this far short of the expected one
+ORDER_TOLERANCE = 0.4
 
 
 def read_int(text: str, key: str, default: int) -> int:
@@ -187,23 +203,98 @@ def run_case(
             return float(np.max(np.abs(error)))
 
 
-def order(errors: List[Optional[float]]) -> str:
-    """Observed order of convergence between the two resolutions.
+def orders(errors: List[Optional[float]]) -> Optional[List[float]]:
+    """Observed order of convergence between each pair of resolutions.
 
     Parameters
     ----------
     errors : list
-        Errors at the two resolutions.
+        Errors at the resolutions, coarsest first.
+
+    Returns
+    -------
+    list or None
+        One order per pair, ``None`` if a run failed or an error is zero.
+    """
+    if not all(x and math.isfinite(x) for x in errors):
+        return None
+    return [math.log2(a / b) for a, b in zip(errors, errors[1:])]  # type: ignore
+
+
+def order(errors: List[Optional[float]]) -> str:
+    """Observed orders of convergence, for printing.
+
+    Parameters
+    ----------
+    errors : list
+        Errors at the resolutions, coarsest first.
 
     Returns
     -------
     str
-        The order, or ``n/a``.
+        The order of each pair, or ``n/a``.
     """
-    old, new = errors
-    if not old or not new:
-        return "n/a"
-    return f"{math.log2(old / new):.2f}"
+    found = orders(errors)
+    return "n/a" if found is None else " ".join(f"{x:.2f}" for x in found)
+
+
+def expected_order(name: str) -> float:
+    """Order the scheme of a case should converge with.
+
+    Parameters
+    ----------
+    name : str
+        Case name.
+
+    Returns
+    -------
+    float
+        The expected order.
+    """
+    for prefix, value in EXPECTED_ORDERS.items():
+        if name.startswith(prefix):
+            return value
+    return DEFAULT_ORDER
+
+
+def check_orders(
+    actual: Dict[str, List[Optional[float]]], known: Dict[str, Dict[str, object]]
+) -> List[str]:
+    """Compare every observed order with the expected one.
+
+    Parameters
+    ----------
+    actual : dict
+        The errors of this run, per case.
+    known : dict
+        ``known-orders.json``: the cases that fall short, with their cause.
+
+    Returns
+    -------
+    list
+        One line per problem: a case below its order with no entry, an entry with
+        no cause, an entry for a case that reaches its order, or for no case.
+    """
+    problems = []
+    for name in sorted(actual):
+        found = orders(actual[name])
+        short = found is None or min(found) < expected_order(name) - ORDER_TOLERANCE
+        entry = known.get(name)
+        if short and entry is None:
+            problems.append(
+                f"{name}: order {order(actual[name])} is below the expected "
+                f"{expected_order(name):g} and is not in {KNOWN_ORDERS.name}"
+            )
+        elif short and not str(entry.get("cause", "")).strip():  # type: ignore
+            problems.append(f"{name}: its entry in {KNOWN_ORDERS.name} has no cause")
+        elif not short and entry is not None:
+            problems.append(
+                f"{name}: order {order(actual[name])} now reaches the expected "
+                f"{expected_order(name):g}; remove it from {KNOWN_ORDERS.name}"
+            )
+    for name in sorted(set(known) - set(actual)):
+        problems.append(f"{name}: in {KNOWN_ORDERS.name} but not a case")
+    return problems
 
 
 def check_mutations(reference: Dict[str, List[Optional[float]]]) -> bool:
@@ -266,8 +357,12 @@ def main() -> int:
                     failed.append(name)
     for name in sorted(set(failed)):
         print(f"FAIL {name}: {actual.get(name)} against {reference.get(name)}")
+    known = json.loads(KNOWN_ORDERS.read_text()) if KNOWN_ORDERS.exists() else {}
+    slow = check_orders(actual, known)
+    for line in slow:
+        print(f"FAIL {line}")
     blind = not check_mutations(reference)
-    return 1 if failed or blind else 0
+    return 1 if failed or slow or blind else 0
 
 
 if __name__ == "__main__":

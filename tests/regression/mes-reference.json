@@ -1,162 +1,202 @@
 {
  "arakawaBracket/ArakawaOfDDXf2/mixModeAndGaussian": [
   0.0005789770098207591,
-  0.00017485801146210596
+  0.00017485801146210596,
+  4.496605968588472e-05
  ],
  "boundaries/1-yExtrapolation/gaussianWSinAndParabola": [
   4.9286629638656265e-09,
-  3.470048415277205e-10
+  3.470048415277205e-10,
+  2.304396951036125e-11
  ],
  "boundaries/2-uEParSheath/gaussianWSinAndParabola": [
   1.4519290590640563,
-  1.4567791445369611
+  1.4567791445369611,
+  1.4565019302367312
  ],
  "boundaries/2-uEParSheath/noYDepInProf": [
   1.022297651609871,
-  1.0456954310046802
+  1.0456954310046802,
+  1.0555822601948894
  ],
  "boundaries/3-cauchyBC/gaussianWSinAndParabola": [
   0.004346462512622842,
-  0.006107474057439596
+  0.006107474057439596,
+  0.02121704320054206
  ],
  "boundaries/3-cauchyBC/noXDepInFunc": [
   0.012750426437877585,
-  0.01725777661761512
+  0.01725777661761512,
+  0.058902770833414074
  ],
  "boundaries/4-jParSheath/data": [
   0.0033005542189095127,
-  0.00016019812268935896
+  0.00016019812268935896,
+  1.210149217290013e-05
  ],
  "boundaries/4-jParSheath/gaussianWSinAndParabola": [
   0.0033005542189095127,
-  0.00016019812268935896
+  0.00016019812268935896,
+  1.210149217290013e-05
  ],
  "divOfScalarTimesVector/1a-divPerp/twoGaussians": [
   0.0021582731604553734,
-  0.0010460875480166332
+  0.0010460875480166332,
+  0.0005140435498043466
  ],
  "divOfScalarTimesVector/1b-JTimesDivPerp/twoGaussians": [
   0.002201682158859174,
-  0.0005431823753193551
+  0.0005431823753193551,
+  0.00013469620494481992
  ],
  "divOfScalarTimesVector/2a-divSource/twoGaussians": [
+  null,
   null,
   null
  ],
  "divOfScalarTimesVector/2a-divSource/twoGaussiansSwapped": [
   null,
+  null,
   null
  ],
  "divOfScalarTimesVector/2a-divSource/twoNormalGaussians": [
+  null,
   null,
   null
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians": [
   null,
+  null,
   null
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussiansSwapped": [
+  null,
   null,
   null
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoNormalGaussians": [
   null,
+  null,
   null
  ],
  "integrals/volumeIntegral/sumSines": [
+  0.00039618958560883044,
   0.00039618958560883044,
   0.00039618958560883044
  ],
  "integrals/volumeIntegral/sumSinesHat": [
   0.00027259816179769913,
+  0.00027259816179769913,
   0.00027259816179769913
  ],
  "integrals/volumeIntegral/xHat": [
+  4.013755698473176e-06,
   4.013755698473176e-06,
   4.013755698473176e-06
  ],
  "integrals/volumeIntegral/yHat": [
   2.1761544588549953e-07,
+  2.1761544588549953e-07,
   2.1761544588549953e-07
  ],
  "integrals/volumeIntegral/zHat": [
+  5.066497270722614e-06,
   5.066497270722614e-06,
   5.066497270722614e-06
  ],
  "integrals/volumeIntegral/zSines": [
   4.151567978283307e-12,
+  4.151567978283307e-12,
   4.151567978283307e-12
  ],
  "laplaceInversion/Naulinsolver0Bndry/twoGaussians": [
   0.0013069713272515493,
-  0.00032687034449763175
+  0.00032687034449763175,
+  8.172464854616646e-05
  ],
  "laplaceInversion/Naulinsolver0Bndry/twoGaussiansSwapped": [
   0.00047345863593440535,
-  0.00011836846434178788
+  0.00011836846434178788,
+  2.9589642180694042e-05
  ],
  "laplaceInversion/Naulinsolver0Bndry/twoNormalGaussians": [
   0.0005256177623282898,
-  0.00013120281006717693
+  0.00013120281006717693,
+  3.27861759545911e-05
  ],
  "polAvg/zHat": [
   8.175385912689848e-08,
-  2.0552062413026206e-08
+  2.0552062413026206e-08,
+  5.145138620710199e-09
  ],
  "singleOperators/1-DDXCylinder/gaussian": [
   5.985390660975115e-05,
-  1.497226899449533e-05
+  1.497226899449533e-05,
+  3.7433565979461125e-06
  ],
  "singleOperators/1-DDXCylinder/gaussianWSinAndParabola": [
   8.089180146591407e-05,
-  2.0242733036909127e-05
+  2.0242733036909127e-05,
+  5.065346168973972e-06
  ],
  "singleOperators/1-DDXCylinder/properZ": [
   0.004816532246895655,
-  0.0012050690542905196
+  0.0012050690542905196,
+  0.0003022428482097328
  ],
  "singleOperators/1.1-DDXCylinderWideStencilCenter/gaussian": [
   5.985390660975115e-05,
-  1.497226899449533e-05
+  1.497226899449533e-05,
+  3.7433565979461125e-06
  ],
  "singleOperators/1.1-DDXCylinderWideStencilCenter/gaussianWSinAndParabola": [
   8.089180146591407e-05,
-  2.0242733036909127e-05
+  2.0242733036909127e-05,
+  5.065346168973972e-06
  ],
  "singleOperators/2-D2DX2Cylinder/gaussian": [
   4.337029995703061e-06,
-  1.084654506963538e-06
+  1.084654506963538e-06,
+  2.7125466964608713e-07
  ],
  "singleOperators/2-D2DX2Cylinder/gaussianWSinAndParabola": [
   6.444890009117167e-06,
-  1.6131244265681424e-06
+  1.6131244265681424e-06,
+  4.033667821900719e-07
  ],
  "singleOperators/2-D2DX2Cylinder/properZ": [
   0.0009568406683318209,
-  0.00025536856757034376
+  0.00025536856757034376,
+  6.405376204028645e-05
  ],
  "singleOperators/3-DDXOverJCylinder/gaussian": [
   0.00010229436168719686,
-  4.9888717564269824e-05
+  4.9888717564269824e-05,
+  2.4614441155174083e-05
  ],
  "singleOperators/3-DDXOverJCylinder/gaussianWSinAndParabola": [
   0.0001331680640649438,
-  6.491753419618496e-05
+  6.491753419618496e-05,
+  3.20439197046829e-05
  ],
  "singleOperators/3-DDXOverJCylinder/properZModified": [
   0.03817645344614233,
-  0.07244885031752225
+  0.07244885031752225,
+  0.14289177433302885
  ],
  "singleOperators/3-DDXOverJCylinder/simpleX": [
   0.04955517351180905,
-  0.030410373678071256
+  0.030410373678071256,
+  0.037832065837870354
  ],
  "singleOperators/4-DDZCylinder/gaussianWSinAndParabola": [
   1.0103029524088925e-14,
-  1.5987211554602254e-14
+  1.5987211554602254e-14,
+  2.3314683517128287e-14
  ],
  "singleOperators/5-D2DZ2Cylinder/gaussianWSinAndParabola": [
   1.4593881658697683e-13,
-  6.483702463810914e-13
+  6.483702463810914e-13,
+  2.972955215341244e-12
  ]
 }
