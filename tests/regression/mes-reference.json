@@ -50,34 +50,34 @@
   0.00013469620494481992
  ],
  "divOfScalarTimesVector/2a-divSource/twoGaussians": [
-  null,
-  null,
-  null
+  6.162297501210176e-06,
+  1.5453898215592957e-06,
+  3.865208318581167e-07
  ],
  "divOfScalarTimesVector/2a-divSource/twoGaussiansSwapped": [
-  null,
-  null,
-  null
+  0.000122854288179959,
+  5.996341304260642e-05,
+  2.960039497880776e-05
  ],
  "divOfScalarTimesVector/2a-divSource/twoNormalGaussians": [
-  null,
-  null,
-  null
+  2.285986491102612e-05,
+  1.0940407694315455e-05,
+  5.34352513707325e-06
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians": [
-  null,
-  null,
-  null
+  4.579207863929409e-05,
+  1.146389249672905e-05,
+  2.8677210114173846e-06
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussiansSwapped": [
-  null,
-  null,
-  null
+  6.10870130969127e-05,
+  1.5379184556183043e-05,
+  3.851332783004523e-06
  ],
  "divOfScalarTimesVector/2b-JTimesDivSource/twoNormalGaussians": [
-  null,
-  null,
-  null
+  3.3364375623541956e-05,
+  8.351706797801034e-06,
+  2.0886239623114228e-06
  ],
  "integrals/volumeIntegral/sumSines": [
   0.00039618958560883044,

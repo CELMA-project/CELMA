@@ -15,6 +15,9 @@ int DivSource::init(bool restarting) {
 
   restoreSignedJacobian();
 
+  // The operators read the (signed) Jacobian, so create them after restoring it
+  ownOp = OwnOperators::createOperators();
+
   // Get the option (before any sections) in the BOUT.inp file
   Options *options = Options::getRoot();
 

@@ -3,29 +3,13 @@
   "kind": "expected property",
   "cause": "Expected property of the scheme, not a bug: Div(f) holds a (1/J) d(J f_x)/dx term; at the first cell next to the axis the 1/J (x = dx/2) multiplies the second-order error of the centred derivative, so the error of that cell falls as dx. Away from the axis (x >= 1) the order is 2, reproduced in a Python replica of the stencil."
  },
- "divOfScalarTimesVector/2a-divSource/twoGaussians": {
-  "kind": "case bug",
-  "cause": "Bug in the case: the run crashes (segmentation fault) at every resolution. divSource.cxx declares ownOp and never creates it, and div_f_GradPerp_g reads its members J and J2 through that pointer. The probable fix is a call ownOp = OwnOperators::createOperators(); in init(), not tried because it changes guarded C++. The crash is read from the code and the CI log, not reproduced under a debugger. No order is known until it runs."
- },
  "divOfScalarTimesVector/2a-divSource/twoGaussiansSwapped": {
-  "kind": "case bug",
-  "cause": "Same as divOfScalarTimesVector/2a-divSource/twoGaussians: ownOp is never created in divSource.cxx, the run crashes at every resolution."
+  "kind": "expected property",
+  "cause": "Expected property of the scheme, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term; at the cells next to the axis (x = (i + 1/2) dx) the 1/J multiplies the second-order error of the centred derivative, so the error at a fixed cell index falls as dx. Here f is nonzero at the axis; in twoGaussians it vanishes there, which is why that input converges at 2. Checked in a Python replica of the stencil that reproduces the CI errors (1.23e-4, 6.00e-5, 2.96e-5): the (f/J) DDX(g) term carries almost all of the error, both fields continue exactly through the axis (the guard cell is exact), and the error at x >= 1 or x >= 3 converges at 2. JTimesDivSource multiplies by J, removes the 1/J, and converges at 2 with the same inputs."
  },
  "divOfScalarTimesVector/2a-divSource/twoNormalGaussians": {
-  "kind": "case bug",
-  "cause": "Same as divOfScalarTimesVector/2a-divSource/twoGaussians: ownOp is never created in divSource.cxx, the run crashes at every resolution."
- },
- "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians": {
-  "kind": "case bug",
-  "cause": "Probably the same as divOfScalarTimesVector/2a-divSource/twoGaussians: JTimesDivSource.cxx declares ownOp and never creates it, and the run crashes at every resolution. Not confirmed by a run."
- },
- "divOfScalarTimesVector/2b-JTimesDivSource/twoGaussiansSwapped": {
-  "kind": "case bug",
-  "cause": "Probably the same as divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians: ownOp is never created, the run crashes at every resolution."
- },
- "divOfScalarTimesVector/2b-JTimesDivSource/twoNormalGaussians": {
-  "kind": "case bug",
-  "cause": "Probably the same as divOfScalarTimesVector/2b-JTimesDivSource/twoGaussians: ownOp is never created, the run crashes at every resolution."
+  "kind": "expected property",
+  "cause": "Expected property of the scheme, not a bug: div_f_GradPerp_g holds an (f/J) DDX(g) term; at the cells next to the axis (x = (i + 1/2) dx) the 1/J multiplies the second-order error of the centred derivative, so the error at a fixed cell index falls as dx. Here f is nonzero at the axis; in twoGaussians it vanishes there, which is why that input converges at 2. Checked in a Python replica of the stencil that reproduces the CI errors (2.29e-5, 1.09e-5, 5.34e-6): the (f/J) DDX(g) term carries almost all of the error, both fields continue exactly through the axis (the guard cell is exact), and the error at x >= 1 or x >= 3 converges at 2. JTimesDivSource multiplies by J, removes the 1/J, and converges at 2 with the same inputs."
  },
  "integrals/volumeIntegral/sumSines": {
   "kind": "case limit",
