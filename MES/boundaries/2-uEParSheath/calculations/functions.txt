@@ -30,23 +30,18 @@ the_vars['phi'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))*\
                   ((x-x0)/Lx)**2*\
                   7
 
-# The profile
-the_vars['profile'] = sin(2*pi*x/Lx + pi*y/Ly)**2
-
 # The parallel velocity, given by the sheath boundary condition
-the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))*the_vars['profile']
+# (no profile factor: the boundary condition has none)
+the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))
 
 
 
 
 
 
-
-[profile]
-sin(pi*geom:xl/15 + pi*y/150)^2
 
 [uEPar]
-0.915025564196348*exp(-7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15 + pi*y/150)^2/sqrt(pi)
+0.915025564196348*exp(-7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60))/sqrt(pi)
 
 [phi]
 7*(geom:xl/30 - 0.3)^2*exp(-0.00222222222222222*(geom:xl - 9.0)^2 - 8.88888888888889e-5*(y - 75.0)^2)*sin(sqrt(2)*pi*(geom:xl + y)/60)
@@ -72,11 +67,9 @@ No y dependency in profile
 
 the_vars['phi'] = sin((1/sqrt(2))*(x + y)*(2*pi/(2*Lx)))
 
-# The profile
-the_vars['profile'] = sin(2*pi*x/Lx)**2
-
 # The parallel velocity, given by the sheath boundary condition
-the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))*the_vars['profile']
+# (no profile factor: the boundary condition has none)
+the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))
 
 
 
@@ -84,8 +77,5 @@ the_vars['uEPar'] = exp(Lambda-(phiRef+the_vars['phi']))*the_vars['profile']
 sin(sqrt(2)*pi*(geom:xl + y)/60)
 
 [uEPar]
-0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))*sin(pi*geom:xl/15)^2/sqrt(pi)
-
-[profile]
-sin(pi*geom:xl/15)^2
+0.915025564196348*exp(-sin(sqrt(2)*pi*(geom:xl + y)/60))/sqrt(pi)
 ======================================================================================================================================
