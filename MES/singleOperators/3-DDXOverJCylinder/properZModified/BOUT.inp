@@ -108,7 +108,7 @@ xl = x * geom:Lx            # x in range [0,Lx]
 # The function to test
 # =============================================================================
 [f]
-function = geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30
+function = geom:xl^2*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*cos(pi*geom:xl/10)/900
 
 # Boundaries
 bndry_xin = none                     # Manual boundary found in the code
@@ -121,4 +121,4 @@ bndry_ydown = none                     # Not used
 # The analytic solution
 # =============================================================================
 [S]
-solution = (-pi*geom:xl*(-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*sin(pi*geom:xl/10)/300 + geom:xl*(0.075*tanh(0.15*geom:xl - 5.25)^2 - 0.075)*sin(2*z)*cos(pi*geom:xl/10)/30 + (-0.5*tanh(0.15*geom:xl - 5.25) + 0.5)*sin(2*z)*cos(pi*geom:xl/10)/30)/geom:xl
+solution = (-2.38095238095238e-6*geom:xl^3*(1 - tanh(0.00214285714285714*geom:xl^2 - 2.625)^2)*sin(2*z)*cos(pi*geom:xl/10) - pi*geom:xl^2*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*sin(pi*geom:xl/10)/9000 + geom:xl*(1/2 - tanh(0.00214285714285714*geom:xl^2 - 2.625)/2)*sin(2*z)*cos(pi*geom:xl/10)/450)/geom:xl
