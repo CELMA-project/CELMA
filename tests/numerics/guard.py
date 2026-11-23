@@ -78,12 +78,12 @@ OPERATORS = (
 )
 # A C++11 raw string literal R"delim( ... )delim" with an optional encoding
 # prefix. strip_comments writes its newlines as NUL so it stays on one line.
-RAW_STRING = r'(?:u8|u|U|L)?R"(?P<delim>[^ ()\\\t\v\f\n]{0,16})\(.*?\)(?P=delim)"'
+RAW_STRING = r'(?:u8|u|U|L)?R"(?P<delim>[^ ()\\\t\v\f\r\n]{0,16})\(.*?\)(?P=delim)"'
 TOKEN = re.compile(
     RAW_STRING + "|"
     r'"(?:\\.|[^"\\])*"'
     r"|'(?:\\.|[^'\\])*'"
-    r"|\d(?:[eEpP][+-]|[\w.'])*"
+    r"|\.?\d(?:[eEpP][+-]|[\w.'])*"
     r"|[A-Za-z_]\w*"
     r"|" + "|".join(re.escape(op) for op in OPERATORS) + r"|\S"
 )
@@ -193,7 +193,7 @@ def is_digit_separator(text: str, i: int) -> bool:
     start = i
     while start > 0 and (text[start - 1].isalnum() or text[start - 1] in "_'."):
         start -= 1
-    return start < i and text[start].isdigit()
+    return start < i and text[start : start + 2].lstrip(".")[:1].isdigit()
 
 
 def raw_string_start(text: str, i: int) -> bool:
@@ -223,7 +223,7 @@ def raw_string_start(text: str, i: int) -> bool:
     if start > 0 and (text[start - 1].isalnum() or text[start - 1] == "_"):
         return False
     j = i + 1
-    while j < len(text) and text[j] not in " ()\\\t\v\f\n" and j - i <= 16:
+    while j < len(text) and text[j] not in " ()\\\t\v\f\r\n" and j - i <= 16:
         j += 1
     return j < len(text) and text[j] == "("
 
@@ -261,7 +261,8 @@ def strip_comments(text: str) -> str:
     -------
     str
         The code with every comment replaced by one space, as the compiler
-        does, so a directive keeps its line.
+        does, so a directive keeps its line, and the digraphs ``%:`` and
+        ``%:%:`` outside literals spelled ``#`` and ``##``.
     """
     out: List[str] = []
     i, n = 0, len(text)
@@ -289,6 +290,12 @@ def strip_comments(text: str) -> str:
             end = text.find("*/", i + 2)
             i = n if end < 0 else end + 2
             out.append(" ")
+        elif text.startswith("%:%:", i):
+            out.append("##")
+            i += 4
+        elif two == "%:":
+            out.append("#")
+            i += 2
         else:
             out.append(char)
             i += 1
@@ -296,7 +303,7 @@ def strip_comments(text: str) -> str:
 
 
 def preprocess(text: str) -> str:
-    """Splice lines, strip comments and spell the digraph ``%:`` as ``#``.
+    """Splice lines, strip comments and spell the digraph ``%:`` as ``#`` in code.
 
     Parameters
     ----------
@@ -308,8 +315,7 @@ def preprocess(text: str) -> str:
     str
         The text every reader of C++ in this module works on.
     """
-    code = strip_comments(splice(text))
-    return code.replace("%:%:", "##").replace("%:", "#")
+    return strip_comments(splice(text))
 
 
 def line_tokens(number: int, line: str) -> List[Token]:
