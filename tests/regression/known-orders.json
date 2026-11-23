@@ -1,20 +1,4 @@
 {
- "boundaries/2-uEParSheath/gaussianWSinAndParabola": {
-  "kind": "case bug",
-  "cause": "Bug in the case: the manufactured uEPar carries a factor sin(...)^2 that the sheath condition uEPar = exp(Lambda - phiRef - phi) does not have, so the exact solution does not satisfy the boundary condition and the error is the constant mismatch (about 1.46). With the factor removed the stencil converges at about 4 (2.9e-9, 2.0e-10, 1.3e-11), checked in a Python replica."
- },
- "boundaries/2-uEParSheath/noYDepInProf": {
-  "kind": "case bug",
-  "cause": "Bug in the case: the manufactured uEPar carries a factor sin(pi x/15)^2 that the sheath condition uEPar = exp(Lambda - phiRef - phi) does not have, so the exact solution does not satisfy the boundary condition and the error is the constant mismatch (about 1.06). With the factor removed the stencil converges at about 4 (2.5e-9, 1.8e-10, 1.2e-11), checked in a Python replica."
- },
- "boundaries/3-cauchyBC/gaussianWSinAndParabola": {
-  "kind": "case bug",
-  "cause": "Bug in the case input: the derivative b is written per unit of y in 0..2pi, but the stencil takes it per unit of coord->dy, which the input sets to Ly/ny (physical length). The two differ by 2pi/Ly, so the ghost value is off by a term that does not shrink with the grid. With b rescaled by 2pi/Ly the error is 4e-9, 4e-10, 7e-11 (order about 3.5 to 4), checked in a Python replica. The warning of the thesis code that the condition is only first order is probably stale. The models do not call this boundary condition, only this case does."
- },
- "boundaries/3-cauchyBC/noXDepInFunc": {
-  "kind": "case bug",
-  "cause": "Bug in the case input: the derivative b is written per unit of y in 0..2pi, but the stencil takes it per unit of coord->dy, which the input sets to Ly/ny (physical length). The two differ by 2pi/Ly, so the ghost value is off by a term that does not shrink with the grid. Rescaling b by 2pi/Ly gives errors of 1e-9 and falling at order 3.5 to 4 in a Python replica. The models do not call this boundary condition, only this case does."
- },
  "divOfScalarTimesVector/1a-divPerp/twoGaussians": {
   "kind": "expected property",
   "cause": "Expected property of the scheme, not a bug: Div(f) holds a (1/J) d(J f_x)/dx term; at the first cell next to the axis the 1/J (x = dx/2) multiplies the second-order error of the centred derivative, so the error of that cell falls as dx. Away from the axis (x >= 1) the order is 2, reproduced in a Python replica of the stencil."
